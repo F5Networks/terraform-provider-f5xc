@@ -1,0 +1,78 @@
+# Generated .gitignore patterns
+
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+go.work
+go.sum
+vendor/
+.vscode/
+.idea/
+*.prof
+*.log
+/tmp/
+/dist/
+/build/
+*.pprof
+__debug_bin
+
+# Log Files
+*.log
+*.log.*
+logs/
+log/
+/logs
+/log
+
+# Temporary Files
+*.tmp
+*.temp
+tmp/
+temp/
+~*
+*~
+
+# IDE Files
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+.vs/
+
+# Cache Files
+*.cache
+.cache/
+cache/
+**/cache/
+.npm/
+.yarn/
+
+# Environment
+.env
+.env.*
+!.env.example
+.envrc
+.environment
+
+# Backup Files
+*.bak
+*.backup
+*.orig
+*.swp
+*.swo
+
+# Misc
+_docker_tags/
+*_out/
+VERSION
+.cache
+_binaries
+_tfgen
+.history/
+/build_out
+.DS_Store

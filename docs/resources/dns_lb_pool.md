@@ -16,13 +16,13 @@ resource "f5xc_dns_lb_pool" "example" {
   name      = "example_dns_lb_pool"
   namespace = "example_namespace"
   pool_type_choice = {
-    a_pool = {
-      a_pool = "example_a_pool"
+    mx_pool = {
+      mx_pool = "example_mx_pool"
     }
   }
   load_balancing_mode = ["ENUM_VALUE"]
   ttl_choice = {
-    use_rrset_ttl = true
+    ttl = 1
   }
 }
 ```

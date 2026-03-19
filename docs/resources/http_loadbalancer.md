@@ -15,68 +15,62 @@ HttpLoadbalancer resource
 resource "f5xc_http_loadbalancer" "example" {
   name      = "example_http_loadbalancer"
   namespace = "example_namespace"
-  waf_choice = {
-    disable_waf = true
+  service_policy_choice = {
+    service_policies_from_namespace = true
   }
   threat_mesh_choice = {
     enable_threat_mesh = true
   }
-  advertise_choice = {
-    advertise_on_public_default_vip = true
+  sensitive_data_policy_choice = {
+    default_sensitive_data_policy = true
   }
-  hash_policy_choice = {
-    ring_hash = {
-      ring_hash = "example_ring_hash"
+  loadbalancer_type_choice = {
+    http = {
+      http = "example_http"
     }
   }
-  malicious_user_detection_choice = {
-    enable_malicious_user_detection = true
+  malware_protection_choice = {
+    disable_malware_protection = true
   }
-  trust_client_ip_headers_choice = {
-    enable_trust_client_ip_headers = {
-      enable_trust_client_ip_headers = "example_enable_trust_client_ip_headers"
+  advertise_choice = {
+    do_not_advertise = true
+  }
+  challenge_type_choice = {
+    policy_based_challenge = {
+      policy_based_challenge = "example_policy_based_challenge"
     }
   }
   user_id_choice = {
-    user_id_client_ip = true
+    user_identification = {
+      user_identification = "example_user_identification"
+    }
+  }
+  rate_limit_choice = {
+    disable_rate_limit = true
+  }
+  malicious_user_detection_choice = {
+    enable_malicious_user_detection = true
   }
   api_discovery_choice = {
     enable_api_discovery = {
       enable_api_discovery = "example_enable_api_discovery"
     }
   }
-  sensitive_data_policy_choice = {
-    default_sensitive_data_policy = true
-  }
-  api_testing_choice = {
-    disable_api_testing = true
-  }
-  loadbalancer_type_choice = {
-    https = {
-      https = "example_https"
-    }
-  }
-  rate_limit_choice = {
-    api_rate_limit = {
-      api_rate_limit = "example_api_rate_limit"
-    }
-  }
-  service_policy_choice = {
-    service_policies_from_namespace = true
-  }
   api_definition_choice = {
     disable_api_definition = true
   }
   domains = ["example_http_loadbalancer"]
-  challenge_type_choice = {
-    captcha_challenge = {
-      captcha_challenge = "example_captcha_challenge"
-    }
+  waf_choice = {
+    disable_waf = true
   }
-  malware_protection_choice = {
-    malware_protection_settings = {
-      malware_protection_settings = "example_malware_protection_settings"
-    }
+  hash_policy_choice = {
+    round_robin = true
+  }
+  api_testing_choice = {
+    disable_api_testing = true
+  }
+  trust_client_ip_headers_choice = {
+    disable_trust_client_ip_headers = true
   }
 }
 ```
@@ -134,7 +128,7 @@ resource "f5xc_http_loadbalancer" "example" {
 
 - `api_protection_rules` (Attributes) API Protection rules API Protection Rules can be defined in two categories. The first category includes fine-grained rules, per API path and methods. The second category includes rules per API groups or Server URLs. If request matches any rule in the first category, second category rules are not evaluated. Rules can also include additional conditions, for example specific clients can access certain API endpoint or API group. (see [below for nested schema](#nestedatt--api_protection_rules))
 - `auto_cert_info` (Attributes) Auto Cert Information Auto certificate related information (see [below for nested schema](#nestedatt--auto_cert_info))
-- `cert_state` (List of String) <br>**Allowed Values (choose one):** `["AutoCertError", "AutoCertDisabled", "AutoCertFinalize", "CertificateInvalid", "AutoCertNotApplicable", "AutoCertGenerationRetry", "PreDomainChallengePending", "DomainChallengeStarted", "DomainChallengePending", "DnsDomainVerification", "DomainChallengeVerified", "CertificateValid", "AutoCertAccountRateLimited", "AutoCertStarted", "AutoCertRateLimited", "AutoCertInitialize", "AutoCertDomainRateLimited", "CertificateExpired"]`
+- `cert_state` (List of String) <br>**Allowed Values (choose one):** `["DnsDomainVerification", "PreDomainChallengePending", "AutoCertFinalize", "AutoCertGenerationRetry", "AutoCertInitialize", "AutoCertDomainRateLimited", "AutoCertDisabled", "AutoCertStarted", "DomainChallengePending", "AutoCertNotApplicable", "AutoCertAccountRateLimited", "DomainChallengeStarted", "AutoCertRateLimited", "DomainChallengeVerified", "CertificateInvalid", "CertificateValid", "AutoCertError", "CertificateExpired"]`
 - `cors_policy` (Attributes) Cross-Origin Resource Sharing (CORS) configuration for requests CORS is a mechanism that uses additional HTTP headers to tell a browser to let a web application running at one origin (domain) have permission to access selected resources from a server at a different origin (see [below for nested schema](#nestedatt--cors_policy))
 - `csrf_policy` (Attributes) csrf_policy Cross-Site Request Forgery (CSRF) is an attack that occurs when a malicious third-party website exploits a vulnerability thats allows them to submit an undesired request on user's behalf. The policy checks where a request is coming from to determine if the request's origin is the same as its destination. The policy relies on two pieces of information used in determining if a request originated from the same host. 1. The origin that caused the user agent to issue the request (source origin). 2. The origin that the request is going to (target origin). When the policy evaluating a request, it ensures both pieces of information are present and compare their values. If the source origin is missing or origins do not match the request is rejected. The exception to this being the source-origin has been added to the policy as valid. Because CSRF attacks specifically target state-changing requests, the policy only acts on the HTTP requests that have state-changing method (PUT,POST, etc.). (see [below for nested schema](#nestedatt--csrf_policy))
 - `jwt_validation` (Attributes) JWT Validation JWT Validation stops JWT replay attacks and JWT tampering by cryptographically verifying incoming JWTs before they are passed to origin APIs. JWT Validation will also stop requests with expired tokens or tokens that are not yet valid. (see [below for nested schema](#nestedatt--jwt_validation))
@@ -278,7 +272,7 @@ Read-Only:
 
 Required:
 
-- `network` (List of String) <br>**Allowed Values (choose one):** `["SITE_NETWORK_OUTSIDE_WITH_INTERNET_VIP", "SITE_NETWORK_SERVICE", "SITE_NETWORK_IP_FABRIC", "SITE_NETWORK_INSIDE_AND_OUTSIDE", "SITE_NETWORK_INSIDE_AND_OUTSIDE_WITH_INTERNET_VIP", "SITE_NETWORK_INSIDE", "SITE_NETWORK_OUTSIDE"]`
+- `network` (List of String) <br>**Allowed Values (choose one):** `["SITE_NETWORK_INSIDE", "SITE_NETWORK_OUTSIDE", "SITE_NETWORK_OUTSIDE_WITH_INTERNET_VIP", "SITE_NETWORK_SERVICE", "SITE_NETWORK_IP_FABRIC", "SITE_NETWORK_INSIDE_AND_OUTSIDE", "SITE_NETWORK_INSIDE_AND_OUTSIDE_WITH_INTERNET_VIP"]`
 - `site` (Attributes) Site Reference to site object (see [below for nested schema](#nestedatt--advertise_choice--advertise_custom--advertise_where--choice--site--site))
 
 Optional:
@@ -389,7 +383,7 @@ Optional:
 
 Required:
 
-- `network` (List of String) <br>**Allowed Values (choose one):** `["SITE_NETWORK_INSIDE", "SITE_NETWORK_OUTSIDE", "SITE_NETWORK_OUTSIDE_WITH_INTERNET_VIP", "SITE_NETWORK_SERVICE", "SITE_NETWORK_IP_FABRIC", "SITE_NETWORK_INSIDE_AND_OUTSIDE", "SITE_NETWORK_INSIDE_AND_OUTSIDE_WITH_INTERNET_VIP"]`
+- `network` (List of String) <br>**Allowed Values (choose one):** `["SITE_NETWORK_SERVICE", "SITE_NETWORK_IP_FABRIC", "SITE_NETWORK_INSIDE_AND_OUTSIDE", "SITE_NETWORK_INSIDE_AND_OUTSIDE_WITH_INTERNET_VIP", "SITE_NETWORK_INSIDE", "SITE_NETWORK_OUTSIDE", "SITE_NETWORK_OUTSIDE_WITH_INTERNET_VIP"]`
 - `virtual_site` (Attributes) Virtual Site Reference to virtual site object (see [below for nested schema](#nestedatt--advertise_choice--advertise_custom--advertise_where--choice--virtual_site--virtual_site))
 
 <a id="nestedatt--advertise_choice--advertise_custom--advertise_where--choice--virtual_site--virtual_site"></a>
@@ -660,7 +654,7 @@ Required:
 
 Optional:
 
-- `methods` (List of String) <br>**Valid Options:** `["ANY", "GET", "HEAD", "PUT", "OPTIONS", "COPY", "POST", "DELETE", "CONNECT", "TRACE", "PATCH"]` (Multiple selection allowed)
+- `methods` (List of String) <br>**Valid Options:** `["GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "TRACE", "PATCH", "ANY", "OPTIONS", "COPY"]` (Multiple selection allowed)
 
 
 
@@ -705,7 +699,7 @@ Required:
 
 Optional:
 
-- `response_validation_properties` (List of String) <br>**Valid Options:** `["PROPERTY_PATH_PARAMETERS", "PROPERTY_CONTENT_TYPE", "PROPERTY_COOKIE_PARAMETERS", "PROPERTY_HTTP_HEADERS", "PROPERTY_HTTP_BODY", "PROPERTY_SECURITY_SCHEMA", "PROPERTY_RESPONSE_CODE", "PROPERTY_QUERY_PARAMETERS"]` (Multiple selection allowed)<br>**Default:** `PROPERTY_HTTP_HEADERS`
+- `response_validation_properties` (List of String) <br>**Valid Options:** `["PROPERTY_SECURITY_SCHEMA", "PROPERTY_RESPONSE_CODE", "PROPERTY_QUERY_PARAMETERS", "PROPERTY_PATH_PARAMETERS", "PROPERTY_CONTENT_TYPE", "PROPERTY_COOKIE_PARAMETERS", "PROPERTY_HTTP_HEADERS", "PROPERTY_HTTP_BODY"]` (Multiple selection allowed)<br>**Default:** `PROPERTY_HTTP_HEADERS`
 
 <a id="nestedatt--api_definition_choice--api_specification--validation_target_choice--validation_all_spec_endpoints--validation_mode--response_validation_mode_choice--response_validation_mode_active--validation_enforcement_type_choice"></a>
 ### Nested Schema for `api_definition_choice.api_specification.validation_target_choice.validation_all_spec_endpoints.validation_mode.response_validation_mode_choice.response_validation_mode_active.validation_enforcement_type_choice`
@@ -873,7 +867,7 @@ Required:
 
 Optional:
 
-- `methods` (List of String) <br>**Valid Options:** `["GET", "HEAD", "PUT", "OPTIONS", "COPY", "POST", "DELETE", "CONNECT", "TRACE", "PATCH", "ANY"]` (Multiple selection allowed)
+- `methods` (List of String) <br>**Valid Options:** `["POST", "PUT", "DELETE", "CONNECT", "TRACE", "PATCH", "ANY", "OPTIONS", "COPY", "GET", "HEAD"]` (Multiple selection allowed)
 
 
 
@@ -921,7 +915,7 @@ Required:
 
 Optional:
 
-- `methods` (List of String) <br>**Valid Options:** `["DELETE", "CONNECT", "TRACE", "PATCH", "ANY", "GET", "HEAD", "PUT", "OPTIONS", "COPY", "POST"]` (Multiple selection allowed)
+- `methods` (List of String) <br>**Valid Options:** `["PATCH", "ANY", "OPTIONS", "COPY", "GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "TRACE"]` (Multiple selection allowed)
 
 
 
@@ -971,7 +965,7 @@ Required:
 
 Optional:
 
-- `response_validation_properties` (List of String) <br>**Valid Options:** `["PROPERTY_QUERY_PARAMETERS", "PROPERTY_PATH_PARAMETERS", "PROPERTY_CONTENT_TYPE", "PROPERTY_COOKIE_PARAMETERS", "PROPERTY_HTTP_HEADERS", "PROPERTY_HTTP_BODY", "PROPERTY_SECURITY_SCHEMA", "PROPERTY_RESPONSE_CODE"]` (Multiple selection allowed)<br>**Default:** `PROPERTY_HTTP_HEADERS`
+- `response_validation_properties` (List of String) <br>**Valid Options:** `["PROPERTY_RESPONSE_CODE", "PROPERTY_QUERY_PARAMETERS", "PROPERTY_PATH_PARAMETERS", "PROPERTY_CONTENT_TYPE", "PROPERTY_COOKIE_PARAMETERS", "PROPERTY_HTTP_HEADERS", "PROPERTY_HTTP_BODY", "PROPERTY_SECURITY_SCHEMA"]` (Multiple selection allowed)<br>**Default:** `PROPERTY_HTTP_HEADERS`
 
 <a id="nestedatt--api_definition_choice--api_specification--validation_target_choice--validation_custom_list--open_api_validation_rules--validation_mode--response_validation_mode_choice--response_validation_mode_active--validation_enforcement_type_choice"></a>
 ### Nested Schema for `api_definition_choice.api_specification.validation_target_choice.validation_custom_list.open_api_validation_rules.validation_mode.response_validation_mode_choice.response_validation_mode_active.validation_enforcement_type_choice`
@@ -1001,7 +995,7 @@ Required:
 
 Optional:
 
-- `request_validation_properties` (List of String) <br>**Valid Options:** `["PROPERTY_PATH_PARAMETERS", "PROPERTY_CONTENT_TYPE", "PROPERTY_COOKIE_PARAMETERS", "PROPERTY_HTTP_HEADERS", "PROPERTY_HTTP_BODY", "PROPERTY_SECURITY_SCHEMA", "PROPERTY_RESPONSE_CODE", "PROPERTY_QUERY_PARAMETERS"]` (Multiple selection allowed)<br>**Default:** `PROPERTY_PATH_PARAMETERS,PROPERTY_QUERY_PARAMETERS,PROPERTY_HTTP_HEADERS`
+- `request_validation_properties` (List of String) <br>**Valid Options:** `["PROPERTY_RESPONSE_CODE", "PROPERTY_QUERY_PARAMETERS", "PROPERTY_PATH_PARAMETERS", "PROPERTY_CONTENT_TYPE", "PROPERTY_COOKIE_PARAMETERS", "PROPERTY_HTTP_HEADERS", "PROPERTY_HTTP_BODY", "PROPERTY_SECURITY_SCHEMA"]` (Multiple selection allowed)<br>**Default:** `PROPERTY_PATH_PARAMETERS,PROPERTY_QUERY_PARAMETERS,PROPERTY_HTTP_HEADERS`
 
 <a id="nestedatt--api_definition_choice--api_specification--validation_target_choice--validation_custom_list--open_api_validation_rules--validation_mode--validation_mode_choice--validation_mode_active--validation_enforcement_type_choice"></a>
 ### Nested Schema for `api_definition_choice.api_specification.validation_target_choice.validation_custom_list.open_api_validation_rules.validation_mode.validation_mode_choice.validation_mode_active.validation_enforcement_type_choice`
@@ -1487,7 +1481,7 @@ Optional:
 Required:
 
 - `json_payload` (Attributes) Json Payload Defines the structure of the API request payload, including payload structure, fields and values. (see [below for nested schema](#nestedatt--api_testing_choice--api_testing--domains--credentials--credentials_choice--login_endpoint--json_payload))
-- `method` (List of String) <br>**Allowed Values (choose one):** `["ANY", "GET", "HEAD", "PUT", "OPTIONS", "COPY", "POST", "DELETE", "CONNECT", "TRACE", "PATCH"]`
+- `method` (List of String) <br>**Allowed Values (choose one):** `["TRACE", "PATCH", "ANY", "OPTIONS", "COPY", "GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT"]`
 - `path` (String) <br>**Validation:** `Length LengthAtMost(1024)`
 - `token_response_key` (String) Token Response Key Specifies the key name used to extract the authentication token from the login response, such as token or access_token.
 
@@ -1828,7 +1822,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["TRANSFORMER_NONE", "UPPER_CASE", "BASE64_DECODE", "URL_DECODE", "TRIM_LEFT", "LOWER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_RIGHT", "TRIM"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM"]` (Multiple selection allowed)
 
 
 
@@ -1879,7 +1873,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["TRANSFORMER_NONE", "UPPER_CASE", "BASE64_DECODE", "URL_DECODE", "TRIM_LEFT", "LOWER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_RIGHT", "TRIM"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM"]` (Multiple selection allowed)
 
 
 <a id="nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--client_choice"></a>
@@ -1927,7 +1921,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["TRIM_LEFT", "LOWER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "UPPER_CASE", "BASE64_DECODE", "URL_DECODE"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT"]` (Multiple selection allowed)
 
 
 
@@ -1969,7 +1963,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["LOWER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "UPPER_CASE", "BASE64_DECODE", "URL_DECODE", "TRIM_LEFT"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["BASE64_DECODE", "REMOVE_WHITESPACE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE"]` (Multiple selection allowed)
 
 
 
@@ -1980,7 +1974,7 @@ Optional:
 Optional:
 
 - `invert_matcher` (Boolean) <br>**Default:** `false`
-- `methods` (List of String) <br>**Valid Options:** `["POST", "DELETE", "CONNECT", "TRACE", "PATCH", "ANY", "GET", "HEAD", "PUT", "OPTIONS", "COPY"]` (Multiple selection allowed)
+- `methods` (List of String) <br>**Valid Options:** `["PUT", "DELETE", "CONNECT", "TRACE", "PATCH", "ANY", "OPTIONS", "COPY", "GET", "HEAD", "POST"]` (Multiple selection allowed)
 
 
 <a id="nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--ip_choice"></a>
@@ -2038,7 +2032,7 @@ Optional:
 - `prefix_values` (List of String) prefix values A list of path prefix values to match the input HTTP path against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input HTTP path against.
 - `suffix_values` (List of String) Suffix values A list of path suffix values to match the input HTTP path against.
-- `transformers` (List of String) <br>**Valid Options:** `["TRANSFORMER_NONE", "UPPER_CASE", "BASE64_DECODE", "URL_DECODE", "TRIM_LEFT", "LOWER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_RIGHT", "TRIM"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["REMOVE_WHITESPACE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE"]` (Multiple selection allowed)
 
 
 <a id="nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--query_params"></a>
@@ -2069,7 +2063,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["BASE64_DECODE", "URL_DECODE", "TRIM_LEFT", "LOWER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "UPPER_CASE"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE"]` (Multiple selection allowed)
 
 
 
@@ -2086,7 +2080,7 @@ Optional:
 
 Optional:
 
-- `classes` (List of String) <br>**Valid Options:** `["TORRENTLOCKER", "TLS_FINGERPRINT_NONE", "ANY_MALICIOUS_FINGERPRINT", "DRIDEX", "RANSOMWARE", "TOFSEE", "TRICKBOT", "ADWARE", "ADWIND", "GOOTKIT", "GOZI", "JBIFROST", "QUAKBOT", "TROLDESH"]` (Multiple selection allowed)
+- `classes` (List of String) <br>**Valid Options:** `["JBIFROST", "RANSOMWARE", "TRICKBOT", "TLS_FINGERPRINT_NONE", "ADWIND", "GOOTKIT", "QUAKBOT", "TROLDESH", "TOFSEE", "TORRENTLOCKER", "ANY_MALICIOUS_FINGERPRINT", "ADWARE", "DRIDEX", "GOZI"]` (Multiple selection allowed)
 - `exact_values` (List of String) exact values A list of exact TLS JA3 fingerprints to match the input TLS JA3 fingerprint against.
 - `excluded_values` (List of String) excluded values A list of TLS JA3 fingerprints to be excluded when matching the input TLS JA3 fingerprint. This can be used to skip known false positives when using one or more known TLS fingerprint classes in the enclosing matcher.
 
@@ -2408,7 +2402,7 @@ Optional:
 
 Required:
 
-- `xfcc_header_elements` (List of String) <br>**Valid Options:** `["XFCC_NONE", "XFCC_CERT", "XFCC_CHAIN", "XFCC_SUBJECT", "XFCC_URI", "XFCC_DNS"]` (Multiple selection allowed)
+- `xfcc_header_elements` (List of String) <br>**Valid Options:** `["XFCC_URI", "XFCC_DNS", "XFCC_NONE", "XFCC_CERT", "XFCC_CHAIN", "XFCC_SUBJECT"]` (Multiple selection allowed)
 
 
 
@@ -2440,8 +2434,8 @@ Required:
 
 Optional:
 
-- `max_version` (List of String) <br>**Allowed Values (choose one):** `["TLS_AUTO", "TLSv1_0", "TLSv1_1", "TLSv1_2", "TLSv1_3"]`
-- `min_version` (List of String) <br>**Allowed Values (choose one):** `["TLSv1_2", "TLSv1_3", "TLS_AUTO", "TLSv1_0", "TLSv1_1"]`
+- `max_version` (List of String) <br>**Allowed Values (choose one):** `["TLSv1_1", "TLSv1_2", "TLSv1_3", "TLS_AUTO", "TLSv1_0"]`
+- `min_version` (List of String) <br>**Allowed Values (choose one):** `["TLSv1_1", "TLSv1_2", "TLSv1_3", "TLS_AUTO", "TLSv1_0"]`
 
 
 
@@ -2537,7 +2531,7 @@ Optional:
 
 Required:
 
-- `xfcc_header_elements` (List of String) <br>**Valid Options:** `["XFCC_CHAIN", "XFCC_SUBJECT", "XFCC_URI", "XFCC_DNS", "XFCC_NONE", "XFCC_CERT"]` (Multiple selection allowed)
+- `xfcc_header_elements` (List of String) <br>**Valid Options:** `["XFCC_SUBJECT", "XFCC_URI", "XFCC_DNS", "XFCC_NONE", "XFCC_CERT", "XFCC_CHAIN"]` (Multiple selection allowed)
 
 
 
@@ -2643,7 +2637,7 @@ Required:
 
 Optional:
 
-- `max_version` (List of String) <br>**Allowed Values (choose one):** `["TLSv1_3", "TLS_AUTO", "TLSv1_0", "TLSv1_1", "TLSv1_2"]`
+- `max_version` (List of String) <br>**Allowed Values (choose one):** `["TLS_AUTO", "TLSv1_0", "TLSv1_1", "TLSv1_2", "TLSv1_3"]`
 - `min_version` (List of String) <br>**Allowed Values (choose one):** `["TLS_AUTO", "TLSv1_0", "TLSv1_1", "TLSv1_2", "TLSv1_3"]`
 
 
@@ -2964,8 +2958,8 @@ Required:
 
 Optional:
 
-- `max_version` (List of String) <br>**Allowed Values (choose one):** `["TLSv1_1", "TLSv1_2", "TLSv1_3", "TLS_AUTO", "TLSv1_0"]`
-- `min_version` (List of String) <br>**Allowed Values (choose one):** `["TLS_AUTO", "TLSv1_0", "TLSv1_1", "TLSv1_2", "TLSv1_3"]`
+- `max_version` (List of String) <br>**Allowed Values (choose one):** `["TLS_AUTO", "TLSv1_0", "TLSv1_1", "TLSv1_2", "TLSv1_3"]`
+- `min_version` (List of String) <br>**Allowed Values (choose one):** `["TLSv1_2", "TLSv1_3", "TLS_AUTO", "TLSv1_0", "TLSv1_1"]`
 
 
 
@@ -3007,7 +3001,7 @@ Optional:
 
 - `action` (Attributes) action Report will identify and log threats, whereas Block will both log and block threats (see [below for nested schema](#nestedatt--malware_protection_choice--malware_protection_settings--malware_protection_rules--action))
 - `domain` (Attributes) Domain Domain to be matched (see [below for nested schema](#nestedatt--malware_protection_choice--malware_protection_settings--malware_protection_rules--domain))
-- `http_methods` (List of String) <br>**Valid Options:** `["POST", "DELETE", "CONNECT", "TRACE", "PATCH", "ANY", "GET", "HEAD", "PUT", "OPTIONS", "COPY"]` (Multiple selection allowed)
+- `http_methods` (List of String) <br>**Valid Options:** `["GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "TRACE", "PATCH", "ANY", "OPTIONS", "COPY"]` (Multiple selection allowed)
 - `path` (Attributes) Path Path to be matched (see [below for nested schema](#nestedatt--malware_protection_choice--malware_protection_settings--malware_protection_rules--path))
 
 <a id="nestedatt--malware_protection_choice--malware_protection_settings--malware_protection_rules--metadata"></a>
@@ -3165,7 +3159,7 @@ Required:
 
 Optional:
 
-- `methods` (List of String) <br>**Valid Options:** `["COPY", "POST", "DELETE", "CONNECT", "TRACE", "PATCH", "ANY", "GET", "HEAD", "PUT", "OPTIONS"]` (Multiple selection allowed)
+- `methods` (List of String) <br>**Valid Options:** `["GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "TRACE", "PATCH", "ANY", "OPTIONS", "COPY"]` (Multiple selection allowed)
 
 
 <a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--destination_type_choice--api_groups"></a>
@@ -3220,7 +3214,7 @@ Required:
 
 Required:
 
-- `ip_threat_categories` (List of String) <br>**Valid Options:** `["DENIAL_OF_SERVICE", "NETWORK", "SPAM_SOURCES", "WEB_ATTACKS", "BOTNETS", "PROXY", "TOR_PROXY", "WINDOWS_EXPLOITS", "SCANNERS", "REPUTATION", "PHISHING", "MOBILE_THREATS"]` (Multiple selection allowed)
+- `ip_threat_categories` (List of String) <br>**Valid Options:** `["WINDOWS_EXPLOITS", "WEB_ATTACKS", "BOTNETS", "PHISHING", "MOBILE_THREATS", "SPAM_SOURCES", "SCANNERS", "REPUTATION", "PROXY", "TOR_PROXY", "DENIAL_OF_SERVICE", "NETWORK"]` (Multiple selection allowed)
 
 
 
@@ -3305,7 +3299,7 @@ Optional:
 
 Optional:
 
-- `classes` (List of String) <br>**Valid Options:** `["JBIFROST", "QUAKBOT", "TROLDESH", "TORRENTLOCKER", "TLS_FINGERPRINT_NONE", "ANY_MALICIOUS_FINGERPRINT", "DRIDEX", "RANSOMWARE", "TOFSEE", "TRICKBOT", "ADWARE", "ADWIND", "GOOTKIT", "GOZI"]` (Multiple selection allowed)
+- `classes` (List of String) <br>**Valid Options:** `["ANY_MALICIOUS_FINGERPRINT", "ADWARE", "DRIDEX", "GOZI", "JBIFROST", "RANSOMWARE", "TRICKBOT", "TLS_FINGERPRINT_NONE", "ADWIND", "GOOTKIT", "QUAKBOT", "TROLDESH", "TOFSEE", "TORRENTLOCKER"]` (Multiple selection allowed)
 - `exact_values` (List of String) exact values A list of exact TLS JA3 fingerprints to match the input TLS JA3 fingerprint against.
 - `excluded_values` (List of String) excluded values A list of TLS JA3 fingerprints to be excluded when matching the input TLS JA3 fingerprint. This can be used to skip known false positives when using one or more known TLS fingerprint classes in the enclosing matcher.
 
@@ -3349,7 +3343,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["TRANSFORMER_NONE", "UPPER_CASE", "BASE64_DECODE", "URL_DECODE", "TRIM_LEFT", "LOWER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_RIGHT", "TRIM"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH"]` (Multiple selection allowed)
 
 
 
@@ -3382,7 +3376,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["LOWER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "UPPER_CASE", "BASE64_DECODE", "URL_DECODE", "TRIM_LEFT"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM"]` (Multiple selection allowed)
 
 
 
@@ -3415,7 +3409,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["TRANSFORMER_NONE", "UPPER_CASE", "BASE64_DECODE", "URL_DECODE", "TRIM_LEFT", "LOWER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_RIGHT", "TRIM"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM"]` (Multiple selection allowed)
 
 
 
@@ -3448,7 +3442,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["TRANSFORMER_NONE", "UPPER_CASE", "BASE64_DECODE", "URL_DECODE", "TRIM_LEFT", "LOWER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_RIGHT", "TRIM"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE"]` (Multiple selection allowed)
 
 
 
@@ -3574,7 +3568,7 @@ Read-Only:
 Optional:
 
 - `invert_matcher` (Boolean) <br>**Default:** `false`
-- `methods` (List of String) <br>**Valid Options:** `["ANY", "GET", "HEAD", "PUT", "OPTIONS", "COPY", "POST", "DELETE", "CONNECT", "TRACE", "PATCH"]` (Multiple selection allowed)
+- `methods` (List of String) <br>**Valid Options:** `["GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "TRACE", "PATCH", "ANY", "OPTIONS", "COPY"]` (Multiple selection allowed)
 
 
 <a id="nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--client_matcher"></a>
@@ -3611,7 +3605,7 @@ Required:
 
 Required:
 
-- `ip_threat_categories` (List of String) <br>**Valid Options:** `["REPUTATION", "PHISHING", "MOBILE_THREATS", "DENIAL_OF_SERVICE", "NETWORK", "SPAM_SOURCES", "WEB_ATTACKS", "BOTNETS", "PROXY", "TOR_PROXY", "WINDOWS_EXPLOITS", "SCANNERS"]` (Multiple selection allowed)
+- `ip_threat_categories` (List of String) <br>**Valid Options:** `["BOTNETS", "PHISHING", "MOBILE_THREATS", "SPAM_SOURCES", "SCANNERS", "REPUTATION", "PROXY", "TOR_PROXY", "DENIAL_OF_SERVICE", "NETWORK", "WINDOWS_EXPLOITS", "WEB_ATTACKS"]` (Multiple selection allowed)
 
 
 
@@ -3696,7 +3690,7 @@ Optional:
 
 Optional:
 
-- `classes` (List of String) <br>**Valid Options:** `["TOFSEE", "TRICKBOT", "ADWARE", "ADWIND", "GOOTKIT", "GOZI", "JBIFROST", "QUAKBOT", "TROLDESH", "TORRENTLOCKER", "TLS_FINGERPRINT_NONE", "ANY_MALICIOUS_FINGERPRINT", "DRIDEX", "RANSOMWARE"]` (Multiple selection allowed)
+- `classes` (List of String) <br>**Valid Options:** `["TROLDESH", "TOFSEE", "TORRENTLOCKER", "ANY_MALICIOUS_FINGERPRINT", "ADWARE", "DRIDEX", "GOZI", "JBIFROST", "RANSOMWARE", "TRICKBOT", "TLS_FINGERPRINT_NONE", "ADWIND", "GOOTKIT", "QUAKBOT"]` (Multiple selection allowed)
 - `exact_values` (List of String) exact values A list of exact TLS JA3 fingerprints to match the input TLS JA3 fingerprint against.
 - `excluded_values` (List of String) excluded values A list of TLS JA3 fingerprints to be excluded when matching the input TLS JA3 fingerprint. This can be used to skip known false positives when using one or more known TLS fingerprint classes in the enclosing matcher.
 
@@ -3740,7 +3734,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["URL_DECODE", "TRIM_LEFT", "LOWER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "UPPER_CASE", "BASE64_DECODE"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH"]` (Multiple selection allowed)
 
 
 
@@ -3773,7 +3767,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["TRANSFORMER_NONE", "UPPER_CASE", "BASE64_DECODE", "URL_DECODE", "TRIM_LEFT", "LOWER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_RIGHT", "TRIM"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM"]` (Multiple selection allowed)
 
 
 
@@ -3806,7 +3800,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["LOWER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "UPPER_CASE", "BASE64_DECODE", "URL_DECODE", "TRIM_LEFT"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE"]` (Multiple selection allowed)
 
 
 
@@ -3839,7 +3833,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["TRANSFORMER_NONE", "UPPER_CASE", "BASE64_DECODE", "URL_DECODE", "TRIM_LEFT", "LOWER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_RIGHT", "TRIM"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE"]` (Multiple selection allowed)
 
 
 
@@ -3884,7 +3878,7 @@ Optional:
 Required:
 
 - `count_by_choice` (Attributes) Count by The classification criteria for requests counts. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--rate_limiter_choice--inline_rate_limiter--count_by_choice))
-- `unit` (List of String) <br>**Allowed Values (choose one):** `["HOUR", "DAY", "SECOND", "MINUTE"]`
+- `unit` (List of String) <br>**Allowed Values (choose one):** `["MINUTE", "HOUR", "DAY", "SECOND"]`
 
 Optional:
 
@@ -3961,7 +3955,7 @@ Required:
 
 Required:
 
-- `ip_threat_categories` (List of String) <br>**Valid Options:** `["WINDOWS_EXPLOITS", "SCANNERS", "REPUTATION", "PHISHING", "MOBILE_THREATS", "DENIAL_OF_SERVICE", "NETWORK", "SPAM_SOURCES", "WEB_ATTACKS", "BOTNETS", "PROXY", "TOR_PROXY"]` (Multiple selection allowed)
+- `ip_threat_categories` (List of String) <br>**Valid Options:** `["WEB_ATTACKS", "BOTNETS", "PHISHING", "MOBILE_THREATS", "SPAM_SOURCES", "SCANNERS", "REPUTATION", "PROXY", "TOR_PROXY", "DENIAL_OF_SERVICE", "NETWORK", "WINDOWS_EXPLOITS"]` (Multiple selection allowed)
 
 
 
@@ -4046,7 +4040,7 @@ Optional:
 
 Optional:
 
-- `classes` (List of String) <br>**Valid Options:** `["ADWARE", "ADWIND", "GOOTKIT", "GOZI", "JBIFROST", "QUAKBOT", "TROLDESH", "TORRENTLOCKER", "TLS_FINGERPRINT_NONE", "ANY_MALICIOUS_FINGERPRINT", "DRIDEX", "RANSOMWARE", "TOFSEE", "TRICKBOT"]` (Multiple selection allowed)
+- `classes` (List of String) <br>**Valid Options:** `["DRIDEX", "GOZI", "JBIFROST", "RANSOMWARE", "TRICKBOT", "TLS_FINGERPRINT_NONE", "ADWIND", "GOOTKIT", "QUAKBOT", "TROLDESH", "TOFSEE", "TORRENTLOCKER", "ANY_MALICIOUS_FINGERPRINT", "ADWARE"]` (Multiple selection allowed)
 - `exact_values` (List of String) exact values A list of exact TLS JA3 fingerprints to match the input TLS JA3 fingerprint against.
 - `excluded_values` (List of String) excluded values A list of TLS JA3 fingerprints to be excluded when matching the input TLS JA3 fingerprint. This can be used to skip known false positives when using one or more known TLS fingerprint classes in the enclosing matcher.
 
@@ -4090,7 +4084,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["TRANSFORMER_NONE", "UPPER_CASE", "BASE64_DECODE", "URL_DECODE", "TRIM_LEFT", "LOWER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_RIGHT", "TRIM"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH"]` (Multiple selection allowed)
 
 
 
@@ -4123,7 +4117,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["BASE64_DECODE", "URL_DECODE", "TRIM_LEFT", "LOWER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "UPPER_CASE"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE"]` (Multiple selection allowed)
 
 
 
@@ -4156,7 +4150,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["TRIM_LEFT", "LOWER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "UPPER_CASE", "BASE64_DECODE", "URL_DECODE"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE", "LOWER_CASE", "UPPER_CASE"]` (Multiple selection allowed)
 
 
 
@@ -4189,7 +4183,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["URL_DECODE", "TRIM_LEFT", "LOWER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "UPPER_CASE", "BASE64_DECODE"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE"]` (Multiple selection allowed)
 
 
 
@@ -4284,7 +4278,7 @@ Read-Only:
 
 Required:
 
-- `unit` (List of String) <br>**Allowed Values (choose one):** `["MINUTE", "HOUR", "DAY", "SECOND"]`
+- `unit` (List of String) <br>**Allowed Values (choose one):** `["SECOND", "MINUTE", "HOUR", "DAY"]`
 
 Optional:
 
@@ -4498,7 +4492,7 @@ Required:
 
 Optional:
 
-- `actions` (List of String) <br>**Valid Options:** `["SKIP_PROCESSING_WAF", "SKIP_PROCESSING_MUM", "SKIP_PROCESSING_API_PROTECTION", "SKIP_PROCESSING_OAS_VALIDATION", "SKIP_PROCESSING_DDOS_PROTECTION", "SKIP_PROCESSING_MALWARE_PROTECTION", "SKIP_PROCESSING_BOT", "SKIP_PROCESSING_IP_REPUTATION", "SKIP_PROCESSING_THREAT_MESH"]` (Multiple selection allowed)
+- `actions` (List of String) <br>**Valid Options:** `["SKIP_PROCESSING_BOT", "SKIP_PROCESSING_IP_REPUTATION", "SKIP_PROCESSING_API_PROTECTION", "SKIP_PROCESSING_MALWARE_PROTECTION", "SKIP_PROCESSING_WAF", "SKIP_PROCESSING_MUM", "SKIP_PROCESSING_OAS_VALIDATION", "SKIP_PROCESSING_DDOS_PROTECTION", "SKIP_PROCESSING_THREAT_MESH"]` (Multiple selection allowed)
 - `expiration_timestamp` (String) expiration timestamp The expiration_timestamp is the RFC 3339 format timestamp at which the containing rule is considered to be logically expired. The rule continues to exist in the configuration but is not applied anymore.
 
 <a id="nestedatt--blocked_clients--client_source_choice"></a>
@@ -4607,7 +4601,7 @@ Optional:
 
 Optional:
 
-- `javascript_location` (List of String) <br>**Allowed Values (choose one):** `["AFTER_HEAD", "AFTER_TITLE_END", "BEFORE_SCRIPT"]`
+- `javascript_location` (List of String) <br>**Allowed Values (choose one):** `["AFTER_TITLE_END", "BEFORE_SCRIPT", "AFTER_HEAD"]`
 
 
 <a id="nestedatt--bot_defense_choice--bot_defense--policy--java_script_choice--js_insert_all_pages_except"></a>
@@ -4883,7 +4877,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["LOWER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "UPPER_CASE", "BASE64_DECODE", "URL_DECODE", "TRIM_LEFT"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["BASE64_DECODE", "REMOVE_WHITESPACE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE"]` (Multiple selection allowed)
 
 
 
@@ -4899,7 +4893,7 @@ Required:
 - `app_traffic_type_choice` (Attributes) Traffic channel Select traffic channel. (see [below for nested schema](#nestedatt--bot_defense_choice--bot_defense--policy--protected_app_endpoints--app_traffic_type_choice))
 - `flow_label_choice` (Attributes) Flow label Endpoint label category (see [below for nested schema](#nestedatt--bot_defense_choice--bot_defense--policy--protected_app_endpoints--flow_label_choice))
 - `goodbot_choice` (Attributes) Good Bot The system will distinguish between good bot traffic and malicious automation. Select if you want to allow good bots to continue to the origin or receive the same mitigation handling as defined for all automated traffic. (see [below for nested schema](#nestedatt--bot_defense_choice--bot_defense--policy--protected_app_endpoints--goodbot_choice))
-- `http_methods` (List of String) <br>**Valid Options:** `["METHOD_ANY", "METHOD_GET", "METHOD_POST", "METHOD_PUT", "METHOD_PATCH", "METHOD_DELETE", "METHOD_GET_DOCUMENT"]` (Multiple selection allowed)
+- `http_methods` (List of String) <br>**Valid Options:** `["METHOD_GET", "METHOD_POST", "METHOD_PUT", "METHOD_PATCH", "METHOD_DELETE", "METHOD_GET_DOCUMENT", "METHOD_ANY"]` (Multiple selection allowed)
 - `metadata` (Attributes) metadata Common attributes for the rule including name and description. (see [below for nested schema](#nestedatt--bot_defense_choice--bot_defense--policy--protected_app_endpoints--metadata))
 - `mitigation` (Attributes) Mitigation Mitigation action. (see [below for nested schema](#nestedatt--bot_defense_choice--bot_defense--policy--protected_app_endpoints--mitigation))
 - `path` (Attributes) Path Matching URI path of the route. (see [below for nested schema](#nestedatt--bot_defense_choice--bot_defense--policy--protected_app_endpoints--path))
@@ -5020,7 +5014,7 @@ Optional:
 
 Required:
 
-- `status` (List of String) <br>**Allowed Values (choose one):** `["UseProxy", "HTTPVersionNotSupported", "InsufficientStorage", "MethodNotAllowed", "ProxyAuthenticationRequired", "RequestHeaderFieldsTooLarge", "MultipleChoices", "BadRequest", "Unauthorized", "ExpectationFailed", "Found", "PayloadTooLarge", "RangeNotSatisfiable", "Locked", "NetworkAuthenticationRequired", "AlreadyReported", "Gone", "ServiceUnavailable", "SeeOther", "PermanentRedirect", "PaymentRequired", "Conflict", "UnsupportedMediaType", "NonAuthoritativeInformation", "PartialContent", "RequestTimeout", "PreconditionFailed", "BadGateway", "EmptyStatusCode", "ResetContent", "MovedPermanently", "URITooLong", "TooManyRequests", "NotImplemented", "Accepted", "LoopDetected", "NotExtended", "MultiStatus", "PreconditionRequired", "GatewayTimeout", "InternalServerError", "NoContent", "NotModified", "MisdirectedRequest", "UpgradeRequired", "VariantAlsoNegotiates", "Continue", "TemporaryRedirect", "NotFound", "UnprocessableEntity", "Forbidden", "NotAcceptable", "OK", "IMUsed", "LengthRequired", "FailedDependency", "Created"]`
+- `status` (List of String) <br>**Allowed Values (choose one):** `["InsufficientStorage", "NetworkAuthenticationRequired", "PayloadTooLarge", "URITooLong", "LoopDetected", "Created", "MethodNotAllowed", "NotAcceptable", "MisdirectedRequest", "PartialContent", "PermanentRedirect", "PreconditionFailed", "Conflict", "RequestHeaderFieldsTooLarge", "TemporaryRedirect", "InternalServerError", "NotExtended", "NonAuthoritativeInformation", "NoContent", "ResetContent", "MultipleChoices", "Forbidden", "MovedPermanently", "Found", "BadRequest", "PaymentRequired", "ProxyAuthenticationRequired", "IMUsed", "NotFound", "UnsupportedMediaType", "FailedDependency", "UpgradeRequired", "PreconditionRequired", "NotImplemented", "NotModified", "RequestTimeout", "BadGateway", "HTTPVersionNotSupported", "MultiStatus", "TooManyRequests", "ServiceUnavailable", "UseProxy", "Gone", "UnprocessableEntity", "Unauthorized", "EmptyStatusCode", "Continue", "OK", "Accepted", "LengthRequired", "RangeNotSatisfiable", "ExpectationFailed", "GatewayTimeout", "VariantAlsoNegotiates", "SeeOther", "Locked", "AlreadyReported"]`
 
 Optional:
 
@@ -5033,7 +5027,7 @@ Optional:
 
 Required:
 
-- `status` (List of String) <br>**Allowed Values (choose one):** `["Unauthorized", "ExpectationFailed", "Found", "PayloadTooLarge", "RangeNotSatisfiable", "Locked", "NetworkAuthenticationRequired", "AlreadyReported", "Gone", "ServiceUnavailable", "SeeOther", "PermanentRedirect", "PaymentRequired", "Conflict", "UnsupportedMediaType", "NonAuthoritativeInformation", "PartialContent", "RequestTimeout", "PreconditionFailed", "BadGateway", "EmptyStatusCode", "ResetContent", "MovedPermanently", "URITooLong", "TooManyRequests", "NotImplemented", "Accepted", "LoopDetected", "NotExtended", "MultiStatus", "PreconditionRequired", "GatewayTimeout", "InternalServerError", "NoContent", "NotModified", "MisdirectedRequest", "UpgradeRequired", "VariantAlsoNegotiates", "Continue", "TemporaryRedirect", "NotFound", "UnprocessableEntity", "Forbidden", "NotAcceptable", "OK", "IMUsed", "LengthRequired", "FailedDependency", "Created", "UseProxy", "HTTPVersionNotSupported", "InsufficientStorage", "MethodNotAllowed", "ProxyAuthenticationRequired", "RequestHeaderFieldsTooLarge", "MultipleChoices", "BadRequest"]`
+- `status` (List of String) <br>**Allowed Values (choose one):** `["NotModified", "RequestTimeout", "BadGateway", "HTTPVersionNotSupported", "MultiStatus", "TooManyRequests", "ServiceUnavailable", "UseProxy", "Gone", "UnprocessableEntity", "Unauthorized", "EmptyStatusCode", "Continue", "OK", "Accepted", "LengthRequired", "RangeNotSatisfiable", "ExpectationFailed", "GatewayTimeout", "VariantAlsoNegotiates", "SeeOther", "Locked", "AlreadyReported", "InsufficientStorage", "NetworkAuthenticationRequired", "PayloadTooLarge", "URITooLong", "LoopDetected", "Created", "MethodNotAllowed", "NotAcceptable", "MisdirectedRequest", "PartialContent", "PermanentRedirect", "PreconditionFailed", "Conflict", "RequestHeaderFieldsTooLarge", "TemporaryRedirect", "InternalServerError", "NotExtended", "NonAuthoritativeInformation", "NoContent", "ResetContent", "MultipleChoices", "Forbidden", "MovedPermanently", "Found", "BadRequest", "PaymentRequired", "ProxyAuthenticationRequired", "IMUsed", "NotFound", "UnsupportedMediaType", "FailedDependency", "UpgradeRequired", "PreconditionRequired", "NotImplemented"]`
 
 Optional:
 
@@ -5189,7 +5183,7 @@ Optional:
 Optional:
 
 - `body` (String) <br>**Default:** `The requested URL was rejected. Please consult with your administrator.`<br>**Validation:** `Length LengthAtMost(4096)`
-- `status` (List of String) <br>**Allowed Values (choose one):** `["VariantAlsoNegotiates", "Continue", "TemporaryRedirect", "NotFound", "UnprocessableEntity", "Forbidden", "NotAcceptable", "OK", "IMUsed", "LengthRequired", "FailedDependency", "Created", "UseProxy", "HTTPVersionNotSupported", "InsufficientStorage", "MethodNotAllowed", "ProxyAuthenticationRequired", "RequestHeaderFieldsTooLarge", "MultipleChoices", "BadRequest", "Unauthorized", "ExpectationFailed", "Found", "PayloadTooLarge", "RangeNotSatisfiable", "Locked", "NetworkAuthenticationRequired", "AlreadyReported", "Gone", "ServiceUnavailable", "SeeOther", "PermanentRedirect", "PaymentRequired", "Conflict", "UnsupportedMediaType", "NonAuthoritativeInformation", "PartialContent", "RequestTimeout", "PreconditionFailed", "BadGateway", "EmptyStatusCode", "ResetContent", "MovedPermanently", "URITooLong", "TooManyRequests", "NotImplemented", "Accepted", "LoopDetected", "NotExtended", "MultiStatus", "PreconditionRequired", "GatewayTimeout", "InternalServerError", "NoContent", "NotModified", "MisdirectedRequest", "UpgradeRequired"]`<br>**Default:** `OK`
+- `status` (List of String) <br>**Allowed Values (choose one):** `["TooManyRequests", "ServiceUnavailable", "UseProxy", "Gone", "UnprocessableEntity", "Unauthorized", "EmptyStatusCode", "Continue", "OK", "Accepted", "LengthRequired", "RangeNotSatisfiable", "ExpectationFailed", "GatewayTimeout", "VariantAlsoNegotiates", "SeeOther", "Locked", "AlreadyReported", "InsufficientStorage", "NetworkAuthenticationRequired", "PayloadTooLarge", "URITooLong", "LoopDetected", "Created", "MethodNotAllowed", "NotAcceptable", "MisdirectedRequest", "PartialContent", "PermanentRedirect", "PreconditionFailed", "Conflict", "RequestHeaderFieldsTooLarge", "TemporaryRedirect", "InternalServerError", "NotExtended", "NonAuthoritativeInformation", "NoContent", "ResetContent", "MultipleChoices", "Forbidden", "MovedPermanently", "Found", "BadRequest", "PaymentRequired", "ProxyAuthenticationRequired", "IMUsed", "NotFound", "UnsupportedMediaType", "FailedDependency", "UpgradeRequired", "PreconditionRequired", "NotImplemented", "NotModified", "RequestTimeout", "BadGateway", "HTTPVersionNotSupported", "MultiStatus"]`<br>**Default:** `OK`
 
 
 <a id="nestedatt--bot_defense_choice--bot_defense--policy--protected_app_endpoints--mitigation--action_type_choice--flag"></a>
@@ -5301,7 +5295,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["UPPER_CASE", "BASE64_DECODE", "URL_DECODE", "TRIM_LEFT", "LOWER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE"]` (Multiple selection allowed)
 
 
 
@@ -5334,7 +5328,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "UPPER_CASE", "BASE64_DECODE", "URL_DECODE", "TRIM_LEFT", "LOWER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE"]` (Multiple selection allowed)
 
 
 
@@ -5471,7 +5465,7 @@ Required:
 
 Optional:
 
-- `javascript_location` (List of String) <br>**Allowed Values (choose one):** `["AFTER_HEAD", "AFTER_TITLE_END", "BEFORE_SCRIPT"]`
+- `javascript_location` (List of String) <br>**Allowed Values (choose one):** `["BEFORE_SCRIPT", "AFTER_HEAD", "AFTER_TITLE_END"]`
 
 <a id="nestedatt--bot_defense_choice--bot_defense_advanced--java_script_choice--js_insertion_rules--rules--domain_matcher_choice"></a>
 ### Nested Schema for `bot_defense_choice.bot_defense_advanced.java_script_choice.js_insertion_rules.rules.domain_matcher_choice`
@@ -5646,7 +5640,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["REMOVE_WHITESPACE", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "UPPER_CASE", "BASE64_DECODE", "URL_DECODE", "TRIM_LEFT", "LOWER_CASE", "NORMALIZE_PATH"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["BASE64_DECODE", "REMOVE_WHITESPACE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE"]` (Multiple selection allowed)
 
 
 
@@ -6103,7 +6097,7 @@ Optional:
 Optional:
 
 - `asn_list` (Attributes) asn_list Addresses that belong to the ASNs in the given list The ASN is obtained by performing a lookup for the source IPv4 Address in a GeoIP DB. (see [below for nested schema](#nestedatt--ddos_mitigation_rules--mitigation_choice--ddos_client_source--asn_list))
-- `country_list` (List of String) <br>**Valid Options:** `["COUNTRY_FR", "COUNTRY_GT", "COUNTRY_SD", "COUNTRY_ID", "COUNTRY_KH", "COUNTRY_PH", "COUNTRY_SO", "COUNTRY_BW", "COUNTRY_DJ", "COUNTRY_GY", "COUNTRY_KP", "COUNTRY_UA", "COUNTRY_LA", "COUNTRY_LV", "COUNTRY_GB", "COUNTRY_KR", "COUNTRY_SV", "COUNTRY_BM", "COUNTRY_CG", "COUNTRY_PW", "COUNTRY_VC", "COUNTRY_MW", "COUNTRY_SM", "COUNTRY_CV", "COUNTRY_GF", "COUNTRY_GS", "COUNTRY_BZ", "COUNTRY_CL", "COUNTRY_NC", "COUNTRY_BR", "COUNTRY_IO", "COUNTRY_IQ", "COUNTRY_KG", "COUNTRY_LR", "COUNTRY_PK", "COUNTRY_FJ", "COUNTRY_SK", "COUNTRY_BI", "COUNTRY_NL", "COUNTRY_XT", "COUNTRY_ZA", "COUNTRY_AS", "COUNTRY_AZ", "COUNTRY_CC", "COUNTRY_ER", "COUNTRY_GG", "COUNTRY_GR", "COUNTRY_LI", "COUNTRY_CU", "COUNTRY_US", "COUNTRY_UY", "COUNTRY_CN", "COUNTRY_TN", "COUNTRY_YE", "COUNTRY_BO", "COUNTRY_OM", "COUNTRY_LY", "COUNTRY_RW", "COUNTRY_YT", "COUNTRY_CI", "COUNTRY_CW", "COUNTRY_MC", "COUNTRY_SG", "COUNTRY_TH", "COUNTRY_VE", "COUNTRY_EH", "COUNTRY_MM", "COUNTRY_ST", "COUNTRY_TG", "COUNTRY_VU", "COUNTRY_AF", "COUNTRY_BN", "COUNTRY_CO", "COUNTRY_CZ", "COUNTRY_EC", "COUNTRY_GA", "COUNTRY_GU", "COUNTRY_TZ", "COUNTRY_GI", "COUNTRY_HM", "COUNTRY_TR", "COUNTRY_TT", "COUNTRY_AI", "COUNTRY_CR", "COUNTRY_EG", "COUNTRY_MT", "COUNTRY_SR", "COUNTRY_CA", "COUNTRY_GN", "COUNTRY_GP", "COUNTRY_KY", "COUNTRY_MD", "COUNTRY_FO", "COUNTRY_DE", "COUNTRY_MO", "COUNTRY_MQ", "COUNTRY_NG", "COUNTRY_PY", "COUNTRY_MY", "COUNTRY_SN", "COUNTRY_BY", "COUNTRY_GL", "COUNTRY_HN", "COUNTRY_HT", "COUNTRY_DM", "COUNTRY_GE", "COUNTRY_LS", "COUNTRY_NU", "COUNTRY_PA", "COUNTRY_TV", "COUNTRY_AX", "COUNTRY_IL", "COUNTRY_MA", "COUNTRY_ML", "COUNTRY_NP", "COUNTRY_PR", "COUNTRY_TM", "COUNTRY_BL", "COUNTRY_BQ", "COUNTRY_MR", "COUNTRY_CD", "COUNTRY_DK", "COUNTRY_HU", "COUNTRY_RU", "COUNTRY_TC", "COUNTRY_WS", "COUNTRY_BT", "COUNTRY_BV", "COUNTRY_FK", "COUNTRY_MG", "COUNTRY_MH", "COUNTRY_PT", "COUNTRY_XK", "COUNTRY_BE", "COUNTRY_MU", "COUNTRY_NR", "COUNTRY_SJ", "COUNTRY_CF", "COUNTRY_CH", "COUNTRY_EE", "COUNTRY_SS", "COUNTRY_TO", "COUNTRY_KZ", "COUNTRY_NF", "COUNTRY_RS", "COUNTRY_AE", "COUNTRY_BS", "COUNTRY_ET", "COUNTRY_UG", "COUNTRY_AW", "COUNTRY_GQ", "COUNTRY_IN", "COUNTRY_JO", "COUNTRY_MK", "COUNTRY_PF", "COUNTRY_AO", "COUNTRY_BD", "COUNTRY_GM", "COUNTRY_KI", "COUNTRY_PG", "COUNTRY_PM", "COUNTRY_SX", "COUNTRY_GD", "COUNTRY_MS", "COUNTRY_VN", "COUNTRY_BG", "COUNTRY_CK", "COUNTRY_LB", "COUNTRY_MF", "COUNTRY_ZM", "COUNTRY_BH", "COUNTRY_NA", "COUNTRY_PS", "COUNTRY_SA", "COUNTRY_UZ", "COUNTRY_IT", "COUNTRY_MZ", "COUNTRY_SL", "COUNTRY_TF", "COUNTRY_PL", "COUNTRY_NONE", "COUNTRY_JM", "COUNTRY_AR", "COUNTRY_CY", "COUNTRY_IM", "COUNTRY_LU", "COUNTRY_MP", "COUNTRY_MV", "COUNTRY_NI", "COUNTRY_RE", "COUNTRY_FI", "COUNTRY_GW", "COUNTRY_LK", "COUNTRY_RO", "COUNTRY_AM", "COUNTRY_BF", "COUNTRY_PN", "COUNTRY_SC", "COUNTRY_WF", "COUNTRY_IE", "COUNTRY_IS", "COUNTRY_TJ", "COUNTRY_TL", "COUNTRY_AL", "COUNTRY_HK", "COUNTRY_MN", "COUNTRY_UM", "COUNTRY_KW", "COUNTRY_SZ", "COUNTRY_NZ", "COUNTRY_TW", "COUNTRY_SY", "COUNTRY_AQ", "COUNTRY_CM", "COUNTRY_DZ", "COUNTRY_IR", "COUNTRY_KE", "COUNTRY_SE", "COUNTRY_SI", "COUNTRY_AN", "COUNTRY_AU", "COUNTRY_JE", "COUNTRY_QA", "COUNTRY_VI", "COUNTRY_AG", "COUNTRY_BA", "COUNTRY_ES", "COUNTRY_CX", "COUNTRY_LC", "COUNTRY_SH", "COUNTRY_TD", "COUNTRY_BB", "COUNTRY_BJ", "COUNTRY_DO", "COUNTRY_FM", "COUNTRY_PE", "COUNTRY_TK", "COUNTRY_CS", "COUNTRY_JP", "COUNTRY_KM", "COUNTRY_SB", "COUNTRY_VA", "COUNTRY_AD", "COUNTRY_HR", "COUNTRY_KN", "COUNTRY_ZW", "COUNTRY_AT", "COUNTRY_ME", "COUNTRY_MX", "COUNTRY_NE", "COUNTRY_NO", "COUNTRY_VG", "COUNTRY_GH", "COUNTRY_LT"]` (Multiple selection allowed)
+- `country_list` (List of String) <br>**Valid Options:** `["COUNTRY_PE", "COUNTRY_RO", "COUNTRY_SH", "COUNTRY_TZ", "COUNTRY_DJ", "COUNTRY_GB", "COUNTRY_SB", "COUNTRY_TJ", "COUNTRY_TT", "COUNTRY_VC", "COUNTRY_VI", "COUNTRY_FO", "COUNTRY_IL", "COUNTRY_NC", "COUNTRY_NR", "COUNTRY_TK", "COUNTRY_AW", "COUNTRY_BW", "COUNTRY_FM", "COUNTRY_KR", "COUNTRY_MQ", "COUNTRY_IR", "COUNTRY_IN", "COUNTRY_KG", "COUNTRY_KH", "COUNTRY_SY", "COUNTRY_TW", "COUNTRY_VA", "COUNTRY_CU", "COUNTRY_YT", "COUNTRY_CA", "COUNTRY_GA", "COUNTRY_MS", "COUNTRY_MU", "COUNTRY_BN", "COUNTRY_ET", "COUNTRY_MC", "COUNTRY_DE", "COUNTRY_GQ", "COUNTRY_JP", "COUNTRY_ML", "COUNTRY_PA", "COUNTRY_BM", "COUNTRY_MO", "COUNTRY_PG", "COUNTRY_SE", "COUNTRY_BB", "COUNTRY_DK", "COUNTRY_FK", "COUNTRY_LY", "COUNTRY_PH", "COUNTRY_UM", "COUNTRY_VE", "COUNTRY_BE", "COUNTRY_AD", "COUNTRY_HN", "COUNTRY_KM", "COUNTRY_UA", "COUNTRY_CS", "COUNTRY_GS", "COUNTRY_HK", "COUNTRY_MN", "COUNTRY_PK", "COUNTRY_UG", "COUNTRY_DM", "COUNTRY_GF", "COUNTRY_JO", "COUNTRY_KP", "COUNTRY_NL", "COUNTRY_NP", "COUNTRY_PY", "COUNTRY_AM", "COUNTRY_LU", "COUNTRY_TM", "COUNTRY_RE", "COUNTRY_AL", "COUNTRY_BR", "COUNTRY_CD", "COUNTRY_FR", "COUNTRY_GD", "COUNTRY_GN", "COUNTRY_NZ", "COUNTRY_PL", "COUNTRY_TL", "COUNTRY_CZ", "COUNTRY_GL", "COUNTRY_SJ", "COUNTRY_NI", "COUNTRY_NONE", "COUNTRY_ES", "COUNTRY_LT", "COUNTRY_MX", "COUNTRY_UZ", "COUNTRY_XT", "COUNTRY_AR", "COUNTRY_BV", "COUNTRY_MZ", "COUNTRY_TH", "COUNTRY_UY", "COUNTRY_BG", "COUNTRY_BJ", "COUNTRY_OM", "COUNTRY_AI", "COUNTRY_GM", "COUNTRY_MA", "COUNTRY_MY", "COUNTRY_CF", "COUNTRY_BH", "COUNTRY_BF", "COUNTRY_ID", "COUNTRY_LK", "COUNTRY_NA", "COUNTRY_SO", "COUNTRY_TV", "COUNTRY_AU", "COUNTRY_BY", "COUNTRY_EH", "COUNTRY_PF", "COUNTRY_PS", "COUNTRY_SX", "COUNTRY_ER", "COUNTRY_PT", "COUNTRY_SC", "COUNTRY_TG", "COUNTRY_BZ", "COUNTRY_LR", "COUNTRY_BL", "COUNTRY_BO", "COUNTRY_IO", "COUNTRY_KI", "COUNTRY_RU", "COUNTRY_TF", "COUNTRY_AN", "COUNTRY_GG", "COUNTRY_LA", "COUNTRY_BT", "COUNTRY_GH", "COUNTRY_HR", "COUNTRY_HU", "COUNTRY_AE", "COUNTRY_MK", "COUNTRY_RW", "COUNTRY_ZM", "COUNTRY_ZA", "COUNTRY_AT", "COUNTRY_CM", "COUNTRY_CX", "COUNTRY_DO", "COUNTRY_GW", "COUNTRY_LB", "COUNTRY_LI", "COUNTRY_PR", "COUNTRY_BI", "COUNTRY_IQ", "COUNTRY_PW", "COUNTRY_SR", "COUNTRY_GP", "COUNTRY_HM", "COUNTRY_LC", "COUNTRY_NF", "COUNTRY_BQ", "COUNTRY_CO", "COUNTRY_GT", "COUNTRY_ME", "COUNTRY_PM", "COUNTRY_YE", "COUNTRY_AQ", "COUNTRY_SA", "COUNTRY_VN", "COUNTRY_XK", "COUNTRY_BA", "COUNTRY_CH", "COUNTRY_GY", "COUNTRY_AG", "COUNTRY_AZ", "COUNTRY_HT", "COUNTRY_JM", "COUNTRY_KW", "COUNTRY_LV", "COUNTRY_MF", "COUNTRY_NO", "COUNTRY_BS", "COUNTRY_SZ", "COUNTRY_CI", "COUNTRY_GR", "COUNTRY_IM", "COUNTRY_JE", "COUNTRY_MH", "COUNTRY_SG", "COUNTRY_CG", "COUNTRY_CK", "COUNTRY_EG", "COUNTRY_FI", "COUNTRY_RS", "COUNTRY_ZW", "COUNTRY_KE", "COUNTRY_QA", "COUNTRY_SD", "COUNTRY_CL", "COUNTRY_MV", "COUNTRY_TO", "COUNTRY_DZ", "COUNTRY_SI", "COUNTRY_ST", "COUNTRY_US", "COUNTRY_GU", "COUNTRY_KZ", "COUNTRY_MT", "COUNTRY_WS", "COUNTRY_IT", "COUNTRY_AO", "COUNTRY_MG", "COUNTRY_NU", "COUNTRY_SM", "COUNTRY_CN", "COUNTRY_CR", "COUNTRY_IE", "COUNTRY_KY", "COUNTRY_PN", "COUNTRY_TN", "COUNTRY_FJ", "COUNTRY_KN", "COUNTRY_TD", "COUNTRY_VU", "COUNTRY_EC", "COUNTRY_GE", "COUNTRY_SL", "COUNTRY_VG", "COUNTRY_BD", "COUNTRY_CW", "COUNTRY_MP", "COUNTRY_AF", "COUNTRY_TC", "COUNTRY_MW", "COUNTRY_NG", "COUNTRY_SV", "COUNTRY_CY", "COUNTRY_GI", "COUNTRY_SN", "COUNTRY_TR", "COUNTRY_WF", "COUNTRY_CV", "COUNTRY_MD", "COUNTRY_MR", "COUNTRY_NE", "COUNTRY_SS", "COUNTRY_AS", "COUNTRY_AX", "COUNTRY_EE", "COUNTRY_LS", "COUNTRY_MM", "COUNTRY_SK", "COUNTRY_CC", "COUNTRY_IS"]` (Multiple selection allowed)
 - `ja4_tls_fingerprint_matcher` (Attributes) TLS JA4 fingerprint matcher TLS JA4 fingerprints to be matched. The predicate evaluates to true if source JA4 TLS fingerprint matches any of the exact values of JA4 TLS fingerprints. (see [below for nested schema](#nestedatt--ddos_mitigation_rules--mitigation_choice--ddos_client_source--ja4_tls_fingerprint_matcher))
 - `tls_fingerprint_matcher` (Attributes) TLS JA3 fingerprint matcher TLS JA3 fingerprints to be matched. The predicate evaluates to true if the TLS fingerprint matches any of the exact values or classes of known TLS fingerprints. (see [below for nested schema](#nestedatt--ddos_mitigation_rules--mitigation_choice--ddos_client_source--tls_fingerprint_matcher))
 
@@ -6128,7 +6122,7 @@ Optional:
 
 Optional:
 
-- `classes` (List of String) <br>**Valid Options:** `["ADWARE", "ADWIND", "GOOTKIT", "GOZI", "JBIFROST", "QUAKBOT", "TROLDESH", "TORRENTLOCKER", "TLS_FINGERPRINT_NONE", "ANY_MALICIOUS_FINGERPRINT", "DRIDEX", "RANSOMWARE", "TOFSEE", "TRICKBOT"]` (Multiple selection allowed)
+- `classes` (List of String) <br>**Valid Options:** `["ADWARE", "DRIDEX", "GOZI", "JBIFROST", "RANSOMWARE", "TRICKBOT", "TLS_FINGERPRINT_NONE", "ADWIND", "GOOTKIT", "QUAKBOT", "TROLDESH", "TOFSEE", "TORRENTLOCKER", "ANY_MALICIOUS_FINGERPRINT"]` (Multiple selection allowed)
 - `exact_values` (List of String) exact values A list of exact TLS JA3 fingerprints to match the input TLS JA3 fingerprint against.
 - `excluded_values` (List of String) excluded values A list of TLS JA3 fingerprints to be excluded when matching the input TLS JA3 fingerprint. This can be used to skip known false positives when using one or more known TLS fingerprint classes in the enclosing matcher.
 
@@ -6280,7 +6274,7 @@ Optional:
 Optional:
 
 - `site_name` (String) Site Name Site Name where Internet VIP is installed
-- `site_network_type` (List of String) <br>**Allowed Values (choose one):** `["SITE_NETWORK_OUTSIDE_WITH_INTERNET_VIP", "SITE_NETWORK_SERVICE", "SITE_NETWORK_IP_FABRIC", "SITE_NETWORK_INSIDE_AND_OUTSIDE", "SITE_NETWORK_INSIDE_AND_OUTSIDE_WITH_INTERNET_VIP", "SITE_NETWORK_INSIDE", "SITE_NETWORK_OUTSIDE"]`
+- `site_network_type` (List of String) <br>**Allowed Values (choose one):** `["SITE_NETWORK_INSIDE_AND_OUTSIDE", "SITE_NETWORK_INSIDE_AND_OUTSIDE_WITH_INTERNET_VIP", "SITE_NETWORK_INSIDE", "SITE_NETWORK_OUTSIDE", "SITE_NETWORK_OUTSIDE_WITH_INTERNET_VIP", "SITE_NETWORK_SERVICE", "SITE_NETWORK_IP_FABRIC"]`
 - `status` (Attributes) Internet VIP Status Detailed status for internet VIP (see [below for nested schema](#nestedatt--internet_vip_info--status))
 
 <a id="nestedatt--internet_vip_info--status"></a>
@@ -6335,7 +6329,7 @@ Optional:
 
 Required:
 
-- `ip_threat_categories` (List of String) <br>**Valid Options:** `["SPAM_SOURCES", "WEB_ATTACKS", "BOTNETS", "PROXY", "TOR_PROXY", "WINDOWS_EXPLOITS", "SCANNERS", "REPUTATION", "PHISHING", "MOBILE_THREATS", "DENIAL_OF_SERVICE", "NETWORK"]` (Multiple selection allowed)
+- `ip_threat_categories` (List of String) <br>**Valid Options:** `["SPAM_SOURCES", "SCANNERS", "REPUTATION", "PROXY", "TOR_PROXY", "DENIAL_OF_SERVICE", "NETWORK", "WINDOWS_EXPLOITS", "WEB_ATTACKS", "BOTNETS", "PHISHING", "MOBILE_THREATS"]` (Multiple selection allowed)
 
 
 
@@ -6451,7 +6445,7 @@ Required:
 Optional:
 
 - `headers` (Attributes List) headers List of (key, value) headers (see [below for nested schema](#nestedatt--routes--choice--direct_response_route--headers))
-- `http_method` (List of String) <br>**Allowed Values (choose one):** `["ANY", "GET", "HEAD", "PUT", "OPTIONS", "COPY", "POST", "DELETE", "CONNECT", "TRACE", "PATCH"]`
+- `http_method` (List of String) <br>**Allowed Values (choose one):** `["POST", "PUT", "DELETE", "CONNECT", "TRACE", "PATCH", "ANY", "OPTIONS", "COPY", "GET", "HEAD"]`
 - `incoming_port` (Attributes) incoming_port The port on which the request is received (see [below for nested schema](#nestedatt--routes--choice--direct_response_route--incoming_port))
 - `route_direct_response` (Attributes) route_direct_response Send direct response (see [below for nested schema](#nestedatt--routes--choice--direct_response_route--route_direct_response))
 
@@ -6534,7 +6528,7 @@ Required:
 Optional:
 
 - `headers` (Attributes List) headers List of (key, value) headers (see [below for nested schema](#nestedatt--routes--choice--redirect_route--headers))
-- `http_method` (List of String) <br>**Allowed Values (choose one):** `["GET", "HEAD", "PUT", "OPTIONS", "COPY", "POST", "DELETE", "CONNECT", "TRACE", "PATCH", "ANY"]`
+- `http_method` (List of String) <br>**Allowed Values (choose one):** `["GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "TRACE", "PATCH", "ANY", "OPTIONS", "COPY"]`
 - `incoming_port` (Attributes) incoming_port The port on which the request is received (see [below for nested schema](#nestedatt--routes--choice--redirect_route--incoming_port))
 - `route_redirect` (Attributes) route_redirect Send redirect response (see [below for nested schema](#nestedatt--routes--choice--redirect_route--route_redirect))
 
@@ -6643,7 +6637,7 @@ Optional:
 - `advanced_options` (Attributes) Advanced Options Configure Advanced per route options (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options))
 - `caching_choice` (Attributes) Caching Caching behavior for this route (see [below for nested schema](#nestedatt--routes--choice--simple_route--caching_choice))
 - `headers` (Attributes List) headers List of (key, value) headers (see [below for nested schema](#nestedatt--routes--choice--simple_route--headers))
-- `http_method` (List of String) <br>**Allowed Values (choose one):** `["ANY", "GET", "HEAD", "PUT", "OPTIONS", "COPY", "POST", "DELETE", "CONNECT", "TRACE", "PATCH"]`
+- `http_method` (List of String) <br>**Allowed Values (choose one):** `["COPY", "GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "TRACE", "PATCH", "ANY", "OPTIONS"]`
 - `incoming_port` (Attributes) incoming_port The port on which the request is received (see [below for nested schema](#nestedatt--routes--choice--simple_route--incoming_port))
 - `query_params` (Attributes) query_params Handling of incoming query parameters in simple route. (see [below for nested schema](#nestedatt--routes--choice--simple_route--query_params))
 
@@ -6903,7 +6897,7 @@ Read-Only:
 
 Required:
 
-- `denominator` (List of String) <br>**Allowed Values (choose one):** `["MILLION", "HUNDRED", "TEN_THOUSAND"]`
+- `denominator` (List of String) <br>**Allowed Values (choose one):** `["HUNDRED", "TEN_THOUSAND", "MILLION"]`
 
 Optional:
 
@@ -7026,7 +7020,7 @@ Optional:
 
 Optional:
 
-- `javascript_tag` (List of String) <br>**Allowed Values (choose one):** `["JS_ATTR_CID", "JS_ATTR_CN", "JS_ATTR_API_DOMAIN", "JS_ATTR_API_URL", "JS_ATTR_API_PATH", "JS_ATTR_ASYNC", "JS_ATTR_DEFER", "JS_ATTR_ID"]`
+- `javascript_tag` (List of String) <br>**Allowed Values (choose one):** `["JS_ATTR_API_URL", "JS_ATTR_API_PATH", "JS_ATTR_ASYNC", "JS_ATTR_DEFER", "JS_ATTR_ID", "JS_ATTR_CID", "JS_ATTR_CN", "JS_ATTR_API_DOMAIN"]`
 - `tag_value` (String) TagValue Add the tag attribute value.
 
 
@@ -7589,7 +7583,7 @@ Required:
 
 Optional:
 
-- `actions` (List of String) <br>**Valid Options:** `["SKIP_PROCESSING_BOT", "SKIP_PROCESSING_IP_REPUTATION", "SKIP_PROCESSING_THREAT_MESH", "SKIP_PROCESSING_WAF", "SKIP_PROCESSING_MUM", "SKIP_PROCESSING_API_PROTECTION", "SKIP_PROCESSING_OAS_VALIDATION", "SKIP_PROCESSING_DDOS_PROTECTION", "SKIP_PROCESSING_MALWARE_PROTECTION"]` (Multiple selection allowed)
+- `actions` (List of String) <br>**Valid Options:** `["SKIP_PROCESSING_OAS_VALIDATION", "SKIP_PROCESSING_DDOS_PROTECTION", "SKIP_PROCESSING_THREAT_MESH", "SKIP_PROCESSING_BOT", "SKIP_PROCESSING_IP_REPUTATION", "SKIP_PROCESSING_API_PROTECTION", "SKIP_PROCESSING_MALWARE_PROTECTION", "SKIP_PROCESSING_WAF", "SKIP_PROCESSING_MUM"]` (Multiple selection allowed)
 - `expiration_timestamp` (String) expiration timestamp The expiration_timestamp is the RFC 3339 format timestamp at which the containing rule is considered to be logically expired. The rule continues to exist in the configuration but is not applied anymore.
 
 <a id="nestedatt--trusted_clients--client_source_choice"></a>
@@ -7716,7 +7710,7 @@ Optional:
 Optional:
 
 - `invert_matcher` (Boolean) <br>**Default:** `false`
-- `methods` (List of String) <br>**Valid Options:** `["CONNECT", "TRACE", "PATCH", "ANY", "GET", "HEAD", "PUT", "OPTIONS", "COPY", "POST", "DELETE"]` (Multiple selection allowed)
+- `methods` (List of String) <br>**Valid Options:** `["GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "TRACE", "PATCH", "ANY", "OPTIONS", "COPY"]` (Multiple selection allowed)
 
 
 <a id="nestedatt--api_protection_rules--api_endpoint_rules--client_matcher"></a>
@@ -7753,7 +7747,7 @@ Required:
 
 Required:
 
-- `ip_threat_categories` (List of String) <br>**Valid Options:** `["MOBILE_THREATS", "DENIAL_OF_SERVICE", "NETWORK", "SPAM_SOURCES", "WEB_ATTACKS", "BOTNETS", "PROXY", "TOR_PROXY", "WINDOWS_EXPLOITS", "SCANNERS", "REPUTATION", "PHISHING"]` (Multiple selection allowed)
+- `ip_threat_categories` (List of String) <br>**Valid Options:** `["REPUTATION", "PROXY", "TOR_PROXY", "DENIAL_OF_SERVICE", "NETWORK", "WINDOWS_EXPLOITS", "WEB_ATTACKS", "BOTNETS", "PHISHING", "MOBILE_THREATS", "SPAM_SOURCES", "SCANNERS"]` (Multiple selection allowed)
 
 
 
@@ -7838,7 +7832,7 @@ Optional:
 
 Optional:
 
-- `classes` (List of String) <br>**Valid Options:** `["ADWARE", "ADWIND", "GOOTKIT", "GOZI", "JBIFROST", "QUAKBOT", "TROLDESH", "TORRENTLOCKER", "TLS_FINGERPRINT_NONE", "ANY_MALICIOUS_FINGERPRINT", "DRIDEX", "RANSOMWARE", "TOFSEE", "TRICKBOT"]` (Multiple selection allowed)
+- `classes` (List of String) <br>**Valid Options:** `["ADWIND", "GOOTKIT", "QUAKBOT", "TROLDESH", "TOFSEE", "TORRENTLOCKER", "ANY_MALICIOUS_FINGERPRINT", "ADWARE", "DRIDEX", "GOZI", "JBIFROST", "RANSOMWARE", "TRICKBOT", "TLS_FINGERPRINT_NONE"]` (Multiple selection allowed)
 - `exact_values` (List of String) exact values A list of exact TLS JA3 fingerprints to match the input TLS JA3 fingerprint against.
 - `excluded_values` (List of String) excluded values A list of TLS JA3 fingerprints to be excluded when matching the input TLS JA3 fingerprint. This can be used to skip known false positives when using one or more known TLS fingerprint classes in the enclosing matcher.
 
@@ -7882,7 +7876,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["LOWER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "UPPER_CASE", "BASE64_DECODE", "URL_DECODE", "TRIM_LEFT"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT"]` (Multiple selection allowed)
 
 
 
@@ -7915,7 +7909,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["LOWER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "UPPER_CASE", "BASE64_DECODE", "URL_DECODE", "TRIM_LEFT"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE"]` (Multiple selection allowed)
 
 
 
@@ -7948,7 +7942,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["TRANSFORMER_NONE", "UPPER_CASE", "BASE64_DECODE", "URL_DECODE", "TRIM_LEFT", "LOWER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_RIGHT", "TRIM"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE"]` (Multiple selection allowed)
 
 
 
@@ -7981,7 +7975,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["LOWER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "UPPER_CASE", "BASE64_DECODE", "URL_DECODE", "TRIM_LEFT"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM"]` (Multiple selection allowed)
 
 
 
@@ -8076,7 +8070,7 @@ Required:
 
 Required:
 
-- `ip_threat_categories` (List of String) <br>**Valid Options:** `["WINDOWS_EXPLOITS", "SCANNERS", "REPUTATION", "PHISHING", "MOBILE_THREATS", "DENIAL_OF_SERVICE", "NETWORK", "SPAM_SOURCES", "WEB_ATTACKS", "BOTNETS", "PROXY", "TOR_PROXY"]` (Multiple selection allowed)
+- `ip_threat_categories` (List of String) <br>**Valid Options:** `["SPAM_SOURCES", "SCANNERS", "REPUTATION", "PROXY", "TOR_PROXY", "DENIAL_OF_SERVICE", "NETWORK", "WINDOWS_EXPLOITS", "WEB_ATTACKS", "BOTNETS", "PHISHING", "MOBILE_THREATS"]` (Multiple selection allowed)
 
 
 
@@ -8161,7 +8155,7 @@ Optional:
 
 Optional:
 
-- `classes` (List of String) <br>**Valid Options:** `["JBIFROST", "QUAKBOT", "TROLDESH", "TORRENTLOCKER", "TLS_FINGERPRINT_NONE", "ANY_MALICIOUS_FINGERPRINT", "DRIDEX", "RANSOMWARE", "TOFSEE", "TRICKBOT", "ADWARE", "ADWIND", "GOOTKIT", "GOZI"]` (Multiple selection allowed)
+- `classes` (List of String) <br>**Valid Options:** `["ANY_MALICIOUS_FINGERPRINT", "ADWARE", "DRIDEX", "GOZI", "JBIFROST", "RANSOMWARE", "TRICKBOT", "TLS_FINGERPRINT_NONE", "ADWIND", "GOOTKIT", "QUAKBOT", "TROLDESH", "TOFSEE", "TORRENTLOCKER"]` (Multiple selection allowed)
 - `exact_values` (List of String) exact values A list of exact TLS JA3 fingerprints to match the input TLS JA3 fingerprint against.
 - `excluded_values` (List of String) excluded values A list of TLS JA3 fingerprints to be excluded when matching the input TLS JA3 fingerprint. This can be used to skip known false positives when using one or more known TLS fingerprint classes in the enclosing matcher.
 
@@ -8205,7 +8199,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["TRANSFORMER_NONE", "UPPER_CASE", "BASE64_DECODE", "URL_DECODE", "TRIM_LEFT", "LOWER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_RIGHT", "TRIM"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE", "LOWER_CASE"]` (Multiple selection allowed)
 
 
 
@@ -8238,7 +8232,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["LOWER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "UPPER_CASE", "BASE64_DECODE", "URL_DECODE", "TRIM_LEFT"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT"]` (Multiple selection allowed)
 
 
 
@@ -8271,7 +8265,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["LOWER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "UPPER_CASE", "BASE64_DECODE", "URL_DECODE", "TRIM_LEFT"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE"]` (Multiple selection allowed)
 
 
 
@@ -8304,7 +8298,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["TRIM_LEFT", "LOWER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "UPPER_CASE", "BASE64_DECODE", "URL_DECODE"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE"]` (Multiple selection allowed)
 
 
 
@@ -8319,7 +8313,7 @@ Optional:
 
 - `auto_cert_expiry` (String) Auto Cert Expiry Timestamp Auto certificate expiry timestamp
 - `auto_cert_issuer` (String) Auto Cert Issuer Issuer of the auto certificate
-- `auto_cert_state` (List of String) <br>**Allowed Values (choose one):** `["DnsDomainVerification", "DomainChallengeVerified", "CertificateValid", "AutoCertAccountRateLimited", "AutoCertStarted", "AutoCertRateLimited", "AutoCertInitialize", "AutoCertDomainRateLimited", "CertificateExpired", "AutoCertError", "AutoCertDisabled", "AutoCertFinalize", "CertificateInvalid", "AutoCertNotApplicable", "AutoCertGenerationRetry", "PreDomainChallengePending", "DomainChallengeStarted", "DomainChallengePending"]`<br>**Default:** `AutoCertInitialize`
+- `auto_cert_state` (List of String) <br>**Allowed Values (choose one):** `["DomainChallengeVerified", "CertificateInvalid", "CertificateValid", "AutoCertError", "CertificateExpired", "DnsDomainVerification", "PreDomainChallengePending", "AutoCertFinalize", "AutoCertGenerationRetry", "AutoCertInitialize", "AutoCertDomainRateLimited", "AutoCertDisabled", "AutoCertStarted", "DomainChallengePending", "AutoCertNotApplicable", "AutoCertAccountRateLimited", "DomainChallengeStarted", "AutoCertRateLimited"]`<br>**Default:** `AutoCertInitialize`
 - `auto_cert_subject` (String) Auto Cert Subject Subject of the auto certificate
 - `dns_records` (Attributes List) DNS Records DNS Records that are to be added by user in their DNS domain. Currently, this will be populated when auto certificates are desired but DNS delegation is not enabled. (see [below for nested schema](#nestedatt--auto_cert_info--dns_records))
 
@@ -9062,7 +9056,7 @@ Required:
 
 Optional:
 
-- `country_codes` (List of String) <br>**Valid Options:** `["COUNTRY_WF", "COUNTRY_IE", "COUNTRY_IS", "COUNTRY_TJ", "COUNTRY_TL", "COUNTRY_AL", "COUNTRY_HK", "COUNTRY_MN", "COUNTRY_UM", "COUNTRY_KW", "COUNTRY_SZ", "COUNTRY_NZ", "COUNTRY_TW", "COUNTRY_SY", "COUNTRY_AQ", "COUNTRY_CM", "COUNTRY_DZ", "COUNTRY_IR", "COUNTRY_KE", "COUNTRY_SE", "COUNTRY_SI", "COUNTRY_AN", "COUNTRY_AU", "COUNTRY_JE", "COUNTRY_QA", "COUNTRY_VI", "COUNTRY_AG", "COUNTRY_BA", "COUNTRY_ES", "COUNTRY_CX", "COUNTRY_LC", "COUNTRY_SH", "COUNTRY_TD", "COUNTRY_BB", "COUNTRY_BJ", "COUNTRY_DO", "COUNTRY_FM", "COUNTRY_PE", "COUNTRY_TK", "COUNTRY_CS", "COUNTRY_JP", "COUNTRY_KM", "COUNTRY_SB", "COUNTRY_VA", "COUNTRY_AD", "COUNTRY_HR", "COUNTRY_KN", "COUNTRY_ZW", "COUNTRY_AT", "COUNTRY_ME", "COUNTRY_MX", "COUNTRY_NE", "COUNTRY_NO", "COUNTRY_VG", "COUNTRY_GH", "COUNTRY_LT", "COUNTRY_FR", "COUNTRY_GT", "COUNTRY_SD", "COUNTRY_ID", "COUNTRY_KH", "COUNTRY_PH", "COUNTRY_SO", "COUNTRY_BW", "COUNTRY_DJ", "COUNTRY_GY", "COUNTRY_KP", "COUNTRY_UA", "COUNTRY_LA", "COUNTRY_LV", "COUNTRY_GB", "COUNTRY_KR", "COUNTRY_SV", "COUNTRY_BM", "COUNTRY_CG", "COUNTRY_PW", "COUNTRY_VC", "COUNTRY_MW", "COUNTRY_SM", "COUNTRY_CV", "COUNTRY_GF", "COUNTRY_GS", "COUNTRY_BZ", "COUNTRY_CL", "COUNTRY_NC", "COUNTRY_BR", "COUNTRY_IO", "COUNTRY_IQ", "COUNTRY_KG", "COUNTRY_LR", "COUNTRY_PK", "COUNTRY_FJ", "COUNTRY_SK", "COUNTRY_BI", "COUNTRY_NL", "COUNTRY_XT", "COUNTRY_ZA", "COUNTRY_AS", "COUNTRY_AZ", "COUNTRY_CC", "COUNTRY_ER", "COUNTRY_GG", "COUNTRY_GR", "COUNTRY_LI", "COUNTRY_CU", "COUNTRY_US", "COUNTRY_UY", "COUNTRY_CN", "COUNTRY_TN", "COUNTRY_YE", "COUNTRY_BO", "COUNTRY_OM", "COUNTRY_LY", "COUNTRY_RW", "COUNTRY_YT", "COUNTRY_CI", "COUNTRY_CW", "COUNTRY_MC", "COUNTRY_SG", "COUNTRY_TH", "COUNTRY_VE", "COUNTRY_EH", "COUNTRY_MM", "COUNTRY_ST", "COUNTRY_TG", "COUNTRY_VU", "COUNTRY_AF", "COUNTRY_BN", "COUNTRY_CO", "COUNTRY_CZ", "COUNTRY_EC", "COUNTRY_GA", "COUNTRY_GU", "COUNTRY_TZ", "COUNTRY_GI", "COUNTRY_HM", "COUNTRY_TR", "COUNTRY_TT", "COUNTRY_AI", "COUNTRY_CR", "COUNTRY_EG", "COUNTRY_MT", "COUNTRY_SR", "COUNTRY_CA", "COUNTRY_GN", "COUNTRY_GP", "COUNTRY_KY", "COUNTRY_MD", "COUNTRY_FO", "COUNTRY_DE", "COUNTRY_MO", "COUNTRY_MQ", "COUNTRY_NG", "COUNTRY_PY", "COUNTRY_MY", "COUNTRY_SN", "COUNTRY_BY", "COUNTRY_GL", "COUNTRY_HN", "COUNTRY_HT", "COUNTRY_DM", "COUNTRY_GE", "COUNTRY_LS", "COUNTRY_NU", "COUNTRY_PA", "COUNTRY_TV", "COUNTRY_AX", "COUNTRY_IL", "COUNTRY_MA", "COUNTRY_ML", "COUNTRY_NP", "COUNTRY_PR", "COUNTRY_TM", "COUNTRY_BL", "COUNTRY_BQ", "COUNTRY_MR", "COUNTRY_CD", "COUNTRY_DK", "COUNTRY_HU", "COUNTRY_RU", "COUNTRY_TC", "COUNTRY_WS", "COUNTRY_BT", "COUNTRY_BV", "COUNTRY_FK", "COUNTRY_MG", "COUNTRY_MH", "COUNTRY_PT", "COUNTRY_XK", "COUNTRY_BE", "COUNTRY_MU", "COUNTRY_NR", "COUNTRY_SJ", "COUNTRY_CF", "COUNTRY_CH", "COUNTRY_EE", "COUNTRY_SS", "COUNTRY_TO", "COUNTRY_KZ", "COUNTRY_NF", "COUNTRY_RS", "COUNTRY_AE", "COUNTRY_BS", "COUNTRY_ET", "COUNTRY_UG", "COUNTRY_AW", "COUNTRY_GQ", "COUNTRY_IN", "COUNTRY_JO", "COUNTRY_MK", "COUNTRY_PF", "COUNTRY_AO", "COUNTRY_BD", "COUNTRY_GM", "COUNTRY_KI", "COUNTRY_PG", "COUNTRY_PM", "COUNTRY_SX", "COUNTRY_GD", "COUNTRY_MS", "COUNTRY_VN", "COUNTRY_BG", "COUNTRY_CK", "COUNTRY_LB", "COUNTRY_MF", "COUNTRY_ZM", "COUNTRY_BH", "COUNTRY_NA", "COUNTRY_PS", "COUNTRY_SA", "COUNTRY_UZ", "COUNTRY_IT", "COUNTRY_MZ", "COUNTRY_SL", "COUNTRY_TF", "COUNTRY_PL", "COUNTRY_NONE", "COUNTRY_JM", "COUNTRY_AR", "COUNTRY_CY", "COUNTRY_IM", "COUNTRY_LU", "COUNTRY_MP", "COUNTRY_MV", "COUNTRY_NI", "COUNTRY_RE", "COUNTRY_FI", "COUNTRY_GW", "COUNTRY_LK", "COUNTRY_RO", "COUNTRY_AM", "COUNTRY_BF", "COUNTRY_PN", "COUNTRY_SC"]` (Multiple selection allowed)
+- `country_codes` (List of String) <br>**Valid Options:** `["COUNTRY_IR", "COUNTRY_IN", "COUNTRY_KG", "COUNTRY_KH", "COUNTRY_SY", "COUNTRY_TW", "COUNTRY_VA", "COUNTRY_CU", "COUNTRY_YT", "COUNTRY_CA", "COUNTRY_GA", "COUNTRY_MS", "COUNTRY_MU", "COUNTRY_BN", "COUNTRY_ET", "COUNTRY_MC", "COUNTRY_DE", "COUNTRY_GQ", "COUNTRY_JP", "COUNTRY_ML", "COUNTRY_PA", "COUNTRY_BM", "COUNTRY_MO", "COUNTRY_PG", "COUNTRY_SE", "COUNTRY_BB", "COUNTRY_DK", "COUNTRY_FK", "COUNTRY_LY", "COUNTRY_PH", "COUNTRY_UM", "COUNTRY_VE", "COUNTRY_BE", "COUNTRY_AD", "COUNTRY_HN", "COUNTRY_KM", "COUNTRY_UA", "COUNTRY_CS", "COUNTRY_GS", "COUNTRY_HK", "COUNTRY_MN", "COUNTRY_PK", "COUNTRY_UG", "COUNTRY_DM", "COUNTRY_GF", "COUNTRY_JO", "COUNTRY_KP", "COUNTRY_NL", "COUNTRY_NP", "COUNTRY_PY", "COUNTRY_AM", "COUNTRY_LU", "COUNTRY_TM", "COUNTRY_RE", "COUNTRY_AL", "COUNTRY_BR", "COUNTRY_CD", "COUNTRY_FR", "COUNTRY_GD", "COUNTRY_GN", "COUNTRY_NZ", "COUNTRY_PL", "COUNTRY_TL", "COUNTRY_CZ", "COUNTRY_GL", "COUNTRY_SJ", "COUNTRY_NI", "COUNTRY_NONE", "COUNTRY_ES", "COUNTRY_LT", "COUNTRY_MX", "COUNTRY_UZ", "COUNTRY_XT", "COUNTRY_AR", "COUNTRY_BV", "COUNTRY_MZ", "COUNTRY_TH", "COUNTRY_UY", "COUNTRY_BG", "COUNTRY_BJ", "COUNTRY_OM", "COUNTRY_AI", "COUNTRY_GM", "COUNTRY_MA", "COUNTRY_MY", "COUNTRY_CF", "COUNTRY_BH", "COUNTRY_BF", "COUNTRY_ID", "COUNTRY_LK", "COUNTRY_NA", "COUNTRY_SO", "COUNTRY_TV", "COUNTRY_AU", "COUNTRY_BY", "COUNTRY_EH", "COUNTRY_PF", "COUNTRY_PS", "COUNTRY_SX", "COUNTRY_ER", "COUNTRY_PT", "COUNTRY_SC", "COUNTRY_TG", "COUNTRY_BZ", "COUNTRY_LR", "COUNTRY_BL", "COUNTRY_BO", "COUNTRY_IO", "COUNTRY_KI", "COUNTRY_RU", "COUNTRY_TF", "COUNTRY_AN", "COUNTRY_GG", "COUNTRY_LA", "COUNTRY_BT", "COUNTRY_GH", "COUNTRY_HR", "COUNTRY_HU", "COUNTRY_AE", "COUNTRY_MK", "COUNTRY_RW", "COUNTRY_ZM", "COUNTRY_ZA", "COUNTRY_AT", "COUNTRY_CM", "COUNTRY_CX", "COUNTRY_DO", "COUNTRY_GW", "COUNTRY_LB", "COUNTRY_LI", "COUNTRY_PR", "COUNTRY_BI", "COUNTRY_IQ", "COUNTRY_PW", "COUNTRY_SR", "COUNTRY_GP", "COUNTRY_HM", "COUNTRY_LC", "COUNTRY_NF", "COUNTRY_BQ", "COUNTRY_CO", "COUNTRY_GT", "COUNTRY_ME", "COUNTRY_PM", "COUNTRY_YE", "COUNTRY_AQ", "COUNTRY_SA", "COUNTRY_VN", "COUNTRY_XK", "COUNTRY_BA", "COUNTRY_CH", "COUNTRY_GY", "COUNTRY_AG", "COUNTRY_AZ", "COUNTRY_HT", "COUNTRY_JM", "COUNTRY_KW", "COUNTRY_LV", "COUNTRY_MF", "COUNTRY_NO", "COUNTRY_BS", "COUNTRY_SZ", "COUNTRY_CI", "COUNTRY_GR", "COUNTRY_IM", "COUNTRY_JE", "COUNTRY_MH", "COUNTRY_SG", "COUNTRY_CG", "COUNTRY_CK", "COUNTRY_EG", "COUNTRY_FI", "COUNTRY_RS", "COUNTRY_ZW", "COUNTRY_KE", "COUNTRY_QA", "COUNTRY_SD", "COUNTRY_CL", "COUNTRY_MV", "COUNTRY_TO", "COUNTRY_DZ", "COUNTRY_SI", "COUNTRY_ST", "COUNTRY_US", "COUNTRY_GU", "COUNTRY_KZ", "COUNTRY_MT", "COUNTRY_WS", "COUNTRY_IT", "COUNTRY_AO", "COUNTRY_MG", "COUNTRY_NU", "COUNTRY_SM", "COUNTRY_CN", "COUNTRY_CR", "COUNTRY_IE", "COUNTRY_KY", "COUNTRY_PN", "COUNTRY_TN", "COUNTRY_FJ", "COUNTRY_KN", "COUNTRY_TD", "COUNTRY_VU", "COUNTRY_EC", "COUNTRY_GE", "COUNTRY_SL", "COUNTRY_VG", "COUNTRY_BD", "COUNTRY_CW", "COUNTRY_MP", "COUNTRY_AF", "COUNTRY_TC", "COUNTRY_MW", "COUNTRY_NG", "COUNTRY_SV", "COUNTRY_CY", "COUNTRY_GI", "COUNTRY_SN", "COUNTRY_TR", "COUNTRY_WF", "COUNTRY_CV", "COUNTRY_MD", "COUNTRY_MR", "COUNTRY_NE", "COUNTRY_SS", "COUNTRY_AS", "COUNTRY_AX", "COUNTRY_EE", "COUNTRY_LS", "COUNTRY_MM", "COUNTRY_SK", "COUNTRY_CC", "COUNTRY_IS", "COUNTRY_PE", "COUNTRY_RO", "COUNTRY_SH", "COUNTRY_TZ", "COUNTRY_DJ", "COUNTRY_GB", "COUNTRY_SB", "COUNTRY_TJ", "COUNTRY_TT", "COUNTRY_VC", "COUNTRY_VI", "COUNTRY_FO", "COUNTRY_IL", "COUNTRY_NC", "COUNTRY_NR", "COUNTRY_TK", "COUNTRY_AW", "COUNTRY_BW", "COUNTRY_FM", "COUNTRY_KR", "COUNTRY_MQ"]` (Multiple selection allowed)
 - `re_name_list` (List of String) RE Name list List of RE names for match
 
 <a id="nestedatt--origin_server_subset_rule_list--origin_server_subset_rules--asn_choice"></a>
@@ -9214,7 +9208,7 @@ Required:
 
 Optional:
 
-- `methods` (List of String) <br>**Valid Options:** `["ANY", "GET", "HEAD", "PUT", "OPTIONS", "COPY", "POST", "DELETE", "CONNECT", "TRACE", "PATCH"]` (Multiple selection allowed)
+- `methods` (List of String) <br>**Valid Options:** `["GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "TRACE", "PATCH", "ANY", "OPTIONS", "COPY"]` (Multiple selection allowed)
 
 
 
@@ -9262,7 +9256,7 @@ Required:
 Optional:
 
 - `expiration_timestamp` (String) expiration timestamp The expiration_timestamp is the RFC 3339 format timestamp at which the containing rule is considered to be logically expired. The rule continues to exist in the configuration but is not applied anymore.
-- `methods` (List of String) <br>**Valid Options:** `["POST", "DELETE", "CONNECT", "TRACE", "PATCH", "ANY", "GET", "HEAD", "PUT", "OPTIONS", "COPY"]` (Multiple selection allowed)
+- `methods` (List of String) <br>**Valid Options:** `["GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "TRACE", "PATCH", "ANY", "OPTIONS", "COPY"]` (Multiple selection allowed)
 - `waf_advanced_configuration_choice` (Attributes) WAF Exclusion Rule Action WAF Exclusion Rule action to be enforced if the input request matches the rule. (see [below for nested schema](#nestedatt--waf_exclusion--waf_exclusion_choice--waf_exclusion_inline_rules--rules--waf_advanced_configuration_choice))
 
 <a id="nestedatt--waf_exclusion--waf_exclusion_choice--waf_exclusion_inline_rules--rules--domain_choice"></a>
@@ -9320,8 +9314,8 @@ Optional:
 
 Required:
 
-- `context` (List of String) <br>**Allowed Values (choose one):** `["CONTEXT_RESPONSE", "CONTEXT_PARAMETER", "CONTEXT_HEADER", "CONTEXT_ANY", "CONTEXT_COOKIE", "CONTEXT_URL", "CONTEXT_URI", "CONTEXT_BODY", "CONTEXT_REQUEST"]`
-- `exclude_attack_type` (List of String) <br>**Allowed Values (choose one):** `["ATTACK_TYPE_GRAPHQL_PARSER_ATTACK", "ATTACK_TYPE_NONE", "ATTACK_TYPE_NON_BROWSER_CLIENT", "ATTACK_TYPE_VULNERABILITY_SCAN", "ATTACK_TYPE_BUFFER_OVERFLOW", "ATTACK_TYPE_PATH_TRAVERSAL", "ATTACK_TYPE_SERVER_SIDE_CODE_INJECTION", "ATTACK_TYPE_CROSS_SITE_SCRIPTING", "ATTACK_TYPE_HTTP_RESPONSE_SPLITTING", "ATTACK_TYPE_OTHER_APPLICATION_ATTACKS", "ATTACK_TYPE_AUTHENTICATION_AUTHORIZATION_ATTACKS", "ATTACK_TYPE_PREDICTABLE_RESOURCE_LOCATION", "ATTACK_TYPE_DIRECTORY_INDEXING", "ATTACK_TYPE_SQL_INJECTION", "ATTACK_TYPE_HTTP_PARSER_ATTACK", "ATTACK_TYPE_REMOTE_FILE_INCLUDE", "ATTACK_TYPE_MALICIOUS_FILE_UPLOAD", "ATTACK_TYPE_DETECTION_EVASION", "ATTACK_TYPE_ABUSE_OF_FUNCTIONALITY", "ATTACK_TYPE_LDAP_INJECTION", "ATTACK_TYPE_FORCEFUL_BROWSING", "ATTACK_TYPE_TROJAN_BACKDOOR_SPYWARE", "ATTACK_TYPE_INFORMATION_LEAKAGE", "ATTACK_TYPE_XPATH_INJECTION", "ATTACK_TYPE_COMMAND_EXECUTION", "ATTACK_TYPE_DENIAL_OF_SERVICE", "ATTACK_TYPE_SESSION_HIJACKING"]`
+- `context` (List of String) <br>**Allowed Values (choose one):** `["CONTEXT_REQUEST", "CONTEXT_HEADER", "CONTEXT_COOKIE", "CONTEXT_URL", "CONTEXT_URI", "CONTEXT_ANY", "CONTEXT_BODY", "CONTEXT_RESPONSE", "CONTEXT_PARAMETER"]`
+- `exclude_attack_type` (List of String) <br>**Allowed Values (choose one):** `["ATTACK_TYPE_HTTP_PARSER_ATTACK", "ATTACK_TYPE_SESSION_HIJACKING", "ATTACK_TYPE_HTTP_RESPONSE_SPLITTING", "ATTACK_TYPE_AUTHENTICATION_AUTHORIZATION_ATTACKS", "ATTACK_TYPE_DIRECTORY_INDEXING", "ATTACK_TYPE_SERVER_SIDE_CODE_INJECTION", "ATTACK_TYPE_FORCEFUL_BROWSING", "ATTACK_TYPE_MALICIOUS_FILE_UPLOAD", "ATTACK_TYPE_GRAPHQL_PARSER_ATTACK", "ATTACK_TYPE_NONE", "ATTACK_TYPE_NON_BROWSER_CLIENT", "ATTACK_TYPE_TROJAN_BACKDOOR_SPYWARE", "ATTACK_TYPE_PATH_TRAVERSAL", "ATTACK_TYPE_REMOTE_FILE_INCLUDE", "ATTACK_TYPE_OTHER_APPLICATION_ATTACKS", "ATTACK_TYPE_DETECTION_EVASION", "ATTACK_TYPE_VULNERABILITY_SCAN", "ATTACK_TYPE_ABUSE_OF_FUNCTIONALITY", "ATTACK_TYPE_PREDICTABLE_RESOURCE_LOCATION", "ATTACK_TYPE_COMMAND_EXECUTION", "ATTACK_TYPE_SQL_INJECTION", "ATTACK_TYPE_DENIAL_OF_SERVICE", "ATTACK_TYPE_BUFFER_OVERFLOW", "ATTACK_TYPE_INFORMATION_LEAKAGE", "ATTACK_TYPE_XPATH_INJECTION", "ATTACK_TYPE_LDAP_INJECTION", "ATTACK_TYPE_CROSS_SITE_SCRIPTING"]`
 
 Optional:
 
@@ -9341,7 +9335,7 @@ Required:
 
 Required:
 
-- `context` (List of String) <br>**Allowed Values (choose one):** `["CONTEXT_HEADER", "CONTEXT_ANY", "CONTEXT_COOKIE", "CONTEXT_URL", "CONTEXT_URI", "CONTEXT_BODY", "CONTEXT_REQUEST", "CONTEXT_RESPONSE", "CONTEXT_PARAMETER"]`
+- `context` (List of String) <br>**Allowed Values (choose one):** `["CONTEXT_ANY", "CONTEXT_BODY", "CONTEXT_RESPONSE", "CONTEXT_PARAMETER", "CONTEXT_REQUEST", "CONTEXT_HEADER", "CONTEXT_COOKIE", "CONTEXT_URL", "CONTEXT_URI"]`
 - `signature_id` (Number) SignatureID The allowed values for signature id are 0 and in the range of 200000001-299999999. 0 implies that all signatures will be excluded for the specified context.
 
 Optional:
@@ -9354,8 +9348,8 @@ Optional:
 
 Required:
 
-- `context` (List of String) <br>**Allowed Values (choose one):** `["CONTEXT_BODY", "CONTEXT_REQUEST", "CONTEXT_RESPONSE", "CONTEXT_PARAMETER", "CONTEXT_HEADER", "CONTEXT_ANY", "CONTEXT_COOKIE", "CONTEXT_URL", "CONTEXT_URI"]`
-- `exclude_violation` (List of String) <br>**Allowed Values (choose one):** `["VIOL_REQUEST_MAX_LENGTH", "VIOL_HTTP_PROTOCOL_SEVERAL_CONTENT_LENGTH_HEADERS", "VIOL_EVASION_APACHE_WHITESPACE", "VIOL_EVASION_IIS_UNICODE_CODEPOINTS", "VIOL_HTTP_PROTOCOL_BAD_MULTIPART_FORMDATA_REQUEST_PARSING", "VIOL_XML_MALFORMED", "VIOL_EVASION_PERCENT_U_DECODING", "VIOL_GRAPHQL_INTROSPECTION_QUERY", "VIOL_MANDATORY_HEADER", "VIOL_ASM_COOKIE_MODIFIED", "VIOL_EVASION_DIRECTORY_TRAVERSALS", "VIOL_NONE", "VIOL_FILETYPE", "VIOL_HTTP_PROTOCOL_CRLF_CHARACTERS_BEFORE_REQUEST_START", "VIOL_HTTP_PROTOCOL_BAD_MULTIPART_PARAMETERS_PARSING", "VIOL_HTTP_PROTOCOL_BODY_IN_GET_OR_HEAD_REQUEST", "VIOL_HTTP_PROTOCOL_HIGH_ASCII_CHARACTERS_IN_HEADERS", "VIOL_HTTP_PROTOCOL_NO_HOST_HEADER_IN_HTTP_1_1_REQUEST", "VIOL_HTTP_PROTOCOL_CONTENT_LENGTH_SHOULD_BE_A_POSITIVE_NUMBER", "VIOL_DATA_GUARD", "VIOL_EVASION_BARE_BYTE_DECODING", "VIOL_COOKIE_MALFORMED", "VIOL_GRAPHQL_MALFORMED", "VIOL_HTTP_RESPONSE_STATUS", "VIOL_JSON_MALFORMED", "VIOL_EVASION_IIS_BACKSLASHES", "VIOL_ENCODING", "VIOL_METHOD", "VIOL_HTTP_PROTOCOL_MULTIPLE_HOST_HEADERS", "VIOL_HTTP_PROTOCOL_UNPARSABLE_REQUEST_CONTENT", "VIOL_HTTP_PROTOCOL_BAD_HTTP_VERSION", "VIOL_EVASION_MULTIPLE_DECODING", "VIOL_COOKIE_MODIFIED", "VIOL_GRAPHQL_FORMAT", "VIOL_MALFORMED_REQUEST", "VIOL_FILE_UPLOAD", "VIOL_FILE_UPLOAD_IN_BODY", "VIOL_HTTP_PROTOCOL_BAD_HOST_HEADER_VALUE", "VIOL_HTTP_PROTOCOL_NULL_IN_REQUEST", "VIOL_EVASION_BAD_UNESCAPE"]`
+- `context` (List of String) <br>**Allowed Values (choose one):** `["CONTEXT_ANY", "CONTEXT_BODY", "CONTEXT_RESPONSE", "CONTEXT_PARAMETER", "CONTEXT_REQUEST", "CONTEXT_HEADER", "CONTEXT_COOKIE", "CONTEXT_URL", "CONTEXT_URI"]`
+- `exclude_violation` (List of String) <br>**Allowed Values (choose one):** `["VIOL_NONE", "VIOL_XML_MALFORMED", "VIOL_EVASION_DIRECTORY_TRAVERSALS", "VIOL_EVASION_IIS_BACKSLASHES", "VIOL_EVASION_BARE_BYTE_DECODING", "VIOL_HTTP_PROTOCOL_BODY_IN_GET_OR_HEAD_REQUEST", "VIOL_GRAPHQL_INTROSPECTION_QUERY", "VIOL_HTTP_PROTOCOL_BAD_HOST_HEADER_VALUE", "VIOL_HTTP_PROTOCOL_CRLF_CHARACTERS_BEFORE_REQUEST_START", "VIOL_HTTP_PROTOCOL_NO_HOST_HEADER_IN_HTTP_1_1_REQUEST", "VIOL_HTTP_PROTOCOL_BAD_MULTIPART_PARAMETERS_PARSING", "VIOL_HTTP_RESPONSE_STATUS", "VIOL_ASM_COOKIE_MODIFIED", "VIOL_EVASION_MULTIPLE_DECODING", "VIOL_EVASION_IIS_UNICODE_CODEPOINTS", "VIOL_EVASION_BAD_UNESCAPE", "VIOL_METHOD", "VIOL_JSON_MALFORMED", "VIOL_HTTP_PROTOCOL_SEVERAL_CONTENT_LENGTH_HEADERS", "VIOL_GRAPHQL_MALFORMED", "VIOL_DATA_GUARD", "VIOL_FILETYPE", "VIOL_FILE_UPLOAD_IN_BODY", "VIOL_HTTP_PROTOCOL_MULTIPLE_HOST_HEADERS", "VIOL_HTTP_PROTOCOL_NULL_IN_REQUEST", "VIOL_HTTP_PROTOCOL_BAD_HTTP_VERSION", "VIOL_EVASION_PERCENT_U_DECODING", "VIOL_REQUEST_MAX_LENGTH", "VIOL_HTTP_PROTOCOL_UNPARSABLE_REQUEST_CONTENT", "VIOL_EVASION_APACHE_WHITESPACE", "VIOL_HTTP_PROTOCOL_BAD_MULTIPART_FORMDATA_REQUEST_PARSING", "VIOL_COOKIE_MALFORMED", "VIOL_FILE_UPLOAD", "VIOL_HTTP_PROTOCOL_CONTENT_LENGTH_SHOULD_BE_A_POSITIVE_NUMBER", "VIOL_MALFORMED_REQUEST", "VIOL_GRAPHQL_FORMAT", "VIOL_MANDATORY_HEADER", "VIOL_COOKIE_MODIFIED", "VIOL_HTTP_PROTOCOL_HIGH_ASCII_CHARACTERS_IN_HEADERS", "VIOL_ENCODING"]`
 
 Optional:
 

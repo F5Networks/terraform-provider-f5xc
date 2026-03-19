@@ -16,8 +16,8 @@ resource "f5xc_cloud_credentials" "example" {
   name      = "example_cloud_credentials"
   namespace = "example_namespace"
   cloud_choice = {
-    azure_pfx_certificate = {
-      azure_pfx_certificate = "example_azure_pfx_certificate"
+    aws_assume_role = {
+      aws_assume_role = "example_aws_assume_role"
     }
   }
 }

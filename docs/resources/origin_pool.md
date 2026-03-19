@@ -13,23 +13,23 @@ OriginPool resource
 
 ```terraform
 resource "f5xc_origin_pool" "example" {
-  name      = "example_origin_pool"
-  namespace = "example_namespace"
+  name                   = "example_origin_pool"
+  namespace              = "example_namespace"
+  loadbalancer_algorithm = ["ENUM_VALUE"]
   origin_servers = [{
     choice = {
-      public_ip = {
-        public_ip = "example_public_ip"
+      vn_private_ip = {
+        vn_private_ip = "example_vn_private_ip"
       }
     }
   }]
-  port_choice = {
-    port = 1
-  }
-  endpoint_selection = ["ENUM_VALUE"]
   tls_choice = {
     no_tls = true
   }
-  loadbalancer_algorithm = ["ENUM_VALUE"]
+  port_choice = {
+    lb_port = true
+  }
+  endpoint_selection = ["ENUM_VALUE"]
 }
 ```
 
@@ -41,7 +41,7 @@ resource "f5xc_origin_pool" "example" {
 ### Required
 
 - `endpoint_selection` (List of String) <br>**Allowed Values (choose one):** `["DISTRIBUTED", "LOCAL_ONLY", "LOCAL_PREFERRED"]`
-- `loadbalancer_algorithm` (List of String) <br>**Allowed Values (choose one):** `["LB_OVERRIDE", "ROUND_ROBIN", "LEAST_REQUEST", "RING_HASH", "RANDOM"]`
+- `loadbalancer_algorithm` (List of String) <br>**Allowed Values (choose one):** `["ROUND_ROBIN", "LEAST_REQUEST", "RING_HASH", "RANDOM", "LB_OVERRIDE"]`
 - `name` (String) name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.
 - `namespace` (String) namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''
 - `origin_servers` (Attributes List) List of Origin Servers List of origin servers in this pool (see [below for nested schema](#nestedatt--origin_servers))
@@ -743,7 +743,7 @@ Optional:
 
 Required:
 
-- `hash_algorithms` (List of String) <br>**Valid Options:** `["SHA256", "SHA1", "INVALID_HASH_ALGORITHM"]` (Multiple selection allowed)
+- `hash_algorithms` (List of String) <br>**Valid Options:** `["INVALID_HASH_ALGORITHM", "SHA256", "SHA1"]` (Multiple selection allowed)
 
 
 
@@ -839,8 +839,8 @@ Required:
 
 Optional:
 
-- `max_version` (List of String) <br>**Allowed Values (choose one):** `["TLSv1_1", "TLSv1_2", "TLSv1_3", "TLS_AUTO", "TLSv1_0"]`
-- `min_version` (List of String) <br>**Allowed Values (choose one):** `["TLSv1_2", "TLSv1_3", "TLS_AUTO", "TLSv1_0", "TLSv1_1"]`
+- `max_version` (List of String) <br>**Allowed Values (choose one):** `["TLSv1_0", "TLSv1_1", "TLSv1_2", "TLSv1_3", "TLS_AUTO"]`
+- `min_version` (List of String) <br>**Allowed Values (choose one):** `["TLS_AUTO", "TLSv1_0", "TLSv1_1", "TLSv1_2", "TLSv1_3"]`
 
 
 

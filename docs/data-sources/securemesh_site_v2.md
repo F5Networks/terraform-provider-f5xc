@@ -15,8 +15,8 @@ The `f5xc_securemesh_site_v2` data source allows you to retrieve information abo
 
 ```terraform
 data "f5xc_securemesh_site_v2" "example" {
-  name      = "example_securemesh_site_v2"
   namespace = "example_namespace"
+  name      = "example_securemesh_site_v2"
 }
 ```
 

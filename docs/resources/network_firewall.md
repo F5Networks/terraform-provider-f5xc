@@ -13,8 +13,8 @@ NetworkFirewall resource
 
 ```terraform
 resource "f5xc_network_firewall" "example" {
-  namespace = "example_namespace"
   name      = "example_network_firewall"
+  namespace = "example_namespace"
 }
 ```
 

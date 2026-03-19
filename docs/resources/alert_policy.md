@@ -13,15 +13,15 @@ AlertPolicy resource
 
 ```terraform
 resource "f5xc_alert_policy" "example" {
-  name      = "example_alert_policy"
   namespace = "example_namespace"
+  name      = "example_alert_policy"
   receivers = [{
     name      = "example_alert_policy"
     namespace = "example_namespace"
   }]
   routes = [{
     action_choice = {
-      send = true
+      dont_send = true
     }
   }]
 }
@@ -90,7 +90,7 @@ Optional:
 
 Optional:
 
-- `alertname` (List of String) <br>**Allowed Values (choose one):** `["SiteCustomerTunnelInterfaceDown", "SyntheticMonitorHealthCritical", "VesClientSideDefenseSuspiciousDomain", "APISecuritySensitiveDataInResponseDetected", "DNSZoneIgnoredDuplicateRecord", "ServiceHealthLow", "ServicePolicyTooManyAttacks", "WAFTooManyMaliciousBots", "ThreatCampaign", "TLSAutomaticCertificateExpired", "RoutedDDoSMitigationNotification", "ServiceClientError", "ServiceServerErrorPerSourceSite", "TLSCustomCertificateExpiringSoon", "APISecurityRiskScoreHighDetected", "RoutedDDoSAlertNotification", "MaliciousUserDetected", "L7DDoS", "SitePhysicalInterfaceDown", "ServiceClientErrorPerSourceSite", "ServiceEndpointHealthcheckFailure", "WAFTooManyAttacks", "BotDefenseTooManySecurityEvents", "TLSCustomCertificateExpired", "ServiceServerError", "ServiceUnavailable", "TLSAutomaticCertificateRenewalStillFailing", "APISecurityUnUsedAPIDetected", "APISecurityTooManyAttacks", "VesClientSideDefenseSensitiveFieldRead", "APISecurityShadowAPIDetected", "TunnelsToCustomerSiteDown", "TLSAutomaticCertificateRenewalFailure", "TLSCustomCertificateExpiring"]`
+- `alertname` (List of String) <br>**Allowed Values (choose one):** `["ServicePolicyTooManyAttacks", "TLSAutomaticCertificateRenewalFailure", "APISecuritySensitiveDataInResponseDetected", "ServiceUnavailable", "WAFTooManyMaliciousBots", "ThreatCampaign", "TLSAutomaticCertificateRenewalStillFailing", "TLSCustomCertificateExpired", "TLSCustomCertificateExpiring", "TLSCustomCertificateExpiringSoon", "SitePhysicalInterfaceDown", "ServiceServerErrorPerSourceSite", "VesClientSideDefenseSuspiciousDomain", "APISecurityUnUsedAPIDetected", "TunnelsToCustomerSiteDown", "ServiceHealthLow", "WAFTooManyAttacks", "DNSZoneIgnoredDuplicateRecord", "APISecurityTooManyAttacks", "SiteCustomerTunnelInterfaceDown", "ServiceServerError", "ServiceClientError", "BotDefenseTooManySecurityEvents", "L7DDoS", "APISecurityRiskScoreHighDetected", "MaliciousUserDetected", "APISecurityShadowAPIDetected", "RoutedDDoSAlertNotification", "RoutedDDoSMitigationNotification", "ServiceClientErrorPerSourceSite", "ServiceEndpointHealthcheckFailure", "SyntheticMonitorHealthCritical", "VesClientSideDefenseSensitiveFieldRead", "TLSAutomaticCertificateExpired"]`
 - `alertname_regex` (String) Alertname Regex Match Regular Expression match for the alertname
 - `any` (Boolean) Any Matches all alerts in the namespace
 - `custom` (Attributes) Custom Match A set of custom equality/regex matchers an alert has to fulfill to match the route. (see [below for nested schema](#nestedatt--routes--matcher_choice--custom))
@@ -181,7 +181,7 @@ Optional:
 
 Optional:
 
-- `groups` (List of String) <br>**Valid Options:** `["TIMESERIES_ANOMALY", "SHAPE_SECURITY", "CDN", "VOLT_SHARE", "SECURITY_CSD", "CLOUD_LINK", "IAAS_CAAS", "UAM", "SYNTHETIC_MONITORS", "TLS", "DNS", "ROUTED_DDOS", "SECURITY", "SECURITY_BOT_DEFENSE", "INFRASTRUCTURE", "VIRTUAL_HOST"]` (Multiple selection allowed)
+- `groups` (List of String) <br>**Valid Options:** `["INFRASTRUCTURE", "VIRTUAL_HOST", "UAM", "TLS", "SECURITY", "TIMESERIES_ANOMALY", "CLOUD_LINK", "DNS", "ROUTED_DDOS", "IAAS_CAAS", "VOLT_SHARE", "CDN", "SECURITY_BOT_DEFENSE", "SHAPE_SECURITY", "SECURITY_CSD", "SYNTHETIC_MONITORS"]` (Multiple selection allowed)
 
 
 <a id="nestedatt--routes--matcher_choice--severity"></a>

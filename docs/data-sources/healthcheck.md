@@ -15,8 +15,8 @@ The `f5xc_healthcheck` data source allows you to retrieve information about an e
 
 ```terraform
 data "f5xc_healthcheck" "example" {
-  name      = "example_healthcheck"
   namespace = "example_namespace"
+  name      = "example_healthcheck"
 }
 ```
 

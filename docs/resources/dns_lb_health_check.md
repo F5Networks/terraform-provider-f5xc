@@ -16,8 +16,8 @@ resource "f5xc_dns_lb_health_check" "example" {
   name      = "example_dns_lb_health_check"
   namespace = "example_namespace"
   health_check_choice = {
-    tcp_hex_health_check = {
-      tcp_hex_health_check = "example_tcp_hex_health_check"
+    tcp_health_check = {
+      tcp_health_check = "example_tcp_health_check"
     }
   }
 }

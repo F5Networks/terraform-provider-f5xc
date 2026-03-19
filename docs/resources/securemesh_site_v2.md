@@ -16,12 +16,14 @@ resource "f5xc_securemesh_site_v2" "example" {
   name      = "example_securemesh_site_v2"
   namespace = "example_namespace"
   provider_choice = {
-    aws = {
-      aws = "example_aws"
+    openstack = {
+      openstack = "example_openstack"
     }
   }
   logs_receiver_choice = {
-    logs_streaming_disabled = true
+    log_receiver_with_net = {
+      log_receiver_with_net = "example_log_receiver_with_net"
+    }
   }
   blocked_services_choice = {
     block_all_services = true
@@ -97,7 +99,7 @@ Optional:
 Optional:
 
 - `blocked_services_value_type_choice` (Attributes) blocked_services_type_choice Choose the Nodel Local Service to disable (see [below for nested schema](#nestedatt--blocked_services_choice--blocked_services--blocked_sevice--blocked_services_value_type_choice))
-- `network_type` (List of String) <br>**Allowed Values (choose one):** `["VIRTUAL_NETWORK_MANAGEMENT", "VIRTUAL_NETWORK_SITE_LOCAL", "VIRTUAL_NETWORK_SITE_LOCAL_INSIDE", "VIRTUAL_NETWORK_PER_SITE", "VIRTUAL_NETWORK_GLOBAL", "VIRTUAL_NETWORK_VER_INTERNAL", "VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE", "VIRTUAL_NETWORK_IP_AUTO", "VIRTUAL_NETWORK_VOLTADN_PRIVATE_NETWORK", "VIRTUAL_NETWORK_PUBLIC", "VIRTUAL_NETWORK_SITE_SERVICE", "VIRTUAL_NETWORK_SRV6_NETWORK", "VIRTUAL_NETWORK_IP_FABRIC", "VIRTUAL_NETWORK_SEGMENT"]`
+- `network_type` (List of String) <br>**Allowed Values (choose one):** `["VIRTUAL_NETWORK_MANAGEMENT", "VIRTUAL_NETWORK_SITE_LOCAL_INSIDE", "VIRTUAL_NETWORK_PER_SITE", "VIRTUAL_NETWORK_PUBLIC", "VIRTUAL_NETWORK_GLOBAL", "VIRTUAL_NETWORK_VER_INTERNAL", "VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE", "VIRTUAL_NETWORK_SRV6_NETWORK", "VIRTUAL_NETWORK_IP_FABRIC", "VIRTUAL_NETWORK_SITE_LOCAL", "VIRTUAL_NETWORK_SITE_SERVICE", "VIRTUAL_NETWORK_IP_AUTO", "VIRTUAL_NETWORK_VOLTADN_PRIVATE_NETWORK", "VIRTUAL_NETWORK_SEGMENT"]`
 
 <a id="nestedatt--blocked_services_choice--blocked_services--blocked_sevice--blocked_services_value_type_choice"></a>
 ### Nested Schema for `blocked_services_choice.blocked_services.blocked_sevice.blocked_services_value_type_choice`
@@ -401,7 +403,7 @@ Optional:
 Required:
 
 - `network_prefix_choice` (Attributes) Network Prefix choice Select DHCP network prefix for a site (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks--network_prefix_choice))
-- `pool_settings` (List of String) <br>**Allowed Values (choose one):** `["EXCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS", "INCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS"]`
+- `pool_settings` (List of String) <br>**Allowed Values (choose one):** `["INCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS", "EXCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS"]`
 
 Optional:
 
@@ -1977,7 +1979,7 @@ Optional:
 Required:
 
 - `network_prefix_choice` (Attributes) Network Prefix choice Select DHCP network prefix for a site (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks--network_prefix_choice))
-- `pool_settings` (List of String) <br>**Allowed Values (choose one):** `["INCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS", "EXCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS"]`
+- `pool_settings` (List of String) <br>**Allowed Values (choose one):** `["EXCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS", "INCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS"]`
 
 Optional:
 
@@ -3553,7 +3555,7 @@ Optional:
 Required:
 
 - `network_prefix_choice` (Attributes) Network Prefix choice Select DHCP network prefix for a site (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks--network_prefix_choice))
-- `pool_settings` (List of String) <br>**Allowed Values (choose one):** `["EXCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS", "INCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS"]`
+- `pool_settings` (List of String) <br>**Allowed Values (choose one):** `["INCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS", "EXCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS"]`
 
 Optional:
 
@@ -3947,7 +3949,7 @@ Optional:
 Required:
 
 - `network_prefix_choice` (Attributes) Network Prefix choice Select DHCP network prefix for a site (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks--network_prefix_choice))
-- `pool_settings` (List of String) <br>**Allowed Values (choose one):** `["EXCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS", "INCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS"]`
+- `pool_settings` (List of String) <br>**Allowed Values (choose one):** `["INCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS", "EXCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS"]`
 
 Optional:
 
@@ -5177,7 +5179,7 @@ Required:
 
 Optional:
 
-- `attrs` (List of String) <br>**Valid Options:** `["ROUTE_ATTR_ADVERTISE", "ROUTE_ATTR_INSTALL_HOST", "ROUTE_ATTR_INSTALL_FORWARDING", "ROUTE_ATTR_MERGE_ONLY", "ROUTE_ATTR_NO_OP"]` (Multiple selection allowed)
+- `attrs` (List of String) <br>**Valid Options:** `["ROUTE_ATTR_INSTALL_FORWARDING", "ROUTE_ATTR_MERGE_ONLY", "ROUTE_ATTR_NO_OP", "ROUTE_ATTR_ADVERTISE", "ROUTE_ATTR_INSTALL_HOST"]` (Multiple selection allowed)
 
 <a id="nestedatt--segment_vrf--segment_config--static_route_choice--static_routes--static_routes--next_hop_choice"></a>
 ### Nested Schema for `segment_vrf.segment_config.static_route_choice.static_routes.static_routes.next_hop_choice`
@@ -5247,7 +5249,7 @@ Required:
 
 Optional:
 
-- `attrs` (List of String) <br>**Valid Options:** `["ROUTE_ATTR_MERGE_ONLY", "ROUTE_ATTR_NO_OP", "ROUTE_ATTR_ADVERTISE", "ROUTE_ATTR_INSTALL_HOST", "ROUTE_ATTR_INSTALL_FORWARDING"]` (Multiple selection allowed)
+- `attrs` (List of String) <br>**Valid Options:** `["ROUTE_ATTR_NO_OP", "ROUTE_ATTR_ADVERTISE", "ROUTE_ATTR_INSTALL_HOST", "ROUTE_ATTR_INSTALL_FORWARDING", "ROUTE_ATTR_MERGE_ONLY"]` (Multiple selection allowed)
 
 <a id="nestedatt--segment_vrf--segment_config--static_v6_route_choice--static_v6_routes--static_routes--next_hop_choice"></a>
 ### Nested Schema for `segment_vrf.segment_config.static_v6_route_choice.static_v6_routes.static_routes.next_hop_choice`
@@ -5489,7 +5491,7 @@ Required:
 
 Optional:
 
-- `attrs` (List of String) <br>**Valid Options:** `["ROUTE_ATTR_ADVERTISE", "ROUTE_ATTR_INSTALL_HOST", "ROUTE_ATTR_INSTALL_FORWARDING", "ROUTE_ATTR_MERGE_ONLY", "ROUTE_ATTR_NO_OP"]` (Multiple selection allowed)
+- `attrs` (List of String) <br>**Valid Options:** `["ROUTE_ATTR_INSTALL_HOST", "ROUTE_ATTR_INSTALL_FORWARDING", "ROUTE_ATTR_MERGE_ONLY", "ROUTE_ATTR_NO_OP", "ROUTE_ATTR_ADVERTISE"]` (Multiple selection allowed)
 
 <a id="nestedatt--local_vrf--slo_choice--slo_config--static_route_choice--static_routes--static_routes--next_hop_choice"></a>
 ### Nested Schema for `local_vrf.slo_choice.slo_config.static_route_choice.static_routes.static_routes.next_hop_choice`
@@ -5656,7 +5658,7 @@ Required:
 
 Optional:
 
-- `attrs` (List of String) <br>**Valid Options:** `["ROUTE_ATTR_INSTALL_HOST", "ROUTE_ATTR_INSTALL_FORWARDING", "ROUTE_ATTR_MERGE_ONLY", "ROUTE_ATTR_NO_OP", "ROUTE_ATTR_ADVERTISE"]` (Multiple selection allowed)
+- `attrs` (List of String) <br>**Valid Options:** `["ROUTE_ATTR_NO_OP", "ROUTE_ATTR_ADVERTISE", "ROUTE_ATTR_INSTALL_HOST", "ROUTE_ATTR_INSTALL_FORWARDING", "ROUTE_ATTR_MERGE_ONLY"]` (Multiple selection allowed)
 
 <a id="nestedatt--local_vrf--sli_choice--sli_config--static_route_choice--static_routes--static_routes--next_hop_choice"></a>
 ### Nested Schema for `local_vrf.sli_choice.sli_config.static_route_choice.static_routes.static_routes.next_hop_choice`
@@ -5726,7 +5728,7 @@ Required:
 
 Optional:
 
-- `attrs` (List of String) <br>**Valid Options:** `["ROUTE_ATTR_NO_OP", "ROUTE_ATTR_ADVERTISE", "ROUTE_ATTR_INSTALL_HOST", "ROUTE_ATTR_INSTALL_FORWARDING", "ROUTE_ATTR_MERGE_ONLY"]` (Multiple selection allowed)
+- `attrs` (List of String) <br>**Valid Options:** `["ROUTE_ATTR_INSTALL_FORWARDING", "ROUTE_ATTR_MERGE_ONLY", "ROUTE_ATTR_NO_OP", "ROUTE_ATTR_ADVERTISE", "ROUTE_ATTR_INSTALL_HOST"]` (Multiple selection allowed)
 
 <a id="nestedatt--local_vrf--sli_choice--sli_config--static_v6_route_choice--static_v6_routes--static_routes--next_hop_choice"></a>
 ### Nested Schema for `local_vrf.sli_choice.sli_config.static_v6_route_choice.static_v6_routes.static_routes.next_hop_choice`

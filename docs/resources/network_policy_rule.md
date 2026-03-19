@@ -108,7 +108,7 @@ Optional:
 
 Optional:
 
-- `action` (List of String) <br>**Allowed Values (choose one):** `["LOG", "NOLOG"]`<br>**Default:** `NOLOG`
+- `action` (List of String) <br>**Allowed Values (choose one):** `["NOLOG", "LOG"]`<br>**Default:** `NOLOG`
 
 
 <a id="nestedatt--label_matcher"></a>

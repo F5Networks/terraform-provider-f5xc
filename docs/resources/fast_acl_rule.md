@@ -15,13 +15,13 @@ FastAclRule resource
 resource "f5xc_fast_acl_rule" "example" {
   name      = "example_fast_acl_rule"
   namespace = "example_namespace"
+  action    = {}
   port      = [{}]
   source_choice = {
-    ip_prefix_set = {
-      ip_prefix_set = "example_ip_prefix_set"
+    prefix = {
+      prefix = "example_prefix"
     }
   }
-  action = {}
 }
 ```
 
@@ -63,7 +63,7 @@ Optional:
 
 - `policer_action` (Attributes) policer_action Reference to policer object to which traffic would be subjected (see [below for nested schema](#nestedatt--action--action_choice--policer_action))
 - `protocol_policer_action` (Attributes) protocol_policer_action Reference to protocol based policer object (see [below for nested schema](#nestedatt--action--action_choice--protocol_policer_action))
-- `simple_action` (List of String) <br>**Allowed Values (choose one):** `["ALLOW", "DENY"]`
+- `simple_action` (List of String) <br>**Allowed Values (choose one):** `["DENY", "ALLOW"]`
 
 <a id="nestedatt--action--action_choice--policer_action"></a>
 ### Nested Schema for `action.action_choice.policer_action`

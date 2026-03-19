@@ -13,16 +13,14 @@ ServicePolicy resource
 
 ```terraform
 resource "f5xc_service_policy" "example" {
-  namespace = "example_namespace"
   name      = "example_service_policy"
-  rule_choice = {
-    legacy_rule_list = {
-      legacy_rule_list = "example_legacy_rule_list"
-    }
-  }
+  namespace = "example_namespace"
   server_choice = {
-    server_name_matcher = {
-      server_name_matcher = "example_server_name_matcher"
+    any_server = true
+  }
+  rule_choice = {
+    deny_list = {
+      deny_list = "example_deny_list"
     }
   }
 }
@@ -74,10 +72,10 @@ Optional:
 
 - `asn_list` (Attributes) asn_list Addresses that belong to the ASNs in the given list The ASN is obtained by performing a lookup for the source IPv4 Address in a GeoIP DB. (see [below for nested schema](#nestedatt--rule_choice--allow_list--asn_list))
 - `asn_set` (Attributes List) asn_set Addresses that belong to the ASNs in the given bgp_asn_set The ASN is obtained by performing a lookup for the source IPv4 Address in a GeoIP DB. (see [below for nested schema](#nestedatt--rule_choice--allow_list--asn_set))
-- `country_list` (List of String) <br>**Valid Options:** `["COUNTRY_DE", "COUNTRY_MO", "COUNTRY_MQ", "COUNTRY_NG", "COUNTRY_PY", "COUNTRY_MY", "COUNTRY_SN", "COUNTRY_BY", "COUNTRY_GL", "COUNTRY_HN", "COUNTRY_HT", "COUNTRY_DM", "COUNTRY_GE", "COUNTRY_LS", "COUNTRY_NU", "COUNTRY_PA", "COUNTRY_TV", "COUNTRY_AX", "COUNTRY_IL", "COUNTRY_MA", "COUNTRY_ML", "COUNTRY_NP", "COUNTRY_PR", "COUNTRY_TM", "COUNTRY_BL", "COUNTRY_BQ", "COUNTRY_MR", "COUNTRY_CD", "COUNTRY_DK", "COUNTRY_HU", "COUNTRY_RU", "COUNTRY_TC", "COUNTRY_WS", "COUNTRY_BT", "COUNTRY_BV", "COUNTRY_FK", "COUNTRY_MG", "COUNTRY_MH", "COUNTRY_PT", "COUNTRY_XK", "COUNTRY_BE", "COUNTRY_MU", "COUNTRY_NR", "COUNTRY_SJ", "COUNTRY_CF", "COUNTRY_CH", "COUNTRY_EE", "COUNTRY_SS", "COUNTRY_TO", "COUNTRY_KZ", "COUNTRY_NF", "COUNTRY_RS", "COUNTRY_AE", "COUNTRY_BS", "COUNTRY_ET", "COUNTRY_UG", "COUNTRY_AW", "COUNTRY_GQ", "COUNTRY_IN", "COUNTRY_JO", "COUNTRY_MK", "COUNTRY_PF", "COUNTRY_AO", "COUNTRY_BD", "COUNTRY_GM", "COUNTRY_KI", "COUNTRY_PG", "COUNTRY_PM", "COUNTRY_SX", "COUNTRY_GD", "COUNTRY_MS", "COUNTRY_VN", "COUNTRY_BG", "COUNTRY_CK", "COUNTRY_LB", "COUNTRY_MF", "COUNTRY_ZM", "COUNTRY_BH", "COUNTRY_NA", "COUNTRY_PS", "COUNTRY_SA", "COUNTRY_UZ", "COUNTRY_IT", "COUNTRY_MZ", "COUNTRY_SL", "COUNTRY_TF", "COUNTRY_PL", "COUNTRY_NONE", "COUNTRY_JM", "COUNTRY_AR", "COUNTRY_CY", "COUNTRY_IM", "COUNTRY_LU", "COUNTRY_MP", "COUNTRY_MV", "COUNTRY_NI", "COUNTRY_RE", "COUNTRY_FI", "COUNTRY_GW", "COUNTRY_LK", "COUNTRY_RO", "COUNTRY_AM", "COUNTRY_BF", "COUNTRY_PN", "COUNTRY_SC", "COUNTRY_WF", "COUNTRY_IE", "COUNTRY_IS", "COUNTRY_TJ", "COUNTRY_TL", "COUNTRY_AL", "COUNTRY_HK", "COUNTRY_MN", "COUNTRY_UM", "COUNTRY_KW", "COUNTRY_SZ", "COUNTRY_NZ", "COUNTRY_TW", "COUNTRY_SY", "COUNTRY_AQ", "COUNTRY_CM", "COUNTRY_DZ", "COUNTRY_IR", "COUNTRY_KE", "COUNTRY_SE", "COUNTRY_SI", "COUNTRY_AN", "COUNTRY_AU", "COUNTRY_JE", "COUNTRY_QA", "COUNTRY_VI", "COUNTRY_AG", "COUNTRY_BA", "COUNTRY_ES", "COUNTRY_CX", "COUNTRY_LC", "COUNTRY_SH", "COUNTRY_TD", "COUNTRY_BB", "COUNTRY_BJ", "COUNTRY_DO", "COUNTRY_FM", "COUNTRY_PE", "COUNTRY_TK", "COUNTRY_CS", "COUNTRY_JP", "COUNTRY_KM", "COUNTRY_SB", "COUNTRY_VA", "COUNTRY_AD", "COUNTRY_HR", "COUNTRY_KN", "COUNTRY_ZW", "COUNTRY_AT", "COUNTRY_ME", "COUNTRY_MX", "COUNTRY_NE", "COUNTRY_NO", "COUNTRY_VG", "COUNTRY_GH", "COUNTRY_LT", "COUNTRY_FR", "COUNTRY_GT", "COUNTRY_SD", "COUNTRY_ID", "COUNTRY_KH", "COUNTRY_PH", "COUNTRY_SO", "COUNTRY_BW", "COUNTRY_DJ", "COUNTRY_GY", "COUNTRY_KP", "COUNTRY_UA", "COUNTRY_LA", "COUNTRY_LV", "COUNTRY_GB", "COUNTRY_KR", "COUNTRY_SV", "COUNTRY_BM", "COUNTRY_CG", "COUNTRY_PW", "COUNTRY_VC", "COUNTRY_MW", "COUNTRY_SM", "COUNTRY_CV", "COUNTRY_GF", "COUNTRY_GS", "COUNTRY_BZ", "COUNTRY_CL", "COUNTRY_NC", "COUNTRY_BR", "COUNTRY_IO", "COUNTRY_IQ", "COUNTRY_KG", "COUNTRY_LR", "COUNTRY_PK", "COUNTRY_FJ", "COUNTRY_SK", "COUNTRY_BI", "COUNTRY_NL", "COUNTRY_XT", "COUNTRY_ZA", "COUNTRY_AS", "COUNTRY_AZ", "COUNTRY_CC", "COUNTRY_ER", "COUNTRY_GG", "COUNTRY_GR", "COUNTRY_LI", "COUNTRY_CU", "COUNTRY_US", "COUNTRY_UY", "COUNTRY_CN", "COUNTRY_TN", "COUNTRY_YE", "COUNTRY_BO", "COUNTRY_OM", "COUNTRY_LY", "COUNTRY_RW", "COUNTRY_YT", "COUNTRY_CI", "COUNTRY_CW", "COUNTRY_MC", "COUNTRY_SG", "COUNTRY_TH", "COUNTRY_VE", "COUNTRY_EH", "COUNTRY_MM", "COUNTRY_ST", "COUNTRY_TG", "COUNTRY_VU", "COUNTRY_AF", "COUNTRY_BN", "COUNTRY_CO", "COUNTRY_CZ", "COUNTRY_EC", "COUNTRY_GA", "COUNTRY_GU", "COUNTRY_TZ", "COUNTRY_GI", "COUNTRY_HM", "COUNTRY_TR", "COUNTRY_TT", "COUNTRY_AI", "COUNTRY_CR", "COUNTRY_EG", "COUNTRY_MT", "COUNTRY_SR", "COUNTRY_CA", "COUNTRY_GN", "COUNTRY_GP", "COUNTRY_KY", "COUNTRY_MD", "COUNTRY_FO"]` (Multiple selection allowed)
+- `country_list` (List of String) <br>**Valid Options:** `["COUNTRY_UM", "COUNTRY_VE", "COUNTRY_BE", "COUNTRY_AD", "COUNTRY_HN", "COUNTRY_KM", "COUNTRY_UA", "COUNTRY_CS", "COUNTRY_GS", "COUNTRY_HK", "COUNTRY_MN", "COUNTRY_PK", "COUNTRY_UG", "COUNTRY_DM", "COUNTRY_GF", "COUNTRY_JO", "COUNTRY_KP", "COUNTRY_NL", "COUNTRY_NP", "COUNTRY_PY", "COUNTRY_AM", "COUNTRY_LU", "COUNTRY_TM", "COUNTRY_RE", "COUNTRY_AL", "COUNTRY_BR", "COUNTRY_CD", "COUNTRY_FR", "COUNTRY_GD", "COUNTRY_GN", "COUNTRY_NZ", "COUNTRY_PL", "COUNTRY_TL", "COUNTRY_CZ", "COUNTRY_GL", "COUNTRY_SJ", "COUNTRY_NI", "COUNTRY_NONE", "COUNTRY_ES", "COUNTRY_LT", "COUNTRY_MX", "COUNTRY_UZ", "COUNTRY_XT", "COUNTRY_AR", "COUNTRY_BV", "COUNTRY_MZ", "COUNTRY_TH", "COUNTRY_UY", "COUNTRY_BG", "COUNTRY_BJ", "COUNTRY_OM", "COUNTRY_AI", "COUNTRY_GM", "COUNTRY_MA", "COUNTRY_MY", "COUNTRY_CF", "COUNTRY_BH", "COUNTRY_BF", "COUNTRY_ID", "COUNTRY_LK", "COUNTRY_NA", "COUNTRY_SO", "COUNTRY_TV", "COUNTRY_AU", "COUNTRY_BY", "COUNTRY_EH", "COUNTRY_PF", "COUNTRY_PS", "COUNTRY_SX", "COUNTRY_ER", "COUNTRY_PT", "COUNTRY_SC", "COUNTRY_TG", "COUNTRY_BZ", "COUNTRY_LR", "COUNTRY_BL", "COUNTRY_BO", "COUNTRY_IO", "COUNTRY_KI", "COUNTRY_RU", "COUNTRY_TF", "COUNTRY_AN", "COUNTRY_GG", "COUNTRY_LA", "COUNTRY_BT", "COUNTRY_GH", "COUNTRY_HR", "COUNTRY_HU", "COUNTRY_AE", "COUNTRY_MK", "COUNTRY_RW", "COUNTRY_ZM", "COUNTRY_ZA", "COUNTRY_AT", "COUNTRY_CM", "COUNTRY_CX", "COUNTRY_DO", "COUNTRY_GW", "COUNTRY_LB", "COUNTRY_LI", "COUNTRY_PR", "COUNTRY_BI", "COUNTRY_IQ", "COUNTRY_PW", "COUNTRY_SR", "COUNTRY_GP", "COUNTRY_HM", "COUNTRY_LC", "COUNTRY_NF", "COUNTRY_BQ", "COUNTRY_CO", "COUNTRY_GT", "COUNTRY_ME", "COUNTRY_PM", "COUNTRY_YE", "COUNTRY_AQ", "COUNTRY_SA", "COUNTRY_VN", "COUNTRY_XK", "COUNTRY_BA", "COUNTRY_CH", "COUNTRY_GY", "COUNTRY_AG", "COUNTRY_AZ", "COUNTRY_HT", "COUNTRY_JM", "COUNTRY_KW", "COUNTRY_LV", "COUNTRY_MF", "COUNTRY_NO", "COUNTRY_BS", "COUNTRY_SZ", "COUNTRY_CI", "COUNTRY_GR", "COUNTRY_IM", "COUNTRY_JE", "COUNTRY_MH", "COUNTRY_SG", "COUNTRY_CG", "COUNTRY_CK", "COUNTRY_EG", "COUNTRY_FI", "COUNTRY_RS", "COUNTRY_ZW", "COUNTRY_KE", "COUNTRY_QA", "COUNTRY_SD", "COUNTRY_CL", "COUNTRY_MV", "COUNTRY_TO", "COUNTRY_DZ", "COUNTRY_SI", "COUNTRY_ST", "COUNTRY_US", "COUNTRY_GU", "COUNTRY_KZ", "COUNTRY_MT", "COUNTRY_WS", "COUNTRY_IT", "COUNTRY_AO", "COUNTRY_MG", "COUNTRY_NU", "COUNTRY_SM", "COUNTRY_CN", "COUNTRY_CR", "COUNTRY_IE", "COUNTRY_KY", "COUNTRY_PN", "COUNTRY_TN", "COUNTRY_FJ", "COUNTRY_KN", "COUNTRY_TD", "COUNTRY_VU", "COUNTRY_EC", "COUNTRY_GE", "COUNTRY_SL", "COUNTRY_VG", "COUNTRY_BD", "COUNTRY_CW", "COUNTRY_MP", "COUNTRY_AF", "COUNTRY_TC", "COUNTRY_MW", "COUNTRY_NG", "COUNTRY_SV", "COUNTRY_CY", "COUNTRY_GI", "COUNTRY_SN", "COUNTRY_TR", "COUNTRY_WF", "COUNTRY_CV", "COUNTRY_MD", "COUNTRY_MR", "COUNTRY_NE", "COUNTRY_SS", "COUNTRY_AS", "COUNTRY_AX", "COUNTRY_EE", "COUNTRY_LS", "COUNTRY_MM", "COUNTRY_SK", "COUNTRY_CC", "COUNTRY_IS", "COUNTRY_PE", "COUNTRY_RO", "COUNTRY_SH", "COUNTRY_TZ", "COUNTRY_DJ", "COUNTRY_GB", "COUNTRY_SB", "COUNTRY_TJ", "COUNTRY_TT", "COUNTRY_VC", "COUNTRY_VI", "COUNTRY_FO", "COUNTRY_IL", "COUNTRY_NC", "COUNTRY_NR", "COUNTRY_TK", "COUNTRY_AW", "COUNTRY_BW", "COUNTRY_FM", "COUNTRY_KR", "COUNTRY_MQ", "COUNTRY_IR", "COUNTRY_IN", "COUNTRY_KG", "COUNTRY_KH", "COUNTRY_SY", "COUNTRY_TW", "COUNTRY_VA", "COUNTRY_CU", "COUNTRY_YT", "COUNTRY_CA", "COUNTRY_GA", "COUNTRY_MS", "COUNTRY_MU", "COUNTRY_BN", "COUNTRY_ET", "COUNTRY_MC", "COUNTRY_DE", "COUNTRY_GQ", "COUNTRY_JP", "COUNTRY_ML", "COUNTRY_PA", "COUNTRY_BM", "COUNTRY_MO", "COUNTRY_PG", "COUNTRY_SE", "COUNTRY_BB", "COUNTRY_DK", "COUNTRY_FK", "COUNTRY_LY", "COUNTRY_PH"]` (Multiple selection allowed)
 - `ip_prefix_set` (Attributes List) ip_prefix_set Addresses that are covered by the prefixes in the given ip_prefix_set (see [below for nested schema](#nestedatt--rule_choice--allow_list--ip_prefix_set))
 - `prefix_list` (Attributes) prefix_list Addresses that are covered by the given list of IPv4 prefixes (see [below for nested schema](#nestedatt--rule_choice--allow_list--prefix_list))
-- `tls_fingerprint_classes` (List of String) <br>**Valid Options:** `["TRICKBOT", "ADWARE", "ADWIND", "GOOTKIT", "GOZI", "JBIFROST", "QUAKBOT", "TROLDESH", "TORRENTLOCKER", "TLS_FINGERPRINT_NONE", "ANY_MALICIOUS_FINGERPRINT", "DRIDEX", "RANSOMWARE", "TOFSEE"]` (Multiple selection allowed)
+- `tls_fingerprint_classes` (List of String) <br>**Valid Options:** `["ADWIND", "GOOTKIT", "QUAKBOT", "TROLDESH", "TOFSEE", "TORRENTLOCKER", "ANY_MALICIOUS_FINGERPRINT", "ADWARE", "DRIDEX", "GOZI", "JBIFROST", "RANSOMWARE", "TRICKBOT", "TLS_FINGERPRINT_NONE"]` (Multiple selection allowed)
 - `tls_fingerprint_values` (List of String) tls_fingerprint_classes A list of exact TLS JA3 fingerprints to match the input TLS JA3 fingerprint against.
 
 <a id="nestedatt--rule_choice--allow_list--default_action_choice"></a>
@@ -145,10 +143,10 @@ Optional:
 
 - `asn_list` (Attributes) asn_list Addresses that belong to the ASNs in the given list The ASN is obtained by performing a lookup for the source IPv4 Address in a GeoIP DB. (see [below for nested schema](#nestedatt--rule_choice--deny_list--asn_list))
 - `asn_set` (Attributes List) asn_set Addresses that belong to the ASNs in the given bgp_asn_set The ASN is obtained by performing a lookup for the source IPv4 Address in a GeoIP DB. (see [below for nested schema](#nestedatt--rule_choice--deny_list--asn_set))
-- `country_list` (List of String) <br>**Valid Options:** `["COUNTRY_IO", "COUNTRY_IQ", "COUNTRY_KG", "COUNTRY_LR", "COUNTRY_PK", "COUNTRY_FJ", "COUNTRY_SK", "COUNTRY_BI", "COUNTRY_NL", "COUNTRY_XT", "COUNTRY_ZA", "COUNTRY_AS", "COUNTRY_AZ", "COUNTRY_CC", "COUNTRY_ER", "COUNTRY_GG", "COUNTRY_GR", "COUNTRY_LI", "COUNTRY_CU", "COUNTRY_US", "COUNTRY_UY", "COUNTRY_CN", "COUNTRY_TN", "COUNTRY_YE", "COUNTRY_BO", "COUNTRY_OM", "COUNTRY_LY", "COUNTRY_RW", "COUNTRY_YT", "COUNTRY_CI", "COUNTRY_CW", "COUNTRY_MC", "COUNTRY_SG", "COUNTRY_TH", "COUNTRY_VE", "COUNTRY_EH", "COUNTRY_MM", "COUNTRY_ST", "COUNTRY_TG", "COUNTRY_VU", "COUNTRY_AF", "COUNTRY_BN", "COUNTRY_CO", "COUNTRY_CZ", "COUNTRY_EC", "COUNTRY_GA", "COUNTRY_GU", "COUNTRY_TZ", "COUNTRY_GI", "COUNTRY_HM", "COUNTRY_TR", "COUNTRY_TT", "COUNTRY_AI", "COUNTRY_CR", "COUNTRY_EG", "COUNTRY_MT", "COUNTRY_SR", "COUNTRY_CA", "COUNTRY_GN", "COUNTRY_GP", "COUNTRY_KY", "COUNTRY_MD", "COUNTRY_FO", "COUNTRY_DE", "COUNTRY_MO", "COUNTRY_MQ", "COUNTRY_NG", "COUNTRY_PY", "COUNTRY_MY", "COUNTRY_SN", "COUNTRY_BY", "COUNTRY_GL", "COUNTRY_HN", "COUNTRY_HT", "COUNTRY_DM", "COUNTRY_GE", "COUNTRY_LS", "COUNTRY_NU", "COUNTRY_PA", "COUNTRY_TV", "COUNTRY_AX", "COUNTRY_IL", "COUNTRY_MA", "COUNTRY_ML", "COUNTRY_NP", "COUNTRY_PR", "COUNTRY_TM", "COUNTRY_BL", "COUNTRY_BQ", "COUNTRY_MR", "COUNTRY_CD", "COUNTRY_DK", "COUNTRY_HU", "COUNTRY_RU", "COUNTRY_TC", "COUNTRY_WS", "COUNTRY_BT", "COUNTRY_BV", "COUNTRY_FK", "COUNTRY_MG", "COUNTRY_MH", "COUNTRY_PT", "COUNTRY_XK", "COUNTRY_BE", "COUNTRY_MU", "COUNTRY_NR", "COUNTRY_SJ", "COUNTRY_CF", "COUNTRY_CH", "COUNTRY_EE", "COUNTRY_SS", "COUNTRY_TO", "COUNTRY_KZ", "COUNTRY_NF", "COUNTRY_RS", "COUNTRY_AE", "COUNTRY_BS", "COUNTRY_ET", "COUNTRY_UG", "COUNTRY_AW", "COUNTRY_GQ", "COUNTRY_IN", "COUNTRY_JO", "COUNTRY_MK", "COUNTRY_PF", "COUNTRY_AO", "COUNTRY_BD", "COUNTRY_GM", "COUNTRY_KI", "COUNTRY_PG", "COUNTRY_PM", "COUNTRY_SX", "COUNTRY_GD", "COUNTRY_MS", "COUNTRY_VN", "COUNTRY_BG", "COUNTRY_CK", "COUNTRY_LB", "COUNTRY_MF", "COUNTRY_ZM", "COUNTRY_BH", "COUNTRY_NA", "COUNTRY_PS", "COUNTRY_SA", "COUNTRY_UZ", "COUNTRY_IT", "COUNTRY_MZ", "COUNTRY_SL", "COUNTRY_TF", "COUNTRY_PL", "COUNTRY_NONE", "COUNTRY_JM", "COUNTRY_AR", "COUNTRY_CY", "COUNTRY_IM", "COUNTRY_LU", "COUNTRY_MP", "COUNTRY_MV", "COUNTRY_NI", "COUNTRY_RE", "COUNTRY_FI", "COUNTRY_GW", "COUNTRY_LK", "COUNTRY_RO", "COUNTRY_AM", "COUNTRY_BF", "COUNTRY_PN", "COUNTRY_SC", "COUNTRY_WF", "COUNTRY_IE", "COUNTRY_IS", "COUNTRY_TJ", "COUNTRY_TL", "COUNTRY_AL", "COUNTRY_HK", "COUNTRY_MN", "COUNTRY_UM", "COUNTRY_KW", "COUNTRY_SZ", "COUNTRY_NZ", "COUNTRY_TW", "COUNTRY_SY", "COUNTRY_AQ", "COUNTRY_CM", "COUNTRY_DZ", "COUNTRY_IR", "COUNTRY_KE", "COUNTRY_SE", "COUNTRY_SI", "COUNTRY_AN", "COUNTRY_AU", "COUNTRY_JE", "COUNTRY_QA", "COUNTRY_VI", "COUNTRY_AG", "COUNTRY_BA", "COUNTRY_ES", "COUNTRY_CX", "COUNTRY_LC", "COUNTRY_SH", "COUNTRY_TD", "COUNTRY_BB", "COUNTRY_BJ", "COUNTRY_DO", "COUNTRY_FM", "COUNTRY_PE", "COUNTRY_TK", "COUNTRY_CS", "COUNTRY_JP", "COUNTRY_KM", "COUNTRY_SB", "COUNTRY_VA", "COUNTRY_AD", "COUNTRY_HR", "COUNTRY_KN", "COUNTRY_ZW", "COUNTRY_AT", "COUNTRY_ME", "COUNTRY_MX", "COUNTRY_NE", "COUNTRY_NO", "COUNTRY_VG", "COUNTRY_GH", "COUNTRY_LT", "COUNTRY_FR", "COUNTRY_GT", "COUNTRY_SD", "COUNTRY_ID", "COUNTRY_KH", "COUNTRY_PH", "COUNTRY_SO", "COUNTRY_BW", "COUNTRY_DJ", "COUNTRY_GY", "COUNTRY_KP", "COUNTRY_UA", "COUNTRY_LA", "COUNTRY_LV", "COUNTRY_GB", "COUNTRY_KR", "COUNTRY_SV", "COUNTRY_BM", "COUNTRY_CG", "COUNTRY_PW", "COUNTRY_VC", "COUNTRY_MW", "COUNTRY_SM", "COUNTRY_CV", "COUNTRY_GF", "COUNTRY_GS", "COUNTRY_BZ", "COUNTRY_CL", "COUNTRY_NC", "COUNTRY_BR"]` (Multiple selection allowed)
+- `country_list` (List of String) <br>**Valid Options:** `["COUNTRY_SB", "COUNTRY_TJ", "COUNTRY_TT", "COUNTRY_VC", "COUNTRY_VI", "COUNTRY_FO", "COUNTRY_IL", "COUNTRY_NC", "COUNTRY_NR", "COUNTRY_TK", "COUNTRY_AW", "COUNTRY_BW", "COUNTRY_FM", "COUNTRY_KR", "COUNTRY_MQ", "COUNTRY_IR", "COUNTRY_IN", "COUNTRY_KG", "COUNTRY_KH", "COUNTRY_SY", "COUNTRY_TW", "COUNTRY_VA", "COUNTRY_CU", "COUNTRY_YT", "COUNTRY_CA", "COUNTRY_GA", "COUNTRY_MS", "COUNTRY_MU", "COUNTRY_BN", "COUNTRY_ET", "COUNTRY_MC", "COUNTRY_DE", "COUNTRY_GQ", "COUNTRY_JP", "COUNTRY_ML", "COUNTRY_PA", "COUNTRY_BM", "COUNTRY_MO", "COUNTRY_PG", "COUNTRY_SE", "COUNTRY_BB", "COUNTRY_DK", "COUNTRY_FK", "COUNTRY_LY", "COUNTRY_PH", "COUNTRY_UM", "COUNTRY_VE", "COUNTRY_BE", "COUNTRY_AD", "COUNTRY_HN", "COUNTRY_KM", "COUNTRY_UA", "COUNTRY_CS", "COUNTRY_GS", "COUNTRY_HK", "COUNTRY_MN", "COUNTRY_PK", "COUNTRY_UG", "COUNTRY_DM", "COUNTRY_GF", "COUNTRY_JO", "COUNTRY_KP", "COUNTRY_NL", "COUNTRY_NP", "COUNTRY_PY", "COUNTRY_AM", "COUNTRY_LU", "COUNTRY_TM", "COUNTRY_RE", "COUNTRY_AL", "COUNTRY_BR", "COUNTRY_CD", "COUNTRY_FR", "COUNTRY_GD", "COUNTRY_GN", "COUNTRY_NZ", "COUNTRY_PL", "COUNTRY_TL", "COUNTRY_CZ", "COUNTRY_GL", "COUNTRY_SJ", "COUNTRY_NI", "COUNTRY_NONE", "COUNTRY_ES", "COUNTRY_LT", "COUNTRY_MX", "COUNTRY_UZ", "COUNTRY_XT", "COUNTRY_AR", "COUNTRY_BV", "COUNTRY_MZ", "COUNTRY_TH", "COUNTRY_UY", "COUNTRY_BG", "COUNTRY_BJ", "COUNTRY_OM", "COUNTRY_AI", "COUNTRY_GM", "COUNTRY_MA", "COUNTRY_MY", "COUNTRY_CF", "COUNTRY_BH", "COUNTRY_BF", "COUNTRY_ID", "COUNTRY_LK", "COUNTRY_NA", "COUNTRY_SO", "COUNTRY_TV", "COUNTRY_AU", "COUNTRY_BY", "COUNTRY_EH", "COUNTRY_PF", "COUNTRY_PS", "COUNTRY_SX", "COUNTRY_ER", "COUNTRY_PT", "COUNTRY_SC", "COUNTRY_TG", "COUNTRY_BZ", "COUNTRY_LR", "COUNTRY_BL", "COUNTRY_BO", "COUNTRY_IO", "COUNTRY_KI", "COUNTRY_RU", "COUNTRY_TF", "COUNTRY_AN", "COUNTRY_GG", "COUNTRY_LA", "COUNTRY_BT", "COUNTRY_GH", "COUNTRY_HR", "COUNTRY_HU", "COUNTRY_AE", "COUNTRY_MK", "COUNTRY_RW", "COUNTRY_ZM", "COUNTRY_ZA", "COUNTRY_AT", "COUNTRY_CM", "COUNTRY_CX", "COUNTRY_DO", "COUNTRY_GW", "COUNTRY_LB", "COUNTRY_LI", "COUNTRY_PR", "COUNTRY_BI", "COUNTRY_IQ", "COUNTRY_PW", "COUNTRY_SR", "COUNTRY_GP", "COUNTRY_HM", "COUNTRY_LC", "COUNTRY_NF", "COUNTRY_BQ", "COUNTRY_CO", "COUNTRY_GT", "COUNTRY_ME", "COUNTRY_PM", "COUNTRY_YE", "COUNTRY_AQ", "COUNTRY_SA", "COUNTRY_VN", "COUNTRY_XK", "COUNTRY_BA", "COUNTRY_CH", "COUNTRY_GY", "COUNTRY_AG", "COUNTRY_AZ", "COUNTRY_HT", "COUNTRY_JM", "COUNTRY_KW", "COUNTRY_LV", "COUNTRY_MF", "COUNTRY_NO", "COUNTRY_BS", "COUNTRY_SZ", "COUNTRY_CI", "COUNTRY_GR", "COUNTRY_IM", "COUNTRY_JE", "COUNTRY_MH", "COUNTRY_SG", "COUNTRY_CG", "COUNTRY_CK", "COUNTRY_EG", "COUNTRY_FI", "COUNTRY_RS", "COUNTRY_ZW", "COUNTRY_KE", "COUNTRY_QA", "COUNTRY_SD", "COUNTRY_CL", "COUNTRY_MV", "COUNTRY_TO", "COUNTRY_DZ", "COUNTRY_SI", "COUNTRY_ST", "COUNTRY_US", "COUNTRY_GU", "COUNTRY_KZ", "COUNTRY_MT", "COUNTRY_WS", "COUNTRY_IT", "COUNTRY_AO", "COUNTRY_MG", "COUNTRY_NU", "COUNTRY_SM", "COUNTRY_CN", "COUNTRY_CR", "COUNTRY_IE", "COUNTRY_KY", "COUNTRY_PN", "COUNTRY_TN", "COUNTRY_FJ", "COUNTRY_KN", "COUNTRY_TD", "COUNTRY_VU", "COUNTRY_EC", "COUNTRY_GE", "COUNTRY_SL", "COUNTRY_VG", "COUNTRY_BD", "COUNTRY_CW", "COUNTRY_MP", "COUNTRY_AF", "COUNTRY_TC", "COUNTRY_MW", "COUNTRY_NG", "COUNTRY_SV", "COUNTRY_CY", "COUNTRY_GI", "COUNTRY_SN", "COUNTRY_TR", "COUNTRY_WF", "COUNTRY_CV", "COUNTRY_MD", "COUNTRY_MR", "COUNTRY_NE", "COUNTRY_SS", "COUNTRY_AS", "COUNTRY_AX", "COUNTRY_EE", "COUNTRY_LS", "COUNTRY_MM", "COUNTRY_SK", "COUNTRY_CC", "COUNTRY_IS", "COUNTRY_PE", "COUNTRY_RO", "COUNTRY_SH", "COUNTRY_TZ", "COUNTRY_DJ", "COUNTRY_GB"]` (Multiple selection allowed)
 - `ip_prefix_set` (Attributes List) ip_prefix_set Addresses that are covered by the prefixes in the given ip_prefix_set (see [below for nested schema](#nestedatt--rule_choice--deny_list--ip_prefix_set))
 - `prefix_list` (Attributes) prefix_list Addresses that are covered by the given list of IPv4 prefixes (see [below for nested schema](#nestedatt--rule_choice--deny_list--prefix_list))
-- `tls_fingerprint_classes` (List of String) <br>**Valid Options:** `["GOZI", "JBIFROST", "QUAKBOT", "TROLDESH", "TORRENTLOCKER", "TLS_FINGERPRINT_NONE", "ANY_MALICIOUS_FINGERPRINT", "DRIDEX", "RANSOMWARE", "TOFSEE", "TRICKBOT", "ADWARE", "ADWIND", "GOOTKIT"]` (Multiple selection allowed)
+- `tls_fingerprint_classes` (List of String) <br>**Valid Options:** `["TOFSEE", "TORRENTLOCKER", "ANY_MALICIOUS_FINGERPRINT", "ADWARE", "DRIDEX", "GOZI", "JBIFROST", "RANSOMWARE", "TRICKBOT", "TLS_FINGERPRINT_NONE", "ADWIND", "GOOTKIT", "QUAKBOT", "TROLDESH"]` (Multiple selection allowed)
 - `tls_fingerprint_values` (List of String) tls_fingerprint_classes A list of exact TLS JA3 fingerprints to match the input TLS JA3 fingerprint against.
 
 <a id="nestedatt--rule_choice--deny_list--default_action_choice"></a>
@@ -258,7 +256,7 @@ Optional:
 
 Required:
 
-- `action` (List of String) <br>**Allowed Values (choose one):** `["DENY", "ALLOW", "NEXT_POLICY_SET", "NEXT_POLICY", "LAST_POLICY", "GOTO_POLICY"]`
+- `action` (List of String) <br>**Allowed Values (choose one):** `["ALLOW", "NEXT_POLICY_SET", "NEXT_POLICY", "LAST_POLICY", "GOTO_POLICY", "DENY"]`
 - `asn_choice` (Attributes) asn choice Match the 4-byte origin Autonomous System Number for the source IPv4 address of the request. The origin ASN for the request is obtained by performing a lookup for the source IPv4 Address in a GeoIP DB. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--spec--asn_choice))
 - `client_choice` (Attributes) client choice Select clients for which the rule will be applied. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--spec--client_choice))
 - `ip_choice` (Attributes) ip choice Match source IP address of the request (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--spec--ip_choice))
@@ -343,7 +341,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["REMOVE_WHITESPACE", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "UPPER_CASE", "BASE64_DECODE", "URL_DECODE", "TRIM_LEFT", "LOWER_CASE", "NORMALIZE_PATH"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE", "LOWER_CASE", "UPPER_CASE"]` (Multiple selection allowed)
 
 
 <a id="nestedatt--rule_choice--rule_list--rules--spec--client_choice--client_selector"></a>
@@ -359,7 +357,7 @@ Required:
 
 Required:
 
-- `ip_threat_categories` (List of String) <br>**Valid Options:** `["DENIAL_OF_SERVICE", "NETWORK", "SPAM_SOURCES", "WEB_ATTACKS", "BOTNETS", "PROXY", "TOR_PROXY", "WINDOWS_EXPLOITS", "SCANNERS", "REPUTATION", "PHISHING", "MOBILE_THREATS"]` (Multiple selection allowed)
+- `ip_threat_categories` (List of String) <br>**Valid Options:** `["BOTNETS", "PHISHING", "MOBILE_THREATS", "SPAM_SOURCES", "SCANNERS", "REPUTATION", "PROXY", "TOR_PROXY", "DENIAL_OF_SERVICE", "NETWORK", "WINDOWS_EXPLOITS", "WEB_ATTACKS"]` (Multiple selection allowed)
 
 
 
@@ -439,8 +437,8 @@ Optional:
 
 Required:
 
-- `context` (List of String) <br>**Allowed Values (choose one):** `["CONTEXT_ANY", "CONTEXT_COOKIE", "CONTEXT_URL", "CONTEXT_URI", "CONTEXT_BODY", "CONTEXT_REQUEST", "CONTEXT_RESPONSE", "CONTEXT_PARAMETER", "CONTEXT_HEADER"]`
-- `exclude_attack_type` (List of String) <br>**Allowed Values (choose one):** `["ATTACK_TYPE_TROJAN_BACKDOOR_SPYWARE", "ATTACK_TYPE_INFORMATION_LEAKAGE", "ATTACK_TYPE_XPATH_INJECTION", "ATTACK_TYPE_COMMAND_EXECUTION", "ATTACK_TYPE_DENIAL_OF_SERVICE", "ATTACK_TYPE_SESSION_HIJACKING", "ATTACK_TYPE_GRAPHQL_PARSER_ATTACK", "ATTACK_TYPE_NONE", "ATTACK_TYPE_NON_BROWSER_CLIENT", "ATTACK_TYPE_VULNERABILITY_SCAN", "ATTACK_TYPE_BUFFER_OVERFLOW", "ATTACK_TYPE_PATH_TRAVERSAL", "ATTACK_TYPE_SERVER_SIDE_CODE_INJECTION", "ATTACK_TYPE_CROSS_SITE_SCRIPTING", "ATTACK_TYPE_HTTP_RESPONSE_SPLITTING", "ATTACK_TYPE_OTHER_APPLICATION_ATTACKS", "ATTACK_TYPE_AUTHENTICATION_AUTHORIZATION_ATTACKS", "ATTACK_TYPE_PREDICTABLE_RESOURCE_LOCATION", "ATTACK_TYPE_DIRECTORY_INDEXING", "ATTACK_TYPE_SQL_INJECTION", "ATTACK_TYPE_HTTP_PARSER_ATTACK", "ATTACK_TYPE_REMOTE_FILE_INCLUDE", "ATTACK_TYPE_MALICIOUS_FILE_UPLOAD", "ATTACK_TYPE_DETECTION_EVASION", "ATTACK_TYPE_ABUSE_OF_FUNCTIONALITY", "ATTACK_TYPE_LDAP_INJECTION", "ATTACK_TYPE_FORCEFUL_BROWSING"]`
+- `context` (List of String) <br>**Allowed Values (choose one):** `["CONTEXT_ANY", "CONTEXT_BODY", "CONTEXT_RESPONSE", "CONTEXT_PARAMETER", "CONTEXT_REQUEST", "CONTEXT_HEADER", "CONTEXT_COOKIE", "CONTEXT_URL", "CONTEXT_URI"]`
+- `exclude_attack_type` (List of String) <br>**Allowed Values (choose one):** `["ATTACK_TYPE_NONE", "ATTACK_TYPE_NON_BROWSER_CLIENT", "ATTACK_TYPE_TROJAN_BACKDOOR_SPYWARE", "ATTACK_TYPE_PATH_TRAVERSAL", "ATTACK_TYPE_REMOTE_FILE_INCLUDE", "ATTACK_TYPE_OTHER_APPLICATION_ATTACKS", "ATTACK_TYPE_DETECTION_EVASION", "ATTACK_TYPE_VULNERABILITY_SCAN", "ATTACK_TYPE_ABUSE_OF_FUNCTIONALITY", "ATTACK_TYPE_PREDICTABLE_RESOURCE_LOCATION", "ATTACK_TYPE_COMMAND_EXECUTION", "ATTACK_TYPE_SQL_INJECTION", "ATTACK_TYPE_DENIAL_OF_SERVICE", "ATTACK_TYPE_BUFFER_OVERFLOW", "ATTACK_TYPE_INFORMATION_LEAKAGE", "ATTACK_TYPE_XPATH_INJECTION", "ATTACK_TYPE_LDAP_INJECTION", "ATTACK_TYPE_CROSS_SITE_SCRIPTING", "ATTACK_TYPE_HTTP_PARSER_ATTACK", "ATTACK_TYPE_SESSION_HIJACKING", "ATTACK_TYPE_HTTP_RESPONSE_SPLITTING", "ATTACK_TYPE_AUTHENTICATION_AUTHORIZATION_ATTACKS", "ATTACK_TYPE_DIRECTORY_INDEXING", "ATTACK_TYPE_SERVER_SIDE_CODE_INJECTION", "ATTACK_TYPE_FORCEFUL_BROWSING", "ATTACK_TYPE_MALICIOUS_FILE_UPLOAD", "ATTACK_TYPE_GRAPHQL_PARSER_ATTACK"]`
 
 Optional:
 
@@ -460,7 +458,7 @@ Required:
 
 Required:
 
-- `context` (List of String) <br>**Allowed Values (choose one):** `["CONTEXT_BODY", "CONTEXT_REQUEST", "CONTEXT_RESPONSE", "CONTEXT_PARAMETER", "CONTEXT_HEADER", "CONTEXT_ANY", "CONTEXT_COOKIE", "CONTEXT_URL", "CONTEXT_URI"]`
+- `context` (List of String) <br>**Allowed Values (choose one):** `["CONTEXT_REQUEST", "CONTEXT_HEADER", "CONTEXT_COOKIE", "CONTEXT_URL", "CONTEXT_URI", "CONTEXT_ANY", "CONTEXT_BODY", "CONTEXT_RESPONSE", "CONTEXT_PARAMETER"]`
 - `signature_id` (Number) SignatureID The allowed values for signature id are 0 and in the range of 200000001-299999999. 0 implies that all signatures will be excluded for the specified context.
 
 Optional:
@@ -473,8 +471,8 @@ Optional:
 
 Required:
 
-- `context` (List of String) <br>**Allowed Values (choose one):** `["CONTEXT_URL", "CONTEXT_URI", "CONTEXT_BODY", "CONTEXT_REQUEST", "CONTEXT_RESPONSE", "CONTEXT_PARAMETER", "CONTEXT_HEADER", "CONTEXT_ANY", "CONTEXT_COOKIE"]`
-- `exclude_violation` (List of String) <br>**Allowed Values (choose one):** `["VIOL_HTTP_PROTOCOL_MULTIPLE_HOST_HEADERS", "VIOL_HTTP_PROTOCOL_UNPARSABLE_REQUEST_CONTENT", "VIOL_HTTP_PROTOCOL_BAD_HTTP_VERSION", "VIOL_EVASION_MULTIPLE_DECODING", "VIOL_COOKIE_MODIFIED", "VIOL_GRAPHQL_FORMAT", "VIOL_MALFORMED_REQUEST", "VIOL_FILE_UPLOAD", "VIOL_FILE_UPLOAD_IN_BODY", "VIOL_HTTP_PROTOCOL_BAD_HOST_HEADER_VALUE", "VIOL_HTTP_PROTOCOL_NULL_IN_REQUEST", "VIOL_EVASION_BAD_UNESCAPE", "VIOL_REQUEST_MAX_LENGTH", "VIOL_HTTP_PROTOCOL_SEVERAL_CONTENT_LENGTH_HEADERS", "VIOL_EVASION_APACHE_WHITESPACE", "VIOL_EVASION_IIS_UNICODE_CODEPOINTS", "VIOL_HTTP_PROTOCOL_BAD_MULTIPART_FORMDATA_REQUEST_PARSING", "VIOL_XML_MALFORMED", "VIOL_EVASION_PERCENT_U_DECODING", "VIOL_GRAPHQL_INTROSPECTION_QUERY", "VIOL_MANDATORY_HEADER", "VIOL_ASM_COOKIE_MODIFIED", "VIOL_EVASION_DIRECTORY_TRAVERSALS", "VIOL_NONE", "VIOL_FILETYPE", "VIOL_HTTP_PROTOCOL_CRLF_CHARACTERS_BEFORE_REQUEST_START", "VIOL_HTTP_PROTOCOL_BAD_MULTIPART_PARAMETERS_PARSING", "VIOL_HTTP_PROTOCOL_BODY_IN_GET_OR_HEAD_REQUEST", "VIOL_HTTP_PROTOCOL_HIGH_ASCII_CHARACTERS_IN_HEADERS", "VIOL_HTTP_PROTOCOL_NO_HOST_HEADER_IN_HTTP_1_1_REQUEST", "VIOL_HTTP_PROTOCOL_CONTENT_LENGTH_SHOULD_BE_A_POSITIVE_NUMBER", "VIOL_DATA_GUARD", "VIOL_EVASION_BARE_BYTE_DECODING", "VIOL_COOKIE_MALFORMED", "VIOL_GRAPHQL_MALFORMED", "VIOL_HTTP_RESPONSE_STATUS", "VIOL_JSON_MALFORMED", "VIOL_EVASION_IIS_BACKSLASHES", "VIOL_ENCODING", "VIOL_METHOD"]`
+- `context` (List of String) <br>**Allowed Values (choose one):** `["CONTEXT_ANY", "CONTEXT_BODY", "CONTEXT_RESPONSE", "CONTEXT_PARAMETER", "CONTEXT_REQUEST", "CONTEXT_HEADER", "CONTEXT_COOKIE", "CONTEXT_URL", "CONTEXT_URI"]`
+- `exclude_violation` (List of String) <br>**Allowed Values (choose one):** `["VIOL_JSON_MALFORMED", "VIOL_HTTP_PROTOCOL_SEVERAL_CONTENT_LENGTH_HEADERS", "VIOL_GRAPHQL_MALFORMED", "VIOL_DATA_GUARD", "VIOL_FILETYPE", "VIOL_FILE_UPLOAD_IN_BODY", "VIOL_HTTP_PROTOCOL_MULTIPLE_HOST_HEADERS", "VIOL_HTTP_PROTOCOL_NULL_IN_REQUEST", "VIOL_HTTP_PROTOCOL_BAD_HTTP_VERSION", "VIOL_EVASION_PERCENT_U_DECODING", "VIOL_REQUEST_MAX_LENGTH", "VIOL_HTTP_PROTOCOL_UNPARSABLE_REQUEST_CONTENT", "VIOL_EVASION_APACHE_WHITESPACE", "VIOL_HTTP_PROTOCOL_BAD_MULTIPART_FORMDATA_REQUEST_PARSING", "VIOL_COOKIE_MALFORMED", "VIOL_FILE_UPLOAD", "VIOL_HTTP_PROTOCOL_CONTENT_LENGTH_SHOULD_BE_A_POSITIVE_NUMBER", "VIOL_MALFORMED_REQUEST", "VIOL_GRAPHQL_FORMAT", "VIOL_MANDATORY_HEADER", "VIOL_COOKIE_MODIFIED", "VIOL_HTTP_PROTOCOL_HIGH_ASCII_CHARACTERS_IN_HEADERS", "VIOL_ENCODING", "VIOL_NONE", "VIOL_XML_MALFORMED", "VIOL_EVASION_DIRECTORY_TRAVERSALS", "VIOL_EVASION_IIS_BACKSLASHES", "VIOL_EVASION_BARE_BYTE_DECODING", "VIOL_HTTP_PROTOCOL_BODY_IN_GET_OR_HEAD_REQUEST", "VIOL_GRAPHQL_INTROSPECTION_QUERY", "VIOL_HTTP_PROTOCOL_BAD_HOST_HEADER_VALUE", "VIOL_HTTP_PROTOCOL_CRLF_CHARACTERS_BEFORE_REQUEST_START", "VIOL_HTTP_PROTOCOL_NO_HOST_HEADER_IN_HTTP_1_1_REQUEST", "VIOL_HTTP_PROTOCOL_BAD_MULTIPART_PARAMETERS_PARSING", "VIOL_HTTP_RESPONSE_STATUS", "VIOL_ASM_COOKIE_MODIFIED", "VIOL_EVASION_MULTIPLE_DECODING", "VIOL_EVASION_IIS_UNICODE_CODEPOINTS", "VIOL_EVASION_BAD_UNESCAPE", "VIOL_METHOD"]`
 
 Optional:
 
@@ -524,7 +522,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "UPPER_CASE", "BASE64_DECODE", "URL_DECODE", "TRIM_LEFT", "LOWER_CASE"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE"]` (Multiple selection allowed)
 
 
 
@@ -536,7 +534,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["TRIM", "TRANSFORMER_NONE", "UPPER_CASE", "BASE64_DECODE", "URL_DECODE", "TRIM_LEFT", "LOWER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_RIGHT"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM"]` (Multiple selection allowed)
 
 
 <a id="nestedatt--rule_choice--rule_list--rules--spec--bot_action"></a>
@@ -584,7 +582,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["LOWER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "UPPER_CASE", "BASE64_DECODE", "URL_DECODE", "TRIM_LEFT"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE"]` (Multiple selection allowed)
 
 
 
@@ -596,7 +594,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["TRANSFORMER_NONE", "UPPER_CASE", "BASE64_DECODE", "URL_DECODE", "TRIM_LEFT", "LOWER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_RIGHT", "TRIM"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM"]` (Multiple selection allowed)
 
 
 <a id="nestedatt--rule_choice--rule_list--rules--spec--headers"></a>
@@ -627,7 +625,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["TRANSFORMER_NONE", "UPPER_CASE", "BASE64_DECODE", "URL_DECODE", "TRIM_LEFT", "LOWER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_RIGHT", "TRIM"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE"]` (Multiple selection allowed)
 
 
 
@@ -638,7 +636,7 @@ Optional:
 Optional:
 
 - `invert_matcher` (Boolean) <br>**Default:** `false`
-- `methods` (List of String) <br>**Valid Options:** `["GET", "HEAD", "PUT", "OPTIONS", "COPY", "POST", "DELETE", "CONNECT", "TRACE", "PATCH", "ANY"]` (Multiple selection allowed)
+- `methods` (List of String) <br>**Valid Options:** `["POST", "PUT", "DELETE", "CONNECT", "TRACE", "PATCH", "ANY", "OPTIONS", "COPY", "GET", "HEAD"]` (Multiple selection allowed)
 
 
 <a id="nestedatt--rule_choice--rule_list--rules--spec--jwt_claims"></a>
@@ -669,7 +667,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["TRANSFORMER_NONE", "UPPER_CASE", "BASE64_DECODE", "URL_DECODE", "TRIM_LEFT", "LOWER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_RIGHT", "TRIM"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT"]` (Multiple selection allowed)
 
 
 
@@ -709,7 +707,7 @@ Optional:
 - `prefix_values` (List of String) prefix values A list of path prefix values to match the input HTTP path against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input HTTP path against.
 - `suffix_values` (List of String) Suffix values A list of path suffix values to match the input HTTP path against.
-- `transformers` (List of String) <br>**Valid Options:** `["TRANSFORMER_NONE", "UPPER_CASE", "BASE64_DECODE", "URL_DECODE", "TRIM_LEFT", "LOWER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_RIGHT", "TRIM"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["BASE64_DECODE", "REMOVE_WHITESPACE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE"]` (Multiple selection allowed)
 
 
 <a id="nestedatt--rule_choice--rule_list--rules--spec--port_matcher"></a>
@@ -752,7 +750,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["TRANSFORMER_NONE", "UPPER_CASE", "BASE64_DECODE", "URL_DECODE", "TRIM_LEFT", "LOWER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_RIGHT", "TRIM"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE"]` (Multiple selection allowed)
 
 
 
@@ -985,7 +983,7 @@ Optional:
 
 Optional:
 
-- `classes` (List of String) <br>**Valid Options:** `["TROLDESH", "TORRENTLOCKER", "TLS_FINGERPRINT_NONE", "ANY_MALICIOUS_FINGERPRINT", "DRIDEX", "RANSOMWARE", "TOFSEE", "TRICKBOT", "ADWARE", "ADWIND", "GOOTKIT", "GOZI", "JBIFROST", "QUAKBOT"]` (Multiple selection allowed)
+- `classes` (List of String) <br>**Valid Options:** `["TORRENTLOCKER", "ANY_MALICIOUS_FINGERPRINT", "ADWARE", "DRIDEX", "GOZI", "JBIFROST", "RANSOMWARE", "TRICKBOT", "TLS_FINGERPRINT_NONE", "ADWIND", "GOOTKIT", "QUAKBOT", "TROLDESH", "TOFSEE"]` (Multiple selection allowed)
 - `exact_values` (List of String) exact values A list of exact TLS JA3 fingerprints to match the input TLS JA3 fingerprint against.
 - `excluded_values` (List of String) excluded values A list of TLS JA3 fingerprints to be excluded when matching the input TLS JA3 fingerprint. This can be used to skip known false positives when using one or more known TLS fingerprint classes in the enclosing matcher.
 

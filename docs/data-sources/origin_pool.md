@@ -15,8 +15,8 @@ The `f5xc_origin_pool` data source allows you to retrieve information about an e
 
 ```terraform
 data "f5xc_origin_pool" "example" {
-  namespace = "example_namespace"
   name      = "example_origin_pool"
+  namespace = "example_namespace"
 }
 ```
 

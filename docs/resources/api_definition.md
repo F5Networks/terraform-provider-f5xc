@@ -61,7 +61,7 @@ Optional:
 
 Required:
 
-- `method` (List of String) <br>**Allowed Values (choose one):** `["POST", "DELETE", "CONNECT", "TRACE", "PATCH", "ANY", "GET", "HEAD", "PUT", "OPTIONS", "COPY"]`
+- `method` (List of String) <br>**Allowed Values (choose one):** `["TRACE", "PATCH", "ANY", "OPTIONS", "COPY", "GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT"]`
 - `path` (String) path An endpoint path, as specified in OpenAPI, including parameters. The path should comply with RFC 3986 and may have parameters according to OpenAPI specification
 
 
@@ -70,7 +70,7 @@ Required:
 
 Required:
 
-- `method` (List of String) <br>**Allowed Values (choose one):** `["COPY", "POST", "DELETE", "CONNECT", "TRACE", "PATCH", "ANY", "GET", "HEAD", "PUT", "OPTIONS"]`
+- `method` (List of String) <br>**Allowed Values (choose one):** `["GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "TRACE", "PATCH", "ANY", "OPTIONS", "COPY"]`
 - `path` (String) path An endpoint path, as specified in OpenAPI, including parameters. The path should comply with RFC 3986 and may have parameters according to OpenAPI specification
 
 
@@ -79,7 +79,7 @@ Required:
 
 Required:
 
-- `method` (List of String) <br>**Allowed Values (choose one):** `["CONNECT", "TRACE", "PATCH", "ANY", "GET", "HEAD", "PUT", "OPTIONS", "COPY", "POST", "DELETE"]`
+- `method` (List of String) <br>**Allowed Values (choose one):** `["DELETE", "CONNECT", "TRACE", "PATCH", "ANY", "OPTIONS", "COPY", "GET", "HEAD", "POST", "PUT"]`
 - `path` (String) path An endpoint path, as specified in OpenAPI, including parameters. The path should comply with RFC 3986 and may have parameters according to OpenAPI specification
 
 

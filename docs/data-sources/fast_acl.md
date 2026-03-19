@@ -15,8 +15,8 @@ The `f5xc_fast_acl` data source allows you to retrieve information about an exis
 
 ```terraform
 data "f5xc_fast_acl" "example" {
-  namespace = "example_namespace"
   name      = "example_fast_acl"
+  namespace = "example_namespace"
 }
 ```
 

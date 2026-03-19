@@ -15,10 +15,10 @@ NetworkInterface resource
 resource "f5xc_network_interface" "example" {
   name         = "example_network_interface"
   namespace    = "example_namespace"
-  type         = ["ENUM_VALUE"]
   DHCP_server  = ["ENUM_VALUE"]
   device_name  = "example_network_interface"
   dhcp_address = ["ENUM_VALUE"]
+  type         = ["ENUM_VALUE"]
 }
 ```
 
@@ -34,7 +34,7 @@ resource "f5xc_network_interface" "example" {
 - `dhcp_server` (List of String) <br>**Allowed Values (choose one):** `["NETWORK_INTERFACE_DHCP_SERVER_DISABLE", "NETWORK_INTERFACE_DHCP_SERVER_ENABLE", "NETWORK_INTERFACE_ENHANCED_DHCP_SERVER_ENABLE"]`
 - `name` (String) name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.
 - `namespace` (String) namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''
-- `type` (List of String) <br>**Allowed Values (choose one):** `["NETWORK_INTERFACE_LAYER2_INTERFACE", "NETWORK_INTERFACE_ETHERNET", "NETWORK_INTERFACE_VLAN_INTERFACE", "NETWORK_INTERFACE_LACP_INTERFACE", "NETWORK_INTERFACE_TUNNEL_INTERFACE", "NETWORK_INTERFACE_LOOPBACK_INTERFACE"]`
+- `type` (List of String) <br>**Allowed Values (choose one):** `["NETWORK_INTERFACE_VLAN_INTERFACE", "NETWORK_INTERFACE_LACP_INTERFACE", "NETWORK_INTERFACE_TUNNEL_INTERFACE", "NETWORK_INTERFACE_LOOPBACK_INTERFACE", "NETWORK_INTERFACE_LAYER2_INTERFACE", "NETWORK_INTERFACE_ETHERNET"]`
 
 ### Optional
 
@@ -46,7 +46,7 @@ resource "f5xc_network_interface" "example" {
 - `labels` (Map of String) labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression
 - `monitoring_choice` (Attributes) Select Link Quality Monitoring configuration Link Quality Monitoring configuration for a network interface. When enabled, VER will send probes on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes. (see [below for nested schema](#nestedatt--monitoring_choice))
 - `mtu` (Number) <br>**Validation:** `OneOf [0]`
-- `network_config` (List of String) <br>**Allowed Values (choose one):** `["NETWORK_INTERFACE_SITE_LOCAL_INSIDE", "NETWORK_INTERFACE_STORAGE", "NETWORK_INTERFACE_MANAGEMENT", "NETWORK_INTERFACE_IPFABRIC", "NETWORK_INTERFACE_SEGMENT", "NETWORK_INTERFACE_NETWORK_REF", "NETWORK_INTERFACE_SITE_LOCAL"]`
+- `network_config` (List of String) <br>**Allowed Values (choose one):** `["NETWORK_INTERFACE_MANAGEMENT", "NETWORK_INTERFACE_IPFABRIC", "NETWORK_INTERFACE_SEGMENT", "NETWORK_INTERFACE_NETWORK_REF", "NETWORK_INTERFACE_SITE_LOCAL", "NETWORK_INTERFACE_SITE_LOCAL_INSIDE", "NETWORK_INTERFACE_STORAGE"]`
 - `priority` (Number) Priority Priority of the network interface when multiple network interfaces are present in the fleet object Greater the value, higher the priority
 - `static_addresses` (Attributes List) Static IP If DHCP server is enabled, configures the subnet to be used for IP allocation. (see [below for nested schema](#nestedatt--static_addresses))
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
@@ -122,7 +122,7 @@ Read-Only:
 
 Required:
 
-- `default_gateway_mode` (List of String) <br>**Allowed Values (choose one):** `["NETWORK_INTERFACE_GATEWAY_AUTO_ALLOCATE", "NETWORK_INTERFACE_GATEWAY_USE_CONFIGURED", "NETWORK_INTERFACE_GATEWAY_DISABLE"]`
+- `default_gateway_mode` (List of String) <br>**Allowed Values (choose one):** `["NETWORK_INTERFACE_GATEWAY_DISABLE", "NETWORK_INTERFACE_GATEWAY_AUTO_ALLOCATE", "NETWORK_INTERFACE_GATEWAY_USE_CONFIGURED"]`
 
 Optional:
 
@@ -157,7 +157,7 @@ Required:
 - `dns_choice` (Attributes) DNS Server Address Select how DNS server address is determined. This DNS server address will be sent in the DHCP response to the DHCP client. (see [below for nested schema](#nestedatt--dhcp_server_params--dhcp_networks--dns_choice))
 - `gateway_choice` (Attributes) Default Gateway Address Select how the default gateway address is determined. This default gateway address will be sent in the DHCP response to the DHCP client. (see [below for nested schema](#nestedatt--dhcp_server_params--dhcp_networks--gateway_choice))
 - `network_prefix_choice` (Attributes) Network Prefix choice Select DHCP network prefix for the site (see [below for nested schema](#nestedatt--dhcp_server_params--dhcp_networks--network_prefix_choice))
-- `pool_settings` (List of String) <br>**Allowed Values (choose one):** `["INCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS", "EXCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS"]`
+- `pool_settings` (List of String) <br>**Allowed Values (choose one):** `["EXCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS", "INCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS"]`
 
 Optional:
 

@@ -398,7 +398,7 @@ Required:
 
 Optional:
 
-- `max_version` (List of String) <br>**Allowed Values (choose one):** `["TLS_AUTO", "TLSv1_0", "TLSv1_1", "TLSv1_2", "TLSv1_3"]`
+- `max_version` (List of String) <br>**Allowed Values (choose one):** `["TLSv1_1", "TLSv1_2", "TLSv1_3", "TLS_AUTO", "TLSv1_0"]`
 - `min_version` (List of String) <br>**Allowed Values (choose one):** `["TLS_AUTO", "TLSv1_0", "TLSv1_1", "TLSv1_2", "TLSv1_3"]`
 
 <a id="nestedatt--receiver_choice--webhook--http_config--tls_choice--use_tls--server_validation_choice"></a>

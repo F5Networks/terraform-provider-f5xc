@@ -13,10 +13,10 @@ NetworkConnector resource
 
 ```terraform
 resource "f5xc_network_connector" "example" {
-  namespace            = "example_namespace"
   name                 = "example_network_connector"
-  connector_type       = ["ENUM_VALUE"]
+  namespace            = "example_namespace"
   outside_network_type = ["ENUM_VALUE"]
+  connector_type       = ["ENUM_VALUE"]
   inside_network_type  = ["ENUM_VALUE"]
 }
 ```
@@ -28,11 +28,11 @@ resource "f5xc_network_connector" "example" {
 
 ### Required
 
-- `connector_type` (List of String) <br>**Allowed Values (choose one):** `["NETWORK_CONNECTOR_TYPE_DYNAMIC_GATEWAY", "NETWORK_CONNECTOR_TYPE_DEFAULT_GATEWAY_SNAT", "NETWORK_CONNECTOR_TYPE_DYNAMIC_GATEWAY_SNAT"]`
-- `inside_network_type` (List of String) <br>**Allowed Values (choose one):** `["VIRTUAL_NETWORK_VER_INTERNAL", "VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE", "VIRTUAL_NETWORK_IP_AUTO", "VIRTUAL_NETWORK_VOLTADN_PRIVATE_NETWORK", "VIRTUAL_NETWORK_PUBLIC", "VIRTUAL_NETWORK_SITE_SERVICE", "VIRTUAL_NETWORK_SRV6_NETWORK", "VIRTUAL_NETWORK_IP_FABRIC", "VIRTUAL_NETWORK_SEGMENT", "VIRTUAL_NETWORK_MANAGEMENT", "VIRTUAL_NETWORK_SITE_LOCAL", "VIRTUAL_NETWORK_SITE_LOCAL_INSIDE", "VIRTUAL_NETWORK_PER_SITE", "VIRTUAL_NETWORK_GLOBAL"]`
+- `connector_type` (List of String) <br>**Allowed Values (choose one):** `["NETWORK_CONNECTOR_TYPE_DEFAULT_GATEWAY_SNAT", "NETWORK_CONNECTOR_TYPE_DYNAMIC_GATEWAY_SNAT", "NETWORK_CONNECTOR_TYPE_DYNAMIC_GATEWAY"]`
+- `inside_network_type` (List of String) <br>**Allowed Values (choose one):** `["VIRTUAL_NETWORK_PUBLIC", "VIRTUAL_NETWORK_GLOBAL", "VIRTUAL_NETWORK_VER_INTERNAL", "VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE", "VIRTUAL_NETWORK_SRV6_NETWORK", "VIRTUAL_NETWORK_IP_FABRIC", "VIRTUAL_NETWORK_SITE_LOCAL", "VIRTUAL_NETWORK_SITE_SERVICE", "VIRTUAL_NETWORK_IP_AUTO", "VIRTUAL_NETWORK_VOLTADN_PRIVATE_NETWORK", "VIRTUAL_NETWORK_SEGMENT", "VIRTUAL_NETWORK_MANAGEMENT", "VIRTUAL_NETWORK_SITE_LOCAL_INSIDE", "VIRTUAL_NETWORK_PER_SITE"]`
 - `name` (String) name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.
 - `namespace` (String) namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''
-- `outside_network_type` (List of String) <br>**Allowed Values (choose one):** `["VIRTUAL_NETWORK_IP_AUTO", "VIRTUAL_NETWORK_VOLTADN_PRIVATE_NETWORK", "VIRTUAL_NETWORK_PUBLIC", "VIRTUAL_NETWORK_SITE_SERVICE", "VIRTUAL_NETWORK_SRV6_NETWORK", "VIRTUAL_NETWORK_IP_FABRIC", "VIRTUAL_NETWORK_SEGMENT", "VIRTUAL_NETWORK_MANAGEMENT", "VIRTUAL_NETWORK_SITE_LOCAL", "VIRTUAL_NETWORK_SITE_LOCAL_INSIDE", "VIRTUAL_NETWORK_PER_SITE", "VIRTUAL_NETWORK_GLOBAL", "VIRTUAL_NETWORK_VER_INTERNAL", "VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE"]`
+- `outside_network_type` (List of String) <br>**Allowed Values (choose one):** `["VIRTUAL_NETWORK_SITE_SERVICE", "VIRTUAL_NETWORK_IP_AUTO", "VIRTUAL_NETWORK_VOLTADN_PRIVATE_NETWORK", "VIRTUAL_NETWORK_SEGMENT", "VIRTUAL_NETWORK_MANAGEMENT", "VIRTUAL_NETWORK_SITE_LOCAL_INSIDE", "VIRTUAL_NETWORK_PER_SITE", "VIRTUAL_NETWORK_PUBLIC", "VIRTUAL_NETWORK_GLOBAL", "VIRTUAL_NETWORK_VER_INTERNAL", "VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE", "VIRTUAL_NETWORK_SRV6_NETWORK", "VIRTUAL_NETWORK_IP_FABRIC", "VIRTUAL_NETWORK_SITE_LOCAL"]`
 
 ### Optional
 
@@ -42,7 +42,7 @@ resource "f5xc_network_connector" "example" {
 - `inside_network` (Attributes List) Inside VN Reference to inside network. Reference is valid only when the network type is per site virtual network or global virtual network. It is ignored for all other network types. public virtual network is not allowed as inside network (see [below for nested schema](#nestedatt--inside_network))
 - `labels` (Map of String) labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression
 - `outside_network` (Attributes List) Outside VN Reference to outside network. Reference is valid only when the network type is per site virtual network or global virtual network. It is ignored for all other network types (see [below for nested schema](#nestedatt--outside_network))
-- `proxy_type` (List of String) <br>**Allowed Values (choose one):** `["NETWORK_CONNECTOR_NO_PROXY", "NETWORK_CONNECTOR_DYNAMIC_REVERSE_PROXY", "NETWORK_CONNECTOR_FORWARD_PROXY"]`
+- `proxy_type` (List of String) <br>**Allowed Values (choose one):** `["NETWORK_CONNECTOR_FORWARD_PROXY", "NETWORK_CONNECTOR_NO_PROXY", "NETWORK_CONNECTOR_DYNAMIC_REVERSE_PROXY"]`
 - `snat_pool_type` (List of String) <br>**Allowed Values (choose one):** `["NETWORK_CONNECTOR_SNAT_SIP_USE_INTERFACE", "NETWORK_CONNECTOR_SNAT_SIP_USE_POOL"]`
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 

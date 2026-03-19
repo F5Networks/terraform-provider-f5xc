@@ -36,7 +36,7 @@ resource "f5xc_dns_domain" "example" {
 
 - `annotations` (Map of String) annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.
 - `description` (String) description Human readable description for the object
-- `dnssec_mode` (List of String) <br>**Allowed Values (choose one):** `["DNSSEC_DISABLE", "DNSSEC_ENABLE"]`
+- `dnssec_mode` (List of String) <br>**Allowed Values (choose one):** `["DNSSEC_ENABLE", "DNSSEC_DISABLE"]`
 - `labels` (Map of String) labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 - `txt_record` (String) TXT Record Value of the TXT record, that is programed in your DNS provided TXT record for this sub domain.

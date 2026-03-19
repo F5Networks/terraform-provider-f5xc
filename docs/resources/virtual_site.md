@@ -13,8 +13,8 @@ VirtualSite resource
 
 ```terraform
 resource "f5xc_virtual_site" "example" {
-  namespace = "example_namespace"
   name      = "example_virtual_site"
+  namespace = "example_namespace"
   site_selector = {
     expressions = ["example_virtual_site"]
   }
@@ -32,7 +32,7 @@ resource "f5xc_virtual_site" "example" {
 - `name` (String) name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.
 - `namespace` (String) namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''
 - `site_selector` (Attributes) site_selector Label selector for virtual-site (see [below for nested schema](#nestedatt--site_selector))
-- `site_type` (List of String) <br>**Allowed Values (choose one):** `["NGINX_ONE", "INVALID", "REGIONAL_EDGE", "CUSTOMER_EDGE"]`
+- `site_type` (List of String) <br>**Allowed Values (choose one):** `["INVALID", "REGIONAL_EDGE", "CUSTOMER_EDGE", "NGINX_ONE"]`
 
 ### Optional
 

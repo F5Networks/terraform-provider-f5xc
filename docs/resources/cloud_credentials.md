@@ -15,9 +15,9 @@ CloudCredentials resource
 resource "f5xc_cloud_credentials" "example" {
   name      = "example_cloud_credentials"
   namespace = "example_namespace"
-  cloud_choice = {
-    aws_assume_role = {
-      aws_assume_role = "example_aws_assume_role"
+  cloud = {
+    gcp_cred_file = {
+      gcp_cred_file = "example_gcp_cred_file"
     }
   }
 }
@@ -111,7 +111,7 @@ Optional:
 
 Required:
 
-- `url` (String) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
+- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
 
 Optional:
 
@@ -164,7 +164,7 @@ Optional:
 
 Required:
 
-- `url` (String) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
+- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
 
 Optional:
 
@@ -218,7 +218,7 @@ Optional:
 
 Required:
 
-- `url` (String) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
+- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
 
 Optional:
 
@@ -268,7 +268,7 @@ Optional:
 
 Required:
 
-- `url` (String) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
+- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
 
 Optional:
 

@@ -5,13 +5,14 @@ package access_log
 
 import (
 	fmt "fmt"
+	math "math"
+	strconv "strconv"
+
 	_ "github.com/gogo/protobuf/gogoproto"
 	proto "github.com/gogo/protobuf/proto"
 	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/log"
 	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/log/access_log"
-	math "math"
-	strconv "strconv"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.

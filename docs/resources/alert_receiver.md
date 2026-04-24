@@ -15,7 +15,7 @@ AlertReceiver resource
 resource "f5xc_alert_receiver" "example" {
   name      = "example_alert_receiver"
   namespace = "example_namespace"
-  receiver_choice = {
+  receiver = {
     opsgenie = {
       opsgenie = "example_opsgenie"
     }
@@ -106,7 +106,7 @@ Optional:
 
 Required:
 
-- `url` (String) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
+- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
 
 Optional:
 
@@ -157,7 +157,7 @@ Optional:
 
 Required:
 
-- `url` (String) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
+- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
 
 Optional:
 
@@ -208,7 +208,7 @@ Optional:
 
 Required:
 
-- `url` (String) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
+- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
 
 Optional:
 
@@ -297,7 +297,7 @@ Optional:
 
 Required:
 
-- `url` (String) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
+- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
 
 Optional:
 
@@ -348,7 +348,7 @@ Optional:
 
 Required:
 
-- `url` (String) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
+- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
 
 Optional:
 
@@ -484,7 +484,7 @@ Optional:
 
 Required:
 
-- `url` (String) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
+- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
 
 Optional:
 

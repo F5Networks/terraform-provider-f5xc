@@ -15,14 +15,12 @@ SecuremeshSiteV2 resource
 resource "f5xc_securemesh_site_v2" "example" {
   name      = "example_securemesh_site_v2"
   namespace = "example_namespace"
-  provider_choice = {
-    openstack = {
-      openstack = "example_openstack"
-    }
-  }
   logs_receiver_choice = {
-    log_receiver_with_net = {
-      log_receiver_with_net = "example_log_receiver_with_net"
+    logs_streaming_disabled = true
+  }
+  provider_choice = {
+    aws = {
+      aws = "example_aws"
     }
   }
   blocked_services_choice = {
@@ -46,37 +44,37 @@ resource "f5xc_securemesh_site_v2" "example" {
 
 ### Optional
 
+- `admin_user_credentials` (Attributes) Admin User Credentials Setup user credentials to manage access to nodes belonging to the site. When configured, 'admin' user will be setup and customers can access these nodes via either the node local WebUI or via SSH to access shell/CLI (see [below for nested schema](#nestedatt--admin_user_credentials))
 - `annotations` (Map of String) annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.
 - `description` (String) description Human readable description for the object
+- `dns_ntp_config` (Attributes) DNS & NTP Servers Specify DNS and NTP servers that will be used by the nodes in this Customer Edge site. (see [below for nested schema](#nestedatt--dns_ntp_config))
 - `enterprise_proxy_choice` (Attributes) Enterprise Proxy Choose how the nodes in this Customer Edge site will communicate with F5 Distributed Cloud SaaS services. By default, all nodes will use the F5 Enterprise Proxy which is hosted on the F5 Global Network. This proxy will be used for node registration and upgrades. This proxy will not be used for the Regional Edge (RE) tunnels from this Customer Edge site. Customers can optionally choose to use an internal Enterprise Proxy. If customers choose to use the internal Enterprise Proxy, in addition to node registrations and upgrades, the Regional Edge (RE) tunnels can also be configured to use this internal Enterprise Proxy. Additionally, customers can configure their internal Enterprise Proxy to target the F5 Enterprise Proxy to handle domain resolution and network traffic for CE registrations and upgrades. Please refer to documentation for more details. (see [below for nested schema](#nestedatt--enterprise_proxy_choice))
 - `forward_proxy_choice` (Attributes) Manage Forward Proxy Attach Forward Proxy Policies to this site. (see [below for nested schema](#nestedatt--forward_proxy_choice))
 - `labels` (Map of String) labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression
+- `load_balancing` (Attributes) Load Balancing Settings This section contains settings on the site that relate to Load Balancing functionality. (see [below for nested schema](#nestedatt--load_balancing))
+- `local_vrf` (Attributes) Local VRF Settings There can be two local VRFs on each site. The Site Local Outside (SLO) local VRF is used to connect WAN side workloads to this site and to connect the site to F5 Distributed Cloud for management. All sites are required to have an SLO local VRF. The Site Local Inside (SLI) local VRF is used to connect LAN side workloads to this site. SLI local VRF is optional. (see [below for nested schema](#nestedatt--local_vrf))
 - `management_network_choice` (Attributes) Management Network Option to enable or disable the Management Network for this site. (see [below for nested schema](#nestedatt--management_network_choice))
 - `network_policy_choice` (Attributes) Network Firewall Attach Enhanced Network Firewall Policies to this site. (see [below for nested schema](#nestedatt--network_policy_choice))
 - `node_ha_choice` (Attributes) High Availability Select High Availability mode for this site. When disabled, the site will not have local HA and will only run with 1 control node. The first node added to the site will register as a control node. The site will come up as soon as the first node registers. Any additional nodes that are added will come up as worker nodes. When enabled, the site will have local HA with 3 control nodes. The first 3 nodes added to the site will register as control nodes. The site will come up after 3 nodes have registered. Any additional nodes that are added will come up as worker nodes. This setting cannot be changed after the site is created. (see [below for nested schema](#nestedatt--node_ha_choice))
+- `offline_survivability_mode` (Attributes) Offline Survivability Mode Offline Survivability allows the Site to continue functioning normally without traffic loss during periods of connectivity loss to the Regional Edge (RE) or the Global Controller (GC). When this feature is enabled, a site can continue to function as is with existing configuration for upto 7 days, even when the site is offline. The certificates needed to keep the services running on this site are signed using a local CA. Secrets would also be cached locally to handle any connectivity loss. When the mode is toggled, services will restart and traffic disruption will be seen. (see [below for nested schema](#nestedatt--offline_survivability_mode))
 - `operating_system_version` (String) <br>**Validation:** `Length LengthAtMost(256)`
+- `performance_enhancement_mode` (Attributes) Performance Enhancement Choice Optimize the site for L3 or L7 traffic processing. By default, the site is optimized for L7 traffic processing. (see [below for nested schema](#nestedatt--performance_enhancement_mode))
 - `proxy_bypass_choice` (Attributes) Proxy Bypass Proxy Bypass can be used for any domains that need to bypass the forward proxy. By default, all domains will go through the F5 Enterprise Proxy or the Custom Enterprise Proxy if configured. Note: The F5 Enterprise Proxy is configured to only allow domains required for Customer Edge bootstrap and upgrades. This setting is especially useful for use-cases such as virtual kubernetes (vk8s) to pull images from custom container registries. (see [below for nested schema](#nestedatt--proxy_bypass_choice))
+- `re_select` (Attributes) Regional Edge Selection Selection criteria to connect the site with F5 Distributed Cloud Regional Edge(s). (see [below for nested schema](#nestedatt--re_select))
 - `s_2s_connectivity_sli_choice` (Attributes) Connect using SLI Local VRF Use this site's Site Local Inside (SLI) Local VRF to connect to other sites. (see [below for nested schema](#nestedatt--s_2s_connectivity_sli_choice))
 - `s_2s_connectivity_slo_choice` (Attributes) SLO Connectivity Use this site's Site Local Outside (SLO) Local VRF to connect to other sites. (see [below for nested schema](#nestedatt--s_2s_connectivity_slo_choice))
 - `segment_vrf` (Attributes List) Segment VRF Settings The Segment VRF is valid across all Sites of a Tenant. These are identified with a Segment name. Though these VRFs are across all Sites of a Tenant, there are some configurations that are valid per Site that can be configured here (see [below for nested schema](#nestedatt--segment_vrf))
+- `software_settings` (Attributes) F5XC Software Settings Select OS and Software version for the site. All nodes in the site will run the same OS and Software version. These settings cannot be changed after the site is created. (see [below for nested schema](#nestedatt--software_settings))
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 - `tunnel_dead_timeout` (Number) tunnel_dead_timeout Time interval, in millisec, within which any ipsec / ssl connection from the site going down is detected. When not set (== 0), a default value of 10000 msec will be used.
-- `tunnel_type` (List of String) <br>**Allowed Values (choose one):** `["SITE_TO_SITE_TUNNEL_IPSEC_OR_SSL", "SITE_TO_SITE_TUNNEL_IPSEC", "SITE_TO_SITE_TUNNEL_SSL"]`<br>**Default:** `SITE_TO_SITE_TUNNEL_IPSEC_OR_SSL`
+- `tunnel_type` (List of String) <br>**Allowed Values (choose one):** `["SITE_TO_SITE_TUNNEL_IPSEC", "SITE_TO_SITE_TUNNEL_SSL", "SITE_TO_SITE_TUNNEL_IPSEC_OR_SSL"]`<br>**Default:** `SITE_TO_SITE_TUNNEL_IPSEC_OR_SSL`
+- `upgrade_settings` (Attributes) Upgrade Settings Specify how a site will be upgraded. (see [below for nested schema](#nestedatt--upgrade_settings))
 - `url_categorization_choice` (Attributes) URL Categorization Enable or disable URL categorization for this site. (see [below for nested schema](#nestedatt--url_categorization_choice))
 - `volterra_software_version` (String) <br>**Validation:** `Length LengthAtMost(256)`
 
 ### Read-Only
 
-- `admin_user_credentials` (Attributes) Admin User Credentials Setup user credentials to manage access to nodes belonging to the site. When configured, 'admin' user will be setup and customers can access these nodes via either the node local WebUI or via SSH to access shell/CLI (see [below for nested schema](#nestedatt--admin_user_credentials))
-- `dns_ntp_config` (Attributes) DNS & NTP Servers Specify DNS and NTP servers that will be used by the nodes in this Customer Edge site. (see [below for nested schema](#nestedatt--dns_ntp_config))
-- `load_balancing` (Attributes) Load Balancing Settings This section contains settings on the site that relate to Load Balancing functionality. (see [below for nested schema](#nestedatt--load_balancing))
-- `local_vrf` (Attributes) Local VRF Settings There can be two local VRFs on each site. The Site Local Outside (SLO) local VRF is used to connect WAN side workloads to this site and to connect the site to F5 Distributed Cloud for management. All sites are required to have an SLO local VRF. The Site Local Inside (SLI) local VRF is used to connect LAN side workloads to this site. SLI local VRF is optional. (see [below for nested schema](#nestedatt--local_vrf))
-- `offline_survivability_mode` (Attributes) Offline Survivability Mode Offline Survivability allows the Site to continue functioning normally without traffic loss during periods of connectivity loss to the Regional Edge (RE) or the Global Controller (GC). When this feature is enabled, a site can continue to function as is with existing configuration for upto 7 days, even when the site is offline. The certificates needed to keep the services running on this site are signed using a local CA. Secrets would also be cached locally to handle any connectivity loss. When the mode is toggled, services will restart and traffic disruption will be seen. (see [below for nested schema](#nestedatt--offline_survivability_mode))
-- `performance_enhancement_mode` (Attributes) Performance Enhancement Choice Optimize the site for L3 or L7 traffic processing. By default, the site is optimized for L7 traffic processing. (see [below for nested schema](#nestedatt--performance_enhancement_mode))
-- `re_select` (Attributes) Regional Edge Selection Selection criteria to connect the site with F5 Distributed Cloud Regional Edge(s). (see [below for nested schema](#nestedatt--re_select))
-- `software_settings` (Attributes) F5XC Software Settings Select OS and Software version for the site. All nodes in the site will run the same OS and Software version. These settings cannot be changed after the site is created. (see [below for nested schema](#nestedatt--software_settings))
 - `uid` (String) uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.
-- `upgrade_settings` (Attributes) Upgrade Settings Specify how a site will be upgraded. (see [below for nested schema](#nestedatt--upgrade_settings))
 
 <a id="nestedatt--blocked_services_choice"></a>
 ### Nested Schema for `blocked_services_choice`
@@ -99,7 +97,7 @@ Optional:
 Optional:
 
 - `blocked_services_value_type_choice` (Attributes) blocked_services_type_choice Choose the Nodel Local Service to disable (see [below for nested schema](#nestedatt--blocked_services_choice--blocked_services--blocked_sevice--blocked_services_value_type_choice))
-- `network_type` (List of String) <br>**Allowed Values (choose one):** `["VIRTUAL_NETWORK_MANAGEMENT", "VIRTUAL_NETWORK_SITE_LOCAL_INSIDE", "VIRTUAL_NETWORK_PER_SITE", "VIRTUAL_NETWORK_PUBLIC", "VIRTUAL_NETWORK_GLOBAL", "VIRTUAL_NETWORK_VER_INTERNAL", "VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE", "VIRTUAL_NETWORK_SRV6_NETWORK", "VIRTUAL_NETWORK_IP_FABRIC", "VIRTUAL_NETWORK_SITE_LOCAL", "VIRTUAL_NETWORK_SITE_SERVICE", "VIRTUAL_NETWORK_IP_AUTO", "VIRTUAL_NETWORK_VOLTADN_PRIVATE_NETWORK", "VIRTUAL_NETWORK_SEGMENT"]`
+- `network_type` (List of String) <br>**Allowed Values (choose one):** `["VIRTUAL_NETWORK_SITE_LOCAL_INSIDE", "VIRTUAL_NETWORK_PER_SITE", "VIRTUAL_NETWORK_SITE_SERVICE", "VIRTUAL_NETWORK_VER_INTERNAL", "VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE", "VIRTUAL_NETWORK_IP_AUTO", "VIRTUAL_NETWORK_VOLTADN_PRIVATE_NETWORK", "VIRTUAL_NETWORK_MANAGEMENT", "VIRTUAL_NETWORK_SITE_LOCAL", "VIRTUAL_NETWORK_PUBLIC", "VIRTUAL_NETWORK_GLOBAL", "VIRTUAL_NETWORK_SRV6_NETWORK", "VIRTUAL_NETWORK_IP_FABRIC", "VIRTUAL_NETWORK_SEGMENT"]`
 
 <a id="nestedatt--blocked_services_choice--blocked_services--blocked_sevice--blocked_services_value_type_choice"></a>
 ### Nested Schema for `blocked_services_choice.blocked_services.blocked_sevice.blocked_services_value_type_choice`
@@ -1979,7 +1977,7 @@ Optional:
 Required:
 
 - `network_prefix_choice` (Attributes) Network Prefix choice Select DHCP network prefix for a site (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks--network_prefix_choice))
-- `pool_settings` (List of String) <br>**Allowed Values (choose one):** `["EXCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS", "INCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS"]`
+- `pool_settings` (List of String) <br>**Allowed Values (choose one):** `["INCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS", "EXCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS"]`
 
 Optional:
 
@@ -4901,6 +4899,100 @@ Optional:
 
 
 
+<a id="nestedatt--admin_user_credentials"></a>
+### Nested Schema for `admin_user_credentials`
+
+Optional:
+
+- `admin_password` (Attributes) Admin Password Provided password can be used for accessing nodes of the site. When provided, customers can either ssh to the nodes of this Customer Edge site or use the node local WebUI by using admin as the user. (see [below for nested schema](#nestedatt--admin_user_credentials--admin_password))
+- `ssh_key` (String) <br>**Validation:** `Length LengthAtMost(8192)`
+
+<a id="nestedatt--admin_user_credentials--admin_password"></a>
+### Nested Schema for `admin_user_credentials.admin_password`
+
+Required:
+
+- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted (see [below for nested schema](#nestedatt--admin_user_credentials--admin_password--secret_info_choice))
+
+<a id="nestedatt--admin_user_credentials--admin_password--secret_info_choice"></a>
+### Nested Schema for `admin_user_credentials.admin_password.secret_info_choice`
+
+Optional:
+
+- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--admin_user_credentials--admin_password--secret_info_choice--blindfold_secret_info))
+- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--admin_user_credentials--admin_password--secret_info_choice--clear_secret_info))
+
+<a id="nestedatt--admin_user_credentials--admin_password--secret_info_choice--blindfold_secret_info"></a>
+### Nested Schema for `admin_user_credentials.admin_password.secret_info_choice.blindfold_secret_info`
+
+Required:
+
+- `location` (String) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
+
+Optional:
+
+- `decryption_provider` (String) Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.
+- `store_provider` (String) Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
+
+
+<a id="nestedatt--admin_user_credentials--admin_password--secret_info_choice--clear_secret_info"></a>
+### Nested Schema for `admin_user_credentials.admin_password.secret_info_choice.clear_secret_info`
+
+Required:
+
+- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
+
+Optional:
+
+- `provider` (String) Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
+
+
+
+
+
+<a id="nestedatt--dns_ntp_config"></a>
+### Nested Schema for `dns_ntp_config`
+
+Optional:
+
+- `dns_server_choice` (Attributes) DNS Servers Specify DNS Servers that will be used for resolving domains required for registration and upgrades. By default, 8.8.8.8 and 8.8.4.4 DNS nameservers will be used. (see [below for nested schema](#nestedatt--dns_ntp_config--dns_server_choice))
+- `ntp_server_choice` (Attributes) NTP Servers Specify NTP Servers that will be by the nodes of this Customer Edge site. By default, time.google.com is used during registration and once tunnels to REs are formed, NTP service hosted by F5 Distributed Cloud will be used. When custom is selected, NTP service hosted by F5 Distributed Cloud will not be used. (see [below for nested schema](#nestedatt--dns_ntp_config--ntp_server_choice))
+
+<a id="nestedatt--dns_ntp_config--dns_server_choice"></a>
+### Nested Schema for `dns_ntp_config.dns_server_choice`
+
+Optional:
+
+- `custom_dns` (Attributes) Custom User specified DNS Servers (see [below for nested schema](#nestedatt--dns_ntp_config--dns_server_choice--custom_dns))
+- `f5_dns_default` (Boolean) Default F5 defaults will use 8.8.8.8, 8.8.4.4
+
+<a id="nestedatt--dns_ntp_config--dns_server_choice--custom_dns"></a>
+### Nested Schema for `dns_ntp_config.dns_server_choice.custom_dns`
+
+Optional:
+
+- `dns_servers` (List of String) DNS Servers DNS Servers
+
+
+
+<a id="nestedatt--dns_ntp_config--ntp_server_choice"></a>
+### Nested Schema for `dns_ntp_config.ntp_server_choice`
+
+Optional:
+
+- `custom_ntp` (Attributes) Custom User specified NTP Servers (see [below for nested schema](#nestedatt--dns_ntp_config--ntp_server_choice--custom_ntp))
+- `f5_ntp_default` (Boolean) Default F5 default will use time.google.com during registration
+
+<a id="nestedatt--dns_ntp_config--ntp_server_choice--custom_ntp"></a>
+### Nested Schema for `dns_ntp_config.ntp_server_choice.custom_ntp`
+
+Optional:
+
+- `ntp_servers` (List of String) NTP Servers NTP Servers
+
+
+
+
 <a id="nestedatt--enterprise_proxy_choice"></a>
 ### Nested Schema for `enterprise_proxy_choice`
 
@@ -4956,7 +5048,7 @@ Optional:
 
 Required:
 
-- `url` (String) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
+- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
 
 Optional:
 
@@ -5002,422 +5094,6 @@ Required:
 Read-Only:
 
 - `tenant` (String)
-
-
-
-
-<a id="nestedatt--management_network_choice"></a>
-### Nested Schema for `management_network_choice`
-
-Optional:
-
-- `disable_management_network` (Boolean) Disable Management Network Management Network is disabled for this site.
-- `enable_management_network` (Boolean) Enable Management Network Management Network is enabled for this site.
-
-
-<a id="nestedatt--network_policy_choice"></a>
-### Nested Schema for `network_policy_choice`
-
-Optional:
-
-- `active_enhanced_firewall_policies` (Attributes) Manage Enhanced Firewall Policy Enable Network Firewall for this site. Traffic will be processed in the order that Network Firewall Policies are added. (see [below for nested schema](#nestedatt--network_policy_choice--active_enhanced_firewall_policies))
-- `no_network_policy` (Boolean) Do Not Manage Firewall Policy Disable Network Firewall for this site.
-
-<a id="nestedatt--network_policy_choice--active_enhanced_firewall_policies"></a>
-### Nested Schema for `network_policy_choice.active_enhanced_firewall_policies`
-
-Required:
-
-- `enhanced_firewall_policies` (Attributes List) Enhanced Firewall Policy Ordered List of Enhanced Firewall Policies active (see [below for nested schema](#nestedatt--network_policy_choice--active_enhanced_firewall_policies--enhanced_firewall_policies))
-
-<a id="nestedatt--network_policy_choice--active_enhanced_firewall_policies--enhanced_firewall_policies"></a>
-### Nested Schema for `network_policy_choice.active_enhanced_firewall_policies.enhanced_firewall_policies`
-
-Required:
-
-- `name` (String)
-- `namespace` (String)
-
-Read-Only:
-
-- `tenant` (String)
-
-
-
-
-<a id="nestedatt--node_ha_choice"></a>
-### Nested Schema for `node_ha_choice`
-
-Optional:
-
-- `disable_ha` (Boolean) Disable
-- `enable_ha` (Boolean) Enable
-
-
-<a id="nestedatt--proxy_bypass_choice"></a>
-### Nested Schema for `proxy_bypass_choice`
-
-Optional:
-
-- `custom_proxy_bypass` (Attributes) Custom User specified domains will bypass the proxy (see [below for nested schema](#nestedatt--proxy_bypass_choice--custom_proxy_bypass))
-- `no_proxy_bypass` (Boolean) Default No domains will bypass the proxy
-
-<a id="nestedatt--proxy_bypass_choice--custom_proxy_bypass"></a>
-### Nested Schema for `proxy_bypass_choice.custom_proxy_bypass`
-
-Optional:
-
-- `proxy_bypass` (List of String) Proxy Bypass List of domains to bypass the proxy
-
-
-
-<a id="nestedatt--s_2s_connectivity_sli_choice"></a>
-### Nested Schema for `s_2s_connectivity_sli_choice`
-
-Optional:
-
-- `dc_cluster_group_sli` (Attributes) Member of DC cluster Group Use a DC Cluster Group to connect to other sites. (see [below for nested schema](#nestedatt--s_2s_connectivity_sli_choice--dc_cluster_group_sli))
-- `no_s_2s_connectivity_sli` (Boolean) Not Connected on SLI
-
-<a id="nestedatt--s_2s_connectivity_sli_choice--dc_cluster_group_sli"></a>
-### Nested Schema for `s_2s_connectivity_sli_choice.dc_cluster_group_sli`
-
-Required:
-
-- `name` (String)
-- `namespace` (String)
-
-Read-Only:
-
-- `tenant` (String)
-
-
-
-<a id="nestedatt--s_2s_connectivity_slo_choice"></a>
-### Nested Schema for `s_2s_connectivity_slo_choice`
-
-Optional:
-
-- `dc_cluster_group_slo` (Attributes) Member of DC cluster Group Use a DC Cluster Group to connect to other sites. (see [below for nested schema](#nestedatt--s_2s_connectivity_slo_choice--dc_cluster_group_slo))
-- `no_s_2s_connectivity_slo` (Boolean) Not Connected on SLO
-- `site_mesh_group_on_slo` (Attributes) Site Mesh Group Use a Site Mesh Group to connect to other sites. (see [below for nested schema](#nestedatt--s_2s_connectivity_slo_choice--site_mesh_group_on_slo))
-
-<a id="nestedatt--s_2s_connectivity_slo_choice--dc_cluster_group_slo"></a>
-### Nested Schema for `s_2s_connectivity_slo_choice.dc_cluster_group_slo`
-
-Required:
-
-- `name` (String)
-- `namespace` (String)
-
-Read-Only:
-
-- `tenant` (String)
-
-
-<a id="nestedatt--s_2s_connectivity_slo_choice--site_mesh_group_on_slo"></a>
-### Nested Schema for `s_2s_connectivity_slo_choice.site_mesh_group_on_slo`
-
-Required:
-
-- `site_mesh_group_ip_choice` (Attributes) Site Mesh Group Connection Type Select how the site mesh group will be connected. By default, public IPs of the control nodes of the site will be used. (see [below for nested schema](#nestedatt--s_2s_connectivity_slo_choice--site_mesh_group_on_slo--site_mesh_group_ip_choice))
-
-<a id="nestedatt--s_2s_connectivity_slo_choice--site_mesh_group_on_slo--site_mesh_group_ip_choice"></a>
-### Nested Schema for `s_2s_connectivity_slo_choice.site_mesh_group_on_slo.site_mesh_group_ip_choice`
-
-Optional:
-
-- `sm_connection_public_ip` (Boolean) Site Mesh Group Connection Via Public Ip This option will use the public IPs of the control nodes of this site to create IPsec tunnels to other sites which are part of the site mesh group.
-- `sm_connection_pvt_ip` (Boolean) Site Mesh Group Connection Via Private Ip This option will use the private IPs of the control nodes of this site to create IPsec tunnels to other sites which are part of the site mesh group. These private IPs will be the IPs on the interfaces that belong to the Site Local Outside (SLO) Local VRF on the control nodes. If multiple interfaces on a control node belong to the Site Local Outside (SLO) Local VRF, the interface which has 'Use for Site to Site Connectivity' set will be used.
-
-
-
-
-<a id="nestedatt--segment_vrf"></a>
-### Nested Schema for `segment_vrf`
-
-Optional:
-
-- `segment_config` (Attributes) Configure Segment Network Configure properties such as static routes, DNS and common VIP for Load Balancing on the segment VRF. (see [below for nested schema](#nestedatt--segment_vrf--segment_config))
-- `segment_network` (Attributes) Segment (see [below for nested schema](#nestedatt--segment_vrf--segment_network))
-
-<a id="nestedatt--segment_vrf--segment_config"></a>
-### Nested Schema for `segment_vrf.segment_config`
-
-Required:
-
-- `static_route_choice` (Attributes) Manage Static Routes Add static routes to network. Used to reach indirectly connected subnets. (see [below for nested schema](#nestedatt--segment_vrf--segment_config--static_route_choice))
-- `static_v6_route_choice` (Attributes) Manage IPv6 Static Routes Add IPv6 static routes to network. Used to reach indirectly connected IPv6 subnets. (see [below for nested schema](#nestedatt--segment_vrf--segment_config--static_v6_route_choice))
-
-Optional:
-
-- `nameserver` (String) nameserver Optional IPv4 DNS server to be used for name resolution
-- `secondary_nameserver` (String) secondary_nameserver Optional Secondary IPv4 DNS server to be used for name resolution
-
-<a id="nestedatt--segment_vrf--segment_config--static_route_choice"></a>
-### Nested Schema for `segment_vrf.segment_config.static_route_choice`
-
-Optional:
-
-- `no_static_routes` (Boolean) Do Not Manage Static Routes Static IPv4 Routes disabled for this Segment Network (VRF).
-- `static_routes` (Attributes) Manage Static routes Manage IPv4 static routes for this Segment Network (VRF). (see [below for nested schema](#nestedatt--segment_vrf--segment_config--static_route_choice--static_routes))
-
-<a id="nestedatt--segment_vrf--segment_config--static_route_choice--static_routes"></a>
-### Nested Schema for `segment_vrf.segment_config.static_route_choice.static_routes`
-
-Required:
-
-- `static_routes` (Attributes List) static_routes (see [below for nested schema](#nestedatt--segment_vrf--segment_config--static_route_choice--static_routes--static_routes))
-
-<a id="nestedatt--segment_vrf--segment_config--static_route_choice--static_routes--static_routes"></a>
-### Nested Schema for `segment_vrf.segment_config.static_route_choice.static_routes.static_routes`
-
-Required:
-
-- `ip_prefixes` (List of String) IP Prefixes List of route prefixes that have common next hop and attributes
-- `next_hop_choice` (Attributes) Next Hop Choice Select type of next hop. Traffic matching the IP prefixes can be sent to a specific IP address, a default gateway or an interface. (see [below for nested schema](#nestedatt--segment_vrf--segment_config--static_route_choice--static_routes--static_routes--next_hop_choice))
-
-Optional:
-
-- `attrs` (List of String) <br>**Valid Options:** `["ROUTE_ATTR_INSTALL_FORWARDING", "ROUTE_ATTR_MERGE_ONLY", "ROUTE_ATTR_NO_OP", "ROUTE_ATTR_ADVERTISE", "ROUTE_ATTR_INSTALL_HOST"]` (Multiple selection allowed)
-
-<a id="nestedatt--segment_vrf--segment_config--static_route_choice--static_routes--static_routes--next_hop_choice"></a>
-### Nested Schema for `segment_vrf.segment_config.static_route_choice.static_routes.static_routes.next_hop_choice`
-
-Optional:
-
-- `default_gateway` (Boolean) Default Gateway Traffic matching the ip prefixes is sent to the default gateway
-- `ip_address` (String) IP Address Traffic matching the ip prefixes is sent to this IP Address
-- `node_interface` (Attributes) Node Interface Traffic matching the ip prefixes is sent to this interface (see [below for nested schema](#nestedatt--segment_vrf--segment_config--static_route_choice--static_routes--static_routes--next_hop_choice--node_interface))
-
-<a id="nestedatt--segment_vrf--segment_config--static_route_choice--static_routes--static_routes--next_hop_choice--node_interface"></a>
-### Nested Schema for `segment_vrf.segment_config.static_route_choice.static_routes.static_routes.next_hop_choice.node_interface`
-
-Optional:
-
-- `list` (Attributes List) NodeInterfaceInfo On a multinode site, this list holds the nodes and corresponding networking_interface (see [below for nested schema](#nestedatt--segment_vrf--segment_config--static_route_choice--static_routes--static_routes--next_hop_choice--node_interface--list))
-
-<a id="nestedatt--segment_vrf--segment_config--static_route_choice--static_routes--static_routes--next_hop_choice--node_interface--list"></a>
-### Nested Schema for `segment_vrf.segment_config.static_route_choice.static_routes.static_routes.next_hop_choice.node_interface.list`
-
-Optional:
-
-- `interface` (Attributes List) Interface Interface reference on this node (see [below for nested schema](#nestedatt--segment_vrf--segment_config--static_route_choice--static_routes--static_routes--next_hop_choice--node_interface--list--interface))
-- `node` (String) Node Node name on this site
-
-<a id="nestedatt--segment_vrf--segment_config--static_route_choice--static_routes--static_routes--next_hop_choice--node_interface--list--interface"></a>
-### Nested Schema for `segment_vrf.segment_config.static_route_choice.static_routes.static_routes.next_hop_choice.node_interface.list.interface`
-
-Required:
-
-- `name` (String)
-- `namespace` (String)
-
-Read-Only:
-
-- `tenant` (String)
-
-
-
-
-
-
-
-
-<a id="nestedatt--segment_vrf--segment_config--static_v6_route_choice"></a>
-### Nested Schema for `segment_vrf.segment_config.static_v6_route_choice`
-
-Optional:
-
-- `no_v6_static_routes` (Boolean) Do Not Manage IPv6 Static Routes Static IPv6 Routes disabled for this segment Network (VRF).
-- `static_v6_routes` (Attributes) Manage IPv6 Static routes Manage IPv6 static routes for this Segment Nework(VRF). (see [below for nested schema](#nestedatt--segment_vrf--segment_config--static_v6_route_choice--static_v6_routes))
-
-<a id="nestedatt--segment_vrf--segment_config--static_v6_route_choice--static_v6_routes"></a>
-### Nested Schema for `segment_vrf.segment_config.static_v6_route_choice.static_v6_routes`
-
-Required:
-
-- `static_routes` (Attributes List) static_routes List of IPv6 static routes (see [below for nested schema](#nestedatt--segment_vrf--segment_config--static_v6_route_choice--static_v6_routes--static_routes))
-
-<a id="nestedatt--segment_vrf--segment_config--static_v6_route_choice--static_v6_routes--static_routes"></a>
-### Nested Schema for `segment_vrf.segment_config.static_v6_route_choice.static_v6_routes.static_routes`
-
-Required:
-
-- `ip_prefixes` (List of String) IPv6 Prefixes List of IPv6 route prefixes that have common next hop and attributes
-- `next_hop_choice` (Attributes) Next Hop Choice Select type of next hop. Traffic matching the IP prefixes can be sent to a specific IP address, a default gateway or an interface. (see [below for nested schema](#nestedatt--segment_vrf--segment_config--static_v6_route_choice--static_v6_routes--static_routes--next_hop_choice))
-
-Optional:
-
-- `attrs` (List of String) <br>**Valid Options:** `["ROUTE_ATTR_NO_OP", "ROUTE_ATTR_ADVERTISE", "ROUTE_ATTR_INSTALL_HOST", "ROUTE_ATTR_INSTALL_FORWARDING", "ROUTE_ATTR_MERGE_ONLY"]` (Multiple selection allowed)
-
-<a id="nestedatt--segment_vrf--segment_config--static_v6_route_choice--static_v6_routes--static_routes--next_hop_choice"></a>
-### Nested Schema for `segment_vrf.segment_config.static_v6_route_choice.static_v6_routes.static_routes.next_hop_choice`
-
-Optional:
-
-- `default_gateway` (Boolean) Default Gateway Traffic matching the ip prefixes is sent to the default gateway
-- `ip_address` (String) IP Address Traffic matching the ip prefixes is sent to this IP Address
-- `node_interface` (Attributes) Node Interface Traffic matching the ip prefixes is sent to this interface (see [below for nested schema](#nestedatt--segment_vrf--segment_config--static_v6_route_choice--static_v6_routes--static_routes--next_hop_choice--node_interface))
-
-<a id="nestedatt--segment_vrf--segment_config--static_v6_route_choice--static_v6_routes--static_routes--next_hop_choice--node_interface"></a>
-### Nested Schema for `segment_vrf.segment_config.static_v6_route_choice.static_v6_routes.static_routes.next_hop_choice.node_interface`
-
-Optional:
-
-- `list` (Attributes List) NodeInterfaceInfo On a multinode site, this list holds the nodes and corresponding networking_interface (see [below for nested schema](#nestedatt--segment_vrf--segment_config--static_v6_route_choice--static_v6_routes--static_routes--next_hop_choice--node_interface--list))
-
-<a id="nestedatt--segment_vrf--segment_config--static_v6_route_choice--static_v6_routes--static_routes--next_hop_choice--node_interface--list"></a>
-### Nested Schema for `segment_vrf.segment_config.static_v6_route_choice.static_v6_routes.static_routes.next_hop_choice.node_interface.list`
-
-Optional:
-
-- `interface` (Attributes List) Interface Interface reference on this node (see [below for nested schema](#nestedatt--segment_vrf--segment_config--static_v6_route_choice--static_v6_routes--static_routes--next_hop_choice--node_interface--list--interface))
-- `node` (String) Node Node name on this site
-
-<a id="nestedatt--segment_vrf--segment_config--static_v6_route_choice--static_v6_routes--static_routes--next_hop_choice--node_interface--list--interface"></a>
-### Nested Schema for `segment_vrf.segment_config.static_v6_route_choice.static_v6_routes.static_routes.next_hop_choice.node_interface.list.interface`
-
-Required:
-
-- `name` (String)
-- `namespace` (String)
-
-Read-Only:
-
-- `tenant` (String)
-
-
-
-
-
-
-
-
-
-<a id="nestedatt--segment_vrf--segment_network"></a>
-### Nested Schema for `segment_vrf.segment_network`
-
-Required:
-
-- `name` (String)
-- `namespace` (String)
-
-Read-Only:
-
-- `tenant` (String)
-
-
-
-<a id="nestedatt--timeouts"></a>
-### Nested Schema for `timeouts`
-
-Optional:
-
-- `create` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
-- `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
-- `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
-
-
-<a id="nestedatt--url_categorization_choice"></a>
-### Nested Schema for `url_categorization_choice`
-
-Optional:
-
-- `disable_url_categorization` (Boolean) Disable URL Categorization
-- `enable_url_categorization` (Boolean) Enable URL Categorization
-
-
-<a id="nestedatt--admin_user_credentials"></a>
-### Nested Schema for `admin_user_credentials`
-
-Optional:
-
-- `admin_password` (Attributes) Admin Password Provided password can be used for accessing nodes of the site. When provided, customers can either ssh to the nodes of this Customer Edge site or use the node local WebUI by using admin as the user. (see [below for nested schema](#nestedatt--admin_user_credentials--admin_password))
-- `ssh_key` (String) <br>**Validation:** `Length LengthAtMost(8192)`
-
-<a id="nestedatt--admin_user_credentials--admin_password"></a>
-### Nested Schema for `admin_user_credentials.admin_password`
-
-Required:
-
-- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted (see [below for nested schema](#nestedatt--admin_user_credentials--admin_password--secret_info_choice))
-
-<a id="nestedatt--admin_user_credentials--admin_password--secret_info_choice"></a>
-### Nested Schema for `admin_user_credentials.admin_password.secret_info_choice`
-
-Optional:
-
-- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--admin_user_credentials--admin_password--secret_info_choice--blindfold_secret_info))
-- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--admin_user_credentials--admin_password--secret_info_choice--clear_secret_info))
-
-<a id="nestedatt--admin_user_credentials--admin_password--secret_info_choice--blindfold_secret_info"></a>
-### Nested Schema for `admin_user_credentials.admin_password.secret_info_choice.blindfold_secret_info`
-
-Required:
-
-- `location` (String) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
-
-Optional:
-
-- `decryption_provider` (String) Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.
-- `store_provider` (String) Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
-
-
-<a id="nestedatt--admin_user_credentials--admin_password--secret_info_choice--clear_secret_info"></a>
-### Nested Schema for `admin_user_credentials.admin_password.secret_info_choice.clear_secret_info`
-
-Required:
-
-- `url` (String) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
-
-Optional:
-
-- `provider` (String) Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
-
-
-
-
-
-<a id="nestedatt--dns_ntp_config"></a>
-### Nested Schema for `dns_ntp_config`
-
-Optional:
-
-- `dns_server_choice` (Attributes) DNS Servers Specify DNS Servers that will be used for resolving domains required for registration and upgrades. By default, 8.8.8.8 and 8.8.4.4 DNS nameservers will be used. (see [below for nested schema](#nestedatt--dns_ntp_config--dns_server_choice))
-- `ntp_server_choice` (Attributes) NTP Servers Specify NTP Servers that will be by the nodes of this Customer Edge site. By default, time.google.com is used during registration and once tunnels to REs are formed, NTP service hosted by F5 Distributed Cloud will be used. When custom is selected, NTP service hosted by F5 Distributed Cloud will not be used. (see [below for nested schema](#nestedatt--dns_ntp_config--ntp_server_choice))
-
-<a id="nestedatt--dns_ntp_config--dns_server_choice"></a>
-### Nested Schema for `dns_ntp_config.dns_server_choice`
-
-Optional:
-
-- `custom_dns` (Attributes) Custom User specified DNS Servers (see [below for nested schema](#nestedatt--dns_ntp_config--dns_server_choice--custom_dns))
-- `f5_dns_default` (Boolean) Default F5 defaults will use 8.8.8.8, 8.8.4.4
-
-<a id="nestedatt--dns_ntp_config--dns_server_choice--custom_dns"></a>
-### Nested Schema for `dns_ntp_config.dns_server_choice.custom_dns`
-
-Optional:
-
-- `dns_servers` (List of String) DNS Servers DNS Servers
-
-
-
-<a id="nestedatt--dns_ntp_config--ntp_server_choice"></a>
-### Nested Schema for `dns_ntp_config.ntp_server_choice`
-
-Optional:
-
-- `custom_ntp` (Attributes) Custom User specified NTP Servers (see [below for nested schema](#nestedatt--dns_ntp_config--ntp_server_choice--custom_ntp))
-- `f5_ntp_default` (Boolean) Default F5 default will use time.google.com during registration
-
-<a id="nestedatt--dns_ntp_config--ntp_server_choice--custom_ntp"></a>
-### Nested Schema for `dns_ntp_config.ntp_server_choice.custom_ntp`
-
-Optional:
-
-- `ntp_servers` (List of String) NTP Servers NTP Servers
 
 
 
@@ -5491,7 +5167,7 @@ Required:
 
 Optional:
 
-- `attrs` (List of String) <br>**Valid Options:** `["ROUTE_ATTR_INSTALL_HOST", "ROUTE_ATTR_INSTALL_FORWARDING", "ROUTE_ATTR_MERGE_ONLY", "ROUTE_ATTR_NO_OP", "ROUTE_ATTR_ADVERTISE"]` (Multiple selection allowed)
+- `attrs` (List of String) <br>**Valid Options:** `["ROUTE_ATTR_MERGE_ONLY", "ROUTE_ATTR_NO_OP", "ROUTE_ATTR_ADVERTISE", "ROUTE_ATTR_INSTALL_HOST", "ROUTE_ATTR_INSTALL_FORWARDING"]` (Multiple selection allowed)
 
 <a id="nestedatt--local_vrf--slo_choice--slo_config--static_route_choice--static_routes--static_routes--next_hop_choice"></a>
 ### Nested Schema for `local_vrf.slo_choice.slo_config.static_route_choice.static_routes.static_routes.next_hop_choice`
@@ -5561,7 +5237,7 @@ Required:
 
 Optional:
 
-- `attrs` (List of String) <br>**Valid Options:** `["ROUTE_ATTR_ADVERTISE", "ROUTE_ATTR_INSTALL_HOST", "ROUTE_ATTR_INSTALL_FORWARDING", "ROUTE_ATTR_MERGE_ONLY", "ROUTE_ATTR_NO_OP"]` (Multiple selection allowed)
+- `attrs` (List of String) <br>**Valid Options:** `["ROUTE_ATTR_MERGE_ONLY", "ROUTE_ATTR_NO_OP", "ROUTE_ATTR_ADVERTISE", "ROUTE_ATTR_INSTALL_HOST", "ROUTE_ATTR_INSTALL_FORWARDING"]` (Multiple selection allowed)
 
 <a id="nestedatt--local_vrf--slo_choice--slo_config--static_v6_route_choice--static_v6_routes--static_routes--next_hop_choice"></a>
 ### Nested Schema for `local_vrf.slo_choice.slo_config.static_v6_route_choice.static_v6_routes.static_routes.next_hop_choice`
@@ -5728,7 +5404,7 @@ Required:
 
 Optional:
 
-- `attrs` (List of String) <br>**Valid Options:** `["ROUTE_ATTR_INSTALL_FORWARDING", "ROUTE_ATTR_MERGE_ONLY", "ROUTE_ATTR_NO_OP", "ROUTE_ATTR_ADVERTISE", "ROUTE_ATTR_INSTALL_HOST"]` (Multiple selection allowed)
+- `attrs` (List of String) <br>**Valid Options:** `["ROUTE_ATTR_NO_OP", "ROUTE_ATTR_ADVERTISE", "ROUTE_ATTR_INSTALL_HOST", "ROUTE_ATTR_INSTALL_FORWARDING", "ROUTE_ATTR_MERGE_ONLY"]` (Multiple selection allowed)
 
 <a id="nestedatt--local_vrf--sli_choice--sli_config--static_v6_route_choice--static_v6_routes--static_routes--next_hop_choice"></a>
 ### Nested Schema for `local_vrf.sli_choice.sli_config.static_v6_route_choice.static_v6_routes.static_routes.next_hop_choice`
@@ -5774,6 +5450,54 @@ Read-Only:
 
 
 
+
+
+<a id="nestedatt--management_network_choice"></a>
+### Nested Schema for `management_network_choice`
+
+Optional:
+
+- `disable_management_network` (Boolean) Disable Management Network Management Network is disabled for this site.
+- `enable_management_network` (Boolean) Enable Management Network Management Network is enabled for this site.
+
+
+<a id="nestedatt--network_policy_choice"></a>
+### Nested Schema for `network_policy_choice`
+
+Optional:
+
+- `active_enhanced_firewall_policies` (Attributes) Manage Enhanced Firewall Policy Enable Network Firewall for this site. Traffic will be processed in the order that Network Firewall Policies are added. (see [below for nested schema](#nestedatt--network_policy_choice--active_enhanced_firewall_policies))
+- `no_network_policy` (Boolean) Do Not Manage Firewall Policy Disable Network Firewall for this site.
+
+<a id="nestedatt--network_policy_choice--active_enhanced_firewall_policies"></a>
+### Nested Schema for `network_policy_choice.active_enhanced_firewall_policies`
+
+Required:
+
+- `enhanced_firewall_policies` (Attributes List) Enhanced Firewall Policy Ordered List of Enhanced Firewall Policies active (see [below for nested schema](#nestedatt--network_policy_choice--active_enhanced_firewall_policies--enhanced_firewall_policies))
+
+<a id="nestedatt--network_policy_choice--active_enhanced_firewall_policies--enhanced_firewall_policies"></a>
+### Nested Schema for `network_policy_choice.active_enhanced_firewall_policies.enhanced_firewall_policies`
+
+Required:
+
+- `name` (String)
+- `namespace` (String)
+
+Read-Only:
+
+- `tenant` (String)
+
+
+
+
+<a id="nestedatt--node_ha_choice"></a>
+### Nested Schema for `node_ha_choice`
+
+Optional:
+
+- `disable_ha` (Boolean) Disable
+- `enable_ha` (Boolean) Enable
 
 
 <a id="nestedatt--offline_survivability_mode"></a>
@@ -5828,6 +5552,36 @@ Optional:
 <a id="nestedatt--performance_enhancement_mode--perf_mode_choice--perf_mode_l7_enhanced"></a>
 ### Nested Schema for `performance_enhancement_mode.perf_mode_choice.perf_mode_l7_enhanced`
 
+Required:
+
+- `perf_mode_choice` (Attributes) L7 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L7 optimized workloads. (see [below for nested schema](#nestedatt--performance_enhancement_mode--perf_mode_choice--perf_mode_l7_enhanced--perf_mode_choice))
+
+<a id="nestedatt--performance_enhancement_mode--perf_mode_choice--perf_mode_l7_enhanced--perf_mode_choice"></a>
+### Nested Schema for `performance_enhancement_mode.perf_mode_choice.perf_mode_l7_enhanced.perf_mode_choice`
+
+Optional:
+
+- `jumbo_disabled` (Boolean) L7 Mode Enhanced Performance with no jumbo frame support
+- `jumbo_enabled` (Boolean) L7 Mode Enhanced Performance with jumbo frame support(9000)
+
+
+
+
+
+<a id="nestedatt--proxy_bypass_choice"></a>
+### Nested Schema for `proxy_bypass_choice`
+
+Optional:
+
+- `custom_proxy_bypass` (Attributes) Custom User specified domains will bypass the proxy (see [below for nested schema](#nestedatt--proxy_bypass_choice--custom_proxy_bypass))
+- `no_proxy_bypass` (Boolean) Default No domains will bypass the proxy
+
+<a id="nestedatt--proxy_bypass_choice--custom_proxy_bypass"></a>
+### Nested Schema for `proxy_bypass_choice.custom_proxy_bypass`
+
+Optional:
+
+- `proxy_bypass` (List of String) Proxy Bypass List of domains to bypass the proxy
 
 
 
@@ -5854,6 +5608,244 @@ Optional:
 - `backup_re` (String) Backup RE Geography Select backup RE for this site, cannot be the same as Primary RE.
 - `primary_re` (String) <br>**Validation:** `Length LengthBetween(1, 64)`
 
+
+
+
+<a id="nestedatt--s_2s_connectivity_sli_choice"></a>
+### Nested Schema for `s_2s_connectivity_sli_choice`
+
+Optional:
+
+- `dc_cluster_group_sli` (Attributes) Member of DC cluster Group Use a DC Cluster Group to connect to other sites. (see [below for nested schema](#nestedatt--s_2s_connectivity_sli_choice--dc_cluster_group_sli))
+- `no_s2s_connectivity_sli` (Boolean) Not Connected on SLI
+
+<a id="nestedatt--s_2s_connectivity_sli_choice--dc_cluster_group_sli"></a>
+### Nested Schema for `s_2s_connectivity_sli_choice.dc_cluster_group_sli`
+
+Required:
+
+- `name` (String)
+- `namespace` (String)
+
+Read-Only:
+
+- `tenant` (String)
+
+
+
+<a id="nestedatt--s_2s_connectivity_slo_choice"></a>
+### Nested Schema for `s_2s_connectivity_slo_choice`
+
+Optional:
+
+- `dc_cluster_group_slo` (Attributes) Member of DC cluster Group Use a DC Cluster Group to connect to other sites. (see [below for nested schema](#nestedatt--s_2s_connectivity_slo_choice--dc_cluster_group_slo))
+- `no_s2s_connectivity_slo` (Boolean) Not Connected on SLO
+- `site_mesh_group_on_slo` (Attributes) Site Mesh Group Use a Site Mesh Group to connect to other sites. (see [below for nested schema](#nestedatt--s_2s_connectivity_slo_choice--site_mesh_group_on_slo))
+
+<a id="nestedatt--s_2s_connectivity_slo_choice--dc_cluster_group_slo"></a>
+### Nested Schema for `s_2s_connectivity_slo_choice.dc_cluster_group_slo`
+
+Required:
+
+- `name` (String)
+- `namespace` (String)
+
+Read-Only:
+
+- `tenant` (String)
+
+
+<a id="nestedatt--s_2s_connectivity_slo_choice--site_mesh_group_on_slo"></a>
+### Nested Schema for `s_2s_connectivity_slo_choice.site_mesh_group_on_slo`
+
+Required:
+
+- `site_mesh_group_ip_choice` (Attributes) Site Mesh Group Connection Type Select how the site mesh group will be connected. By default, public IPs of the control nodes of the site will be used. (see [below for nested schema](#nestedatt--s_2s_connectivity_slo_choice--site_mesh_group_on_slo--site_mesh_group_ip_choice))
+
+<a id="nestedatt--s_2s_connectivity_slo_choice--site_mesh_group_on_slo--site_mesh_group_ip_choice"></a>
+### Nested Schema for `s_2s_connectivity_slo_choice.site_mesh_group_on_slo.site_mesh_group_ip_choice`
+
+Optional:
+
+- `sm_connection_public_ip` (Boolean) Site Mesh Group Connection Via Public Ip This option will use the public IPs of the control nodes of this site to create IPsec tunnels to other sites which are part of the site mesh group.
+- `sm_connection_pvt_ip` (Boolean) Site Mesh Group Connection Via Private Ip This option will use the private IPs of the control nodes of this site to create IPsec tunnels to other sites which are part of the site mesh group. These private IPs will be the IPs on the interfaces that belong to the Site Local Outside (SLO) Local VRF on the control nodes. If multiple interfaces on a control node belong to the Site Local Outside (SLO) Local VRF, the interface which has 'Use for Site to Site Connectivity' set will be used.
+
+
+
+
+<a id="nestedatt--segment_vrf"></a>
+### Nested Schema for `segment_vrf`
+
+Optional:
+
+- `segment_config` (Attributes) Configure Segment Network Configure properties such as static routes, DNS and common VIP for Load Balancing on the segment VRF. (see [below for nested schema](#nestedatt--segment_vrf--segment_config))
+- `segment_network` (Attributes) Segment (see [below for nested schema](#nestedatt--segment_vrf--segment_network))
+
+<a id="nestedatt--segment_vrf--segment_config"></a>
+### Nested Schema for `segment_vrf.segment_config`
+
+Required:
+
+- `static_route_choice` (Attributes) Manage Static Routes Add static routes to network. Used to reach indirectly connected subnets. (see [below for nested schema](#nestedatt--segment_vrf--segment_config--static_route_choice))
+- `static_v6_route_choice` (Attributes) Manage IPv6 Static Routes Add IPv6 static routes to network. Used to reach indirectly connected IPv6 subnets. (see [below for nested schema](#nestedatt--segment_vrf--segment_config--static_v6_route_choice))
+
+Optional:
+
+- `nameserver` (String) nameserver Optional IPv4 DNS server to be used for name resolution
+- `secondary_nameserver` (String) secondary_nameserver Optional Secondary IPv4 DNS server to be used for name resolution
+
+<a id="nestedatt--segment_vrf--segment_config--static_route_choice"></a>
+### Nested Schema for `segment_vrf.segment_config.static_route_choice`
+
+Optional:
+
+- `no_static_routes` (Boolean) Do Not Manage Static Routes Static IPv4 Routes disabled for this Segment Network (VRF).
+- `static_routes` (Attributes) Manage Static routes Manage IPv4 static routes for this Segment Network (VRF). (see [below for nested schema](#nestedatt--segment_vrf--segment_config--static_route_choice--static_routes))
+
+<a id="nestedatt--segment_vrf--segment_config--static_route_choice--static_routes"></a>
+### Nested Schema for `segment_vrf.segment_config.static_route_choice.static_routes`
+
+Required:
+
+- `static_routes` (Attributes List) static_routes (see [below for nested schema](#nestedatt--segment_vrf--segment_config--static_route_choice--static_routes--static_routes))
+
+<a id="nestedatt--segment_vrf--segment_config--static_route_choice--static_routes--static_routes"></a>
+### Nested Schema for `segment_vrf.segment_config.static_route_choice.static_routes.static_routes`
+
+Required:
+
+- `ip_prefixes` (List of String) IP Prefixes List of route prefixes that have common next hop and attributes
+- `next_hop_choice` (Attributes) Next Hop Choice Select type of next hop. Traffic matching the IP prefixes can be sent to a specific IP address, a default gateway or an interface. (see [below for nested schema](#nestedatt--segment_vrf--segment_config--static_route_choice--static_routes--static_routes--next_hop_choice))
+
+Optional:
+
+- `attrs` (List of String) <br>**Valid Options:** `["ROUTE_ATTR_NO_OP", "ROUTE_ATTR_ADVERTISE", "ROUTE_ATTR_INSTALL_HOST", "ROUTE_ATTR_INSTALL_FORWARDING", "ROUTE_ATTR_MERGE_ONLY"]` (Multiple selection allowed)
+
+<a id="nestedatt--segment_vrf--segment_config--static_route_choice--static_routes--static_routes--next_hop_choice"></a>
+### Nested Schema for `segment_vrf.segment_config.static_route_choice.static_routes.static_routes.next_hop_choice`
+
+Optional:
+
+- `default_gateway` (Boolean) Default Gateway Traffic matching the ip prefixes is sent to the default gateway
+- `ip_address` (String) IP Address Traffic matching the ip prefixes is sent to this IP Address
+- `node_interface` (Attributes) Node Interface Traffic matching the ip prefixes is sent to this interface (see [below for nested schema](#nestedatt--segment_vrf--segment_config--static_route_choice--static_routes--static_routes--next_hop_choice--node_interface))
+
+<a id="nestedatt--segment_vrf--segment_config--static_route_choice--static_routes--static_routes--next_hop_choice--node_interface"></a>
+### Nested Schema for `segment_vrf.segment_config.static_route_choice.static_routes.static_routes.next_hop_choice.node_interface`
+
+Optional:
+
+- `list` (Attributes List) NodeInterfaceInfo On a multinode site, this list holds the nodes and corresponding networking_interface (see [below for nested schema](#nestedatt--segment_vrf--segment_config--static_route_choice--static_routes--static_routes--next_hop_choice--node_interface--list))
+
+<a id="nestedatt--segment_vrf--segment_config--static_route_choice--static_routes--static_routes--next_hop_choice--node_interface--list"></a>
+### Nested Schema for `segment_vrf.segment_config.static_route_choice.static_routes.static_routes.next_hop_choice.node_interface.list`
+
+Optional:
+
+- `interface` (Attributes List) Interface Interface reference on this node (see [below for nested schema](#nestedatt--segment_vrf--segment_config--static_route_choice--static_routes--static_routes--next_hop_choice--node_interface--list--interface))
+- `node` (String) Node Node name on this site
+
+<a id="nestedatt--segment_vrf--segment_config--static_route_choice--static_routes--static_routes--next_hop_choice--node_interface--list--interface"></a>
+### Nested Schema for `segment_vrf.segment_config.static_route_choice.static_routes.static_routes.next_hop_choice.node_interface.list.interface`
+
+Required:
+
+- `name` (String)
+- `namespace` (String)
+
+Read-Only:
+
+- `tenant` (String)
+
+
+
+
+
+
+
+
+<a id="nestedatt--segment_vrf--segment_config--static_v6_route_choice"></a>
+### Nested Schema for `segment_vrf.segment_config.static_v6_route_choice`
+
+Optional:
+
+- `no_v6_static_routes` (Boolean) Do Not Manage IPv6 Static Routes Static IPv6 Routes disabled for this segment Network (VRF).
+- `static_v6_routes` (Attributes) Manage IPv6 Static routes Manage IPv6 static routes for this Segment Nework(VRF). (see [below for nested schema](#nestedatt--segment_vrf--segment_config--static_v6_route_choice--static_v6_routes))
+
+<a id="nestedatt--segment_vrf--segment_config--static_v6_route_choice--static_v6_routes"></a>
+### Nested Schema for `segment_vrf.segment_config.static_v6_route_choice.static_v6_routes`
+
+Required:
+
+- `static_routes` (Attributes List) static_routes List of IPv6 static routes (see [below for nested schema](#nestedatt--segment_vrf--segment_config--static_v6_route_choice--static_v6_routes--static_routes))
+
+<a id="nestedatt--segment_vrf--segment_config--static_v6_route_choice--static_v6_routes--static_routes"></a>
+### Nested Schema for `segment_vrf.segment_config.static_v6_route_choice.static_v6_routes.static_routes`
+
+Required:
+
+- `ip_prefixes` (List of String) IPv6 Prefixes List of IPv6 route prefixes that have common next hop and attributes
+- `next_hop_choice` (Attributes) Next Hop Choice Select type of next hop. Traffic matching the IP prefixes can be sent to a specific IP address, a default gateway or an interface. (see [below for nested schema](#nestedatt--segment_vrf--segment_config--static_v6_route_choice--static_v6_routes--static_routes--next_hop_choice))
+
+Optional:
+
+- `attrs` (List of String) <br>**Valid Options:** `["ROUTE_ATTR_NO_OP", "ROUTE_ATTR_ADVERTISE", "ROUTE_ATTR_INSTALL_HOST", "ROUTE_ATTR_INSTALL_FORWARDING", "ROUTE_ATTR_MERGE_ONLY"]` (Multiple selection allowed)
+
+<a id="nestedatt--segment_vrf--segment_config--static_v6_route_choice--static_v6_routes--static_routes--next_hop_choice"></a>
+### Nested Schema for `segment_vrf.segment_config.static_v6_route_choice.static_v6_routes.static_routes.next_hop_choice`
+
+Optional:
+
+- `default_gateway` (Boolean) Default Gateway Traffic matching the ip prefixes is sent to the default gateway
+- `ip_address` (String) IP Address Traffic matching the ip prefixes is sent to this IP Address
+- `node_interface` (Attributes) Node Interface Traffic matching the ip prefixes is sent to this interface (see [below for nested schema](#nestedatt--segment_vrf--segment_config--static_v6_route_choice--static_v6_routes--static_routes--next_hop_choice--node_interface))
+
+<a id="nestedatt--segment_vrf--segment_config--static_v6_route_choice--static_v6_routes--static_routes--next_hop_choice--node_interface"></a>
+### Nested Schema for `segment_vrf.segment_config.static_v6_route_choice.static_v6_routes.static_routes.next_hop_choice.node_interface`
+
+Optional:
+
+- `list` (Attributes List) NodeInterfaceInfo On a multinode site, this list holds the nodes and corresponding networking_interface (see [below for nested schema](#nestedatt--segment_vrf--segment_config--static_v6_route_choice--static_v6_routes--static_routes--next_hop_choice--node_interface--list))
+
+<a id="nestedatt--segment_vrf--segment_config--static_v6_route_choice--static_v6_routes--static_routes--next_hop_choice--node_interface--list"></a>
+### Nested Schema for `segment_vrf.segment_config.static_v6_route_choice.static_v6_routes.static_routes.next_hop_choice.node_interface.list`
+
+Optional:
+
+- `interface` (Attributes List) Interface Interface reference on this node (see [below for nested schema](#nestedatt--segment_vrf--segment_config--static_v6_route_choice--static_v6_routes--static_routes--next_hop_choice--node_interface--list--interface))
+- `node` (String) Node Node name on this site
+
+<a id="nestedatt--segment_vrf--segment_config--static_v6_route_choice--static_v6_routes--static_routes--next_hop_choice--node_interface--list--interface"></a>
+### Nested Schema for `segment_vrf.segment_config.static_v6_route_choice.static_v6_routes.static_routes.next_hop_choice.node_interface.list.interface`
+
+Required:
+
+- `name` (String)
+- `namespace` (String)
+
+Read-Only:
+
+- `tenant` (String)
+
+
+
+
+
+
+
+
+
+<a id="nestedatt--segment_vrf--segment_network"></a>
+### Nested Schema for `segment_vrf.segment_network`
+
+Required:
+
+- `name` (String)
+- `namespace` (String)
+
+Read-Only:
+
+- `tenant` (String)
 
 
 
@@ -5900,6 +5892,16 @@ Optional:
 
 
 
+<a id="nestedatt--timeouts"></a>
+### Nested Schema for `timeouts`
+
+Optional:
+
+- `create` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
+- `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
+- `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
+
+
 <a id="nestedatt--upgrade_settings"></a>
 ### Nested Schema for `upgrade_settings`
 
@@ -5939,3 +5941,16 @@ Optional:
 Optional:
 
 - `drain_max_unavailable_node_count` (Number) <br>**Default:** `1`
+
+
+
+
+
+
+<a id="nestedatt--url_categorization_choice"></a>
+### Nested Schema for `url_categorization_choice`
+
+Optional:
+
+- `disable_url_categorization` (Boolean) Disable URL Categorization
+- `enable_url_categorization` (Boolean) Enable URL Categorization

@@ -15,8 +15,8 @@ The `f5xc_dns_lb_health_check` data source allows you to retrieve information ab
 
 ```terraform
 data "f5xc_dns_lb_health_check" "example" {
-  namespace = "example_namespace"
   name      = "example_dns_lb_health_check"
+  namespace = "example_namespace"
 }
 ```
 

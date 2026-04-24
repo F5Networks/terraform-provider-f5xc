@@ -19,6 +19,13 @@ import (
 	context "context"
 	encoding_binary "encoding/binary"
 	fmt "fmt"
+	io "io"
+	math "math"
+	math_bits "math/bits"
+	reflect "reflect"
+	strconv "strconv"
+	strings "strings"
+
 	_ "github.com/gogo/googleapis/google/api"
 	_ "github.com/gogo/protobuf/gogoproto"
 	proto "github.com/gogo/protobuf/proto"
@@ -34,12 +41,6 @@ import (
 	ticket_management "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/ticket_management"
 	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/vesenv"
 	views "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views"
-	io "io"
-	math "math"
-	math_bits "math/bits"
-	reflect "reflect"
-	strconv "strconv"
-	strings "strings"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.

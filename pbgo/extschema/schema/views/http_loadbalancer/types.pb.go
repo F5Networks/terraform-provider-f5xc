@@ -5,6 +5,12 @@ package http_loadbalancer
 
 import (
 	fmt "fmt"
+	io "io"
+	math "math"
+	math_bits "math/bits"
+	reflect "reflect"
+	strings "strings"
+
 	_ "github.com/gogo/protobuf/gogoproto"
 	proto "github.com/gogo/protobuf/proto"
 	github_com_gogo_protobuf_sortkeys "github.com/gogo/protobuf/sortkeys"
@@ -24,11 +30,6 @@ import (
 	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views/rate_limiter_policy"
 	virtual_host "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/virtual_host"
 	virtual_host_dns_info "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/virtual_host_dns_info"
-	io "io"
-	math "math"
-	math_bits "math/bits"
-	reflect "reflect"
-	strings "strings"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.

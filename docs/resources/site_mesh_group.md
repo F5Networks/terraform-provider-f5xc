@@ -13,13 +13,15 @@ SiteMeshGroup resource
 
 ```terraform
 resource "f5xc_site_mesh_group" "example" {
-  name      = "example_site_mesh_group"
   namespace = "example_namespace"
-  re_fallback_choice = {
-    enable_re_fallback = true
+  name      = "example_site_mesh_group"
+  re_fallback = {
+    disable_re_fallback = true
   }
   bfd_choice = {
-    bfd_disabled = true
+    bfd_enabled = {
+      bfd_enabled = "example_bfd_enabled"
+    }
   }
 }
 ```

@@ -92,7 +92,7 @@ Read-Only:
 - `virtual_site` (Attributes) Virtual Site Advertise on a customer virtual site and a given network. (see [below for nested schema](#nestedatt--advertise_choice--advertise_custom--advertise_where--choice--virtual_site))
 - `virtual_site_segment` (Attributes) Segment on Virtual Site Advertise on a segment on a virtual site (see [below for nested schema](#nestedatt--advertise_choice--advertise_custom--advertise_where--choice--virtual_site_segment))
 - `virtual_site_with_vip` (Attributes) Virtual Site With Specified VIP Advertise on a customer virtual site and a given network and IP. (see [below for nested schema](#nestedatt--advertise_choice--advertise_custom--advertise_where--choice--virtual_site_with_vip))
-- `vk_8s_service` (Attributes) vK8s services network Advertise on vK8s Service Network on RE. (see [below for nested schema](#nestedatt--advertise_choice--advertise_custom--advertise_where--choice--vk_8s_service))
+- `vk8s_service` (Attributes) vK8s services network Advertise on vK8s Service Network on RE. (see [below for nested schema](#nestedatt--advertise_choice--advertise_custom--advertise_where--choice--vk8s_service))
 
 <a id="nestedatt--advertise_choice--advertise_custom--advertise_where--choice--advertise_on_public"></a>
 ### Nested Schema for `advertise_choice.advertise_custom.advertise_where.choice.advertise_on_public`
@@ -324,23 +324,23 @@ Read-Only:
 
 
 
-<a id="nestedatt--advertise_choice--advertise_custom--advertise_where--choice--vk_8s_service"></a>
-### Nested Schema for `advertise_choice.advertise_custom.advertise_where.choice.vk_8s_service`
+<a id="nestedatt--advertise_choice--advertise_custom--advertise_where--choice--vk8s_service"></a>
+### Nested Schema for `advertise_choice.advertise_custom.advertise_where.choice.vk8s_service`
 
 Read-Only:
 
-- `choice` (Attributes) RE or RE Virtual Site This defines a reference to a RE site or virtual site where a VIP could be advertised in the vK8s service network (see [below for nested schema](#nestedatt--advertise_choice--advertise_custom--advertise_where--choice--vk_8s_service--choice))
+- `choice` (Attributes) RE or RE Virtual Site This defines a reference to a RE site or virtual site where a VIP could be advertised in the vK8s service network (see [below for nested schema](#nestedatt--advertise_choice--advertise_custom--advertise_where--choice--vk8s_service--choice))
 
-<a id="nestedatt--advertise_choice--advertise_custom--advertise_where--choice--vk_8s_service--choice"></a>
-### Nested Schema for `advertise_choice.advertise_custom.advertise_where.choice.vk_8s_service.choice`
+<a id="nestedatt--advertise_choice--advertise_custom--advertise_where--choice--vk8s_service--choice"></a>
+### Nested Schema for `advertise_choice.advertise_custom.advertise_where.choice.vk8s_service.choice`
 
 Read-Only:
 
-- `site` (Attributes) RE Site Reference to site object (see [below for nested schema](#nestedatt--advertise_choice--advertise_custom--advertise_where--choice--vk_8s_service--choice--site))
-- `virtual_site` (Attributes) Virtual Site Reference to virtual site object (see [below for nested schema](#nestedatt--advertise_choice--advertise_custom--advertise_where--choice--vk_8s_service--choice--virtual_site))
+- `site` (Attributes) RE Site Reference to site object (see [below for nested schema](#nestedatt--advertise_choice--advertise_custom--advertise_where--choice--vk8s_service--choice--site))
+- `virtual_site` (Attributes) Virtual Site Reference to virtual site object (see [below for nested schema](#nestedatt--advertise_choice--advertise_custom--advertise_where--choice--vk8s_service--choice--virtual_site))
 
-<a id="nestedatt--advertise_choice--advertise_custom--advertise_where--choice--vk_8s_service--choice--site"></a>
-### Nested Schema for `advertise_choice.advertise_custom.advertise_where.choice.vk_8s_service.choice.site`
+<a id="nestedatt--advertise_choice--advertise_custom--advertise_where--choice--vk8s_service--choice--site"></a>
+### Nested Schema for `advertise_choice.advertise_custom.advertise_where.choice.vk8s_service.choice.site`
 
 Read-Only:
 
@@ -349,8 +349,8 @@ Read-Only:
 - `tenant` (String)
 
 
-<a id="nestedatt--advertise_choice--advertise_custom--advertise_where--choice--vk_8s_service--choice--virtual_site"></a>
-### Nested Schema for `advertise_choice.advertise_custom.advertise_where.choice.vk_8s_service.choice.virtual_site`
+<a id="nestedatt--advertise_choice--advertise_custom--advertise_where--choice--vk8s_service--choice--virtual_site"></a>
+### Nested Schema for `advertise_choice.advertise_custom.advertise_where.choice.vk8s_service.choice.virtual_site`
 
 Read-Only:
 

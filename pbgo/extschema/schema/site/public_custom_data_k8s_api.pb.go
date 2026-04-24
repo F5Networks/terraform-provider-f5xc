@@ -11,6 +11,13 @@ package site
 import (
 	context "context"
 	fmt "fmt"
+	io "io"
+	math "math"
+	math_bits "math/bits"
+	reflect "reflect"
+	strconv "strconv"
+	strings "strings"
+
 	_ "github.com/gogo/googleapis/google/api"
 	_ "github.com/gogo/protobuf/gogoproto"
 	proto "github.com/gogo/protobuf/proto"
@@ -21,16 +28,10 @@ import (
 	status "google.golang.org/grpc/status"
 	schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/vesenv"
-	io "io"
 	v11 "k8s.io/api/apps/v1"
 	v12 "k8s.io/api/batch/v1"
 	v1beta1 "k8s.io/api/batch/v1beta1"
 	v1 "k8s.io/api/core/v1"
-	math "math"
-	math_bits "math/bits"
-	reflect "reflect"
-	strconv "strconv"
-	strings "strings"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.

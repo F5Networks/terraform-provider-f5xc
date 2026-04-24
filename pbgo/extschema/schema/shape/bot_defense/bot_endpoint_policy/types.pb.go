@@ -5,6 +5,12 @@ package bot_endpoint_policy
 
 import (
 	fmt "fmt"
+	io "io"
+	math "math"
+	math_bits "math/bits"
+	reflect "reflect"
+	strings "strings"
+
 	_ "github.com/gogo/protobuf/gogoproto"
 	proto "github.com/gogo/protobuf/proto"
 	_ "github.com/gogo/protobuf/types"
@@ -13,11 +19,6 @@ import (
 	bot_defense "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/shape/bot_defense"
 	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/shape/bot_defense/bot_policy_version"
 	views "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views"
-	io "io"
-	math "math"
-	math_bits "math/bits"
-	reflect "reflect"
-	strings "strings"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.

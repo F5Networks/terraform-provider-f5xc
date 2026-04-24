@@ -5,6 +5,12 @@ package service_policy
 
 import (
 	fmt "fmt"
+	io "io"
+	math "math"
+	math_bits "math/bits"
+	reflect "reflect"
+	strings "strings"
+
 	_ "github.com/gogo/protobuf/gogoproto"
 	proto "github.com/gogo/protobuf/proto"
 	github_com_gogo_protobuf_sortkeys "github.com/gogo/protobuf/sortkeys"
@@ -15,11 +21,6 @@ import (
 	rate_limiter "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/rate_limiter"
 	service_policy_rule "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/service_policy_rule"
 	views "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views"
-	io "io"
-	math "math"
-	math_bits "math/bits"
-	reflect "reflect"
-	strings "strings"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.

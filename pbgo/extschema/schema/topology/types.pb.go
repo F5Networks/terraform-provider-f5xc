@@ -5,6 +5,13 @@ package topology
 
 import (
 	fmt "fmt"
+	io "io"
+	math "math"
+	math_bits "math/bits"
+	reflect "reflect"
+	strconv "strconv"
+	strings "strings"
+
 	_ "github.com/gogo/protobuf/gogoproto"
 	proto "github.com/gogo/protobuf/proto"
 	github_com_gogo_protobuf_sortkeys "github.com/gogo/protobuf/sortkeys"
@@ -14,12 +21,6 @@ import (
 	dc_cluster_group "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/dc_cluster_group"
 	site "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/site"
 	site_mesh_group "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/site_mesh_group"
-	io "io"
-	math "math"
-	math_bits "math/bits"
-	reflect "reflect"
-	strconv "strconv"
-	strings "strings"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.

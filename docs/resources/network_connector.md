@@ -13,10 +13,10 @@ NetworkConnector resource
 
 ```terraform
 resource "f5xc_network_connector" "example" {
-  name                 = "example_network_connector"
   namespace            = "example_namespace"
-  outside_network_type = ["ENUM_VALUE"]
+  name                 = "example_network_connector"
   connector_type       = ["ENUM_VALUE"]
+  outside_network_type = ["ENUM_VALUE"]
   inside_network_type  = ["ENUM_VALUE"]
 }
 ```
@@ -29,26 +29,26 @@ resource "f5xc_network_connector" "example" {
 ### Required
 
 - `connector_type` (List of String) <br>**Allowed Values (choose one):** `["NETWORK_CONNECTOR_TYPE_DEFAULT_GATEWAY_SNAT", "NETWORK_CONNECTOR_TYPE_DYNAMIC_GATEWAY_SNAT", "NETWORK_CONNECTOR_TYPE_DYNAMIC_GATEWAY"]`
-- `inside_network_type` (List of String) <br>**Allowed Values (choose one):** `["VIRTUAL_NETWORK_PUBLIC", "VIRTUAL_NETWORK_GLOBAL", "VIRTUAL_NETWORK_VER_INTERNAL", "VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE", "VIRTUAL_NETWORK_SRV6_NETWORK", "VIRTUAL_NETWORK_IP_FABRIC", "VIRTUAL_NETWORK_SITE_LOCAL", "VIRTUAL_NETWORK_SITE_SERVICE", "VIRTUAL_NETWORK_IP_AUTO", "VIRTUAL_NETWORK_VOLTADN_PRIVATE_NETWORK", "VIRTUAL_NETWORK_SEGMENT", "VIRTUAL_NETWORK_MANAGEMENT", "VIRTUAL_NETWORK_SITE_LOCAL_INSIDE", "VIRTUAL_NETWORK_PER_SITE"]`
+- `inside_network_type` (List of String) <br>**Allowed Values (choose one):** `["VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE", "VIRTUAL_NETWORK_IP_AUTO", "VIRTUAL_NETWORK_VOLTADN_PRIVATE_NETWORK", "VIRTUAL_NETWORK_MANAGEMENT", "VIRTUAL_NETWORK_SITE_LOCAL", "VIRTUAL_NETWORK_PUBLIC", "VIRTUAL_NETWORK_GLOBAL", "VIRTUAL_NETWORK_SRV6_NETWORK", "VIRTUAL_NETWORK_IP_FABRIC", "VIRTUAL_NETWORK_SEGMENT", "VIRTUAL_NETWORK_SITE_LOCAL_INSIDE", "VIRTUAL_NETWORK_PER_SITE", "VIRTUAL_NETWORK_SITE_SERVICE", "VIRTUAL_NETWORK_VER_INTERNAL"]`
 - `name` (String) name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.
 - `namespace` (String) namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''
-- `outside_network_type` (List of String) <br>**Allowed Values (choose one):** `["VIRTUAL_NETWORK_SITE_SERVICE", "VIRTUAL_NETWORK_IP_AUTO", "VIRTUAL_NETWORK_VOLTADN_PRIVATE_NETWORK", "VIRTUAL_NETWORK_SEGMENT", "VIRTUAL_NETWORK_MANAGEMENT", "VIRTUAL_NETWORK_SITE_LOCAL_INSIDE", "VIRTUAL_NETWORK_PER_SITE", "VIRTUAL_NETWORK_PUBLIC", "VIRTUAL_NETWORK_GLOBAL", "VIRTUAL_NETWORK_VER_INTERNAL", "VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE", "VIRTUAL_NETWORK_SRV6_NETWORK", "VIRTUAL_NETWORK_IP_FABRIC", "VIRTUAL_NETWORK_SITE_LOCAL"]`
+- `outside_network_type` (List of String) <br>**Allowed Values (choose one):** `["VIRTUAL_NETWORK_VOLTADN_PRIVATE_NETWORK", "VIRTUAL_NETWORK_MANAGEMENT", "VIRTUAL_NETWORK_SITE_LOCAL", "VIRTUAL_NETWORK_PUBLIC", "VIRTUAL_NETWORK_GLOBAL", "VIRTUAL_NETWORK_SRV6_NETWORK", "VIRTUAL_NETWORK_IP_FABRIC", "VIRTUAL_NETWORK_SEGMENT", "VIRTUAL_NETWORK_SITE_LOCAL_INSIDE", "VIRTUAL_NETWORK_PER_SITE", "VIRTUAL_NETWORK_SITE_SERVICE", "VIRTUAL_NETWORK_VER_INTERNAL", "VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE", "VIRTUAL_NETWORK_IP_AUTO"]`
 
 ### Optional
 
 - `annotations` (Map of String) annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.
 - `description` (String) description Human readable description for the object
 - `dynamic_reverse_proxy` (Attributes List) Dynamic Reverse Proxy Vhost to be used for dynamic reverse proxy configuration (see [below for nested schema](#nestedatt--dynamic_reverse_proxy))
+- `forward_proxy` (Attributes) Forward Proxy Configuration Configuration, applicable only for forward proxy, fine tunes the forward proxy behavior (see [below for nested schema](#nestedatt--forward_proxy))
 - `inside_network` (Attributes List) Inside VN Reference to inside network. Reference is valid only when the network type is per site virtual network or global virtual network. It is ignored for all other network types. public virtual network is not allowed as inside network (see [below for nested schema](#nestedatt--inside_network))
 - `labels` (Map of String) labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression
 - `outside_network` (Attributes List) Outside VN Reference to outside network. Reference is valid only when the network type is per site virtual network or global virtual network. It is ignored for all other network types (see [below for nested schema](#nestedatt--outside_network))
-- `proxy_type` (List of String) <br>**Allowed Values (choose one):** `["NETWORK_CONNECTOR_FORWARD_PROXY", "NETWORK_CONNECTOR_NO_PROXY", "NETWORK_CONNECTOR_DYNAMIC_REVERSE_PROXY"]`
+- `proxy_type` (List of String) <br>**Allowed Values (choose one):** `["NETWORK_CONNECTOR_NO_PROXY", "NETWORK_CONNECTOR_DYNAMIC_REVERSE_PROXY", "NETWORK_CONNECTOR_FORWARD_PROXY"]`
 - `snat_pool_type` (List of String) <br>**Allowed Values (choose one):** `["NETWORK_CONNECTOR_SNAT_SIP_USE_INTERFACE", "NETWORK_CONNECTOR_SNAT_SIP_USE_POOL"]`
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 
 ### Read-Only
 
-- `forward_proxy` (Attributes) Forward Proxy Configuration Configuration, applicable only for forward proxy, fine tunes the forward proxy behavior (see [below for nested schema](#nestedatt--forward_proxy))
 - `uid` (String) uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.
 
 <a id="nestedatt--dynamic_reverse_proxy"></a>
@@ -62,6 +62,17 @@ Required:
 Read-Only:
 
 - `tenant` (String)
+
+
+<a id="nestedatt--forward_proxy"></a>
+### Nested Schema for `forward_proxy`
+
+Optional:
+
+- `connection_timeout` (Number) <br>**Default:** `2000`
+- `max_connect_attempts` (Number) <br>**Default:** `1`
+- `white_listed_ports` (List of Number) Port list Traffic to these destination TCP ports is not subjected to protocol parsing Example 'tmate' server port
+- `white_listed_prefixes` (List of String) IP prefix list Traffic to these destination ip prefixes is not subjected to protocol parsing Example 'tmate' server ip
 
 
 <a id="nestedatt--inside_network"></a>
@@ -98,14 +109,3 @@ Optional:
 - `create` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 - `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
 - `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
-
-
-<a id="nestedatt--forward_proxy"></a>
-### Nested Schema for `forward_proxy`
-
-Optional:
-
-- `connection_timeout` (Number) <br>**Default:** `2000`
-- `max_connect_attempts` (Number) <br>**Default:** `1`
-- `white_listed_ports` (List of Number) Port list Traffic to these destination TCP ports is not subjected to protocol parsing Example 'tmate' server port
-- `white_listed_prefixes` (List of String) IP prefix list Traffic to these destination ip prefixes is not subjected to protocol parsing Example 'tmate' server ip

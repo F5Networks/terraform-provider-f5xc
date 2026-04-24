@@ -5,6 +5,12 @@ package policy_based_routing
 
 import (
 	fmt "fmt"
+	io "io"
+	math "math"
+	math_bits "math/bits"
+	reflect "reflect"
+	strings "strings"
+
 	_ "github.com/gogo/protobuf/gogoproto"
 	proto "github.com/gogo/protobuf/proto"
 	golang_proto "github.com/golang/protobuf/proto"
@@ -12,11 +18,6 @@ import (
 	network_policy "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/network_policy"
 	views "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views"
 	forward_proxy_policy "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views/forward_proxy_policy"
-	io "io"
-	math "math"
-	math_bits "math/bits"
-	reflect "reflect"
-	strings "strings"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.

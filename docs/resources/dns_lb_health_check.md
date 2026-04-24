@@ -15,9 +15,9 @@ DnsLbHealthCheck resource
 resource "f5xc_dns_lb_health_check" "example" {
   name      = "example_dns_lb_health_check"
   namespace = "example_namespace"
-  health_check_choice = {
-    tcp_health_check = {
-      tcp_health_check = "example_tcp_health_check"
+  health_check = {
+    http_health_check = {
+      http_health_check = "example_http_health_check"
     }
   }
 }

@@ -5,6 +5,13 @@ package virtual_host
 
 import (
 	fmt "fmt"
+	io "io"
+	math "math"
+	math_bits "math/bits"
+	reflect "reflect"
+	strconv "strconv"
+	strings "strings"
+
 	_ "github.com/gogo/protobuf/gogoproto"
 	proto "github.com/gogo/protobuf/proto"
 	github_com_gogo_protobuf_sortkeys "github.com/gogo/protobuf/sortkeys"
@@ -16,12 +23,6 @@ import (
 	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/service_policy"
 	views "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views"
 	virtual_host_dns_info "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/virtual_host_dns_info"
-	io "io"
-	math "math"
-	math_bits "math/bits"
-	reflect "reflect"
-	strconv "strconv"
-	strings "strings"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.

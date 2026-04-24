@@ -15,6 +15,12 @@ package app_security
 import (
 	context "context"
 	fmt "fmt"
+	io "io"
+	math "math"
+	math_bits "math/bits"
+	reflect "reflect"
+	strings "strings"
+
 	_ "github.com/gogo/googleapis/google/api"
 	_ "github.com/gogo/protobuf/gogoproto"
 	proto "github.com/gogo/protobuf/proto"
@@ -30,11 +36,6 @@ import (
 	common_security "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views/common_security"
 	common_waf "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views/common_waf"
 	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views/http_loadbalancer"
-	io "io"
-	math "math"
-	math_bits "math/bits"
-	reflect "reflect"
-	strings "strings"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.

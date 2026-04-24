@@ -272,7 +272,7 @@ Read-Only:
 - `cbip_service` (Attributes) OriginServerCBIPService Specify origin server with BIG-IP service name (see [below for nested schema](#nestedatt--origin_servers--choice--cbip_service))
 - `consul_service` (Attributes) OriginServerConsulService Specify origin server with Hashi Corp Consul service name and site information (see [below for nested schema](#nestedatt--origin_servers--choice--consul_service))
 - `custom_endpoint_object` (Attributes) OriginServerCustomEndpoint Specify origin server with a reference to endpoint object (see [below for nested schema](#nestedatt--origin_servers--choice--custom_endpoint_object))
-- `k_8s_service` (Attributes) OriginServerK8SService Specify origin server with K8s service name and site information (see [below for nested schema](#nestedatt--origin_servers--choice--k_8s_service))
+- `k8s_service` (Attributes) OriginServerK8SService Specify origin server with K8s service name and site information (see [below for nested schema](#nestedatt--origin_servers--choice--k8s_service))
 - `private_ip` (Attributes) OriginServerPrivateIP Specify origin server with private or public IP address and site information (see [below for nested schema](#nestedatt--origin_servers--choice--private_ip))
 - `private_name` (Attributes) OriginServerPrivateName Specify origin server with private or public DNS name and site information (see [below for nested schema](#nestedatt--origin_servers--choice--private_name))
 - `public_ip` (Attributes) OriginServerPublicIP Specify origin server with public IP (see [below for nested schema](#nestedatt--origin_servers--choice--public_ip))
@@ -389,62 +389,52 @@ Read-Only:
 
 
 
-<a id="nestedatt--origin_servers--choice--k_8s_service"></a>
-### Nested Schema for `origin_servers.choice.k_8s_service`
+<a id="nestedatt--origin_servers--choice--k8s_service"></a>
+### Nested Schema for `origin_servers.choice.k8s_service`
 
 Read-Only:
 
-- `network_choice` (Attributes) Site Network Inside or Outside Network (see [below for nested schema](#nestedatt--origin_servers--choice--k_8s_service--network_choice))
+- `network_choice` (Attributes) Site Network Inside or Outside Network (see [below for nested schema](#nestedatt--origin_servers--choice--k8s_service--network_choice))
 - `protocol` (List of String) Protocol Protocol to be used in the discovery.
-- `service_info_choice` (Attributes) service_info Specifies whether service discovery has to be done using service name or labels (see [below for nested schema](#nestedatt--origin_servers--choice--k_8s_service--service_info_choice))
-- `site_locator` (Attributes) Site Locator Site or Virtual site where this origin server is located (see [below for nested schema](#nestedatt--origin_servers--choice--k_8s_service--site_locator))
-- `snat_pool` (Attributes) SNAT Pool Configuration (see [below for nested schema](#nestedatt--origin_servers--choice--k_8s_service--snat_pool))
+- `service_info_choice` (Attributes) service_info Specifies whether service discovery has to be done using service name or labels (see [below for nested schema](#nestedatt--origin_servers--choice--k8s_service--service_info_choice))
+- `site_locator` (Attributes) Site Locator Site or Virtual site where this origin server is located (see [below for nested schema](#nestedatt--origin_servers--choice--k8s_service--site_locator))
+- `snat_pool` (Attributes) SNAT Pool Configuration (see [below for nested schema](#nestedatt--origin_servers--choice--k8s_service--snat_pool))
 
-<a id="nestedatt--origin_servers--choice--k_8s_service--network_choice"></a>
-### Nested Schema for `origin_servers.choice.k_8s_service.network_choice`
+<a id="nestedatt--origin_servers--choice--k8s_service--network_choice"></a>
+### Nested Schema for `origin_servers.choice.k8s_service.network_choice`
 
 Read-Only:
 
 - `inside_network` (Boolean) Inside Network Inside network on the site
 - `outside_network` (Boolean) Outside Network Outside network on the site
-- `vk_8s_networks` (Boolean) vK8s Networks on site origin server are on vK8s network on the site
+- `vk8s_networks` (Boolean) vK8s Networks on site origin server are on vK8s network on the site
 
 
-<a id="nestedatt--origin_servers--choice--k_8s_service--service_info_choice"></a>
-### Nested Schema for `origin_servers.choice.k_8s_service.service_info_choice`
+<a id="nestedatt--origin_servers--choice--k8s_service--service_info_choice"></a>
+### Nested Schema for `origin_servers.choice.k8s_service.service_info_choice`
 
 Read-Only:
 
 - `service_name` (String) Service Name K8s service name of the origin server will be listed, including the namespace and cluster-id. For vK8s services, you need to enter a string with the format servicename.namespace:cluster-id. If the servicename is 'frontend', namespace is 'speedtest' and cluster-id is 'prod', then you will enter 'frontend.speedtest:prod'. Both namespace and cluster-id are optional.
 
 
-<a id="nestedatt--origin_servers--choice--k_8s_service--site_locator"></a>
-### Nested Schema for `origin_servers.choice.k_8s_service.site_locator`
+<a id="nestedatt--origin_servers--choice--k8s_service--site_locator"></a>
+### Nested Schema for `origin_servers.choice.k8s_service.site_locator`
 
 Read-Only:
 
-- `choice` (Attributes) SiteLocator (see [below for nested schema](#nestedatt--origin_servers--choice--k_8s_service--site_locator--choice))
+- `choice` (Attributes) SiteLocator (see [below for nested schema](#nestedatt--origin_servers--choice--k8s_service--site_locator--choice))
 
-<a id="nestedatt--origin_servers--choice--k_8s_service--site_locator--choice"></a>
-### Nested Schema for `origin_servers.choice.k_8s_service.site_locator.choice`
-
-Read-Only:
-
-- `site` (Attributes) site Reference to site object (see [below for nested schema](#nestedatt--origin_servers--choice--k_8s_service--site_locator--choice--site))
-- `virtual_site` (Attributes) Virtual Site Reference to virtual site object (see [below for nested schema](#nestedatt--origin_servers--choice--k_8s_service--site_locator--choice--virtual_site))
-
-<a id="nestedatt--origin_servers--choice--k_8s_service--site_locator--choice--site"></a>
-### Nested Schema for `origin_servers.choice.k_8s_service.site_locator.choice.site`
+<a id="nestedatt--origin_servers--choice--k8s_service--site_locator--choice"></a>
+### Nested Schema for `origin_servers.choice.k8s_service.site_locator.choice`
 
 Read-Only:
 
-- `name` (String)
-- `namespace` (String)
-- `tenant` (String)
+- `site` (Attributes) site Reference to site object (see [below for nested schema](#nestedatt--origin_servers--choice--k8s_service--site_locator--choice--site))
+- `virtual_site` (Attributes) Virtual Site Reference to virtual site object (see [below for nested schema](#nestedatt--origin_servers--choice--k8s_service--site_locator--choice--virtual_site))
 
-
-<a id="nestedatt--origin_servers--choice--k_8s_service--site_locator--choice--virtual_site"></a>
-### Nested Schema for `origin_servers.choice.k_8s_service.site_locator.choice.virtual_site`
+<a id="nestedatt--origin_servers--choice--k8s_service--site_locator--choice--site"></a>
+### Nested Schema for `origin_servers.choice.k8s_service.site_locator.choice.site`
 
 Read-Only:
 
@@ -453,25 +443,35 @@ Read-Only:
 - `tenant` (String)
 
 
-
-
-<a id="nestedatt--origin_servers--choice--k_8s_service--snat_pool"></a>
-### Nested Schema for `origin_servers.choice.k_8s_service.snat_pool`
+<a id="nestedatt--origin_servers--choice--k8s_service--site_locator--choice--virtual_site"></a>
+### Nested Schema for `origin_servers.choice.k8s_service.site_locator.choice.virtual_site`
 
 Read-Only:
 
-- `snat_pool_choice` (Attributes) Snat Pool Choice Snat Pool for the origin server (see [below for nested schema](#nestedatt--origin_servers--choice--k_8s_service--snat_pool--snat_pool_choice))
+- `name` (String)
+- `namespace` (String)
+- `tenant` (String)
 
-<a id="nestedatt--origin_servers--choice--k_8s_service--snat_pool--snat_pool_choice"></a>
-### Nested Schema for `origin_servers.choice.k_8s_service.snat_pool.snat_pool_choice`
+
+
+
+<a id="nestedatt--origin_servers--choice--k8s_service--snat_pool"></a>
+### Nested Schema for `origin_servers.choice.k8s_service.snat_pool`
+
+Read-Only:
+
+- `snat_pool_choice` (Attributes) Snat Pool Choice Snat Pool for the origin server (see [below for nested schema](#nestedatt--origin_servers--choice--k8s_service--snat_pool--snat_pool_choice))
+
+<a id="nestedatt--origin_servers--choice--k8s_service--snat_pool--snat_pool_choice"></a>
+### Nested Schema for `origin_servers.choice.k8s_service.snat_pool.snat_pool_choice`
 
 Read-Only:
 
 - `no_snat_pool` (Boolean) No SNAT Pool No configured SNAT Pool to reach Origin Server
-- `snat_pool` (Attributes) SNAT Pool Configure SNAT Pool to reach Origin Server (see [below for nested schema](#nestedatt--origin_servers--choice--k_8s_service--snat_pool--snat_pool_choice--snat_pool))
+- `snat_pool` (Attributes) SNAT Pool Configure SNAT Pool to reach Origin Server (see [below for nested schema](#nestedatt--origin_servers--choice--k8s_service--snat_pool--snat_pool_choice--snat_pool))
 
-<a id="nestedatt--origin_servers--choice--k_8s_service--snat_pool--snat_pool_choice--snat_pool"></a>
-### Nested Schema for `origin_servers.choice.k_8s_service.snat_pool.snat_pool_choice.snat_pool`
+<a id="nestedatt--origin_servers--choice--k8s_service--snat_pool--snat_pool_choice--snat_pool"></a>
+### Nested Schema for `origin_servers.choice.k8s_service.snat_pool.snat_pool_choice.snat_pool`
 
 Read-Only:
 

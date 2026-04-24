@@ -1,6 +1,7 @@
+/*
 resource "f5xc_http_loadbalancer" "lb" {
   name = "ck-lb-test-01"
-  # labels      = { "a" : "b" }
+  labels      = { "keyA" : "valueA", "keyB": "valueB" }
   namespace   = "default"
   annotations = { "annoA" : "annob" }
   description = "lb_test_01"
@@ -17,6 +18,7 @@ resource "f5xc_http_loadbalancer" "lb" {
       }
     }
   }
+ */
 
   /*
   bot_defense_choice = {
@@ -62,7 +64,7 @@ resource "f5xc_http_loadbalancer" "lb" {
     }
   }
    */
-
+/*
   waf_choice = {
     #disable_waf = true
     app_firewall = {
@@ -127,3 +129,58 @@ resource "f5xc_http_loadbalancer" "lb" {
     disable_malware_protection = true
   }
 }
+*/
+
+/*
+resource "f5xc_tcp_loadbalancer" "tcp-lb1" {
+  name      = "ck-tcp-lb-1"
+  namespace = "default"
+  origin_pools_weights = [
+    {
+      pool_choice = {
+        pool = {
+          name      = "aartee-http-pool"
+          namespace = "default"
+        }
+      }
+    }
+  ]
+  cluster_retract_choice = {
+    retract_cluster = true
+  }
+  service_policy_choice = {
+    active_service_policies = {
+      policies = [
+        {
+          name      = f5xc_service_policy.sp1.name
+          namespace = f5xc_service_policy.sp1.namespace
+        }
+      ]
+    }
+  }
+  advertise_choice = {
+    do_not_advertise = true
+  }
+  hash_policy_choice = {
+    hash_policy_choice_least_active = true
+  }
+  port_choice = {
+    listen_port = 1
+  }
+  loadbalancer_type_choice = {
+    tls_tcp_auto_cert = {
+      mtls_choice = {
+        no_mtls = true
+      }
+      tls_config = {
+        choice = {
+          default_security = true
+        }
+      }
+    }
+  }
+  sni_default_lb_choice = {
+    no_sni = true
+  }
+}
+*/

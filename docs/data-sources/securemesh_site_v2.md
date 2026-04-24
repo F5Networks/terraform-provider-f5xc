@@ -15,8 +15,8 @@ The `f5xc_securemesh_site_v2` data source allows you to retrieve information abo
 
 ```terraform
 data "f5xc_securemesh_site_v2" "example" {
-  namespace = "example_namespace"
   name      = "example_securemesh_site_v2"
+  namespace = "example_namespace"
 }
 ```
 
@@ -739,6 +739,19 @@ Read-Only:
 
 <a id="nestedatt--performance_enhancement_mode--perf_mode_choice--perf_mode_l7_enhanced"></a>
 ### Nested Schema for `performance_enhancement_mode.perf_mode_choice.perf_mode_l7_enhanced`
+
+Read-Only:
+
+- `perf_mode_choice` (Attributes) L7 Mode Enhanced Performance Options Choose to enable/disable jumbo frame support for L7 optimized workloads. (see [below for nested schema](#nestedatt--performance_enhancement_mode--perf_mode_choice--perf_mode_l7_enhanced--perf_mode_choice))
+
+<a id="nestedatt--performance_enhancement_mode--perf_mode_choice--perf_mode_l7_enhanced--perf_mode_choice"></a>
+### Nested Schema for `performance_enhancement_mode.perf_mode_choice.perf_mode_l7_enhanced.perf_mode_choice`
+
+Read-Only:
+
+- `jumbo_disabled` (Boolean) L7 Mode Enhanced Performance with no jumbo frame support
+- `jumbo_enabled` (Boolean) L7 Mode Enhanced Performance with jumbo frame support(9000)
+
 
 
 
@@ -5143,7 +5156,7 @@ Read-Only:
 Read-Only:
 
 - `dc_cluster_group_sli` (Attributes) Member of DC cluster Group Use a DC Cluster Group to connect to other sites. (see [below for nested schema](#nestedatt--s_2s_connectivity_sli_choice--dc_cluster_group_sli))
-- `no_s_2s_connectivity_sli` (Boolean) Not Connected on SLI
+- `no_s2s_connectivity_sli` (Boolean) Not Connected on SLI
 
 <a id="nestedatt--s_2s_connectivity_sli_choice--dc_cluster_group_sli"></a>
 ### Nested Schema for `s_2s_connectivity_sli_choice.dc_cluster_group_sli`
@@ -5162,7 +5175,7 @@ Read-Only:
 Read-Only:
 
 - `dc_cluster_group_slo` (Attributes) Member of DC cluster Group Use a DC Cluster Group to connect to other sites. (see [below for nested schema](#nestedatt--s_2s_connectivity_slo_choice--dc_cluster_group_slo))
-- `no_s_2s_connectivity_slo` (Boolean) Not Connected on SLO
+- `no_s2s_connectivity_slo` (Boolean) Not Connected on SLO
 - `site_mesh_group_on_slo` (Attributes) Site Mesh Group Use a Site Mesh Group to connect to other sites. (see [below for nested schema](#nestedatt--s_2s_connectivity_slo_choice--site_mesh_group_on_slo))
 
 <a id="nestedatt--s_2s_connectivity_slo_choice--dc_cluster_group_slo"></a>

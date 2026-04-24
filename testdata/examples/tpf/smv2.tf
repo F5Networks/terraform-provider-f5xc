@@ -1,7 +1,7 @@
-/*
 resource "f5xc_securemesh_site_v2" "smv2" {
   name      = "ck-smv2-test-01"
   namespace = "system"
+  labels = {"keyA": "valueA"}
   offline_survivability_mode = {
     offline_survivability_mode_choice = {
       no_offline_survivability_mode = true
@@ -19,7 +19,7 @@ resource "f5xc_securemesh_site_v2" "smv2" {
     perf_mode_choice = {
       perf_mode_l7_enhanced = {
         perf_mode_choice = {
-          //jumbo_enabled = true
+          jumbo_enabled = true
         }
       }
     }
@@ -44,24 +44,20 @@ resource "f5xc_securemesh_site_v2" "smv2" {
   re_select = {
     re_selection_choice = {
       specific_re = {
-        primary_re = "ves-io-telaviv"
-        backup_re  = "ves-io-dallas"
+        primary_re = "ves-io-paris"
+        backup_re  = "ves-io-sanjose"
       }
     }
   }
-  /*admin_user_credentials get spec not popolated properly*/
-/*
   admin_user_credentials = {
     admin_password = {
       secret_info_choice = {
         clear_secret_info = {
-          url = format("string:///%s",base64encode("passwordAbc123"))
+          url = format("string:///%s", base64encode("passwordAbc123"))
         }
       }
     }
   }
-   */
-/*
   software_settings = {
     sw = {
       volterra_sw_version_choice = {
@@ -75,4 +71,3 @@ resource "f5xc_securemesh_site_v2" "smv2" {
     }
   }
 }
- */

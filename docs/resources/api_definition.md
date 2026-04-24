@@ -13,10 +13,10 @@ ApiDefinition resource
 
 ```terraform
 resource "f5xc_api_definition" "example" {
-  name      = "example_api_definition"
   namespace = "example_namespace"
-  schema_updates_strategy_choice = {
-    strict_schema_origin = true
+  name      = "example_api_definition"
+  schema_updates_strategy = {
+    mixed_schema_origin = true
   }
 }
 ```
@@ -61,7 +61,7 @@ Optional:
 
 Required:
 
-- `method` (List of String) <br>**Allowed Values (choose one):** `["TRACE", "PATCH", "ANY", "OPTIONS", "COPY", "GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT"]`
+- `method` (List of String) <br>**Allowed Values (choose one):** `["GET", "HEAD", "CONNECT", "COPY", "ANY", "POST", "PUT", "DELETE", "OPTIONS", "TRACE", "PATCH"]`
 - `path` (String) path An endpoint path, as specified in OpenAPI, including parameters. The path should comply with RFC 3986 and may have parameters according to OpenAPI specification
 
 
@@ -70,7 +70,7 @@ Required:
 
 Required:
 
-- `method` (List of String) <br>**Allowed Values (choose one):** `["GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "TRACE", "PATCH", "ANY", "OPTIONS", "COPY"]`
+- `method` (List of String) <br>**Allowed Values (choose one):** `["COPY", "ANY", "POST", "PUT", "DELETE", "OPTIONS", "TRACE", "PATCH", "GET", "HEAD", "CONNECT"]`
 - `path` (String) path An endpoint path, as specified in OpenAPI, including parameters. The path should comply with RFC 3986 and may have parameters according to OpenAPI specification
 
 
@@ -79,7 +79,7 @@ Required:
 
 Required:
 
-- `method` (List of String) <br>**Allowed Values (choose one):** `["DELETE", "CONNECT", "TRACE", "PATCH", "ANY", "OPTIONS", "COPY", "GET", "HEAD", "POST", "PUT"]`
+- `method` (List of String) <br>**Allowed Values (choose one):** `["GET", "HEAD", "CONNECT", "COPY", "ANY", "POST", "PUT", "DELETE", "OPTIONS", "TRACE", "PATCH"]`
 - `path` (String) path An endpoint path, as specified in OpenAPI, including parameters. The path should comply with RFC 3986 and may have parameters according to OpenAPI specification
 
 

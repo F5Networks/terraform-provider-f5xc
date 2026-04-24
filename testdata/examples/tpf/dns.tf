@@ -9,11 +9,12 @@ resource "f5xc_dns_domain" "example" {
   }
   dnssec_mode = ["DNSSEC_ENABLE"]
 }
- */
+*/
 
 /*
 resource "f5xc_dns_zone" "zone" {
   name = "zoneA"
+  namespace = "system"
   annotations = {
     a = "b"
     c = "d"

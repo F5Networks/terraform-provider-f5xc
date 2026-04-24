@@ -15,38 +15,21 @@ HttpLoadbalancer resource
 resource "f5xc_http_loadbalancer" "example" {
   name      = "example_http_loadbalancer"
   namespace = "example_namespace"
-  service_policy_choice = {
-    service_policies_from_namespace = true
-  }
-  threat_mesh_choice = {
-    enable_threat_mesh = true
-  }
-  sensitive_data_policy_choice = {
-    default_sensitive_data_policy = true
-  }
-  loadbalancer_type_choice = {
-    http = {
-      http = "example_http"
+  challenge_type = {
+    captcha_challenge = {
+      captcha_challenge = "example_captcha_challenge"
     }
   }
-  malware_protection_choice = {
-    disable_malware_protection = true
+  api_testing_choice = {
+    api_testing = {
+      api_testing = "example_api_testing"
+    }
   }
   advertise_choice = {
     do_not_advertise = true
   }
-  challenge_type_choice = {
-    policy_based_challenge = {
-      policy_based_challenge = "example_policy_based_challenge"
-    }
-  }
-  user_id_choice = {
-    user_identification = {
-      user_identification = "example_user_identification"
-    }
-  }
-  rate_limit_choice = {
-    disable_rate_limit = true
+  trust_client_ip_headers_choice = {
+    disable_trust_client_ip_headers = true
   }
   malicious_user_detection_choice = {
     enable_malicious_user_detection = true
@@ -56,21 +39,44 @@ resource "f5xc_http_loadbalancer" "example" {
       enable_api_discovery = "example_enable_api_discovery"
     }
   }
-  api_definition_choice = {
-    disable_api_definition = true
+  user_id_choice = {
+    user_id_client_ip = true
+  }
+  malware_protection = {
+    disable_malware_protection = true
+  }
+  service_policy_choice = {
+    service_policies_from_namespace = true
+  }
+  sensitive_data_policy_choice = {
+    default_sensitive_data_policy = true
+  }
+  loadbalancer_type = {
+    https_auto_cert = {
+      https_auto_cert = "example_https_auto_cert"
+    }
+  }
+  waf_choice = {
+    app_firewall = {
+      app_firewall = "example_app_firewall"
+    }
   }
   domains = ["example_http_loadbalancer"]
-  waf_choice = {
-    disable_waf = true
-  }
   hash_policy_choice = {
-    round_robin = true
+    cookie_stickiness = {
+      cookie_stickiness = "example_cookie_stickiness"
+    }
   }
-  api_testing_choice = {
-    disable_api_testing = true
+  threat_mesh_choice = {
+    disable_threat_mesh = true
   }
-  trust_client_ip_headers_choice = {
-    disable_trust_client_ip_headers = true
+  rate_limit_choice = {
+    api_rate_limit = {
+      api_rate_limit = "example_api_rate_limit"
+    }
+  }
+  api_definition_choice = {
+    disable_api_definition = true
   }
 }
 ```
@@ -104,40 +110,40 @@ resource "f5xc_http_loadbalancer" "example" {
 
 - `add_location` (Boolean) <br>**Default:** `true`
 - `annotations` (Map of String) annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.
+- `api_protection_rules` (Attributes) API Protection rules API Protection Rules can be defined in two categories. The first category includes fine-grained rules, per API path and methods. The second category includes rules per API groups or Server URLs. If request matches any rule in the first category, second category rules are not evaluated. Rules can also include additional conditions, for example specific clients can access certain API endpoint or API group. (see [below for nested schema](#nestedatt--api_protection_rules))
 - `blocked_clients` (Attributes List) Client Blocking Rules Define rules to block IP Prefixes or AS numbers. (see [below for nested schema](#nestedatt--blocked_clients))
 - `bot_defense_choice` (Attributes) Enable Bot Defense functionality for VirtualHost Bot Defense protects your applications from automated attacks by leveraging JavaScript and API calls to collect telemetry and mitigate sophisticated attacks within the context of F5's Distributed Cloud global network. When automation is detected, and mitigation action is set to Block or Redirect, the client will receive the configured mitigation response. If action is set to Flag, automated requests are monitored by Bot Defense, but are allowed to proceed to the customer's server. (see [below for nested schema](#nestedatt--bot_defense_choice))
 - `cache_options_choice` (Attributes) Enable CDN This feature belongs to the Content Delivery Network service. Enable it to enhance Console capabilities and utilize this feature. (see [below for nested schema](#nestedatt--cache_options_choice))
 - `client_side_defense_choice` (Attributes) Enable Client-Side Defense functionality for VirtualHost Client-Side Defense (CSD) provides a multi-phase protection system that protects web applications against Magecart, formjacking, digital skimming, PII harvesting and other malicious JavaScript attacks. Enabling CSD is a 2-part process (1) Service Enablement (2) JavaScript injection using a Load Balancer. By clicking enable in this section and going through the configuration, you can complete part 2 of the process. To enable the service itself, please visit the Service's Landing page using the search on the left navigation pane. (see [below for nested schema](#nestedatt--client_side_defense_choice))
+- `cors_policy` (Attributes) Cross-Origin Resource Sharing (CORS) configuration for requests CORS is a mechanism that uses additional HTTP headers to tell a browser to let a web application running at one origin (domain) have permission to access selected resources from a server at a different origin (see [below for nested schema](#nestedatt--cors_policy))
+- `csrf_policy` (Attributes) csrf_policy Cross-Site Request Forgery (CSRF) is an attack that occurs when a malicious third-party website exploits a vulnerability thats allows them to submit an undesired request on user's behalf. The policy checks where a request is coming from to determine if the request's origin is the same as its destination. The policy relies on two pieces of information used in determining if a request originated from the same host. 1. The origin that caused the user agent to issue the request (source origin). 2. The origin that the request is going to (target origin). When the policy evaluating a request, it ensures both pieces of information are present and compare their values. If the source origin is missing or origins do not match the request is rejected. The exception to this being the source-origin has been added to the policy as valid. Because CSRF attacks specifically target state-changing requests, the policy only acts on the HTTP requests that have state-changing method (PUT,POST, etc.). (see [below for nested schema](#nestedatt--csrf_policy))
 - `data_guard_rules` (Attributes List) Data Guard Rules Data Guard prevents responses from exposing sensitive information by masking the data. The system masks credit card numbers and social security numbers leaked from the application from within the http response with a string of asterisks (*). Note: App Firewall should be enabled, to use Data Guard feature. (see [below for nested schema](#nestedatt--data_guard_rules))
 - `ddos_mitigation_rules` (Attributes List) DDoS Mitigation Rules Define manual mitigation rules to block L7 DDoS attacks. (see [below for nested schema](#nestedatt--ddos_mitigation_rules))
 - `default_route_pools` (Attributes List) Default Route Origin Pools Origin Pools used when no route is specified (default route) (see [below for nested schema](#nestedatt--default_route_pools))
 - `description` (String) description Human readable description for the object
 - `graphql_rules` (Attributes List) GraphQL Inspection GraphQL is a query language and server-side runtime for APIs which provides a complete and understandable description of the data in API. GraphQL gives clients the power to ask for exactly what they need, makes it easier to evolve APIs over time, and enables powerful developer tools. Policy configuration to analyze GraphQL queries and prevent GraphQL tailored attacks. (see [below for nested schema](#nestedatt--graphql_rules))
-- `host_name` (String) host name Internally generated host name to be used for the virtual host
 - `host_rewrite_params_choice` (Attributes) HostRewriteParams Select how the host header can be modified during forwarding to the default origin servers(default route) (see [below for nested schema](#nestedatt--host_rewrite_params_choice))
 - `internet_vip_info` (Attributes List) Internet VIP Info Internet VIP Info (see [below for nested schema](#nestedatt--internet_vip_info))
 - `ip_reputation_choice` (Attributes) ip_reputation IP reputation service analyzes IP threats and publishes a dynamic data set of millions of high-risk IP addresses, to protect users from inbound traffic from malicious IPs. IP threat categories include Spam Sources, Windows Exploits, Web Attacks, BotNets, Scanners, Denial of Service, Reputation, Phishing, Proxy, Mobile Threats, and TOR Proxy. (see [below for nested schema](#nestedatt--ip_reputation_choice))
+- `jwt_validation` (Attributes) JWT Validation JWT Validation stops JWT replay attacks and JWT tampering by cryptographically verifying incoming JWTs before they are passed to origin APIs. JWT Validation will also stop requests with expired tokens or tokens that are not yet valid. (see [below for nested schema](#nestedatt--jwt_validation))
+- `l7_ddos_protection` (Attributes) L7 DDoS Protection Settings L7 DDoS protection is critical for safeguarding web applications, APIs, and services that are exposed to the internet from sophisticated, volumetric, application-level threats. Configure actions, thresholds and policies to apply during L7 DDoS attack (see [below for nested schema](#nestedatt--l7_ddos_protection))
 - `labels` (Map of String) labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression
+- `more_option` (Attributes) More Options More options like header manipulation, compression etc. (see [below for nested schema](#nestedatt--more_option))
+- `origin_server_subset_rule_list` (Attributes) Origin Server Subset Rules Origin Server Subset Rules allow users to define match condition on Client (IP address, ASN, Country), IP Reputation, Regional Edge names, Request for subset selection of origin servers. Origin Server Subset  is a sequential engine where rules are evaluated one after the other. It's important to define the correct order for Origin Server Subset  to get the intended result, rules are evaluated from top to bottom in the list. When an Origin server subset rule is matched, then this selection rule takes effect and no more rules are evaluated. (see [below for nested schema](#nestedatt--origin_server_subset_rule_list))
 - `protected_cookies` (Attributes List) Cookie protection Allows setting attributes (SameSite, Secure, and HttpOnly) on cookies in responses. Cookie Tampering Protection prevents attackers from modifying the value of session cookies. For Cookie Tampering Protection, enabling a web app firewall (WAF) is a prerequisite. The configured mode of WAF (monitoring or blocking) will be enforced on the request when cookie tampering is identified. Note: We recommend enabling Secure and HttpOnly attributes along with cookie tampering protection. (see [below for nested schema](#nestedatt--protected_cookies))
 - `routes` (Attributes List) Routes Routes allow users to define match condition on a path and/or HTTP method to either forward matching traffic to origin pool or redirect matching traffic to a different URL or respond directly to matching traffic (see [below for nested schema](#nestedatt--routes))
+- `sensitive_data_disclosure_rules` (Attributes) Sensitive Data Exposure Rules Sensitive Data Exposure Rules allows specifying rules to mask sensitive data fields in API responses (see [below for nested schema](#nestedatt--sensitive_data_disclosure_rules))
 - `slow_ddos_mitigation_choice` (Attributes) Slow DDoS Mitigation 'Slow and low' attacks tie up server resources, leaving none available for servicing requests from actual users.Configuration that protects origins from slow and low attacks. In the case HTTP loadbalancer, only default settings can be applied. For HTTPS load balancer, the request timeout and request headers timeout value can be customized. (see [below for nested schema](#nestedatt--slow_ddos_mitigation_choice))
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 - `trusted_clients` (Attributes List) Trusted Client Rules Define rules to skip processing of one or more features such as WAF, Bot Defense etc. for clients. (see [below for nested schema](#nestedatt--trusted_clients))
+- `waf_exclusion` (Attributes) WAF Exclusion Define the Signatures, Violations, Attack Types, and Bot Names that should be excluded from WAF processing for HTTP requests matching specific domain, path, and method criteria. The WAF Exclusion is evaluated sequentially and can only be matched once per request. (see [below for nested schema](#nestedatt--waf_exclusion))
 
 ### Read-Only
 
-- `api_protection_rules` (Attributes) API Protection rules API Protection Rules can be defined in two categories. The first category includes fine-grained rules, per API path and methods. The second category includes rules per API groups or Server URLs. If request matches any rule in the first category, second category rules are not evaluated. Rules can also include additional conditions, for example specific clients can access certain API endpoint or API group. (see [below for nested schema](#nestedatt--api_protection_rules))
 - `auto_cert_info` (Attributes) Auto Cert Information Auto certificate related information (see [below for nested schema](#nestedatt--auto_cert_info))
-- `cert_state` (List of String) <br>**Allowed Values (choose one):** `["DnsDomainVerification", "PreDomainChallengePending", "AutoCertFinalize", "AutoCertGenerationRetry", "AutoCertInitialize", "AutoCertDomainRateLimited", "AutoCertDisabled", "AutoCertStarted", "DomainChallengePending", "AutoCertNotApplicable", "AutoCertAccountRateLimited", "DomainChallengeStarted", "AutoCertRateLimited", "DomainChallengeVerified", "CertificateInvalid", "CertificateValid", "AutoCertError", "CertificateExpired"]`
-- `cors_policy` (Attributes) Cross-Origin Resource Sharing (CORS) configuration for requests CORS is a mechanism that uses additional HTTP headers to tell a browser to let a web application running at one origin (domain) have permission to access selected resources from a server at a different origin (see [below for nested schema](#nestedatt--cors_policy))
-- `csrf_policy` (Attributes) csrf_policy Cross-Site Request Forgery (CSRF) is an attack that occurs when a malicious third-party website exploits a vulnerability thats allows them to submit an undesired request on user's behalf. The policy checks where a request is coming from to determine if the request's origin is the same as its destination. The policy relies on two pieces of information used in determining if a request originated from the same host. 1. The origin that caused the user agent to issue the request (source origin). 2. The origin that the request is going to (target origin). When the policy evaluating a request, it ensures both pieces of information are present and compare their values. If the source origin is missing or origins do not match the request is rejected. The exception to this being the source-origin has been added to the policy as valid. Because CSRF attacks specifically target state-changing requests, the policy only acts on the HTTP requests that have state-changing method (PUT,POST, etc.). (see [below for nested schema](#nestedatt--csrf_policy))
-- `jwt_validation` (Attributes) JWT Validation JWT Validation stops JWT replay attacks and JWT tampering by cryptographically verifying incoming JWTs before they are passed to origin APIs. JWT Validation will also stop requests with expired tokens or tokens that are not yet valid. (see [below for nested schema](#nestedatt--jwt_validation))
-- `l7_ddos_protection` (Attributes) L7 DDoS Protection Settings L7 DDoS protection is critical for safeguarding web applications, APIs, and services that are exposed to the internet from sophisticated, volumetric, application-level threats. Configure actions, thresholds and policies to apply during L7 DDoS attack (see [below for nested schema](#nestedatt--l7_ddos_protection))
-- `more_option` (Attributes) More Options More options like header manipulation, compression etc. (see [below for nested schema](#nestedatt--more_option))
-- `origin_server_subset_rule_list` (Attributes) Origin Server Subset Rules Origin Server Subset Rules allow users to define match condition on Client (IP address, ASN, Country), IP Reputation, Regional Edge names, Request for subset selection of origin servers. Origin Server Subset  is a sequential engine where rules are evaluated one after the other. It's important to define the correct order for Origin Server Subset  to get the intended result, rules are evaluated from top to bottom in the list. When an Origin server subset rule is matched, then this selection rule takes effect and no more rules are evaluated. (see [below for nested schema](#nestedatt--origin_server_subset_rule_list))
-- `sensitive_data_disclosure_rules` (Attributes) Sensitive Data Exposure Rules Sensitive Data Exposure Rules allows specifying rules to mask sensitive data fields in API responses (see [below for nested schema](#nestedatt--sensitive_data_disclosure_rules))
+- `cert_state` (List of String) <br>**Allowed Values (choose one):** `["AutoCertGenerationRetry", "AutoCertDisabled", "AutoCertStarted", "PreDomainChallengePending", "DomainChallengeVerified", "AutoCertFinalize", "CertificateValid", "AutoCertNotApplicable", "DnsDomainVerification", "AutoCertError", "AutoCertInitialize", "AutoCertAccountRateLimited", "CertificateExpired", "DomainChallengePending", "AutoCertDomainRateLimited", "DomainChallengeStarted", "CertificateInvalid", "AutoCertRateLimited"]`
+- `host_name` (String) host name Internally generated host name to be used for the virtual host
 - `uid` (String) uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.
-- `waf_exclusion` (Attributes) WAF Exclusion Define the Signatures, Violations, Attack Types, and Bot Names that should be excluded from WAF processing for HTTP requests matching specific domain, path, and method criteria. The WAF Exclusion is evaluated sequentially and can only be matched once per request. (see [below for nested schema](#nestedatt--waf_exclusion))
 
 <a id="nestedatt--advertise_choice"></a>
 ### Nested Schema for `advertise_choice`
@@ -178,7 +184,7 @@ Optional:
 - `virtual_site` (Attributes) Virtual Site Advertise on a customer virtual site and a given network. (see [below for nested schema](#nestedatt--advertise_choice--advertise_custom--advertise_where--choice--virtual_site))
 - `virtual_site_segment` (Attributes) Segment on Virtual Site Advertise on a segment on a virtual site (see [below for nested schema](#nestedatt--advertise_choice--advertise_custom--advertise_where--choice--virtual_site_segment))
 - `virtual_site_with_vip` (Attributes) Virtual Site With Specified VIP Advertise on a customer virtual site and a given network and IP. (see [below for nested schema](#nestedatt--advertise_choice--advertise_custom--advertise_where--choice--virtual_site_with_vip))
-- `vk_8s_service` (Attributes) vK8s services network Advertise on vK8s Service Network on RE. (see [below for nested schema](#nestedatt--advertise_choice--advertise_custom--advertise_where--choice--vk_8s_service))
+- `vk8s_service` (Attributes) vK8s services network Advertise on vK8s Service Network on RE. (see [below for nested schema](#nestedatt--advertise_choice--advertise_custom--advertise_where--choice--vk8s_service))
 
 <a id="nestedatt--advertise_choice--advertise_custom--advertise_where--choice--advertise_on_public"></a>
 ### Nested Schema for `advertise_choice.advertise_custom.advertise_where.choice.advertise_on_public`
@@ -272,7 +278,7 @@ Read-Only:
 
 Required:
 
-- `network` (List of String) <br>**Allowed Values (choose one):** `["SITE_NETWORK_INSIDE", "SITE_NETWORK_OUTSIDE", "SITE_NETWORK_OUTSIDE_WITH_INTERNET_VIP", "SITE_NETWORK_SERVICE", "SITE_NETWORK_IP_FABRIC", "SITE_NETWORK_INSIDE_AND_OUTSIDE", "SITE_NETWORK_INSIDE_AND_OUTSIDE_WITH_INTERNET_VIP"]`
+- `network` (List of String) <br>**Allowed Values (choose one):** `["SITE_NETWORK_INSIDE_AND_OUTSIDE_WITH_INTERNET_VIP", "SITE_NETWORK_INSIDE", "SITE_NETWORK_OUTSIDE", "SITE_NETWORK_OUTSIDE_WITH_INTERNET_VIP", "SITE_NETWORK_SERVICE", "SITE_NETWORK_IP_FABRIC", "SITE_NETWORK_INSIDE_AND_OUTSIDE"]`
 - `site` (Attributes) Site Reference to site object (see [below for nested schema](#nestedatt--advertise_choice--advertise_custom--advertise_where--choice--site--site))
 
 Optional:
@@ -383,7 +389,7 @@ Optional:
 
 Required:
 
-- `network` (List of String) <br>**Allowed Values (choose one):** `["SITE_NETWORK_SERVICE", "SITE_NETWORK_IP_FABRIC", "SITE_NETWORK_INSIDE_AND_OUTSIDE", "SITE_NETWORK_INSIDE_AND_OUTSIDE_WITH_INTERNET_VIP", "SITE_NETWORK_INSIDE", "SITE_NETWORK_OUTSIDE", "SITE_NETWORK_OUTSIDE_WITH_INTERNET_VIP"]`
+- `network` (List of String) <br>**Allowed Values (choose one):** `["SITE_NETWORK_INSIDE", "SITE_NETWORK_OUTSIDE", "SITE_NETWORK_OUTSIDE_WITH_INTERNET_VIP", "SITE_NETWORK_SERVICE", "SITE_NETWORK_IP_FABRIC", "SITE_NETWORK_INSIDE_AND_OUTSIDE", "SITE_NETWORK_INSIDE_AND_OUTSIDE_WITH_INTERNET_VIP"]`
 - `virtual_site` (Attributes) Virtual Site Reference to virtual site object (see [below for nested schema](#nestedatt--advertise_choice--advertise_custom--advertise_where--choice--virtual_site--virtual_site))
 
 <a id="nestedatt--advertise_choice--advertise_custom--advertise_where--choice--virtual_site--virtual_site"></a>
@@ -467,23 +473,23 @@ Read-Only:
 
 
 
-<a id="nestedatt--advertise_choice--advertise_custom--advertise_where--choice--vk_8s_service"></a>
-### Nested Schema for `advertise_choice.advertise_custom.advertise_where.choice.vk_8s_service`
+<a id="nestedatt--advertise_choice--advertise_custom--advertise_where--choice--vk8s_service"></a>
+### Nested Schema for `advertise_choice.advertise_custom.advertise_where.choice.vk8s_service`
 
 Required:
 
-- `choice` (Attributes) RE or RE Virtual Site This defines a reference to a RE site or virtual site where a VIP could be advertised in the vK8s service network (see [below for nested schema](#nestedatt--advertise_choice--advertise_custom--advertise_where--choice--vk_8s_service--choice))
+- `choice` (Attributes) RE or RE Virtual Site This defines a reference to a RE site or virtual site where a VIP could be advertised in the vK8s service network (see [below for nested schema](#nestedatt--advertise_choice--advertise_custom--advertise_where--choice--vk8s_service--choice))
 
-<a id="nestedatt--advertise_choice--advertise_custom--advertise_where--choice--vk_8s_service--choice"></a>
-### Nested Schema for `advertise_choice.advertise_custom.advertise_where.choice.vk_8s_service.choice`
+<a id="nestedatt--advertise_choice--advertise_custom--advertise_where--choice--vk8s_service--choice"></a>
+### Nested Schema for `advertise_choice.advertise_custom.advertise_where.choice.vk8s_service.choice`
 
 Optional:
 
-- `site` (Attributes) RE Site Reference to site object (see [below for nested schema](#nestedatt--advertise_choice--advertise_custom--advertise_where--choice--vk_8s_service--choice--site))
-- `virtual_site` (Attributes) Virtual Site Reference to virtual site object (see [below for nested schema](#nestedatt--advertise_choice--advertise_custom--advertise_where--choice--vk_8s_service--choice--virtual_site))
+- `site` (Attributes) RE Site Reference to site object (see [below for nested schema](#nestedatt--advertise_choice--advertise_custom--advertise_where--choice--vk8s_service--choice--site))
+- `virtual_site` (Attributes) Virtual Site Reference to virtual site object (see [below for nested schema](#nestedatt--advertise_choice--advertise_custom--advertise_where--choice--vk8s_service--choice--virtual_site))
 
-<a id="nestedatt--advertise_choice--advertise_custom--advertise_where--choice--vk_8s_service--choice--site"></a>
-### Nested Schema for `advertise_choice.advertise_custom.advertise_where.choice.vk_8s_service.choice.site`
+<a id="nestedatt--advertise_choice--advertise_custom--advertise_where--choice--vk8s_service--choice--site"></a>
+### Nested Schema for `advertise_choice.advertise_custom.advertise_where.choice.vk8s_service.choice.site`
 
 Required:
 
@@ -495,8 +501,8 @@ Read-Only:
 - `tenant` (String)
 
 
-<a id="nestedatt--advertise_choice--advertise_custom--advertise_where--choice--vk_8s_service--choice--virtual_site"></a>
-### Nested Schema for `advertise_choice.advertise_custom.advertise_where.choice.vk_8s_service.choice.virtual_site`
+<a id="nestedatt--advertise_choice--advertise_custom--advertise_where--choice--vk8s_service--choice--virtual_site"></a>
+### Nested Schema for `advertise_choice.advertise_custom.advertise_where.choice.vk8s_service.choice.virtual_site`
 
 Required:
 
@@ -654,7 +660,7 @@ Required:
 
 Optional:
 
-- `methods` (List of String) <br>**Valid Options:** `["GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "TRACE", "PATCH", "ANY", "OPTIONS", "COPY"]` (Multiple selection allowed)
+- `methods` (List of String) <br>**Valid Options:** `["GET", "HEAD", "CONNECT", "COPY", "ANY", "POST", "PUT", "DELETE", "OPTIONS", "TRACE", "PATCH"]` (Multiple selection allowed)
 
 
 
@@ -699,7 +705,7 @@ Required:
 
 Optional:
 
-- `response_validation_properties` (List of String) <br>**Valid Options:** `["PROPERTY_SECURITY_SCHEMA", "PROPERTY_RESPONSE_CODE", "PROPERTY_QUERY_PARAMETERS", "PROPERTY_PATH_PARAMETERS", "PROPERTY_CONTENT_TYPE", "PROPERTY_COOKIE_PARAMETERS", "PROPERTY_HTTP_HEADERS", "PROPERTY_HTTP_BODY"]` (Multiple selection allowed)<br>**Default:** `PROPERTY_HTTP_HEADERS`
+- `response_validation_properties` (List of String) <br>**Valid Options:** `["PROPERTY_HTTP_BODY", "PROPERTY_SECURITY_SCHEMA", "PROPERTY_RESPONSE_CODE", "PROPERTY_QUERY_PARAMETERS", "PROPERTY_PATH_PARAMETERS", "PROPERTY_CONTENT_TYPE", "PROPERTY_COOKIE_PARAMETERS", "PROPERTY_HTTP_HEADERS"]` (Multiple selection allowed)<br>**Default:** `PROPERTY_HTTP_HEADERS`
 
 <a id="nestedatt--api_definition_choice--api_specification--validation_target_choice--validation_all_spec_endpoints--validation_mode--response_validation_mode_choice--response_validation_mode_active--validation_enforcement_type_choice"></a>
 ### Nested Schema for `api_definition_choice.api_specification.validation_target_choice.validation_all_spec_endpoints.validation_mode.response_validation_mode_choice.response_validation_mode_active.validation_enforcement_type_choice`
@@ -729,7 +735,7 @@ Required:
 
 Optional:
 
-- `request_validation_properties` (List of String) <br>**Valid Options:** `["PROPERTY_RESPONSE_CODE", "PROPERTY_QUERY_PARAMETERS", "PROPERTY_PATH_PARAMETERS", "PROPERTY_CONTENT_TYPE", "PROPERTY_COOKIE_PARAMETERS", "PROPERTY_HTTP_HEADERS", "PROPERTY_HTTP_BODY", "PROPERTY_SECURITY_SCHEMA"]` (Multiple selection allowed)<br>**Default:** `PROPERTY_PATH_PARAMETERS,PROPERTY_QUERY_PARAMETERS,PROPERTY_HTTP_HEADERS`
+- `request_validation_properties` (List of String) <br>**Valid Options:** `["PROPERTY_HTTP_BODY", "PROPERTY_SECURITY_SCHEMA", "PROPERTY_RESPONSE_CODE", "PROPERTY_QUERY_PARAMETERS", "PROPERTY_PATH_PARAMETERS", "PROPERTY_CONTENT_TYPE", "PROPERTY_COOKIE_PARAMETERS", "PROPERTY_HTTP_HEADERS"]` (Multiple selection allowed)<br>**Default:** `PROPERTY_PATH_PARAMETERS,PROPERTY_QUERY_PARAMETERS,PROPERTY_HTTP_HEADERS`
 
 <a id="nestedatt--api_definition_choice--api_specification--validation_target_choice--validation_all_spec_endpoints--validation_mode--validation_mode_choice--validation_mode_active--validation_enforcement_type_choice"></a>
 ### Nested Schema for `api_definition_choice.api_specification.validation_target_choice.validation_all_spec_endpoints.validation_mode.validation_mode_choice.validation_mode_active.validation_enforcement_type_choice`
@@ -867,7 +873,7 @@ Required:
 
 Optional:
 
-- `methods` (List of String) <br>**Valid Options:** `["POST", "PUT", "DELETE", "CONNECT", "TRACE", "PATCH", "ANY", "OPTIONS", "COPY", "GET", "HEAD"]` (Multiple selection allowed)
+- `methods` (List of String) <br>**Valid Options:** `["OPTIONS", "TRACE", "PATCH", "GET", "HEAD", "CONNECT", "COPY", "ANY", "POST", "PUT", "DELETE"]` (Multiple selection allowed)
 
 
 
@@ -915,7 +921,7 @@ Required:
 
 Optional:
 
-- `methods` (List of String) <br>**Valid Options:** `["PATCH", "ANY", "OPTIONS", "COPY", "GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "TRACE"]` (Multiple selection allowed)
+- `methods` (List of String) <br>**Valid Options:** `["ANY", "POST", "PUT", "DELETE", "OPTIONS", "TRACE", "PATCH", "GET", "HEAD", "CONNECT", "COPY"]` (Multiple selection allowed)
 
 
 
@@ -965,7 +971,7 @@ Required:
 
 Optional:
 
-- `response_validation_properties` (List of String) <br>**Valid Options:** `["PROPERTY_RESPONSE_CODE", "PROPERTY_QUERY_PARAMETERS", "PROPERTY_PATH_PARAMETERS", "PROPERTY_CONTENT_TYPE", "PROPERTY_COOKIE_PARAMETERS", "PROPERTY_HTTP_HEADERS", "PROPERTY_HTTP_BODY", "PROPERTY_SECURITY_SCHEMA"]` (Multiple selection allowed)<br>**Default:** `PROPERTY_HTTP_HEADERS`
+- `response_validation_properties` (List of String) <br>**Valid Options:** `["PROPERTY_SECURITY_SCHEMA", "PROPERTY_RESPONSE_CODE", "PROPERTY_QUERY_PARAMETERS", "PROPERTY_PATH_PARAMETERS", "PROPERTY_CONTENT_TYPE", "PROPERTY_COOKIE_PARAMETERS", "PROPERTY_HTTP_HEADERS", "PROPERTY_HTTP_BODY"]` (Multiple selection allowed)<br>**Default:** `PROPERTY_HTTP_HEADERS`
 
 <a id="nestedatt--api_definition_choice--api_specification--validation_target_choice--validation_custom_list--open_api_validation_rules--validation_mode--response_validation_mode_choice--response_validation_mode_active--validation_enforcement_type_choice"></a>
 ### Nested Schema for `api_definition_choice.api_specification.validation_target_choice.validation_custom_list.open_api_validation_rules.validation_mode.response_validation_mode_choice.response_validation_mode_active.validation_enforcement_type_choice`
@@ -995,7 +1001,7 @@ Required:
 
 Optional:
 
-- `request_validation_properties` (List of String) <br>**Valid Options:** `["PROPERTY_RESPONSE_CODE", "PROPERTY_QUERY_PARAMETERS", "PROPERTY_PATH_PARAMETERS", "PROPERTY_CONTENT_TYPE", "PROPERTY_COOKIE_PARAMETERS", "PROPERTY_HTTP_HEADERS", "PROPERTY_HTTP_BODY", "PROPERTY_SECURITY_SCHEMA"]` (Multiple selection allowed)<br>**Default:** `PROPERTY_PATH_PARAMETERS,PROPERTY_QUERY_PARAMETERS,PROPERTY_HTTP_HEADERS`
+- `request_validation_properties` (List of String) <br>**Valid Options:** `["PROPERTY_SECURITY_SCHEMA", "PROPERTY_RESPONSE_CODE", "PROPERTY_QUERY_PARAMETERS", "PROPERTY_PATH_PARAMETERS", "PROPERTY_CONTENT_TYPE", "PROPERTY_COOKIE_PARAMETERS", "PROPERTY_HTTP_HEADERS", "PROPERTY_HTTP_BODY"]` (Multiple selection allowed)<br>**Default:** `PROPERTY_PATH_PARAMETERS,PROPERTY_QUERY_PARAMETERS,PROPERTY_HTTP_HEADERS`
 
 <a id="nestedatt--api_definition_choice--api_specification--validation_target_choice--validation_custom_list--open_api_validation_rules--validation_mode--validation_mode_choice--validation_mode_active--validation_enforcement_type_choice"></a>
 ### Nested Schema for `api_definition_choice.api_specification.validation_target_choice.validation_custom_list.open_api_validation_rules.validation_mode.validation_mode_choice.validation_mode_active.validation_enforcement_type_choice`
@@ -1201,7 +1207,7 @@ Optional:
 
 Required:
 
-- `url` (String) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
+- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
 
 Optional:
 
@@ -1364,7 +1370,7 @@ Optional:
 
 Required:
 
-- `url` (String) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
+- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
 
 Optional:
 
@@ -1415,7 +1421,7 @@ Optional:
 
 Required:
 
-- `url` (String) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
+- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
 
 Optional:
 
@@ -1465,7 +1471,7 @@ Optional:
 
 Required:
 
-- `url` (String) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
+- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
 
 Optional:
 
@@ -1481,7 +1487,7 @@ Optional:
 Required:
 
 - `json_payload` (Attributes) Json Payload Defines the structure of the API request payload, including payload structure, fields and values. (see [below for nested schema](#nestedatt--api_testing_choice--api_testing--domains--credentials--credentials_choice--login_endpoint--json_payload))
-- `method` (List of String) <br>**Allowed Values (choose one):** `["TRACE", "PATCH", "ANY", "OPTIONS", "COPY", "GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT"]`
+- `method` (List of String) <br>**Allowed Values (choose one):** `["ANY", "POST", "PUT", "DELETE", "OPTIONS", "TRACE", "PATCH", "GET", "HEAD", "CONNECT", "COPY"]`
 - `path` (String) <br>**Validation:** `Length LengthAtMost(1024)`
 - `token_response_key` (String) Token Response Key Specifies the key name used to extract the authentication token from the login response, such as token or access_token.
 
@@ -1518,7 +1524,7 @@ Optional:
 
 Required:
 
-- `url` (String) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
+- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
 
 Optional:
 
@@ -1822,7 +1828,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "URL_DECODE", "LOWER_CASE", "UPPER_CASE"]` (Multiple selection allowed)
 
 
 
@@ -1873,7 +1879,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "URL_DECODE", "LOWER_CASE", "UPPER_CASE"]` (Multiple selection allowed)
 
 
 <a id="nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--client_choice"></a>
@@ -1921,7 +1927,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["REMOVE_WHITESPACE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "URL_DECODE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH"]` (Multiple selection allowed)
 
 
 
@@ -1963,7 +1969,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["BASE64_DECODE", "REMOVE_WHITESPACE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["REMOVE_WHITESPACE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "URL_DECODE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH"]` (Multiple selection allowed)
 
 
 
@@ -1974,7 +1980,7 @@ Optional:
 Optional:
 
 - `invert_matcher` (Boolean) <br>**Default:** `false`
-- `methods` (List of String) <br>**Valid Options:** `["PUT", "DELETE", "CONNECT", "TRACE", "PATCH", "ANY", "OPTIONS", "COPY", "GET", "HEAD", "POST"]` (Multiple selection allowed)
+- `methods` (List of String) <br>**Valid Options:** `["PUT", "DELETE", "OPTIONS", "TRACE", "PATCH", "GET", "HEAD", "CONNECT", "COPY", "ANY", "POST"]` (Multiple selection allowed)
 
 
 <a id="nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--ip_choice"></a>
@@ -2032,7 +2038,7 @@ Optional:
 - `prefix_values` (List of String) prefix values A list of path prefix values to match the input HTTP path against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input HTTP path against.
 - `suffix_values` (List of String) Suffix values A list of path suffix values to match the input HTTP path against.
-- `transformers` (List of String) <br>**Valid Options:** `["REMOVE_WHITESPACE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["TRANSFORMER_NONE", "BASE64_DECODE", "URL_DECODE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM"]` (Multiple selection allowed)
 
 
 <a id="nestedatt--challenge_type_choice--policy_based_challenge--rule_list--rules--spec--query_params"></a>
@@ -2063,7 +2069,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "URL_DECODE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE"]` (Multiple selection allowed)
 
 
 
@@ -2080,7 +2086,7 @@ Optional:
 
 Optional:
 
-- `classes` (List of String) <br>**Valid Options:** `["JBIFROST", "RANSOMWARE", "TRICKBOT", "TLS_FINGERPRINT_NONE", "ADWIND", "GOOTKIT", "QUAKBOT", "TROLDESH", "TOFSEE", "TORRENTLOCKER", "ANY_MALICIOUS_FINGERPRINT", "ADWARE", "DRIDEX", "GOZI"]` (Multiple selection allowed)
+- `classes` (List of String) <br>**Valid Options:** `["TORRENTLOCKER", "ADWARE", "ADWIND", "GOOTKIT", "QUAKBOT", "TOFSEE", "TRICKBOT", "TLS_FINGERPRINT_NONE", "ANY_MALICIOUS_FINGERPRINT", "DRIDEX", "GOZI", "JBIFROST", "RANSOMWARE", "TROLDESH"]` (Multiple selection allowed)
 - `exact_values` (List of String) exact values A list of exact TLS JA3 fingerprints to match the input TLS JA3 fingerprint against.
 - `excluded_values` (List of String) excluded values A list of TLS JA3 fingerprints to be excluded when matching the input TLS JA3 fingerprint. This can be used to skip known false positives when using one or more known TLS fingerprint classes in the enclosing matcher.
 
@@ -2402,7 +2408,7 @@ Optional:
 
 Required:
 
-- `xfcc_header_elements` (List of String) <br>**Valid Options:** `["XFCC_URI", "XFCC_DNS", "XFCC_NONE", "XFCC_CERT", "XFCC_CHAIN", "XFCC_SUBJECT"]` (Multiple selection allowed)
+- `xfcc_header_elements` (List of String) <br>**Valid Options:** `["XFCC_SUBJECT", "XFCC_URI", "XFCC_DNS", "XFCC_NONE", "XFCC_CERT", "XFCC_CHAIN"]` (Multiple selection allowed)
 
 
 
@@ -2434,8 +2440,8 @@ Required:
 
 Optional:
 
-- `max_version` (List of String) <br>**Allowed Values (choose one):** `["TLSv1_1", "TLSv1_2", "TLSv1_3", "TLS_AUTO", "TLSv1_0"]`
-- `min_version` (List of String) <br>**Allowed Values (choose one):** `["TLSv1_1", "TLSv1_2", "TLSv1_3", "TLS_AUTO", "TLSv1_0"]`
+- `max_version` (List of String) <br>**Allowed Values (choose one):** `["TLS_AUTO", "TLSv1_0", "TLSv1_1", "TLSv1_2", "TLSv1_3"]`
+- `min_version` (List of String) <br>**Allowed Values (choose one):** `["TLSv1_2", "TLSv1_3", "TLS_AUTO", "TLSv1_0", "TLSv1_1"]`
 
 
 
@@ -2583,7 +2589,7 @@ Optional:
 
 Required:
 
-- `url` (String) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
+- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
 
 Optional:
 
@@ -2637,7 +2643,7 @@ Required:
 
 Optional:
 
-- `max_version` (List of String) <br>**Allowed Values (choose one):** `["TLS_AUTO", "TLSv1_0", "TLSv1_1", "TLSv1_2", "TLSv1_3"]`
+- `max_version` (List of String) <br>**Allowed Values (choose one):** `["TLSv1_0", "TLSv1_1", "TLSv1_2", "TLSv1_3", "TLS_AUTO"]`
 - `min_version` (List of String) <br>**Allowed Values (choose one):** `["TLS_AUTO", "TLSv1_0", "TLSv1_1", "TLSv1_2", "TLSv1_3"]`
 
 
@@ -2826,7 +2832,7 @@ Optional:
 
 Required:
 
-- `xfcc_header_elements` (List of String) <br>**Valid Options:** `["XFCC_URI", "XFCC_DNS", "XFCC_NONE", "XFCC_CERT", "XFCC_CHAIN", "XFCC_SUBJECT"]` (Multiple selection allowed)
+- `xfcc_header_elements` (List of String) <br>**Valid Options:** `["XFCC_NONE", "XFCC_CERT", "XFCC_CHAIN", "XFCC_SUBJECT", "XFCC_URI", "XFCC_DNS"]` (Multiple selection allowed)
 
 
 
@@ -3001,7 +3007,7 @@ Optional:
 
 - `action` (Attributes) action Report will identify and log threats, whereas Block will both log and block threats (see [below for nested schema](#nestedatt--malware_protection_choice--malware_protection_settings--malware_protection_rules--action))
 - `domain` (Attributes) Domain Domain to be matched (see [below for nested schema](#nestedatt--malware_protection_choice--malware_protection_settings--malware_protection_rules--domain))
-- `http_methods` (List of String) <br>**Valid Options:** `["GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "TRACE", "PATCH", "ANY", "OPTIONS", "COPY"]` (Multiple selection allowed)
+- `http_methods` (List of String) <br>**Valid Options:** `["ANY", "POST", "PUT", "DELETE", "OPTIONS", "TRACE", "PATCH", "GET", "HEAD", "CONNECT", "COPY"]` (Multiple selection allowed)
 - `path` (Attributes) Path Path to be matched (see [below for nested schema](#nestedatt--malware_protection_choice--malware_protection_settings--malware_protection_rules--path))
 
 <a id="nestedatt--malware_protection_choice--malware_protection_settings--malware_protection_rules--metadata"></a>
@@ -3159,7 +3165,7 @@ Required:
 
 Optional:
 
-- `methods` (List of String) <br>**Valid Options:** `["GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "TRACE", "PATCH", "ANY", "OPTIONS", "COPY"]` (Multiple selection allowed)
+- `methods` (List of String) <br>**Valid Options:** `["PUT", "DELETE", "OPTIONS", "TRACE", "PATCH", "GET", "HEAD", "CONNECT", "COPY", "ANY", "POST"]` (Multiple selection allowed)
 
 
 <a id="nestedatt--rate_limit_choice--api_rate_limit--ip_allowed_list_choice--bypass_rate_limiting_rules--bypass_rate_limiting_rules--destination_type_choice--api_groups"></a>
@@ -3214,7 +3220,7 @@ Required:
 
 Required:
 
-- `ip_threat_categories` (List of String) <br>**Valid Options:** `["WINDOWS_EXPLOITS", "WEB_ATTACKS", "BOTNETS", "PHISHING", "MOBILE_THREATS", "SPAM_SOURCES", "SCANNERS", "REPUTATION", "PROXY", "TOR_PROXY", "DENIAL_OF_SERVICE", "NETWORK"]` (Multiple selection allowed)
+- `ip_threat_categories` (List of String) <br>**Valid Options:** `["SPAM_SOURCES", "BOTNETS", "SCANNERS", "PHISHING", "PROXY", "TOR_PROXY", "DENIAL_OF_SERVICE", "NETWORK", "WINDOWS_EXPLOITS", "WEB_ATTACKS", "REPUTATION", "MOBILE_THREATS"]` (Multiple selection allowed)
 
 
 
@@ -3299,7 +3305,7 @@ Optional:
 
 Optional:
 
-- `classes` (List of String) <br>**Valid Options:** `["ANY_MALICIOUS_FINGERPRINT", "ADWARE", "DRIDEX", "GOZI", "JBIFROST", "RANSOMWARE", "TRICKBOT", "TLS_FINGERPRINT_NONE", "ADWIND", "GOOTKIT", "QUAKBOT", "TROLDESH", "TOFSEE", "TORRENTLOCKER"]` (Multiple selection allowed)
+- `classes` (List of String) <br>**Valid Options:** `["JBIFROST", "RANSOMWARE", "TROLDESH", "TORRENTLOCKER", "ADWARE", "ADWIND", "GOOTKIT", "QUAKBOT", "TOFSEE", "TRICKBOT", "TLS_FINGERPRINT_NONE", "ANY_MALICIOUS_FINGERPRINT", "DRIDEX", "GOZI"]` (Multiple selection allowed)
 - `exact_values` (List of String) exact values A list of exact TLS JA3 fingerprints to match the input TLS JA3 fingerprint against.
 - `excluded_values` (List of String) excluded values A list of TLS JA3 fingerprints to be excluded when matching the input TLS JA3 fingerprint. This can be used to skip known false positives when using one or more known TLS fingerprint classes in the enclosing matcher.
 
@@ -3343,7 +3349,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "URL_DECODE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_LEFT"]` (Multiple selection allowed)
 
 
 
@@ -3376,7 +3382,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "URL_DECODE"]` (Multiple selection allowed)
 
 
 
@@ -3409,7 +3415,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "URL_DECODE", "LOWER_CASE", "UPPER_CASE"]` (Multiple selection allowed)
 
 
 
@@ -3442,7 +3448,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["BASE64_DECODE", "URL_DECODE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE"]` (Multiple selection allowed)
 
 
 
@@ -3568,7 +3574,7 @@ Read-Only:
 Optional:
 
 - `invert_matcher` (Boolean) <br>**Default:** `false`
-- `methods` (List of String) <br>**Valid Options:** `["GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "TRACE", "PATCH", "ANY", "OPTIONS", "COPY"]` (Multiple selection allowed)
+- `methods` (List of String) <br>**Valid Options:** `["OPTIONS", "TRACE", "PATCH", "GET", "HEAD", "CONNECT", "COPY", "ANY", "POST", "PUT", "DELETE"]` (Multiple selection allowed)
 
 
 <a id="nestedatt--rate_limit_choice--api_rate_limit--api_endpoint_rules--client_matcher"></a>
@@ -3605,7 +3611,7 @@ Required:
 
 Required:
 
-- `ip_threat_categories` (List of String) <br>**Valid Options:** `["BOTNETS", "PHISHING", "MOBILE_THREATS", "SPAM_SOURCES", "SCANNERS", "REPUTATION", "PROXY", "TOR_PROXY", "DENIAL_OF_SERVICE", "NETWORK", "WINDOWS_EXPLOITS", "WEB_ATTACKS"]` (Multiple selection allowed)
+- `ip_threat_categories` (List of String) <br>**Valid Options:** `["DENIAL_OF_SERVICE", "NETWORK", "WINDOWS_EXPLOITS", "WEB_ATTACKS", "REPUTATION", "MOBILE_THREATS", "SPAM_SOURCES", "BOTNETS", "SCANNERS", "PHISHING", "PROXY", "TOR_PROXY"]` (Multiple selection allowed)
 
 
 
@@ -3690,7 +3696,7 @@ Optional:
 
 Optional:
 
-- `classes` (List of String) <br>**Valid Options:** `["TROLDESH", "TOFSEE", "TORRENTLOCKER", "ANY_MALICIOUS_FINGERPRINT", "ADWARE", "DRIDEX", "GOZI", "JBIFROST", "RANSOMWARE", "TRICKBOT", "TLS_FINGERPRINT_NONE", "ADWIND", "GOOTKIT", "QUAKBOT"]` (Multiple selection allowed)
+- `classes` (List of String) <br>**Valid Options:** `["TLS_FINGERPRINT_NONE", "ANY_MALICIOUS_FINGERPRINT", "DRIDEX", "GOZI", "JBIFROST", "RANSOMWARE", "TROLDESH", "TORRENTLOCKER", "ADWARE", "ADWIND", "GOOTKIT", "QUAKBOT", "TOFSEE", "TRICKBOT"]` (Multiple selection allowed)
 - `exact_values` (List of String) exact values A list of exact TLS JA3 fingerprints to match the input TLS JA3 fingerprint against.
 - `excluded_values` (List of String) excluded values A list of TLS JA3 fingerprints to be excluded when matching the input TLS JA3 fingerprint. This can be used to skip known false positives when using one or more known TLS fingerprint classes in the enclosing matcher.
 
@@ -3734,7 +3740,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["TRANSFORMER_NONE", "BASE64_DECODE", "URL_DECODE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM"]` (Multiple selection allowed)
 
 
 
@@ -3767,7 +3773,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["UPPER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "URL_DECODE", "LOWER_CASE"]` (Multiple selection allowed)
 
 
 
@@ -3800,7 +3806,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["REMOVE_WHITESPACE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "URL_DECODE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH"]` (Multiple selection allowed)
 
 
 
@@ -3833,7 +3839,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "URL_DECODE"]` (Multiple selection allowed)
 
 
 
@@ -3878,7 +3884,7 @@ Optional:
 Required:
 
 - `count_by_choice` (Attributes) Count by The classification criteria for requests counts. (see [below for nested schema](#nestedatt--rate_limit_choice--api_rate_limit--server_url_rules--rate_limiter_choice--inline_rate_limiter--count_by_choice))
-- `unit` (List of String) <br>**Allowed Values (choose one):** `["MINUTE", "HOUR", "DAY", "SECOND"]`
+- `unit` (List of String) <br>**Allowed Values (choose one):** `["SECOND", "MINUTE", "HOUR", "DAY"]`
 
 Optional:
 
@@ -3955,7 +3961,7 @@ Required:
 
 Required:
 
-- `ip_threat_categories` (List of String) <br>**Valid Options:** `["WEB_ATTACKS", "BOTNETS", "PHISHING", "MOBILE_THREATS", "SPAM_SOURCES", "SCANNERS", "REPUTATION", "PROXY", "TOR_PROXY", "DENIAL_OF_SERVICE", "NETWORK", "WINDOWS_EXPLOITS"]` (Multiple selection allowed)
+- `ip_threat_categories` (List of String) <br>**Valid Options:** `["SPAM_SOURCES", "BOTNETS", "SCANNERS", "PHISHING", "PROXY", "TOR_PROXY", "DENIAL_OF_SERVICE", "NETWORK", "WINDOWS_EXPLOITS", "WEB_ATTACKS", "REPUTATION", "MOBILE_THREATS"]` (Multiple selection allowed)
 
 
 
@@ -4040,7 +4046,7 @@ Optional:
 
 Optional:
 
-- `classes` (List of String) <br>**Valid Options:** `["DRIDEX", "GOZI", "JBIFROST", "RANSOMWARE", "TRICKBOT", "TLS_FINGERPRINT_NONE", "ADWIND", "GOOTKIT", "QUAKBOT", "TROLDESH", "TOFSEE", "TORRENTLOCKER", "ANY_MALICIOUS_FINGERPRINT", "ADWARE"]` (Multiple selection allowed)
+- `classes` (List of String) <br>**Valid Options:** `["ANY_MALICIOUS_FINGERPRINT", "DRIDEX", "GOZI", "JBIFROST", "RANSOMWARE", "TROLDESH", "TORRENTLOCKER", "ADWARE", "ADWIND", "GOOTKIT", "QUAKBOT", "TOFSEE", "TRICKBOT", "TLS_FINGERPRINT_NONE"]` (Multiple selection allowed)
 - `exact_values` (List of String) exact values A list of exact TLS JA3 fingerprints to match the input TLS JA3 fingerprint against.
 - `excluded_values` (List of String) excluded values A list of TLS JA3 fingerprints to be excluded when matching the input TLS JA3 fingerprint. This can be used to skip known false positives when using one or more known TLS fingerprint classes in the enclosing matcher.
 
@@ -4084,7 +4090,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "URL_DECODE"]` (Multiple selection allowed)
 
 
 
@@ -4117,7 +4123,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["UPPER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "URL_DECODE", "LOWER_CASE"]` (Multiple selection allowed)
 
 
 
@@ -4150,7 +4156,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE", "LOWER_CASE", "UPPER_CASE"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "URL_DECODE"]` (Multiple selection allowed)
 
 
 
@@ -4183,7 +4189,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "URL_DECODE"]` (Multiple selection allowed)
 
 
 
@@ -4278,7 +4284,7 @@ Read-Only:
 
 Required:
 
-- `unit` (List of String) <br>**Allowed Values (choose one):** `["SECOND", "MINUTE", "HOUR", "DAY"]`
+- `unit` (List of String) <br>**Allowed Values (choose one):** `["HOUR", "DAY", "SECOND", "MINUTE"]`
 
 Optional:
 
@@ -4482,6 +4488,670 @@ Read-Only:
 
 
 
+<a id="nestedatt--api_protection_rules"></a>
+### Nested Schema for `api_protection_rules`
+
+Optional:
+
+- `api_endpoint_rules` (Attributes List) api_endpoint_rules This category defines specific rules per API endpoints. If request matches any of these rules, skipping second category rules. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules))
+- `api_groups_rules` (Attributes List) api_groups_rules This category includes rules per API group or Server URL. For API groups, refer to API Definition which includes API groups derived from uploaded swaggers. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules))
+
+<a id="nestedatt--api_protection_rules--api_endpoint_rules"></a>
+### Nested Schema for `api_protection_rules.api_endpoint_rules`
+
+Required:
+
+- `action` (Attributes) action The action to take if the input request matches the rule. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--action))
+- `api_endpoint_path` (String) <br>**Validation:** `Length LengthAtMost(1024)`
+- `domain_choice` (Attributes) domain choices Choose if the rule will apply for all domains or a specific one. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--domain_choice))
+- `metadata` (Attributes) metadata Common attributes for the rule including name and description. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--metadata))
+
+Optional:
+
+- `api_endpoint_method` (Attributes) method The list of expected values for the HTTP method in the request API. The actual value of the HTTP method is extracted from the HTTP request. The predicate evaluates to true if the actual HTTP method belongs is present in the list of expected values. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--api_endpoint_method))
+- `client_matcher` (Attributes) client_matcher Conditions related to the origin of the request, such as client IP, TLS fingerprint, etc. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--client_matcher))
+- `request_matcher` (Attributes) request_matcher Conditions related to the request, such as query parameters, headers, etc. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--request_matcher))
+
+<a id="nestedatt--api_protection_rules--api_endpoint_rules--action"></a>
+### Nested Schema for `api_protection_rules.api_endpoint_rules.action`
+
+Required:
+
+- `action_choice` (Attributes) action The action to take when rule is matched. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--action--action_choice))
+
+<a id="nestedatt--api_protection_rules--api_endpoint_rules--action--action_choice"></a>
+### Nested Schema for `api_protection_rules.api_endpoint_rules.action.action_choice`
+
+Optional:
+
+- `allow` (Boolean) Allow Allow the request to proceed.
+- `deny` (Boolean) Deny Deny the request.
+
+
+
+<a id="nestedatt--api_protection_rules--api_endpoint_rules--domain_choice"></a>
+### Nested Schema for `api_protection_rules.api_endpoint_rules.domain_choice`
+
+Optional:
+
+- `any_domain` (Boolean) any domain The rule will apply for all domains.
+- `specific_domain` (String) <br>**Validation:** `Length LengthAtMost(128)`
+
+
+<a id="nestedatt--api_protection_rules--api_endpoint_rules--metadata"></a>
+### Nested Schema for `api_protection_rules.api_endpoint_rules.metadata`
+
+Required:
+
+- `name` (String) <br>**Validation:** `Length LengthAtLeast(1)`
+
+Optional:
+
+- `description` (String) <br>**Validation:** `Length LengthAtMost(256)`
+
+
+<a id="nestedatt--api_protection_rules--api_endpoint_rules--api_endpoint_method"></a>
+### Nested Schema for `api_protection_rules.api_endpoint_rules.api_endpoint_method`
+
+Optional:
+
+- `invert_matcher` (Boolean) <br>**Default:** `false`
+- `methods` (List of String) <br>**Valid Options:** `["OPTIONS", "TRACE", "PATCH", "GET", "HEAD", "CONNECT", "COPY", "ANY", "POST", "PUT", "DELETE"]` (Multiple selection allowed)
+
+
+<a id="nestedatt--api_protection_rules--api_endpoint_rules--client_matcher"></a>
+### Nested Schema for `api_protection_rules.api_endpoint_rules.client_matcher`
+
+Required:
+
+- `client_choice` (Attributes) client choice Select clients for which the rule will be applied. The actual names of the client are extracted from its TLS certificate. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--client_matcher--client_choice))
+- `ip_asn_choice` (Attributes) ip asn choice Match source IP address/ASN  of the request (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--client_matcher--ip_asn_choice))
+
+Optional:
+
+- `tls_fingerprint_matcher` (Attributes) TLS JA3 fingerprint matcher TLS JA3 fingerprints to be matched. The predicate evaluates to true if the TLS fingerprint matches any of the exact values or classes of known TLS fingerprints. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--client_matcher--tls_fingerprint_matcher))
+
+<a id="nestedatt--api_protection_rules--api_endpoint_rules--client_matcher--client_choice"></a>
+### Nested Schema for `api_protection_rules.api_endpoint_rules.client_matcher.client_choice`
+
+Optional:
+
+- `any_client` (Boolean) any ip Any Client
+- `client_selector` (Attributes) client selector A label selector that describes the expected set of clients. The labels associated with the client making the API request are used to evaluate the label expressions in the selector. These labels can be derived from the client TLS certificate or from the volterra internal control plane. This is a more flexible and powerful version of the client name matcher predicate that allows a given rule to be applicable to a set of clients based on the client labels rather than being limited to relying on patterns in the client name. The predicate evaluates to true if the expressions in the label selector are true for the client labels. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--client_matcher--client_choice--client_selector))
+- `ip_threat_category_list` (Attributes) IP Threat Category List IP threat categories to choose from (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--client_matcher--client_choice--ip_threat_category_list))
+
+<a id="nestedatt--api_protection_rules--api_endpoint_rules--client_matcher--client_choice--client_selector"></a>
+### Nested Schema for `api_protection_rules.api_endpoint_rules.client_matcher.client_choice.client_selector`
+
+Required:
+
+- `expressions` (List of String) expressions expressions contains the kubernetes style label expression for selections.
+
+
+<a id="nestedatt--api_protection_rules--api_endpoint_rules--client_matcher--client_choice--ip_threat_category_list"></a>
+### Nested Schema for `api_protection_rules.api_endpoint_rules.client_matcher.client_choice.ip_threat_category_list`
+
+Required:
+
+- `ip_threat_categories` (List of String) <br>**Valid Options:** `["SPAM_SOURCES", "BOTNETS", "SCANNERS", "PHISHING", "PROXY", "TOR_PROXY", "DENIAL_OF_SERVICE", "NETWORK", "WINDOWS_EXPLOITS", "WEB_ATTACKS", "REPUTATION", "MOBILE_THREATS"]` (Multiple selection allowed)
+
+
+
+<a id="nestedatt--api_protection_rules--api_endpoint_rules--client_matcher--ip_asn_choice"></a>
+### Nested Schema for `api_protection_rules.api_endpoint_rules.client_matcher.ip_asn_choice`
+
+Optional:
+
+- `any_ip` (Boolean) any ip Any Source IP
+- `asn_list` (Attributes) asn list List of 4-byte ASN values. The predicate evaluates to true if the origin ASN is present in the ASN list. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--client_matcher--ip_asn_choice--asn_list))
+- `asn_matcher` (Attributes) asn matcher List of references to BGP ASN Set objects. The predicate evaluates to true if the origin ASN is present in one of the BGP ASN Set objects. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--client_matcher--ip_asn_choice--asn_matcher))
+- `ip_matcher` (Attributes) ip matcher List of references to IP Prefix Set objects. The predicate evaluates to true if the client IP Address is covered by one or more of the IP Prefixes in the IP Prefix Sets. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--client_matcher--ip_asn_choice--ip_matcher))
+- `ip_prefix_list` (Attributes) ip prefix list List of IP Prefixes values. The predicate evaluates to true if the client IP Address is covered by one or more of the IP Prefixes from the list. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--client_matcher--ip_asn_choice--ip_prefix_list))
+
+<a id="nestedatt--api_protection_rules--api_endpoint_rules--client_matcher--ip_asn_choice--asn_list"></a>
+### Nested Schema for `api_protection_rules.api_endpoint_rules.client_matcher.ip_asn_choice.asn_list`
+
+Required:
+
+- `as_numbers` (List of Number) as numbers An unordered set of RFC 6793 defined 4-byte AS numbers that can be used to create allow or deny lists for use in network policy or service policy. It can be used to create the allow list only for DNS Load Balancer.
+
+
+<a id="nestedatt--api_protection_rules--api_endpoint_rules--client_matcher--ip_asn_choice--asn_matcher"></a>
+### Nested Schema for `api_protection_rules.api_endpoint_rules.client_matcher.ip_asn_choice.asn_matcher`
+
+Required:
+
+- `asn_sets` (Attributes List) asn_sets A list of references to bgp_asn_set objects. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--client_matcher--ip_asn_choice--asn_matcher--asn_sets))
+
+<a id="nestedatt--api_protection_rules--api_endpoint_rules--client_matcher--ip_asn_choice--asn_matcher--asn_sets"></a>
+### Nested Schema for `api_protection_rules.api_endpoint_rules.client_matcher.ip_asn_choice.asn_matcher.asn_sets`
+
+Required:
+
+- `name` (String)
+- `namespace` (String)
+
+Read-Only:
+
+- `tenant` (String)
+
+
+
+<a id="nestedatt--api_protection_rules--api_endpoint_rules--client_matcher--ip_asn_choice--ip_matcher"></a>
+### Nested Schema for `api_protection_rules.api_endpoint_rules.client_matcher.ip_asn_choice.ip_matcher`
+
+Required:
+
+- `prefix_sets` (Attributes List) prefix_sets A list of references to ip_prefix_set objects. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--client_matcher--ip_asn_choice--ip_matcher--prefix_sets))
+
+Optional:
+
+- `invert_matcher` (Boolean) <br>**Default:** `false`
+
+<a id="nestedatt--api_protection_rules--api_endpoint_rules--client_matcher--ip_asn_choice--ip_matcher--prefix_sets"></a>
+### Nested Schema for `api_protection_rules.api_endpoint_rules.client_matcher.ip_asn_choice.ip_matcher.prefix_sets`
+
+Required:
+
+- `name` (String)
+- `namespace` (String)
+
+Read-Only:
+
+- `tenant` (String)
+
+
+
+<a id="nestedatt--api_protection_rules--api_endpoint_rules--client_matcher--ip_asn_choice--ip_prefix_list"></a>
+### Nested Schema for `api_protection_rules.api_endpoint_rules.client_matcher.ip_asn_choice.ip_prefix_list`
+
+Optional:
+
+- `invert_match` (Boolean) <br>**Default:** `false`
+- `ip_prefixes` (List of String) ip prefixes List of IPv4 prefix strings.
+- `ipv6_prefixes` (List of String) ipv6 prefixes List of IPv6 prefix strings.
+
+
+
+<a id="nestedatt--api_protection_rules--api_endpoint_rules--client_matcher--tls_fingerprint_matcher"></a>
+### Nested Schema for `api_protection_rules.api_endpoint_rules.client_matcher.tls_fingerprint_matcher`
+
+Optional:
+
+- `classes` (List of String) <br>**Valid Options:** `["RANSOMWARE", "TROLDESH", "TORRENTLOCKER", "ADWARE", "ADWIND", "GOOTKIT", "QUAKBOT", "TOFSEE", "TRICKBOT", "TLS_FINGERPRINT_NONE", "ANY_MALICIOUS_FINGERPRINT", "DRIDEX", "GOZI", "JBIFROST"]` (Multiple selection allowed)
+- `exact_values` (List of String) exact values A list of exact TLS JA3 fingerprints to match the input TLS JA3 fingerprint against.
+- `excluded_values` (List of String) excluded values A list of TLS JA3 fingerprints to be excluded when matching the input TLS JA3 fingerprint. This can be used to skip known false positives when using one or more known TLS fingerprint classes in the enclosing matcher.
+
+
+
+<a id="nestedatt--api_protection_rules--api_endpoint_rules--request_matcher"></a>
+### Nested Schema for `api_protection_rules.api_endpoint_rules.request_matcher`
+
+Optional:
+
+- `cookie_matchers` (Attributes List) cookie matchers A list of predicates for all cookies that need to be matched. The criteria for matching each cookie is described in individual instances of CookieMatcherType. The actual cookie values are extracted from the request API as a list of strings for each cookie name. Note that all specified cookie matcher predicates must evaluate to true. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--request_matcher--cookie_matchers))
+- `headers` (Attributes List) headers A list of predicates for various HTTP headers that need to match. The criteria for matching each HTTP header are described in individual HeaderMatcherType instances. The actual HTTP header values are extracted from the request API as a list of strings for each HTTP header type. Note that all specified header predicates must evaluate to true. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--request_matcher--headers))
+- `jwt_claims` (Attributes List) JWT claims A list of predicates for various JWT claims that need to match. The criteria for matching each JWT claim are described in individual JWTClaimMatcherType instances. The actual JWT claims values are extracted from the JWT payload as a list of strings. Note that all specified JWT claim predicates must evaluate to true. Note that this feature only works on LBs with JWT Validation feature enabled. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--request_matcher--jwt_claims))
+- `query_params` (Attributes List) query params A list of predicates for all query parameters that need to be matched. The criteria for matching each query parameter are described in individual instances of QueryParameterMatcherType. The actual query parameter values are extracted from the request API as a list of strings for each query parameter name. Note that all specified query parameter predicates must evaluate to true. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--request_matcher--query_params))
+
+<a id="nestedatt--api_protection_rules--api_endpoint_rules--request_matcher--cookie_matchers"></a>
+### Nested Schema for `api_protection_rules.api_endpoint_rules.request_matcher.cookie_matchers`
+
+Required:
+
+- `match_choice` (Attributes) match Select Match Options. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--request_matcher--cookie_matchers--match_choice))
+- `name` (String) name A case-sensitive cookie name.
+
+Optional:
+
+- `invert_matcher` (Boolean) <br>**Default:** `false`
+
+<a id="nestedatt--api_protection_rules--api_endpoint_rules--request_matcher--cookie_matchers--match_choice"></a>
+### Nested Schema for `api_protection_rules.api_endpoint_rules.request_matcher.cookie_matchers.match_choice`
+
+Optional:
+
+- `check_not_present` (Boolean) check_not_present Check that the cookie is not present.
+- `check_present` (Boolean) check_present Check that the cookie is present.
+- `item` (Attributes) item Criteria for matching the values for the cookie. The match is successful if any of the values in the input satisfies the criteria in the matcher. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--request_matcher--cookie_matchers--match_choice--item))
+
+<a id="nestedatt--api_protection_rules--api_endpoint_rules--request_matcher--cookie_matchers--match_choice--item"></a>
+### Nested Schema for `api_protection_rules.api_endpoint_rules.request_matcher.cookie_matchers.match_choice.item`
+
+Optional:
+
+- `exact_values` (List of String) exact values A list of exact values to match the input against.
+- `regex_values` (List of String) regex values A list of regular expressions to match the input against.
+- `transformers` (List of String) <br>**Valid Options:** `["URL_DECODE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE"]` (Multiple selection allowed)
+
+
+
+
+<a id="nestedatt--api_protection_rules--api_endpoint_rules--request_matcher--headers"></a>
+### Nested Schema for `api_protection_rules.api_endpoint_rules.request_matcher.headers`
+
+Required:
+
+- `match_choice` (Attributes) match Select Match Options. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--request_matcher--headers--match_choice))
+- `name` (String) name A case-insensitive HTTP header name.
+
+Optional:
+
+- `invert_matcher` (Boolean) <br>**Default:** `false`
+
+<a id="nestedatt--api_protection_rules--api_endpoint_rules--request_matcher--headers--match_choice"></a>
+### Nested Schema for `api_protection_rules.api_endpoint_rules.request_matcher.headers.match_choice`
+
+Optional:
+
+- `check_not_present` (Boolean) check_not_present Check that the header is not present.
+- `check_present` (Boolean) check_present Check that the header is present.
+- `item` (Attributes) item Criteria for matching the values for the header. The match is successful if any of the values in the input satisfies the criteria in the matcher. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--request_matcher--headers--match_choice--item))
+
+<a id="nestedatt--api_protection_rules--api_endpoint_rules--request_matcher--headers--match_choice--item"></a>
+### Nested Schema for `api_protection_rules.api_endpoint_rules.request_matcher.headers.match_choice.item`
+
+Optional:
+
+- `exact_values` (List of String) exact values A list of exact values to match the input against.
+- `regex_values` (List of String) regex values A list of regular expressions to match the input against.
+- `transformers` (List of String) <br>**Valid Options:** `["TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "URL_DECODE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE"]` (Multiple selection allowed)
+
+
+
+
+<a id="nestedatt--api_protection_rules--api_endpoint_rules--request_matcher--jwt_claims"></a>
+### Nested Schema for `api_protection_rules.api_endpoint_rules.request_matcher.jwt_claims`
+
+Required:
+
+- `match_choice` (Attributes) match Select Match Options. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--request_matcher--jwt_claims--match_choice))
+- `name` (String) name JWT claim name.
+
+Optional:
+
+- `invert_matcher` (Boolean) <br>**Default:** `false`
+
+<a id="nestedatt--api_protection_rules--api_endpoint_rules--request_matcher--jwt_claims--match_choice"></a>
+### Nested Schema for `api_protection_rules.api_endpoint_rules.request_matcher.jwt_claims.match_choice`
+
+Optional:
+
+- `check_not_present` (Boolean) check_not_present Check that the JWT Claim is not present.
+- `check_present` (Boolean) check_present Check that the JWT Claim is present.
+- `item` (Attributes) item Criteria for matching the values for the JWT Claim. The match is successful if any of the values in the input satisfies the criteria in the matcher. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--request_matcher--jwt_claims--match_choice--item))
+
+<a id="nestedatt--api_protection_rules--api_endpoint_rules--request_matcher--jwt_claims--match_choice--item"></a>
+### Nested Schema for `api_protection_rules.api_endpoint_rules.request_matcher.jwt_claims.match_choice.item`
+
+Optional:
+
+- `exact_values` (List of String) exact values A list of exact values to match the input against.
+- `regex_values` (List of String) regex values A list of regular expressions to match the input against.
+- `transformers` (List of String) <br>**Valid Options:** `["TRANSFORMER_NONE", "BASE64_DECODE", "URL_DECODE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM"]` (Multiple selection allowed)
+
+
+
+
+<a id="nestedatt--api_protection_rules--api_endpoint_rules--request_matcher--query_params"></a>
+### Nested Schema for `api_protection_rules.api_endpoint_rules.request_matcher.query_params`
+
+Required:
+
+- `key` (String) key A case-sensitive HTTP query parameter name.
+- `match_choice` (Attributes) match Select Match Options. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--request_matcher--query_params--match_choice))
+
+Optional:
+
+- `invert_matcher` (Boolean) <br>**Default:** `false`
+
+<a id="nestedatt--api_protection_rules--api_endpoint_rules--request_matcher--query_params--match_choice"></a>
+### Nested Schema for `api_protection_rules.api_endpoint_rules.request_matcher.query_params.match_choice`
+
+Optional:
+
+- `check_not_present` (Boolean) check_not_present Check that the query parameter is not present.
+- `check_present` (Boolean) check_present Check that the query parameter is present.
+- `item` (Attributes) item Criteria for matching the values for the given query parameter. The match is successful if any of the values for the query parameter satisfies the criteria in the matcher. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--request_matcher--query_params--match_choice--item))
+
+<a id="nestedatt--api_protection_rules--api_endpoint_rules--request_matcher--query_params--match_choice--item"></a>
+### Nested Schema for `api_protection_rules.api_endpoint_rules.request_matcher.query_params.match_choice.item`
+
+Optional:
+
+- `exact_values` (List of String) exact values A list of exact values to match the input against.
+- `regex_values` (List of String) regex values A list of regular expressions to match the input against.
+- `transformers` (List of String) <br>**Valid Options:** `["BASE64_DECODE", "URL_DECODE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE"]` (Multiple selection allowed)
+
+
+
+
+
+
+<a id="nestedatt--api_protection_rules--api_groups_rules"></a>
+### Nested Schema for `api_protection_rules.api_groups_rules`
+
+Required:
+
+- `action` (Attributes) action The action to take if the input request matches the rule. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--action))
+- `domain_choice` (Attributes) domain choices Choose if the rule will apply for all domains or a specific one. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--domain_choice))
+- `metadata` (Attributes) metadata Common attributes for the rule including name and description. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--metadata))
+
+Optional:
+
+- `api_group` (String) <br>**Validation:** `Length LengthAtMost(128)`
+- `base_path` (String) <br>**Default:** `/`<br>**Validation:** `Length LengthAtMost(128)`
+- `client_matcher` (Attributes) client_matcher Conditions related to the origin of the request, such as client IP, TLS fingerprint, etc. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--client_matcher))
+- `request_matcher` (Attributes) request_matcher Conditions related to the request, such as query parameters, headers, etc. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--request_matcher))
+
+<a id="nestedatt--api_protection_rules--api_groups_rules--action"></a>
+### Nested Schema for `api_protection_rules.api_groups_rules.action`
+
+Required:
+
+- `action_choice` (Attributes) action The action to take when rule is matched. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--action--action_choice))
+
+<a id="nestedatt--api_protection_rules--api_groups_rules--action--action_choice"></a>
+### Nested Schema for `api_protection_rules.api_groups_rules.action.action_choice`
+
+Optional:
+
+- `allow` (Boolean) Allow Allow the request to proceed.
+- `deny` (Boolean) Deny Deny the request.
+
+
+
+<a id="nestedatt--api_protection_rules--api_groups_rules--domain_choice"></a>
+### Nested Schema for `api_protection_rules.api_groups_rules.domain_choice`
+
+Optional:
+
+- `any_domain` (Boolean) any domain The rule will apply for all domains.
+- `specific_domain` (String) <br>**Validation:** `Length LengthAtMost(128)`
+
+
+<a id="nestedatt--api_protection_rules--api_groups_rules--metadata"></a>
+### Nested Schema for `api_protection_rules.api_groups_rules.metadata`
+
+Required:
+
+- `name` (String) <br>**Validation:** `Length LengthAtLeast(1)`
+
+Optional:
+
+- `description` (String) <br>**Validation:** `Length LengthAtMost(256)`
+
+
+<a id="nestedatt--api_protection_rules--api_groups_rules--client_matcher"></a>
+### Nested Schema for `api_protection_rules.api_groups_rules.client_matcher`
+
+Required:
+
+- `client_choice` (Attributes) client choice Select clients for which the rule will be applied. The actual names of the client are extracted from its TLS certificate. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--client_matcher--client_choice))
+- `ip_asn_choice` (Attributes) ip asn choice Match source IP address/ASN  of the request (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--client_matcher--ip_asn_choice))
+
+Optional:
+
+- `tls_fingerprint_matcher` (Attributes) TLS JA3 fingerprint matcher TLS JA3 fingerprints to be matched. The predicate evaluates to true if the TLS fingerprint matches any of the exact values or classes of known TLS fingerprints. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--client_matcher--tls_fingerprint_matcher))
+
+<a id="nestedatt--api_protection_rules--api_groups_rules--client_matcher--client_choice"></a>
+### Nested Schema for `api_protection_rules.api_groups_rules.client_matcher.client_choice`
+
+Optional:
+
+- `any_client` (Boolean) any ip Any Client
+- `client_selector` (Attributes) client selector A label selector that describes the expected set of clients. The labels associated with the client making the API request are used to evaluate the label expressions in the selector. These labels can be derived from the client TLS certificate or from the volterra internal control plane. This is a more flexible and powerful version of the client name matcher predicate that allows a given rule to be applicable to a set of clients based on the client labels rather than being limited to relying on patterns in the client name. The predicate evaluates to true if the expressions in the label selector are true for the client labels. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--client_matcher--client_choice--client_selector))
+- `ip_threat_category_list` (Attributes) IP Threat Category List IP threat categories to choose from (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--client_matcher--client_choice--ip_threat_category_list))
+
+<a id="nestedatt--api_protection_rules--api_groups_rules--client_matcher--client_choice--client_selector"></a>
+### Nested Schema for `api_protection_rules.api_groups_rules.client_matcher.client_choice.client_selector`
+
+Required:
+
+- `expressions` (List of String) expressions expressions contains the kubernetes style label expression for selections.
+
+
+<a id="nestedatt--api_protection_rules--api_groups_rules--client_matcher--client_choice--ip_threat_category_list"></a>
+### Nested Schema for `api_protection_rules.api_groups_rules.client_matcher.client_choice.ip_threat_category_list`
+
+Required:
+
+- `ip_threat_categories` (List of String) <br>**Valid Options:** `["BOTNETS", "SCANNERS", "PHISHING", "PROXY", "TOR_PROXY", "DENIAL_OF_SERVICE", "NETWORK", "WINDOWS_EXPLOITS", "WEB_ATTACKS", "REPUTATION", "MOBILE_THREATS", "SPAM_SOURCES"]` (Multiple selection allowed)
+
+
+
+<a id="nestedatt--api_protection_rules--api_groups_rules--client_matcher--ip_asn_choice"></a>
+### Nested Schema for `api_protection_rules.api_groups_rules.client_matcher.ip_asn_choice`
+
+Optional:
+
+- `any_ip` (Boolean) any ip Any Source IP
+- `asn_list` (Attributes) asn list List of 4-byte ASN values. The predicate evaluates to true if the origin ASN is present in the ASN list. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--client_matcher--ip_asn_choice--asn_list))
+- `asn_matcher` (Attributes) asn matcher List of references to BGP ASN Set objects. The predicate evaluates to true if the origin ASN is present in one of the BGP ASN Set objects. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--client_matcher--ip_asn_choice--asn_matcher))
+- `ip_matcher` (Attributes) ip matcher List of references to IP Prefix Set objects. The predicate evaluates to true if the client IP Address is covered by one or more of the IP Prefixes in the IP Prefix Sets. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--client_matcher--ip_asn_choice--ip_matcher))
+- `ip_prefix_list` (Attributes) ip prefix list List of IP Prefixes values. The predicate evaluates to true if the client IP Address is covered by one or more of the IP Prefixes from the list. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--client_matcher--ip_asn_choice--ip_prefix_list))
+
+<a id="nestedatt--api_protection_rules--api_groups_rules--client_matcher--ip_asn_choice--asn_list"></a>
+### Nested Schema for `api_protection_rules.api_groups_rules.client_matcher.ip_asn_choice.asn_list`
+
+Required:
+
+- `as_numbers` (List of Number) as numbers An unordered set of RFC 6793 defined 4-byte AS numbers that can be used to create allow or deny lists for use in network policy or service policy. It can be used to create the allow list only for DNS Load Balancer.
+
+
+<a id="nestedatt--api_protection_rules--api_groups_rules--client_matcher--ip_asn_choice--asn_matcher"></a>
+### Nested Schema for `api_protection_rules.api_groups_rules.client_matcher.ip_asn_choice.asn_matcher`
+
+Required:
+
+- `asn_sets` (Attributes List) asn_sets A list of references to bgp_asn_set objects. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--client_matcher--ip_asn_choice--asn_matcher--asn_sets))
+
+<a id="nestedatt--api_protection_rules--api_groups_rules--client_matcher--ip_asn_choice--asn_matcher--asn_sets"></a>
+### Nested Schema for `api_protection_rules.api_groups_rules.client_matcher.ip_asn_choice.asn_matcher.asn_sets`
+
+Required:
+
+- `name` (String)
+- `namespace` (String)
+
+Read-Only:
+
+- `tenant` (String)
+
+
+
+<a id="nestedatt--api_protection_rules--api_groups_rules--client_matcher--ip_asn_choice--ip_matcher"></a>
+### Nested Schema for `api_protection_rules.api_groups_rules.client_matcher.ip_asn_choice.ip_matcher`
+
+Required:
+
+- `prefix_sets` (Attributes List) prefix_sets A list of references to ip_prefix_set objects. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--client_matcher--ip_asn_choice--ip_matcher--prefix_sets))
+
+Optional:
+
+- `invert_matcher` (Boolean) <br>**Default:** `false`
+
+<a id="nestedatt--api_protection_rules--api_groups_rules--client_matcher--ip_asn_choice--ip_matcher--prefix_sets"></a>
+### Nested Schema for `api_protection_rules.api_groups_rules.client_matcher.ip_asn_choice.ip_matcher.prefix_sets`
+
+Required:
+
+- `name` (String)
+- `namespace` (String)
+
+Read-Only:
+
+- `tenant` (String)
+
+
+
+<a id="nestedatt--api_protection_rules--api_groups_rules--client_matcher--ip_asn_choice--ip_prefix_list"></a>
+### Nested Schema for `api_protection_rules.api_groups_rules.client_matcher.ip_asn_choice.ip_prefix_list`
+
+Optional:
+
+- `invert_match` (Boolean) <br>**Default:** `false`
+- `ip_prefixes` (List of String) ip prefixes List of IPv4 prefix strings.
+- `ipv6_prefixes` (List of String) ipv6 prefixes List of IPv6 prefix strings.
+
+
+
+<a id="nestedatt--api_protection_rules--api_groups_rules--client_matcher--tls_fingerprint_matcher"></a>
+### Nested Schema for `api_protection_rules.api_groups_rules.client_matcher.tls_fingerprint_matcher`
+
+Optional:
+
+- `classes` (List of String) <br>**Valid Options:** `["TRICKBOT", "TLS_FINGERPRINT_NONE", "ANY_MALICIOUS_FINGERPRINT", "DRIDEX", "GOZI", "JBIFROST", "RANSOMWARE", "TROLDESH", "TORRENTLOCKER", "ADWARE", "ADWIND", "GOOTKIT", "QUAKBOT", "TOFSEE"]` (Multiple selection allowed)
+- `exact_values` (List of String) exact values A list of exact TLS JA3 fingerprints to match the input TLS JA3 fingerprint against.
+- `excluded_values` (List of String) excluded values A list of TLS JA3 fingerprints to be excluded when matching the input TLS JA3 fingerprint. This can be used to skip known false positives when using one or more known TLS fingerprint classes in the enclosing matcher.
+
+
+
+<a id="nestedatt--api_protection_rules--api_groups_rules--request_matcher"></a>
+### Nested Schema for `api_protection_rules.api_groups_rules.request_matcher`
+
+Optional:
+
+- `cookie_matchers` (Attributes List) cookie matchers A list of predicates for all cookies that need to be matched. The criteria for matching each cookie is described in individual instances of CookieMatcherType. The actual cookie values are extracted from the request API as a list of strings for each cookie name. Note that all specified cookie matcher predicates must evaluate to true. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--request_matcher--cookie_matchers))
+- `headers` (Attributes List) headers A list of predicates for various HTTP headers that need to match. The criteria for matching each HTTP header are described in individual HeaderMatcherType instances. The actual HTTP header values are extracted from the request API as a list of strings for each HTTP header type. Note that all specified header predicates must evaluate to true. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--request_matcher--headers))
+- `jwt_claims` (Attributes List) JWT claims A list of predicates for various JWT claims that need to match. The criteria for matching each JWT claim are described in individual JWTClaimMatcherType instances. The actual JWT claims values are extracted from the JWT payload as a list of strings. Note that all specified JWT claim predicates must evaluate to true. Note that this feature only works on LBs with JWT Validation feature enabled. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--request_matcher--jwt_claims))
+- `query_params` (Attributes List) query params A list of predicates for all query parameters that need to be matched. The criteria for matching each query parameter are described in individual instances of QueryParameterMatcherType. The actual query parameter values are extracted from the request API as a list of strings for each query parameter name. Note that all specified query parameter predicates must evaluate to true. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--request_matcher--query_params))
+
+<a id="nestedatt--api_protection_rules--api_groups_rules--request_matcher--cookie_matchers"></a>
+### Nested Schema for `api_protection_rules.api_groups_rules.request_matcher.cookie_matchers`
+
+Required:
+
+- `match_choice` (Attributes) match Select Match Options. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--request_matcher--cookie_matchers--match_choice))
+- `name` (String) name A case-sensitive cookie name.
+
+Optional:
+
+- `invert_matcher` (Boolean) <br>**Default:** `false`
+
+<a id="nestedatt--api_protection_rules--api_groups_rules--request_matcher--cookie_matchers--match_choice"></a>
+### Nested Schema for `api_protection_rules.api_groups_rules.request_matcher.cookie_matchers.match_choice`
+
+Optional:
+
+- `check_not_present` (Boolean) check_not_present Check that the cookie is not present.
+- `check_present` (Boolean) check_present Check that the cookie is present.
+- `item` (Attributes) item Criteria for matching the values for the cookie. The match is successful if any of the values in the input satisfies the criteria in the matcher. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--request_matcher--cookie_matchers--match_choice--item))
+
+<a id="nestedatt--api_protection_rules--api_groups_rules--request_matcher--cookie_matchers--match_choice--item"></a>
+### Nested Schema for `api_protection_rules.api_groups_rules.request_matcher.cookie_matchers.match_choice.item`
+
+Optional:
+
+- `exact_values` (List of String) exact values A list of exact values to match the input against.
+- `regex_values` (List of String) regex values A list of regular expressions to match the input against.
+- `transformers` (List of String) <br>**Valid Options:** `["REMOVE_WHITESPACE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "URL_DECODE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH"]` (Multiple selection allowed)
+
+
+
+
+<a id="nestedatt--api_protection_rules--api_groups_rules--request_matcher--headers"></a>
+### Nested Schema for `api_protection_rules.api_groups_rules.request_matcher.headers`
+
+Required:
+
+- `match_choice` (Attributes) match Select Match Options. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--request_matcher--headers--match_choice))
+- `name` (String) name A case-insensitive HTTP header name.
+
+Optional:
+
+- `invert_matcher` (Boolean) <br>**Default:** `false`
+
+<a id="nestedatt--api_protection_rules--api_groups_rules--request_matcher--headers--match_choice"></a>
+### Nested Schema for `api_protection_rules.api_groups_rules.request_matcher.headers.match_choice`
+
+Optional:
+
+- `check_not_present` (Boolean) check_not_present Check that the header is not present.
+- `check_present` (Boolean) check_present Check that the header is present.
+- `item` (Attributes) item Criteria for matching the values for the header. The match is successful if any of the values in the input satisfies the criteria in the matcher. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--request_matcher--headers--match_choice--item))
+
+<a id="nestedatt--api_protection_rules--api_groups_rules--request_matcher--headers--match_choice--item"></a>
+### Nested Schema for `api_protection_rules.api_groups_rules.request_matcher.headers.match_choice.item`
+
+Optional:
+
+- `exact_values` (List of String) exact values A list of exact values to match the input against.
+- `regex_values` (List of String) regex values A list of regular expressions to match the input against.
+- `transformers` (List of String) <br>**Valid Options:** `["LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "URL_DECODE"]` (Multiple selection allowed)
+
+
+
+
+<a id="nestedatt--api_protection_rules--api_groups_rules--request_matcher--jwt_claims"></a>
+### Nested Schema for `api_protection_rules.api_groups_rules.request_matcher.jwt_claims`
+
+Required:
+
+- `match_choice` (Attributes) match Select Match Options. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--request_matcher--jwt_claims--match_choice))
+- `name` (String) name JWT claim name.
+
+Optional:
+
+- `invert_matcher` (Boolean) <br>**Default:** `false`
+
+<a id="nestedatt--api_protection_rules--api_groups_rules--request_matcher--jwt_claims--match_choice"></a>
+### Nested Schema for `api_protection_rules.api_groups_rules.request_matcher.jwt_claims.match_choice`
+
+Optional:
+
+- `check_not_present` (Boolean) check_not_present Check that the JWT Claim is not present.
+- `check_present` (Boolean) check_present Check that the JWT Claim is present.
+- `item` (Attributes) item Criteria for matching the values for the JWT Claim. The match is successful if any of the values in the input satisfies the criteria in the matcher. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--request_matcher--jwt_claims--match_choice--item))
+
+<a id="nestedatt--api_protection_rules--api_groups_rules--request_matcher--jwt_claims--match_choice--item"></a>
+### Nested Schema for `api_protection_rules.api_groups_rules.request_matcher.jwt_claims.match_choice.item`
+
+Optional:
+
+- `exact_values` (List of String) exact values A list of exact values to match the input against.
+- `regex_values` (List of String) regex values A list of regular expressions to match the input against.
+- `transformers` (List of String) <br>**Valid Options:** `["LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "URL_DECODE"]` (Multiple selection allowed)
+
+
+
+
+<a id="nestedatt--api_protection_rules--api_groups_rules--request_matcher--query_params"></a>
+### Nested Schema for `api_protection_rules.api_groups_rules.request_matcher.query_params`
+
+Required:
+
+- `key` (String) key A case-sensitive HTTP query parameter name.
+- `match_choice` (Attributes) match Select Match Options. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--request_matcher--query_params--match_choice))
+
+Optional:
+
+- `invert_matcher` (Boolean) <br>**Default:** `false`
+
+<a id="nestedatt--api_protection_rules--api_groups_rules--request_matcher--query_params--match_choice"></a>
+### Nested Schema for `api_protection_rules.api_groups_rules.request_matcher.query_params.match_choice`
+
+Optional:
+
+- `check_not_present` (Boolean) check_not_present Check that the query parameter is not present.
+- `check_present` (Boolean) check_present Check that the query parameter is present.
+- `item` (Attributes) item Criteria for matching the values for the given query parameter. The match is successful if any of the values for the query parameter satisfies the criteria in the matcher. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--request_matcher--query_params--match_choice--item))
+
+<a id="nestedatt--api_protection_rules--api_groups_rules--request_matcher--query_params--match_choice--item"></a>
+### Nested Schema for `api_protection_rules.api_groups_rules.request_matcher.query_params.match_choice.item`
+
+Optional:
+
+- `exact_values` (List of String) exact values A list of exact values to match the input against.
+- `regex_values` (List of String) regex values A list of regular expressions to match the input against.
+- `transformers` (List of String) <br>**Valid Options:** `["TRANSFORMER_NONE", "BASE64_DECODE", "URL_DECODE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM"]` (Multiple selection allowed)
+
+
+
+
+
+
+
 <a id="nestedatt--blocked_clients"></a>
 ### Nested Schema for `blocked_clients`
 
@@ -4492,7 +5162,7 @@ Required:
 
 Optional:
 
-- `actions` (List of String) <br>**Valid Options:** `["SKIP_PROCESSING_BOT", "SKIP_PROCESSING_IP_REPUTATION", "SKIP_PROCESSING_API_PROTECTION", "SKIP_PROCESSING_MALWARE_PROTECTION", "SKIP_PROCESSING_WAF", "SKIP_PROCESSING_MUM", "SKIP_PROCESSING_OAS_VALIDATION", "SKIP_PROCESSING_DDOS_PROTECTION", "SKIP_PROCESSING_THREAT_MESH"]` (Multiple selection allowed)
+- `actions` (List of String) <br>**Valid Options:** `["SKIP_PROCESSING_BOT", "SKIP_PROCESSING_MUM", "SKIP_PROCESSING_DDOS_PROTECTION", "SKIP_PROCESSING_MALWARE_PROTECTION", "SKIP_PROCESSING_WAF", "SKIP_PROCESSING_IP_REPUTATION", "SKIP_PROCESSING_API_PROTECTION", "SKIP_PROCESSING_OAS_VALIDATION", "SKIP_PROCESSING_THREAT_MESH"]` (Multiple selection allowed)
 - `expiration_timestamp` (String) expiration timestamp The expiration_timestamp is the RFC 3339 format timestamp at which the containing rule is considered to be logically expired. The rule continues to exist in the configuration but is not applied anymore.
 
 <a id="nestedatt--blocked_clients--client_source_choice"></a>
@@ -4601,7 +5271,7 @@ Optional:
 
 Optional:
 
-- `javascript_location` (List of String) <br>**Allowed Values (choose one):** `["AFTER_TITLE_END", "BEFORE_SCRIPT", "AFTER_HEAD"]`
+- `javascript_location` (List of String) <br>**Allowed Values (choose one):** `["BEFORE_SCRIPT", "AFTER_HEAD", "AFTER_TITLE_END"]`
 
 
 <a id="nestedatt--bot_defense_choice--bot_defense--policy--java_script_choice--js_insert_all_pages_except"></a>
@@ -4610,7 +5280,7 @@ Optional:
 Optional:
 
 - `exclude_list` (Attributes List) exclude_list Optional JavaScript insertions exclude list of domain and path matchers. (see [below for nested schema](#nestedatt--bot_defense_choice--bot_defense--policy--java_script_choice--js_insert_all_pages_except--exclude_list))
-- `javascript_location` (List of String) <br>**Allowed Values (choose one):** `["AFTER_HEAD", "AFTER_TITLE_END", "BEFORE_SCRIPT"]`
+- `javascript_location` (List of String) <br>**Allowed Values (choose one):** `["AFTER_TITLE_END", "BEFORE_SCRIPT", "AFTER_HEAD"]`
 
 <a id="nestedatt--bot_defense_choice--bot_defense--policy--java_script_choice--js_insert_all_pages_except--exclude_list"></a>
 ### Nested Schema for `bot_defense_choice.bot_defense.policy.java_script_choice.js_insert_all_pages_except.exclude_list`
@@ -4702,7 +5372,7 @@ Required:
 
 Optional:
 
-- `javascript_location` (List of String) <br>**Allowed Values (choose one):** `["AFTER_HEAD", "AFTER_TITLE_END", "BEFORE_SCRIPT"]`
+- `javascript_location` (List of String) <br>**Allowed Values (choose one):** `["AFTER_TITLE_END", "BEFORE_SCRIPT", "AFTER_HEAD"]`
 
 <a id="nestedatt--bot_defense_choice--bot_defense--policy--java_script_choice--js_insertion_rules--rules--domain_matcher_choice"></a>
 ### Nested Schema for `bot_defense_choice.bot_defense.policy.java_script_choice.js_insertion_rules.rules.domain_matcher_choice`
@@ -4877,7 +5547,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["BASE64_DECODE", "REMOVE_WHITESPACE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["URL_DECODE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE"]` (Multiple selection allowed)
 
 
 
@@ -4893,7 +5563,7 @@ Required:
 - `app_traffic_type_choice` (Attributes) Traffic channel Select traffic channel. (see [below for nested schema](#nestedatt--bot_defense_choice--bot_defense--policy--protected_app_endpoints--app_traffic_type_choice))
 - `flow_label_choice` (Attributes) Flow label Endpoint label category (see [below for nested schema](#nestedatt--bot_defense_choice--bot_defense--policy--protected_app_endpoints--flow_label_choice))
 - `goodbot_choice` (Attributes) Good Bot The system will distinguish between good bot traffic and malicious automation. Select if you want to allow good bots to continue to the origin or receive the same mitigation handling as defined for all automated traffic. (see [below for nested schema](#nestedatt--bot_defense_choice--bot_defense--policy--protected_app_endpoints--goodbot_choice))
-- `http_methods` (List of String) <br>**Valid Options:** `["METHOD_GET", "METHOD_POST", "METHOD_PUT", "METHOD_PATCH", "METHOD_DELETE", "METHOD_GET_DOCUMENT", "METHOD_ANY"]` (Multiple selection allowed)
+- `http_methods` (List of String) <br>**Valid Options:** `["METHOD_ANY", "METHOD_GET", "METHOD_POST", "METHOD_PUT", "METHOD_PATCH", "METHOD_DELETE", "METHOD_GET_DOCUMENT"]` (Multiple selection allowed)
 - `metadata` (Attributes) metadata Common attributes for the rule including name and description. (see [below for nested schema](#nestedatt--bot_defense_choice--bot_defense--policy--protected_app_endpoints--metadata))
 - `mitigation` (Attributes) Mitigation Mitigation action. (see [below for nested schema](#nestedatt--bot_defense_choice--bot_defense--policy--protected_app_endpoints--mitigation))
 - `path` (Attributes) Path Matching URI path of the route. (see [below for nested schema](#nestedatt--bot_defense_choice--bot_defense--policy--protected_app_endpoints--path))
@@ -5014,7 +5684,7 @@ Optional:
 
 Required:
 
-- `status` (List of String) <br>**Allowed Values (choose one):** `["InsufficientStorage", "NetworkAuthenticationRequired", "PayloadTooLarge", "URITooLong", "LoopDetected", "Created", "MethodNotAllowed", "NotAcceptable", "MisdirectedRequest", "PartialContent", "PermanentRedirect", "PreconditionFailed", "Conflict", "RequestHeaderFieldsTooLarge", "TemporaryRedirect", "InternalServerError", "NotExtended", "NonAuthoritativeInformation", "NoContent", "ResetContent", "MultipleChoices", "Forbidden", "MovedPermanently", "Found", "BadRequest", "PaymentRequired", "ProxyAuthenticationRequired", "IMUsed", "NotFound", "UnsupportedMediaType", "FailedDependency", "UpgradeRequired", "PreconditionRequired", "NotImplemented", "NotModified", "RequestTimeout", "BadGateway", "HTTPVersionNotSupported", "MultiStatus", "TooManyRequests", "ServiceUnavailable", "UseProxy", "Gone", "UnprocessableEntity", "Unauthorized", "EmptyStatusCode", "Continue", "OK", "Accepted", "LengthRequired", "RangeNotSatisfiable", "ExpectationFailed", "GatewayTimeout", "VariantAlsoNegotiates", "SeeOther", "Locked", "AlreadyReported"]`
+- `status` (List of String) <br>**Allowed Values (choose one):** `["PreconditionFailed", "FailedDependency", "RequestHeaderFieldsTooLarge", "BadGateway", "GatewayTimeout", "Continue", "MovedPermanently", "ProxyAuthenticationRequired", "HTTPVersionNotSupported", "Conflict", "NotImplemented", "ResetContent", "MultipleChoices", "PreconditionRequired", "PaymentRequired", "IMUsed", "BadRequest", "MisdirectedRequest", "ServiceUnavailable", "OK", "MethodNotAllowed", "NotAcceptable", "NotExtended", "NoContent", "PartialContent", "LengthRequired", "URITooLong", "UnprocessableEntity", "TooManyRequests", "TemporaryRedirect", "Forbidden", "Locked", "InsufficientStorage", "RequestTimeout", "InternalServerError", "Unauthorized", "PayloadTooLarge", "NetworkAuthenticationRequired", "UseProxy", "Gone", "UnsupportedMediaType", "RangeNotSatisfiable", "VariantAlsoNegotiates", "Accepted", "MultiStatus", "AlreadyReported", "NotFound", "ExpectationFailed", "UpgradeRequired", "NonAuthoritativeInformation", "SeeOther", "PermanentRedirect", "Created", "Found", "LoopDetected", "EmptyStatusCode", "NotModified"]`
 
 Optional:
 
@@ -5027,7 +5697,7 @@ Optional:
 
 Required:
 
-- `status` (List of String) <br>**Allowed Values (choose one):** `["NotModified", "RequestTimeout", "BadGateway", "HTTPVersionNotSupported", "MultiStatus", "TooManyRequests", "ServiceUnavailable", "UseProxy", "Gone", "UnprocessableEntity", "Unauthorized", "EmptyStatusCode", "Continue", "OK", "Accepted", "LengthRequired", "RangeNotSatisfiable", "ExpectationFailed", "GatewayTimeout", "VariantAlsoNegotiates", "SeeOther", "Locked", "AlreadyReported", "InsufficientStorage", "NetworkAuthenticationRequired", "PayloadTooLarge", "URITooLong", "LoopDetected", "Created", "MethodNotAllowed", "NotAcceptable", "MisdirectedRequest", "PartialContent", "PermanentRedirect", "PreconditionFailed", "Conflict", "RequestHeaderFieldsTooLarge", "TemporaryRedirect", "InternalServerError", "NotExtended", "NonAuthoritativeInformation", "NoContent", "ResetContent", "MultipleChoices", "Forbidden", "MovedPermanently", "Found", "BadRequest", "PaymentRequired", "ProxyAuthenticationRequired", "IMUsed", "NotFound", "UnsupportedMediaType", "FailedDependency", "UpgradeRequired", "PreconditionRequired", "NotImplemented"]`
+- `status` (List of String) <br>**Allowed Values (choose one):** `["LoopDetected", "EmptyStatusCode", "NotModified", "PreconditionFailed", "FailedDependency", "RequestHeaderFieldsTooLarge", "BadGateway", "GatewayTimeout", "Continue", "MovedPermanently", "ProxyAuthenticationRequired", "HTTPVersionNotSupported", "Conflict", "NotImplemented", "ResetContent", "MultipleChoices", "PreconditionRequired", "PaymentRequired", "IMUsed", "BadRequest", "MisdirectedRequest", "ServiceUnavailable", "OK", "MethodNotAllowed", "NotAcceptable", "NotExtended", "NoContent", "PartialContent", "LengthRequired", "URITooLong", "UnprocessableEntity", "TooManyRequests", "TemporaryRedirect", "Forbidden", "Locked", "InsufficientStorage", "RequestTimeout", "InternalServerError", "Unauthorized", "PayloadTooLarge", "NetworkAuthenticationRequired", "UseProxy", "Gone", "UnsupportedMediaType", "RangeNotSatisfiable", "VariantAlsoNegotiates", "Accepted", "MultiStatus", "AlreadyReported", "NotFound", "ExpectationFailed", "UpgradeRequired", "NonAuthoritativeInformation", "SeeOther", "PermanentRedirect", "Created", "Found"]`
 
 Optional:
 
@@ -5183,7 +5853,7 @@ Optional:
 Optional:
 
 - `body` (String) <br>**Default:** `The requested URL was rejected. Please consult with your administrator.`<br>**Validation:** `Length LengthAtMost(4096)`
-- `status` (List of String) <br>**Allowed Values (choose one):** `["TooManyRequests", "ServiceUnavailable", "UseProxy", "Gone", "UnprocessableEntity", "Unauthorized", "EmptyStatusCode", "Continue", "OK", "Accepted", "LengthRequired", "RangeNotSatisfiable", "ExpectationFailed", "GatewayTimeout", "VariantAlsoNegotiates", "SeeOther", "Locked", "AlreadyReported", "InsufficientStorage", "NetworkAuthenticationRequired", "PayloadTooLarge", "URITooLong", "LoopDetected", "Created", "MethodNotAllowed", "NotAcceptable", "MisdirectedRequest", "PartialContent", "PermanentRedirect", "PreconditionFailed", "Conflict", "RequestHeaderFieldsTooLarge", "TemporaryRedirect", "InternalServerError", "NotExtended", "NonAuthoritativeInformation", "NoContent", "ResetContent", "MultipleChoices", "Forbidden", "MovedPermanently", "Found", "BadRequest", "PaymentRequired", "ProxyAuthenticationRequired", "IMUsed", "NotFound", "UnsupportedMediaType", "FailedDependency", "UpgradeRequired", "PreconditionRequired", "NotImplemented", "NotModified", "RequestTimeout", "BadGateway", "HTTPVersionNotSupported", "MultiStatus"]`<br>**Default:** `OK`
+- `status` (List of String) <br>**Allowed Values (choose one):** `["PaymentRequired", "IMUsed", "BadRequest", "MisdirectedRequest", "ServiceUnavailable", "OK", "MethodNotAllowed", "NotAcceptable", "NotExtended", "NoContent", "PartialContent", "LengthRequired", "URITooLong", "UnprocessableEntity", "TooManyRequests", "TemporaryRedirect", "Forbidden", "Locked", "InsufficientStorage", "RequestTimeout", "InternalServerError", "Unauthorized", "PayloadTooLarge", "NetworkAuthenticationRequired", "UseProxy", "Gone", "UnsupportedMediaType", "RangeNotSatisfiable", "VariantAlsoNegotiates", "Accepted", "MultiStatus", "AlreadyReported", "NotFound", "ExpectationFailed", "UpgradeRequired", "NonAuthoritativeInformation", "SeeOther", "PermanentRedirect", "Created", "Found", "LoopDetected", "EmptyStatusCode", "NotModified", "PreconditionFailed", "FailedDependency", "RequestHeaderFieldsTooLarge", "BadGateway", "GatewayTimeout", "Continue", "MovedPermanently", "ProxyAuthenticationRequired", "HTTPVersionNotSupported", "Conflict", "NotImplemented", "ResetContent", "MultipleChoices", "PreconditionRequired"]`<br>**Default:** `OK`
 
 
 <a id="nestedatt--bot_defense_choice--bot_defense--policy--protected_app_endpoints--mitigation--action_type_choice--flag"></a>
@@ -5295,7 +5965,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "URL_DECODE"]` (Multiple selection allowed)
 
 
 
@@ -5328,7 +5998,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "URL_DECODE"]` (Multiple selection allowed)
 
 
 
@@ -5465,7 +6135,7 @@ Required:
 
 Optional:
 
-- `javascript_location` (List of String) <br>**Allowed Values (choose one):** `["BEFORE_SCRIPT", "AFTER_HEAD", "AFTER_TITLE_END"]`
+- `javascript_location` (List of String) <br>**Allowed Values (choose one):** `["AFTER_HEAD", "AFTER_TITLE_END", "BEFORE_SCRIPT"]`
 
 <a id="nestedatt--bot_defense_choice--bot_defense_advanced--java_script_choice--js_insertion_rules--rules--domain_matcher_choice"></a>
 ### Nested Schema for `bot_defense_choice.bot_defense_advanced.java_script_choice.js_insertion_rules.rules.domain_matcher_choice`
@@ -5640,7 +6310,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["BASE64_DECODE", "REMOVE_WHITESPACE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["URL_DECODE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE"]` (Multiple selection allowed)
 
 
 
@@ -5990,6 +6660,47 @@ Optional:
 
 
 
+<a id="nestedatt--cors_policy"></a>
+### Nested Schema for `cors_policy`
+
+Optional:
+
+- `allow_credentials` (Boolean) <br>**Default:** `false`
+- `allow_headers` (String) allow_headers Specifies the content for the access-control-allow-headers header
+- `allow_methods` (String) allow_methods Specifies the content for the access-control-allow-methods header
+- `allow_origin` (List of String) allow_origin Specifies the origins that will be allowed to do CORS requests. An origin is allowed if either allow_origin or allow_origin_regex match
+- `allow_origin_regex` (List of String) allow_origin_regex Specifies regex patterns that match allowed origins. An origin is allowed if either allow_origin or allow_origin_regex match
+- `disabled` (Boolean) <br>**Default:** `false`
+- `expose_headers` (String) expose_headers Specifies the content for the access-control-expose-headers header
+- `maximum_age` (Number) maximum_age This indicates the maximum number of seconds the results can be cached A value of -1 will disable caching. Maximum permitted value is 86400 seconds (24 hours)
+
+
+<a id="nestedatt--csrf_policy"></a>
+### Nested Schema for `csrf_policy`
+
+Required:
+
+- `allowed_domains_choice` (Attributes) allowed_domains The list of source origin that should be allowed. (see [below for nested schema](#nestedatt--csrf_policy--allowed_domains_choice))
+
+<a id="nestedatt--csrf_policy--allowed_domains_choice"></a>
+### Nested Schema for `csrf_policy.allowed_domains_choice`
+
+Optional:
+
+- `all_load_balancer_domains` (Boolean) all_load_balancer_domains Add All load balancer domains to source origin (allow) list.
+- `custom_domain_list` (Attributes) custom_domain_list Add one or more domains to source origin (allow) list. (see [below for nested schema](#nestedatt--csrf_policy--allowed_domains_choice--custom_domain_list))
+- `disabled` (Boolean) disabled Allow all source origin domains.
+
+<a id="nestedatt--csrf_policy--allowed_domains_choice--custom_domain_list"></a>
+### Nested Schema for `csrf_policy.allowed_domains_choice.custom_domain_list`
+
+Required:
+
+- `domains` (List of String) Domains A list of domain names that will be matched to loadbalancer. These domains are not used for SNI match. Wildcard names are supported in the suffix or prefix form.
+
+
+
+
 <a id="nestedatt--data_guard_rules"></a>
 ### Nested Schema for `data_guard_rules`
 
@@ -6097,7 +6808,7 @@ Optional:
 Optional:
 
 - `asn_list` (Attributes) asn_list Addresses that belong to the ASNs in the given list The ASN is obtained by performing a lookup for the source IPv4 Address in a GeoIP DB. (see [below for nested schema](#nestedatt--ddos_mitigation_rules--mitigation_choice--ddos_client_source--asn_list))
-- `country_list` (List of String) <br>**Valid Options:** `["COUNTRY_PE", "COUNTRY_RO", "COUNTRY_SH", "COUNTRY_TZ", "COUNTRY_DJ", "COUNTRY_GB", "COUNTRY_SB", "COUNTRY_TJ", "COUNTRY_TT", "COUNTRY_VC", "COUNTRY_VI", "COUNTRY_FO", "COUNTRY_IL", "COUNTRY_NC", "COUNTRY_NR", "COUNTRY_TK", "COUNTRY_AW", "COUNTRY_BW", "COUNTRY_FM", "COUNTRY_KR", "COUNTRY_MQ", "COUNTRY_IR", "COUNTRY_IN", "COUNTRY_KG", "COUNTRY_KH", "COUNTRY_SY", "COUNTRY_TW", "COUNTRY_VA", "COUNTRY_CU", "COUNTRY_YT", "COUNTRY_CA", "COUNTRY_GA", "COUNTRY_MS", "COUNTRY_MU", "COUNTRY_BN", "COUNTRY_ET", "COUNTRY_MC", "COUNTRY_DE", "COUNTRY_GQ", "COUNTRY_JP", "COUNTRY_ML", "COUNTRY_PA", "COUNTRY_BM", "COUNTRY_MO", "COUNTRY_PG", "COUNTRY_SE", "COUNTRY_BB", "COUNTRY_DK", "COUNTRY_FK", "COUNTRY_LY", "COUNTRY_PH", "COUNTRY_UM", "COUNTRY_VE", "COUNTRY_BE", "COUNTRY_AD", "COUNTRY_HN", "COUNTRY_KM", "COUNTRY_UA", "COUNTRY_CS", "COUNTRY_GS", "COUNTRY_HK", "COUNTRY_MN", "COUNTRY_PK", "COUNTRY_UG", "COUNTRY_DM", "COUNTRY_GF", "COUNTRY_JO", "COUNTRY_KP", "COUNTRY_NL", "COUNTRY_NP", "COUNTRY_PY", "COUNTRY_AM", "COUNTRY_LU", "COUNTRY_TM", "COUNTRY_RE", "COUNTRY_AL", "COUNTRY_BR", "COUNTRY_CD", "COUNTRY_FR", "COUNTRY_GD", "COUNTRY_GN", "COUNTRY_NZ", "COUNTRY_PL", "COUNTRY_TL", "COUNTRY_CZ", "COUNTRY_GL", "COUNTRY_SJ", "COUNTRY_NI", "COUNTRY_NONE", "COUNTRY_ES", "COUNTRY_LT", "COUNTRY_MX", "COUNTRY_UZ", "COUNTRY_XT", "COUNTRY_AR", "COUNTRY_BV", "COUNTRY_MZ", "COUNTRY_TH", "COUNTRY_UY", "COUNTRY_BG", "COUNTRY_BJ", "COUNTRY_OM", "COUNTRY_AI", "COUNTRY_GM", "COUNTRY_MA", "COUNTRY_MY", "COUNTRY_CF", "COUNTRY_BH", "COUNTRY_BF", "COUNTRY_ID", "COUNTRY_LK", "COUNTRY_NA", "COUNTRY_SO", "COUNTRY_TV", "COUNTRY_AU", "COUNTRY_BY", "COUNTRY_EH", "COUNTRY_PF", "COUNTRY_PS", "COUNTRY_SX", "COUNTRY_ER", "COUNTRY_PT", "COUNTRY_SC", "COUNTRY_TG", "COUNTRY_BZ", "COUNTRY_LR", "COUNTRY_BL", "COUNTRY_BO", "COUNTRY_IO", "COUNTRY_KI", "COUNTRY_RU", "COUNTRY_TF", "COUNTRY_AN", "COUNTRY_GG", "COUNTRY_LA", "COUNTRY_BT", "COUNTRY_GH", "COUNTRY_HR", "COUNTRY_HU", "COUNTRY_AE", "COUNTRY_MK", "COUNTRY_RW", "COUNTRY_ZM", "COUNTRY_ZA", "COUNTRY_AT", "COUNTRY_CM", "COUNTRY_CX", "COUNTRY_DO", "COUNTRY_GW", "COUNTRY_LB", "COUNTRY_LI", "COUNTRY_PR", "COUNTRY_BI", "COUNTRY_IQ", "COUNTRY_PW", "COUNTRY_SR", "COUNTRY_GP", "COUNTRY_HM", "COUNTRY_LC", "COUNTRY_NF", "COUNTRY_BQ", "COUNTRY_CO", "COUNTRY_GT", "COUNTRY_ME", "COUNTRY_PM", "COUNTRY_YE", "COUNTRY_AQ", "COUNTRY_SA", "COUNTRY_VN", "COUNTRY_XK", "COUNTRY_BA", "COUNTRY_CH", "COUNTRY_GY", "COUNTRY_AG", "COUNTRY_AZ", "COUNTRY_HT", "COUNTRY_JM", "COUNTRY_KW", "COUNTRY_LV", "COUNTRY_MF", "COUNTRY_NO", "COUNTRY_BS", "COUNTRY_SZ", "COUNTRY_CI", "COUNTRY_GR", "COUNTRY_IM", "COUNTRY_JE", "COUNTRY_MH", "COUNTRY_SG", "COUNTRY_CG", "COUNTRY_CK", "COUNTRY_EG", "COUNTRY_FI", "COUNTRY_RS", "COUNTRY_ZW", "COUNTRY_KE", "COUNTRY_QA", "COUNTRY_SD", "COUNTRY_CL", "COUNTRY_MV", "COUNTRY_TO", "COUNTRY_DZ", "COUNTRY_SI", "COUNTRY_ST", "COUNTRY_US", "COUNTRY_GU", "COUNTRY_KZ", "COUNTRY_MT", "COUNTRY_WS", "COUNTRY_IT", "COUNTRY_AO", "COUNTRY_MG", "COUNTRY_NU", "COUNTRY_SM", "COUNTRY_CN", "COUNTRY_CR", "COUNTRY_IE", "COUNTRY_KY", "COUNTRY_PN", "COUNTRY_TN", "COUNTRY_FJ", "COUNTRY_KN", "COUNTRY_TD", "COUNTRY_VU", "COUNTRY_EC", "COUNTRY_GE", "COUNTRY_SL", "COUNTRY_VG", "COUNTRY_BD", "COUNTRY_CW", "COUNTRY_MP", "COUNTRY_AF", "COUNTRY_TC", "COUNTRY_MW", "COUNTRY_NG", "COUNTRY_SV", "COUNTRY_CY", "COUNTRY_GI", "COUNTRY_SN", "COUNTRY_TR", "COUNTRY_WF", "COUNTRY_CV", "COUNTRY_MD", "COUNTRY_MR", "COUNTRY_NE", "COUNTRY_SS", "COUNTRY_AS", "COUNTRY_AX", "COUNTRY_EE", "COUNTRY_LS", "COUNTRY_MM", "COUNTRY_SK", "COUNTRY_CC", "COUNTRY_IS"]` (Multiple selection allowed)
+- `country_list` (List of String) <br>**Valid Options:** `["COUNTRY_MC", "COUNTRY_MH", "COUNTRY_MQ", "COUNTRY_VC", "COUNTRY_KZ", "COUNTRY_BE", "COUNTRY_MM", "COUNTRY_NA", "COUNTRY_OM", "COUNTRY_GU", "COUNTRY_MR", "COUNTRY_SG", "COUNTRY_IQ", "COUNTRY_KH", "COUNTRY_PE", "COUNTRY_PN", "COUNTRY_TJ", "COUNTRY_US", "COUNTRY_AM", "COUNTRY_HM", "COUNTRY_SI", "COUNTRY_GW", "COUNTRY_HU", "COUNTRY_KG", "COUNTRY_MA", "COUNTRY_MT", "COUNTRY_UZ", "COUNTRY_FK", "COUNTRY_PH", "COUNTRY_SB", "COUNTRY_VG", "COUNTRY_BW", "COUNTRY_CH", "COUNTRY_GI", "COUNTRY_PL", "COUNTRY_CD", "COUNTRY_CR", "COUNTRY_FJ", "COUNTRY_JO", "COUNTRY_NZ", "COUNTRY_PG", "COUNTRY_SZ", "COUNTRY_VI", "COUNTRY_AR", "COUNTRY_UA", "COUNTRY_AG", "COUNTRY_BQ", "COUNTRY_CG", "COUNTRY_CM", "COUNTRY_DK", "COUNTRY_TH", "COUNTRY_RS", "COUNTRY_UG", "COUNTRY_ZM", "COUNTRY_BD", "COUNTRY_PF", "COUNTRY_PM", "COUNTRY_PY", "COUNTRY_SX", "COUNTRY_VN", "COUNTRY_MS", "COUNTRY_PA", "COUNTRY_BH", "COUNTRY_BM", "COUNTRY_CZ", "COUNTRY_GT", "COUNTRY_LB", "COUNTRY_SM", "COUNTRY_TL", "COUNTRY_XT", "COUNTRY_NONE", "COUNTRY_ES", "COUNTRY_HN", "COUNTRY_ID", "COUNTRY_LS", "COUNTRY_GD", "COUNTRY_GP", "COUNTRY_KN", "COUNTRY_KW", "COUNTRY_LU", "COUNTRY_TR", "COUNTRY_YE", "COUNTRY_TF", "COUNTRY_AW", "COUNTRY_EE", "COUNTRY_HK", "COUNTRY_FO", "COUNTRY_GS", "COUNTRY_KM", "COUNTRY_LC", "COUNTRY_SR", "COUNTRY_ZW", "COUNTRY_IS", "COUNTRY_CS", "COUNTRY_AD", "COUNTRY_GM", "COUNTRY_ME", "COUNTRY_MZ", "COUNTRY_CF", "COUNTRY_RU", "COUNTRY_GH", "COUNTRY_BS", "COUNTRY_CU", "COUNTRY_CO", "COUNTRY_DZ", "COUNTRY_FM", "COUNTRY_GR", "COUNTRY_ML", "COUNTRY_SD", "COUNTRY_WF", "COUNTRY_KI", "COUNTRY_MV", "COUNTRY_MY", "COUNTRY_NO", "COUNTRY_GQ", "COUNTRY_QA", "COUNTRY_SV", "COUNTRY_SY", "COUNTRY_UY", "COUNTRY_ET", "COUNTRY_PS", "COUNTRY_BG", "COUNTRY_CI", "COUNTRY_EH", "COUNTRY_SO", "COUNTRY_TK", "COUNTRY_CV", "COUNTRY_CX", "COUNTRY_JM", "COUNTRY_LA", "COUNTRY_PW", "COUNTRY_TO", "COUNTRY_BL", "COUNTRY_KY", "COUNTRY_NG", "COUNTRY_NP", "COUNTRY_SN", "COUNTRY_WS", "COUNTRY_BF", "COUNTRY_GY", "COUNTRY_LK", "COUNTRY_MX", "COUNTRY_ZA", "COUNTRY_IT", "COUNTRY_MU", "COUNTRY_AE", "COUNTRY_AX", "COUNTRY_FI", "COUNTRY_IO", "COUNTRY_LT", "COUNTRY_LV", "COUNTRY_MP", "COUNTRY_GE", "COUNTRY_PT", "COUNTRY_TD", "COUNTRY_GF", "COUNTRY_TN", "COUNTRY_TW", "COUNTRY_VU", "COUNTRY_IR", "COUNTRY_CY", "COUNTRY_EC", "COUNTRY_JP", "COUNTRY_NL", "COUNTRY_NR", "COUNTRY_NU", "COUNTRY_BT", "COUNTRY_GL", "COUNTRY_MK", "COUNTRY_UM", "COUNTRY_AF", "COUNTRY_IE", "COUNTRY_RE", "COUNTRY_SC", "COUNTRY_NE", "COUNTRY_RW", "COUNTRY_ST", "COUNTRY_AN", "COUNTRY_DO", "COUNTRY_KR", "COUNTRY_LI", "COUNTRY_MN", "COUNTRY_SA", "COUNTRY_AO", "COUNTRY_BO", "COUNTRY_VE", "COUNTRY_CW", "COUNTRY_LR", "COUNTRY_PR", "COUNTRY_TG", "COUNTRY_BA", "COUNTRY_BN", "COUNTRY_MF", "COUNTRY_SJ", "COUNTRY_BY", "COUNTRY_MW", "COUNTRY_NC", "COUNTRY_RO", "COUNTRY_AI", "COUNTRY_BR", "COUNTRY_CN", "COUNTRY_IM", "COUNTRY_SS", "COUNTRY_AT", "COUNTRY_AZ", "COUNTRY_KP", "COUNTRY_NF", "COUNTRY_TZ", "COUNTRY_VA", "COUNTRY_FR", "COUNTRY_JE", "COUNTRY_LY", "COUNTRY_MO", "COUNTRY_BI", "COUNTRY_CL", "COUNTRY_BB", "COUNTRY_EG", "COUNTRY_GB", "COUNTRY_GN", "COUNTRY_MG", "COUNTRY_AQ", "COUNTRY_AU", "COUNTRY_HR", "COUNTRY_MD", "COUNTRY_NI", "COUNTRY_CA", "COUNTRY_DM", "COUNTRY_ER", "COUNTRY_AL", "COUNTRY_BJ", "COUNTRY_BV", "COUNTRY_BZ", "COUNTRY_PK", "COUNTRY_XK", "COUNTRY_AS", "COUNTRY_CK", "COUNTRY_GG", "COUNTRY_IN", "COUNTRY_TC", "COUNTRY_CC", "COUNTRY_DE", "COUNTRY_KE", "COUNTRY_SK", "COUNTRY_TV", "COUNTRY_DJ", "COUNTRY_GA", "COUNTRY_HT", "COUNTRY_SE", "COUNTRY_SH", "COUNTRY_SL", "COUNTRY_TT", "COUNTRY_IL", "COUNTRY_TM", "COUNTRY_YT"]` (Multiple selection allowed)
 - `ja4_tls_fingerprint_matcher` (Attributes) TLS JA4 fingerprint matcher TLS JA4 fingerprints to be matched. The predicate evaluates to true if source JA4 TLS fingerprint matches any of the exact values of JA4 TLS fingerprints. (see [below for nested schema](#nestedatt--ddos_mitigation_rules--mitigation_choice--ddos_client_source--ja4_tls_fingerprint_matcher))
 - `tls_fingerprint_matcher` (Attributes) TLS JA3 fingerprint matcher TLS JA3 fingerprints to be matched. The predicate evaluates to true if the TLS fingerprint matches any of the exact values or classes of known TLS fingerprints. (see [below for nested schema](#nestedatt--ddos_mitigation_rules--mitigation_choice--ddos_client_source--tls_fingerprint_matcher))
 
@@ -6122,7 +6833,7 @@ Optional:
 
 Optional:
 
-- `classes` (List of String) <br>**Valid Options:** `["ADWARE", "DRIDEX", "GOZI", "JBIFROST", "RANSOMWARE", "TRICKBOT", "TLS_FINGERPRINT_NONE", "ADWIND", "GOOTKIT", "QUAKBOT", "TROLDESH", "TOFSEE", "TORRENTLOCKER", "ANY_MALICIOUS_FINGERPRINT"]` (Multiple selection allowed)
+- `classes` (List of String) <br>**Valid Options:** `["TOFSEE", "TRICKBOT", "TLS_FINGERPRINT_NONE", "ANY_MALICIOUS_FINGERPRINT", "DRIDEX", "GOZI", "JBIFROST", "RANSOMWARE", "TROLDESH", "TORRENTLOCKER", "ADWARE", "ADWIND", "GOOTKIT", "QUAKBOT"]` (Multiple selection allowed)
 - `exact_values` (List of String) exact values A list of exact TLS JA3 fingerprints to match the input TLS JA3 fingerprint against.
 - `excluded_values` (List of String) excluded values A list of TLS JA3 fingerprints to be excluded when matching the input TLS JA3 fingerprint. This can be used to skip known false positives when using one or more known TLS fingerprint classes in the enclosing matcher.
 
@@ -6329,2043 +7040,7 @@ Optional:
 
 Required:
 
-- `ip_threat_categories` (List of String) <br>**Valid Options:** `["SPAM_SOURCES", "SCANNERS", "REPUTATION", "PROXY", "TOR_PROXY", "DENIAL_OF_SERVICE", "NETWORK", "WINDOWS_EXPLOITS", "WEB_ATTACKS", "BOTNETS", "PHISHING", "MOBILE_THREATS"]` (Multiple selection allowed)
-
-
-
-<a id="nestedatt--protected_cookies"></a>
-### Nested Schema for `protected_cookies`
-
-Required:
-
-- `cookie_tampering_choice` (Attributes) cookie_tampering Cookie Tampering Protection prevents attackers from modifying the value of session cookies. To use this feature, Web Application Firewall must be enabled. (see [below for nested schema](#nestedatt--protected_cookies--cookie_tampering_choice))
-- `name` (String) <br>**Validation:** `Length LengthAtMost(256)`
-
-Optional:
-
-- `httponly_choice` (Attributes) httponly A cookie with the HttpOnly attribute is inaccessible to the JavaScript. (see [below for nested schema](#nestedatt--protected_cookies--httponly_choice))
-- `samesite_choice` (Attributes) samesite Controls whether or not a cookie is sent with cross-site requests (see [below for nested schema](#nestedatt--protected_cookies--samesite_choice))
-- `secure_choice` (Attributes) secure A cookie with the Secure attribute is only sent to the server with an encrypted request over the HTTPS protocol and therefore, is more resistant to man-in-the-middle attacks. (see [below for nested schema](#nestedatt--protected_cookies--secure_choice))
-
-<a id="nestedatt--protected_cookies--cookie_tampering_choice"></a>
-### Nested Schema for `protected_cookies.cookie_tampering_choice`
-
-Optional:
-
-- `disable_tampering_protection` (Boolean) disable
-- `enable_tampering_protection` (Boolean) enable
-
-
-<a id="nestedatt--protected_cookies--httponly_choice"></a>
-### Nested Schema for `protected_cookies.httponly_choice`
-
-Optional:
-
-- `add_httponly` (Boolean) add_httponly
-- `ignore_httponly` (Boolean) ignore_httponly
-
-
-<a id="nestedatt--protected_cookies--samesite_choice"></a>
-### Nested Schema for `protected_cookies.samesite_choice`
-
-Optional:
-
-- `ignore_samesite` (Boolean) ignore_samesite Ignore Samesite attribute
-- `samesite_lax` (Boolean) lax Add Samesite attribute with Lax. Means that the cookie is not sent on cross-site requests
-- `samesite_none` (Boolean) none Add Samesite attribute with None. Means that the browser sends the cookie with both cross-site and same-site requests
-- `samesite_strict` (Boolean) strict Add Samesite attribute with Strict. Means that the browser sends the cookie only for same-site requests
-
-
-<a id="nestedatt--protected_cookies--secure_choice"></a>
-### Nested Schema for `protected_cookies.secure_choice`
-
-Optional:
-
-- `add_secure` (Boolean) add_secure
-- `ignore_secure` (Boolean) ignore_secure
-
-
-
-<a id="nestedatt--routes"></a>
-### Nested Schema for `routes`
-
-Required:
-
-- `choice` (Attributes) choice Define a simple, redirect, direct response or custom route (see [below for nested schema](#nestedatt--routes--choice))
-- `route_state_choice` (Attributes) Route Activation By default routes are enabled after saving. Use disabled state for work in progress routes, or temporary turn off specific routes. (see [below for nested schema](#nestedatt--routes--route_state_choice))
-
-<a id="nestedatt--routes--choice"></a>
-### Nested Schema for `routes.choice`
-
-Optional:
-
-- `custom_route_object` (Attributes) RouteTypeCustomRoute A custom route uses a route object created outside of this view. (see [below for nested schema](#nestedatt--routes--choice--custom_route_object))
-- `direct_response_route` (Attributes) RouteTypeDirectResponse A direct response route matches on path and/or HTTP method and responds directly to the matching traffic (see [below for nested schema](#nestedatt--routes--choice--direct_response_route))
-- `redirect_route` (Attributes) RouteTypeRedirect A redirect route matches on path and/or HTTP method and redirects the matching traffic to a different URL (see [below for nested schema](#nestedatt--routes--choice--redirect_route))
-- `simple_route` (Attributes) RouteTypeSimple A simple route matches on path and/or HTTP method and forwards the matching traffic to the associated pools (see [below for nested schema](#nestedatt--routes--choice--simple_route))
-
-<a id="nestedatt--routes--choice--custom_route_object"></a>
-### Nested Schema for `routes.choice.custom_route_object`
-
-Optional:
-
-- `caching_choice` (Attributes) Caching Caching behavior for this route (see [below for nested schema](#nestedatt--routes--choice--custom_route_object--caching_choice))
-- `route_ref` (Attributes) route_refs Reference to a custom route object (see [below for nested schema](#nestedatt--routes--choice--custom_route_object--route_ref))
-
-<a id="nestedatt--routes--choice--custom_route_object--caching_choice"></a>
-### Nested Schema for `routes.choice.custom_route_object.caching_choice`
-
-Optional:
-
-- `caching_disable` (Boolean) Caching is disabled for this Route
-- `caching_inherit` (Boolean) Caching is inherited from Load Balancer
-
-
-<a id="nestedatt--routes--choice--custom_route_object--route_ref"></a>
-### Nested Schema for `routes.choice.custom_route_object.route_ref`
-
-Required:
-
-- `name` (String)
-- `namespace` (String)
-
-Read-Only:
-
-- `tenant` (String)
-
-
-
-<a id="nestedatt--routes--choice--direct_response_route"></a>
-### Nested Schema for `routes.choice.direct_response_route`
-
-Required:
-
-- `path` (Attributes) path URI path of route (see [below for nested schema](#nestedatt--routes--choice--direct_response_route--path))
-
-Optional:
-
-- `headers` (Attributes List) headers List of (key, value) headers (see [below for nested schema](#nestedatt--routes--choice--direct_response_route--headers))
-- `http_method` (List of String) <br>**Allowed Values (choose one):** `["POST", "PUT", "DELETE", "CONNECT", "TRACE", "PATCH", "ANY", "OPTIONS", "COPY", "GET", "HEAD"]`
-- `incoming_port` (Attributes) incoming_port The port on which the request is received (see [below for nested schema](#nestedatt--routes--choice--direct_response_route--incoming_port))
-- `route_direct_response` (Attributes) route_direct_response Send direct response (see [below for nested schema](#nestedatt--routes--choice--direct_response_route--route_direct_response))
-
-<a id="nestedatt--routes--choice--direct_response_route--path"></a>
-### Nested Schema for `routes.choice.direct_response_route.path`
-
-Required:
-
-- `path_match_choice` (Attributes) path_match A specification of path match (see [below for nested schema](#nestedatt--routes--choice--direct_response_route--path--path_match_choice))
-
-<a id="nestedatt--routes--choice--direct_response_route--path--path_match_choice"></a>
-### Nested Schema for `routes.choice.direct_response_route.path.path_match_choice`
-
-Optional:
-
-- `path` (String) <br>**Validation:** `Length LengthAtMost(256)`
-- `prefix` (String) <br>**Validation:** `Length LengthAtMost(256)`
-- `regex` (String) regex Regular expression of path match (e.g. the value .* will match on all paths)
-
-
-
-<a id="nestedatt--routes--choice--direct_response_route--headers"></a>
-### Nested Schema for `routes.choice.direct_response_route.headers`
-
-Required:
-
-- `name` (String) name Name of the header
-
-Optional:
-
-- `invert_match` (Boolean) <br>**Default:** `false`
-- `value_match_choice` (Attributes) value_match The variants of matching a header value (see [below for nested schema](#nestedatt--routes--choice--direct_response_route--headers--value_match_choice))
-
-<a id="nestedatt--routes--choice--direct_response_route--headers--value_match_choice"></a>
-### Nested Schema for `routes.choice.direct_response_route.headers.value_match_choice`
-
-Optional:
-
-- `exact` (String) exact Header value to match exactly
-- `presence` (Boolean) presence If true, check for presence of header
-- `regex` (String) regex Regex match of the header value in re2 format
-
-
-
-<a id="nestedatt--routes--choice--direct_response_route--incoming_port"></a>
-### Nested Schema for `routes.choice.direct_response_route.incoming_port`
-
-Optional:
-
-- `port_match_choice` (Attributes) port_match A specification of port match (see [below for nested schema](#nestedatt--routes--choice--direct_response_route--incoming_port--port_match_choice))
-
-<a id="nestedatt--routes--choice--direct_response_route--incoming_port--port_match_choice"></a>
-### Nested Schema for `routes.choice.direct_response_route.incoming_port.port_match_choice`
-
-Optional:
-
-- `no_port_match` (Boolean) disable port Match Disable matching of ports
-- `port` (Number) port Exact Port to match
-- `port_ranges` (String) <br>**Validation:** `Length LengthBetween(1, 32)`
-
-
-
-<a id="nestedatt--routes--choice--direct_response_route--route_direct_response"></a>
-### Nested Schema for `routes.choice.direct_response_route.route_direct_response`
-
-Optional:
-
-- `response_body_encoded` (String) response_body Response body to send. Currently supported URL schemes is string:/// for which message should be encoded in Base64 format. The message can be either plain text or html. E.g. '<p> Access Denied </p>'. Base64 encoded string url for this is string:///PHA+IEFjY2VzcyBEZW5pZWQgPC9wPg==
-- `response_code` (Number) response_code response code to send
-
-
-
-<a id="nestedatt--routes--choice--redirect_route"></a>
-### Nested Schema for `routes.choice.redirect_route`
-
-Required:
-
-- `path` (Attributes) path URI path of route (see [below for nested schema](#nestedatt--routes--choice--redirect_route--path))
-
-Optional:
-
-- `headers` (Attributes List) headers List of (key, value) headers (see [below for nested schema](#nestedatt--routes--choice--redirect_route--headers))
-- `http_method` (List of String) <br>**Allowed Values (choose one):** `["GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "TRACE", "PATCH", "ANY", "OPTIONS", "COPY"]`
-- `incoming_port` (Attributes) incoming_port The port on which the request is received (see [below for nested schema](#nestedatt--routes--choice--redirect_route--incoming_port))
-- `route_redirect` (Attributes) route_redirect Send redirect response (see [below for nested schema](#nestedatt--routes--choice--redirect_route--route_redirect))
-
-<a id="nestedatt--routes--choice--redirect_route--path"></a>
-### Nested Schema for `routes.choice.redirect_route.path`
-
-Required:
-
-- `path_match_choice` (Attributes) path_match A specification of path match (see [below for nested schema](#nestedatt--routes--choice--redirect_route--path--path_match_choice))
-
-<a id="nestedatt--routes--choice--redirect_route--path--path_match_choice"></a>
-### Nested Schema for `routes.choice.redirect_route.path.path_match_choice`
-
-Optional:
-
-- `path` (String) <br>**Validation:** `Length LengthAtMost(256)`
-- `prefix` (String) <br>**Validation:** `Length LengthAtMost(256)`
-- `regex` (String) regex Regular expression of path match (e.g. the value .* will match on all paths)
-
-
-
-<a id="nestedatt--routes--choice--redirect_route--headers"></a>
-### Nested Schema for `routes.choice.redirect_route.headers`
-
-Required:
-
-- `name` (String) name Name of the header
-
-Optional:
-
-- `invert_match` (Boolean) <br>**Default:** `false`
-- `value_match_choice` (Attributes) value_match The variants of matching a header value (see [below for nested schema](#nestedatt--routes--choice--redirect_route--headers--value_match_choice))
-
-<a id="nestedatt--routes--choice--redirect_route--headers--value_match_choice"></a>
-### Nested Schema for `routes.choice.redirect_route.headers.value_match_choice`
-
-Optional:
-
-- `exact` (String) exact Header value to match exactly
-- `presence` (Boolean) presence If true, check for presence of header
-- `regex` (String) regex Regex match of the header value in re2 format
-
-
-
-<a id="nestedatt--routes--choice--redirect_route--incoming_port"></a>
-### Nested Schema for `routes.choice.redirect_route.incoming_port`
-
-Optional:
-
-- `port_match_choice` (Attributes) port_match A specification of port match (see [below for nested schema](#nestedatt--routes--choice--redirect_route--incoming_port--port_match_choice))
-
-<a id="nestedatt--routes--choice--redirect_route--incoming_port--port_match_choice"></a>
-### Nested Schema for `routes.choice.redirect_route.incoming_port.port_match_choice`
-
-Optional:
-
-- `no_port_match` (Boolean) disable port Match Disable matching of ports
-- `port` (Number) port Exact Port to match
-- `port_ranges` (String) <br>**Validation:** `Length LengthBetween(1, 32)`
-
-
-
-<a id="nestedatt--routes--choice--redirect_route--route_redirect"></a>
-### Nested Schema for `routes.choice.redirect_route.route_redirect`
-
-Optional:
-
-- `host_redirect` (String) host_redirect swap host part of incoming URL in redirect URL
-- `proto_redirect` (String) proto_redirect swap protocol part of incoming URL in redirect URL The protocol can be swapped with either http or https When incoming-proto option is specified, swapping of protocol is not done.
-- `query_params_choice` (Attributes) query_params handling of incoming query parameters in redirect request. (see [below for nested schema](#nestedatt--routes--choice--redirect_route--route_redirect--query_params_choice))
-- `redirect_path_choice` (Attributes) Redirect Path Path in the redirect response (see [below for nested schema](#nestedatt--routes--choice--redirect_route--route_redirect--redirect_path_choice))
-- `response_code` (Number) <br>**Default:** `301`
-
-<a id="nestedatt--routes--choice--redirect_route--route_redirect--query_params_choice"></a>
-### Nested Schema for `routes.choice.redirect_route.route_redirect.query_params_choice`
-
-Optional:
-
-- `remove_all_params` (Boolean) Remove All Params
-- `replace_params` (String) <br>**Validation:** `Length LengthBetween(1, 256)`
-- `retain_all_params` (Boolean) Retain All Params
-
-
-<a id="nestedatt--routes--choice--redirect_route--route_redirect--redirect_path_choice"></a>
-### Nested Schema for `routes.choice.redirect_route.route_redirect.redirect_path_choice`
-
-Optional:
-
-- `path_redirect` (String) <br>**Validation:** `Length LengthAtMost(256)`
-- `prefix_rewrite` (String) <br>**Validation:** `Length LengthAtMost(256)`
-
-
-
-
-<a id="nestedatt--routes--choice--simple_route"></a>
-### Nested Schema for `routes.choice.simple_route`
-
-Required:
-
-- `host_rewrite_params_choice` (Attributes) HostRewriteParams Specifies how the host header can be modified during forwarding (see [below for nested schema](#nestedatt--routes--choice--simple_route--host_rewrite_params_choice))
-- `origin_pools` (Attributes List) Origin Pools Origin Pools for this route (see [below for nested schema](#nestedatt--routes--choice--simple_route--origin_pools))
-- `path` (Attributes) path URI path of route (see [below for nested schema](#nestedatt--routes--choice--simple_route--path))
-
-Optional:
-
-- `advanced_options` (Attributes) Advanced Options Configure Advanced per route options (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options))
-- `caching_choice` (Attributes) Caching Caching behavior for this route (see [below for nested schema](#nestedatt--routes--choice--simple_route--caching_choice))
-- `headers` (Attributes List) headers List of (key, value) headers (see [below for nested schema](#nestedatt--routes--choice--simple_route--headers))
-- `http_method` (List of String) <br>**Allowed Values (choose one):** `["COPY", "GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "TRACE", "PATCH", "ANY", "OPTIONS"]`
-- `incoming_port` (Attributes) incoming_port The port on which the request is received (see [below for nested schema](#nestedatt--routes--choice--simple_route--incoming_port))
-- `query_params` (Attributes) query_params Handling of incoming query parameters in simple route. (see [below for nested schema](#nestedatt--routes--choice--simple_route--query_params))
-
-<a id="nestedatt--routes--choice--simple_route--host_rewrite_params_choice"></a>
-### Nested Schema for `routes.choice.simple_route.host_rewrite_params_choice`
-
-Optional:
-
-- `auto_host_rewrite` (Boolean) Auto Host Rewrite Host header will be swapped with hostname of upstream host chosen by the cluster
-- `disable_host_rewrite` (Boolean) Disable Host Rewrite Host header is not modified
-- `host_rewrite` (String) HostRewrite Host header will be swapped with this value
-
-
-<a id="nestedatt--routes--choice--simple_route--origin_pools"></a>
-### Nested Schema for `routes.choice.simple_route.origin_pools`
-
-Required:
-
-- `pool_choice` (Attributes) Pool Choice Select origin pool method, simple origin pool method or more flexible cluster object. (see [below for nested schema](#nestedatt--routes--choice--simple_route--origin_pools--pool_choice))
-
-Optional:
-
-- `endpoint_subsets` (Map of String) Origin Servers Subset Upstream origin pool may be configured to divide its origin servers into subsets based on metadata attached to the origin servers. Routes may then specify the metadata that a endpoint must match in order to be selected by the load balancer For origin servers which are discovered in K8S or Consul cluster, the label of the service is merged with endpoint's labels. In case of Consul, the label is derived from the 'Tag' field. For labels that are common between configured endpoint and discovered service, labels from discovered service takes precedence. List of key-value pairs that will be used as matching metadata. Only those origin servers of upstream origin pool which match this metadata will be selected for load balancing
-- `priority` (Number) <br>**Default:** `1`
-- `weight` (Number) <br>**Default:** `1`
-
-<a id="nestedatt--routes--choice--simple_route--origin_pools--pool_choice"></a>
-### Nested Schema for `routes.choice.simple_route.origin_pools.pool_choice`
-
-Optional:
-
-- `cluster` (Attributes) Cluster More flexible, advanced feature control with cluster (see [below for nested schema](#nestedatt--routes--choice--simple_route--origin_pools--pool_choice--cluster))
-- `pool` (Attributes) Pool Simple, commonly used pool parameters with origin pool (see [below for nested schema](#nestedatt--routes--choice--simple_route--origin_pools--pool_choice--pool))
-
-<a id="nestedatt--routes--choice--simple_route--origin_pools--pool_choice--cluster"></a>
-### Nested Schema for `routes.choice.simple_route.origin_pools.pool_choice.cluster`
-
-Required:
-
-- `name` (String)
-- `namespace` (String)
-
-Read-Only:
-
-- `tenant` (String)
-
-
-<a id="nestedatt--routes--choice--simple_route--origin_pools--pool_choice--pool"></a>
-### Nested Schema for `routes.choice.simple_route.origin_pools.pool_choice.pool`
-
-Required:
-
-- `name` (String)
-- `namespace` (String)
-
-Read-Only:
-
-- `tenant` (String)
-
-
-
-
-<a id="nestedatt--routes--choice--simple_route--path"></a>
-### Nested Schema for `routes.choice.simple_route.path`
-
-Required:
-
-- `path_match_choice` (Attributes) path_match A specification of path match (see [below for nested schema](#nestedatt--routes--choice--simple_route--path--path_match_choice))
-
-<a id="nestedatt--routes--choice--simple_route--path--path_match_choice"></a>
-### Nested Schema for `routes.choice.simple_route.path.path_match_choice`
-
-Optional:
-
-- `path` (String) <br>**Validation:** `Length LengthAtMost(256)`
-- `prefix` (String) <br>**Validation:** `Length LengthAtMost(256)`
-- `regex` (String) regex Regular expression of path match (e.g. the value .* will match on all paths)
-
-
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options`
-
-Required:
-
-- `buffer_choice` (Attributes) Enable Route Specific Buffering Enable or disable route specific buffering (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--buffer_choice))
-- `cluster_retract_choice` (Attributes) Oneof for Cluster retraction Specifies whether retraction of cluster has to be enabled or disabled (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--cluster_retract_choice))
-- `hash_policy_choice` (Attributes) Hash Policy Choice Enable route specific hash policy for this route (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--hash_policy_choice))
-- `mirroring_choice` (Attributes) Mirroring Enable/disable Mirroring (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--mirroring_choice))
-- `retry_policy_choice` (Attributes) Retry Policy Choice Select default retry policy or configure custom (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--retry_policy_choice))
-- `rewrite_choice` (Attributes) Enable Rewrite Select to enable prefix or regex rewrite or disable all options (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--rewrite_choice))
-- `spdy_choice` (Attributes) SPDY Choice Select to enable or disable spdy upgrade (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--spdy_choice))
-- `websocket_choice` (Attributes) Websocket Choice Select to enable or disable websocket upgrade (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--websocket_choice))
-
-Optional:
-
-- `bot_defense_javascript_injection_choice` (Attributes) Oneof Bot Defense JavaScript Injection Specifies whether bot defense javascript injection has a specific configuration for this route (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--bot_defense_javascript_injection_choice))
-- `cors_policy` (Attributes) cors_policy Cross-Origin Resource Sharing requests configuration CORS is a mechanism that uses additional HTTP headers to tell a browser to let a web application running at one origin (domain) have permission to access selected resources from a server at a different origin (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--cors_policy))
-- `csrf_policy` (Attributes) csrf_policy Cross-Site Request Forgery (CSRF) is an attack that occurs when a malicious third-party website exploits a vulnerability thats allows them to submit an undesired request on user's behalf. The policy checks where a request is coming from to determine if the request's origin is the same as its destination. The policy relies on two pieces of information used in determining if a request originated from the same host. 1. The origin that caused the user agent to issue the request (source origin). 2. The origin that the request is going to (target origin). When the policy evaluating a request, it ensures both pieces of information are present and compare their values. If the source origin is missing or origins do not match the request is rejected. The exception to this being the source-origin has been added to the policy as valid. Because CSRF attacks specifically target state-changing requests, the policy only acts on the HTTP requests that have state-changing method (PUT,POST, etc.). (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--csrf_policy))
-- `disable_location_add` (Boolean) <br>**Default:** `false`
-- `endpoint_subsets` (Map of String) Origin Servers Subset Upstream origin pool may be configured to divide its origin servers into subsets based on metadata attached to the origin servers. Routes may then specify the metadata that a endpoint must match in order to be selected by the load balancer For origin servers which are discovered in K8S or Consul cluster, the label of the service is merged with endpoint's labels. In case of Consul, the label is derived from the 'Tag' field. For labels that are common between configured endpoint and discovered service, labels from discovered service takes precedence. List of key-value pairs that will be used as matching metadata. Only those origin servers of upstream origin pool which match this metadata will be selected for load balancing
-- `priority` (List of String) <br>**Allowed Values (choose one):** `["DEFAULT", "HIGH"]`
-- `request_cookies_to_add` (Attributes List) Cookies to add in request Cookies are key-value pairs to be added to HTTP request being routed towards upstream. Cookies specified at this level are applied after cookies from matched Route are applied (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--request_cookies_to_add))
-- `request_cookies_to_remove` (List of String) Cookies to be removed from request List of keys of Cookies to be removed from the HTTP request being sent towards upstream.
-- `request_headers_to_add` (Attributes List) Headers to add in request Headers are key-value pairs to be added to HTTP request being routed towards upstream. (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--request_headers_to_add))
-- `request_headers_to_remove` (List of String) Header to be removed from request List of keys of Headers to be removed from the HTTP request being sent towards upstream.
-- `response_cookies_to_add` (Attributes List) Cookies to add in set-cookie header in response Cookies are name-value pairs along with optional attribute parameters to be added to HTTP response being sent towards downstream. Cookies specified at this level are applied after cookies from matched Route are applied (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add))
-- `response_cookies_to_remove` (List of String) Cookies to be removed from response List of name of Cookies to be removed from the HTTP response being sent towards downstream. Entire set-cookie header will be removed
-- `response_headers_to_add` (Attributes List) Headers to add in response Headers are key-value pairs to be added to HTTP response being sent towards downstream. (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--response_headers_to_add))
-- `response_headers_to_remove` (List of String) Header to be removed from response List of keys of Headers to be removed from the HTTP response being sent towards downstream.
-- `timeout` (Number) <br>**Default:** `30000`
-- `waf_choice` (Attributes) Enable the WAF (Web Application Firewall) functionality for VirtualHost WAF can be used to analyze inbound and outbound http/https traffic. WAF can be configured either in BLOCKing Mode or ALERTing Mode. In BLOCKing mode if WAF detects suspicious inbound/outbound traffic it blocks the request or response. In ALERTing mode if suspicious traffic is detected, WAF generates ALERTs with details on the suspicious traffic (instead of blocking traffic). (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--waf_choice))
-- `waf_exclusion_choice` (Attributes) Enable the WAF Exclusion functionality for VirtualHost A WAF Exclusion that can be applied to one or more Load Balancers or Routes. The WAF Exclusion is evaluated sequentially and can only be matched once per request. (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--waf_exclusion_choice))
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--buffer_choice"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.buffer_choice`
-
-Optional:
-
-- `buffer_policy` (Attributes) Route Specific Buffering Configuration Buffering configuration for requests Some upstream applications are not capable of handling streamed data. This config enables buffering the entire request before sending to upstream application. We can specify the maximum buffer size and buffer interval with this config. Route level buffer configuration overrides any configuration at VirtualHost level. (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--buffer_choice--buffer_policy))
-- `common_buffering` (Boolean) Common buffering Configuration Use common buffering configuration
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--buffer_choice--buffer_policy"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.buffer_choice.buffer_policy`
-
-Optional:
-
-- `disabled` (Boolean) <br>**Default:** `false`
-- `max_request_bytes` (Number) max_request_bytes The maximum request size that the filter will buffer before the connection manager will stop buffering and return a RequestEntityTooLarge (413) response.
-
-
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--cluster_retract_choice"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.cluster_retract_choice`
-
-Optional:
-
-- `do_not_retract_cluster` (Boolean) do_not_retract_cluster When this option is configured, cluster with no healthy endpoints is not retracted from route having weighted cluster configuration.
-- `retract_cluster` (Boolean) retract_cluster When this option is enabled, weighted cluster will not be considered for load balancing, if all its endpoints are unhealthy. Since the cluster with all unhealthy endpoints is removed, the traffic will be distributed among remaining clusters as per their weight. Also panic-threshold configuration is ignored for retracted cluster. This option is ignored when single destination cluster is configured for route
-
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--hash_policy_choice"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.hash_policy_choice`
-
-Optional:
-
-- `common_hash_policy` (Boolean) Common Hash Policy Use load balancer hash policy for this route
-- `specific_hash_policy` (Attributes) Route Specific Hash Policy Configure hash policy specific for this route (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--hash_policy_choice--specific_hash_policy))
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--hash_policy_choice--specific_hash_policy"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.hash_policy_choice.specific_hash_policy`
-
-Required:
-
-- `hash_policy` (Attributes List) hash_policy Specifies a list of hash policies to use for ring hash load balancing. Each hash policy is evaluated individually and the combined result is used to route the request (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--hash_policy_choice--specific_hash_policy--hash_policy))
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--hash_policy_choice--specific_hash_policy--hash_policy"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.hash_policy_choice.specific_hash_policy.hash_policy`
-
-Required:
-
-- `policy_specifier_choice` (Attributes) PolicySpecifier Specifies whether hashing is done on incoming request header, cookie or source IP (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--hash_policy_choice--specific_hash_policy--hash_policy--policy_specifier_choice))
-
-Optional:
-
-- `terminal` (Boolean) <br>**Default:** `false`
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--hash_policy_choice--specific_hash_policy--hash_policy--policy_specifier_choice"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.hash_policy_choice.specific_hash_policy.hash_policy.policy_specifier_choice`
-
-Optional:
-
-- `cookie` (Attributes) Cookie Hash based on cookie (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--hash_policy_choice--specific_hash_policy--hash_policy--policy_specifier_choice--cookie))
-- `header_name` (String) <br>**Validation:** `Length LengthBetween(1, 256)`
-- `source_ip` (Boolean) Source IP Hash based on source IP address
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--hash_policy_choice--specific_hash_policy--hash_policy--policy_specifier_choice--cookie"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.hash_policy_choice.specific_hash_policy.hash_policy.policy_specifier_choice.cookie`
-
-Required:
-
-- `name` (String) <br>**Validation:** `Length LengthBetween(1, 256)`
-
-Optional:
-
-- `httponly_choice` (Attributes) httponly A cookie with the HttpOnly attribute is inaccessible to the JavaScript. (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--hash_policy_choice--specific_hash_policy--hash_policy--policy_specifier_choice--cookie--httponly_choice))
-- `path` (String) path The name of the path for the cookie. If no path is specified here, no path will be set for the cookie
-- `samesite_choice` (Attributes) samesite Controls whether or not a cookie is sent with cross-site requests (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--hash_policy_choice--specific_hash_policy--hash_policy--policy_specifier_choice--cookie--samesite_choice))
-- `secure_choice` (Attributes) secure A cookie with the Secure attribute is only sent to the server with an encrypted request over the HTTPS protocol and therefore, is more resistant to man-in-the-middle attacks. (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--hash_policy_choice--specific_hash_policy--hash_policy--policy_specifier_choice--cookie--secure_choice))
-- `ttl` (Number) ttl If specified, a cookie with the TTL will be generated if the cookie is not present. If the TTL is present and zero, the generated cookie will be a session cookie. TTL value is in milliseconds
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--hash_policy_choice--specific_hash_policy--hash_policy--policy_specifier_choice--cookie--httponly_choice"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.hash_policy_choice.specific_hash_policy.hash_policy.policy_specifier_choice.cookie.httponly_choice`
-
-Optional:
-
-- `add_httponly` (Boolean) add_httponly Add httponly attribute
-- `ignore_httponly` (Boolean) ignore_httponly Ignore httponly attribute
-
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--hash_policy_choice--specific_hash_policy--hash_policy--policy_specifier_choice--cookie--samesite_choice"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.hash_policy_choice.specific_hash_policy.hash_policy.policy_specifier_choice.cookie.samesite_choice`
-
-Optional:
-
-- `ignore_samesite` (Boolean) ignore_samesite Ignore Samesite attribute
-- `samesite_lax` (Boolean) lax Add Samesite attribute with Lax. Means that the cookie is not sent on cross-site requests
-- `samesite_none` (Boolean) none Add Samesite attribute with None. Means that the browser sends the cookie with both cross-site and same-site requests
-- `samesite_strict` (Boolean) strict Add Samesite attribute with Strict. Means that the browser sends the cookie only for same-site requests
-
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--hash_policy_choice--specific_hash_policy--hash_policy--policy_specifier_choice--cookie--secure_choice"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.hash_policy_choice.specific_hash_policy.hash_policy.policy_specifier_choice.cookie.secure_choice`
-
-Optional:
-
-- `add_secure` (Boolean) add_secure Add secure attribute
-- `ignore_secure` (Boolean) ignore_secure Ignore secure attribute
-
-
-
-
-
-
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--mirroring_choice"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.mirroring_choice`
-
-Optional:
-
-- `disable_mirroring` (Boolean) Disable Mirroring Disable Mirroring of request
-- `mirror_policy` (Attributes) Enable Mirroring MirrorPolicy is used for shadowing traffic from one cluster to another. The current implementation is 'fire and forget,' meaning it will not wait for the shadow cluster to respond before returning the response from the primary cluster. All normal statistics are collected for the shadow cluster making this feature useful for testing. During shadowing, the host/authority header is altered such that *-shadow* is appended. This is useful for logging. For example, *cluster1* becomes *cluster1-shadow*. (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--mirroring_choice--mirror_policy))
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--mirroring_choice--mirror_policy"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.mirroring_choice.mirror_policy`
-
-Required:
-
-- `origin_pool` (Attributes) cluster Specifies the cluster to which the requests will be mirrored. The cluster object referred here must be present. (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--mirroring_choice--mirror_policy--origin_pool))
-- `percent` (Attributes) percent Percentage of requests to be mirrored (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--mirroring_choice--mirror_policy--percent))
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--mirroring_choice--mirror_policy--origin_pool"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.mirroring_choice.mirror_policy.origin_pool`
-
-Required:
-
-- `name` (String)
-- `namespace` (String)
-
-Read-Only:
-
-- `tenant` (String)
-
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--mirroring_choice--mirror_policy--percent"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.mirroring_choice.mirror_policy.percent`
-
-Required:
-
-- `denominator` (List of String) <br>**Allowed Values (choose one):** `["HUNDRED", "TEN_THOUSAND", "MILLION"]`
-
-Optional:
-
-- `numerator` (Number) <br>**Default:** `5`
-
-
-
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--retry_policy_choice"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.retry_policy_choice`
-
-Optional:
-
-- `default_retry_policy` (Boolean) Use Default Retry Policy Use system default retry policy
-- `no_retry_policy` (Boolean) No retry policy Do not configure retry policy
-- `retry_policy` (Attributes) Custom Retry Policy Configure custom retry policy (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--retry_policy_choice--retry_policy))
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--retry_policy_choice--retry_policy"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.retry_policy_choice.retry_policy`
-
-Required:
-
-- `retry_condition` (List of String) retry_condition Specifies the conditions under which retry takes place. Retries can be on different types of condition depending on application requirements. For example, network failure, all 5xx response codes, idempotent 4xx response codes, etc The possible values are '5xx'             : Retry will be done if the upstream server responds with any 5xx response code, or does not respond at all (disconnect/reset/read timeout). 'gateway-error'   : Retry will be done only if the upstream server responds with 502, 503 or 504 responses (Included in 5xx) 'connect-failure' : Retry will be done if the request fails because of a connection failure to the upstream server (connect timeout, etc.). (Included in 5xx) 'refused-stream'  : Retry is done if the upstream server resets the stream with a REFUSED_STREAM error code (Included in 5xx) 'retriable-4xx'   : Retry is done if the upstream server responds with a retriable 4xx response code. The only response code in this category is HTTP CONFLICT (409) 'retriable-status-codes' :  Retry is done if the upstream server responds with any response code matching one defined in retriable_status_codes field 'reset'           : Retry is done if the upstream server does not respond at all (disconnect/reset/read timeout.)
-
-Optional:
-
-- `back_off` (Attributes) Retry BackOff Specifies parameters that control retry back off. This parameter is optional, in which case the default base interval is 25 milliseconds. The default maximum interval is 10 times the base interval (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--retry_policy_choice--retry_policy--back_off))
-- `num_retries` (Number) <br>**Default:** `1`
-- `per_try_timeout` (Number) per_try_timeout Specifies a non-zero timeout per retry attempt. In milliseconds
-- `retriable_status_codes` (List of Number) Retriable status Code HTTP status codes that should trigger a retry in addition to those specified by retry_on.
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--retry_policy_choice--retry_policy--back_off"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.retry_policy_choice.retry_policy.back_off`
-
-Optional:
-
-- `base_interval` (Number) <br>**Default:** `25`
-- `max_interval` (Number) max_interval Specifies the maximum interval between retries in milliseconds. This parameter is optional, but must be greater than or equal to the base_interval if set. The default is 10 times the base_interval.
-
-
-
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--rewrite_choice"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.rewrite_choice`
-
-Optional:
-
-- `disable_prefix_rewrite` (Boolean) Disable Rewrite Do not rewrite any path portion.
-- `prefix_rewrite` (String) <br>**Validation:** `Length LengthAtMost(256)`
-- `regex_rewrite` (Attributes) regex_rewrite regex_rewrite indicates that during forwarding, the matched regex should be swapped with the substitution value. (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--rewrite_choice--regex_rewrite))
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--rewrite_choice--regex_rewrite"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.rewrite_choice.regex_rewrite`
-
-Optional:
-
-- `pattern` (String) <br>**Validation:** `Length LengthBetween(1, 256)`
-- `substitution` (String) <br>**Validation:** `Length LengthAtMost(256)`
-
-
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--spdy_choice"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.spdy_choice`
-
-Optional:
-
-- `disable_spdy` (Boolean) Disable SPDY SPDY upgrade is disabled
-- `enable_spdy` (Boolean) Enable SPDY SPDY upgrade is enabled
-
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--websocket_choice"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.websocket_choice`
-
-Optional:
-
-- `disable_web_socket_config` (Boolean) Disable Websocket Websocket upgrade is disabled
-- `web_socket_config` (Attributes) Websocket Configuration Upgrade to Websocket for this route (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--websocket_choice--web_socket_config))
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--websocket_choice--web_socket_config"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.websocket_choice.web_socket_config`
-
-Optional:
-
-- `use_websocket` (Boolean) <br>**Default:** `false`
-
-
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--bot_defense_javascript_injection_choice"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.bot_defense_javascript_injection_choice`
-
-Optional:
-
-- `bot_defense_javascript_injection` (Attributes) Bot Defense JavaScript Injection for inline bot defense deployments Configuration for Bot Defense JavaScript Injection (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--bot_defense_javascript_injection_choice--bot_defense_javascript_injection))
-- `inherited_bot_defense_javascript_injection` (Boolean) Inherited Bot Defense JavaScript Injection Bot Defense JavaScript Injection configuration is taken from Load Balancer. Hence no custom configuration is applied on the route
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--bot_defense_javascript_injection_choice--bot_defense_javascript_injection"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.bot_defense_javascript_injection_choice.bot_defense_javascript_injection`
-
-Required:
-
-- `javascript_tags` (Attributes List) javascript_tags Select Add item to configure your javascript tag. If adding both Bot Adv and Fraud, the Bot Javascript should be added first. (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--bot_defense_javascript_injection_choice--bot_defense_javascript_injection--javascript_tags))
-
-Optional:
-
-- `javascript_location` (List of String) <br>**Allowed Values (choose one):** `["AFTER_HEAD", "AFTER_TITLE_END", "BEFORE_SCRIPT"]`
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--bot_defense_javascript_injection_choice--bot_defense_javascript_injection--javascript_tags"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.bot_defense_javascript_injection_choice.bot_defense_javascript_injection.javascript_tags`
-
-Required:
-
-- `javascript_url` (String) JavaScriptURL Please enter the full URL (include domain and path), or relative path.
-
-Optional:
-
-- `tag_attributes` (Attributes List) TagAttributes Add the tag attributes you want to include in your Javascript tag. (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--bot_defense_javascript_injection_choice--bot_defense_javascript_injection--javascript_tags--tag_attributes))
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--bot_defense_javascript_injection_choice--bot_defense_javascript_injection--javascript_tags--tag_attributes"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.bot_defense_javascript_injection_choice.bot_defense_javascript_injection.javascript_tags.tag_attributes`
-
-Optional:
-
-- `javascript_tag` (List of String) <br>**Allowed Values (choose one):** `["JS_ATTR_API_URL", "JS_ATTR_API_PATH", "JS_ATTR_ASYNC", "JS_ATTR_DEFER", "JS_ATTR_ID", "JS_ATTR_CID", "JS_ATTR_CN", "JS_ATTR_API_DOMAIN"]`
-- `tag_value` (String) TagValue Add the tag attribute value.
-
-
-
-
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--cors_policy"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.cors_policy`
-
-Optional:
-
-- `allow_credentials` (Boolean) <br>**Default:** `false`
-- `allow_headers` (String) allow_headers Specifies the content for the access-control-allow-headers header
-- `allow_methods` (String) allow_methods Specifies the content for the access-control-allow-methods header
-- `allow_origin` (List of String) allow_origin Specifies the origins that will be allowed to do CORS requests. An origin is allowed if either allow_origin or allow_origin_regex match
-- `allow_origin_regex` (List of String) allow_origin_regex Specifies regex patterns that match allowed origins. An origin is allowed if either allow_origin or allow_origin_regex match
-- `disabled` (Boolean) <br>**Default:** `false`
-- `expose_headers` (String) expose_headers Specifies the content for the access-control-expose-headers header
-- `maximum_age` (Number) maximum_age This indicates the maximum number of seconds the results can be cached A value of -1 will disable caching. Maximum permitted value is 86400 seconds (24 hours)
-
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--csrf_policy"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.csrf_policy`
-
-Required:
-
-- `allowed_domains_choice` (Attributes) allowed_domains The list of source origin that should be allowed. (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--csrf_policy--allowed_domains_choice))
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--csrf_policy--allowed_domains_choice"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.csrf_policy.allowed_domains_choice`
-
-Optional:
-
-- `all_load_balancer_domains` (Boolean) all_load_balancer_domains Add All load balancer domains to source origin (allow) list.
-- `custom_domain_list` (Attributes) custom_domain_list Add one or more domains to source origin (allow) list. (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--csrf_policy--allowed_domains_choice--custom_domain_list))
-- `disabled` (Boolean) disabled Allow all source origin domains.
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--csrf_policy--allowed_domains_choice--custom_domain_list"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.csrf_policy.allowed_domains_choice.custom_domain_list`
-
-Required:
-
-- `domains` (List of String) Domains A list of domain names that will be matched to loadbalancer. These domains are not used for SNI match. Wildcard names are supported in the suffix or prefix form.
-
-
-
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--request_cookies_to_add"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.request_cookies_to_add`
-
-Required:
-
-- `name` (String) <br>**Validation:** `Length LengthAtMost(256)`
-- `value_choice` (Attributes) value Enter Cookie value as string or blindfolded secret. (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--request_cookies_to_add--value_choice))
-
-Optional:
-
-- `overwrite` (Boolean) <br>**Default:** `false`
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--request_cookies_to_add--value_choice"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.request_cookies_to_add.value_choice`
-
-Optional:
-
-- `secret_value` (Attributes) Secret Value Secret Value of the Cookie header (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--request_cookies_to_add--value_choice--secret_value))
-- `value` (String) <br>**Validation:** `Length LengthAtMost(8096)`
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--request_cookies_to_add--value_choice--secret_value"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.request_cookies_to_add.value_choice.secret_value`
-
-Required:
-
-- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--request_cookies_to_add--value_choice--secret_value--secret_info_choice))
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--request_cookies_to_add--value_choice--secret_value--secret_info_choice"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.request_cookies_to_add.value_choice.secret_value.secret_info_choice`
-
-Optional:
-
-- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--request_cookies_to_add--value_choice--secret_value--secret_info_choice--blindfold_secret_info))
-- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--request_cookies_to_add--value_choice--secret_value--secret_info_choice--clear_secret_info))
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--request_cookies_to_add--value_choice--secret_value--secret_info_choice--blindfold_secret_info"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.request_cookies_to_add.value_choice.secret_value.secret_info_choice.blindfold_secret_info`
-
-Required:
-
-- `location` (String) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
-
-Optional:
-
-- `decryption_provider` (String) Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.
-- `store_provider` (String) Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
-
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--request_cookies_to_add--value_choice--secret_value--secret_info_choice--clear_secret_info"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.request_cookies_to_add.value_choice.secret_value.secret_info_choice.clear_secret_info`
-
-Required:
-
-- `url` (String) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
-
-Optional:
-
-- `provider` (String) Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
-
-
-
-
-
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--request_headers_to_add"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.request_headers_to_add`
-
-Required:
-
-- `name` (String) <br>**Validation:** `Length LengthAtMost(256)`
-- `value_choice` (Attributes) value Enter Header value as string or blindfolded secret. (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--request_headers_to_add--value_choice))
-
-Optional:
-
-- `append` (Boolean) <br>**Default:** `false`
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--request_headers_to_add--value_choice"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.request_headers_to_add.value_choice`
-
-Optional:
-
-- `secret_value` (Attributes) Secret Value Secret Value of the HTTP header. (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--request_headers_to_add--value_choice--secret_value))
-- `value` (String) <br>**Validation:** `Length LengthAtMost(8096)`
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--request_headers_to_add--value_choice--secret_value"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.request_headers_to_add.value_choice.secret_value`
-
-Required:
-
-- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--request_headers_to_add--value_choice--secret_value--secret_info_choice))
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--request_headers_to_add--value_choice--secret_value--secret_info_choice"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.request_headers_to_add.value_choice.secret_value.secret_info_choice`
-
-Optional:
-
-- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--request_headers_to_add--value_choice--secret_value--secret_info_choice--blindfold_secret_info))
-- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--request_headers_to_add--value_choice--secret_value--secret_info_choice--clear_secret_info))
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--request_headers_to_add--value_choice--secret_value--secret_info_choice--blindfold_secret_info"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.request_headers_to_add.value_choice.secret_value.secret_info_choice.blindfold_secret_info`
-
-Required:
-
-- `location` (String) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
-
-Optional:
-
-- `decryption_provider` (String) Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.
-- `store_provider` (String) Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
-
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--request_headers_to_add--value_choice--secret_value--secret_info_choice--clear_secret_info"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.request_headers_to_add.value_choice.secret_value.secret_info_choice.clear_secret_info`
-
-Required:
-
-- `url` (String) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
-
-Optional:
-
-- `provider` (String) Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
-
-
-
-
-
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.response_cookies_to_add`
-
-Required:
-
-- `name` (String) <br>**Validation:** `Length LengthAtMost(256)`
-
-Optional:
-
-- `domain_choice` (Attributes) domain Domain to which cookie will be sent during request (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add--domain_choice))
-- `expiry_choice` (Attributes) Expiry Indicates the maximum lifetime of the cookie as an HTTP-date timestamp. Eg. Mon, 01 Dec 2008 00:23:53 GMT (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add--expiry_choice))
-- `httponly_choice` (Attributes) httponly A cookie with the HttpOnly attribute is inaccessible to the JavaScript. (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add--httponly_choice))
-- `max_age_choice` (Attributes) max_age Enter the maximum age in minutes for session cookies after which cookies are automatically expired (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add--max_age_choice))
-- `overwrite` (Boolean) <br>**Default:** `false`
-- `partitioned_choice` (Attributes) Partitioned A cookie with the Partitioned attribute is stored using partitioned storage. (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add--partitioned_choice))
-- `path_choice` (Attributes) path The path that must exist in the requested URL for the browser to send the Cookie header. (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add--path_choice))
-- `samesite_choice` (Attributes) samesite Controls whether or not a cookie is sent with cross-site requests (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add--samesite_choice))
-- `secure_choice` (Attributes) secure A cookie with the Secure attribute is only sent to the server with an encrypted request over the HTTPS protocol and therefore, is more resistant to man-in-the-middle attacks. (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add--secure_choice))
-- `value_choice` (Attributes) value Enter Cookie value as string or blindfolded secret. (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add--value_choice))
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add--domain_choice"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.response_cookies_to_add.domain_choice`
-
-Optional:
-
-- `add_domain` (String) <br>**Validation:** `Length LengthBetween(1, 256)`
-- `ignore_domain` (Boolean) ignore_domain Ignore max age attribute
-
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add--expiry_choice"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.response_cookies_to_add.expiry_choice`
-
-Optional:
-
-- `add_expiry` (String) <br>**Validation:** `Length LengthAtMost(256)`
-- `ignore_expiry` (Boolean) ignore_expiry Ignore expiry attribute
-
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add--httponly_choice"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.response_cookies_to_add.httponly_choice`
-
-Optional:
-
-- `add_httponly` (Boolean) add_httponly
-- `ignore_httponly` (Boolean) ignore_httponly
-
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add--max_age_choice"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.response_cookies_to_add.max_age_choice`
-
-Optional:
-
-- `ignore_max_age` (Boolean) ignore_max_age Ignore max age attribute
-- `max_age_value` (Number) <br>**Default:** `86400`
-
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add--partitioned_choice"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.response_cookies_to_add.partitioned_choice`
-
-Optional:
-
-- `add_partitioned` (Boolean) add_partitioned
-- `ignore_partitioned` (Boolean) ignore_partitioned
-
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add--path_choice"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.response_cookies_to_add.path_choice`
-
-Optional:
-
-- `add_path` (String) <br>**Validation:** `Length LengthAtMost(256)`
-- `ignore_path` (Boolean) ignore_domain Ignore path attribute
-
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add--samesite_choice"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.response_cookies_to_add.samesite_choice`
-
-Optional:
-
-- `ignore_samesite` (Boolean) ignore_samesite Ignore Samesite attribute
-- `samesite_lax` (Boolean) lax Add Samesite attribute with Lax. Means that the cookie is not sent on cross-site requests
-- `samesite_none` (Boolean) none Add Samesite attribute with None. Means that the browser sends the cookie with both cross-site and same-site requests
-- `samesite_strict` (Boolean) strict Add Samesite attribute with Strict. Means that the browser sends the cookie only for same-site requests
-
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add--secure_choice"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.response_cookies_to_add.secure_choice`
-
-Optional:
-
-- `add_secure` (Boolean) add_secure
-- `ignore_secure` (Boolean) ignore_secure
-
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add--value_choice"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.response_cookies_to_add.value_choice`
-
-Optional:
-
-- `ignore_value` (Boolean) ignore_value Ignore value of cookie
-- `secret_value` (Attributes) Secret Value Secret Value of the Cookie header (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add--value_choice--secret_value))
-- `value` (String) <br>**Validation:** `Length LengthAtMost(8096)`
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add--value_choice--secret_value"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.response_cookies_to_add.value_choice.secret_value`
-
-Required:
-
-- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add--value_choice--secret_value--secret_info_choice))
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add--value_choice--secret_value--secret_info_choice"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.response_cookies_to_add.value_choice.secret_value.secret_info_choice`
-
-Optional:
-
-- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add--value_choice--secret_value--secret_info_choice--blindfold_secret_info))
-- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add--value_choice--secret_value--secret_info_choice--clear_secret_info))
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add--value_choice--secret_value--secret_info_choice--blindfold_secret_info"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.response_cookies_to_add.value_choice.secret_value.secret_info_choice.blindfold_secret_info`
-
-Required:
-
-- `location` (String) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
-
-Optional:
-
-- `decryption_provider` (String) Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.
-- `store_provider` (String) Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
-
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add--value_choice--secret_value--secret_info_choice--clear_secret_info"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.response_cookies_to_add.value_choice.secret_value.secret_info_choice.clear_secret_info`
-
-Required:
-
-- `url` (String) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
-
-Optional:
-
-- `provider` (String) Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
-
-
-
-
-
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--response_headers_to_add"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.response_headers_to_add`
-
-Required:
-
-- `name` (String) <br>**Validation:** `Length LengthAtMost(256)`
-- `value_choice` (Attributes) value Enter Header value as string or blindfolded secret. (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--response_headers_to_add--value_choice))
-
-Optional:
-
-- `append` (Boolean) <br>**Default:** `false`
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--response_headers_to_add--value_choice"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.response_headers_to_add.value_choice`
-
-Optional:
-
-- `secret_value` (Attributes) Secret Value Secret Value of the HTTP header. (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--response_headers_to_add--value_choice--secret_value))
-- `value` (String) <br>**Validation:** `Length LengthAtMost(8096)`
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--response_headers_to_add--value_choice--secret_value"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.response_headers_to_add.value_choice.secret_value`
-
-Required:
-
-- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--response_headers_to_add--value_choice--secret_value--secret_info_choice))
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--response_headers_to_add--value_choice--secret_value--secret_info_choice"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.response_headers_to_add.value_choice.secret_value.secret_info_choice`
-
-Optional:
-
-- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--response_headers_to_add--value_choice--secret_value--secret_info_choice--blindfold_secret_info))
-- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--response_headers_to_add--value_choice--secret_value--secret_info_choice--clear_secret_info))
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--response_headers_to_add--value_choice--secret_value--secret_info_choice--blindfold_secret_info"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.response_headers_to_add.value_choice.secret_value.secret_info_choice.blindfold_secret_info`
-
-Required:
-
-- `location` (String) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
-
-Optional:
-
-- `decryption_provider` (String) Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.
-- `store_provider` (String) Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
-
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--response_headers_to_add--value_choice--secret_value--secret_info_choice--clear_secret_info"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.response_headers_to_add.value_choice.secret_value.secret_info_choice.clear_secret_info`
-
-Required:
-
-- `url` (String) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
-
-Optional:
-
-- `provider` (String) Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
-
-
-
-
-
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--waf_choice"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.waf_choice`
-
-Optional:
-
-- `app_firewall` (Attributes) app_firewall Reference to App Firewall configuration object (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--waf_choice--app_firewall))
-- `disable_waf` (Boolean) disable_app_firewall App Firewall configuration that is configured in the Load Balancer will not be enforced on this route
-- `inherited_waf` (Boolean) Inherited WAF App Firewall configuration is taken from the Load Balancer. Hence no custom configuration is applied on the route
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--waf_choice--app_firewall"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.waf_choice.app_firewall`
-
-Required:
-
-- `name` (String)
-- `namespace` (String)
-
-Read-Only:
-
-- `tenant` (String)
-
-
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--waf_exclusion_choice"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.waf_exclusion_choice`
-
-Optional:
-
-- `inherited_waf_exclusion` (Boolean) Inherit WAF Exclusion configuration is taken from the Load Balancer. Hence no custom configuration is applied on the route
-- `waf_exclusion_policy` (Attributes) Custom Policy A reference to WAF Exclusion Policy configuration object (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--waf_exclusion_choice--waf_exclusion_policy))
-
-<a id="nestedatt--routes--choice--simple_route--advanced_options--waf_exclusion_choice--waf_exclusion_policy"></a>
-### Nested Schema for `routes.choice.simple_route.advanced_options.waf_exclusion_choice.waf_exclusion_policy`
-
-Required:
-
-- `name` (String)
-- `namespace` (String)
-
-Read-Only:
-
-- `tenant` (String)
-
-
-
-
-<a id="nestedatt--routes--choice--simple_route--caching_choice"></a>
-### Nested Schema for `routes.choice.simple_route.caching_choice`
-
-Optional:
-
-- `caching_disable` (Boolean) Caching is disabled for this Route
-- `caching_inherit` (Boolean) Caching is inherited from Load Balancer
-
-
-<a id="nestedatt--routes--choice--simple_route--headers"></a>
-### Nested Schema for `routes.choice.simple_route.headers`
-
-Required:
-
-- `name` (String) name Name of the header
-
-Optional:
-
-- `invert_match` (Boolean) <br>**Default:** `false`
-- `value_match_choice` (Attributes) value_match The variants of matching a header value (see [below for nested schema](#nestedatt--routes--choice--simple_route--headers--value_match_choice))
-
-<a id="nestedatt--routes--choice--simple_route--headers--value_match_choice"></a>
-### Nested Schema for `routes.choice.simple_route.headers.value_match_choice`
-
-Optional:
-
-- `exact` (String) exact Header value to match exactly
-- `presence` (Boolean) presence If true, check for presence of header
-- `regex` (String) regex Regex match of the header value in re2 format
-
-
-
-<a id="nestedatt--routes--choice--simple_route--incoming_port"></a>
-### Nested Schema for `routes.choice.simple_route.incoming_port`
-
-Optional:
-
-- `port_match_choice` (Attributes) port_match A specification of port match (see [below for nested schema](#nestedatt--routes--choice--simple_route--incoming_port--port_match_choice))
-
-<a id="nestedatt--routes--choice--simple_route--incoming_port--port_match_choice"></a>
-### Nested Schema for `routes.choice.simple_route.incoming_port.port_match_choice`
-
-Optional:
-
-- `no_port_match` (Boolean) disable port Match Disable matching of ports
-- `port` (Number) port Exact Port to match
-- `port_ranges` (String) <br>**Validation:** `Length LengthBetween(1, 32)`
-
-
-
-<a id="nestedatt--routes--choice--simple_route--query_params"></a>
-### Nested Schema for `routes.choice.simple_route.query_params`
-
-Required:
-
-- `query_params_choice` (Attributes) query_params Handling of incoming query parameters in simple route. (see [below for nested schema](#nestedatt--routes--choice--simple_route--query_params--query_params_choice))
-
-<a id="nestedatt--routes--choice--simple_route--query_params--query_params_choice"></a>
-### Nested Schema for `routes.choice.simple_route.query_params.query_params_choice`
-
-Optional:
-
-- `remove_all_params` (Boolean) Remove All Params
-- `replace_params` (String) <br>**Validation:** `Length LengthBetween(1, 256)`
-- `retain_all_params` (Boolean) Retain All Params
-
-
-
-
-
-<a id="nestedatt--routes--route_state_choice"></a>
-### Nested Schema for `routes.route_state_choice`
-
-Optional:
-
-- `route_state_disabled` (Boolean) Disabled
-- `route_state_enabled` (Boolean) Enabled
-
-
-
-<a id="nestedatt--slow_ddos_mitigation_choice"></a>
-### Nested Schema for `slow_ddos_mitigation_choice`
-
-Optional:
-
-- `slow_ddos_mitigation` (Attributes) Slow DDoS Mitigation Custom Settings for Slow DDoS Mitigation (see [below for nested schema](#nestedatt--slow_ddos_mitigation_choice--slow_ddos_mitigation))
-- `system_default_timeouts` (Boolean) System Default Settings Default Settings for Slow DDoS Mitigation
-
-<a id="nestedatt--slow_ddos_mitigation_choice--slow_ddos_mitigation"></a>
-### Nested Schema for `slow_ddos_mitigation_choice.slow_ddos_mitigation`
-
-Required:
-
-- `request_timeout_choice` (Attributes) Total Request Timeout The amount of time allowed for the entire request stream to be received from the client, in milliseconds. The stream is terminated with a HTTP 408 (Request Timeout) error code if request has not been completed. The default value is 60000 milliseconds. This setting provides protection against Slow POST attacks. (see [below for nested schema](#nestedatt--slow_ddos_mitigation_choice--slow_ddos_mitigation--request_timeout_choice))
-
-Optional:
-
-- `request_headers_timeout` (Number) <br>**Default:** `10000`
-
-<a id="nestedatt--slow_ddos_mitigation_choice--slow_ddos_mitigation--request_timeout_choice"></a>
-### Nested Schema for `slow_ddos_mitigation_choice.slow_ddos_mitigation.request_timeout_choice`
-
-Optional:
-
-- `disable_request_timeout` (Boolean) No Timeout
-- `request_timeout` (Number) <br>**Default:** `60000`
-
-
-
-
-<a id="nestedatt--timeouts"></a>
-### Nested Schema for `timeouts`
-
-Optional:
-
-- `create` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
-- `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
-- `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
-
-
-<a id="nestedatt--trusted_clients"></a>
-### Nested Schema for `trusted_clients`
-
-Required:
-
-- `client_source_choice` (Attributes) Client Identifier Client identifier that should be used for the client rule (see [below for nested schema](#nestedatt--trusted_clients--client_source_choice))
-- `metadata` (Attributes) metadata Common attributes for the rule including name and description. (see [below for nested schema](#nestedatt--trusted_clients--metadata))
-
-Optional:
-
-- `actions` (List of String) <br>**Valid Options:** `["SKIP_PROCESSING_OAS_VALIDATION", "SKIP_PROCESSING_DDOS_PROTECTION", "SKIP_PROCESSING_THREAT_MESH", "SKIP_PROCESSING_BOT", "SKIP_PROCESSING_IP_REPUTATION", "SKIP_PROCESSING_API_PROTECTION", "SKIP_PROCESSING_MALWARE_PROTECTION", "SKIP_PROCESSING_WAF", "SKIP_PROCESSING_MUM"]` (Multiple selection allowed)
-- `expiration_timestamp` (String) expiration timestamp The expiration_timestamp is the RFC 3339 format timestamp at which the containing rule is considered to be logically expired. The rule continues to exist in the configuration but is not applied anymore.
-
-<a id="nestedatt--trusted_clients--client_source_choice"></a>
-### Nested Schema for `trusted_clients.client_source_choice`
-
-Optional:
-
-- `as_number` (Number) as number RFC 6793 defined 4-byte AS number
-- `http_header` (Attributes) HTTP Header Request header name and value pairs (see [below for nested schema](#nestedatt--trusted_clients--client_source_choice--http_header))
-- `ip_prefix` (String) ip prefix IPv4 prefix string.
-- `ipv6_prefix` (String) ipv6 prefix IPv6 prefix string.
-- `user_identifier` (String) <br>**Validation:** `Length LengthAtMost(256)`
-
-<a id="nestedatt--trusted_clients--client_source_choice--http_header"></a>
-### Nested Schema for `trusted_clients.client_source_choice.http_header`
-
-Required:
-
-- `headers` (Attributes List) headers List of HTTP header name and value pairs (see [below for nested schema](#nestedatt--trusted_clients--client_source_choice--http_header--headers))
-
-<a id="nestedatt--trusted_clients--client_source_choice--http_header--headers"></a>
-### Nested Schema for `trusted_clients.client_source_choice.http_header.headers`
-
-Required:
-
-- `name` (String) name Name of the header
-
-Optional:
-
-- `invert_match` (Boolean) <br>**Default:** `false`
-- `value_match_choice` (Attributes) value_match The variants of matching a header value (see [below for nested schema](#nestedatt--trusted_clients--client_source_choice--http_header--headers--value_match_choice))
-
-<a id="nestedatt--trusted_clients--client_source_choice--http_header--headers--value_match_choice"></a>
-### Nested Schema for `trusted_clients.client_source_choice.http_header.headers.value_match_choice`
-
-Optional:
-
-- `exact` (String) exact Header value to match exactly
-- `presence` (Boolean) presence If true, check for presence of header
-- `regex` (String) regex Regex match of the header value in re2 format
-
-
-
-
-
-<a id="nestedatt--trusted_clients--metadata"></a>
-### Nested Schema for `trusted_clients.metadata`
-
-Required:
-
-- `name` (String) <br>**Validation:** `Length LengthAtLeast(1)`
-
-Optional:
-
-- `description` (String) <br>**Validation:** `Length LengthAtMost(256)`
-
-
-
-<a id="nestedatt--api_protection_rules"></a>
-### Nested Schema for `api_protection_rules`
-
-Optional:
-
-- `api_endpoint_rules` (Attributes List) api_endpoint_rules This category defines specific rules per API endpoints. If request matches any of these rules, skipping second category rules. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules))
-- `api_groups_rules` (Attributes List) api_groups_rules This category includes rules per API group or Server URL. For API groups, refer to API Definition which includes API groups derived from uploaded swaggers. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules))
-
-<a id="nestedatt--api_protection_rules--api_endpoint_rules"></a>
-### Nested Schema for `api_protection_rules.api_endpoint_rules`
-
-Required:
-
-- `action` (Attributes) action The action to take if the input request matches the rule. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--action))
-- `api_endpoint_path` (String) <br>**Validation:** `Length LengthAtMost(1024)`
-- `domain_choice` (Attributes) domain choices Choose if the rule will apply for all domains or a specific one. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--domain_choice))
-- `metadata` (Attributes) metadata Common attributes for the rule including name and description. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--metadata))
-
-Optional:
-
-- `api_endpoint_method` (Attributes) method The list of expected values for the HTTP method in the request API. The actual value of the HTTP method is extracted from the HTTP request. The predicate evaluates to true if the actual HTTP method belongs is present in the list of expected values. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--api_endpoint_method))
-- `client_matcher` (Attributes) client_matcher Conditions related to the origin of the request, such as client IP, TLS fingerprint, etc. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--client_matcher))
-- `request_matcher` (Attributes) request_matcher Conditions related to the request, such as query parameters, headers, etc. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--request_matcher))
-
-<a id="nestedatt--api_protection_rules--api_endpoint_rules--action"></a>
-### Nested Schema for `api_protection_rules.api_endpoint_rules.action`
-
-Required:
-
-- `action_choice` (Attributes) action The action to take when rule is matched. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--action--action_choice))
-
-<a id="nestedatt--api_protection_rules--api_endpoint_rules--action--action_choice"></a>
-### Nested Schema for `api_protection_rules.api_endpoint_rules.action.action_choice`
-
-Optional:
-
-- `allow` (Boolean) Allow Allow the request to proceed.
-- `deny` (Boolean) Deny Deny the request.
-
-
-
-<a id="nestedatt--api_protection_rules--api_endpoint_rules--domain_choice"></a>
-### Nested Schema for `api_protection_rules.api_endpoint_rules.domain_choice`
-
-Optional:
-
-- `any_domain` (Boolean) any domain The rule will apply for all domains.
-- `specific_domain` (String) <br>**Validation:** `Length LengthAtMost(128)`
-
-
-<a id="nestedatt--api_protection_rules--api_endpoint_rules--metadata"></a>
-### Nested Schema for `api_protection_rules.api_endpoint_rules.metadata`
-
-Required:
-
-- `name` (String) <br>**Validation:** `Length LengthAtLeast(1)`
-
-Optional:
-
-- `description` (String) <br>**Validation:** `Length LengthAtMost(256)`
-
-
-<a id="nestedatt--api_protection_rules--api_endpoint_rules--api_endpoint_method"></a>
-### Nested Schema for `api_protection_rules.api_endpoint_rules.api_endpoint_method`
-
-Optional:
-
-- `invert_matcher` (Boolean) <br>**Default:** `false`
-- `methods` (List of String) <br>**Valid Options:** `["GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "TRACE", "PATCH", "ANY", "OPTIONS", "COPY"]` (Multiple selection allowed)
-
-
-<a id="nestedatt--api_protection_rules--api_endpoint_rules--client_matcher"></a>
-### Nested Schema for `api_protection_rules.api_endpoint_rules.client_matcher`
-
-Required:
-
-- `client_choice` (Attributes) client choice Select clients for which the rule will be applied. The actual names of the client are extracted from its TLS certificate. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--client_matcher--client_choice))
-- `ip_asn_choice` (Attributes) ip asn choice Match source IP address/ASN  of the request (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--client_matcher--ip_asn_choice))
-
-Optional:
-
-- `tls_fingerprint_matcher` (Attributes) TLS JA3 fingerprint matcher TLS JA3 fingerprints to be matched. The predicate evaluates to true if the TLS fingerprint matches any of the exact values or classes of known TLS fingerprints. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--client_matcher--tls_fingerprint_matcher))
-
-<a id="nestedatt--api_protection_rules--api_endpoint_rules--client_matcher--client_choice"></a>
-### Nested Schema for `api_protection_rules.api_endpoint_rules.client_matcher.client_choice`
-
-Optional:
-
-- `any_client` (Boolean) any ip Any Client
-- `client_selector` (Attributes) client selector A label selector that describes the expected set of clients. The labels associated with the client making the API request are used to evaluate the label expressions in the selector. These labels can be derived from the client TLS certificate or from the volterra internal control plane. This is a more flexible and powerful version of the client name matcher predicate that allows a given rule to be applicable to a set of clients based on the client labels rather than being limited to relying on patterns in the client name. The predicate evaluates to true if the expressions in the label selector are true for the client labels. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--client_matcher--client_choice--client_selector))
-- `ip_threat_category_list` (Attributes) IP Threat Category List IP threat categories to choose from (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--client_matcher--client_choice--ip_threat_category_list))
-
-<a id="nestedatt--api_protection_rules--api_endpoint_rules--client_matcher--client_choice--client_selector"></a>
-### Nested Schema for `api_protection_rules.api_endpoint_rules.client_matcher.client_choice.client_selector`
-
-Required:
-
-- `expressions` (List of String) expressions expressions contains the kubernetes style label expression for selections.
-
-
-<a id="nestedatt--api_protection_rules--api_endpoint_rules--client_matcher--client_choice--ip_threat_category_list"></a>
-### Nested Schema for `api_protection_rules.api_endpoint_rules.client_matcher.client_choice.ip_threat_category_list`
-
-Required:
-
-- `ip_threat_categories` (List of String) <br>**Valid Options:** `["REPUTATION", "PROXY", "TOR_PROXY", "DENIAL_OF_SERVICE", "NETWORK", "WINDOWS_EXPLOITS", "WEB_ATTACKS", "BOTNETS", "PHISHING", "MOBILE_THREATS", "SPAM_SOURCES", "SCANNERS"]` (Multiple selection allowed)
-
-
-
-<a id="nestedatt--api_protection_rules--api_endpoint_rules--client_matcher--ip_asn_choice"></a>
-### Nested Schema for `api_protection_rules.api_endpoint_rules.client_matcher.ip_asn_choice`
-
-Optional:
-
-- `any_ip` (Boolean) any ip Any Source IP
-- `asn_list` (Attributes) asn list List of 4-byte ASN values. The predicate evaluates to true if the origin ASN is present in the ASN list. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--client_matcher--ip_asn_choice--asn_list))
-- `asn_matcher` (Attributes) asn matcher List of references to BGP ASN Set objects. The predicate evaluates to true if the origin ASN is present in one of the BGP ASN Set objects. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--client_matcher--ip_asn_choice--asn_matcher))
-- `ip_matcher` (Attributes) ip matcher List of references to IP Prefix Set objects. The predicate evaluates to true if the client IP Address is covered by one or more of the IP Prefixes in the IP Prefix Sets. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--client_matcher--ip_asn_choice--ip_matcher))
-- `ip_prefix_list` (Attributes) ip prefix list List of IP Prefixes values. The predicate evaluates to true if the client IP Address is covered by one or more of the IP Prefixes from the list. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--client_matcher--ip_asn_choice--ip_prefix_list))
-
-<a id="nestedatt--api_protection_rules--api_endpoint_rules--client_matcher--ip_asn_choice--asn_list"></a>
-### Nested Schema for `api_protection_rules.api_endpoint_rules.client_matcher.ip_asn_choice.asn_list`
-
-Required:
-
-- `as_numbers` (List of Number) as numbers An unordered set of RFC 6793 defined 4-byte AS numbers that can be used to create allow or deny lists for use in network policy or service policy. It can be used to create the allow list only for DNS Load Balancer.
-
-
-<a id="nestedatt--api_protection_rules--api_endpoint_rules--client_matcher--ip_asn_choice--asn_matcher"></a>
-### Nested Schema for `api_protection_rules.api_endpoint_rules.client_matcher.ip_asn_choice.asn_matcher`
-
-Required:
-
-- `asn_sets` (Attributes List) asn_sets A list of references to bgp_asn_set objects. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--client_matcher--ip_asn_choice--asn_matcher--asn_sets))
-
-<a id="nestedatt--api_protection_rules--api_endpoint_rules--client_matcher--ip_asn_choice--asn_matcher--asn_sets"></a>
-### Nested Schema for `api_protection_rules.api_endpoint_rules.client_matcher.ip_asn_choice.asn_matcher.asn_sets`
-
-Required:
-
-- `name` (String)
-- `namespace` (String)
-
-Read-Only:
-
-- `tenant` (String)
-
-
-
-<a id="nestedatt--api_protection_rules--api_endpoint_rules--client_matcher--ip_asn_choice--ip_matcher"></a>
-### Nested Schema for `api_protection_rules.api_endpoint_rules.client_matcher.ip_asn_choice.ip_matcher`
-
-Required:
-
-- `prefix_sets` (Attributes List) prefix_sets A list of references to ip_prefix_set objects. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--client_matcher--ip_asn_choice--ip_matcher--prefix_sets))
-
-Optional:
-
-- `invert_matcher` (Boolean) <br>**Default:** `false`
-
-<a id="nestedatt--api_protection_rules--api_endpoint_rules--client_matcher--ip_asn_choice--ip_matcher--prefix_sets"></a>
-### Nested Schema for `api_protection_rules.api_endpoint_rules.client_matcher.ip_asn_choice.ip_matcher.prefix_sets`
-
-Required:
-
-- `name` (String)
-- `namespace` (String)
-
-Read-Only:
-
-- `tenant` (String)
-
-
-
-<a id="nestedatt--api_protection_rules--api_endpoint_rules--client_matcher--ip_asn_choice--ip_prefix_list"></a>
-### Nested Schema for `api_protection_rules.api_endpoint_rules.client_matcher.ip_asn_choice.ip_prefix_list`
-
-Optional:
-
-- `invert_match` (Boolean) <br>**Default:** `false`
-- `ip_prefixes` (List of String) ip prefixes List of IPv4 prefix strings.
-- `ipv6_prefixes` (List of String) ipv6 prefixes List of IPv6 prefix strings.
-
-
-
-<a id="nestedatt--api_protection_rules--api_endpoint_rules--client_matcher--tls_fingerprint_matcher"></a>
-### Nested Schema for `api_protection_rules.api_endpoint_rules.client_matcher.tls_fingerprint_matcher`
-
-Optional:
-
-- `classes` (List of String) <br>**Valid Options:** `["ADWIND", "GOOTKIT", "QUAKBOT", "TROLDESH", "TOFSEE", "TORRENTLOCKER", "ANY_MALICIOUS_FINGERPRINT", "ADWARE", "DRIDEX", "GOZI", "JBIFROST", "RANSOMWARE", "TRICKBOT", "TLS_FINGERPRINT_NONE"]` (Multiple selection allowed)
-- `exact_values` (List of String) exact values A list of exact TLS JA3 fingerprints to match the input TLS JA3 fingerprint against.
-- `excluded_values` (List of String) excluded values A list of TLS JA3 fingerprints to be excluded when matching the input TLS JA3 fingerprint. This can be used to skip known false positives when using one or more known TLS fingerprint classes in the enclosing matcher.
-
-
-
-<a id="nestedatt--api_protection_rules--api_endpoint_rules--request_matcher"></a>
-### Nested Schema for `api_protection_rules.api_endpoint_rules.request_matcher`
-
-Optional:
-
-- `cookie_matchers` (Attributes List) cookie matchers A list of predicates for all cookies that need to be matched. The criteria for matching each cookie is described in individual instances of CookieMatcherType. The actual cookie values are extracted from the request API as a list of strings for each cookie name. Note that all specified cookie matcher predicates must evaluate to true. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--request_matcher--cookie_matchers))
-- `headers` (Attributes List) headers A list of predicates for various HTTP headers that need to match. The criteria for matching each HTTP header are described in individual HeaderMatcherType instances. The actual HTTP header values are extracted from the request API as a list of strings for each HTTP header type. Note that all specified header predicates must evaluate to true. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--request_matcher--headers))
-- `jwt_claims` (Attributes List) JWT claims A list of predicates for various JWT claims that need to match. The criteria for matching each JWT claim are described in individual JWTClaimMatcherType instances. The actual JWT claims values are extracted from the JWT payload as a list of strings. Note that all specified JWT claim predicates must evaluate to true. Note that this feature only works on LBs with JWT Validation feature enabled. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--request_matcher--jwt_claims))
-- `query_params` (Attributes List) query params A list of predicates for all query parameters that need to be matched. The criteria for matching each query parameter are described in individual instances of QueryParameterMatcherType. The actual query parameter values are extracted from the request API as a list of strings for each query parameter name. Note that all specified query parameter predicates must evaluate to true. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--request_matcher--query_params))
-
-<a id="nestedatt--api_protection_rules--api_endpoint_rules--request_matcher--cookie_matchers"></a>
-### Nested Schema for `api_protection_rules.api_endpoint_rules.request_matcher.cookie_matchers`
-
-Required:
-
-- `match_choice` (Attributes) match Select Match Options. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--request_matcher--cookie_matchers--match_choice))
-- `name` (String) name A case-sensitive cookie name.
-
-Optional:
-
-- `invert_matcher` (Boolean) <br>**Default:** `false`
-
-<a id="nestedatt--api_protection_rules--api_endpoint_rules--request_matcher--cookie_matchers--match_choice"></a>
-### Nested Schema for `api_protection_rules.api_endpoint_rules.request_matcher.cookie_matchers.match_choice`
-
-Optional:
-
-- `check_not_present` (Boolean) check_not_present Check that the cookie is not present.
-- `check_present` (Boolean) check_present Check that the cookie is present.
-- `item` (Attributes) item Criteria for matching the values for the cookie. The match is successful if any of the values in the input satisfies the criteria in the matcher. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--request_matcher--cookie_matchers--match_choice--item))
-
-<a id="nestedatt--api_protection_rules--api_endpoint_rules--request_matcher--cookie_matchers--match_choice--item"></a>
-### Nested Schema for `api_protection_rules.api_endpoint_rules.request_matcher.cookie_matchers.match_choice.item`
-
-Optional:
-
-- `exact_values` (List of String) exact values A list of exact values to match the input against.
-- `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT"]` (Multiple selection allowed)
-
-
-
-
-<a id="nestedatt--api_protection_rules--api_endpoint_rules--request_matcher--headers"></a>
-### Nested Schema for `api_protection_rules.api_endpoint_rules.request_matcher.headers`
-
-Required:
-
-- `match_choice` (Attributes) match Select Match Options. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--request_matcher--headers--match_choice))
-- `name` (String) name A case-insensitive HTTP header name.
-
-Optional:
-
-- `invert_matcher` (Boolean) <br>**Default:** `false`
-
-<a id="nestedatt--api_protection_rules--api_endpoint_rules--request_matcher--headers--match_choice"></a>
-### Nested Schema for `api_protection_rules.api_endpoint_rules.request_matcher.headers.match_choice`
-
-Optional:
-
-- `check_not_present` (Boolean) check_not_present Check that the header is not present.
-- `check_present` (Boolean) check_present Check that the header is present.
-- `item` (Attributes) item Criteria for matching the values for the header. The match is successful if any of the values in the input satisfies the criteria in the matcher. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--request_matcher--headers--match_choice--item))
-
-<a id="nestedatt--api_protection_rules--api_endpoint_rules--request_matcher--headers--match_choice--item"></a>
-### Nested Schema for `api_protection_rules.api_endpoint_rules.request_matcher.headers.match_choice.item`
-
-Optional:
-
-- `exact_values` (List of String) exact values A list of exact values to match the input against.
-- `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE"]` (Multiple selection allowed)
-
-
-
-
-<a id="nestedatt--api_protection_rules--api_endpoint_rules--request_matcher--jwt_claims"></a>
-### Nested Schema for `api_protection_rules.api_endpoint_rules.request_matcher.jwt_claims`
-
-Required:
-
-- `match_choice` (Attributes) match Select Match Options. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--request_matcher--jwt_claims--match_choice))
-- `name` (String) name JWT claim name.
-
-Optional:
-
-- `invert_matcher` (Boolean) <br>**Default:** `false`
-
-<a id="nestedatt--api_protection_rules--api_endpoint_rules--request_matcher--jwt_claims--match_choice"></a>
-### Nested Schema for `api_protection_rules.api_endpoint_rules.request_matcher.jwt_claims.match_choice`
-
-Optional:
-
-- `check_not_present` (Boolean) check_not_present Check that the JWT Claim is not present.
-- `check_present` (Boolean) check_present Check that the JWT Claim is present.
-- `item` (Attributes) item Criteria for matching the values for the JWT Claim. The match is successful if any of the values in the input satisfies the criteria in the matcher. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--request_matcher--jwt_claims--match_choice--item))
-
-<a id="nestedatt--api_protection_rules--api_endpoint_rules--request_matcher--jwt_claims--match_choice--item"></a>
-### Nested Schema for `api_protection_rules.api_endpoint_rules.request_matcher.jwt_claims.match_choice.item`
-
-Optional:
-
-- `exact_values` (List of String) exact values A list of exact values to match the input against.
-- `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE"]` (Multiple selection allowed)
-
-
-
-
-<a id="nestedatt--api_protection_rules--api_endpoint_rules--request_matcher--query_params"></a>
-### Nested Schema for `api_protection_rules.api_endpoint_rules.request_matcher.query_params`
-
-Required:
-
-- `key` (String) key A case-sensitive HTTP query parameter name.
-- `match_choice` (Attributes) match Select Match Options. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--request_matcher--query_params--match_choice))
-
-Optional:
-
-- `invert_matcher` (Boolean) <br>**Default:** `false`
-
-<a id="nestedatt--api_protection_rules--api_endpoint_rules--request_matcher--query_params--match_choice"></a>
-### Nested Schema for `api_protection_rules.api_endpoint_rules.request_matcher.query_params.match_choice`
-
-Optional:
-
-- `check_not_present` (Boolean) check_not_present Check that the query parameter is not present.
-- `check_present` (Boolean) check_present Check that the query parameter is present.
-- `item` (Attributes) item Criteria for matching the values for the given query parameter. The match is successful if any of the values for the query parameter satisfies the criteria in the matcher. (see [below for nested schema](#nestedatt--api_protection_rules--api_endpoint_rules--request_matcher--query_params--match_choice--item))
-
-<a id="nestedatt--api_protection_rules--api_endpoint_rules--request_matcher--query_params--match_choice--item"></a>
-### Nested Schema for `api_protection_rules.api_endpoint_rules.request_matcher.query_params.match_choice.item`
-
-Optional:
-
-- `exact_values` (List of String) exact values A list of exact values to match the input against.
-- `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM"]` (Multiple selection allowed)
-
-
-
-
-
-
-<a id="nestedatt--api_protection_rules--api_groups_rules"></a>
-### Nested Schema for `api_protection_rules.api_groups_rules`
-
-Required:
-
-- `action` (Attributes) action The action to take if the input request matches the rule. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--action))
-- `domain_choice` (Attributes) domain choices Choose if the rule will apply for all domains or a specific one. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--domain_choice))
-- `metadata` (Attributes) metadata Common attributes for the rule including name and description. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--metadata))
-
-Optional:
-
-- `api_group` (String) <br>**Validation:** `Length LengthAtMost(128)`
-- `base_path` (String) <br>**Default:** `/`<br>**Validation:** `Length LengthAtMost(128)`
-- `client_matcher` (Attributes) client_matcher Conditions related to the origin of the request, such as client IP, TLS fingerprint, etc. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--client_matcher))
-- `request_matcher` (Attributes) request_matcher Conditions related to the request, such as query parameters, headers, etc. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--request_matcher))
-
-<a id="nestedatt--api_protection_rules--api_groups_rules--action"></a>
-### Nested Schema for `api_protection_rules.api_groups_rules.action`
-
-Required:
-
-- `action_choice` (Attributes) action The action to take when rule is matched. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--action--action_choice))
-
-<a id="nestedatt--api_protection_rules--api_groups_rules--action--action_choice"></a>
-### Nested Schema for `api_protection_rules.api_groups_rules.action.action_choice`
-
-Optional:
-
-- `allow` (Boolean) Allow Allow the request to proceed.
-- `deny` (Boolean) Deny Deny the request.
-
-
-
-<a id="nestedatt--api_protection_rules--api_groups_rules--domain_choice"></a>
-### Nested Schema for `api_protection_rules.api_groups_rules.domain_choice`
-
-Optional:
-
-- `any_domain` (Boolean) any domain The rule will apply for all domains.
-- `specific_domain` (String) <br>**Validation:** `Length LengthAtMost(128)`
-
-
-<a id="nestedatt--api_protection_rules--api_groups_rules--metadata"></a>
-### Nested Schema for `api_protection_rules.api_groups_rules.metadata`
-
-Required:
-
-- `name` (String) <br>**Validation:** `Length LengthAtLeast(1)`
-
-Optional:
-
-- `description` (String) <br>**Validation:** `Length LengthAtMost(256)`
-
-
-<a id="nestedatt--api_protection_rules--api_groups_rules--client_matcher"></a>
-### Nested Schema for `api_protection_rules.api_groups_rules.client_matcher`
-
-Required:
-
-- `client_choice` (Attributes) client choice Select clients for which the rule will be applied. The actual names of the client are extracted from its TLS certificate. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--client_matcher--client_choice))
-- `ip_asn_choice` (Attributes) ip asn choice Match source IP address/ASN  of the request (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--client_matcher--ip_asn_choice))
-
-Optional:
-
-- `tls_fingerprint_matcher` (Attributes) TLS JA3 fingerprint matcher TLS JA3 fingerprints to be matched. The predicate evaluates to true if the TLS fingerprint matches any of the exact values or classes of known TLS fingerprints. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--client_matcher--tls_fingerprint_matcher))
-
-<a id="nestedatt--api_protection_rules--api_groups_rules--client_matcher--client_choice"></a>
-### Nested Schema for `api_protection_rules.api_groups_rules.client_matcher.client_choice`
-
-Optional:
-
-- `any_client` (Boolean) any ip Any Client
-- `client_selector` (Attributes) client selector A label selector that describes the expected set of clients. The labels associated with the client making the API request are used to evaluate the label expressions in the selector. These labels can be derived from the client TLS certificate or from the volterra internal control plane. This is a more flexible and powerful version of the client name matcher predicate that allows a given rule to be applicable to a set of clients based on the client labels rather than being limited to relying on patterns in the client name. The predicate evaluates to true if the expressions in the label selector are true for the client labels. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--client_matcher--client_choice--client_selector))
-- `ip_threat_category_list` (Attributes) IP Threat Category List IP threat categories to choose from (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--client_matcher--client_choice--ip_threat_category_list))
-
-<a id="nestedatt--api_protection_rules--api_groups_rules--client_matcher--client_choice--client_selector"></a>
-### Nested Schema for `api_protection_rules.api_groups_rules.client_matcher.client_choice.client_selector`
-
-Required:
-
-- `expressions` (List of String) expressions expressions contains the kubernetes style label expression for selections.
-
-
-<a id="nestedatt--api_protection_rules--api_groups_rules--client_matcher--client_choice--ip_threat_category_list"></a>
-### Nested Schema for `api_protection_rules.api_groups_rules.client_matcher.client_choice.ip_threat_category_list`
-
-Required:
-
-- `ip_threat_categories` (List of String) <br>**Valid Options:** `["SPAM_SOURCES", "SCANNERS", "REPUTATION", "PROXY", "TOR_PROXY", "DENIAL_OF_SERVICE", "NETWORK", "WINDOWS_EXPLOITS", "WEB_ATTACKS", "BOTNETS", "PHISHING", "MOBILE_THREATS"]` (Multiple selection allowed)
-
-
-
-<a id="nestedatt--api_protection_rules--api_groups_rules--client_matcher--ip_asn_choice"></a>
-### Nested Schema for `api_protection_rules.api_groups_rules.client_matcher.ip_asn_choice`
-
-Optional:
-
-- `any_ip` (Boolean) any ip Any Source IP
-- `asn_list` (Attributes) asn list List of 4-byte ASN values. The predicate evaluates to true if the origin ASN is present in the ASN list. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--client_matcher--ip_asn_choice--asn_list))
-- `asn_matcher` (Attributes) asn matcher List of references to BGP ASN Set objects. The predicate evaluates to true if the origin ASN is present in one of the BGP ASN Set objects. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--client_matcher--ip_asn_choice--asn_matcher))
-- `ip_matcher` (Attributes) ip matcher List of references to IP Prefix Set objects. The predicate evaluates to true if the client IP Address is covered by one or more of the IP Prefixes in the IP Prefix Sets. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--client_matcher--ip_asn_choice--ip_matcher))
-- `ip_prefix_list` (Attributes) ip prefix list List of IP Prefixes values. The predicate evaluates to true if the client IP Address is covered by one or more of the IP Prefixes from the list. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--client_matcher--ip_asn_choice--ip_prefix_list))
-
-<a id="nestedatt--api_protection_rules--api_groups_rules--client_matcher--ip_asn_choice--asn_list"></a>
-### Nested Schema for `api_protection_rules.api_groups_rules.client_matcher.ip_asn_choice.asn_list`
-
-Required:
-
-- `as_numbers` (List of Number) as numbers An unordered set of RFC 6793 defined 4-byte AS numbers that can be used to create allow or deny lists for use in network policy or service policy. It can be used to create the allow list only for DNS Load Balancer.
-
-
-<a id="nestedatt--api_protection_rules--api_groups_rules--client_matcher--ip_asn_choice--asn_matcher"></a>
-### Nested Schema for `api_protection_rules.api_groups_rules.client_matcher.ip_asn_choice.asn_matcher`
-
-Required:
-
-- `asn_sets` (Attributes List) asn_sets A list of references to bgp_asn_set objects. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--client_matcher--ip_asn_choice--asn_matcher--asn_sets))
-
-<a id="nestedatt--api_protection_rules--api_groups_rules--client_matcher--ip_asn_choice--asn_matcher--asn_sets"></a>
-### Nested Schema for `api_protection_rules.api_groups_rules.client_matcher.ip_asn_choice.asn_matcher.asn_sets`
-
-Required:
-
-- `name` (String)
-- `namespace` (String)
-
-Read-Only:
-
-- `tenant` (String)
-
-
-
-<a id="nestedatt--api_protection_rules--api_groups_rules--client_matcher--ip_asn_choice--ip_matcher"></a>
-### Nested Schema for `api_protection_rules.api_groups_rules.client_matcher.ip_asn_choice.ip_matcher`
-
-Required:
-
-- `prefix_sets` (Attributes List) prefix_sets A list of references to ip_prefix_set objects. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--client_matcher--ip_asn_choice--ip_matcher--prefix_sets))
-
-Optional:
-
-- `invert_matcher` (Boolean) <br>**Default:** `false`
-
-<a id="nestedatt--api_protection_rules--api_groups_rules--client_matcher--ip_asn_choice--ip_matcher--prefix_sets"></a>
-### Nested Schema for `api_protection_rules.api_groups_rules.client_matcher.ip_asn_choice.ip_matcher.prefix_sets`
-
-Required:
-
-- `name` (String)
-- `namespace` (String)
-
-Read-Only:
-
-- `tenant` (String)
-
-
-
-<a id="nestedatt--api_protection_rules--api_groups_rules--client_matcher--ip_asn_choice--ip_prefix_list"></a>
-### Nested Schema for `api_protection_rules.api_groups_rules.client_matcher.ip_asn_choice.ip_prefix_list`
-
-Optional:
-
-- `invert_match` (Boolean) <br>**Default:** `false`
-- `ip_prefixes` (List of String) ip prefixes List of IPv4 prefix strings.
-- `ipv6_prefixes` (List of String) ipv6 prefixes List of IPv6 prefix strings.
-
-
-
-<a id="nestedatt--api_protection_rules--api_groups_rules--client_matcher--tls_fingerprint_matcher"></a>
-### Nested Schema for `api_protection_rules.api_groups_rules.client_matcher.tls_fingerprint_matcher`
-
-Optional:
-
-- `classes` (List of String) <br>**Valid Options:** `["ANY_MALICIOUS_FINGERPRINT", "ADWARE", "DRIDEX", "GOZI", "JBIFROST", "RANSOMWARE", "TRICKBOT", "TLS_FINGERPRINT_NONE", "ADWIND", "GOOTKIT", "QUAKBOT", "TROLDESH", "TOFSEE", "TORRENTLOCKER"]` (Multiple selection allowed)
-- `exact_values` (List of String) exact values A list of exact TLS JA3 fingerprints to match the input TLS JA3 fingerprint against.
-- `excluded_values` (List of String) excluded values A list of TLS JA3 fingerprints to be excluded when matching the input TLS JA3 fingerprint. This can be used to skip known false positives when using one or more known TLS fingerprint classes in the enclosing matcher.
-
-
-
-<a id="nestedatt--api_protection_rules--api_groups_rules--request_matcher"></a>
-### Nested Schema for `api_protection_rules.api_groups_rules.request_matcher`
-
-Optional:
-
-- `cookie_matchers` (Attributes List) cookie matchers A list of predicates for all cookies that need to be matched. The criteria for matching each cookie is described in individual instances of CookieMatcherType. The actual cookie values are extracted from the request API as a list of strings for each cookie name. Note that all specified cookie matcher predicates must evaluate to true. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--request_matcher--cookie_matchers))
-- `headers` (Attributes List) headers A list of predicates for various HTTP headers that need to match. The criteria for matching each HTTP header are described in individual HeaderMatcherType instances. The actual HTTP header values are extracted from the request API as a list of strings for each HTTP header type. Note that all specified header predicates must evaluate to true. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--request_matcher--headers))
-- `jwt_claims` (Attributes List) JWT claims A list of predicates for various JWT claims that need to match. The criteria for matching each JWT claim are described in individual JWTClaimMatcherType instances. The actual JWT claims values are extracted from the JWT payload as a list of strings. Note that all specified JWT claim predicates must evaluate to true. Note that this feature only works on LBs with JWT Validation feature enabled. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--request_matcher--jwt_claims))
-- `query_params` (Attributes List) query params A list of predicates for all query parameters that need to be matched. The criteria for matching each query parameter are described in individual instances of QueryParameterMatcherType. The actual query parameter values are extracted from the request API as a list of strings for each query parameter name. Note that all specified query parameter predicates must evaluate to true. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--request_matcher--query_params))
-
-<a id="nestedatt--api_protection_rules--api_groups_rules--request_matcher--cookie_matchers"></a>
-### Nested Schema for `api_protection_rules.api_groups_rules.request_matcher.cookie_matchers`
-
-Required:
-
-- `match_choice` (Attributes) match Select Match Options. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--request_matcher--cookie_matchers--match_choice))
-- `name` (String) name A case-sensitive cookie name.
-
-Optional:
-
-- `invert_matcher` (Boolean) <br>**Default:** `false`
-
-<a id="nestedatt--api_protection_rules--api_groups_rules--request_matcher--cookie_matchers--match_choice"></a>
-### Nested Schema for `api_protection_rules.api_groups_rules.request_matcher.cookie_matchers.match_choice`
-
-Optional:
-
-- `check_not_present` (Boolean) check_not_present Check that the cookie is not present.
-- `check_present` (Boolean) check_present Check that the cookie is present.
-- `item` (Attributes) item Criteria for matching the values for the cookie. The match is successful if any of the values in the input satisfies the criteria in the matcher. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--request_matcher--cookie_matchers--match_choice--item))
-
-<a id="nestedatt--api_protection_rules--api_groups_rules--request_matcher--cookie_matchers--match_choice--item"></a>
-### Nested Schema for `api_protection_rules.api_groups_rules.request_matcher.cookie_matchers.match_choice.item`
-
-Optional:
-
-- `exact_values` (List of String) exact values A list of exact values to match the input against.
-- `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE", "LOWER_CASE"]` (Multiple selection allowed)
-
-
-
-
-<a id="nestedatt--api_protection_rules--api_groups_rules--request_matcher--headers"></a>
-### Nested Schema for `api_protection_rules.api_groups_rules.request_matcher.headers`
-
-Required:
-
-- `match_choice` (Attributes) match Select Match Options. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--request_matcher--headers--match_choice))
-- `name` (String) name A case-insensitive HTTP header name.
-
-Optional:
-
-- `invert_matcher` (Boolean) <br>**Default:** `false`
-
-<a id="nestedatt--api_protection_rules--api_groups_rules--request_matcher--headers--match_choice"></a>
-### Nested Schema for `api_protection_rules.api_groups_rules.request_matcher.headers.match_choice`
-
-Optional:
-
-- `check_not_present` (Boolean) check_not_present Check that the header is not present.
-- `check_present` (Boolean) check_present Check that the header is present.
-- `item` (Attributes) item Criteria for matching the values for the header. The match is successful if any of the values in the input satisfies the criteria in the matcher. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--request_matcher--headers--match_choice--item))
-
-<a id="nestedatt--api_protection_rules--api_groups_rules--request_matcher--headers--match_choice--item"></a>
-### Nested Schema for `api_protection_rules.api_groups_rules.request_matcher.headers.match_choice.item`
-
-Optional:
-
-- `exact_values` (List of String) exact values A list of exact values to match the input against.
-- `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT"]` (Multiple selection allowed)
-
-
-
-
-<a id="nestedatt--api_protection_rules--api_groups_rules--request_matcher--jwt_claims"></a>
-### Nested Schema for `api_protection_rules.api_groups_rules.request_matcher.jwt_claims`
-
-Required:
-
-- `match_choice` (Attributes) match Select Match Options. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--request_matcher--jwt_claims--match_choice))
-- `name` (String) name JWT claim name.
-
-Optional:
-
-- `invert_matcher` (Boolean) <br>**Default:** `false`
-
-<a id="nestedatt--api_protection_rules--api_groups_rules--request_matcher--jwt_claims--match_choice"></a>
-### Nested Schema for `api_protection_rules.api_groups_rules.request_matcher.jwt_claims.match_choice`
-
-Optional:
-
-- `check_not_present` (Boolean) check_not_present Check that the JWT Claim is not present.
-- `check_present` (Boolean) check_present Check that the JWT Claim is present.
-- `item` (Attributes) item Criteria for matching the values for the JWT Claim. The match is successful if any of the values in the input satisfies the criteria in the matcher. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--request_matcher--jwt_claims--match_choice--item))
-
-<a id="nestedatt--api_protection_rules--api_groups_rules--request_matcher--jwt_claims--match_choice--item"></a>
-### Nested Schema for `api_protection_rules.api_groups_rules.request_matcher.jwt_claims.match_choice.item`
-
-Optional:
-
-- `exact_values` (List of String) exact values A list of exact values to match the input against.
-- `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE"]` (Multiple selection allowed)
-
-
-
-
-<a id="nestedatt--api_protection_rules--api_groups_rules--request_matcher--query_params"></a>
-### Nested Schema for `api_protection_rules.api_groups_rules.request_matcher.query_params`
-
-Required:
-
-- `key` (String) key A case-sensitive HTTP query parameter name.
-- `match_choice` (Attributes) match Select Match Options. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--request_matcher--query_params--match_choice))
-
-Optional:
-
-- `invert_matcher` (Boolean) <br>**Default:** `false`
-
-<a id="nestedatt--api_protection_rules--api_groups_rules--request_matcher--query_params--match_choice"></a>
-### Nested Schema for `api_protection_rules.api_groups_rules.request_matcher.query_params.match_choice`
-
-Optional:
-
-- `check_not_present` (Boolean) check_not_present Check that the query parameter is not present.
-- `check_present` (Boolean) check_present Check that the query parameter is present.
-- `item` (Attributes) item Criteria for matching the values for the given query parameter. The match is successful if any of the values for the query parameter satisfies the criteria in the matcher. (see [below for nested schema](#nestedatt--api_protection_rules--api_groups_rules--request_matcher--query_params--match_choice--item))
-
-<a id="nestedatt--api_protection_rules--api_groups_rules--request_matcher--query_params--match_choice--item"></a>
-### Nested Schema for `api_protection_rules.api_groups_rules.request_matcher.query_params.match_choice.item`
-
-Optional:
-
-- `exact_values` (List of String) exact values A list of exact values to match the input against.
-- `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "REMOVE_WHITESPACE"]` (Multiple selection allowed)
-
-
-
-
-
-
-
-<a id="nestedatt--auto_cert_info"></a>
-### Nested Schema for `auto_cert_info`
-
-Optional:
-
-- `auto_cert_expiry` (String) Auto Cert Expiry Timestamp Auto certificate expiry timestamp
-- `auto_cert_issuer` (String) Auto Cert Issuer Issuer of the auto certificate
-- `auto_cert_state` (List of String) <br>**Allowed Values (choose one):** `["DomainChallengeVerified", "CertificateInvalid", "CertificateValid", "AutoCertError", "CertificateExpired", "DnsDomainVerification", "PreDomainChallengePending", "AutoCertFinalize", "AutoCertGenerationRetry", "AutoCertInitialize", "AutoCertDomainRateLimited", "AutoCertDisabled", "AutoCertStarted", "DomainChallengePending", "AutoCertNotApplicable", "AutoCertAccountRateLimited", "DomainChallengeStarted", "AutoCertRateLimited"]`<br>**Default:** `AutoCertInitialize`
-- `auto_cert_subject` (String) Auto Cert Subject Subject of the auto certificate
-- `dns_records` (Attributes List) DNS Records DNS Records that are to be added by user in their DNS domain. Currently, this will be populated when auto certificates are desired but DNS delegation is not enabled. (see [below for nested schema](#nestedatt--auto_cert_info--dns_records))
-
-<a id="nestedatt--auto_cert_info--dns_records"></a>
-### Nested Schema for `auto_cert_info.dns_records`
-
-Optional:
-
-- `name` (String) Name Name of the DNS record
-- `type` (String) Type Type of the DNS record
-- `value` (String) Value DNS record Value
-
-
-
-<a id="nestedatt--cors_policy"></a>
-### Nested Schema for `cors_policy`
-
-Optional:
-
-- `allow_credentials` (Boolean) <br>**Default:** `false`
-- `allow_headers` (String) allow_headers Specifies the content for the access-control-allow-headers header
-- `allow_methods` (String) allow_methods Specifies the content for the access-control-allow-methods header
-- `allow_origin` (List of String) allow_origin Specifies the origins that will be allowed to do CORS requests. An origin is allowed if either allow_origin or allow_origin_regex match
-- `allow_origin_regex` (List of String) allow_origin_regex Specifies regex patterns that match allowed origins. An origin is allowed if either allow_origin or allow_origin_regex match
-- `disabled` (Boolean) <br>**Default:** `false`
-- `expose_headers` (String) expose_headers Specifies the content for the access-control-expose-headers header
-- `maximum_age` (Number) maximum_age This indicates the maximum number of seconds the results can be cached A value of -1 will disable caching. Maximum permitted value is 86400 seconds (24 hours)
-
-
-<a id="nestedatt--csrf_policy"></a>
-### Nested Schema for `csrf_policy`
-
-Required:
-
-- `allowed_domains_choice` (Attributes) allowed_domains The list of source origin that should be allowed. (see [below for nested schema](#nestedatt--csrf_policy--allowed_domains_choice))
-
-<a id="nestedatt--csrf_policy--allowed_domains_choice"></a>
-### Nested Schema for `csrf_policy.allowed_domains_choice`
-
-Optional:
-
-- `all_load_balancer_domains` (Boolean) all_load_balancer_domains Add All load balancer domains to source origin (allow) list.
-- `custom_domain_list` (Attributes) custom_domain_list Add one or more domains to source origin (allow) list. (see [below for nested schema](#nestedatt--csrf_policy--allowed_domains_choice--custom_domain_list))
-- `disabled` (Boolean) disabled Allow all source origin domains.
-
-<a id="nestedatt--csrf_policy--allowed_domains_choice--custom_domain_list"></a>
-### Nested Schema for `csrf_policy.allowed_domains_choice.custom_domain_list`
-
-Required:
-
-- `domains` (List of String) Domains A list of domain names that will be matched to loadbalancer. These domains are not used for SNI match. Wildcard names are supported in the suffix or prefix form.
-
+- `ip_threat_categories` (List of String) <br>**Valid Options:** `["NETWORK", "WINDOWS_EXPLOITS", "WEB_ATTACKS", "REPUTATION", "MOBILE_THREATS", "SPAM_SOURCES", "BOTNETS", "SCANNERS", "PHISHING", "PROXY", "TOR_PROXY", "DENIAL_OF_SERVICE"]` (Multiple selection allowed)
 
 
 
@@ -8749,7 +7424,7 @@ Optional:
 
 Required:
 
-- `url` (String) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
+- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
 
 Optional:
 
@@ -8813,7 +7488,7 @@ Optional:
 
 Required:
 
-- `url` (String) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
+- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
 
 Optional:
 
@@ -8960,7 +7635,7 @@ Optional:
 
 Required:
 
-- `url` (String) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
+- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
 
 Optional:
 
@@ -9024,7 +7699,7 @@ Optional:
 
 Required:
 
-- `url` (String) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
+- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
 
 Optional:
 
@@ -9056,7 +7731,7 @@ Required:
 
 Optional:
 
-- `country_codes` (List of String) <br>**Valid Options:** `["COUNTRY_IR", "COUNTRY_IN", "COUNTRY_KG", "COUNTRY_KH", "COUNTRY_SY", "COUNTRY_TW", "COUNTRY_VA", "COUNTRY_CU", "COUNTRY_YT", "COUNTRY_CA", "COUNTRY_GA", "COUNTRY_MS", "COUNTRY_MU", "COUNTRY_BN", "COUNTRY_ET", "COUNTRY_MC", "COUNTRY_DE", "COUNTRY_GQ", "COUNTRY_JP", "COUNTRY_ML", "COUNTRY_PA", "COUNTRY_BM", "COUNTRY_MO", "COUNTRY_PG", "COUNTRY_SE", "COUNTRY_BB", "COUNTRY_DK", "COUNTRY_FK", "COUNTRY_LY", "COUNTRY_PH", "COUNTRY_UM", "COUNTRY_VE", "COUNTRY_BE", "COUNTRY_AD", "COUNTRY_HN", "COUNTRY_KM", "COUNTRY_UA", "COUNTRY_CS", "COUNTRY_GS", "COUNTRY_HK", "COUNTRY_MN", "COUNTRY_PK", "COUNTRY_UG", "COUNTRY_DM", "COUNTRY_GF", "COUNTRY_JO", "COUNTRY_KP", "COUNTRY_NL", "COUNTRY_NP", "COUNTRY_PY", "COUNTRY_AM", "COUNTRY_LU", "COUNTRY_TM", "COUNTRY_RE", "COUNTRY_AL", "COUNTRY_BR", "COUNTRY_CD", "COUNTRY_FR", "COUNTRY_GD", "COUNTRY_GN", "COUNTRY_NZ", "COUNTRY_PL", "COUNTRY_TL", "COUNTRY_CZ", "COUNTRY_GL", "COUNTRY_SJ", "COUNTRY_NI", "COUNTRY_NONE", "COUNTRY_ES", "COUNTRY_LT", "COUNTRY_MX", "COUNTRY_UZ", "COUNTRY_XT", "COUNTRY_AR", "COUNTRY_BV", "COUNTRY_MZ", "COUNTRY_TH", "COUNTRY_UY", "COUNTRY_BG", "COUNTRY_BJ", "COUNTRY_OM", "COUNTRY_AI", "COUNTRY_GM", "COUNTRY_MA", "COUNTRY_MY", "COUNTRY_CF", "COUNTRY_BH", "COUNTRY_BF", "COUNTRY_ID", "COUNTRY_LK", "COUNTRY_NA", "COUNTRY_SO", "COUNTRY_TV", "COUNTRY_AU", "COUNTRY_BY", "COUNTRY_EH", "COUNTRY_PF", "COUNTRY_PS", "COUNTRY_SX", "COUNTRY_ER", "COUNTRY_PT", "COUNTRY_SC", "COUNTRY_TG", "COUNTRY_BZ", "COUNTRY_LR", "COUNTRY_BL", "COUNTRY_BO", "COUNTRY_IO", "COUNTRY_KI", "COUNTRY_RU", "COUNTRY_TF", "COUNTRY_AN", "COUNTRY_GG", "COUNTRY_LA", "COUNTRY_BT", "COUNTRY_GH", "COUNTRY_HR", "COUNTRY_HU", "COUNTRY_AE", "COUNTRY_MK", "COUNTRY_RW", "COUNTRY_ZM", "COUNTRY_ZA", "COUNTRY_AT", "COUNTRY_CM", "COUNTRY_CX", "COUNTRY_DO", "COUNTRY_GW", "COUNTRY_LB", "COUNTRY_LI", "COUNTRY_PR", "COUNTRY_BI", "COUNTRY_IQ", "COUNTRY_PW", "COUNTRY_SR", "COUNTRY_GP", "COUNTRY_HM", "COUNTRY_LC", "COUNTRY_NF", "COUNTRY_BQ", "COUNTRY_CO", "COUNTRY_GT", "COUNTRY_ME", "COUNTRY_PM", "COUNTRY_YE", "COUNTRY_AQ", "COUNTRY_SA", "COUNTRY_VN", "COUNTRY_XK", "COUNTRY_BA", "COUNTRY_CH", "COUNTRY_GY", "COUNTRY_AG", "COUNTRY_AZ", "COUNTRY_HT", "COUNTRY_JM", "COUNTRY_KW", "COUNTRY_LV", "COUNTRY_MF", "COUNTRY_NO", "COUNTRY_BS", "COUNTRY_SZ", "COUNTRY_CI", "COUNTRY_GR", "COUNTRY_IM", "COUNTRY_JE", "COUNTRY_MH", "COUNTRY_SG", "COUNTRY_CG", "COUNTRY_CK", "COUNTRY_EG", "COUNTRY_FI", "COUNTRY_RS", "COUNTRY_ZW", "COUNTRY_KE", "COUNTRY_QA", "COUNTRY_SD", "COUNTRY_CL", "COUNTRY_MV", "COUNTRY_TO", "COUNTRY_DZ", "COUNTRY_SI", "COUNTRY_ST", "COUNTRY_US", "COUNTRY_GU", "COUNTRY_KZ", "COUNTRY_MT", "COUNTRY_WS", "COUNTRY_IT", "COUNTRY_AO", "COUNTRY_MG", "COUNTRY_NU", "COUNTRY_SM", "COUNTRY_CN", "COUNTRY_CR", "COUNTRY_IE", "COUNTRY_KY", "COUNTRY_PN", "COUNTRY_TN", "COUNTRY_FJ", "COUNTRY_KN", "COUNTRY_TD", "COUNTRY_VU", "COUNTRY_EC", "COUNTRY_GE", "COUNTRY_SL", "COUNTRY_VG", "COUNTRY_BD", "COUNTRY_CW", "COUNTRY_MP", "COUNTRY_AF", "COUNTRY_TC", "COUNTRY_MW", "COUNTRY_NG", "COUNTRY_SV", "COUNTRY_CY", "COUNTRY_GI", "COUNTRY_SN", "COUNTRY_TR", "COUNTRY_WF", "COUNTRY_CV", "COUNTRY_MD", "COUNTRY_MR", "COUNTRY_NE", "COUNTRY_SS", "COUNTRY_AS", "COUNTRY_AX", "COUNTRY_EE", "COUNTRY_LS", "COUNTRY_MM", "COUNTRY_SK", "COUNTRY_CC", "COUNTRY_IS", "COUNTRY_PE", "COUNTRY_RO", "COUNTRY_SH", "COUNTRY_TZ", "COUNTRY_DJ", "COUNTRY_GB", "COUNTRY_SB", "COUNTRY_TJ", "COUNTRY_TT", "COUNTRY_VC", "COUNTRY_VI", "COUNTRY_FO", "COUNTRY_IL", "COUNTRY_NC", "COUNTRY_NR", "COUNTRY_TK", "COUNTRY_AW", "COUNTRY_BW", "COUNTRY_FM", "COUNTRY_KR", "COUNTRY_MQ"]` (Multiple selection allowed)
+- `country_codes` (List of String) <br>**Valid Options:** `["COUNTRY_RW", "COUNTRY_ST", "COUNTRY_AN", "COUNTRY_DO", "COUNTRY_KR", "COUNTRY_LI", "COUNTRY_MN", "COUNTRY_SA", "COUNTRY_AO", "COUNTRY_BO", "COUNTRY_VE", "COUNTRY_CW", "COUNTRY_LR", "COUNTRY_PR", "COUNTRY_TG", "COUNTRY_BA", "COUNTRY_BN", "COUNTRY_MF", "COUNTRY_SJ", "COUNTRY_BY", "COUNTRY_MW", "COUNTRY_NC", "COUNTRY_RO", "COUNTRY_AI", "COUNTRY_BR", "COUNTRY_CN", "COUNTRY_IM", "COUNTRY_SS", "COUNTRY_AT", "COUNTRY_AZ", "COUNTRY_KP", "COUNTRY_NF", "COUNTRY_TZ", "COUNTRY_VA", "COUNTRY_FR", "COUNTRY_JE", "COUNTRY_LY", "COUNTRY_MO", "COUNTRY_BI", "COUNTRY_CL", "COUNTRY_BB", "COUNTRY_EG", "COUNTRY_GB", "COUNTRY_GN", "COUNTRY_MG", "COUNTRY_AQ", "COUNTRY_AU", "COUNTRY_HR", "COUNTRY_MD", "COUNTRY_NI", "COUNTRY_CA", "COUNTRY_DM", "COUNTRY_ER", "COUNTRY_AL", "COUNTRY_BJ", "COUNTRY_BV", "COUNTRY_BZ", "COUNTRY_PK", "COUNTRY_XK", "COUNTRY_AS", "COUNTRY_CK", "COUNTRY_GG", "COUNTRY_IN", "COUNTRY_TC", "COUNTRY_CC", "COUNTRY_DE", "COUNTRY_KE", "COUNTRY_SK", "COUNTRY_TV", "COUNTRY_DJ", "COUNTRY_GA", "COUNTRY_HT", "COUNTRY_SE", "COUNTRY_SH", "COUNTRY_SL", "COUNTRY_TT", "COUNTRY_IL", "COUNTRY_TM", "COUNTRY_YT", "COUNTRY_MC", "COUNTRY_MH", "COUNTRY_MQ", "COUNTRY_VC", "COUNTRY_KZ", "COUNTRY_BE", "COUNTRY_MM", "COUNTRY_NA", "COUNTRY_OM", "COUNTRY_GU", "COUNTRY_MR", "COUNTRY_SG", "COUNTRY_IQ", "COUNTRY_KH", "COUNTRY_PE", "COUNTRY_PN", "COUNTRY_TJ", "COUNTRY_US", "COUNTRY_AM", "COUNTRY_HM", "COUNTRY_SI", "COUNTRY_GW", "COUNTRY_HU", "COUNTRY_KG", "COUNTRY_MA", "COUNTRY_MT", "COUNTRY_UZ", "COUNTRY_FK", "COUNTRY_PH", "COUNTRY_SB", "COUNTRY_VG", "COUNTRY_BW", "COUNTRY_CH", "COUNTRY_GI", "COUNTRY_PL", "COUNTRY_CD", "COUNTRY_CR", "COUNTRY_FJ", "COUNTRY_JO", "COUNTRY_NZ", "COUNTRY_PG", "COUNTRY_SZ", "COUNTRY_VI", "COUNTRY_AR", "COUNTRY_UA", "COUNTRY_AG", "COUNTRY_BQ", "COUNTRY_CG", "COUNTRY_CM", "COUNTRY_DK", "COUNTRY_TH", "COUNTRY_RS", "COUNTRY_UG", "COUNTRY_ZM", "COUNTRY_BD", "COUNTRY_PF", "COUNTRY_PM", "COUNTRY_PY", "COUNTRY_SX", "COUNTRY_VN", "COUNTRY_MS", "COUNTRY_PA", "COUNTRY_BH", "COUNTRY_BM", "COUNTRY_CZ", "COUNTRY_GT", "COUNTRY_LB", "COUNTRY_SM", "COUNTRY_TL", "COUNTRY_XT", "COUNTRY_NONE", "COUNTRY_ES", "COUNTRY_HN", "COUNTRY_ID", "COUNTRY_LS", "COUNTRY_GD", "COUNTRY_GP", "COUNTRY_KN", "COUNTRY_KW", "COUNTRY_LU", "COUNTRY_TR", "COUNTRY_YE", "COUNTRY_TF", "COUNTRY_AW", "COUNTRY_EE", "COUNTRY_HK", "COUNTRY_FO", "COUNTRY_GS", "COUNTRY_KM", "COUNTRY_LC", "COUNTRY_SR", "COUNTRY_ZW", "COUNTRY_IS", "COUNTRY_CS", "COUNTRY_AD", "COUNTRY_GM", "COUNTRY_ME", "COUNTRY_MZ", "COUNTRY_CF", "COUNTRY_RU", "COUNTRY_GH", "COUNTRY_BS", "COUNTRY_CU", "COUNTRY_CO", "COUNTRY_DZ", "COUNTRY_FM", "COUNTRY_GR", "COUNTRY_ML", "COUNTRY_SD", "COUNTRY_WF", "COUNTRY_KI", "COUNTRY_MV", "COUNTRY_MY", "COUNTRY_NO", "COUNTRY_GQ", "COUNTRY_QA", "COUNTRY_SV", "COUNTRY_SY", "COUNTRY_UY", "COUNTRY_ET", "COUNTRY_PS", "COUNTRY_BG", "COUNTRY_CI", "COUNTRY_EH", "COUNTRY_SO", "COUNTRY_TK", "COUNTRY_CV", "COUNTRY_CX", "COUNTRY_JM", "COUNTRY_LA", "COUNTRY_PW", "COUNTRY_TO", "COUNTRY_BL", "COUNTRY_KY", "COUNTRY_NG", "COUNTRY_NP", "COUNTRY_SN", "COUNTRY_WS", "COUNTRY_BF", "COUNTRY_GY", "COUNTRY_LK", "COUNTRY_MX", "COUNTRY_ZA", "COUNTRY_IT", "COUNTRY_MU", "COUNTRY_AE", "COUNTRY_AX", "COUNTRY_FI", "COUNTRY_IO", "COUNTRY_LT", "COUNTRY_LV", "COUNTRY_MP", "COUNTRY_GE", "COUNTRY_PT", "COUNTRY_TD", "COUNTRY_GF", "COUNTRY_TN", "COUNTRY_TW", "COUNTRY_VU", "COUNTRY_IR", "COUNTRY_CY", "COUNTRY_EC", "COUNTRY_JP", "COUNTRY_NL", "COUNTRY_NR", "COUNTRY_NU", "COUNTRY_BT", "COUNTRY_GL", "COUNTRY_MK", "COUNTRY_UM", "COUNTRY_AF", "COUNTRY_IE", "COUNTRY_RE", "COUNTRY_SC", "COUNTRY_NE"]` (Multiple selection allowed)
 - `re_name_list` (List of String) RE Name list List of RE names for match
 
 <a id="nestedatt--origin_server_subset_rule_list--origin_server_subset_rules--asn_choice"></a>
@@ -9174,6 +7849,1206 @@ Required:
 
 
 
+<a id="nestedatt--protected_cookies"></a>
+### Nested Schema for `protected_cookies`
+
+Required:
+
+- `cookie_tampering_choice` (Attributes) cookie_tampering Cookie Tampering Protection prevents attackers from modifying the value of session cookies. To use this feature, Web Application Firewall must be enabled. (see [below for nested schema](#nestedatt--protected_cookies--cookie_tampering_choice))
+- `name` (String) <br>**Validation:** `Length LengthAtMost(256)`
+
+Optional:
+
+- `httponly_choice` (Attributes) httponly A cookie with the HttpOnly attribute is inaccessible to the JavaScript. (see [below for nested schema](#nestedatt--protected_cookies--httponly_choice))
+- `samesite_choice` (Attributes) samesite Controls whether or not a cookie is sent with cross-site requests (see [below for nested schema](#nestedatt--protected_cookies--samesite_choice))
+- `secure_choice` (Attributes) secure A cookie with the Secure attribute is only sent to the server with an encrypted request over the HTTPS protocol and therefore, is more resistant to man-in-the-middle attacks. (see [below for nested schema](#nestedatt--protected_cookies--secure_choice))
+
+<a id="nestedatt--protected_cookies--cookie_tampering_choice"></a>
+### Nested Schema for `protected_cookies.cookie_tampering_choice`
+
+Optional:
+
+- `disable_tampering_protection` (Boolean) disable
+- `enable_tampering_protection` (Boolean) enable
+
+
+<a id="nestedatt--protected_cookies--httponly_choice"></a>
+### Nested Schema for `protected_cookies.httponly_choice`
+
+Optional:
+
+- `add_httponly` (Boolean) add_httponly
+- `ignore_httponly` (Boolean) ignore_httponly
+
+
+<a id="nestedatt--protected_cookies--samesite_choice"></a>
+### Nested Schema for `protected_cookies.samesite_choice`
+
+Optional:
+
+- `ignore_samesite` (Boolean) ignore_samesite Ignore Samesite attribute
+- `samesite_lax` (Boolean) lax Add Samesite attribute with Lax. Means that the cookie is not sent on cross-site requests
+- `samesite_none` (Boolean) none Add Samesite attribute with None. Means that the browser sends the cookie with both cross-site and same-site requests
+- `samesite_strict` (Boolean) strict Add Samesite attribute with Strict. Means that the browser sends the cookie only for same-site requests
+
+
+<a id="nestedatt--protected_cookies--secure_choice"></a>
+### Nested Schema for `protected_cookies.secure_choice`
+
+Optional:
+
+- `add_secure` (Boolean) add_secure
+- `ignore_secure` (Boolean) ignore_secure
+
+
+
+<a id="nestedatt--routes"></a>
+### Nested Schema for `routes`
+
+Required:
+
+- `choice` (Attributes) choice Define a simple, redirect, direct response or custom route (see [below for nested schema](#nestedatt--routes--choice))
+- `route_state_choice` (Attributes) Route Activation By default routes are enabled after saving. Use disabled state for work in progress routes, or temporary turn off specific routes. (see [below for nested schema](#nestedatt--routes--route_state_choice))
+
+<a id="nestedatt--routes--choice"></a>
+### Nested Schema for `routes.choice`
+
+Optional:
+
+- `custom_route_object` (Attributes) RouteTypeCustomRoute A custom route uses a route object created outside of this view. (see [below for nested schema](#nestedatt--routes--choice--custom_route_object))
+- `direct_response_route` (Attributes) RouteTypeDirectResponse A direct response route matches on path and/or HTTP method and responds directly to the matching traffic (see [below for nested schema](#nestedatt--routes--choice--direct_response_route))
+- `redirect_route` (Attributes) RouteTypeRedirect A redirect route matches on path and/or HTTP method and redirects the matching traffic to a different URL (see [below for nested schema](#nestedatt--routes--choice--redirect_route))
+- `simple_route` (Attributes) RouteTypeSimple A simple route matches on path and/or HTTP method and forwards the matching traffic to the associated pools (see [below for nested schema](#nestedatt--routes--choice--simple_route))
+
+<a id="nestedatt--routes--choice--custom_route_object"></a>
+### Nested Schema for `routes.choice.custom_route_object`
+
+Optional:
+
+- `caching_choice` (Attributes) Caching Caching behavior for this route (see [below for nested schema](#nestedatt--routes--choice--custom_route_object--caching_choice))
+- `route_ref` (Attributes) route_refs Reference to a custom route object (see [below for nested schema](#nestedatt--routes--choice--custom_route_object--route_ref))
+
+<a id="nestedatt--routes--choice--custom_route_object--caching_choice"></a>
+### Nested Schema for `routes.choice.custom_route_object.caching_choice`
+
+Optional:
+
+- `caching_disable` (Boolean) Caching is disabled for this Route
+- `caching_inherit` (Boolean) Caching is inherited from Load Balancer
+
+
+<a id="nestedatt--routes--choice--custom_route_object--route_ref"></a>
+### Nested Schema for `routes.choice.custom_route_object.route_ref`
+
+Required:
+
+- `name` (String)
+- `namespace` (String)
+
+Read-Only:
+
+- `tenant` (String)
+
+
+
+<a id="nestedatt--routes--choice--direct_response_route"></a>
+### Nested Schema for `routes.choice.direct_response_route`
+
+Required:
+
+- `path` (Attributes) path URI path of route (see [below for nested schema](#nestedatt--routes--choice--direct_response_route--path))
+
+Optional:
+
+- `headers` (Attributes List) headers List of (key, value) headers (see [below for nested schema](#nestedatt--routes--choice--direct_response_route--headers))
+- `http_method` (List of String) <br>**Allowed Values (choose one):** `["CONNECT", "COPY", "ANY", "POST", "PUT", "DELETE", "OPTIONS", "TRACE", "PATCH", "GET", "HEAD"]`
+- `incoming_port` (Attributes) incoming_port The port on which the request is received (see [below for nested schema](#nestedatt--routes--choice--direct_response_route--incoming_port))
+- `route_direct_response` (Attributes) route_direct_response Send direct response (see [below for nested schema](#nestedatt--routes--choice--direct_response_route--route_direct_response))
+
+<a id="nestedatt--routes--choice--direct_response_route--path"></a>
+### Nested Schema for `routes.choice.direct_response_route.path`
+
+Required:
+
+- `path_match_choice` (Attributes) path_match A specification of path match (see [below for nested schema](#nestedatt--routes--choice--direct_response_route--path--path_match_choice))
+
+<a id="nestedatt--routes--choice--direct_response_route--path--path_match_choice"></a>
+### Nested Schema for `routes.choice.direct_response_route.path.path_match_choice`
+
+Optional:
+
+- `path` (String) <br>**Validation:** `Length LengthAtMost(256)`
+- `prefix` (String) <br>**Validation:** `Length LengthAtMost(256)`
+- `regex` (String) regex Regular expression of path match (e.g. the value .* will match on all paths)
+
+
+
+<a id="nestedatt--routes--choice--direct_response_route--headers"></a>
+### Nested Schema for `routes.choice.direct_response_route.headers`
+
+Required:
+
+- `name` (String) name Name of the header
+
+Optional:
+
+- `invert_match` (Boolean) <br>**Default:** `false`
+- `value_match_choice` (Attributes) value_match The variants of matching a header value (see [below for nested schema](#nestedatt--routes--choice--direct_response_route--headers--value_match_choice))
+
+<a id="nestedatt--routes--choice--direct_response_route--headers--value_match_choice"></a>
+### Nested Schema for `routes.choice.direct_response_route.headers.value_match_choice`
+
+Optional:
+
+- `exact` (String) exact Header value to match exactly
+- `presence` (Boolean) presence If true, check for presence of header
+- `regex` (String) regex Regex match of the header value in re2 format
+
+
+
+<a id="nestedatt--routes--choice--direct_response_route--incoming_port"></a>
+### Nested Schema for `routes.choice.direct_response_route.incoming_port`
+
+Optional:
+
+- `port_match_choice` (Attributes) port_match A specification of port match (see [below for nested schema](#nestedatt--routes--choice--direct_response_route--incoming_port--port_match_choice))
+
+<a id="nestedatt--routes--choice--direct_response_route--incoming_port--port_match_choice"></a>
+### Nested Schema for `routes.choice.direct_response_route.incoming_port.port_match_choice`
+
+Optional:
+
+- `no_port_match` (Boolean) disable port Match Disable matching of ports
+- `port` (Number) port Exact Port to match
+- `port_ranges` (String) <br>**Validation:** `Length LengthBetween(1, 32)`
+
+
+
+<a id="nestedatt--routes--choice--direct_response_route--route_direct_response"></a>
+### Nested Schema for `routes.choice.direct_response_route.route_direct_response`
+
+Optional:
+
+- `response_body_encoded` (String) response_body Response body to send. Currently supported URL schemes is string:/// for which message should be encoded in Base64 format. The message can be either plain text or html. E.g. '<p> Access Denied </p>'. Base64 encoded string url for this is string:///PHA+IEFjY2VzcyBEZW5pZWQgPC9wPg==
+- `response_code` (Number) response_code response code to send
+
+
+
+<a id="nestedatt--routes--choice--redirect_route"></a>
+### Nested Schema for `routes.choice.redirect_route`
+
+Required:
+
+- `path` (Attributes) path URI path of route (see [below for nested schema](#nestedatt--routes--choice--redirect_route--path))
+
+Optional:
+
+- `headers` (Attributes List) headers List of (key, value) headers (see [below for nested schema](#nestedatt--routes--choice--redirect_route--headers))
+- `http_method` (List of String) <br>**Allowed Values (choose one):** `["ANY", "POST", "PUT", "DELETE", "OPTIONS", "TRACE", "PATCH", "GET", "HEAD", "CONNECT", "COPY"]`
+- `incoming_port` (Attributes) incoming_port The port on which the request is received (see [below for nested schema](#nestedatt--routes--choice--redirect_route--incoming_port))
+- `route_redirect` (Attributes) route_redirect Send redirect response (see [below for nested schema](#nestedatt--routes--choice--redirect_route--route_redirect))
+
+<a id="nestedatt--routes--choice--redirect_route--path"></a>
+### Nested Schema for `routes.choice.redirect_route.path`
+
+Required:
+
+- `path_match_choice` (Attributes) path_match A specification of path match (see [below for nested schema](#nestedatt--routes--choice--redirect_route--path--path_match_choice))
+
+<a id="nestedatt--routes--choice--redirect_route--path--path_match_choice"></a>
+### Nested Schema for `routes.choice.redirect_route.path.path_match_choice`
+
+Optional:
+
+- `path` (String) <br>**Validation:** `Length LengthAtMost(256)`
+- `prefix` (String) <br>**Validation:** `Length LengthAtMost(256)`
+- `regex` (String) regex Regular expression of path match (e.g. the value .* will match on all paths)
+
+
+
+<a id="nestedatt--routes--choice--redirect_route--headers"></a>
+### Nested Schema for `routes.choice.redirect_route.headers`
+
+Required:
+
+- `name` (String) name Name of the header
+
+Optional:
+
+- `invert_match` (Boolean) <br>**Default:** `false`
+- `value_match_choice` (Attributes) value_match The variants of matching a header value (see [below for nested schema](#nestedatt--routes--choice--redirect_route--headers--value_match_choice))
+
+<a id="nestedatt--routes--choice--redirect_route--headers--value_match_choice"></a>
+### Nested Schema for `routes.choice.redirect_route.headers.value_match_choice`
+
+Optional:
+
+- `exact` (String) exact Header value to match exactly
+- `presence` (Boolean) presence If true, check for presence of header
+- `regex` (String) regex Regex match of the header value in re2 format
+
+
+
+<a id="nestedatt--routes--choice--redirect_route--incoming_port"></a>
+### Nested Schema for `routes.choice.redirect_route.incoming_port`
+
+Optional:
+
+- `port_match_choice` (Attributes) port_match A specification of port match (see [below for nested schema](#nestedatt--routes--choice--redirect_route--incoming_port--port_match_choice))
+
+<a id="nestedatt--routes--choice--redirect_route--incoming_port--port_match_choice"></a>
+### Nested Schema for `routes.choice.redirect_route.incoming_port.port_match_choice`
+
+Optional:
+
+- `no_port_match` (Boolean) disable port Match Disable matching of ports
+- `port` (Number) port Exact Port to match
+- `port_ranges` (String) <br>**Validation:** `Length LengthBetween(1, 32)`
+
+
+
+<a id="nestedatt--routes--choice--redirect_route--route_redirect"></a>
+### Nested Schema for `routes.choice.redirect_route.route_redirect`
+
+Optional:
+
+- `host_redirect` (String) host_redirect swap host part of incoming URL in redirect URL
+- `proto_redirect` (String) proto_redirect swap protocol part of incoming URL in redirect URL The protocol can be swapped with either http or https When incoming-proto option is specified, swapping of protocol is not done.
+- `query_params_choice` (Attributes) query_params handling of incoming query parameters in redirect request. (see [below for nested schema](#nestedatt--routes--choice--redirect_route--route_redirect--query_params_choice))
+- `redirect_path_choice` (Attributes) Redirect Path Path in the redirect response (see [below for nested schema](#nestedatt--routes--choice--redirect_route--route_redirect--redirect_path_choice))
+- `response_code` (Number) <br>**Default:** `301`
+
+<a id="nestedatt--routes--choice--redirect_route--route_redirect--query_params_choice"></a>
+### Nested Schema for `routes.choice.redirect_route.route_redirect.query_params_choice`
+
+Optional:
+
+- `remove_all_params` (Boolean) Remove All Params
+- `replace_params` (String) <br>**Validation:** `Length LengthBetween(1, 256)`
+- `retain_all_params` (Boolean) Retain All Params
+
+
+<a id="nestedatt--routes--choice--redirect_route--route_redirect--redirect_path_choice"></a>
+### Nested Schema for `routes.choice.redirect_route.route_redirect.redirect_path_choice`
+
+Optional:
+
+- `path_redirect` (String) <br>**Validation:** `Length LengthAtMost(256)`
+- `prefix_rewrite` (String) <br>**Validation:** `Length LengthAtMost(256)`
+
+
+
+
+<a id="nestedatt--routes--choice--simple_route"></a>
+### Nested Schema for `routes.choice.simple_route`
+
+Required:
+
+- `host_rewrite_params_choice` (Attributes) HostRewriteParams Specifies how the host header can be modified during forwarding (see [below for nested schema](#nestedatt--routes--choice--simple_route--host_rewrite_params_choice))
+- `origin_pools` (Attributes List) Origin Pools Origin Pools for this route (see [below for nested schema](#nestedatt--routes--choice--simple_route--origin_pools))
+- `path` (Attributes) path URI path of route (see [below for nested schema](#nestedatt--routes--choice--simple_route--path))
+
+Optional:
+
+- `advanced_options` (Attributes) Advanced Options Configure Advanced per route options (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options))
+- `caching_choice` (Attributes) Caching Caching behavior for this route (see [below for nested schema](#nestedatt--routes--choice--simple_route--caching_choice))
+- `headers` (Attributes List) headers List of (key, value) headers (see [below for nested schema](#nestedatt--routes--choice--simple_route--headers))
+- `http_method` (List of String) <br>**Allowed Values (choose one):** `["CONNECT", "COPY", "ANY", "POST", "PUT", "DELETE", "OPTIONS", "TRACE", "PATCH", "GET", "HEAD"]`
+- `incoming_port` (Attributes) incoming_port The port on which the request is received (see [below for nested schema](#nestedatt--routes--choice--simple_route--incoming_port))
+- `query_params` (Attributes) query_params Handling of incoming query parameters in simple route. (see [below for nested schema](#nestedatt--routes--choice--simple_route--query_params))
+
+<a id="nestedatt--routes--choice--simple_route--host_rewrite_params_choice"></a>
+### Nested Schema for `routes.choice.simple_route.host_rewrite_params_choice`
+
+Optional:
+
+- `auto_host_rewrite` (Boolean) Auto Host Rewrite Host header will be swapped with hostname of upstream host chosen by the cluster
+- `disable_host_rewrite` (Boolean) Disable Host Rewrite Host header is not modified
+- `host_rewrite` (String) HostRewrite Host header will be swapped with this value
+
+
+<a id="nestedatt--routes--choice--simple_route--origin_pools"></a>
+### Nested Schema for `routes.choice.simple_route.origin_pools`
+
+Required:
+
+- `pool_choice` (Attributes) Pool Choice Select origin pool method, simple origin pool method or more flexible cluster object. (see [below for nested schema](#nestedatt--routes--choice--simple_route--origin_pools--pool_choice))
+
+Optional:
+
+- `endpoint_subsets` (Map of String) Origin Servers Subset Upstream origin pool may be configured to divide its origin servers into subsets based on metadata attached to the origin servers. Routes may then specify the metadata that a endpoint must match in order to be selected by the load balancer For origin servers which are discovered in K8S or Consul cluster, the label of the service is merged with endpoint's labels. In case of Consul, the label is derived from the 'Tag' field. For labels that are common between configured endpoint and discovered service, labels from discovered service takes precedence. List of key-value pairs that will be used as matching metadata. Only those origin servers of upstream origin pool which match this metadata will be selected for load balancing
+- `priority` (Number) <br>**Default:** `1`
+- `weight` (Number) <br>**Default:** `1`
+
+<a id="nestedatt--routes--choice--simple_route--origin_pools--pool_choice"></a>
+### Nested Schema for `routes.choice.simple_route.origin_pools.pool_choice`
+
+Optional:
+
+- `cluster` (Attributes) Cluster More flexible, advanced feature control with cluster (see [below for nested schema](#nestedatt--routes--choice--simple_route--origin_pools--pool_choice--cluster))
+- `pool` (Attributes) Pool Simple, commonly used pool parameters with origin pool (see [below for nested schema](#nestedatt--routes--choice--simple_route--origin_pools--pool_choice--pool))
+
+<a id="nestedatt--routes--choice--simple_route--origin_pools--pool_choice--cluster"></a>
+### Nested Schema for `routes.choice.simple_route.origin_pools.pool_choice.cluster`
+
+Required:
+
+- `name` (String)
+- `namespace` (String)
+
+Read-Only:
+
+- `tenant` (String)
+
+
+<a id="nestedatt--routes--choice--simple_route--origin_pools--pool_choice--pool"></a>
+### Nested Schema for `routes.choice.simple_route.origin_pools.pool_choice.pool`
+
+Required:
+
+- `name` (String)
+- `namespace` (String)
+
+Read-Only:
+
+- `tenant` (String)
+
+
+
+
+<a id="nestedatt--routes--choice--simple_route--path"></a>
+### Nested Schema for `routes.choice.simple_route.path`
+
+Required:
+
+- `path_match_choice` (Attributes) path_match A specification of path match (see [below for nested schema](#nestedatt--routes--choice--simple_route--path--path_match_choice))
+
+<a id="nestedatt--routes--choice--simple_route--path--path_match_choice"></a>
+### Nested Schema for `routes.choice.simple_route.path.path_match_choice`
+
+Optional:
+
+- `path` (String) <br>**Validation:** `Length LengthAtMost(256)`
+- `prefix` (String) <br>**Validation:** `Length LengthAtMost(256)`
+- `regex` (String) regex Regular expression of path match (e.g. the value .* will match on all paths)
+
+
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options`
+
+Required:
+
+- `buffer_choice` (Attributes) Enable Route Specific Buffering Enable or disable route specific buffering (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--buffer_choice))
+- `cluster_retract_choice` (Attributes) Oneof for Cluster retraction Specifies whether retraction of cluster has to be enabled or disabled (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--cluster_retract_choice))
+- `hash_policy_choice` (Attributes) Hash Policy Choice Enable route specific hash policy for this route (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--hash_policy_choice))
+- `mirroring_choice` (Attributes) Mirroring Enable/disable Mirroring (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--mirroring_choice))
+- `retry_policy_choice` (Attributes) Retry Policy Choice Select default retry policy or configure custom (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--retry_policy_choice))
+- `rewrite_choice` (Attributes) Enable Rewrite Select to enable prefix or regex rewrite or disable all options (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--rewrite_choice))
+- `spdy_choice` (Attributes) SPDY Choice Select to enable or disable spdy upgrade (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--spdy_choice))
+- `websocket_choice` (Attributes) Websocket Choice Select to enable or disable websocket upgrade (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--websocket_choice))
+
+Optional:
+
+- `bot_defense_javascript_injection_choice` (Attributes) Oneof Bot Defense JavaScript Injection Specifies whether bot defense javascript injection has a specific configuration for this route (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--bot_defense_javascript_injection_choice))
+- `cors_policy` (Attributes) cors_policy Cross-Origin Resource Sharing requests configuration CORS is a mechanism that uses additional HTTP headers to tell a browser to let a web application running at one origin (domain) have permission to access selected resources from a server at a different origin (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--cors_policy))
+- `csrf_policy` (Attributes) csrf_policy Cross-Site Request Forgery (CSRF) is an attack that occurs when a malicious third-party website exploits a vulnerability thats allows them to submit an undesired request on user's behalf. The policy checks where a request is coming from to determine if the request's origin is the same as its destination. The policy relies on two pieces of information used in determining if a request originated from the same host. 1. The origin that caused the user agent to issue the request (source origin). 2. The origin that the request is going to (target origin). When the policy evaluating a request, it ensures both pieces of information are present and compare their values. If the source origin is missing or origins do not match the request is rejected. The exception to this being the source-origin has been added to the policy as valid. Because CSRF attacks specifically target state-changing requests, the policy only acts on the HTTP requests that have state-changing method (PUT,POST, etc.). (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--csrf_policy))
+- `disable_location_add` (Boolean) <br>**Default:** `false`
+- `endpoint_subsets` (Map of String) Origin Servers Subset Upstream origin pool may be configured to divide its origin servers into subsets based on metadata attached to the origin servers. Routes may then specify the metadata that a endpoint must match in order to be selected by the load balancer For origin servers which are discovered in K8S or Consul cluster, the label of the service is merged with endpoint's labels. In case of Consul, the label is derived from the 'Tag' field. For labels that are common between configured endpoint and discovered service, labels from discovered service takes precedence. List of key-value pairs that will be used as matching metadata. Only those origin servers of upstream origin pool which match this metadata will be selected for load balancing
+- `priority` (List of String) <br>**Allowed Values (choose one):** `["DEFAULT", "HIGH"]`
+- `request_cookies_to_add` (Attributes List) Cookies to add in request Cookies are key-value pairs to be added to HTTP request being routed towards upstream. Cookies specified at this level are applied after cookies from matched Route are applied (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--request_cookies_to_add))
+- `request_cookies_to_remove` (List of String) Cookies to be removed from request List of keys of Cookies to be removed from the HTTP request being sent towards upstream.
+- `request_headers_to_add` (Attributes List) Headers to add in request Headers are key-value pairs to be added to HTTP request being routed towards upstream. (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--request_headers_to_add))
+- `request_headers_to_remove` (List of String) Header to be removed from request List of keys of Headers to be removed from the HTTP request being sent towards upstream.
+- `response_cookies_to_add` (Attributes List) Cookies to add in set-cookie header in response Cookies are name-value pairs along with optional attribute parameters to be added to HTTP response being sent towards downstream. Cookies specified at this level are applied after cookies from matched Route are applied (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add))
+- `response_cookies_to_remove` (List of String) Cookies to be removed from response List of name of Cookies to be removed from the HTTP response being sent towards downstream. Entire set-cookie header will be removed
+- `response_headers_to_add` (Attributes List) Headers to add in response Headers are key-value pairs to be added to HTTP response being sent towards downstream. (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--response_headers_to_add))
+- `response_headers_to_remove` (List of String) Header to be removed from response List of keys of Headers to be removed from the HTTP response being sent towards downstream.
+- `timeout` (Number) <br>**Default:** `30000`
+- `waf_choice` (Attributes) Enable the WAF (Web Application Firewall) functionality for VirtualHost WAF can be used to analyze inbound and outbound http/https traffic. WAF can be configured either in BLOCKing Mode or ALERTing Mode. In BLOCKing mode if WAF detects suspicious inbound/outbound traffic it blocks the request or response. In ALERTing mode if suspicious traffic is detected, WAF generates ALERTs with details on the suspicious traffic (instead of blocking traffic). (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--waf_choice))
+- `waf_exclusion_choice` (Attributes) Enable the WAF Exclusion functionality for VirtualHost A WAF Exclusion that can be applied to one or more Load Balancers or Routes. The WAF Exclusion is evaluated sequentially and can only be matched once per request. (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--waf_exclusion_choice))
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--buffer_choice"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.buffer_choice`
+
+Optional:
+
+- `buffer_policy` (Attributes) Route Specific Buffering Configuration Buffering configuration for requests Some upstream applications are not capable of handling streamed data. This config enables buffering the entire request before sending to upstream application. We can specify the maximum buffer size and buffer interval with this config. Route level buffer configuration overrides any configuration at VirtualHost level. (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--buffer_choice--buffer_policy))
+- `common_buffering` (Boolean) Common buffering Configuration Use common buffering configuration
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--buffer_choice--buffer_policy"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.buffer_choice.buffer_policy`
+
+Optional:
+
+- `disabled` (Boolean) <br>**Default:** `false`
+- `max_request_bytes` (Number) max_request_bytes The maximum request size that the filter will buffer before the connection manager will stop buffering and return a RequestEntityTooLarge (413) response.
+
+
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--cluster_retract_choice"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.cluster_retract_choice`
+
+Optional:
+
+- `do_not_retract_cluster` (Boolean) do_not_retract_cluster When this option is configured, cluster with no healthy endpoints is not retracted from route having weighted cluster configuration.
+- `retract_cluster` (Boolean) retract_cluster When this option is enabled, weighted cluster will not be considered for load balancing, if all its endpoints are unhealthy. Since the cluster with all unhealthy endpoints is removed, the traffic will be distributed among remaining clusters as per their weight. Also panic-threshold configuration is ignored for retracted cluster. This option is ignored when single destination cluster is configured for route
+
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--hash_policy_choice"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.hash_policy_choice`
+
+Optional:
+
+- `common_hash_policy` (Boolean) Common Hash Policy Use load balancer hash policy for this route
+- `specific_hash_policy` (Attributes) Route Specific Hash Policy Configure hash policy specific for this route (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--hash_policy_choice--specific_hash_policy))
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--hash_policy_choice--specific_hash_policy"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.hash_policy_choice.specific_hash_policy`
+
+Required:
+
+- `hash_policy` (Attributes List) hash_policy Specifies a list of hash policies to use for ring hash load balancing. Each hash policy is evaluated individually and the combined result is used to route the request (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--hash_policy_choice--specific_hash_policy--hash_policy))
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--hash_policy_choice--specific_hash_policy--hash_policy"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.hash_policy_choice.specific_hash_policy.hash_policy`
+
+Required:
+
+- `policy_specifier_choice` (Attributes) PolicySpecifier Specifies whether hashing is done on incoming request header, cookie or source IP (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--hash_policy_choice--specific_hash_policy--hash_policy--policy_specifier_choice))
+
+Optional:
+
+- `terminal` (Boolean) <br>**Default:** `false`
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--hash_policy_choice--specific_hash_policy--hash_policy--policy_specifier_choice"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.hash_policy_choice.specific_hash_policy.hash_policy.policy_specifier_choice`
+
+Optional:
+
+- `cookie` (Attributes) Cookie Hash based on cookie (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--hash_policy_choice--specific_hash_policy--hash_policy--policy_specifier_choice--cookie))
+- `header_name` (String) <br>**Validation:** `Length LengthBetween(1, 256)`
+- `source_ip` (Boolean) Source IP Hash based on source IP address
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--hash_policy_choice--specific_hash_policy--hash_policy--policy_specifier_choice--cookie"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.hash_policy_choice.specific_hash_policy.hash_policy.policy_specifier_choice.cookie`
+
+Required:
+
+- `name` (String) <br>**Validation:** `Length LengthBetween(1, 256)`
+
+Optional:
+
+- `httponly_choice` (Attributes) httponly A cookie with the HttpOnly attribute is inaccessible to the JavaScript. (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--hash_policy_choice--specific_hash_policy--hash_policy--policy_specifier_choice--cookie--httponly_choice))
+- `path` (String) path The name of the path for the cookie. If no path is specified here, no path will be set for the cookie
+- `samesite_choice` (Attributes) samesite Controls whether or not a cookie is sent with cross-site requests (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--hash_policy_choice--specific_hash_policy--hash_policy--policy_specifier_choice--cookie--samesite_choice))
+- `secure_choice` (Attributes) secure A cookie with the Secure attribute is only sent to the server with an encrypted request over the HTTPS protocol and therefore, is more resistant to man-in-the-middle attacks. (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--hash_policy_choice--specific_hash_policy--hash_policy--policy_specifier_choice--cookie--secure_choice))
+- `ttl` (Number) ttl If specified, a cookie with the TTL will be generated if the cookie is not present. If the TTL is present and zero, the generated cookie will be a session cookie. TTL value is in milliseconds
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--hash_policy_choice--specific_hash_policy--hash_policy--policy_specifier_choice--cookie--httponly_choice"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.hash_policy_choice.specific_hash_policy.hash_policy.policy_specifier_choice.cookie.httponly_choice`
+
+Optional:
+
+- `add_httponly` (Boolean) add_httponly Add httponly attribute
+- `ignore_httponly` (Boolean) ignore_httponly Ignore httponly attribute
+
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--hash_policy_choice--specific_hash_policy--hash_policy--policy_specifier_choice--cookie--samesite_choice"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.hash_policy_choice.specific_hash_policy.hash_policy.policy_specifier_choice.cookie.samesite_choice`
+
+Optional:
+
+- `ignore_samesite` (Boolean) ignore_samesite Ignore Samesite attribute
+- `samesite_lax` (Boolean) lax Add Samesite attribute with Lax. Means that the cookie is not sent on cross-site requests
+- `samesite_none` (Boolean) none Add Samesite attribute with None. Means that the browser sends the cookie with both cross-site and same-site requests
+- `samesite_strict` (Boolean) strict Add Samesite attribute with Strict. Means that the browser sends the cookie only for same-site requests
+
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--hash_policy_choice--specific_hash_policy--hash_policy--policy_specifier_choice--cookie--secure_choice"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.hash_policy_choice.specific_hash_policy.hash_policy.policy_specifier_choice.cookie.secure_choice`
+
+Optional:
+
+- `add_secure` (Boolean) add_secure Add secure attribute
+- `ignore_secure` (Boolean) ignore_secure Ignore secure attribute
+
+
+
+
+
+
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--mirroring_choice"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.mirroring_choice`
+
+Optional:
+
+- `disable_mirroring` (Boolean) Disable Mirroring Disable Mirroring of request
+- `mirror_policy` (Attributes) Enable Mirroring MirrorPolicy is used for shadowing traffic from one cluster to another. The current implementation is 'fire and forget,' meaning it will not wait for the shadow cluster to respond before returning the response from the primary cluster. All normal statistics are collected for the shadow cluster making this feature useful for testing. During shadowing, the host/authority header is altered such that *-shadow* is appended. This is useful for logging. For example, *cluster1* becomes *cluster1-shadow*. (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--mirroring_choice--mirror_policy))
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--mirroring_choice--mirror_policy"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.mirroring_choice.mirror_policy`
+
+Required:
+
+- `origin_pool` (Attributes) cluster Specifies the cluster to which the requests will be mirrored. The cluster object referred here must be present. (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--mirroring_choice--mirror_policy--origin_pool))
+- `percent` (Attributes) percent Percentage of requests to be mirrored (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--mirroring_choice--mirror_policy--percent))
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--mirroring_choice--mirror_policy--origin_pool"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.mirroring_choice.mirror_policy.origin_pool`
+
+Required:
+
+- `name` (String)
+- `namespace` (String)
+
+Read-Only:
+
+- `tenant` (String)
+
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--mirroring_choice--mirror_policy--percent"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.mirroring_choice.mirror_policy.percent`
+
+Required:
+
+- `denominator` (List of String) <br>**Allowed Values (choose one):** `["HUNDRED", "TEN_THOUSAND", "MILLION"]`
+
+Optional:
+
+- `numerator` (Number) <br>**Default:** `5`
+
+
+
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--retry_policy_choice"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.retry_policy_choice`
+
+Optional:
+
+- `default_retry_policy` (Boolean) Use Default Retry Policy Use system default retry policy
+- `no_retry_policy` (Boolean) No retry policy Do not configure retry policy
+- `retry_policy` (Attributes) Custom Retry Policy Configure custom retry policy (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--retry_policy_choice--retry_policy))
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--retry_policy_choice--retry_policy"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.retry_policy_choice.retry_policy`
+
+Required:
+
+- `retry_condition` (List of String) retry_condition Specifies the conditions under which retry takes place. Retries can be on different types of condition depending on application requirements. For example, network failure, all 5xx response codes, idempotent 4xx response codes, etc The possible values are '5xx'             : Retry will be done if the upstream server responds with any 5xx response code, or does not respond at all (disconnect/reset/read timeout). 'gateway-error'   : Retry will be done only if the upstream server responds with 502, 503 or 504 responses (Included in 5xx) 'connect-failure' : Retry will be done if the request fails because of a connection failure to the upstream server (connect timeout, etc.). (Included in 5xx) 'refused-stream'  : Retry is done if the upstream server resets the stream with a REFUSED_STREAM error code (Included in 5xx) 'retriable-4xx'   : Retry is done if the upstream server responds with a retriable 4xx response code. The only response code in this category is HTTP CONFLICT (409) 'retriable-status-codes' :  Retry is done if the upstream server responds with any response code matching one defined in retriable_status_codes field 'reset'           : Retry is done if the upstream server does not respond at all (disconnect/reset/read timeout.)
+
+Optional:
+
+- `back_off` (Attributes) Retry BackOff Specifies parameters that control retry back off. This parameter is optional, in which case the default base interval is 25 milliseconds. The default maximum interval is 10 times the base interval (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--retry_policy_choice--retry_policy--back_off))
+- `num_retries` (Number) <br>**Default:** `1`
+- `per_try_timeout` (Number) per_try_timeout Specifies a non-zero timeout per retry attempt. In milliseconds
+- `retriable_status_codes` (List of Number) Retriable status Code HTTP status codes that should trigger a retry in addition to those specified by retry_on.
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--retry_policy_choice--retry_policy--back_off"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.retry_policy_choice.retry_policy.back_off`
+
+Optional:
+
+- `base_interval` (Number) <br>**Default:** `25`
+- `max_interval` (Number) max_interval Specifies the maximum interval between retries in milliseconds. This parameter is optional, but must be greater than or equal to the base_interval if set. The default is 10 times the base_interval.
+
+
+
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--rewrite_choice"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.rewrite_choice`
+
+Optional:
+
+- `disable_prefix_rewrite` (Boolean) Disable Rewrite Do not rewrite any path portion.
+- `prefix_rewrite` (String) <br>**Validation:** `Length LengthAtMost(256)`
+- `regex_rewrite` (Attributes) regex_rewrite regex_rewrite indicates that during forwarding, the matched regex should be swapped with the substitution value. (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--rewrite_choice--regex_rewrite))
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--rewrite_choice--regex_rewrite"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.rewrite_choice.regex_rewrite`
+
+Optional:
+
+- `pattern` (String) <br>**Validation:** `Length LengthBetween(1, 256)`
+- `substitution` (String) <br>**Validation:** `Length LengthAtMost(256)`
+
+
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--spdy_choice"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.spdy_choice`
+
+Optional:
+
+- `disable_spdy` (Boolean) Disable SPDY SPDY upgrade is disabled
+- `enable_spdy` (Boolean) Enable SPDY SPDY upgrade is enabled
+
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--websocket_choice"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.websocket_choice`
+
+Optional:
+
+- `disable_web_socket_config` (Boolean) Disable Websocket Websocket upgrade is disabled
+- `web_socket_config` (Attributes) Websocket Configuration Upgrade to Websocket for this route (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--websocket_choice--web_socket_config))
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--websocket_choice--web_socket_config"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.websocket_choice.web_socket_config`
+
+Optional:
+
+- `use_websocket` (Boolean) <br>**Default:** `false`
+
+
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--bot_defense_javascript_injection_choice"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.bot_defense_javascript_injection_choice`
+
+Optional:
+
+- `bot_defense_javascript_injection` (Attributes) Bot Defense JavaScript Injection for inline bot defense deployments Configuration for Bot Defense JavaScript Injection (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--bot_defense_javascript_injection_choice--bot_defense_javascript_injection))
+- `inherited_bot_defense_javascript_injection` (Boolean) Inherited Bot Defense JavaScript Injection Bot Defense JavaScript Injection configuration is taken from Load Balancer. Hence no custom configuration is applied on the route
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--bot_defense_javascript_injection_choice--bot_defense_javascript_injection"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.bot_defense_javascript_injection_choice.bot_defense_javascript_injection`
+
+Required:
+
+- `javascript_tags` (Attributes List) javascript_tags Select Add item to configure your javascript tag. If adding both Bot Adv and Fraud, the Bot Javascript should be added first. (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--bot_defense_javascript_injection_choice--bot_defense_javascript_injection--javascript_tags))
+
+Optional:
+
+- `javascript_location` (List of String) <br>**Allowed Values (choose one):** `["AFTER_HEAD", "AFTER_TITLE_END", "BEFORE_SCRIPT"]`
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--bot_defense_javascript_injection_choice--bot_defense_javascript_injection--javascript_tags"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.bot_defense_javascript_injection_choice.bot_defense_javascript_injection.javascript_tags`
+
+Required:
+
+- `javascript_url` (String) JavaScriptURL Please enter the full URL (include domain and path), or relative path.
+
+Optional:
+
+- `tag_attributes` (Attributes List) TagAttributes Add the tag attributes you want to include in your Javascript tag. (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--bot_defense_javascript_injection_choice--bot_defense_javascript_injection--javascript_tags--tag_attributes))
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--bot_defense_javascript_injection_choice--bot_defense_javascript_injection--javascript_tags--tag_attributes"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.bot_defense_javascript_injection_choice.bot_defense_javascript_injection.javascript_tags.tag_attributes`
+
+Optional:
+
+- `javascript_tag` (List of String) <br>**Allowed Values (choose one):** `["JS_ATTR_DEFER", "JS_ATTR_ID", "JS_ATTR_CID", "JS_ATTR_CN", "JS_ATTR_API_DOMAIN", "JS_ATTR_API_URL", "JS_ATTR_API_PATH", "JS_ATTR_ASYNC"]`
+- `tag_value` (String) TagValue Add the tag attribute value.
+
+
+
+
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--cors_policy"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.cors_policy`
+
+Optional:
+
+- `allow_credentials` (Boolean) <br>**Default:** `false`
+- `allow_headers` (String) allow_headers Specifies the content for the access-control-allow-headers header
+- `allow_methods` (String) allow_methods Specifies the content for the access-control-allow-methods header
+- `allow_origin` (List of String) allow_origin Specifies the origins that will be allowed to do CORS requests. An origin is allowed if either allow_origin or allow_origin_regex match
+- `allow_origin_regex` (List of String) allow_origin_regex Specifies regex patterns that match allowed origins. An origin is allowed if either allow_origin or allow_origin_regex match
+- `disabled` (Boolean) <br>**Default:** `false`
+- `expose_headers` (String) expose_headers Specifies the content for the access-control-expose-headers header
+- `maximum_age` (Number) maximum_age This indicates the maximum number of seconds the results can be cached A value of -1 will disable caching. Maximum permitted value is 86400 seconds (24 hours)
+
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--csrf_policy"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.csrf_policy`
+
+Required:
+
+- `allowed_domains_choice` (Attributes) allowed_domains The list of source origin that should be allowed. (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--csrf_policy--allowed_domains_choice))
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--csrf_policy--allowed_domains_choice"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.csrf_policy.allowed_domains_choice`
+
+Optional:
+
+- `all_load_balancer_domains` (Boolean) all_load_balancer_domains Add All load balancer domains to source origin (allow) list.
+- `custom_domain_list` (Attributes) custom_domain_list Add one or more domains to source origin (allow) list. (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--csrf_policy--allowed_domains_choice--custom_domain_list))
+- `disabled` (Boolean) disabled Allow all source origin domains.
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--csrf_policy--allowed_domains_choice--custom_domain_list"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.csrf_policy.allowed_domains_choice.custom_domain_list`
+
+Required:
+
+- `domains` (List of String) Domains A list of domain names that will be matched to loadbalancer. These domains are not used for SNI match. Wildcard names are supported in the suffix or prefix form.
+
+
+
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--request_cookies_to_add"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.request_cookies_to_add`
+
+Required:
+
+- `name` (String) <br>**Validation:** `Length LengthAtMost(256)`
+- `value_choice` (Attributes) value Enter Cookie value as string or blindfolded secret. (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--request_cookies_to_add--value_choice))
+
+Optional:
+
+- `overwrite` (Boolean) <br>**Default:** `false`
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--request_cookies_to_add--value_choice"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.request_cookies_to_add.value_choice`
+
+Optional:
+
+- `secret_value` (Attributes) Secret Value Secret Value of the Cookie header (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--request_cookies_to_add--value_choice--secret_value))
+- `value` (String) <br>**Validation:** `Length LengthAtMost(8096)`
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--request_cookies_to_add--value_choice--secret_value"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.request_cookies_to_add.value_choice.secret_value`
+
+Required:
+
+- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--request_cookies_to_add--value_choice--secret_value--secret_info_choice))
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--request_cookies_to_add--value_choice--secret_value--secret_info_choice"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.request_cookies_to_add.value_choice.secret_value.secret_info_choice`
+
+Optional:
+
+- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--request_cookies_to_add--value_choice--secret_value--secret_info_choice--blindfold_secret_info))
+- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--request_cookies_to_add--value_choice--secret_value--secret_info_choice--clear_secret_info))
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--request_cookies_to_add--value_choice--secret_value--secret_info_choice--blindfold_secret_info"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.request_cookies_to_add.value_choice.secret_value.secret_info_choice.blindfold_secret_info`
+
+Required:
+
+- `location` (String) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
+
+Optional:
+
+- `decryption_provider` (String) Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.
+- `store_provider` (String) Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
+
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--request_cookies_to_add--value_choice--secret_value--secret_info_choice--clear_secret_info"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.request_cookies_to_add.value_choice.secret_value.secret_info_choice.clear_secret_info`
+
+Required:
+
+- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
+
+Optional:
+
+- `provider` (String) Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
+
+
+
+
+
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--request_headers_to_add"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.request_headers_to_add`
+
+Required:
+
+- `name` (String) <br>**Validation:** `Length LengthAtMost(256)`
+- `value_choice` (Attributes) value Enter Header value as string or blindfolded secret. (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--request_headers_to_add--value_choice))
+
+Optional:
+
+- `append` (Boolean) <br>**Default:** `false`
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--request_headers_to_add--value_choice"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.request_headers_to_add.value_choice`
+
+Optional:
+
+- `secret_value` (Attributes) Secret Value Secret Value of the HTTP header. (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--request_headers_to_add--value_choice--secret_value))
+- `value` (String) <br>**Validation:** `Length LengthAtMost(8096)`
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--request_headers_to_add--value_choice--secret_value"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.request_headers_to_add.value_choice.secret_value`
+
+Required:
+
+- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--request_headers_to_add--value_choice--secret_value--secret_info_choice))
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--request_headers_to_add--value_choice--secret_value--secret_info_choice"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.request_headers_to_add.value_choice.secret_value.secret_info_choice`
+
+Optional:
+
+- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--request_headers_to_add--value_choice--secret_value--secret_info_choice--blindfold_secret_info))
+- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--request_headers_to_add--value_choice--secret_value--secret_info_choice--clear_secret_info))
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--request_headers_to_add--value_choice--secret_value--secret_info_choice--blindfold_secret_info"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.request_headers_to_add.value_choice.secret_value.secret_info_choice.blindfold_secret_info`
+
+Required:
+
+- `location` (String) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
+
+Optional:
+
+- `decryption_provider` (String) Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.
+- `store_provider` (String) Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
+
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--request_headers_to_add--value_choice--secret_value--secret_info_choice--clear_secret_info"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.request_headers_to_add.value_choice.secret_value.secret_info_choice.clear_secret_info`
+
+Required:
+
+- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
+
+Optional:
+
+- `provider` (String) Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
+
+
+
+
+
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.response_cookies_to_add`
+
+Required:
+
+- `name` (String) <br>**Validation:** `Length LengthAtMost(256)`
+
+Optional:
+
+- `domain_choice` (Attributes) domain Domain to which cookie will be sent during request (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add--domain_choice))
+- `expiry_choice` (Attributes) Expiry Indicates the maximum lifetime of the cookie as an HTTP-date timestamp. Eg. Mon, 01 Dec 2008 00:23:53 GMT (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add--expiry_choice))
+- `httponly_choice` (Attributes) httponly A cookie with the HttpOnly attribute is inaccessible to the JavaScript. (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add--httponly_choice))
+- `max_age_choice` (Attributes) max_age Enter the maximum age in minutes for session cookies after which cookies are automatically expired (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add--max_age_choice))
+- `overwrite` (Boolean) <br>**Default:** `false`
+- `partitioned_choice` (Attributes) Partitioned A cookie with the Partitioned attribute is stored using partitioned storage. (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add--partitioned_choice))
+- `path_choice` (Attributes) path The path that must exist in the requested URL for the browser to send the Cookie header. (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add--path_choice))
+- `samesite_choice` (Attributes) samesite Controls whether or not a cookie is sent with cross-site requests (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add--samesite_choice))
+- `secure_choice` (Attributes) secure A cookie with the Secure attribute is only sent to the server with an encrypted request over the HTTPS protocol and therefore, is more resistant to man-in-the-middle attacks. (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add--secure_choice))
+- `value_choice` (Attributes) value Enter Cookie value as string or blindfolded secret. (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add--value_choice))
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add--domain_choice"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.response_cookies_to_add.domain_choice`
+
+Optional:
+
+- `add_domain` (String) <br>**Validation:** `Length LengthBetween(1, 256)`
+- `ignore_domain` (Boolean) ignore_domain Ignore max age attribute
+
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add--expiry_choice"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.response_cookies_to_add.expiry_choice`
+
+Optional:
+
+- `add_expiry` (String) <br>**Validation:** `Length LengthAtMost(256)`
+- `ignore_expiry` (Boolean) ignore_expiry Ignore expiry attribute
+
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add--httponly_choice"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.response_cookies_to_add.httponly_choice`
+
+Optional:
+
+- `add_httponly` (Boolean) add_httponly
+- `ignore_httponly` (Boolean) ignore_httponly
+
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add--max_age_choice"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.response_cookies_to_add.max_age_choice`
+
+Optional:
+
+- `ignore_max_age` (Boolean) ignore_max_age Ignore max age attribute
+- `max_age_value` (Number) <br>**Default:** `86400`
+
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add--partitioned_choice"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.response_cookies_to_add.partitioned_choice`
+
+Optional:
+
+- `add_partitioned` (Boolean) add_partitioned
+- `ignore_partitioned` (Boolean) ignore_partitioned
+
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add--path_choice"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.response_cookies_to_add.path_choice`
+
+Optional:
+
+- `add_path` (String) <br>**Validation:** `Length LengthAtMost(256)`
+- `ignore_path` (Boolean) ignore_domain Ignore path attribute
+
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add--samesite_choice"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.response_cookies_to_add.samesite_choice`
+
+Optional:
+
+- `ignore_samesite` (Boolean) ignore_samesite Ignore Samesite attribute
+- `samesite_lax` (Boolean) lax Add Samesite attribute with Lax. Means that the cookie is not sent on cross-site requests
+- `samesite_none` (Boolean) none Add Samesite attribute with None. Means that the browser sends the cookie with both cross-site and same-site requests
+- `samesite_strict` (Boolean) strict Add Samesite attribute with Strict. Means that the browser sends the cookie only for same-site requests
+
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add--secure_choice"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.response_cookies_to_add.secure_choice`
+
+Optional:
+
+- `add_secure` (Boolean) add_secure
+- `ignore_secure` (Boolean) ignore_secure
+
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add--value_choice"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.response_cookies_to_add.value_choice`
+
+Optional:
+
+- `ignore_value` (Boolean) ignore_value Ignore value of cookie
+- `secret_value` (Attributes) Secret Value Secret Value of the Cookie header (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add--value_choice--secret_value))
+- `value` (String) <br>**Validation:** `Length LengthAtMost(8096)`
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add--value_choice--secret_value"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.response_cookies_to_add.value_choice.secret_value`
+
+Required:
+
+- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add--value_choice--secret_value--secret_info_choice))
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add--value_choice--secret_value--secret_info_choice"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.response_cookies_to_add.value_choice.secret_value.secret_info_choice`
+
+Optional:
+
+- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add--value_choice--secret_value--secret_info_choice--blindfold_secret_info))
+- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add--value_choice--secret_value--secret_info_choice--clear_secret_info))
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add--value_choice--secret_value--secret_info_choice--blindfold_secret_info"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.response_cookies_to_add.value_choice.secret_value.secret_info_choice.blindfold_secret_info`
+
+Required:
+
+- `location` (String) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
+
+Optional:
+
+- `decryption_provider` (String) Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.
+- `store_provider` (String) Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
+
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--response_cookies_to_add--value_choice--secret_value--secret_info_choice--clear_secret_info"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.response_cookies_to_add.value_choice.secret_value.secret_info_choice.clear_secret_info`
+
+Required:
+
+- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
+
+Optional:
+
+- `provider` (String) Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
+
+
+
+
+
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--response_headers_to_add"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.response_headers_to_add`
+
+Required:
+
+- `name` (String) <br>**Validation:** `Length LengthAtMost(256)`
+- `value_choice` (Attributes) value Enter Header value as string or blindfolded secret. (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--response_headers_to_add--value_choice))
+
+Optional:
+
+- `append` (Boolean) <br>**Default:** `false`
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--response_headers_to_add--value_choice"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.response_headers_to_add.value_choice`
+
+Optional:
+
+- `secret_value` (Attributes) Secret Value Secret Value of the HTTP header. (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--response_headers_to_add--value_choice--secret_value))
+- `value` (String) <br>**Validation:** `Length LengthAtMost(8096)`
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--response_headers_to_add--value_choice--secret_value"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.response_headers_to_add.value_choice.secret_value`
+
+Required:
+
+- `secret_info_choice` (Attributes) SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--response_headers_to_add--value_choice--secret_value--secret_info_choice))
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--response_headers_to_add--value_choice--secret_value--secret_info_choice"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.response_headers_to_add.value_choice.secret_value.secret_info_choice`
+
+Optional:
+
+- `blindfold_secret_info` (Attributes) Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--response_headers_to_add--value_choice--secret_value--secret_info_choice--blindfold_secret_info))
+- `clear_secret_info` (Attributes) Clear Secret Clear Secret is used for the secrets that are not encrypted (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--response_headers_to_add--value_choice--secret_value--secret_info_choice--clear_secret_info))
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--response_headers_to_add--value_choice--secret_value--secret_info_choice--blindfold_secret_info"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.response_headers_to_add.value_choice.secret_value.secret_info_choice.blindfold_secret_info`
+
+Required:
+
+- `location` (String) Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location
+
+Optional:
+
+- `decryption_provider` (String) Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.
+- `store_provider` (String) Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
+
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--response_headers_to_add--value_choice--secret_value--secret_info_choice--clear_secret_info"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.response_headers_to_add.value_choice.secret_value.secret_info_choice.clear_secret_info`
+
+Required:
+
+- `url` (String, Sensitive) URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.
+
+Optional:
+
+- `provider` (String) Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///
+
+
+
+
+
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--waf_choice"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.waf_choice`
+
+Optional:
+
+- `app_firewall` (Attributes) app_firewall Reference to App Firewall configuration object (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--waf_choice--app_firewall))
+- `disable_waf` (Boolean) disable_app_firewall App Firewall configuration that is configured in the Load Balancer will not be enforced on this route
+- `inherited_waf` (Boolean) Inherited WAF App Firewall configuration is taken from the Load Balancer. Hence no custom configuration is applied on the route
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--waf_choice--app_firewall"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.waf_choice.app_firewall`
+
+Required:
+
+- `name` (String)
+- `namespace` (String)
+
+Read-Only:
+
+- `tenant` (String)
+
+
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--waf_exclusion_choice"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.waf_exclusion_choice`
+
+Optional:
+
+- `inherited_waf_exclusion` (Boolean) Inherit WAF Exclusion configuration is taken from the Load Balancer. Hence no custom configuration is applied on the route
+- `waf_exclusion_policy` (Attributes) Custom Policy A reference to WAF Exclusion Policy configuration object (see [below for nested schema](#nestedatt--routes--choice--simple_route--advanced_options--waf_exclusion_choice--waf_exclusion_policy))
+
+<a id="nestedatt--routes--choice--simple_route--advanced_options--waf_exclusion_choice--waf_exclusion_policy"></a>
+### Nested Schema for `routes.choice.simple_route.advanced_options.waf_exclusion_choice.waf_exclusion_policy`
+
+Required:
+
+- `name` (String)
+- `namespace` (String)
+
+Read-Only:
+
+- `tenant` (String)
+
+
+
+
+<a id="nestedatt--routes--choice--simple_route--caching_choice"></a>
+### Nested Schema for `routes.choice.simple_route.caching_choice`
+
+Optional:
+
+- `caching_disable` (Boolean) Caching is disabled for this Route
+- `caching_inherit` (Boolean) Caching is inherited from Load Balancer
+
+
+<a id="nestedatt--routes--choice--simple_route--headers"></a>
+### Nested Schema for `routes.choice.simple_route.headers`
+
+Required:
+
+- `name` (String) name Name of the header
+
+Optional:
+
+- `invert_match` (Boolean) <br>**Default:** `false`
+- `value_match_choice` (Attributes) value_match The variants of matching a header value (see [below for nested schema](#nestedatt--routes--choice--simple_route--headers--value_match_choice))
+
+<a id="nestedatt--routes--choice--simple_route--headers--value_match_choice"></a>
+### Nested Schema for `routes.choice.simple_route.headers.value_match_choice`
+
+Optional:
+
+- `exact` (String) exact Header value to match exactly
+- `presence` (Boolean) presence If true, check for presence of header
+- `regex` (String) regex Regex match of the header value in re2 format
+
+
+
+<a id="nestedatt--routes--choice--simple_route--incoming_port"></a>
+### Nested Schema for `routes.choice.simple_route.incoming_port`
+
+Optional:
+
+- `port_match_choice` (Attributes) port_match A specification of port match (see [below for nested schema](#nestedatt--routes--choice--simple_route--incoming_port--port_match_choice))
+
+<a id="nestedatt--routes--choice--simple_route--incoming_port--port_match_choice"></a>
+### Nested Schema for `routes.choice.simple_route.incoming_port.port_match_choice`
+
+Optional:
+
+- `no_port_match` (Boolean) disable port Match Disable matching of ports
+- `port` (Number) port Exact Port to match
+- `port_ranges` (String) <br>**Validation:** `Length LengthBetween(1, 32)`
+
+
+
+<a id="nestedatt--routes--choice--simple_route--query_params"></a>
+### Nested Schema for `routes.choice.simple_route.query_params`
+
+Required:
+
+- `query_params_choice` (Attributes) query_params Handling of incoming query parameters in simple route. (see [below for nested schema](#nestedatt--routes--choice--simple_route--query_params--query_params_choice))
+
+<a id="nestedatt--routes--choice--simple_route--query_params--query_params_choice"></a>
+### Nested Schema for `routes.choice.simple_route.query_params.query_params_choice`
+
+Optional:
+
+- `remove_all_params` (Boolean) Remove All Params
+- `replace_params` (String) <br>**Validation:** `Length LengthBetween(1, 256)`
+- `retain_all_params` (Boolean) Retain All Params
+
+
+
+
+
+<a id="nestedatt--routes--route_state_choice"></a>
+### Nested Schema for `routes.route_state_choice`
+
+Optional:
+
+- `route_state_disabled` (Boolean) Disabled
+- `route_state_enabled` (Boolean) Enabled
+
+
+
 <a id="nestedatt--sensitive_data_disclosure_rules"></a>
 ### Nested Schema for `sensitive_data_disclosure_rules`
 
@@ -9208,7 +9083,7 @@ Required:
 
 Optional:
 
-- `methods` (List of String) <br>**Valid Options:** `["GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "TRACE", "PATCH", "ANY", "OPTIONS", "COPY"]` (Multiple selection allowed)
+- `methods` (List of String) <br>**Valid Options:** `["PUT", "DELETE", "OPTIONS", "TRACE", "PATCH", "GET", "HEAD", "CONNECT", "COPY", "ANY", "POST"]` (Multiple selection allowed)
 
 
 
@@ -9219,6 +9094,115 @@ Required:
 
 - `fields` (List of String) Field Values List of JSON Path field values. Use square brackets with an underscore [_] to indicate array elements (e.g., person.emails[_]). To reference JSON keys that contain spaces, enclose the entire path in double quotes. For example: 'person.first name'.
 
+
+
+
+<a id="nestedatt--slow_ddos_mitigation_choice"></a>
+### Nested Schema for `slow_ddos_mitigation_choice`
+
+Optional:
+
+- `slow_ddos_mitigation` (Attributes) Slow DDoS Mitigation Custom Settings for Slow DDoS Mitigation (see [below for nested schema](#nestedatt--slow_ddos_mitigation_choice--slow_ddos_mitigation))
+- `system_default_timeouts` (Boolean) System Default Settings Default Settings for Slow DDoS Mitigation
+
+<a id="nestedatt--slow_ddos_mitigation_choice--slow_ddos_mitigation"></a>
+### Nested Schema for `slow_ddos_mitigation_choice.slow_ddos_mitigation`
+
+Required:
+
+- `request_timeout_choice` (Attributes) Total Request Timeout The amount of time allowed for the entire request stream to be received from the client, in milliseconds. The stream is terminated with a HTTP 408 (Request Timeout) error code if request has not been completed. The default value is 60000 milliseconds. This setting provides protection against Slow POST attacks. (see [below for nested schema](#nestedatt--slow_ddos_mitigation_choice--slow_ddos_mitigation--request_timeout_choice))
+
+Optional:
+
+- `request_headers_timeout` (Number) <br>**Default:** `10000`
+
+<a id="nestedatt--slow_ddos_mitigation_choice--slow_ddos_mitigation--request_timeout_choice"></a>
+### Nested Schema for `slow_ddos_mitigation_choice.slow_ddos_mitigation.request_timeout_choice`
+
+Optional:
+
+- `disable_request_timeout` (Boolean) No Timeout
+- `request_timeout` (Number) <br>**Default:** `60000`
+
+
+
+
+<a id="nestedatt--timeouts"></a>
+### Nested Schema for `timeouts`
+
+Optional:
+
+- `create` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
+- `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
+- `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
+
+
+<a id="nestedatt--trusted_clients"></a>
+### Nested Schema for `trusted_clients`
+
+Required:
+
+- `client_source_choice` (Attributes) Client Identifier Client identifier that should be used for the client rule (see [below for nested schema](#nestedatt--trusted_clients--client_source_choice))
+- `metadata` (Attributes) metadata Common attributes for the rule including name and description. (see [below for nested schema](#nestedatt--trusted_clients--metadata))
+
+Optional:
+
+- `actions` (List of String) <br>**Valid Options:** `["SKIP_PROCESSING_BOT", "SKIP_PROCESSING_MUM", "SKIP_PROCESSING_DDOS_PROTECTION", "SKIP_PROCESSING_MALWARE_PROTECTION", "SKIP_PROCESSING_WAF", "SKIP_PROCESSING_IP_REPUTATION", "SKIP_PROCESSING_API_PROTECTION", "SKIP_PROCESSING_OAS_VALIDATION", "SKIP_PROCESSING_THREAT_MESH"]` (Multiple selection allowed)
+- `expiration_timestamp` (String) expiration timestamp The expiration_timestamp is the RFC 3339 format timestamp at which the containing rule is considered to be logically expired. The rule continues to exist in the configuration but is not applied anymore.
+
+<a id="nestedatt--trusted_clients--client_source_choice"></a>
+### Nested Schema for `trusted_clients.client_source_choice`
+
+Optional:
+
+- `as_number` (Number) as number RFC 6793 defined 4-byte AS number
+- `http_header` (Attributes) HTTP Header Request header name and value pairs (see [below for nested schema](#nestedatt--trusted_clients--client_source_choice--http_header))
+- `ip_prefix` (String) ip prefix IPv4 prefix string.
+- `ipv6_prefix` (String) ipv6 prefix IPv6 prefix string.
+- `user_identifier` (String) <br>**Validation:** `Length LengthAtMost(256)`
+
+<a id="nestedatt--trusted_clients--client_source_choice--http_header"></a>
+### Nested Schema for `trusted_clients.client_source_choice.http_header`
+
+Required:
+
+- `headers` (Attributes List) headers List of HTTP header name and value pairs (see [below for nested schema](#nestedatt--trusted_clients--client_source_choice--http_header--headers))
+
+<a id="nestedatt--trusted_clients--client_source_choice--http_header--headers"></a>
+### Nested Schema for `trusted_clients.client_source_choice.http_header.headers`
+
+Required:
+
+- `name` (String) name Name of the header
+
+Optional:
+
+- `invert_match` (Boolean) <br>**Default:** `false`
+- `value_match_choice` (Attributes) value_match The variants of matching a header value (see [below for nested schema](#nestedatt--trusted_clients--client_source_choice--http_header--headers--value_match_choice))
+
+<a id="nestedatt--trusted_clients--client_source_choice--http_header--headers--value_match_choice"></a>
+### Nested Schema for `trusted_clients.client_source_choice.http_header.headers.value_match_choice`
+
+Optional:
+
+- `exact` (String) exact Header value to match exactly
+- `presence` (Boolean) presence If true, check for presence of header
+- `regex` (String) regex Regex match of the header value in re2 format
+
+
+
+
+
+<a id="nestedatt--trusted_clients--metadata"></a>
+### Nested Schema for `trusted_clients.metadata`
+
+Required:
+
+- `name` (String) <br>**Validation:** `Length LengthAtLeast(1)`
+
+Optional:
+
+- `description` (String) <br>**Validation:** `Length LengthAtMost(256)`
 
 
 
@@ -9256,7 +9240,7 @@ Required:
 Optional:
 
 - `expiration_timestamp` (String) expiration timestamp The expiration_timestamp is the RFC 3339 format timestamp at which the containing rule is considered to be logically expired. The rule continues to exist in the configuration but is not applied anymore.
-- `methods` (List of String) <br>**Valid Options:** `["GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "TRACE", "PATCH", "ANY", "OPTIONS", "COPY"]` (Multiple selection allowed)
+- `methods` (List of String) <br>**Valid Options:** `["OPTIONS", "TRACE", "PATCH", "GET", "HEAD", "CONNECT", "COPY", "ANY", "POST", "PUT", "DELETE"]` (Multiple selection allowed)
 - `waf_advanced_configuration_choice` (Attributes) WAF Exclusion Rule Action WAF Exclusion Rule action to be enforced if the input request matches the rule. (see [below for nested schema](#nestedatt--waf_exclusion--waf_exclusion_choice--waf_exclusion_inline_rules--rules--waf_advanced_configuration_choice))
 
 <a id="nestedatt--waf_exclusion--waf_exclusion_choice--waf_exclusion_inline_rules--rules--domain_choice"></a>
@@ -9314,8 +9298,8 @@ Optional:
 
 Required:
 
-- `context` (List of String) <br>**Allowed Values (choose one):** `["CONTEXT_REQUEST", "CONTEXT_HEADER", "CONTEXT_COOKIE", "CONTEXT_URL", "CONTEXT_URI", "CONTEXT_ANY", "CONTEXT_BODY", "CONTEXT_RESPONSE", "CONTEXT_PARAMETER"]`
-- `exclude_attack_type` (List of String) <br>**Allowed Values (choose one):** `["ATTACK_TYPE_HTTP_PARSER_ATTACK", "ATTACK_TYPE_SESSION_HIJACKING", "ATTACK_TYPE_HTTP_RESPONSE_SPLITTING", "ATTACK_TYPE_AUTHENTICATION_AUTHORIZATION_ATTACKS", "ATTACK_TYPE_DIRECTORY_INDEXING", "ATTACK_TYPE_SERVER_SIDE_CODE_INJECTION", "ATTACK_TYPE_FORCEFUL_BROWSING", "ATTACK_TYPE_MALICIOUS_FILE_UPLOAD", "ATTACK_TYPE_GRAPHQL_PARSER_ATTACK", "ATTACK_TYPE_NONE", "ATTACK_TYPE_NON_BROWSER_CLIENT", "ATTACK_TYPE_TROJAN_BACKDOOR_SPYWARE", "ATTACK_TYPE_PATH_TRAVERSAL", "ATTACK_TYPE_REMOTE_FILE_INCLUDE", "ATTACK_TYPE_OTHER_APPLICATION_ATTACKS", "ATTACK_TYPE_DETECTION_EVASION", "ATTACK_TYPE_VULNERABILITY_SCAN", "ATTACK_TYPE_ABUSE_OF_FUNCTIONALITY", "ATTACK_TYPE_PREDICTABLE_RESOURCE_LOCATION", "ATTACK_TYPE_COMMAND_EXECUTION", "ATTACK_TYPE_SQL_INJECTION", "ATTACK_TYPE_DENIAL_OF_SERVICE", "ATTACK_TYPE_BUFFER_OVERFLOW", "ATTACK_TYPE_INFORMATION_LEAKAGE", "ATTACK_TYPE_XPATH_INJECTION", "ATTACK_TYPE_LDAP_INJECTION", "ATTACK_TYPE_CROSS_SITE_SCRIPTING"]`
+- `context` (List of String) <br>**Allowed Values (choose one):** `["CONTEXT_HEADER", "CONTEXT_COOKIE", "CONTEXT_URL", "CONTEXT_REQUEST", "CONTEXT_RESPONSE", "CONTEXT_URI", "CONTEXT_ANY", "CONTEXT_BODY", "CONTEXT_PARAMETER"]`
+- `exclude_attack_type` (List of String) <br>**Allowed Values (choose one):** `["ATTACK_TYPE_GRAPHQL_PARSER_ATTACK", "ATTACK_TYPE_OTHER_APPLICATION_ATTACKS", "ATTACK_TYPE_ABUSE_OF_FUNCTIONALITY", "ATTACK_TYPE_AUTHENTICATION_AUTHORIZATION_ATTACKS", "ATTACK_TYPE_DIRECTORY_INDEXING", "ATTACK_TYPE_LDAP_INJECTION", "ATTACK_TYPE_HTTP_RESPONSE_SPLITTING", "ATTACK_TYPE_FORCEFUL_BROWSING", "ATTACK_TYPE_REMOTE_FILE_INCLUDE", "ATTACK_TYPE_NONE", "ATTACK_TYPE_BUFFER_OVERFLOW", "ATTACK_TYPE_PREDICTABLE_RESOURCE_LOCATION", "ATTACK_TYPE_DENIAL_OF_SERVICE", "ATTACK_TYPE_MALICIOUS_FILE_UPLOAD", "ATTACK_TYPE_NON_BROWSER_CLIENT", "ATTACK_TYPE_TROJAN_BACKDOOR_SPYWARE", "ATTACK_TYPE_DETECTION_EVASION", "ATTACK_TYPE_VULNERABILITY_SCAN", "ATTACK_TYPE_INFORMATION_LEAKAGE", "ATTACK_TYPE_XPATH_INJECTION", "ATTACK_TYPE_SERVER_SIDE_CODE_INJECTION", "ATTACK_TYPE_COMMAND_EXECUTION", "ATTACK_TYPE_PATH_TRAVERSAL", "ATTACK_TYPE_SQL_INJECTION", "ATTACK_TYPE_CROSS_SITE_SCRIPTING", "ATTACK_TYPE_HTTP_PARSER_ATTACK", "ATTACK_TYPE_SESSION_HIJACKING"]`
 
 Optional:
 
@@ -9335,7 +9319,7 @@ Required:
 
 Required:
 
-- `context` (List of String) <br>**Allowed Values (choose one):** `["CONTEXT_ANY", "CONTEXT_BODY", "CONTEXT_RESPONSE", "CONTEXT_PARAMETER", "CONTEXT_REQUEST", "CONTEXT_HEADER", "CONTEXT_COOKIE", "CONTEXT_URL", "CONTEXT_URI"]`
+- `context` (List of String) <br>**Allowed Values (choose one):** `["CONTEXT_PARAMETER", "CONTEXT_HEADER", "CONTEXT_COOKIE", "CONTEXT_URL", "CONTEXT_REQUEST", "CONTEXT_RESPONSE", "CONTEXT_URI", "CONTEXT_ANY", "CONTEXT_BODY"]`
 - `signature_id` (Number) SignatureID The allowed values for signature id are 0 and in the range of 200000001-299999999. 0 implies that all signatures will be excluded for the specified context.
 
 Optional:
@@ -9348,8 +9332,8 @@ Optional:
 
 Required:
 
-- `context` (List of String) <br>**Allowed Values (choose one):** `["CONTEXT_ANY", "CONTEXT_BODY", "CONTEXT_RESPONSE", "CONTEXT_PARAMETER", "CONTEXT_REQUEST", "CONTEXT_HEADER", "CONTEXT_COOKIE", "CONTEXT_URL", "CONTEXT_URI"]`
-- `exclude_violation` (List of String) <br>**Allowed Values (choose one):** `["VIOL_NONE", "VIOL_XML_MALFORMED", "VIOL_EVASION_DIRECTORY_TRAVERSALS", "VIOL_EVASION_IIS_BACKSLASHES", "VIOL_EVASION_BARE_BYTE_DECODING", "VIOL_HTTP_PROTOCOL_BODY_IN_GET_OR_HEAD_REQUEST", "VIOL_GRAPHQL_INTROSPECTION_QUERY", "VIOL_HTTP_PROTOCOL_BAD_HOST_HEADER_VALUE", "VIOL_HTTP_PROTOCOL_CRLF_CHARACTERS_BEFORE_REQUEST_START", "VIOL_HTTP_PROTOCOL_NO_HOST_HEADER_IN_HTTP_1_1_REQUEST", "VIOL_HTTP_PROTOCOL_BAD_MULTIPART_PARAMETERS_PARSING", "VIOL_HTTP_RESPONSE_STATUS", "VIOL_ASM_COOKIE_MODIFIED", "VIOL_EVASION_MULTIPLE_DECODING", "VIOL_EVASION_IIS_UNICODE_CODEPOINTS", "VIOL_EVASION_BAD_UNESCAPE", "VIOL_METHOD", "VIOL_JSON_MALFORMED", "VIOL_HTTP_PROTOCOL_SEVERAL_CONTENT_LENGTH_HEADERS", "VIOL_GRAPHQL_MALFORMED", "VIOL_DATA_GUARD", "VIOL_FILETYPE", "VIOL_FILE_UPLOAD_IN_BODY", "VIOL_HTTP_PROTOCOL_MULTIPLE_HOST_HEADERS", "VIOL_HTTP_PROTOCOL_NULL_IN_REQUEST", "VIOL_HTTP_PROTOCOL_BAD_HTTP_VERSION", "VIOL_EVASION_PERCENT_U_DECODING", "VIOL_REQUEST_MAX_LENGTH", "VIOL_HTTP_PROTOCOL_UNPARSABLE_REQUEST_CONTENT", "VIOL_EVASION_APACHE_WHITESPACE", "VIOL_HTTP_PROTOCOL_BAD_MULTIPART_FORMDATA_REQUEST_PARSING", "VIOL_COOKIE_MALFORMED", "VIOL_FILE_UPLOAD", "VIOL_HTTP_PROTOCOL_CONTENT_LENGTH_SHOULD_BE_A_POSITIVE_NUMBER", "VIOL_MALFORMED_REQUEST", "VIOL_GRAPHQL_FORMAT", "VIOL_MANDATORY_HEADER", "VIOL_COOKIE_MODIFIED", "VIOL_HTTP_PROTOCOL_HIGH_ASCII_CHARACTERS_IN_HEADERS", "VIOL_ENCODING"]`
+- `context` (List of String) <br>**Allowed Values (choose one):** `["CONTEXT_ANY", "CONTEXT_BODY", "CONTEXT_PARAMETER", "CONTEXT_HEADER", "CONTEXT_COOKIE", "CONTEXT_URL", "CONTEXT_REQUEST", "CONTEXT_RESPONSE", "CONTEXT_URI"]`
+- `exclude_violation` (List of String) <br>**Allowed Values (choose one):** `["VIOL_ENCODING", "VIOL_HTTP_PROTOCOL_NULL_IN_REQUEST", "VIOL_HTTP_PROTOCOL_CRLF_CHARACTERS_BEFORE_REQUEST_START", "VIOL_HTTP_PROTOCOL_CONTENT_LENGTH_SHOULD_BE_A_POSITIVE_NUMBER", "VIOL_EVASION_PERCENT_U_DECODING", "VIOL_GRAPHQL_MALFORMED", "VIOL_GRAPHQL_INTROSPECTION_QUERY", "VIOL_FILE_UPLOAD_IN_BODY", "VIOL_HTTP_PROTOCOL_MULTIPLE_HOST_HEADERS", "VIOL_HTTP_PROTOCOL_BAD_HTTP_VERSION", "VIOL_DATA_GUARD", "VIOL_COOKIE_MODIFIED", "VIOL_EVASION_BAD_UNESCAPE", "VIOL_METHOD", "VIOL_JSON_MALFORMED", "VIOL_EVASION_APACHE_WHITESPACE", "VIOL_MANDATORY_HEADER", "VIOL_HTTP_RESPONSE_STATUS", "VIOL_REQUEST_MAX_LENGTH", "VIOL_HTTP_PROTOCOL_BAD_MULTIPART_PARAMETERS_PARSING", "VIOL_HTTP_PROTOCOL_SEVERAL_CONTENT_LENGTH_HEADERS", "VIOL_MALFORMED_REQUEST", "VIOL_EVASION_MULTIPLE_DECODING", "VIOL_EVASION_IIS_BACKSLASHES", "VIOL_HTTP_PROTOCOL_NO_HOST_HEADER_IN_HTTP_1_1_REQUEST", "VIOL_EVASION_IIS_UNICODE_CODEPOINTS", "VIOL_HTTP_PROTOCOL_BODY_IN_GET_OR_HEAD_REQUEST", "VIOL_HTTP_PROTOCOL_HIGH_ASCII_CHARACTERS_IN_HEADERS", "VIOL_COOKIE_MALFORMED", "VIOL_GRAPHQL_FORMAT", "VIOL_FILETYPE", "VIOL_FILE_UPLOAD", "VIOL_XML_MALFORMED", "VIOL_ASM_COOKIE_MODIFIED", "VIOL_HTTP_PROTOCOL_BAD_HOST_HEADER_VALUE", "VIOL_EVASION_BARE_BYTE_DECODING", "VIOL_HTTP_PROTOCOL_BAD_MULTIPART_FORMDATA_REQUEST_PARSING", "VIOL_NONE", "VIOL_HTTP_PROTOCOL_UNPARSABLE_REQUEST_CONTENT", "VIOL_EVASION_DIRECTORY_TRAVERSALS"]`
 
 Optional:
 
@@ -9371,6 +9355,29 @@ Required:
 Read-Only:
 
 - `tenant` (String)
+
+
+
+
+<a id="nestedatt--auto_cert_info"></a>
+### Nested Schema for `auto_cert_info`
+
+Optional:
+
+- `auto_cert_expiry` (String) Auto Cert Expiry Timestamp Auto certificate expiry timestamp
+- `auto_cert_issuer` (String) Auto Cert Issuer Issuer of the auto certificate
+- `auto_cert_state` (List of String) <br>**Allowed Values (choose one):** `["DomainChallengeStarted", "CertificateInvalid", "AutoCertRateLimited", "AutoCertGenerationRetry", "AutoCertDisabled", "AutoCertStarted", "PreDomainChallengePending", "DomainChallengeVerified", "AutoCertFinalize", "CertificateValid", "AutoCertNotApplicable", "DnsDomainVerification", "AutoCertError", "AutoCertInitialize", "AutoCertAccountRateLimited", "CertificateExpired", "DomainChallengePending", "AutoCertDomainRateLimited"]`<br>**Default:** `AutoCertInitialize`
+- `auto_cert_subject` (String) Auto Cert Subject Subject of the auto certificate
+- `dns_records` (Attributes List) DNS Records DNS Records that are to be added by user in their DNS domain. Currently, this will be populated when auto certificates are desired but DNS delegation is not enabled. (see [below for nested schema](#nestedatt--auto_cert_info--dns_records))
+
+<a id="nestedatt--auto_cert_info--dns_records"></a>
+### Nested Schema for `auto_cert_info.dns_records`
+
+Optional:
+
+- `name` (String) Name Name of the DNS record
+- `type` (String) Type Type of the DNS record
+- `value` (String) Value DNS record Value
 
 ## Import
 

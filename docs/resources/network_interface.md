@@ -17,8 +17,8 @@ resource "f5xc_network_interface" "example" {
   namespace    = "example_namespace"
   DHCP_server  = ["ENUM_VALUE"]
   device_name  = "example_network_interface"
-  dhcp_address = ["ENUM_VALUE"]
   type         = ["ENUM_VALUE"]
+  dhcp_address = ["ENUM_VALUE"]
 }
 ```
 
@@ -30,7 +30,7 @@ resource "f5xc_network_interface" "example" {
 ### Required
 
 - `device_name` (String) Device Name Name of the physical network interface device  which this network interface represents.
-- `dhcp_address` (List of String) <br>**Allowed Values (choose one):** `["NETWORK_INTERFACE_DHCP_DISABLE", "NETWORK_INTERFACE_DHCP_ENABLE"]`
+- `dhcp_address` (List of String) <br>**Allowed Values (choose one):** `["NETWORK_INTERFACE_DHCP_ENABLE", "NETWORK_INTERFACE_DHCP_DISABLE"]`
 - `dhcp_server` (List of String) <br>**Allowed Values (choose one):** `["NETWORK_INTERFACE_DHCP_SERVER_DISABLE", "NETWORK_INTERFACE_DHCP_SERVER_ENABLE", "NETWORK_INTERFACE_ENHANCED_DHCP_SERVER_ENABLE"]`
 - `name` (String) name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.
 - `namespace` (String) namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''
@@ -40,8 +40,12 @@ resource "f5xc_network_interface" "example" {
 
 - `address_allocator` (Attributes List) Address Allocator Reference to an address allocator for the network interface. When set, the allocator is used to allocate a subnet for the interface and an address from the subnet is set on the interface. (see [below for nested schema](#nestedatt--address_allocator))
 - `annotations` (Map of String) annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.
+- `default_gateway` (Attributes) Default Gateway Configures how default gateway is derived for the subnet static addresses (see [below for nested schema](#nestedatt--default_gateway))
 - `description` (String) description Human readable description for the object
+- `dhcp_server_params` (Attributes) DHCP Server parameters DHCP Server parameters (see [below for nested schema](#nestedatt--dhcp_server_params))
+- `dns_server` (Attributes) DNS Server Configures how DNS server is derived for the subnet in static addresses (see [below for nested schema](#nestedatt--dns_server))
 - `interface_ip_map` (Map of String) Site:Node to IP mapping Map of Site:Node to IP address offset. Key:Node, Value:Map Value of 10.1.1.5 with network prefix 24, offset is 0.0.0.5
+- `ipv6_auto_config` (Attributes) IPV6 Address Auto Configuration IPV6 Addrss Auto configuration parameters (see [below for nested schema](#nestedatt--ipv6_auto_config))
 - `is_primary` (Boolean) <br>**Default:** `false`
 - `labels` (Map of String) labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression
 - `monitoring_choice` (Attributes) Select Link Quality Monitoring configuration Link Quality Monitoring configuration for a network interface. When enabled, VER will send probes on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes. (see [below for nested schema](#nestedatt--monitoring_choice))
@@ -50,62 +54,17 @@ resource "f5xc_network_interface" "example" {
 - `priority` (Number) Priority Priority of the network interface when multiple network interfaces are present in the fleet object Greater the value, higher the priority
 - `static_addresses` (Attributes List) Static IP If DHCP server is enabled, configures the subnet to be used for IP allocation. (see [below for nested schema](#nestedatt--static_addresses))
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
+- `tunnel` (Attributes) Tunnel When interface is created as TUNNEL type, then reference to tunnel is specified here (see [below for nested schema](#nestedatt--tunnel))
 - `virtual_network` (Attributes List) Virtual Network Virtual-network for the interface This is optional and can contain at most one entry (see [below for nested schema](#nestedatt--virtual_network))
 - `vlan_tag` (Number) Vlan Tag Vlan tag of the interface, valid only if VLAN tagging is enabled when vlan_tagging is enabled, value must be between 1 - 4094
 - `vlan_tagging` (List of String) <br>**Allowed Values (choose one):** `["NETWORK_INTERFACE_VLAN_TAGGING_DISABLE", "NETWORK_INTERFACE_VLAN_TAGGING_ENABLE"]`
 
 ### Read-Only
 
-- `default_gateway` (Attributes) Default Gateway Configures how default gateway is derived for the subnet static addresses (see [below for nested schema](#nestedatt--default_gateway))
-- `dhcp_server_params` (Attributes) DHCP Server parameters DHCP Server parameters (see [below for nested schema](#nestedatt--dhcp_server_params))
-- `dns_server` (Attributes) DNS Server Configures how DNS server is derived for the subnet in static addresses (see [below for nested schema](#nestedatt--dns_server))
-- `ipv6_auto_config` (Attributes) IPV6 Address Auto Configuration IPV6 Addrss Auto configuration parameters (see [below for nested schema](#nestedatt--ipv6_auto_config))
-- `tunnel` (Attributes) Tunnel When interface is created as TUNNEL type, then reference to tunnel is specified here (see [below for nested schema](#nestedatt--tunnel))
 - `uid` (String) uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.
 
 <a id="nestedatt--address_allocator"></a>
 ### Nested Schema for `address_allocator`
-
-Required:
-
-- `name` (String)
-- `namespace` (String)
-
-Read-Only:
-
-- `tenant` (String)
-
-
-<a id="nestedatt--monitoring_choice"></a>
-### Nested Schema for `monitoring_choice`
-
-Optional:
-
-- `monitor` (Boolean) Monitoring enabled Link Quality Monitoring parameters. Choosing the option will enable link quality monitoring.
-- `monitor_disabled` (Boolean) Monitoring disabled Link quality monitoring disabled on the interface.
-
-
-<a id="nestedatt--static_addresses"></a>
-### Nested Schema for `static_addresses`
-
-Optional:
-
-- `plen` (Number) Prefix Length
-- `prefix` (String) Prefix Prefix part of the IPv4 subnet in string form with dot-decimal notation
-
-
-<a id="nestedatt--timeouts"></a>
-### Nested Schema for `timeouts`
-
-Optional:
-
-- `create` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
-- `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
-- `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
-
-
-<a id="nestedatt--virtual_network"></a>
-### Nested Schema for `virtual_network`
 
 Required:
 
@@ -157,7 +116,7 @@ Required:
 - `dns_choice` (Attributes) DNS Server Address Select how DNS server address is determined. This DNS server address will be sent in the DHCP response to the DHCP client. (see [below for nested schema](#nestedatt--dhcp_server_params--dhcp_networks--dns_choice))
 - `gateway_choice` (Attributes) Default Gateway Address Select how the default gateway address is determined. This default gateway address will be sent in the DHCP response to the DHCP client. (see [below for nested schema](#nestedatt--dhcp_server_params--dhcp_networks--gateway_choice))
 - `network_prefix_choice` (Attributes) Network Prefix choice Select DHCP network prefix for the site (see [below for nested schema](#nestedatt--dhcp_server_params--dhcp_networks--network_prefix_choice))
-- `pool_settings` (List of String) <br>**Allowed Values (choose one):** `["EXCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS", "INCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS"]`
+- `pool_settings` (List of String) <br>**Allowed Values (choose one):** `["INCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS", "EXCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS"]`
 
 Optional:
 
@@ -381,6 +340,34 @@ Optional:
 
 
 
+<a id="nestedatt--monitoring_choice"></a>
+### Nested Schema for `monitoring_choice`
+
+Optional:
+
+- `monitor` (Boolean) Monitoring enabled Link Quality Monitoring parameters. Choosing the option will enable link quality monitoring.
+- `monitor_disabled` (Boolean) Monitoring disabled Link quality monitoring disabled on the interface.
+
+
+<a id="nestedatt--static_addresses"></a>
+### Nested Schema for `static_addresses`
+
+Optional:
+
+- `plen` (Number) Prefix Length
+- `prefix` (String) Prefix Prefix part of the IPv4 subnet in string form with dot-decimal notation
+
+
+<a id="nestedatt--timeouts"></a>
+### Nested Schema for `timeouts`
+
+Optional:
+
+- `create` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
+- `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
+- `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
+
+
 <a id="nestedatt--tunnel"></a>
 ### Nested Schema for `tunnel`
 
@@ -390,6 +377,20 @@ Optional:
 
 <a id="nestedatt--tunnel--tunnel"></a>
 ### Nested Schema for `tunnel.tunnel`
+
+Required:
+
+- `name` (String)
+- `namespace` (String)
+
+Read-Only:
+
+- `tenant` (String)
+
+
+
+<a id="nestedatt--virtual_network"></a>
+### Nested Schema for `virtual_network`
 
 Required:
 

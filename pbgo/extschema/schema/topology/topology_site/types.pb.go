@@ -5,15 +5,16 @@ package topology_site
 
 import (
 	fmt "fmt"
-	_ "github.com/gogo/protobuf/gogoproto"
-	proto "github.com/gogo/protobuf/proto"
-	site "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/site"
-	topology "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/topology"
 	io "io"
 	math "math"
 	math_bits "math/bits"
 	reflect "reflect"
 	strings "strings"
+
+	_ "github.com/gogo/protobuf/gogoproto"
+	proto "github.com/gogo/protobuf/proto"
+	site "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/site"
+	topology "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/topology"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.

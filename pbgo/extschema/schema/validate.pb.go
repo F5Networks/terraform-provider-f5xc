@@ -7,14 +7,15 @@ import (
 	bytes "bytes"
 	encoding_binary "encoding/binary"
 	fmt "fmt"
-	proto "github.com/gogo/protobuf/proto"
-	types "github.com/gogo/protobuf/types"
-	descriptor "github.com/golang/protobuf/protoc-gen-go/descriptor"
 	io "io"
 	math "math"
 	math_bits "math/bits"
 	reflect "reflect"
 	strings "strings"
+
+	proto "github.com/gogo/protobuf/proto"
+	types "github.com/gogo/protobuf/types"
+	descriptor "github.com/golang/protobuf/protoc-gen-go/descriptor"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.

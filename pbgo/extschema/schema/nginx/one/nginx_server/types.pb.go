@@ -5,18 +5,17 @@ package nginx_server
 
 import (
 	fmt "fmt"
-	io "io"
-	math "math"
-	math_bits "math/bits"
-	reflect "reflect"
-	strings "strings"
-
 	_ "github.com/gogo/protobuf/gogoproto"
 	proto "github.com/gogo/protobuf/proto"
 	_ "github.com/gogo/protobuf/types"
 	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	nginx_instance "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/nginx/one/nginx_instance"
 	views "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views"
+	io "io"
+	math "math"
+	math_bits "math/bits"
+	reflect "reflect"
+	strings "strings"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -348,7 +347,7 @@ type Location struct {
 	// This includes both the optional_modifier and the location_match combined.
 	// A location can either be defined by a prefix string, or by a regular expression.
 	// Reference: https://nginx.org/en/docs/http/ngx_http_core_module.html#location
-	// x-example: "~* \.(jpg|png|gif)$"
+	// x-example: "~* \\.(jpg|png|gif)$"
 	Definition string `protobuf:"bytes,1,opt,name=definition,proto3" json:"definition,omitempty"`
 	// waf_spec
 	//

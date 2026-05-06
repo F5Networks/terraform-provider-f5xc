@@ -16,9 +16,7 @@ resource "f5xc_enhanced_firewall_policy" "example" {
   name      = "example_enhanced_firewall_policy"
   namespace = "example_namespace"
   rule_choice = {
-    allowed_destinations = {
-      allowed_destinations = "example_allowed_destinations"
-    }
+    deny_all = true
   }
 }
 ```
@@ -317,7 +315,7 @@ Optional:
 
 Optional:
 
-- `action` (List of String) <br>**Allowed Values (choose one):** `["LOG", "NOLOG"]`<br>**Default:** `NOLOG`
+- `action` (List of String) <br>**Allowed Values (choose one):** `["NOLOG", "LOG"]`<br>**Default:** `NOLOG`
 
 
 <a id="nestedatt--rule_choice--rule_list--rules--label_matcher"></a>

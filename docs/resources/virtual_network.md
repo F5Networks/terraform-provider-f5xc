@@ -16,7 +16,7 @@ resource "f5xc_virtual_network" "example" {
   name      = "example_virtual_network"
   namespace = "example_namespace"
   network_choice = {
-    site_local_inside_network = true
+    global_network = true
   }
 }
 ```
@@ -51,7 +51,7 @@ resource "f5xc_virtual_network" "example" {
 Optional:
 
 - `global_network` (Boolean) Global Network Global network can extend to multiple sites.
-- `legacy_type` (List of String) <br>**Allowed Values (choose one):** `["VIRTUAL_NETWORK_VER_INTERNAL", "VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE", "VIRTUAL_NETWORK_IP_AUTO", "VIRTUAL_NETWORK_VOLTADN_PRIVATE_NETWORK", "VIRTUAL_NETWORK_MANAGEMENT", "VIRTUAL_NETWORK_SITE_LOCAL", "VIRTUAL_NETWORK_PUBLIC", "VIRTUAL_NETWORK_GLOBAL", "VIRTUAL_NETWORK_SRV6_NETWORK", "VIRTUAL_NETWORK_IP_FABRIC", "VIRTUAL_NETWORK_SEGMENT", "VIRTUAL_NETWORK_SITE_LOCAL_INSIDE", "VIRTUAL_NETWORK_PER_SITE", "VIRTUAL_NETWORK_SITE_SERVICE"]`
+- `legacy_type` (List of String) <br>**Allowed Values (choose one):** `["VIRTUAL_NETWORK_SITE_LOCAL", "VIRTUAL_NETWORK_SITE_LOCAL_INSIDE", "VIRTUAL_NETWORK_PER_SITE", "VIRTUAL_NETWORK_GLOBAL", "VIRTUAL_NETWORK_VER_INTERNAL", "VIRTUAL_NETWORK_VOLTADN_PRIVATE_NETWORK", "VIRTUAL_NETWORK_IP_FABRIC", "VIRTUAL_NETWORK_PUBLIC", "VIRTUAL_NETWORK_SITE_SERVICE", "VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE", "VIRTUAL_NETWORK_IP_AUTO", "VIRTUAL_NETWORK_SRV6_NETWORK", "VIRTUAL_NETWORK_SEGMENT", "VIRTUAL_NETWORK_MANAGEMENT"]`
 - `site_local_inside_network` (Boolean) Site Local Inside Network Site local Inside network, also known as inside network
 - `site_local_network` (Boolean) Site Local Network (outside) Site local network, also known as outside network
 
@@ -66,7 +66,7 @@ Required:
 
 Optional:
 
-- `attrs` (List of String) <br>**Valid Options:** `["ROUTE_ATTR_NO_OP", "ROUTE_ATTR_ADVERTISE", "ROUTE_ATTR_INSTALL_HOST", "ROUTE_ATTR_INSTALL_FORWARDING", "ROUTE_ATTR_MERGE_ONLY"]` (Multiple selection allowed)
+- `attrs` (List of String) <br>**Valid Options:** `["ROUTE_ATTR_ADVERTISE", "ROUTE_ATTR_INSTALL_HOST", "ROUTE_ATTR_INSTALL_FORWARDING", "ROUTE_ATTR_MERGE_ONLY", "ROUTE_ATTR_NO_OP"]` (Multiple selection allowed)
 
 <a id="nestedatt--static_routes--next_hop_choice"></a>
 ### Nested Schema for `static_routes.next_hop_choice`

@@ -15,8 +15,8 @@ The `f5xc_app_firewall` data source allows you to retrieve information about an 
 
 ```terraform
 data "f5xc_app_firewall" "example" {
-  namespace = "example_namespace"
   name      = "example_app_firewall"
+  namespace = "example_namespace"
 }
 ```
 

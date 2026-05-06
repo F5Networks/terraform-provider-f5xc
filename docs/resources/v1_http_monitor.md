@@ -13,14 +13,14 @@ V1HttpMonitor resource
 
 ```terraform
 resource "f5xc_v1_http_monitor" "example" {
-  namespace = "example_namespace"
-  name      = "example_v1_http_monitor"
-  interval_choice = {
-    interval_30_secs = true
-  }
-  url = "example_v1_http_monitor"
+  name           = "example_v1_http_monitor"
+  namespace      = "example_namespace"
+  response_codes = ["example_v1_http_monitor"]
+  url            = "example_v1_http_monitor"
   method = {
-    get = true
+    post = {
+      post = "example_post"
+    }
   }
   external_sources = [{
     source_choice = {
@@ -29,7 +29,9 @@ resource "f5xc_v1_http_monitor" "example" {
       }
     }
   }]
-  response_codes = ["example_v1_http_monitor"]
+  interval_choice = {
+    interval_15_mins = true
+  }
 }
 ```
 
@@ -185,7 +187,7 @@ Optional:
 
 Required:
 
-- `eval_period` (List of String) <br>**Allowed Values (choose one):** `["EVAL_PERIOD_3_MINS", "EVAL_PERIOD_5_MINS", "EVAL_PERIOD_10_MINS", "EVAL_PERIOD_15_MINS"]`
+- `eval_period` (List of String) <br>**Allowed Values (choose one):** `["EVAL_PERIOD_10_MINS", "EVAL_PERIOD_15_MINS", "EVAL_PERIOD_3_MINS", "EVAL_PERIOD_5_MINS"]`
 - `std_dev_val` (List of String) <br>**Allowed Values (choose one):** `["STD_DEV_VAL_3", "STD_DEV_VAL_4", "STD_DEV_VAL_5", "STD_DEV_VAL_6"]`
 
 
@@ -224,7 +226,7 @@ Optional:
 
 Required:
 
-- `eval_period` (List of String) <br>**Allowed Values (choose one):** `["EVAL_PERIOD_15_MINS", "EVAL_PERIOD_3_MINS", "EVAL_PERIOD_5_MINS", "EVAL_PERIOD_10_MINS"]`
+- `eval_period` (List of String) <br>**Allowed Values (choose one):** `["EVAL_PERIOD_5_MINS", "EVAL_PERIOD_10_MINS", "EVAL_PERIOD_15_MINS", "EVAL_PERIOD_3_MINS"]`
 
 Optional:
 

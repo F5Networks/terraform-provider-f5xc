@@ -15,38 +15,44 @@ VoltstackSite resource
 resource "f5xc_voltstack_site" "example" {
   name      = "example_voltstack_site"
   namespace = "example_namespace"
-  k8s_cluster_choice = {
-    no_k8s_cluster = true
+  network_cfg_choice = {
+    default_network_config = true
   }
   logs_receiver_choice = {
     logs_streaming_disabled = true
   }
-  blocked_services_choice = {
-    default_blocked_services = true
-  }
-  sriov_interface_choice = {
-    default_sriov_interface = true
+  storage_cfg_choice = {
+    custom_storage_config = {
+      custom_storage_config = "example_custom_storage_config"
+    }
   }
   master_node_configuration = [{
     name = "example_voltstack_site"
   }]
-  storage_cfg_choice = {
-    default_storage_config = true
+  gpu_choice = {
+    disable_gpu = true
   }
-  network_cfg_choice = {
-    default_network_config = true
+  k8s_cluster_choice = {
+    k8s_cluster = {
+      k8s_cluster = "example_k8s_cluster"
+    }
   }
   usb_policy_choice = {
     deny_all_usb = true
+  }
+  sriov_interface_choice = {
+    sriov_interfaces = {
+      sriov_interfaces = "example_sriov_interfaces"
+    }
   }
   bond_choice = {
     bond_device_list = {
       bond_device_list = "example_bond_device_list"
     }
   }
-  gpu_choice = {
-    enable_vgpu = {
-      enable_vgpu = "example_enable_vgpu"
+  blocked_services_choice = {
+    blocked_services = {
+      blocked_services = "example_blocked_services"
     }
   }
 }
@@ -117,7 +123,7 @@ Optional:
 Optional:
 
 - `blocked_services_value_type_choice` (Attributes) blocked_services_type_choice Choose the Nodel Local Service to disable (see [below for nested schema](#nestedatt--blocked_services_choice--blocked_services--blocked_sevice--blocked_services_value_type_choice))
-- `network_type` (List of String) <br>**Allowed Values (choose one):** `["VIRTUAL_NETWORK_SITE_LOCAL", "VIRTUAL_NETWORK_PUBLIC", "VIRTUAL_NETWORK_GLOBAL", "VIRTUAL_NETWORK_SRV6_NETWORK", "VIRTUAL_NETWORK_IP_FABRIC", "VIRTUAL_NETWORK_SEGMENT", "VIRTUAL_NETWORK_SITE_LOCAL_INSIDE", "VIRTUAL_NETWORK_PER_SITE", "VIRTUAL_NETWORK_SITE_SERVICE", "VIRTUAL_NETWORK_VER_INTERNAL", "VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE", "VIRTUAL_NETWORK_IP_AUTO", "VIRTUAL_NETWORK_VOLTADN_PRIVATE_NETWORK", "VIRTUAL_NETWORK_MANAGEMENT"]`
+- `network_type` (List of String) <br>**Allowed Values (choose one):** `["VIRTUAL_NETWORK_IP_FABRIC", "VIRTUAL_NETWORK_PUBLIC", "VIRTUAL_NETWORK_SITE_SERVICE", "VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE", "VIRTUAL_NETWORK_IP_AUTO", "VIRTUAL_NETWORK_SRV6_NETWORK", "VIRTUAL_NETWORK_SEGMENT", "VIRTUAL_NETWORK_MANAGEMENT", "VIRTUAL_NETWORK_SITE_LOCAL", "VIRTUAL_NETWORK_SITE_LOCAL_INSIDE", "VIRTUAL_NETWORK_PER_SITE", "VIRTUAL_NETWORK_GLOBAL", "VIRTUAL_NETWORK_VER_INTERNAL", "VIRTUAL_NETWORK_VOLTADN_PRIVATE_NETWORK"]`
 
 <a id="nestedatt--blocked_services_choice--blocked_services--blocked_sevice--blocked_services_value_type_choice"></a>
 ### Nested Schema for `blocked_services_choice.blocked_services.blocked_sevice.blocked_services_value_type_choice`
@@ -195,7 +201,7 @@ Optional:
 
 Required:
 
-- `feature_type` (List of String) <br>**Allowed Values (choose one):** `["UNLICENSED", "VGPU", "VWS", "VCS"]`
+- `feature_type` (List of String) <br>**Allowed Values (choose one):** `["VCS", "UNLICENSED", "VGPU", "VWS"]`
 
 Optional:
 
@@ -1162,7 +1168,7 @@ Required:
 
 Optional:
 
-- `attrs` (List of String) <br>**Valid Options:** `["ROUTE_ATTR_MERGE_ONLY", "ROUTE_ATTR_NO_OP", "ROUTE_ATTR_ADVERTISE", "ROUTE_ATTR_INSTALL_HOST", "ROUTE_ATTR_INSTALL_FORWARDING"]` (Multiple selection allowed)
+- `attrs` (List of String) <br>**Valid Options:** `["ROUTE_ATTR_INSTALL_FORWARDING", "ROUTE_ATTR_MERGE_ONLY", "ROUTE_ATTR_NO_OP", "ROUTE_ATTR_ADVERTISE", "ROUTE_ATTR_INSTALL_HOST"]` (Multiple selection allowed)
 
 <a id="nestedatt--network_cfg_choice--custom_network_config--slo_choice--slo_config--static_route_choice--static_routes--static_routes--next_hop_choice"></a>
 ### Nested Schema for `network_cfg_choice.custom_network_config.slo_choice.slo_config.static_route_choice.static_routes.static_routes.next_hop_choice`

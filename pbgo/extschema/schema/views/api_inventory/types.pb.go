@@ -5,12 +5,6 @@ package api_inventory
 
 import (
 	fmt "fmt"
-	io "io"
-	math "math"
-	math_bits "math/bits"
-	reflect "reflect"
-	strings "strings"
-
 	_ "github.com/gogo/protobuf/gogoproto"
 	proto "github.com/gogo/protobuf/proto"
 	golang_proto "github.com/golang/protobuf/proto"
@@ -19,6 +13,11 @@ import (
 	views "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views"
 	api_definition "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views/api_definition"
 	common_waf "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views/common_waf"
+	io "io"
+	math "math"
+	math_bits "math/bits"
+	reflect "reflect"
+	strings "strings"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.

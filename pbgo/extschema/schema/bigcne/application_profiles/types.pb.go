@@ -5,16 +5,15 @@ package application_profiles
 
 import (
 	fmt "fmt"
+	_ "github.com/gogo/protobuf/gogoproto"
+	proto "github.com/gogo/protobuf/proto"
+	golang_proto "github.com/golang/protobuf/proto"
+	schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	io "io"
 	math "math"
 	math_bits "math/bits"
 	reflect "reflect"
 	strings "strings"
-
-	_ "github.com/gogo/protobuf/gogoproto"
-	proto "github.com/gogo/protobuf/proto"
-	golang_proto "github.com/golang/protobuf/proto"
-	schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -60,7 +59,7 @@ type GlobalSpecType struct {
 	// Traffic Policy
 	//
 	// x-displayName: "Traffic Policy"
-	TrafficPolicies []*schema.ObjectRefType `protobuf:"bytes,5,rep,name=traffic_policies,json=trafficPolicies,proto3" json:"traffic_policies,omitempty"`
+	PmfTrafficPolicies []*schema.ObjectRefType `protobuf:"bytes,6,rep,name=pmf_traffic_policies,json=pmfTrafficPolicies,proto3" json:"pmf_traffic_policies,omitempty"`
 }
 
 func (m *GlobalSpecType) Reset()      { *m = GlobalSpecType{} }
@@ -119,9 +118,9 @@ func (m *GlobalSpecType) GetVirtualServer() *VirtualServerType {
 	return nil
 }
 
-func (m *GlobalSpecType) GetTrafficPolicies() []*schema.ObjectRefType {
+func (m *GlobalSpecType) GetPmfTrafficPolicies() []*schema.ObjectRefType {
 	if m != nil {
-		return m.TrafficPolicies
+		return m.PmfTrafficPolicies
 	}
 	return nil
 }
@@ -233,6 +232,7 @@ type VirtualServerType struct {
 	//	*VirtualServerType_Https
 	//	*VirtualServerType_Tcp
 	//	*VirtualServerType_Udp
+	//	*VirtualServerType_Http3
 	VirtualServerType isVirtualServerType_VirtualServerType `protobuf_oneof:"virtual_server_type"`
 	// FIX Profile
 	//
@@ -283,7 +283,7 @@ type VirtualServerType_Http struct {
 	Http *HTTPProfileType `protobuf:"bytes,20,opt,name=http,proto3,oneof" json:"http,omitempty"`
 }
 type VirtualServerType_Https struct {
-	Https *HTTPSProfileType `protobuf:"bytes,21,opt,name=https,proto3,oneof" json:"https,omitempty"`
+	Https *HTTPProfileType `protobuf:"bytes,21,opt,name=https,proto3,oneof" json:"https,omitempty"`
 }
 type VirtualServerType_Tcp struct {
 	Tcp *TCPProfileType `protobuf:"bytes,22,opt,name=tcp,proto3,oneof" json:"tcp,omitempty"`
@@ -291,11 +291,15 @@ type VirtualServerType_Tcp struct {
 type VirtualServerType_Udp struct {
 	Udp *UDPProfileType `protobuf:"bytes,23,opt,name=udp,proto3,oneof" json:"udp,omitempty"`
 }
+type VirtualServerType_Http3 struct {
+	Http3 *HTTP3ProfileType `protobuf:"bytes,29,opt,name=http3,proto3,oneof" json:"http3,omitempty"`
+}
 
 func (*VirtualServerType_Http) isVirtualServerType_VirtualServerType()  {}
 func (*VirtualServerType_Https) isVirtualServerType_VirtualServerType() {}
 func (*VirtualServerType_Tcp) isVirtualServerType_VirtualServerType()   {}
 func (*VirtualServerType_Udp) isVirtualServerType_VirtualServerType()   {}
+func (*VirtualServerType_Http3) isVirtualServerType_VirtualServerType() {}
 
 func (m *VirtualServerType) GetVirtualServerType() isVirtualServerType_VirtualServerType {
 	if m != nil {
@@ -437,7 +441,7 @@ func (m *VirtualServerType) GetHttp() *HTTPProfileType {
 	return nil
 }
 
-func (m *VirtualServerType) GetHttps() *HTTPSProfileType {
+func (m *VirtualServerType) GetHttps() *HTTPProfileType {
 	if x, ok := m.GetVirtualServerType().(*VirtualServerType_Https); ok {
 		return x.Https
 	}
@@ -454,6 +458,13 @@ func (m *VirtualServerType) GetTcp() *TCPProfileType {
 func (m *VirtualServerType) GetUdp() *UDPProfileType {
 	if x, ok := m.GetVirtualServerType().(*VirtualServerType_Udp); ok {
 		return x.Udp
+	}
+	return nil
+}
+
+func (m *VirtualServerType) GetHttp3() *HTTP3ProfileType {
+	if x, ok := m.GetVirtualServerType().(*VirtualServerType_Http3); ok {
+		return x.Http3
 	}
 	return nil
 }
@@ -479,231 +490,8 @@ func (*VirtualServerType) XXX_OneofWrappers() []interface{} {
 		(*VirtualServerType_Https)(nil),
 		(*VirtualServerType_Tcp)(nil),
 		(*VirtualServerType_Udp)(nil),
+		(*VirtualServerType_Http3)(nil),
 	}
-}
-
-// HTTPS
-//
-// x-displayName: "HTTPS profiles"
-type HTTPSProfileType struct {
-	// Protocol Profile (Client)
-	//
-	// x-displayName: "Protocol Profile (Client)"
-	TcpClientProfile []*schema.ObjectRefType `protobuf:"bytes,1,rep,name=tcp_client_profile,json=tcpClientProfile,proto3" json:"tcp_client_profile,omitempty"`
-	// Protocol Profile (Server)
-	//
-	// x-displayName: "Protocol Profile (Server)"
-	TcpServerProfile []*schema.ObjectRefType `protobuf:"bytes,2,rep,name=tcp_server_profile,json=tcpServerProfile,proto3" json:"tcp_server_profile,omitempty"`
-	// HTTP Profile (Client)
-	//
-	// x-displayName: "HTTP Profile (Client)"
-	HttpClientProfile []*schema.ObjectRefType `protobuf:"bytes,3,rep,name=http_client_profile,json=httpClientProfile,proto3" json:"http_client_profile,omitempty"`
-	// HTTP Profile (Server)
-	//
-	// x-displayName: "HTTP Profile (Server)"
-	HttpServerProfile []*schema.ObjectRefType `protobuf:"bytes,4,rep,name=http_server_profile,json=httpServerProfile,proto3" json:"http_server_profile,omitempty"`
-	// Stream Profile
-	//
-	// x-displayName: "Stream Profile"
-	StreamProfile []*schema.ObjectRefType `protobuf:"bytes,5,rep,name=stream_profile,json=streamProfile,proto3" json:"stream_profile,omitempty"`
-	// WebSocket Profile Client
-	//
-	// x-displayName: "WebSocket Profile Client"
-	WebsocketClientProfile []*schema.ObjectRefType `protobuf:"bytes,6,rep,name=websocket_client_profile,json=websocketClientProfile,proto3" json:"websocket_client_profile,omitempty"`
-	// WebSocket Profile Server
-	//
-	// x-displayName: "WebSocket Profile Server"
-	WebsocketServerProfile []*schema.ObjectRefType `protobuf:"bytes,7,rep,name=websocket_server_profile,json=websocketServerProfile,proto3" json:"websocket_server_profile,omitempty"`
-}
-
-func (m *HTTPSProfileType) Reset()      { *m = HTTPSProfileType{} }
-func (*HTTPSProfileType) ProtoMessage() {}
-func (*HTTPSProfileType) Descriptor() ([]byte, []int) {
-	return fileDescriptor_27b5e0b3e41892c5, []int{2}
-}
-func (m *HTTPSProfileType) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *HTTPSProfileType) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	b = b[:cap(b)]
-	n, err := m.MarshalToSizedBuffer(b)
-	if err != nil {
-		return nil, err
-	}
-	return b[:n], nil
-}
-func (m *HTTPSProfileType) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_HTTPSProfileType.Merge(m, src)
-}
-func (m *HTTPSProfileType) XXX_Size() int {
-	return m.Size()
-}
-func (m *HTTPSProfileType) XXX_DiscardUnknown() {
-	xxx_messageInfo_HTTPSProfileType.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_HTTPSProfileType proto.InternalMessageInfo
-
-func (m *HTTPSProfileType) GetTcpClientProfile() []*schema.ObjectRefType {
-	if m != nil {
-		return m.TcpClientProfile
-	}
-	return nil
-}
-
-func (m *HTTPSProfileType) GetTcpServerProfile() []*schema.ObjectRefType {
-	if m != nil {
-		return m.TcpServerProfile
-	}
-	return nil
-}
-
-func (m *HTTPSProfileType) GetHttpClientProfile() []*schema.ObjectRefType {
-	if m != nil {
-		return m.HttpClientProfile
-	}
-	return nil
-}
-
-func (m *HTTPSProfileType) GetHttpServerProfile() []*schema.ObjectRefType {
-	if m != nil {
-		return m.HttpServerProfile
-	}
-	return nil
-}
-
-func (m *HTTPSProfileType) GetStreamProfile() []*schema.ObjectRefType {
-	if m != nil {
-		return m.StreamProfile
-	}
-	return nil
-}
-
-func (m *HTTPSProfileType) GetWebsocketClientProfile() []*schema.ObjectRefType {
-	if m != nil {
-		return m.WebsocketClientProfile
-	}
-	return nil
-}
-
-func (m *HTTPSProfileType) GetWebsocketServerProfile() []*schema.ObjectRefType {
-	if m != nil {
-		return m.WebsocketServerProfile
-	}
-	return nil
-}
-
-// TCP
-//
-// x-displayName: "TCP profiles"
-type TCPProfileType struct {
-	// Protocol Profile (Client)
-	//
-	// x-displayName: "Protocol Profile (Client)"
-	TcpClientProfile []*schema.ObjectRefType `protobuf:"bytes,1,rep,name=tcp_client_profile,json=tcpClientProfile,proto3" json:"tcp_client_profile,omitempty"`
-	// Protocol Profile (Server)
-	//
-	// x-displayName: "Protocol Profile (Server)"
-	TcpServerProfile []*schema.ObjectRefType `protobuf:"bytes,2,rep,name=tcp_server_profile,json=tcpServerProfile,proto3" json:"tcp_server_profile,omitempty"`
-}
-
-func (m *TCPProfileType) Reset()      { *m = TCPProfileType{} }
-func (*TCPProfileType) ProtoMessage() {}
-func (*TCPProfileType) Descriptor() ([]byte, []int) {
-	return fileDescriptor_27b5e0b3e41892c5, []int{3}
-}
-func (m *TCPProfileType) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *TCPProfileType) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	b = b[:cap(b)]
-	n, err := m.MarshalToSizedBuffer(b)
-	if err != nil {
-		return nil, err
-	}
-	return b[:n], nil
-}
-func (m *TCPProfileType) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_TCPProfileType.Merge(m, src)
-}
-func (m *TCPProfileType) XXX_Size() int {
-	return m.Size()
-}
-func (m *TCPProfileType) XXX_DiscardUnknown() {
-	xxx_messageInfo_TCPProfileType.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_TCPProfileType proto.InternalMessageInfo
-
-func (m *TCPProfileType) GetTcpClientProfile() []*schema.ObjectRefType {
-	if m != nil {
-		return m.TcpClientProfile
-	}
-	return nil
-}
-
-func (m *TCPProfileType) GetTcpServerProfile() []*schema.ObjectRefType {
-	if m != nil {
-		return m.TcpServerProfile
-	}
-	return nil
-}
-
-// UDP
-//
-// x-displayName: "UDP profiles"
-// These options will be enhanced in future MR
-type UDPProfileType struct {
-	// Protocol Profile (Client)
-	//
-	// x-displayName: "Protocol Profile (Client)"
-	TcpClientProfile []*schema.ObjectRefType `protobuf:"bytes,1,rep,name=tcp_client_profile,json=tcpClientProfile,proto3" json:"tcp_client_profile,omitempty"`
-	// Protocol Profile (Server)
-	//
-	// x-displayName: "Protocol Profile (Server)"
-	TcpServerProfile []*schema.ObjectRefType `protobuf:"bytes,2,rep,name=tcp_server_profile,json=tcpServerProfile,proto3" json:"tcp_server_profile,omitempty"`
-}
-
-func (m *UDPProfileType) Reset()      { *m = UDPProfileType{} }
-func (*UDPProfileType) ProtoMessage() {}
-func (*UDPProfileType) Descriptor() ([]byte, []int) {
-	return fileDescriptor_27b5e0b3e41892c5, []int{4}
-}
-func (m *UDPProfileType) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *UDPProfileType) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	b = b[:cap(b)]
-	n, err := m.MarshalToSizedBuffer(b)
-	if err != nil {
-		return nil, err
-	}
-	return b[:n], nil
-}
-func (m *UDPProfileType) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_UDPProfileType.Merge(m, src)
-}
-func (m *UDPProfileType) XXX_Size() int {
-	return m.Size()
-}
-func (m *UDPProfileType) XXX_DiscardUnknown() {
-	xxx_messageInfo_UDPProfileType.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_UDPProfileType proto.InternalMessageInfo
-
-func (m *UDPProfileType) GetTcpClientProfile() []*schema.ObjectRefType {
-	if m != nil {
-		return m.TcpClientProfile
-	}
-	return nil
-}
-
-func (m *UDPProfileType) GetTcpServerProfile() []*schema.ObjectRefType {
-	if m != nil {
-		return m.TcpServerProfile
-	}
-	return nil
 }
 
 // HTTP
@@ -738,12 +526,32 @@ type HTTPProfileType struct {
 	//
 	// x-displayName: "WebSocket Profile Server"
 	WebsocketServerProfile []*schema.ObjectRefType `protobuf:"bytes,7,rep,name=websocket_server_profile,json=websocketServerProfile,proto3" json:"websocket_server_profile,omitempty"`
+	// HTTP/2 Profile Client
+	//
+	// x-displayName: "HTTP/2 Profile Client"
+	Http2ClientProfile []*schema.ObjectRefType `protobuf:"bytes,8,rep,name=http2_client_profile,json=http2ClientProfile,proto3" json:"http2_client_profile,omitempty"`
+	// HTTP/2 Profile Server
+	//
+	// x-displayName: "HTTP/2 Profile Server"
+	Http2ServerProfile []*schema.ObjectRefType `protobuf:"bytes,9,rep,name=http2_server_profile,json=http2ServerProfile,proto3" json:"http2_server_profile,omitempty"`
+	// Client SSL Profile
+	//
+	// x-displayName: "Client SSL Profile"
+	ClientSslProfile []*schema.ObjectRefType `protobuf:"bytes,10,rep,name=client_ssl_profile,json=clientSslProfile,proto3" json:"client_ssl_profile,omitempty"`
+	// Server SSL Profile
+	//
+	// x-displayName: "Server SSL Profile"
+	ServerSslProfile []*schema.ObjectRefType `protobuf:"bytes,11,rep,name=server_ssl_profile,json=serverSslProfile,proto3" json:"server_ssl_profile,omitempty"`
+	// OCSP Profile
+	//
+	// x-displayName: "OCSP Profile"
+	OcspProfile []*schema.ObjectRefType `protobuf:"bytes,12,rep,name=ocsp_profile,json=ocspProfile,proto3" json:"ocsp_profile,omitempty"`
 }
 
 func (m *HTTPProfileType) Reset()      { *m = HTTPProfileType{} }
 func (*HTTPProfileType) ProtoMessage() {}
 func (*HTTPProfileType) Descriptor() ([]byte, []int) {
-	return fileDescriptor_27b5e0b3e41892c5, []int{5}
+	return fileDescriptor_27b5e0b3e41892c5, []int{2}
 }
 func (m *HTTPProfileType) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -813,6 +621,341 @@ func (m *HTTPProfileType) GetWebsocketClientProfile() []*schema.ObjectRefType {
 func (m *HTTPProfileType) GetWebsocketServerProfile() []*schema.ObjectRefType {
 	if m != nil {
 		return m.WebsocketServerProfile
+	}
+	return nil
+}
+
+func (m *HTTPProfileType) GetHttp2ClientProfile() []*schema.ObjectRefType {
+	if m != nil {
+		return m.Http2ClientProfile
+	}
+	return nil
+}
+
+func (m *HTTPProfileType) GetHttp2ServerProfile() []*schema.ObjectRefType {
+	if m != nil {
+		return m.Http2ServerProfile
+	}
+	return nil
+}
+
+func (m *HTTPProfileType) GetClientSslProfile() []*schema.ObjectRefType {
+	if m != nil {
+		return m.ClientSslProfile
+	}
+	return nil
+}
+
+func (m *HTTPProfileType) GetServerSslProfile() []*schema.ObjectRefType {
+	if m != nil {
+		return m.ServerSslProfile
+	}
+	return nil
+}
+
+func (m *HTTPProfileType) GetOcspProfile() []*schema.ObjectRefType {
+	if m != nil {
+		return m.OcspProfile
+	}
+	return nil
+}
+
+// TCP
+//
+// x-displayName: "TCP profiles"
+type TCPProfileType struct {
+	// Protocol Profile (Client)
+	//
+	// x-displayName: "Protocol Profile (Client)"
+	TcpClientProfile []*schema.ObjectRefType `protobuf:"bytes,1,rep,name=tcp_client_profile,json=tcpClientProfile,proto3" json:"tcp_client_profile,omitempty"`
+	// Protocol Profile (Server)
+	//
+	// x-displayName: "Protocol Profile (Server)"
+	TcpServerProfile []*schema.ObjectRefType `protobuf:"bytes,2,rep,name=tcp_server_profile,json=tcpServerProfile,proto3" json:"tcp_server_profile,omitempty"`
+	// Client SSL Profile
+	//
+	// x-displayName: "Client SSL Profile"
+	ClientSslProfile []*schema.ObjectRefType `protobuf:"bytes,3,rep,name=client_ssl_profile,json=clientSslProfile,proto3" json:"client_ssl_profile,omitempty"`
+	// Server SSL Profile
+	//
+	// x-displayName: "Server SSL Profile"
+	ServerSslProfile []*schema.ObjectRefType `protobuf:"bytes,4,rep,name=server_ssl_profile,json=serverSslProfile,proto3" json:"server_ssl_profile,omitempty"`
+	// OCSP Profile
+	//
+	// x-displayName: "OCSP Profile"
+	OcspProfile []*schema.ObjectRefType `protobuf:"bytes,5,rep,name=ocsp_profile,json=ocspProfile,proto3" json:"ocsp_profile,omitempty"`
+}
+
+func (m *TCPProfileType) Reset()      { *m = TCPProfileType{} }
+func (*TCPProfileType) ProtoMessage() {}
+func (*TCPProfileType) Descriptor() ([]byte, []int) {
+	return fileDescriptor_27b5e0b3e41892c5, []int{3}
+}
+func (m *TCPProfileType) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *TCPProfileType) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	b = b[:cap(b)]
+	n, err := m.MarshalToSizedBuffer(b)
+	if err != nil {
+		return nil, err
+	}
+	return b[:n], nil
+}
+func (m *TCPProfileType) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TCPProfileType.Merge(m, src)
+}
+func (m *TCPProfileType) XXX_Size() int {
+	return m.Size()
+}
+func (m *TCPProfileType) XXX_DiscardUnknown() {
+	xxx_messageInfo_TCPProfileType.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_TCPProfileType proto.InternalMessageInfo
+
+func (m *TCPProfileType) GetTcpClientProfile() []*schema.ObjectRefType {
+	if m != nil {
+		return m.TcpClientProfile
+	}
+	return nil
+}
+
+func (m *TCPProfileType) GetTcpServerProfile() []*schema.ObjectRefType {
+	if m != nil {
+		return m.TcpServerProfile
+	}
+	return nil
+}
+
+func (m *TCPProfileType) GetClientSslProfile() []*schema.ObjectRefType {
+	if m != nil {
+		return m.ClientSslProfile
+	}
+	return nil
+}
+
+func (m *TCPProfileType) GetServerSslProfile() []*schema.ObjectRefType {
+	if m != nil {
+		return m.ServerSslProfile
+	}
+	return nil
+}
+
+func (m *TCPProfileType) GetOcspProfile() []*schema.ObjectRefType {
+	if m != nil {
+		return m.OcspProfile
+	}
+	return nil
+}
+
+// HTTP/3
+//
+// x-displayName: "HTTP/3 profiles"
+type HTTP3ProfileType struct {
+	// Protocol Profile (Client)
+	//
+	// x-displayName: "Protocol Profile (Client)"
+	UdpClientProfile []*schema.ObjectRefType `protobuf:"bytes,1,rep,name=udp_client_profile,json=udpClientProfile,proto3" json:"udp_client_profile,omitempty"`
+	// Protocol Profile (Server)
+	//
+	// x-displayName: "Protocol Profile (Server)"
+	UdpServerProfile []*schema.ObjectRefType `protobuf:"bytes,2,rep,name=udp_server_profile,json=udpServerProfile,proto3" json:"udp_server_profile,omitempty"`
+	// QUIC Profile
+	//
+	// x-displayName: "QUIC Profile"
+	QuicProfile []*schema.ObjectRefType `protobuf:"bytes,3,rep,name=quic_profile,json=quicProfile,proto3" json:"quic_profile,omitempty"`
+	// HTTP/3 Profile
+	//
+	// x-displayName: "HTTP/3 Profile"
+	Http3Profile []*schema.ObjectRefType `protobuf:"bytes,4,rep,name=http3_profile,json=http3Profile,proto3" json:"http3_profile,omitempty"`
+	// HTTP Profile (Server)
+	//
+	// x-displayName: "HTTP Profile (Server)"
+	HttpServerProfile []*schema.ObjectRefType `protobuf:"bytes,5,rep,name=http_server_profile,json=httpServerProfile,proto3" json:"http_server_profile,omitempty"`
+	// HTTP Profile (Client)
+	//
+	// x-displayName: "HTTP Profile (Client)"
+	HttpClientProfile []*schema.ObjectRefType `protobuf:"bytes,6,rep,name=http_client_profile,json=httpClientProfile,proto3" json:"http_client_profile,omitempty"`
+	// TCP Profile (Server)
+	//
+	// x-displayName: "TCP Profile (Server)"
+	TcpServerProfile []*schema.ObjectRefType `protobuf:"bytes,7,rep,name=tcp_server_profile,json=tcpServerProfile,proto3" json:"tcp_server_profile,omitempty"`
+	// Client SSL Profile
+	//
+	// x-displayName: "Client SSL Profile"
+	ClientSslProfile []*schema.ObjectRefType `protobuf:"bytes,8,rep,name=client_ssl_profile,json=clientSslProfile,proto3" json:"client_ssl_profile,omitempty"`
+	// Server SSL Profile
+	//
+	// x-displayName: "Server SSL Profile"
+	ServerSslProfile []*schema.ObjectRefType `protobuf:"bytes,9,rep,name=server_ssl_profile,json=serverSslProfile,proto3" json:"server_ssl_profile,omitempty"`
+}
+
+func (m *HTTP3ProfileType) Reset()      { *m = HTTP3ProfileType{} }
+func (*HTTP3ProfileType) ProtoMessage() {}
+func (*HTTP3ProfileType) Descriptor() ([]byte, []int) {
+	return fileDescriptor_27b5e0b3e41892c5, []int{4}
+}
+func (m *HTTP3ProfileType) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *HTTP3ProfileType) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	b = b[:cap(b)]
+	n, err := m.MarshalToSizedBuffer(b)
+	if err != nil {
+		return nil, err
+	}
+	return b[:n], nil
+}
+func (m *HTTP3ProfileType) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_HTTP3ProfileType.Merge(m, src)
+}
+func (m *HTTP3ProfileType) XXX_Size() int {
+	return m.Size()
+}
+func (m *HTTP3ProfileType) XXX_DiscardUnknown() {
+	xxx_messageInfo_HTTP3ProfileType.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_HTTP3ProfileType proto.InternalMessageInfo
+
+func (m *HTTP3ProfileType) GetUdpClientProfile() []*schema.ObjectRefType {
+	if m != nil {
+		return m.UdpClientProfile
+	}
+	return nil
+}
+
+func (m *HTTP3ProfileType) GetUdpServerProfile() []*schema.ObjectRefType {
+	if m != nil {
+		return m.UdpServerProfile
+	}
+	return nil
+}
+
+func (m *HTTP3ProfileType) GetQuicProfile() []*schema.ObjectRefType {
+	if m != nil {
+		return m.QuicProfile
+	}
+	return nil
+}
+
+func (m *HTTP3ProfileType) GetHttp3Profile() []*schema.ObjectRefType {
+	if m != nil {
+		return m.Http3Profile
+	}
+	return nil
+}
+
+func (m *HTTP3ProfileType) GetHttpServerProfile() []*schema.ObjectRefType {
+	if m != nil {
+		return m.HttpServerProfile
+	}
+	return nil
+}
+
+func (m *HTTP3ProfileType) GetHttpClientProfile() []*schema.ObjectRefType {
+	if m != nil {
+		return m.HttpClientProfile
+	}
+	return nil
+}
+
+func (m *HTTP3ProfileType) GetTcpServerProfile() []*schema.ObjectRefType {
+	if m != nil {
+		return m.TcpServerProfile
+	}
+	return nil
+}
+
+func (m *HTTP3ProfileType) GetClientSslProfile() []*schema.ObjectRefType {
+	if m != nil {
+		return m.ClientSslProfile
+	}
+	return nil
+}
+
+func (m *HTTP3ProfileType) GetServerSslProfile() []*schema.ObjectRefType {
+	if m != nil {
+		return m.ServerSslProfile
+	}
+	return nil
+}
+
+// UDP
+//
+// x-displayName: "UDP profiles"
+type UDPProfileType struct {
+	// Protocol Profile (Client)
+	//
+	// x-displayName: "Protocol Profile (Client)"
+	UdpClientProfile []*schema.ObjectRefType `protobuf:"bytes,1,rep,name=udp_client_profile,json=udpClientProfile,proto3" json:"udp_client_profile,omitempty"`
+	// Protocol Profile (Server)
+	//
+	// x-displayName: "Protocol Profile (Server)"
+	UdpServerProfile []*schema.ObjectRefType `protobuf:"bytes,2,rep,name=udp_server_profile,json=udpServerProfile,proto3" json:"udp_server_profile,omitempty"`
+	// Client SSL Profile
+	//
+	// x-displayName: "Client SSL Profile"
+	ClientSslProfile []*schema.ObjectRefType `protobuf:"bytes,3,rep,name=client_ssl_profile,json=clientSslProfile,proto3" json:"client_ssl_profile,omitempty"`
+	// Server SSL Profile
+	//
+	// x-displayName: "Server SSL Profile"
+	ServerSslProfile []*schema.ObjectRefType `protobuf:"bytes,4,rep,name=server_ssl_profile,json=serverSslProfile,proto3" json:"server_ssl_profile,omitempty"`
+}
+
+func (m *UDPProfileType) Reset()      { *m = UDPProfileType{} }
+func (*UDPProfileType) ProtoMessage() {}
+func (*UDPProfileType) Descriptor() ([]byte, []int) {
+	return fileDescriptor_27b5e0b3e41892c5, []int{5}
+}
+func (m *UDPProfileType) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *UDPProfileType) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	b = b[:cap(b)]
+	n, err := m.MarshalToSizedBuffer(b)
+	if err != nil {
+		return nil, err
+	}
+	return b[:n], nil
+}
+func (m *UDPProfileType) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UDPProfileType.Merge(m, src)
+}
+func (m *UDPProfileType) XXX_Size() int {
+	return m.Size()
+}
+func (m *UDPProfileType) XXX_DiscardUnknown() {
+	xxx_messageInfo_UDPProfileType.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_UDPProfileType proto.InternalMessageInfo
+
+func (m *UDPProfileType) GetUdpClientProfile() []*schema.ObjectRefType {
+	if m != nil {
+		return m.UdpClientProfile
+	}
+	return nil
+}
+
+func (m *UDPProfileType) GetUdpServerProfile() []*schema.ObjectRefType {
+	if m != nil {
+		return m.UdpServerProfile
+	}
+	return nil
+}
+
+func (m *UDPProfileType) GetClientSslProfile() []*schema.ObjectRefType {
+	if m != nil {
+		return m.ClientSslProfile
+	}
+	return nil
+}
+
+func (m *UDPProfileType) GetServerSslProfile() []*schema.ObjectRefType {
+	if m != nil {
+		return m.ServerSslProfile
 	}
 	return nil
 }
@@ -1009,7 +1152,7 @@ type CreateSpecType struct {
 	AdvancedTcpProfile *AdvancedTCPProfile     `protobuf:"bytes,2,opt,name=advanced_tcp_profile,json=advancedTcpProfile,proto3" json:"advanced_tcp_profile,omitempty"`
 	Irules             []*schema.ObjectRefType `protobuf:"bytes,3,rep,name=irules,proto3" json:"irules,omitempty"`
 	VirtualServer      *VirtualServerType      `protobuf:"bytes,4,opt,name=virtual_server,json=virtualServer,proto3" json:"virtual_server,omitempty"`
-	TrafficPolicies    []*schema.ObjectRefType `protobuf:"bytes,5,rep,name=traffic_policies,json=trafficPolicies,proto3" json:"traffic_policies,omitempty"`
+	PmfTrafficPolicies []*schema.ObjectRefType `protobuf:"bytes,6,rep,name=pmf_traffic_policies,json=pmfTrafficPolicies,proto3" json:"pmf_traffic_policies,omitempty"`
 }
 
 func (m *CreateSpecType) Reset()      { *m = CreateSpecType{} }
@@ -1068,9 +1211,9 @@ func (m *CreateSpecType) GetVirtualServer() *VirtualServerType {
 	return nil
 }
 
-func (m *CreateSpecType) GetTrafficPolicies() []*schema.ObjectRefType {
+func (m *CreateSpecType) GetPmfTrafficPolicies() []*schema.ObjectRefType {
 	if m != nil {
-		return m.TrafficPolicies
+		return m.PmfTrafficPolicies
 	}
 	return nil
 }
@@ -1084,7 +1227,7 @@ type ReplaceSpecType struct {
 	AdvancedTcpProfile *AdvancedTCPProfile     `protobuf:"bytes,2,opt,name=advanced_tcp_profile,json=advancedTcpProfile,proto3" json:"advanced_tcp_profile,omitempty"`
 	Irules             []*schema.ObjectRefType `protobuf:"bytes,3,rep,name=irules,proto3" json:"irules,omitempty"`
 	VirtualServer      *VirtualServerType      `protobuf:"bytes,4,opt,name=virtual_server,json=virtualServer,proto3" json:"virtual_server,omitempty"`
-	TrafficPolicies    []*schema.ObjectRefType `protobuf:"bytes,5,rep,name=traffic_policies,json=trafficPolicies,proto3" json:"traffic_policies,omitempty"`
+	PmfTrafficPolicies []*schema.ObjectRefType `protobuf:"bytes,6,rep,name=pmf_traffic_policies,json=pmfTrafficPolicies,proto3" json:"pmf_traffic_policies,omitempty"`
 }
 
 func (m *ReplaceSpecType) Reset()      { *m = ReplaceSpecType{} }
@@ -1143,9 +1286,9 @@ func (m *ReplaceSpecType) GetVirtualServer() *VirtualServerType {
 	return nil
 }
 
-func (m *ReplaceSpecType) GetTrafficPolicies() []*schema.ObjectRefType {
+func (m *ReplaceSpecType) GetPmfTrafficPolicies() []*schema.ObjectRefType {
 	if m != nil {
-		return m.TrafficPolicies
+		return m.PmfTrafficPolicies
 	}
 	return nil
 }
@@ -1159,7 +1302,7 @@ type GetSpecType struct {
 	AdvancedTcpProfile *AdvancedTCPProfile     `protobuf:"bytes,2,opt,name=advanced_tcp_profile,json=advancedTcpProfile,proto3" json:"advanced_tcp_profile,omitempty"`
 	Irules             []*schema.ObjectRefType `protobuf:"bytes,3,rep,name=irules,proto3" json:"irules,omitempty"`
 	VirtualServer      *VirtualServerType      `protobuf:"bytes,4,opt,name=virtual_server,json=virtualServer,proto3" json:"virtual_server,omitempty"`
-	TrafficPolicies    []*schema.ObjectRefType `protobuf:"bytes,5,rep,name=traffic_policies,json=trafficPolicies,proto3" json:"traffic_policies,omitempty"`
+	PmfTrafficPolicies []*schema.ObjectRefType `protobuf:"bytes,6,rep,name=pmf_traffic_policies,json=pmfTrafficPolicies,proto3" json:"pmf_traffic_policies,omitempty"`
 }
 
 func (m *GetSpecType) Reset()      { *m = GetSpecType{} }
@@ -1218,9 +1361,9 @@ func (m *GetSpecType) GetVirtualServer() *VirtualServerType {
 	return nil
 }
 
-func (m *GetSpecType) GetTrafficPolicies() []*schema.ObjectRefType {
+func (m *GetSpecType) GetPmfTrafficPolicies() []*schema.ObjectRefType {
 	if m != nil {
-		return m.TrafficPolicies
+		return m.PmfTrafficPolicies
 	}
 	return nil
 }
@@ -1230,14 +1373,14 @@ func init() {
 	golang_proto.RegisterType((*GlobalSpecType)(nil), "ves.io.schema.bigcne.application_profiles.GlobalSpecType")
 	proto.RegisterType((*VirtualServerType)(nil), "ves.io.schema.bigcne.application_profiles.VirtualServerType")
 	golang_proto.RegisterType((*VirtualServerType)(nil), "ves.io.schema.bigcne.application_profiles.VirtualServerType")
-	proto.RegisterType((*HTTPSProfileType)(nil), "ves.io.schema.bigcne.application_profiles.HTTPSProfileType")
-	golang_proto.RegisterType((*HTTPSProfileType)(nil), "ves.io.schema.bigcne.application_profiles.HTTPSProfileType")
-	proto.RegisterType((*TCPProfileType)(nil), "ves.io.schema.bigcne.application_profiles.TCPProfileType")
-	golang_proto.RegisterType((*TCPProfileType)(nil), "ves.io.schema.bigcne.application_profiles.TCPProfileType")
-	proto.RegisterType((*UDPProfileType)(nil), "ves.io.schema.bigcne.application_profiles.UDPProfileType")
-	golang_proto.RegisterType((*UDPProfileType)(nil), "ves.io.schema.bigcne.application_profiles.UDPProfileType")
 	proto.RegisterType((*HTTPProfileType)(nil), "ves.io.schema.bigcne.application_profiles.HTTPProfileType")
 	golang_proto.RegisterType((*HTTPProfileType)(nil), "ves.io.schema.bigcne.application_profiles.HTTPProfileType")
+	proto.RegisterType((*TCPProfileType)(nil), "ves.io.schema.bigcne.application_profiles.TCPProfileType")
+	golang_proto.RegisterType((*TCPProfileType)(nil), "ves.io.schema.bigcne.application_profiles.TCPProfileType")
+	proto.RegisterType((*HTTP3ProfileType)(nil), "ves.io.schema.bigcne.application_profiles.HTTP3ProfileType")
+	golang_proto.RegisterType((*HTTP3ProfileType)(nil), "ves.io.schema.bigcne.application_profiles.HTTP3ProfileType")
+	proto.RegisterType((*UDPProfileType)(nil), "ves.io.schema.bigcne.application_profiles.UDPProfileType")
+	golang_proto.RegisterType((*UDPProfileType)(nil), "ves.io.schema.bigcne.application_profiles.UDPProfileType")
 	proto.RegisterType((*DDoSProfile)(nil), "ves.io.schema.bigcne.application_profiles.DDoSProfile")
 	golang_proto.RegisterType((*DDoSProfile)(nil), "ves.io.schema.bigcne.application_profiles.DDoSProfile")
 	proto.RegisterType((*AdvancedTCPProfile)(nil), "ves.io.schema.bigcne.application_profiles.AdvancedTCPProfile")
@@ -1258,110 +1401,126 @@ func init() {
 }
 
 var fileDescriptor_27b5e0b3e41892c5 = []byte{
-	// 1636 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xec, 0x59, 0xcf, 0x6f, 0x1b, 0x4f,
-	0x15, 0xf7, 0xd4, 0x8e, 0x13, 0xc6, 0xf9, 0x61, 0x4f, 0x9c, 0x64, 0xf3, 0x43, 0x5b, 0xcb, 0x80,
-	0x48, 0x8b, 0x62, 0x43, 0xda, 0x46, 0xa2, 0x85, 0xa2, 0xfc, 0x40, 0x0d, 0x55, 0xd2, 0x46, 0xb6,
-	0x5b, 0x44, 0x11, 0x5a, 0xd6, 0xbb, 0x63, 0x67, 0xda, 0xf5, 0xce, 0x76, 0x77, 0xec, 0x24, 0x48,
-	0x96, 0x7a, 0xe0, 0x80, 0x38, 0x21, 0x6e, 0xfc, 0x07, 0xc8, 0xfc, 0x07, 0x84, 0x43, 0xc4, 0x09,
-	0x7a, 0x21, 0x17, 0xa4, 0xaa, 0x27, 0xea, 0x5c, 0xe0, 0x80, 0x14, 0xc4, 0x3f, 0x80, 0x76, 0x76,
-	0xd7, 0xf6, 0xae, 0x37, 0x89, 0x53, 0xa5, 0xdf, 0x43, 0x9b, 0x53, 0xbc, 0x3b, 0xef, 0xf3, 0xf9,
-	0xbc, 0xf7, 0x66, 0xf6, 0xed, 0xcb, 0x5b, 0x78, 0xaf, 0x81, 0xad, 0x1c, 0xa1, 0x79, 0x4b, 0xd9,
-	0xc5, 0x35, 0x39, 0x5f, 0x26, 0x55, 0x45, 0xc7, 0x79, 0xd9, 0x30, 0x34, 0xa2, 0xc8, 0x8c, 0x50,
-	0x5d, 0x32, 0x4c, 0x5a, 0x21, 0x1a, 0xb6, 0xf2, 0xec, 0xc0, 0xc0, 0x56, 0xce, 0x30, 0x29, 0xa3,
-	0xe8, 0x96, 0x03, 0xcb, 0x39, 0xb0, 0x9c, 0x03, 0xcb, 0x85, 0xc1, 0xe6, 0x96, 0xaa, 0x84, 0xed,
-	0xd6, 0xcb, 0x39, 0x85, 0xd6, 0xf2, 0x55, 0x5a, 0xa5, 0x79, 0xce, 0x50, 0xae, 0x57, 0xf8, 0x15,
-	0xbf, 0xe0, 0xbf, 0x1c, 0xe6, 0xb9, 0x9b, 0x7d, 0x0e, 0x11, 0x43, 0xea, 0x91, 0x9e, 0x9b, 0xf7,
-	0x1b, 0x50, 0xc3, 0x96, 0xf3, 0x16, 0x67, 0xfd, 0x8b, 0xbd, 0xb8, 0x05, 0xff, 0x52, 0x43, 0xd6,
-	0x88, 0x2a, 0x33, 0xec, 0xae, 0x66, 0x02, 0xab, 0x04, 0xef, 0x49, 0x3e, 0xea, 0xec, 0xfb, 0x18,
-	0x1c, 0x7f, 0xa4, 0xd1, 0xb2, 0xac, 0x15, 0x0d, 0xac, 0x94, 0x0e, 0x0c, 0x8c, 0x24, 0x38, 0xaa,
-	0xaa, 0xd4, 0xf2, 0x62, 0x15, 0x40, 0x06, 0x2c, 0x26, 0x96, 0x57, 0x72, 0x03, 0x27, 0x27, 0xb7,
-	0xb1, 0x41, 0x8b, 0x3b, 0xce, 0xc5, 0x5a, 0xec, 0xf8, 0x10, 0x80, 0x42, 0xc2, 0x66, 0x74, 0x6f,
-	0xa1, 0x3a, 0x4c, 0xcb, 0x6a, 0x43, 0xd6, 0x15, 0xac, 0x4a, 0x4c, 0x31, 0x3a, 0x42, 0x37, 0xb8,
-	0xd0, 0x0f, 0x2e, 0x21, 0xb4, 0xea, 0xd2, 0x94, 0xd6, 0x77, 0xfc, 0x7a, 0xc8, 0x13, 0x28, 0x29,
-	0x86, 0x27, 0xfb, 0x1c, 0xc6, 0x89, 0x59, 0xd7, 0xb0, 0x25, 0x44, 0x33, 0xd1, 0xc5, 0xc4, 0xf2,
-	0x42, 0x40, 0xe8, 0x69, 0xf9, 0x25, 0x56, 0x58, 0x01, 0x57, 0xec, 0x2c, 0xac, 0x65, 0x5a, 0xcd,
-	0x21, 0x6e, 0x6e, 0xf3, 0xfd, 0xe9, 0xdf, 0x47, 0xd1, 0xa1, 0xdf, 0x81, 0x1b, 0xc9, 0xa4, 0xf7,
-	0x4b, 0x00, 0x05, 0x97, 0x0d, 0x29, 0x70, 0xbc, 0x41, 0x4c, 0x56, 0x97, 0x35, 0xc9, 0xc2, 0x66,
-	0x03, 0x9b, 0x42, 0x8c, 0x07, 0xf2, 0xfd, 0x4b, 0x04, 0xf2, 0xdc, 0x21, 0x28, 0x72, 0xbc, 0xad,
-	0x5f, 0x18, 0x6b, 0xf4, 0xde, 0x42, 0x26, 0x4c, 0x32, 0x53, 0xae, 0x54, 0x88, 0x22, 0x19, 0x54,
-	0x23, 0x0a, 0xc1, 0x96, 0x30, 0x34, 0x40, 0x18, 0xb7, 0x5a, 0xcd, 0x71, 0x1f, 0xf0, 0xe0, 0xcd,
-	0x9f, 0x7b, 0xe2, 0xc9, 0xf4, 0xc4, 0x33, 0xe1, 0xda, 0xed, 0xb8, 0xfc, 0xf7, 0x7f, 0xf8, 0x97,
-	0x43, 0xf0, 0x00, 0xa6, 0xe0, 0xa8, 0xbd, 0x9f, 0x19, 0x2f, 0x8d, 0xe0, 0xbb, 0x70, 0x16, 0xa6,
-	0xbd, 0xcc, 0x67, 0x4a, 0xeb, 0x3b, 0xdd, 0xa5, 0x65, 0x98, 0x80, 0x71, 0x52, 0xe0, 0x69, 0x01,
-	0x77, 0xb2, 0x7f, 0x44, 0x30, 0xd5, 0x17, 0x19, 0xda, 0x86, 0x69, 0x7f, 0xbe, 0x24, 0x8b, 0xc9,
-	0xcc, 0x3b, 0x67, 0xf3, 0x81, 0x70, 0x4a, 0xdb, 0xdb, 0x45, 0x7b, 0x99, 0x27, 0x05, 0xf9, 0x92,
-	0xc2, 0xef, 0xa3, 0x07, 0x30, 0xa9, 0x50, 0x5d, 0xc7, 0x0a, 0xcf, 0xa8, 0x46, 0x6a, 0x84, 0xf1,
-	0x93, 0x34, 0xb6, 0x96, 0x7c, 0x7f, 0x08, 0xc0, 0x77, 0xec, 0x08, 0xe3, 0xb7, 0x63, 0xc2, 0xd1,
-	0xdf, 0xbf, 0x51, 0x98, 0xe8, 0x5a, 0x6e, 0xd9, 0x86, 0x68, 0x03, 0x4e, 0xf5, 0x80, 0x4d, 0x99,
-	0x61, 0x97, 0x21, 0x7a, 0x06, 0xc3, 0x64, 0xd7, 0xbc, 0x20, 0x33, 0xec, 0xb0, 0x58, 0x70, 0x2e,
-	0x94, 0x45, 0xaa, 0x51, 0x15, 0xbb, 0xa7, 0x61, 0xa5, 0x3f, 0x2e, 0x5f, 0x6a, 0xd6, 0xfb, 0x79,
-	0xb7, 0xa9, 0x8a, 0x0b, 0x33, 0x4a, 0xf8, 0x02, 0xaa, 0xc0, 0x49, 0x59, 0x55, 0x4d, 0x6c, 0x59,
-	0x12, 0x33, 0x65, 0xdd, 0xd2, 0xf8, 0x91, 0x12, 0x86, 0xb8, 0xda, 0xbd, 0x0b, 0xd4, 0x56, 0x1d,
-	0x64, 0xa9, 0x0b, 0x74, 0xf2, 0x2b, 0xf7, 0xdd, 0x47, 0x3f, 0x87, 0x49, 0x83, 0x9a, 0xcc, 0x27,
-	0x12, 0xe7, 0x22, 0xcb, 0x17, 0x88, 0xec, 0x50, 0x93, 0x05, 0x15, 0x26, 0x0c, 0xff, 0x4d, 0xf4,
-	0x04, 0x26, 0x2c, 0x5a, 0x37, 0x15, 0x2c, 0xd9, 0x2b, 0xc2, 0x30, 0x67, 0x5e, 0xba, 0x80, 0xb9,
-	0xc8, 0x11, 0x9c, 0xdf, 0x26, 0x85, 0x56, 0xe7, 0x1a, 0x15, 0xe0, 0x98, 0x5c, 0x67, 0x54, 0xd2,
-	0x64, 0x8b, 0x49, 0xbb, 0xd4, 0x10, 0x46, 0x38, 0x63, 0xee, 0xa2, 0x84, 0xd4, 0x19, 0xdd, 0x92,
-	0x2d, 0xb6, 0x49, 0x0d, 0x4e, 0x99, 0x90, 0xbb, 0x37, 0xd0, 0x43, 0x38, 0xa4, 0xcb, 0x6c, 0xe5,
-	0xae, 0xf0, 0x35, 0xce, 0xb5, 0x78, 0x01, 0xd7, 0x93, 0xd5, 0xd2, 0xca, 0x5d, 0xce, 0xe2, 0xc0,
-	0xd0, 0xb7, 0xe1, 0x48, 0xc3, 0x92, 0x2c, 0x85, 0x9a, 0x58, 0x80, 0x67, 0x1c, 0xac, 0xe1, 0x86,
-	0x55, 0xb4, 0x0d, 0xd0, 0x2f, 0x61, 0x86, 0xd4, 0x6a, 0x58, 0x25, 0xf6, 0x31, 0x92, 0x9d, 0x23,
-	0x45, 0x75, 0xfe, 0xa8, 0x10, 0x05, 0x4b, 0x2a, 0xdd, 0xd3, 0x85, 0xc4, 0x59, 0xf9, 0xff, 0xb1,
-	0x87, 0x5c, 0xe5, 0xc0, 0xa7, 0x7a, 0xd1, 0x81, 0x6d, 0xd0, 0x3d, 0x27, 0xff, 0x0b, 0xe4, 0x1c,
-	0x0b, 0xb4, 0x0b, 0x53, 0x8a, 0x46, 0x75, 0x7b, 0x2f, 0xa8, 0x26, 0x29, 0x1a, 0xc1, 0x3a, 0x13,
-	0x46, 0x07, 0x28, 0x33, 0x62, 0xab, 0x39, 0xac, 0x68, 0x75, 0x8b, 0x61, 0xb3, 0x53, 0x5b, 0x40,
-	0x6f, 0x6d, 0xe1, 0xb4, 0x3b, 0x94, 0x6a, 0xeb, 0x9c, 0x34, 0xa0, 0xe4, 0xd6, 0xcd, 0xb1, 0x2b,
-	0x55, 0x72, 0x2b, 0xa7, 0xfd, 0x3a, 0xc3, 0x15, 0xb9, 0xae, 0x31, 0xae, 0x25, 0x8c, 0x5f, 0x81,
-	0x48, 0xc2, 0x65, 0xb4, 0x65, 0xd0, 0x2f, 0xe0, 0x98, 0x77, 0xd8, 0x1c, 0x85, 0x89, 0xab, 0x50,
-	0xd0, 0x9c, 0xb3, 0xc7, 0x15, 0x7e, 0x0d, 0xe0, 0x7c, 0x27, 0x06, 0x6c, 0x5a, 0xc4, 0x62, 0x58,
-	0xb7, 0x9f, 0x18, 0xf7, 0xc5, 0x99, 0x1c, 0x40, 0xf0, 0x76, 0xab, 0x39, 0x19, 0x82, 0x0d, 0x15,
-	0x9f, 0xf5, 0xc2, 0xeb, 0xda, 0x7b, 0x25, 0xfe, 0x37, 0x00, 0x2e, 0x54, 0x64, 0x4d, 0x2b, 0xcb,
-	0xca, 0xab, 0x50, 0x5f, 0x52, 0x57, 0xec, 0xcb, 0x9c, 0xa7, 0x16, 0xe2, 0xcc, 0xaf, 0x00, 0x9c,
-	0x31, 0xf1, 0xeb, 0x3a, 0xb6, 0x98, 0xa4, 0xd1, 0x6a, 0x95, 0xe8, 0xd5, 0x8e, 0x1f, 0x68, 0x00,
-	0x3f, 0x72, 0xad, 0xe6, 0x59, 0xf8, 0x50, 0x5f, 0xa6, 0x5c, 0xe3, 0x2d, 0xc7, 0xd6, 0x73, 0x63,
-	0x07, 0xc6, 0x76, 0x19, 0x33, 0x84, 0x34, 0x7f, 0x2a, 0xef, 0x5f, 0xe2, 0xb5, 0xbf, 0x59, 0x2a,
-	0x79, 0x8d, 0x8b, 0xed, 0xd0, 0x66, 0xa4, 0xc0, 0x99, 0x50, 0x11, 0x0e, 0xd9, 0x7f, 0x2d, 0x61,
-	0x8a, 0x53, 0x3e, 0xb8, 0x24, 0x65, 0xd1, 0xcf, 0xe9, 0x70, 0xa1, 0x6d, 0x18, 0x65, 0x8a, 0x21,
-	0x4c, 0x73, 0xca, 0xef, 0x5d, 0x82, 0xb2, 0xdb, 0x5d, 0xb9, 0x84, 0x36, 0x8f, 0x4d, 0x57, 0x57,
-	0x0d, 0x61, 0xe6, 0xd2, 0x74, 0xcf, 0x36, 0x82, 0x74, 0x75, 0xd5, 0x40, 0x32, 0x4c, 0x54, 0xc8,
-	0x7e, 0x67, 0xfb, 0x84, 0x01, 0xb6, 0x2f, 0xdb, 0x6a, 0xf6, 0x62, 0x42, 0xb7, 0x0c, 0x56, 0xc8,
-	0xbe, 0xb7, 0x4f, 0x0d, 0x88, 0xec, 0x4e, 0x83, 0x58, 0x8c, 0x28, 0xdd, 0xf6, 0x76, 0x76, 0xb0,
-	0x2e, 0x2a, 0x04, 0x1a, 0x2a, 0x98, 0xea, 0xda, 0x79, 0x2d, 0xe9, 0x4d, 0x38, 0x19, 0x68, 0x78,
-	0xec, 0x0e, 0x1e, 0x8d, 0x1c, 0x1d, 0x82, 0xf4, 0xf1, 0x21, 0x98, 0x7c, 0x1c, 0x1b, 0x99, 0x4c,
-	0xa6, 0xb3, 0x6f, 0xe3, 0x30, 0x19, 0xdc, 0x3d, 0xa4, 0x43, 0x64, 0xb7, 0xc8, 0x4e, 0x29, 0xee,
-	0x69, 0xc9, 0x07, 0xcb, 0x4e, 0x4f, 0x77, 0x1d, 0xea, 0x6c, 0x92, 0x29, 0x86, 0x53, 0x90, 0xbd,
-	0x1c, 0xb9, 0x7a, 0xae, 0x9f, 0xdd, 0xce, 0xfc, 0xea, 0xf4, 0xdc, 0xde, 0xc0, 0xd5, 0x7b, 0x0d,
-	0x27, 0xed, 0xd3, 0x19, 0x0c, 0x70, 0x90, 0x0e, 0xfd, 0xeb, 0xad, 0xe6, 0x28, 0xc7, 0x9e, 0xbb,
-	0x1d, 0xb6, 0x85, 0x3f, 0x44, 0x4f, 0x32, 0x10, 0x63, 0xec, 0x4a, 0x25, 0xfd, 0x51, 0xbe, 0x84,
-	0xe3, 0x16, 0x33, 0xb1, 0x5c, 0xeb, 0xa8, 0x0d, 0xd2, 0xbb, 0x7f, 0xb3, 0xd5, 0x0c, 0xc0, 0x42,
-	0xf5, 0xc6, 0x1c, 0x1b, 0x4f, 0xeb, 0x0d, 0x80, 0xc2, 0x1e, 0x2e, 0x5b, 0x54, 0x79, 0x85, 0x59,
-	0x30, 0xaf, 0xf1, 0x01, 0x64, 0x17, 0x5b, 0xcd, 0x54, 0x97, 0xe0, 0x3c, 0xe5, 0xe9, 0x8e, 0x99,
-	0x3f, 0xc3, 0x7e, 0x17, 0x02, 0x79, 0x1e, 0xfe, 0x44, 0x2e, 0xf8, 0x32, 0x9e, 0x3d, 0x05, 0x70,
-	0xdc, 0x5f, 0xb7, 0x3e, 0xf7, 0x47, 0x89, 0x87, 0xec, 0xaf, 0xad, 0x9f, 0x7d, 0xc8, 0x7f, 0x8b,
-	0xc3, 0x89, 0xc0, 0x3b, 0xf4, 0xba, 0x62, 0x5e, 0x57, 0xcc, 0xeb, 0x8a, 0xf9, 0x11, 0x15, 0xf3,
-	0x1f, 0x00, 0x26, 0x7a, 0x06, 0x77, 0x68, 0x0b, 0x4e, 0x63, 0x5d, 0x2e, 0x6b, 0x58, 0xe2, 0xd3,
-	0xc0, 0x1a, 0x61, 0xa4, 0xea, 0xfc, 0xf7, 0xef, 0xcc, 0xe9, 0xd2, 0x01, 0x7f, 0x7e, 0x54, 0x33,
-	0xd8, 0xc1, 0x66, 0xa4, 0x90, 0x76, 0x50, 0x1b, 0x2a, 0xb5, 0xb6, 0x3b, 0x18, 0xf4, 0x04, 0xce,
-	0xa8, 0xc4, 0x0a, 0xa5, 0x8b, 0x9e, 0x4b, 0x37, 0xe5, 0xc2, 0xfc, 0x7c, 0x6b, 0x59, 0x38, 0x1d,
-	0xe0, 0x91, 0x94, 0x5d, 0x4a, 0x14, 0xa7, 0xad, 0x8a, 0x1e, 0x1f, 0x02, 0xf0, 0x38, 0x36, 0x02,
-	0x92, 0x37, 0xb2, 0xff, 0x03, 0x10, 0xf5, 0xcf, 0x09, 0xd1, 0x33, 0x38, 0xef, 0x86, 0x67, 0x3f,
-	0x82, 0x9d, 0x79, 0xa4, 0x7f, 0x16, 0x79, 0x96, 0x53, 0x82, 0x03, 0x2d, 0x29, 0x86, 0xc7, 0xec,
-	0xd1, 0xfe, 0x04, 0x2e, 0x78, 0x71, 0x86, 0xf2, 0x9e, 0x1f, 0xec, 0xac, 0x8b, 0xed, 0x27, 0x5e,
-	0xfb, 0x16, 0x9c, 0x0f, 0x23, 0x3c, 0x2b, 0xea, 0xd3, 0x28, 0x1c, 0x5f, 0x37, 0xb1, 0xcc, 0x70,
-	0x67, 0xae, 0xfb, 0xd3, 0xab, 0x9c, 0xeb, 0xfa, 0x27, 0xba, 0xf4, 0x13, 0x4e, 0x74, 0x43, 0x67,
-	0xb9, 0x0f, 0x2f, 0x35, 0xcb, 0x1d, 0xf1, 0x66, 0xb9, 0x5f, 0xed, 0xcc, 0xf6, 0xc5, 0x47, 0xce,
-	0x6c, 0x53, 0x7d, 0x33, 0xdb, 0xfe, 0xd9, 0x6c, 0xea, 0xed, 0xc3, 0xc0, 0xdc, 0x3e, 0xfb, 0xdf,
-	0x28, 0x9c, 0x28, 0x60, 0x43, 0x93, 0x95, 0xeb, 0x3d, 0xff, 0x52, 0xf6, 0xfc, 0x3f, 0x51, 0x98,
-	0x78, 0x84, 0xd9, 0xf5, 0x7e, 0x7f, 0x19, 0xfb, 0xbd, 0xf6, 0x7b, 0x70, 0xfc, 0x41, 0x8c, 0xbc,
-	0xfb, 0x20, 0x46, 0x4e, 0x3f, 0x88, 0xe0, 0x4d, 0x5b, 0x04, 0x7f, 0x68, 0x8b, 0xe0, 0xaf, 0x6d,
-	0x11, 0x1c, 0xb7, 0x45, 0xf0, 0xae, 0x2d, 0x82, 0x7f, 0xb6, 0x45, 0xf0, 0xaf, 0xb6, 0x18, 0x39,
-	0x6d, 0x8b, 0xe0, 0xb7, 0x27, 0x62, 0xe4, 0xe8, 0x44, 0x04, 0xc7, 0x27, 0x62, 0xe4, 0xdd, 0x89,
-	0x18, 0x79, 0xf1, 0xb3, 0x2a, 0x35, 0x5e, 0x55, 0x73, 0x0d, 0xaa, 0x31, 0x6c, 0x9a, 0x72, 0xae,
-	0x6e, 0xe5, 0xf9, 0x8f, 0x0a, 0x35, 0x6b, 0x4b, 0x86, 0x49, 0x1b, 0x44, 0xc5, 0xe6, 0x52, 0xe5,
-	0xde, 0xbe, 0x92, 0x37, 0xca, 0x55, 0x9a, 0xc7, 0xfb, 0xcc, 0xfd, 0x74, 0x78, 0xf1, 0x97, 0xd4,
-	0x72, 0x9c, 0x7f, 0x51, 0xbc, 0xf3, 0xff, 0x00, 0x00, 0x00, 0xff, 0xff, 0xaf, 0x79, 0xdc, 0xf8,
-	0x7d, 0x1d, 0x00, 0x00,
+	// 1902 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xec, 0x5a, 0xcf, 0x8f, 0x1b, 0x49,
+	0x15, 0x9e, 0xda, 0xb1, 0x3d, 0x4e, 0x79, 0x7e, 0x78, 0x6a, 0x9c, 0xa4, 0xe7, 0x07, 0xce, 0xc8,
+	0x2c, 0x22, 0xbb, 0x10, 0x9b, 0x9d, 0xd9, 0x44, 0x22, 0x81, 0xa0, 0xcc, 0x0c, 0xda, 0x10, 0x65,
+	0xb2, 0x23, 0xdb, 0xbb, 0x08, 0x10, 0x6a, 0xda, 0xdd, 0x65, 0x4f, 0xed, 0xb4, 0x5d, 0x9d, 0xae,
+	0x6a, 0x27, 0x41, 0xb2, 0x94, 0x03, 0x48, 0xb0, 0x48, 0x80, 0xb8, 0xf1, 0x1f, 0x20, 0x9f, 0x38,
+	0x33, 0x1c, 0x22, 0x4e, 0x88, 0x0b, 0x73, 0x41, 0x8a, 0x38, 0x20, 0x32, 0xb9, 0x00, 0xa7, 0x95,
+	0x38, 0x71, 0x02, 0x55, 0x75, 0xb7, 0xed, 0x6e, 0xf7, 0x78, 0xda, 0xc1, 0x06, 0x69, 0x95, 0xd3,
+	0xd8, 0x5d, 0xef, 0xfb, 0xbe, 0x7a, 0xaf, 0x5e, 0x57, 0xbd, 0x9a, 0x67, 0x78, 0xbd, 0x8d, 0x59,
+	0x91, 0xd0, 0x12, 0xd3, 0x0f, 0x71, 0x53, 0x2b, 0xd5, 0x48, 0x43, 0x6f, 0xe1, 0x92, 0x66, 0x59,
+	0x26, 0xd1, 0x35, 0x4e, 0x68, 0x4b, 0xb5, 0x6c, 0x5a, 0x27, 0x26, 0x66, 0x25, 0xfe, 0xc4, 0xc2,
+	0xac, 0x68, 0xd9, 0x94, 0x53, 0xf4, 0x96, 0x0b, 0x2b, 0xba, 0xb0, 0xa2, 0x0b, 0x2b, 0x46, 0xc1,
+	0xd6, 0xae, 0x35, 0x08, 0x3f, 0x74, 0x6a, 0x45, 0x9d, 0x36, 0x4b, 0x0d, 0xda, 0xa0, 0x25, 0xc9,
+	0x50, 0x73, 0xea, 0xf2, 0x9b, 0xfc, 0x22, 0x3f, 0xb9, 0xcc, 0x6b, 0x57, 0x86, 0x26, 0x44, 0x2c,
+	0x75, 0x40, 0x7a, 0x6d, 0x3d, 0x68, 0x40, 0x2d, 0x21, 0xe7, 0x0f, 0xae, 0x06, 0x07, 0x07, 0x71,
+	0x1b, 0xc1, 0xa1, 0xb6, 0x66, 0x12, 0x43, 0xe3, 0xd8, 0x1b, 0xdd, 0x0c, 0x8d, 0x12, 0xfc, 0x48,
+	0x0d, 0x50, 0x17, 0xfe, 0x95, 0x80, 0x8b, 0xef, 0x99, 0xb4, 0xa6, 0x99, 0x15, 0x0b, 0xeb, 0xd5,
+	0x27, 0x16, 0x46, 0x2a, 0x9c, 0x37, 0x0c, 0xca, 0x7c, 0x5f, 0x15, 0xb0, 0x09, 0xae, 0x66, 0xb6,
+	0x6e, 0x14, 0x63, 0x07, 0xa7, 0xb8, 0xb7, 0x47, 0x2b, 0x07, 0xee, 0x97, 0x9d, 0xc4, 0xc9, 0x31,
+	0x00, 0xe5, 0x8c, 0x60, 0xf4, 0x1e, 0x21, 0x07, 0xe6, 0x34, 0xa3, 0xad, 0xb5, 0x74, 0x6c, 0xa8,
+	0x5c, 0xb7, 0x7a, 0x42, 0x6f, 0x48, 0xa1, 0xaf, 0x8e, 0x21, 0x74, 0xc7, 0xa3, 0xa9, 0xee, 0x1e,
+	0x04, 0xf5, 0x90, 0x2f, 0x50, 0xd5, 0x2d, 0x5f, 0xf6, 0x43, 0x98, 0x22, 0xb6, 0x63, 0x62, 0xa6,
+	0xcc, 0x6e, 0xce, 0x5e, 0xcd, 0x6c, 0x6d, 0x84, 0x84, 0xde, 0xaf, 0x7d, 0x84, 0x75, 0x5e, 0xc6,
+	0x75, 0x11, 0x85, 0x9d, 0xcd, 0x6e, 0x27, 0x29, 0xcd, 0x05, 0xdf, 0x6f, 0xfe, 0xfe, 0x6c, 0x36,
+	0xf9, 0x0b, 0xf0, 0x46, 0x36, 0xeb, 0x7f, 0x52, 0x40, 0xd9, 0x63, 0x43, 0x3a, 0x5c, 0x6c, 0x13,
+	0x9b, 0x3b, 0x9a, 0xa9, 0x32, 0x6c, 0xb7, 0xb1, 0xad, 0x24, 0xa4, 0x23, 0x5f, 0x19, 0xc3, 0x91,
+	0x0f, 0x5d, 0x82, 0x8a, 0xc4, 0x0b, 0xfd, 0xf2, 0x42, 0x7b, 0xf0, 0x11, 0xfa, 0x18, 0xc0, 0x9c,
+	0xd5, 0xac, 0xab, 0xdc, 0xd6, 0xea, 0x75, 0xa2, 0xab, 0x16, 0x35, 0x89, 0x4e, 0x30, 0x53, 0x52,
+	0x31, 0x7c, 0xb9, 0xd9, 0xed, 0xa0, 0x21, 0xf0, 0x93, 0x7f, 0x74, 0xa0, 0x81, 0x9b, 0xf4, 0x9d,
+	0x2f, 0x72, 0xcc, 0xf8, 0xd3, 0xdf, 0x0e, 0x78, 0xb9, 0x39, 0xe0, 0xa5, 0x00, 0x56, 0x5d, 0xdc,
+	0x81, 0xa7, 0x79, 0xf3, 0x6b, 0xbf, 0x3b, 0x06, 0xb7, 0xe0, 0x32, 0x9c, 0x17, 0x0b, 0xbd, 0xe9,
+	0xc7, 0x17, 0xbc, 0x03, 0x57, 0x61, 0xce, 0x5f, 0x92, 0xcd, 0xea, 0xee, 0x41, 0x7f, 0x68, 0x0b,
+	0x66, 0x60, 0x8a, 0x94, 0x65, 0xbc, 0xc0, 0xf6, 0xbd, 0x44, 0x3a, 0x99, 0x4d, 0x15, 0xfe, 0x8d,
+	0xe0, 0xf2, 0x90, 0xe3, 0x68, 0x1f, 0xe6, 0x82, 0xe1, 0x54, 0x19, 0xd7, 0xb8, 0x9f, 0x86, 0xeb,
+	0x21, 0x47, 0xab, 0xfb, 0xfb, 0x15, 0x31, 0x2c, 0x63, 0x86, 0x02, 0x31, 0x93, 0xcf, 0xd1, 0x2d,
+	0x98, 0xd5, 0x69, 0xab, 0x85, 0x75, 0x19, 0x70, 0x93, 0x34, 0x09, 0x97, 0x89, 0xb6, 0xb0, 0x93,
+	0xfd, 0xf3, 0x31, 0x00, 0x5f, 0x12, 0xae, 0xa6, 0xde, 0x4e, 0x28, 0xcf, 0xfe, 0xf8, 0x66, 0x79,
+	0xa9, 0x6f, 0x79, 0x5f, 0x18, 0xa2, 0x3d, 0x78, 0x71, 0x00, 0x6c, 0x6b, 0x1c, 0x7b, 0x0c, 0xb3,
+	0x67, 0x30, 0xac, 0xf4, 0xcd, 0xcb, 0x1a, 0xc7, 0x2e, 0x0b, 0x83, 0x6b, 0x91, 0x2c, 0x6a, 0x93,
+	0x1a, 0xd8, 0x4b, 0x96, 0x1b, 0xc3, 0x7e, 0x05, 0x42, 0xb3, 0x3b, 0xcc, 0xbb, 0x4f, 0x0d, 0x5c,
+	0xbe, 0xac, 0x47, 0x0f, 0xa0, 0x3a, 0x5c, 0xd1, 0x0c, 0xc3, 0xc6, 0x8c, 0x89, 0x65, 0x6f, 0x31,
+	0x53, 0x66, 0x9c, 0x92, 0x94, 0x6a, 0xd7, 0xcf, 0x51, 0xbb, 0xe3, 0x22, 0xab, 0x7d, 0xa0, 0x1b,
+	0x5f, 0x6d, 0xe8, 0x39, 0xfa, 0x2e, 0xcc, 0x5a, 0xd4, 0xe6, 0x01, 0x91, 0x94, 0x14, 0xd9, 0x3a,
+	0x47, 0xe4, 0x80, 0xda, 0x3c, 0xac, 0xb0, 0x64, 0x05, 0x1f, 0xa2, 0x07, 0x30, 0xc3, 0xa8, 0x63,
+	0xeb, 0x58, 0x15, 0x23, 0xca, 0x9c, 0x64, 0xbe, 0x76, 0x0e, 0x73, 0x45, 0x22, 0x24, 0xbf, 0x20,
+	0x85, 0xac, 0xf7, 0x1d, 0x95, 0xe1, 0x82, 0xe6, 0x70, 0xaa, 0x9a, 0x1a, 0xe3, 0xea, 0x21, 0xb5,
+	0x94, 0xb4, 0x64, 0x2c, 0x9e, 0x17, 0x10, 0x87, 0xd3, 0xfb, 0x1a, 0xe3, 0x77, 0xa9, 0x25, 0x29,
+	0x33, 0x5a, 0xff, 0x01, 0xba, 0x0d, 0x93, 0x2d, 0x8d, 0xdf, 0x78, 0x57, 0xb9, 0x20, 0xb9, 0xae,
+	0x9e, 0xc3, 0xf5, 0xe0, 0x4e, 0xf5, 0xc6, 0xbb, 0x92, 0xc5, 0x85, 0xa1, 0x2f, 0xc0, 0x74, 0x9b,
+	0xa9, 0x4c, 0xa7, 0x36, 0x56, 0xe0, 0x19, 0x89, 0x35, 0xd7, 0x66, 0x15, 0x61, 0x80, 0xbe, 0x0f,
+	0x37, 0x49, 0xb3, 0x89, 0x0d, 0x22, 0xd2, 0x48, 0x73, 0x53, 0x8a, 0xb6, 0xe4, 0xab, 0x42, 0x74,
+	0xac, 0x1a, 0xf4, 0x51, 0x4b, 0xc9, 0x9c, 0x15, 0xff, 0x6f, 0xf8, 0xc8, 0x3b, 0x12, 0xf8, 0x7e,
+	0xab, 0xe2, 0xc2, 0xf6, 0xe8, 0x23, 0x37, 0xfe, 0x1b, 0x64, 0x84, 0x05, 0x3a, 0x84, 0xcb, 0xba,
+	0x49, 0x5b, 0x62, 0x2d, 0xa8, 0xa9, 0xea, 0x26, 0xc1, 0x2d, 0xae, 0xcc, 0xc7, 0xd8, 0x80, 0xf2,
+	0xdd, 0xce, 0x9c, 0x6e, 0x3a, 0x8c, 0x63, 0xbb, 0xb7, 0xc9, 0x80, 0x81, 0x4d, 0x66, 0x49, 0xd2,
+	0x1e, 0x50, 0x6a, 0xee, 0x4a, 0xd2, 0x90, 0x92, 0xb7, 0xad, 0x2e, 0x4c, 0x54, 0xc9, 0xdb, 0x58,
+	0xc5, 0x69, 0x87, 0xeb, 0x9a, 0x63, 0x72, 0xa9, 0xa5, 0x2c, 0x4e, 0x40, 0x24, 0xe3, 0x31, 0x0a,
+	0x19, 0xf4, 0x3d, 0xb8, 0xe0, 0x27, 0x9b, 0xab, 0xb0, 0x34, 0x09, 0x05, 0xd3, 0xcd, 0x3d, 0xa9,
+	0xf0, 0x23, 0x00, 0xd7, 0x7b, 0x3e, 0x60, 0x9b, 0x11, 0xc6, 0x71, 0x4b, 0xbc, 0x31, 0xde, 0xb9,
+	0x9a, 0x8d, 0x21, 0xf8, 0x76, 0xb7, 0xb3, 0x12, 0x81, 0x8d, 0x14, 0x5f, 0xf5, 0xdd, 0xeb, 0xdb,
+	0xfb, 0x1b, 0xfd, 0xc7, 0x00, 0x6e, 0xd4, 0x35, 0xd3, 0xac, 0x69, 0xfa, 0x51, 0xe4, 0x5c, 0x96,
+	0x27, 0x3c, 0x97, 0x35, 0x5f, 0x2d, 0x62, 0x32, 0x3f, 0x00, 0xf0, 0xb2, 0x8d, 0x1f, 0x3a, 0x98,
+	0x71, 0xd5, 0xa4, 0x8d, 0x06, 0x69, 0x35, 0x7a, 0xf3, 0x40, 0x31, 0xe6, 0x51, 0xec, 0x76, 0xce,
+	0xc2, 0x47, 0xce, 0xe5, 0xa2, 0x67, 0x7c, 0xdf, 0xb5, 0xf5, 0xa7, 0x71, 0x00, 0x13, 0x87, 0x9c,
+	0x5b, 0x4a, 0x4e, 0xbe, 0x95, 0x37, 0xc7, 0xa8, 0x0a, 0xee, 0x56, 0xab, 0x7e, 0x5d, 0x23, 0x26,
+	0x74, 0x77, 0xa6, 0x2c, 0x99, 0x50, 0x19, 0x26, 0xc5, 0x5f, 0xa6, 0x5c, 0x9c, 0x00, 0xa5, 0x4b,
+	0x85, 0xf6, 0xe1, 0x2c, 0xd7, 0x2d, 0xe5, 0x92, 0x64, 0xfc, 0xf2, 0x18, 0x8c, 0xfd, 0xda, 0xcb,
+	0x23, 0x14, 0x3c, 0x82, 0xce, 0x31, 0x2c, 0xe5, 0xf2, 0xd8, 0x74, 0x1f, 0xec, 0x85, 0xe9, 0x1c,
+	0xc3, 0x42, 0x15, 0xd7, 0xe3, 0x6d, 0xe5, 0x33, 0x92, 0xf0, 0xd6, 0x98, 0x1e, 0x6f, 0x47, 0xb8,
+	0xbc, 0x8d, 0x34, 0x98, 0xa9, 0x93, 0xc7, 0xbd, 0x94, 0x50, 0x62, 0xa4, 0x44, 0xa1, 0xdb, 0x19,
+	0xc4, 0x44, 0xa6, 0x01, 0xac, 0x93, 0xc7, 0xfe, 0xda, 0xb7, 0x21, 0x12, 0xd5, 0x0b, 0x61, 0x9c,
+	0xe8, 0xfd, 0x8a, 0x7a, 0x35, 0x86, 0xd2, 0x5b, 0xdd, 0x4e, 0x04, 0x34, 0x52, 0x70, 0xb9, 0x6f,
+	0xe7, 0x57, 0xc1, 0x57, 0xe0, 0x4a, 0xa8, 0x88, 0x12, 0x97, 0x06, 0x94, 0x7e, 0x76, 0x0c, 0x72,
+	0x27, 0xc7, 0x60, 0xe5, 0x5e, 0x22, 0xbd, 0x92, 0xcd, 0x15, 0x7e, 0x9c, 0x81, 0x4b, 0xa1, 0x8c,
+	0x40, 0x2d, 0x88, 0x44, 0x51, 0xee, 0xee, 0xee, 0x03, 0x97, 0x80, 0x78, 0xc1, 0x19, 0xa8, 0xe7,
+	0x23, 0xe7, 0x9a, 0xe5, 0xba, 0xe5, 0xee, 0xf1, 0x7e, 0x88, 0x3c, 0x3d, 0x6f, 0x9a, 0xfd, 0xbb,
+	0xc0, 0xe4, 0xf4, 0xbc, 0x72, 0xc3, 0xd3, 0x7b, 0x08, 0x57, 0xc4, 0xf2, 0x87, 0x1d, 0x8c, 0x73,
+	0x27, 0xf8, 0x6c, 0xb7, 0x33, 0x2f, 0xb1, 0x23, 0x57, 0x43, 0x58, 0x04, 0x5d, 0xf4, 0x25, 0x43,
+	0x3e, 0x26, 0x26, 0x2a, 0x19, 0xf4, 0xf2, 0x23, 0xb8, 0xc8, 0xb8, 0x8d, 0xb5, 0x66, 0x4f, 0x2d,
+	0x19, 0x43, 0xed, 0x73, 0xdd, 0x4e, 0x08, 0x16, 0xa9, 0xb7, 0xe0, 0xda, 0xf8, 0x5a, 0x4f, 0x01,
+	0x54, 0x1e, 0xe1, 0x1a, 0xa3, 0xfa, 0x11, 0xe6, 0xe1, 0xb8, 0xc6, 0xb9, 0x9f, 0x5c, 0xed, 0x76,
+	0x96, 0xfb, 0x04, 0xa3, 0x94, 0x2f, 0xf5, 0xcc, 0x82, 0x11, 0x0e, 0x4e, 0x21, 0x14, 0xe7, 0xb9,
+	0x29, 0x4d, 0x21, 0x18, 0x71, 0x0e, 0x73, 0x62, 0x19, 0xb6, 0xc2, 0x01, 0x48, 0xc7, 0x50, 0x7f,
+	0xb3, 0xdb, 0x59, 0x70, 0xc1, 0xa3, 0x94, 0x91, 0x34, 0x09, 0x3a, 0xde, 0x53, 0x0d, 0xf9, 0x7c,
+	0x61, 0xc2, 0xaa, 0x41, 0x5f, 0x1d, 0x88, 0x3c, 0x2f, 0x19, 0x33, 0x7b, 0x9a, 0x30, 0xee, 0xb6,
+	0xc6, 0xcc, 0x50, 0x90, 0x22, 0x6f, 0x9e, 0x59, 0xd7, 0xa6, 0xc2, 0xcc, 0x01, 0x59, 0xff, 0x4a,
+	0x38, 0x20, 0x9b, 0x19, 0x43, 0x36, 0x18, 0xa5, 0x68, 0x59, 0xd7, 0x66, 0x40, 0xd6, 0x80, 0xf3,
+	0x54, 0x67, 0xfd, 0xff, 0x53, 0xcc, 0xc7, 0x7c, 0x6f, 0x07, 0x41, 0xd1, 0x55, 0x9c, 0xb0, 0xf0,
+	0x54, 0x0a, 0xbf, 0x4e, 0xc0, 0xc5, 0xe0, 0x59, 0xfa, 0xa9, 0xdf, 0x8a, 0x8f, 0x22, 0xd3, 0x28,
+	0xce, 0x4e, 0x7c, 0x65, 0x64, 0x1a, 0x45, 0x26, 0xcf, 0x51, 0x64, 0xf2, 0x24, 0xc6, 0x10, 0x8b,
+	0x4e, 0x9e, 0x58, 0x29, 0x93, 0x9c, 0x4a, 0xca, 0xfc, 0x30, 0x0d, 0xb3, 0xe1, 0xf2, 0x46, 0x2c,
+	0xa2, 0x63, 0xbc, 0x72, 0xd2, 0x08, 0xe8, 0xc8, 0x45, 0x74, 0x8c, 0xe1, 0xa4, 0x11, 0xa0, 0x57,
+	0x4c, 0x9a, 0x38, 0x7a, 0xc1, 0xa4, 0x31, 0xe0, 0xfc, 0x43, 0x87, 0xe8, 0x63, 0x1f, 0xdc, 0x83,
+	0xa0, 0xe8, 0xd0, 0x0a, 0x0b, 0x5f, 0xa5, 0x01, 0xe5, 0xd6, 0xb8, 0x3d, 0x56, 0xa2, 0xf8, 0x1b,
+	0xea, 0xf6, 0x48, 0x1d, 0x79, 0x9e, 0x6f, 0x9f, 0x53, 0x1b, 0x24, 0xa7, 0x58, 0x1b, 0x9c, 0x51,
+	0x01, 0xa5, 0xa6, 0x58, 0x01, 0x45, 0xef, 0x2c, 0x73, 0x53, 0xdb, 0x59, 0xa2, 0x0f, 0xa8, 0xf4,
+	0xff, 0xe7, 0x80, 0xba, 0x30, 0xe5, 0x03, 0xaa, 0xf0, 0x97, 0x59, 0xb8, 0x18, 0xbc, 0x37, 0x7d,
+	0xea, 0x77, 0x01, 0xe7, 0x95, 0x8f, 0x8e, 0x29, 0x2c, 0x70, 0x62, 0xda, 0x0b, 0xfc, 0x27, 0x00,
+	0x33, 0x03, 0x4d, 0x15, 0x74, 0x1f, 0x5e, 0xc2, 0x2d, 0xad, 0x66, 0x62, 0x55, 0x76, 0x6a, 0x9a,
+	0x84, 0x93, 0x86, 0xfb, 0xaf, 0x57, 0xb7, 0x87, 0x92, 0x0b, 0x4d, 0xe5, 0xeb, 0x4d, 0x8b, 0x3f,
+	0xb9, 0x3b, 0x53, 0xce, 0xb9, 0xa8, 0x3d, 0x83, 0xb2, 0xfd, 0x1e, 0x06, 0x3d, 0x80, 0x97, 0x0d,
+	0xc2, 0x22, 0xe9, 0x66, 0x47, 0xd2, 0x5d, 0xf4, 0x60, 0x41, 0xbe, 0x9d, 0x02, 0xbc, 0x14, 0xe2,
+	0x51, 0xf5, 0x43, 0x4a, 0x74, 0xf7, 0xfe, 0x39, 0x7b, 0x72, 0x0c, 0xc0, 0xbd, 0x44, 0x1a, 0x64,
+	0xdf, 0x28, 0xfc, 0x13, 0x40, 0x34, 0xdc, 0xc3, 0x41, 0x1f, 0xc0, 0x75, 0xcf, 0x3d, 0xf1, 0xe6,
+	0xf7, 0x7a, 0x45, 0xc1, 0x3e, 0xd1, 0x59, 0x93, 0x52, 0x5c, 0x68, 0x55, 0xb7, 0x7c, 0x66, 0x9f,
+	0xf6, 0x9b, 0x70, 0xc3, 0xf7, 0x33, 0x92, 0x77, 0xb4, 0xb3, 0xab, 0x1e, 0x76, 0x98, 0x78, 0xe7,
+	0xf3, 0x70, 0x3d, 0x8a, 0xf0, 0x2c, 0xaf, 0x7f, 0x9a, 0x80, 0x8b, 0xbb, 0x36, 0xd6, 0x38, 0xee,
+	0xf5, 0xdc, 0xbe, 0x35, 0xc9, 0x9e, 0x5b, 0xb0, 0xdb, 0x46, 0xa7, 0xd8, 0x6d, 0x8b, 0xec, 0xb3,
+	0xdd, 0x1e, 0xab, 0xcf, 0x96, 0xf6, 0xfb, 0x6c, 0xff, 0xdb, 0x7e, 0x9a, 0xfd, 0x5f, 0xb4, 0xd3,
+	0x0a, 0xe7, 0xb7, 0xd3, 0x22, 0xdb, 0x66, 0xcb, 0x7f, 0xb8, 0x1d, 0xea, 0xb5, 0x7a, 0x8d, 0xb0,
+	0x9f, 0x25, 0xe0, 0x52, 0x19, 0x5b, 0xa6, 0xa6, 0xbf, 0xce, 0x88, 0xd7, 0x19, 0x21, 0x32, 0xe2,
+	0x27, 0x09, 0x98, 0x79, 0x0f, 0xf3, 0xd7, 0xd9, 0xf0, 0x3a, 0x1b, 0xb2, 0xa9, 0x9d, 0x5f, 0x82,
+	0x93, 0x17, 0xf9, 0x99, 0xe7, 0x2f, 0xf2, 0x33, 0x9f, 0xbc, 0xc8, 0x83, 0xa7, 0xa7, 0x79, 0xf0,
+	0xab, 0xd3, 0x3c, 0xf8, 0xfd, 0x69, 0x1e, 0x9c, 0x9c, 0xe6, 0xc1, 0xf3, 0xd3, 0x3c, 0xf8, 0xeb,
+	0x69, 0x1e, 0xfc, 0xed, 0x34, 0x3f, 0xf3, 0xc9, 0x69, 0x1e, 0xfc, 0xfc, 0x65, 0x7e, 0xe6, 0xd9,
+	0xcb, 0x3c, 0x38, 0x79, 0x99, 0x9f, 0x79, 0xfe, 0x32, 0x3f, 0xf3, 0xed, 0xef, 0x34, 0xa8, 0x75,
+	0xd4, 0x28, 0xb6, 0xa9, 0xc9, 0xb1, 0x6d, 0x6b, 0x45, 0x87, 0x95, 0xe4, 0x87, 0x3a, 0xb5, 0x9b,
+	0xd7, 0x2c, 0x9b, 0xb6, 0x89, 0x81, 0xed, 0x6b, 0xf5, 0xeb, 0x8f, 0xf5, 0x92, 0x55, 0x6b, 0xd0,
+	0x12, 0x7e, 0xcc, 0xbd, 0x1f, 0x8c, 0x9c, 0xff, 0xfb, 0x99, 0x5a, 0x4a, 0xfe, 0x8e, 0x64, 0xfb,
+	0x3f, 0x01, 0x00, 0x00, 0xff, 0xff, 0x01, 0x95, 0x7d, 0x8b, 0x73, 0x23, 0x00, 0x00,
 }
 
 func (this *GlobalSpecType) Equal(that interface{}) bool {
@@ -1400,11 +1559,11 @@ func (this *GlobalSpecType) Equal(that interface{}) bool {
 	if !this.VirtualServer.Equal(that1.VirtualServer) {
 		return false
 	}
-	if len(this.TrafficPolicies) != len(that1.TrafficPolicies) {
+	if len(this.PmfTrafficPolicies) != len(that1.PmfTrafficPolicies) {
 		return false
 	}
-	for i := range this.TrafficPolicies {
-		if !this.TrafficPolicies[i].Equal(that1.TrafficPolicies[i]) {
+	for i := range this.PmfTrafficPolicies {
+		if !this.PmfTrafficPolicies[i].Equal(that1.PmfTrafficPolicies[i]) {
 			return false
 		}
 	}
@@ -1641,14 +1800,14 @@ func (this *VirtualServerType_Udp) Equal(that interface{}) bool {
 	}
 	return true
 }
-func (this *HTTPSProfileType) Equal(that interface{}) bool {
+func (this *VirtualServerType_Http3) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
 	}
 
-	that1, ok := that.(*HTTPSProfileType)
+	that1, ok := that.(*VirtualServerType_Http3)
 	if !ok {
-		that2, ok := that.(HTTPSProfileType)
+		that2, ok := that.(VirtualServerType_Http3)
 		if ok {
 			that1 = &that2
 		} else {
@@ -1660,135 +1819,8 @@ func (this *HTTPSProfileType) Equal(that interface{}) bool {
 	} else if this == nil {
 		return false
 	}
-	if len(this.TcpClientProfile) != len(that1.TcpClientProfile) {
+	if !this.Http3.Equal(that1.Http3) {
 		return false
-	}
-	for i := range this.TcpClientProfile {
-		if !this.TcpClientProfile[i].Equal(that1.TcpClientProfile[i]) {
-			return false
-		}
-	}
-	if len(this.TcpServerProfile) != len(that1.TcpServerProfile) {
-		return false
-	}
-	for i := range this.TcpServerProfile {
-		if !this.TcpServerProfile[i].Equal(that1.TcpServerProfile[i]) {
-			return false
-		}
-	}
-	if len(this.HttpClientProfile) != len(that1.HttpClientProfile) {
-		return false
-	}
-	for i := range this.HttpClientProfile {
-		if !this.HttpClientProfile[i].Equal(that1.HttpClientProfile[i]) {
-			return false
-		}
-	}
-	if len(this.HttpServerProfile) != len(that1.HttpServerProfile) {
-		return false
-	}
-	for i := range this.HttpServerProfile {
-		if !this.HttpServerProfile[i].Equal(that1.HttpServerProfile[i]) {
-			return false
-		}
-	}
-	if len(this.StreamProfile) != len(that1.StreamProfile) {
-		return false
-	}
-	for i := range this.StreamProfile {
-		if !this.StreamProfile[i].Equal(that1.StreamProfile[i]) {
-			return false
-		}
-	}
-	if len(this.WebsocketClientProfile) != len(that1.WebsocketClientProfile) {
-		return false
-	}
-	for i := range this.WebsocketClientProfile {
-		if !this.WebsocketClientProfile[i].Equal(that1.WebsocketClientProfile[i]) {
-			return false
-		}
-	}
-	if len(this.WebsocketServerProfile) != len(that1.WebsocketServerProfile) {
-		return false
-	}
-	for i := range this.WebsocketServerProfile {
-		if !this.WebsocketServerProfile[i].Equal(that1.WebsocketServerProfile[i]) {
-			return false
-		}
-	}
-	return true
-}
-func (this *TCPProfileType) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*TCPProfileType)
-	if !ok {
-		that2, ok := that.(TCPProfileType)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if len(this.TcpClientProfile) != len(that1.TcpClientProfile) {
-		return false
-	}
-	for i := range this.TcpClientProfile {
-		if !this.TcpClientProfile[i].Equal(that1.TcpClientProfile[i]) {
-			return false
-		}
-	}
-	if len(this.TcpServerProfile) != len(that1.TcpServerProfile) {
-		return false
-	}
-	for i := range this.TcpServerProfile {
-		if !this.TcpServerProfile[i].Equal(that1.TcpServerProfile[i]) {
-			return false
-		}
-	}
-	return true
-}
-func (this *UDPProfileType) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*UDPProfileType)
-	if !ok {
-		that2, ok := that.(UDPProfileType)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if len(this.TcpClientProfile) != len(that1.TcpClientProfile) {
-		return false
-	}
-	for i := range this.TcpClientProfile {
-		if !this.TcpClientProfile[i].Equal(that1.TcpClientProfile[i]) {
-			return false
-		}
-	}
-	if len(this.TcpServerProfile) != len(that1.TcpServerProfile) {
-		return false
-	}
-	for i := range this.TcpServerProfile {
-		if !this.TcpServerProfile[i].Equal(that1.TcpServerProfile[i]) {
-			return false
-		}
 	}
 	return true
 }
@@ -1864,6 +1896,253 @@ func (this *HTTPProfileType) Equal(that interface{}) bool {
 	}
 	for i := range this.WebsocketServerProfile {
 		if !this.WebsocketServerProfile[i].Equal(that1.WebsocketServerProfile[i]) {
+			return false
+		}
+	}
+	if len(this.Http2ClientProfile) != len(that1.Http2ClientProfile) {
+		return false
+	}
+	for i := range this.Http2ClientProfile {
+		if !this.Http2ClientProfile[i].Equal(that1.Http2ClientProfile[i]) {
+			return false
+		}
+	}
+	if len(this.Http2ServerProfile) != len(that1.Http2ServerProfile) {
+		return false
+	}
+	for i := range this.Http2ServerProfile {
+		if !this.Http2ServerProfile[i].Equal(that1.Http2ServerProfile[i]) {
+			return false
+		}
+	}
+	if len(this.ClientSslProfile) != len(that1.ClientSslProfile) {
+		return false
+	}
+	for i := range this.ClientSslProfile {
+		if !this.ClientSslProfile[i].Equal(that1.ClientSslProfile[i]) {
+			return false
+		}
+	}
+	if len(this.ServerSslProfile) != len(that1.ServerSslProfile) {
+		return false
+	}
+	for i := range this.ServerSslProfile {
+		if !this.ServerSslProfile[i].Equal(that1.ServerSslProfile[i]) {
+			return false
+		}
+	}
+	if len(this.OcspProfile) != len(that1.OcspProfile) {
+		return false
+	}
+	for i := range this.OcspProfile {
+		if !this.OcspProfile[i].Equal(that1.OcspProfile[i]) {
+			return false
+		}
+	}
+	return true
+}
+func (this *TCPProfileType) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*TCPProfileType)
+	if !ok {
+		that2, ok := that.(TCPProfileType)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if len(this.TcpClientProfile) != len(that1.TcpClientProfile) {
+		return false
+	}
+	for i := range this.TcpClientProfile {
+		if !this.TcpClientProfile[i].Equal(that1.TcpClientProfile[i]) {
+			return false
+		}
+	}
+	if len(this.TcpServerProfile) != len(that1.TcpServerProfile) {
+		return false
+	}
+	for i := range this.TcpServerProfile {
+		if !this.TcpServerProfile[i].Equal(that1.TcpServerProfile[i]) {
+			return false
+		}
+	}
+	if len(this.ClientSslProfile) != len(that1.ClientSslProfile) {
+		return false
+	}
+	for i := range this.ClientSslProfile {
+		if !this.ClientSslProfile[i].Equal(that1.ClientSslProfile[i]) {
+			return false
+		}
+	}
+	if len(this.ServerSslProfile) != len(that1.ServerSslProfile) {
+		return false
+	}
+	for i := range this.ServerSslProfile {
+		if !this.ServerSslProfile[i].Equal(that1.ServerSslProfile[i]) {
+			return false
+		}
+	}
+	if len(this.OcspProfile) != len(that1.OcspProfile) {
+		return false
+	}
+	for i := range this.OcspProfile {
+		if !this.OcspProfile[i].Equal(that1.OcspProfile[i]) {
+			return false
+		}
+	}
+	return true
+}
+func (this *HTTP3ProfileType) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*HTTP3ProfileType)
+	if !ok {
+		that2, ok := that.(HTTP3ProfileType)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if len(this.UdpClientProfile) != len(that1.UdpClientProfile) {
+		return false
+	}
+	for i := range this.UdpClientProfile {
+		if !this.UdpClientProfile[i].Equal(that1.UdpClientProfile[i]) {
+			return false
+		}
+	}
+	if len(this.UdpServerProfile) != len(that1.UdpServerProfile) {
+		return false
+	}
+	for i := range this.UdpServerProfile {
+		if !this.UdpServerProfile[i].Equal(that1.UdpServerProfile[i]) {
+			return false
+		}
+	}
+	if len(this.QuicProfile) != len(that1.QuicProfile) {
+		return false
+	}
+	for i := range this.QuicProfile {
+		if !this.QuicProfile[i].Equal(that1.QuicProfile[i]) {
+			return false
+		}
+	}
+	if len(this.Http3Profile) != len(that1.Http3Profile) {
+		return false
+	}
+	for i := range this.Http3Profile {
+		if !this.Http3Profile[i].Equal(that1.Http3Profile[i]) {
+			return false
+		}
+	}
+	if len(this.HttpServerProfile) != len(that1.HttpServerProfile) {
+		return false
+	}
+	for i := range this.HttpServerProfile {
+		if !this.HttpServerProfile[i].Equal(that1.HttpServerProfile[i]) {
+			return false
+		}
+	}
+	if len(this.HttpClientProfile) != len(that1.HttpClientProfile) {
+		return false
+	}
+	for i := range this.HttpClientProfile {
+		if !this.HttpClientProfile[i].Equal(that1.HttpClientProfile[i]) {
+			return false
+		}
+	}
+	if len(this.TcpServerProfile) != len(that1.TcpServerProfile) {
+		return false
+	}
+	for i := range this.TcpServerProfile {
+		if !this.TcpServerProfile[i].Equal(that1.TcpServerProfile[i]) {
+			return false
+		}
+	}
+	if len(this.ClientSslProfile) != len(that1.ClientSslProfile) {
+		return false
+	}
+	for i := range this.ClientSslProfile {
+		if !this.ClientSslProfile[i].Equal(that1.ClientSslProfile[i]) {
+			return false
+		}
+	}
+	if len(this.ServerSslProfile) != len(that1.ServerSslProfile) {
+		return false
+	}
+	for i := range this.ServerSslProfile {
+		if !this.ServerSslProfile[i].Equal(that1.ServerSslProfile[i]) {
+			return false
+		}
+	}
+	return true
+}
+func (this *UDPProfileType) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*UDPProfileType)
+	if !ok {
+		that2, ok := that.(UDPProfileType)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if len(this.UdpClientProfile) != len(that1.UdpClientProfile) {
+		return false
+	}
+	for i := range this.UdpClientProfile {
+		if !this.UdpClientProfile[i].Equal(that1.UdpClientProfile[i]) {
+			return false
+		}
+	}
+	if len(this.UdpServerProfile) != len(that1.UdpServerProfile) {
+		return false
+	}
+	for i := range this.UdpServerProfile {
+		if !this.UdpServerProfile[i].Equal(that1.UdpServerProfile[i]) {
+			return false
+		}
+	}
+	if len(this.ClientSslProfile) != len(that1.ClientSslProfile) {
+		return false
+	}
+	for i := range this.ClientSslProfile {
+		if !this.ClientSslProfile[i].Equal(that1.ClientSslProfile[i]) {
+			return false
+		}
+	}
+	if len(this.ServerSslProfile) != len(that1.ServerSslProfile) {
+		return false
+	}
+	for i := range this.ServerSslProfile {
+		if !this.ServerSslProfile[i].Equal(that1.ServerSslProfile[i]) {
 			return false
 		}
 	}
@@ -2061,11 +2340,11 @@ func (this *CreateSpecType) Equal(that interface{}) bool {
 	if !this.VirtualServer.Equal(that1.VirtualServer) {
 		return false
 	}
-	if len(this.TrafficPolicies) != len(that1.TrafficPolicies) {
+	if len(this.PmfTrafficPolicies) != len(that1.PmfTrafficPolicies) {
 		return false
 	}
-	for i := range this.TrafficPolicies {
-		if !this.TrafficPolicies[i].Equal(that1.TrafficPolicies[i]) {
+	for i := range this.PmfTrafficPolicies {
+		if !this.PmfTrafficPolicies[i].Equal(that1.PmfTrafficPolicies[i]) {
 			return false
 		}
 	}
@@ -2107,11 +2386,11 @@ func (this *ReplaceSpecType) Equal(that interface{}) bool {
 	if !this.VirtualServer.Equal(that1.VirtualServer) {
 		return false
 	}
-	if len(this.TrafficPolicies) != len(that1.TrafficPolicies) {
+	if len(this.PmfTrafficPolicies) != len(that1.PmfTrafficPolicies) {
 		return false
 	}
-	for i := range this.TrafficPolicies {
-		if !this.TrafficPolicies[i].Equal(that1.TrafficPolicies[i]) {
+	for i := range this.PmfTrafficPolicies {
+		if !this.PmfTrafficPolicies[i].Equal(that1.PmfTrafficPolicies[i]) {
 			return false
 		}
 	}
@@ -2153,11 +2432,11 @@ func (this *GetSpecType) Equal(that interface{}) bool {
 	if !this.VirtualServer.Equal(that1.VirtualServer) {
 		return false
 	}
-	if len(this.TrafficPolicies) != len(that1.TrafficPolicies) {
+	if len(this.PmfTrafficPolicies) != len(that1.PmfTrafficPolicies) {
 		return false
 	}
-	for i := range this.TrafficPolicies {
-		if !this.TrafficPolicies[i].Equal(that1.TrafficPolicies[i]) {
+	for i := range this.PmfTrafficPolicies {
+		if !this.PmfTrafficPolicies[i].Equal(that1.PmfTrafficPolicies[i]) {
 			return false
 		}
 	}
@@ -2181,8 +2460,8 @@ func (this *GlobalSpecType) GoString() string {
 	if this.VirtualServer != nil {
 		s = append(s, "VirtualServer: "+fmt.Sprintf("%#v", this.VirtualServer)+",\n")
 	}
-	if this.TrafficPolicies != nil {
-		s = append(s, "TrafficPolicies: "+fmt.Sprintf("%#v", this.TrafficPolicies)+",\n")
+	if this.PmfTrafficPolicies != nil {
+		s = append(s, "PmfTrafficPolicies: "+fmt.Sprintf("%#v", this.PmfTrafficPolicies)+",\n")
 	}
 	s = append(s, "}")
 	return strings.Join(s, "")
@@ -2191,7 +2470,7 @@ func (this *VirtualServerType) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 28)
+	s := make([]string, 0, 29)
 	s = append(s, "&application_profiles.VirtualServerType{")
 	if this.VirtualServerState != nil {
 		s = append(s, "VirtualServerState: "+fmt.Sprintf("%#v", this.VirtualServerState)+",\n")
@@ -2285,71 +2564,19 @@ func (this *VirtualServerType_Udp) GoString() string {
 		`Udp:` + fmt.Sprintf("%#v", this.Udp) + `}`}, ", ")
 	return s
 }
-func (this *HTTPSProfileType) GoString() string {
+func (this *VirtualServerType_Http3) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 11)
-	s = append(s, "&application_profiles.HTTPSProfileType{")
-	if this.TcpClientProfile != nil {
-		s = append(s, "TcpClientProfile: "+fmt.Sprintf("%#v", this.TcpClientProfile)+",\n")
-	}
-	if this.TcpServerProfile != nil {
-		s = append(s, "TcpServerProfile: "+fmt.Sprintf("%#v", this.TcpServerProfile)+",\n")
-	}
-	if this.HttpClientProfile != nil {
-		s = append(s, "HttpClientProfile: "+fmt.Sprintf("%#v", this.HttpClientProfile)+",\n")
-	}
-	if this.HttpServerProfile != nil {
-		s = append(s, "HttpServerProfile: "+fmt.Sprintf("%#v", this.HttpServerProfile)+",\n")
-	}
-	if this.StreamProfile != nil {
-		s = append(s, "StreamProfile: "+fmt.Sprintf("%#v", this.StreamProfile)+",\n")
-	}
-	if this.WebsocketClientProfile != nil {
-		s = append(s, "WebsocketClientProfile: "+fmt.Sprintf("%#v", this.WebsocketClientProfile)+",\n")
-	}
-	if this.WebsocketServerProfile != nil {
-		s = append(s, "WebsocketServerProfile: "+fmt.Sprintf("%#v", this.WebsocketServerProfile)+",\n")
-	}
-	s = append(s, "}")
-	return strings.Join(s, "")
-}
-func (this *TCPProfileType) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := make([]string, 0, 6)
-	s = append(s, "&application_profiles.TCPProfileType{")
-	if this.TcpClientProfile != nil {
-		s = append(s, "TcpClientProfile: "+fmt.Sprintf("%#v", this.TcpClientProfile)+",\n")
-	}
-	if this.TcpServerProfile != nil {
-		s = append(s, "TcpServerProfile: "+fmt.Sprintf("%#v", this.TcpServerProfile)+",\n")
-	}
-	s = append(s, "}")
-	return strings.Join(s, "")
-}
-func (this *UDPProfileType) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := make([]string, 0, 6)
-	s = append(s, "&application_profiles.UDPProfileType{")
-	if this.TcpClientProfile != nil {
-		s = append(s, "TcpClientProfile: "+fmt.Sprintf("%#v", this.TcpClientProfile)+",\n")
-	}
-	if this.TcpServerProfile != nil {
-		s = append(s, "TcpServerProfile: "+fmt.Sprintf("%#v", this.TcpServerProfile)+",\n")
-	}
-	s = append(s, "}")
-	return strings.Join(s, "")
+	s := strings.Join([]string{`&application_profiles.VirtualServerType_Http3{` +
+		`Http3:` + fmt.Sprintf("%#v", this.Http3) + `}`}, ", ")
+	return s
 }
 func (this *HTTPProfileType) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 11)
+	s := make([]string, 0, 16)
 	s = append(s, "&application_profiles.HTTPProfileType{")
 	if this.TcpClientProfile != nil {
 		s = append(s, "TcpClientProfile: "+fmt.Sprintf("%#v", this.TcpClientProfile)+",\n")
@@ -2371,6 +2598,102 @@ func (this *HTTPProfileType) GoString() string {
 	}
 	if this.WebsocketServerProfile != nil {
 		s = append(s, "WebsocketServerProfile: "+fmt.Sprintf("%#v", this.WebsocketServerProfile)+",\n")
+	}
+	if this.Http2ClientProfile != nil {
+		s = append(s, "Http2ClientProfile: "+fmt.Sprintf("%#v", this.Http2ClientProfile)+",\n")
+	}
+	if this.Http2ServerProfile != nil {
+		s = append(s, "Http2ServerProfile: "+fmt.Sprintf("%#v", this.Http2ServerProfile)+",\n")
+	}
+	if this.ClientSslProfile != nil {
+		s = append(s, "ClientSslProfile: "+fmt.Sprintf("%#v", this.ClientSslProfile)+",\n")
+	}
+	if this.ServerSslProfile != nil {
+		s = append(s, "ServerSslProfile: "+fmt.Sprintf("%#v", this.ServerSslProfile)+",\n")
+	}
+	if this.OcspProfile != nil {
+		s = append(s, "OcspProfile: "+fmt.Sprintf("%#v", this.OcspProfile)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *TCPProfileType) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 9)
+	s = append(s, "&application_profiles.TCPProfileType{")
+	if this.TcpClientProfile != nil {
+		s = append(s, "TcpClientProfile: "+fmt.Sprintf("%#v", this.TcpClientProfile)+",\n")
+	}
+	if this.TcpServerProfile != nil {
+		s = append(s, "TcpServerProfile: "+fmt.Sprintf("%#v", this.TcpServerProfile)+",\n")
+	}
+	if this.ClientSslProfile != nil {
+		s = append(s, "ClientSslProfile: "+fmt.Sprintf("%#v", this.ClientSslProfile)+",\n")
+	}
+	if this.ServerSslProfile != nil {
+		s = append(s, "ServerSslProfile: "+fmt.Sprintf("%#v", this.ServerSslProfile)+",\n")
+	}
+	if this.OcspProfile != nil {
+		s = append(s, "OcspProfile: "+fmt.Sprintf("%#v", this.OcspProfile)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *HTTP3ProfileType) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 13)
+	s = append(s, "&application_profiles.HTTP3ProfileType{")
+	if this.UdpClientProfile != nil {
+		s = append(s, "UdpClientProfile: "+fmt.Sprintf("%#v", this.UdpClientProfile)+",\n")
+	}
+	if this.UdpServerProfile != nil {
+		s = append(s, "UdpServerProfile: "+fmt.Sprintf("%#v", this.UdpServerProfile)+",\n")
+	}
+	if this.QuicProfile != nil {
+		s = append(s, "QuicProfile: "+fmt.Sprintf("%#v", this.QuicProfile)+",\n")
+	}
+	if this.Http3Profile != nil {
+		s = append(s, "Http3Profile: "+fmt.Sprintf("%#v", this.Http3Profile)+",\n")
+	}
+	if this.HttpServerProfile != nil {
+		s = append(s, "HttpServerProfile: "+fmt.Sprintf("%#v", this.HttpServerProfile)+",\n")
+	}
+	if this.HttpClientProfile != nil {
+		s = append(s, "HttpClientProfile: "+fmt.Sprintf("%#v", this.HttpClientProfile)+",\n")
+	}
+	if this.TcpServerProfile != nil {
+		s = append(s, "TcpServerProfile: "+fmt.Sprintf("%#v", this.TcpServerProfile)+",\n")
+	}
+	if this.ClientSslProfile != nil {
+		s = append(s, "ClientSslProfile: "+fmt.Sprintf("%#v", this.ClientSslProfile)+",\n")
+	}
+	if this.ServerSslProfile != nil {
+		s = append(s, "ServerSslProfile: "+fmt.Sprintf("%#v", this.ServerSslProfile)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *UDPProfileType) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 8)
+	s = append(s, "&application_profiles.UDPProfileType{")
+	if this.UdpClientProfile != nil {
+		s = append(s, "UdpClientProfile: "+fmt.Sprintf("%#v", this.UdpClientProfile)+",\n")
+	}
+	if this.UdpServerProfile != nil {
+		s = append(s, "UdpServerProfile: "+fmt.Sprintf("%#v", this.UdpServerProfile)+",\n")
+	}
+	if this.ClientSslProfile != nil {
+		s = append(s, "ClientSslProfile: "+fmt.Sprintf("%#v", this.ClientSslProfile)+",\n")
+	}
+	if this.ServerSslProfile != nil {
+		s = append(s, "ServerSslProfile: "+fmt.Sprintf("%#v", this.ServerSslProfile)+",\n")
 	}
 	s = append(s, "}")
 	return strings.Join(s, "")
@@ -2449,8 +2772,8 @@ func (this *CreateSpecType) GoString() string {
 	if this.VirtualServer != nil {
 		s = append(s, "VirtualServer: "+fmt.Sprintf("%#v", this.VirtualServer)+",\n")
 	}
-	if this.TrafficPolicies != nil {
-		s = append(s, "TrafficPolicies: "+fmt.Sprintf("%#v", this.TrafficPolicies)+",\n")
+	if this.PmfTrafficPolicies != nil {
+		s = append(s, "PmfTrafficPolicies: "+fmt.Sprintf("%#v", this.PmfTrafficPolicies)+",\n")
 	}
 	s = append(s, "}")
 	return strings.Join(s, "")
@@ -2473,8 +2796,8 @@ func (this *ReplaceSpecType) GoString() string {
 	if this.VirtualServer != nil {
 		s = append(s, "VirtualServer: "+fmt.Sprintf("%#v", this.VirtualServer)+",\n")
 	}
-	if this.TrafficPolicies != nil {
-		s = append(s, "TrafficPolicies: "+fmt.Sprintf("%#v", this.TrafficPolicies)+",\n")
+	if this.PmfTrafficPolicies != nil {
+		s = append(s, "PmfTrafficPolicies: "+fmt.Sprintf("%#v", this.PmfTrafficPolicies)+",\n")
 	}
 	s = append(s, "}")
 	return strings.Join(s, "")
@@ -2497,8 +2820,8 @@ func (this *GetSpecType) GoString() string {
 	if this.VirtualServer != nil {
 		s = append(s, "VirtualServer: "+fmt.Sprintf("%#v", this.VirtualServer)+",\n")
 	}
-	if this.TrafficPolicies != nil {
-		s = append(s, "TrafficPolicies: "+fmt.Sprintf("%#v", this.TrafficPolicies)+",\n")
+	if this.PmfTrafficPolicies != nil {
+		s = append(s, "PmfTrafficPolicies: "+fmt.Sprintf("%#v", this.PmfTrafficPolicies)+",\n")
 	}
 	s = append(s, "}")
 	return strings.Join(s, "")
@@ -2531,10 +2854,10 @@ func (m *GlobalSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	if len(m.TrafficPolicies) > 0 {
-		for iNdEx := len(m.TrafficPolicies) - 1; iNdEx >= 0; iNdEx-- {
+	if len(m.PmfTrafficPolicies) > 0 {
+		for iNdEx := len(m.PmfTrafficPolicies) - 1; iNdEx >= 0; iNdEx-- {
 			{
-				size, err := m.TrafficPolicies[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				size, err := m.PmfTrafficPolicies[iNdEx].MarshalToSizedBuffer(dAtA[:i])
 				if err != nil {
 					return 0, err
 				}
@@ -2542,7 +2865,7 @@ func (m *GlobalSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 				i = encodeVarintTypes(dAtA, i, uint64(size))
 			}
 			i--
-			dAtA[i] = 0x2a
+			dAtA[i] = 0x32
 		}
 	}
 	if m.VirtualServer != nil {
@@ -2618,6 +2941,15 @@ func (m *VirtualServerType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if m.VirtualServerType != nil {
+		{
+			size := m.VirtualServerType.Size()
+			i -= size
+			if _, err := m.VirtualServerType.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
+	}
 	if len(m.StatisticsProfile) > 0 {
 		for iNdEx := len(m.StatisticsProfile) - 1; iNdEx >= 0; iNdEx-- {
 			{
@@ -2648,15 +2980,6 @@ func (m *VirtualServerType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 			dAtA[i] = 0x1
 			i--
 			dAtA[i] = 0xc2
-		}
-	}
-	if m.VirtualServerType != nil {
-		{
-			size := m.VirtualServerType.Size()
-			i -= size
-			if _, err := m.VirtualServerType.MarshalTo(dAtA[i:]); err != nil {
-				return 0, err
-			}
 		}
 	}
 	if len(m.RequestLoggingProfile) > 0 {
@@ -2969,7 +3292,30 @@ func (m *VirtualServerType_Udp) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	}
 	return len(dAtA) - i, nil
 }
-func (m *HTTPSProfileType) Marshal() (dAtA []byte, err error) {
+func (m *VirtualServerType_Http3) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *VirtualServerType_Http3) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.Http3 != nil {
+		{
+			size, err := m.Http3.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1
+		i--
+		dAtA[i] = 0xea
+	}
+	return len(dAtA) - i, nil
+}
+func (m *HTTPProfileType) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -2979,16 +3325,86 @@ func (m *HTTPSProfileType) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *HTTPSProfileType) MarshalTo(dAtA []byte) (int, error) {
+func (m *HTTPProfileType) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *HTTPSProfileType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *HTTPProfileType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
+	if len(m.OcspProfile) > 0 {
+		for iNdEx := len(m.OcspProfile) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.OcspProfile[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTypes(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x62
+		}
+	}
+	if len(m.ServerSslProfile) > 0 {
+		for iNdEx := len(m.ServerSslProfile) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.ServerSslProfile[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTypes(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x5a
+		}
+	}
+	if len(m.ClientSslProfile) > 0 {
+		for iNdEx := len(m.ClientSslProfile) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.ClientSslProfile[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTypes(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x52
+		}
+	}
+	if len(m.Http2ServerProfile) > 0 {
+		for iNdEx := len(m.Http2ServerProfile) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Http2ServerProfile[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTypes(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x4a
+		}
+	}
+	if len(m.Http2ClientProfile) > 0 {
+		for iNdEx := len(m.Http2ClientProfile) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Http2ClientProfile[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTypes(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x42
+		}
+	}
 	if len(m.WebsocketServerProfile) > 0 {
 		for iNdEx := len(m.WebsocketServerProfile) - 1; iNdEx >= 0; iNdEx-- {
 			{
@@ -3110,6 +3526,48 @@ func (m *TCPProfileType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if len(m.OcspProfile) > 0 {
+		for iNdEx := len(m.OcspProfile) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.OcspProfile[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTypes(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x2a
+		}
+	}
+	if len(m.ServerSslProfile) > 0 {
+		for iNdEx := len(m.ServerSslProfile) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.ServerSslProfile[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTypes(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x22
+		}
+	}
+	if len(m.ClientSslProfile) > 0 {
+		for iNdEx := len(m.ClientSslProfile) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.ClientSslProfile[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTypes(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x1a
+		}
+	}
 	if len(m.TcpServerProfile) > 0 {
 		for iNdEx := len(m.TcpServerProfile) - 1; iNdEx >= 0; iNdEx-- {
 			{
@@ -3128,6 +3586,155 @@ func (m *TCPProfileType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		for iNdEx := len(m.TcpClientProfile) - 1; iNdEx >= 0; iNdEx-- {
 			{
 				size, err := m.TcpClientProfile[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTypes(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *HTTP3ProfileType) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *HTTP3ProfileType) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *HTTP3ProfileType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.ServerSslProfile) > 0 {
+		for iNdEx := len(m.ServerSslProfile) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.ServerSslProfile[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTypes(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x4a
+		}
+	}
+	if len(m.ClientSslProfile) > 0 {
+		for iNdEx := len(m.ClientSslProfile) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.ClientSslProfile[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTypes(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x42
+		}
+	}
+	if len(m.TcpServerProfile) > 0 {
+		for iNdEx := len(m.TcpServerProfile) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.TcpServerProfile[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTypes(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x3a
+		}
+	}
+	if len(m.HttpClientProfile) > 0 {
+		for iNdEx := len(m.HttpClientProfile) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.HttpClientProfile[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTypes(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x32
+		}
+	}
+	if len(m.HttpServerProfile) > 0 {
+		for iNdEx := len(m.HttpServerProfile) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.HttpServerProfile[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTypes(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x2a
+		}
+	}
+	if len(m.Http3Profile) > 0 {
+		for iNdEx := len(m.Http3Profile) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Http3Profile[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTypes(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x22
+		}
+	}
+	if len(m.QuicProfile) > 0 {
+		for iNdEx := len(m.QuicProfile) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.QuicProfile[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTypes(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x1a
+		}
+	}
+	if len(m.UdpServerProfile) > 0 {
+		for iNdEx := len(m.UdpServerProfile) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.UdpServerProfile[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTypes(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x12
+		}
+	}
+	if len(m.UdpClientProfile) > 0 {
+		for iNdEx := len(m.UdpClientProfile) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.UdpClientProfile[iNdEx].MarshalToSizedBuffer(dAtA[:i])
 				if err != nil {
 					return 0, err
 				}
@@ -3161,103 +3768,10 @@ func (m *UDPProfileType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	if len(m.TcpServerProfile) > 0 {
-		for iNdEx := len(m.TcpServerProfile) - 1; iNdEx >= 0; iNdEx-- {
+	if len(m.ServerSslProfile) > 0 {
+		for iNdEx := len(m.ServerSslProfile) - 1; iNdEx >= 0; iNdEx-- {
 			{
-				size, err := m.TcpServerProfile[iNdEx].MarshalToSizedBuffer(dAtA[:i])
-				if err != nil {
-					return 0, err
-				}
-				i -= size
-				i = encodeVarintTypes(dAtA, i, uint64(size))
-			}
-			i--
-			dAtA[i] = 0x12
-		}
-	}
-	if len(m.TcpClientProfile) > 0 {
-		for iNdEx := len(m.TcpClientProfile) - 1; iNdEx >= 0; iNdEx-- {
-			{
-				size, err := m.TcpClientProfile[iNdEx].MarshalToSizedBuffer(dAtA[:i])
-				if err != nil {
-					return 0, err
-				}
-				i -= size
-				i = encodeVarintTypes(dAtA, i, uint64(size))
-			}
-			i--
-			dAtA[i] = 0xa
-		}
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *HTTPProfileType) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *HTTPProfileType) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *HTTPProfileType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.WebsocketServerProfile) > 0 {
-		for iNdEx := len(m.WebsocketServerProfile) - 1; iNdEx >= 0; iNdEx-- {
-			{
-				size, err := m.WebsocketServerProfile[iNdEx].MarshalToSizedBuffer(dAtA[:i])
-				if err != nil {
-					return 0, err
-				}
-				i -= size
-				i = encodeVarintTypes(dAtA, i, uint64(size))
-			}
-			i--
-			dAtA[i] = 0x3a
-		}
-	}
-	if len(m.WebsocketClientProfile) > 0 {
-		for iNdEx := len(m.WebsocketClientProfile) - 1; iNdEx >= 0; iNdEx-- {
-			{
-				size, err := m.WebsocketClientProfile[iNdEx].MarshalToSizedBuffer(dAtA[:i])
-				if err != nil {
-					return 0, err
-				}
-				i -= size
-				i = encodeVarintTypes(dAtA, i, uint64(size))
-			}
-			i--
-			dAtA[i] = 0x32
-		}
-	}
-	if len(m.StreamProfile) > 0 {
-		for iNdEx := len(m.StreamProfile) - 1; iNdEx >= 0; iNdEx-- {
-			{
-				size, err := m.StreamProfile[iNdEx].MarshalToSizedBuffer(dAtA[:i])
-				if err != nil {
-					return 0, err
-				}
-				i -= size
-				i = encodeVarintTypes(dAtA, i, uint64(size))
-			}
-			i--
-			dAtA[i] = 0x2a
-		}
-	}
-	if len(m.HttpServerProfile) > 0 {
-		for iNdEx := len(m.HttpServerProfile) - 1; iNdEx >= 0; iNdEx-- {
-			{
-				size, err := m.HttpServerProfile[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				size, err := m.ServerSslProfile[iNdEx].MarshalToSizedBuffer(dAtA[:i])
 				if err != nil {
 					return 0, err
 				}
@@ -3268,10 +3782,10 @@ func (m *HTTPProfileType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 			dAtA[i] = 0x22
 		}
 	}
-	if len(m.HttpClientProfile) > 0 {
-		for iNdEx := len(m.HttpClientProfile) - 1; iNdEx >= 0; iNdEx-- {
+	if len(m.ClientSslProfile) > 0 {
+		for iNdEx := len(m.ClientSslProfile) - 1; iNdEx >= 0; iNdEx-- {
 			{
-				size, err := m.HttpClientProfile[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				size, err := m.ClientSslProfile[iNdEx].MarshalToSizedBuffer(dAtA[:i])
 				if err != nil {
 					return 0, err
 				}
@@ -3282,10 +3796,10 @@ func (m *HTTPProfileType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 			dAtA[i] = 0x1a
 		}
 	}
-	if len(m.TcpServerProfile) > 0 {
-		for iNdEx := len(m.TcpServerProfile) - 1; iNdEx >= 0; iNdEx-- {
+	if len(m.UdpServerProfile) > 0 {
+		for iNdEx := len(m.UdpServerProfile) - 1; iNdEx >= 0; iNdEx-- {
 			{
-				size, err := m.TcpServerProfile[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				size, err := m.UdpServerProfile[iNdEx].MarshalToSizedBuffer(dAtA[:i])
 				if err != nil {
 					return 0, err
 				}
@@ -3296,10 +3810,10 @@ func (m *HTTPProfileType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 			dAtA[i] = 0x12
 		}
 	}
-	if len(m.TcpClientProfile) > 0 {
-		for iNdEx := len(m.TcpClientProfile) - 1; iNdEx >= 0; iNdEx-- {
+	if len(m.UdpClientProfile) > 0 {
+		for iNdEx := len(m.UdpClientProfile) - 1; iNdEx >= 0; iNdEx-- {
 			{
-				size, err := m.TcpClientProfile[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				size, err := m.UdpClientProfile[iNdEx].MarshalToSizedBuffer(dAtA[:i])
 				if err != nil {
 					return 0, err
 				}
@@ -3481,10 +3995,10 @@ func (m *CreateSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	if len(m.TrafficPolicies) > 0 {
-		for iNdEx := len(m.TrafficPolicies) - 1; iNdEx >= 0; iNdEx-- {
+	if len(m.PmfTrafficPolicies) > 0 {
+		for iNdEx := len(m.PmfTrafficPolicies) - 1; iNdEx >= 0; iNdEx-- {
 			{
-				size, err := m.TrafficPolicies[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				size, err := m.PmfTrafficPolicies[iNdEx].MarshalToSizedBuffer(dAtA[:i])
 				if err != nil {
 					return 0, err
 				}
@@ -3492,7 +4006,7 @@ func (m *CreateSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 				i = encodeVarintTypes(dAtA, i, uint64(size))
 			}
 			i--
-			dAtA[i] = 0x2a
+			dAtA[i] = 0x32
 		}
 	}
 	if m.VirtualServer != nil {
@@ -3568,10 +4082,10 @@ func (m *ReplaceSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	if len(m.TrafficPolicies) > 0 {
-		for iNdEx := len(m.TrafficPolicies) - 1; iNdEx >= 0; iNdEx-- {
+	if len(m.PmfTrafficPolicies) > 0 {
+		for iNdEx := len(m.PmfTrafficPolicies) - 1; iNdEx >= 0; iNdEx-- {
 			{
-				size, err := m.TrafficPolicies[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				size, err := m.PmfTrafficPolicies[iNdEx].MarshalToSizedBuffer(dAtA[:i])
 				if err != nil {
 					return 0, err
 				}
@@ -3579,7 +4093,7 @@ func (m *ReplaceSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 				i = encodeVarintTypes(dAtA, i, uint64(size))
 			}
 			i--
-			dAtA[i] = 0x2a
+			dAtA[i] = 0x32
 		}
 	}
 	if m.VirtualServer != nil {
@@ -3655,10 +4169,10 @@ func (m *GetSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	if len(m.TrafficPolicies) > 0 {
-		for iNdEx := len(m.TrafficPolicies) - 1; iNdEx >= 0; iNdEx-- {
+	if len(m.PmfTrafficPolicies) > 0 {
+		for iNdEx := len(m.PmfTrafficPolicies) - 1; iNdEx >= 0; iNdEx-- {
 			{
-				size, err := m.TrafficPolicies[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				size, err := m.PmfTrafficPolicies[iNdEx].MarshalToSizedBuffer(dAtA[:i])
 				if err != nil {
 					return 0, err
 				}
@@ -3666,7 +4180,7 @@ func (m *GetSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 				i = encodeVarintTypes(dAtA, i, uint64(size))
 			}
 			i--
-			dAtA[i] = 0x2a
+			dAtA[i] = 0x32
 		}
 	}
 	if m.VirtualServer != nil {
@@ -3757,8 +4271,8 @@ func (m *GlobalSpecType) Size() (n int) {
 		l = m.VirtualServer.Size()
 		n += 1 + l + sovTypes(uint64(l))
 	}
-	if len(m.TrafficPolicies) > 0 {
-		for _, e := range m.TrafficPolicies {
+	if len(m.PmfTrafficPolicies) > 0 {
+		for _, e := range m.PmfTrafficPolicies {
 			l = e.Size()
 			n += 1 + l + sovTypes(uint64(l))
 		}
@@ -3921,99 +4435,18 @@ func (m *VirtualServerType_Udp) Size() (n int) {
 	}
 	return n
 }
-func (m *HTTPSProfileType) Size() (n int) {
+func (m *VirtualServerType_Http3) Size() (n int) {
 	if m == nil {
 		return 0
 	}
 	var l int
 	_ = l
-	if len(m.TcpClientProfile) > 0 {
-		for _, e := range m.TcpClientProfile {
-			l = e.Size()
-			n += 1 + l + sovTypes(uint64(l))
-		}
-	}
-	if len(m.TcpServerProfile) > 0 {
-		for _, e := range m.TcpServerProfile {
-			l = e.Size()
-			n += 1 + l + sovTypes(uint64(l))
-		}
-	}
-	if len(m.HttpClientProfile) > 0 {
-		for _, e := range m.HttpClientProfile {
-			l = e.Size()
-			n += 1 + l + sovTypes(uint64(l))
-		}
-	}
-	if len(m.HttpServerProfile) > 0 {
-		for _, e := range m.HttpServerProfile {
-			l = e.Size()
-			n += 1 + l + sovTypes(uint64(l))
-		}
-	}
-	if len(m.StreamProfile) > 0 {
-		for _, e := range m.StreamProfile {
-			l = e.Size()
-			n += 1 + l + sovTypes(uint64(l))
-		}
-	}
-	if len(m.WebsocketClientProfile) > 0 {
-		for _, e := range m.WebsocketClientProfile {
-			l = e.Size()
-			n += 1 + l + sovTypes(uint64(l))
-		}
-	}
-	if len(m.WebsocketServerProfile) > 0 {
-		for _, e := range m.WebsocketServerProfile {
-			l = e.Size()
-			n += 1 + l + sovTypes(uint64(l))
-		}
+	if m.Http3 != nil {
+		l = m.Http3.Size()
+		n += 2 + l + sovTypes(uint64(l))
 	}
 	return n
 }
-
-func (m *TCPProfileType) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if len(m.TcpClientProfile) > 0 {
-		for _, e := range m.TcpClientProfile {
-			l = e.Size()
-			n += 1 + l + sovTypes(uint64(l))
-		}
-	}
-	if len(m.TcpServerProfile) > 0 {
-		for _, e := range m.TcpServerProfile {
-			l = e.Size()
-			n += 1 + l + sovTypes(uint64(l))
-		}
-	}
-	return n
-}
-
-func (m *UDPProfileType) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if len(m.TcpClientProfile) > 0 {
-		for _, e := range m.TcpClientProfile {
-			l = e.Size()
-			n += 1 + l + sovTypes(uint64(l))
-		}
-	}
-	if len(m.TcpServerProfile) > 0 {
-		for _, e := range m.TcpServerProfile {
-			l = e.Size()
-			n += 1 + l + sovTypes(uint64(l))
-		}
-	}
-	return n
-}
-
 func (m *HTTPProfileType) Size() (n int) {
 	if m == nil {
 		return 0
@@ -4058,6 +4491,171 @@ func (m *HTTPProfileType) Size() (n int) {
 	}
 	if len(m.WebsocketServerProfile) > 0 {
 		for _, e := range m.WebsocketServerProfile {
+			l = e.Size()
+			n += 1 + l + sovTypes(uint64(l))
+		}
+	}
+	if len(m.Http2ClientProfile) > 0 {
+		for _, e := range m.Http2ClientProfile {
+			l = e.Size()
+			n += 1 + l + sovTypes(uint64(l))
+		}
+	}
+	if len(m.Http2ServerProfile) > 0 {
+		for _, e := range m.Http2ServerProfile {
+			l = e.Size()
+			n += 1 + l + sovTypes(uint64(l))
+		}
+	}
+	if len(m.ClientSslProfile) > 0 {
+		for _, e := range m.ClientSslProfile {
+			l = e.Size()
+			n += 1 + l + sovTypes(uint64(l))
+		}
+	}
+	if len(m.ServerSslProfile) > 0 {
+		for _, e := range m.ServerSslProfile {
+			l = e.Size()
+			n += 1 + l + sovTypes(uint64(l))
+		}
+	}
+	if len(m.OcspProfile) > 0 {
+		for _, e := range m.OcspProfile {
+			l = e.Size()
+			n += 1 + l + sovTypes(uint64(l))
+		}
+	}
+	return n
+}
+
+func (m *TCPProfileType) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.TcpClientProfile) > 0 {
+		for _, e := range m.TcpClientProfile {
+			l = e.Size()
+			n += 1 + l + sovTypes(uint64(l))
+		}
+	}
+	if len(m.TcpServerProfile) > 0 {
+		for _, e := range m.TcpServerProfile {
+			l = e.Size()
+			n += 1 + l + sovTypes(uint64(l))
+		}
+	}
+	if len(m.ClientSslProfile) > 0 {
+		for _, e := range m.ClientSslProfile {
+			l = e.Size()
+			n += 1 + l + sovTypes(uint64(l))
+		}
+	}
+	if len(m.ServerSslProfile) > 0 {
+		for _, e := range m.ServerSslProfile {
+			l = e.Size()
+			n += 1 + l + sovTypes(uint64(l))
+		}
+	}
+	if len(m.OcspProfile) > 0 {
+		for _, e := range m.OcspProfile {
+			l = e.Size()
+			n += 1 + l + sovTypes(uint64(l))
+		}
+	}
+	return n
+}
+
+func (m *HTTP3ProfileType) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.UdpClientProfile) > 0 {
+		for _, e := range m.UdpClientProfile {
+			l = e.Size()
+			n += 1 + l + sovTypes(uint64(l))
+		}
+	}
+	if len(m.UdpServerProfile) > 0 {
+		for _, e := range m.UdpServerProfile {
+			l = e.Size()
+			n += 1 + l + sovTypes(uint64(l))
+		}
+	}
+	if len(m.QuicProfile) > 0 {
+		for _, e := range m.QuicProfile {
+			l = e.Size()
+			n += 1 + l + sovTypes(uint64(l))
+		}
+	}
+	if len(m.Http3Profile) > 0 {
+		for _, e := range m.Http3Profile {
+			l = e.Size()
+			n += 1 + l + sovTypes(uint64(l))
+		}
+	}
+	if len(m.HttpServerProfile) > 0 {
+		for _, e := range m.HttpServerProfile {
+			l = e.Size()
+			n += 1 + l + sovTypes(uint64(l))
+		}
+	}
+	if len(m.HttpClientProfile) > 0 {
+		for _, e := range m.HttpClientProfile {
+			l = e.Size()
+			n += 1 + l + sovTypes(uint64(l))
+		}
+	}
+	if len(m.TcpServerProfile) > 0 {
+		for _, e := range m.TcpServerProfile {
+			l = e.Size()
+			n += 1 + l + sovTypes(uint64(l))
+		}
+	}
+	if len(m.ClientSslProfile) > 0 {
+		for _, e := range m.ClientSslProfile {
+			l = e.Size()
+			n += 1 + l + sovTypes(uint64(l))
+		}
+	}
+	if len(m.ServerSslProfile) > 0 {
+		for _, e := range m.ServerSslProfile {
+			l = e.Size()
+			n += 1 + l + sovTypes(uint64(l))
+		}
+	}
+	return n
+}
+
+func (m *UDPProfileType) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.UdpClientProfile) > 0 {
+		for _, e := range m.UdpClientProfile {
+			l = e.Size()
+			n += 1 + l + sovTypes(uint64(l))
+		}
+	}
+	if len(m.UdpServerProfile) > 0 {
+		for _, e := range m.UdpServerProfile {
+			l = e.Size()
+			n += 1 + l + sovTypes(uint64(l))
+		}
+	}
+	if len(m.ClientSslProfile) > 0 {
+		for _, e := range m.ClientSslProfile {
+			l = e.Size()
+			n += 1 + l + sovTypes(uint64(l))
+		}
+	}
+	if len(m.ServerSslProfile) > 0 {
+		for _, e := range m.ServerSslProfile {
 			l = e.Size()
 			n += 1 + l + sovTypes(uint64(l))
 		}
@@ -4161,8 +4759,8 @@ func (m *CreateSpecType) Size() (n int) {
 		l = m.VirtualServer.Size()
 		n += 1 + l + sovTypes(uint64(l))
 	}
-	if len(m.TrafficPolicies) > 0 {
-		for _, e := range m.TrafficPolicies {
+	if len(m.PmfTrafficPolicies) > 0 {
+		for _, e := range m.PmfTrafficPolicies {
 			l = e.Size()
 			n += 1 + l + sovTypes(uint64(l))
 		}
@@ -4194,8 +4792,8 @@ func (m *ReplaceSpecType) Size() (n int) {
 		l = m.VirtualServer.Size()
 		n += 1 + l + sovTypes(uint64(l))
 	}
-	if len(m.TrafficPolicies) > 0 {
-		for _, e := range m.TrafficPolicies {
+	if len(m.PmfTrafficPolicies) > 0 {
+		for _, e := range m.PmfTrafficPolicies {
 			l = e.Size()
 			n += 1 + l + sovTypes(uint64(l))
 		}
@@ -4227,8 +4825,8 @@ func (m *GetSpecType) Size() (n int) {
 		l = m.VirtualServer.Size()
 		n += 1 + l + sovTypes(uint64(l))
 	}
-	if len(m.TrafficPolicies) > 0 {
-		for _, e := range m.TrafficPolicies {
+	if len(m.PmfTrafficPolicies) > 0 {
+		for _, e := range m.PmfTrafficPolicies {
 			l = e.Size()
 			n += 1 + l + sovTypes(uint64(l))
 		}
@@ -4251,17 +4849,17 @@ func (this *GlobalSpecType) String() string {
 		repeatedStringForIrules += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "schema.ObjectRefType", 1) + ","
 	}
 	repeatedStringForIrules += "}"
-	repeatedStringForTrafficPolicies := "[]*ObjectRefType{"
-	for _, f := range this.TrafficPolicies {
-		repeatedStringForTrafficPolicies += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "schema.ObjectRefType", 1) + ","
+	repeatedStringForPmfTrafficPolicies := "[]*ObjectRefType{"
+	for _, f := range this.PmfTrafficPolicies {
+		repeatedStringForPmfTrafficPolicies += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "schema.ObjectRefType", 1) + ","
 	}
-	repeatedStringForTrafficPolicies += "}"
+	repeatedStringForPmfTrafficPolicies += "}"
 	s := strings.Join([]string{`&GlobalSpecType{`,
 		`DdosProfile:` + strings.Replace(this.DdosProfile.String(), "DDoSProfile", "DDoSProfile", 1) + `,`,
 		`AdvancedTcpProfile:` + strings.Replace(this.AdvancedTcpProfile.String(), "AdvancedTCPProfile", "AdvancedTCPProfile", 1) + `,`,
 		`Irules:` + repeatedStringForIrules + `,`,
 		`VirtualServer:` + strings.Replace(this.VirtualServer.String(), "VirtualServerType", "VirtualServerType", 1) + `,`,
-		`TrafficPolicies:` + repeatedStringForTrafficPolicies + `,`,
+		`PmfTrafficPolicies:` + repeatedStringForPmfTrafficPolicies + `,`,
 		`}`,
 	}, "")
 	return s
@@ -4356,7 +4954,7 @@ func (this *VirtualServerType_Https) String() string {
 		return "nil"
 	}
 	s := strings.Join([]string{`&VirtualServerType_Https{`,
-		`Https:` + strings.Replace(fmt.Sprintf("%v", this.Https), "HTTPSProfileType", "HTTPSProfileType", 1) + `,`,
+		`Https:` + strings.Replace(fmt.Sprintf("%v", this.Https), "HTTPProfileType", "HTTPProfileType", 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -4381,95 +4979,12 @@ func (this *VirtualServerType_Udp) String() string {
 	}, "")
 	return s
 }
-func (this *HTTPSProfileType) String() string {
+func (this *VirtualServerType_Http3) String() string {
 	if this == nil {
 		return "nil"
 	}
-	repeatedStringForTcpClientProfile := "[]*ObjectRefType{"
-	for _, f := range this.TcpClientProfile {
-		repeatedStringForTcpClientProfile += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "schema.ObjectRefType", 1) + ","
-	}
-	repeatedStringForTcpClientProfile += "}"
-	repeatedStringForTcpServerProfile := "[]*ObjectRefType{"
-	for _, f := range this.TcpServerProfile {
-		repeatedStringForTcpServerProfile += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "schema.ObjectRefType", 1) + ","
-	}
-	repeatedStringForTcpServerProfile += "}"
-	repeatedStringForHttpClientProfile := "[]*ObjectRefType{"
-	for _, f := range this.HttpClientProfile {
-		repeatedStringForHttpClientProfile += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "schema.ObjectRefType", 1) + ","
-	}
-	repeatedStringForHttpClientProfile += "}"
-	repeatedStringForHttpServerProfile := "[]*ObjectRefType{"
-	for _, f := range this.HttpServerProfile {
-		repeatedStringForHttpServerProfile += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "schema.ObjectRefType", 1) + ","
-	}
-	repeatedStringForHttpServerProfile += "}"
-	repeatedStringForStreamProfile := "[]*ObjectRefType{"
-	for _, f := range this.StreamProfile {
-		repeatedStringForStreamProfile += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "schema.ObjectRefType", 1) + ","
-	}
-	repeatedStringForStreamProfile += "}"
-	repeatedStringForWebsocketClientProfile := "[]*ObjectRefType{"
-	for _, f := range this.WebsocketClientProfile {
-		repeatedStringForWebsocketClientProfile += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "schema.ObjectRefType", 1) + ","
-	}
-	repeatedStringForWebsocketClientProfile += "}"
-	repeatedStringForWebsocketServerProfile := "[]*ObjectRefType{"
-	for _, f := range this.WebsocketServerProfile {
-		repeatedStringForWebsocketServerProfile += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "schema.ObjectRefType", 1) + ","
-	}
-	repeatedStringForWebsocketServerProfile += "}"
-	s := strings.Join([]string{`&HTTPSProfileType{`,
-		`TcpClientProfile:` + repeatedStringForTcpClientProfile + `,`,
-		`TcpServerProfile:` + repeatedStringForTcpServerProfile + `,`,
-		`HttpClientProfile:` + repeatedStringForHttpClientProfile + `,`,
-		`HttpServerProfile:` + repeatedStringForHttpServerProfile + `,`,
-		`StreamProfile:` + repeatedStringForStreamProfile + `,`,
-		`WebsocketClientProfile:` + repeatedStringForWebsocketClientProfile + `,`,
-		`WebsocketServerProfile:` + repeatedStringForWebsocketServerProfile + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func (this *TCPProfileType) String() string {
-	if this == nil {
-		return "nil"
-	}
-	repeatedStringForTcpClientProfile := "[]*ObjectRefType{"
-	for _, f := range this.TcpClientProfile {
-		repeatedStringForTcpClientProfile += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "schema.ObjectRefType", 1) + ","
-	}
-	repeatedStringForTcpClientProfile += "}"
-	repeatedStringForTcpServerProfile := "[]*ObjectRefType{"
-	for _, f := range this.TcpServerProfile {
-		repeatedStringForTcpServerProfile += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "schema.ObjectRefType", 1) + ","
-	}
-	repeatedStringForTcpServerProfile += "}"
-	s := strings.Join([]string{`&TCPProfileType{`,
-		`TcpClientProfile:` + repeatedStringForTcpClientProfile + `,`,
-		`TcpServerProfile:` + repeatedStringForTcpServerProfile + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func (this *UDPProfileType) String() string {
-	if this == nil {
-		return "nil"
-	}
-	repeatedStringForTcpClientProfile := "[]*ObjectRefType{"
-	for _, f := range this.TcpClientProfile {
-		repeatedStringForTcpClientProfile += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "schema.ObjectRefType", 1) + ","
-	}
-	repeatedStringForTcpClientProfile += "}"
-	repeatedStringForTcpServerProfile := "[]*ObjectRefType{"
-	for _, f := range this.TcpServerProfile {
-		repeatedStringForTcpServerProfile += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "schema.ObjectRefType", 1) + ","
-	}
-	repeatedStringForTcpServerProfile += "}"
-	s := strings.Join([]string{`&UDPProfileType{`,
-		`TcpClientProfile:` + repeatedStringForTcpClientProfile + `,`,
-		`TcpServerProfile:` + repeatedStringForTcpServerProfile + `,`,
+	s := strings.Join([]string{`&VirtualServerType_Http3{`,
+		`Http3:` + strings.Replace(fmt.Sprintf("%v", this.Http3), "HTTP3ProfileType", "HTTP3ProfileType", 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -4513,6 +5028,31 @@ func (this *HTTPProfileType) String() string {
 		repeatedStringForWebsocketServerProfile += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "schema.ObjectRefType", 1) + ","
 	}
 	repeatedStringForWebsocketServerProfile += "}"
+	repeatedStringForHttp2ClientProfile := "[]*ObjectRefType{"
+	for _, f := range this.Http2ClientProfile {
+		repeatedStringForHttp2ClientProfile += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "schema.ObjectRefType", 1) + ","
+	}
+	repeatedStringForHttp2ClientProfile += "}"
+	repeatedStringForHttp2ServerProfile := "[]*ObjectRefType{"
+	for _, f := range this.Http2ServerProfile {
+		repeatedStringForHttp2ServerProfile += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "schema.ObjectRefType", 1) + ","
+	}
+	repeatedStringForHttp2ServerProfile += "}"
+	repeatedStringForClientSslProfile := "[]*ObjectRefType{"
+	for _, f := range this.ClientSslProfile {
+		repeatedStringForClientSslProfile += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "schema.ObjectRefType", 1) + ","
+	}
+	repeatedStringForClientSslProfile += "}"
+	repeatedStringForServerSslProfile := "[]*ObjectRefType{"
+	for _, f := range this.ServerSslProfile {
+		repeatedStringForServerSslProfile += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "schema.ObjectRefType", 1) + ","
+	}
+	repeatedStringForServerSslProfile += "}"
+	repeatedStringForOcspProfile := "[]*ObjectRefType{"
+	for _, f := range this.OcspProfile {
+		repeatedStringForOcspProfile += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "schema.ObjectRefType", 1) + ","
+	}
+	repeatedStringForOcspProfile += "}"
 	s := strings.Join([]string{`&HTTPProfileType{`,
 		`TcpClientProfile:` + repeatedStringForTcpClientProfile + `,`,
 		`TcpServerProfile:` + repeatedStringForTcpServerProfile + `,`,
@@ -4521,6 +5061,146 @@ func (this *HTTPProfileType) String() string {
 		`StreamProfile:` + repeatedStringForStreamProfile + `,`,
 		`WebsocketClientProfile:` + repeatedStringForWebsocketClientProfile + `,`,
 		`WebsocketServerProfile:` + repeatedStringForWebsocketServerProfile + `,`,
+		`Http2ClientProfile:` + repeatedStringForHttp2ClientProfile + `,`,
+		`Http2ServerProfile:` + repeatedStringForHttp2ServerProfile + `,`,
+		`ClientSslProfile:` + repeatedStringForClientSslProfile + `,`,
+		`ServerSslProfile:` + repeatedStringForServerSslProfile + `,`,
+		`OcspProfile:` + repeatedStringForOcspProfile + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *TCPProfileType) String() string {
+	if this == nil {
+		return "nil"
+	}
+	repeatedStringForTcpClientProfile := "[]*ObjectRefType{"
+	for _, f := range this.TcpClientProfile {
+		repeatedStringForTcpClientProfile += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "schema.ObjectRefType", 1) + ","
+	}
+	repeatedStringForTcpClientProfile += "}"
+	repeatedStringForTcpServerProfile := "[]*ObjectRefType{"
+	for _, f := range this.TcpServerProfile {
+		repeatedStringForTcpServerProfile += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "schema.ObjectRefType", 1) + ","
+	}
+	repeatedStringForTcpServerProfile += "}"
+	repeatedStringForClientSslProfile := "[]*ObjectRefType{"
+	for _, f := range this.ClientSslProfile {
+		repeatedStringForClientSslProfile += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "schema.ObjectRefType", 1) + ","
+	}
+	repeatedStringForClientSslProfile += "}"
+	repeatedStringForServerSslProfile := "[]*ObjectRefType{"
+	for _, f := range this.ServerSslProfile {
+		repeatedStringForServerSslProfile += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "schema.ObjectRefType", 1) + ","
+	}
+	repeatedStringForServerSslProfile += "}"
+	repeatedStringForOcspProfile := "[]*ObjectRefType{"
+	for _, f := range this.OcspProfile {
+		repeatedStringForOcspProfile += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "schema.ObjectRefType", 1) + ","
+	}
+	repeatedStringForOcspProfile += "}"
+	s := strings.Join([]string{`&TCPProfileType{`,
+		`TcpClientProfile:` + repeatedStringForTcpClientProfile + `,`,
+		`TcpServerProfile:` + repeatedStringForTcpServerProfile + `,`,
+		`ClientSslProfile:` + repeatedStringForClientSslProfile + `,`,
+		`ServerSslProfile:` + repeatedStringForServerSslProfile + `,`,
+		`OcspProfile:` + repeatedStringForOcspProfile + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *HTTP3ProfileType) String() string {
+	if this == nil {
+		return "nil"
+	}
+	repeatedStringForUdpClientProfile := "[]*ObjectRefType{"
+	for _, f := range this.UdpClientProfile {
+		repeatedStringForUdpClientProfile += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "schema.ObjectRefType", 1) + ","
+	}
+	repeatedStringForUdpClientProfile += "}"
+	repeatedStringForUdpServerProfile := "[]*ObjectRefType{"
+	for _, f := range this.UdpServerProfile {
+		repeatedStringForUdpServerProfile += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "schema.ObjectRefType", 1) + ","
+	}
+	repeatedStringForUdpServerProfile += "}"
+	repeatedStringForQuicProfile := "[]*ObjectRefType{"
+	for _, f := range this.QuicProfile {
+		repeatedStringForQuicProfile += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "schema.ObjectRefType", 1) + ","
+	}
+	repeatedStringForQuicProfile += "}"
+	repeatedStringForHttp3Profile := "[]*ObjectRefType{"
+	for _, f := range this.Http3Profile {
+		repeatedStringForHttp3Profile += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "schema.ObjectRefType", 1) + ","
+	}
+	repeatedStringForHttp3Profile += "}"
+	repeatedStringForHttpServerProfile := "[]*ObjectRefType{"
+	for _, f := range this.HttpServerProfile {
+		repeatedStringForHttpServerProfile += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "schema.ObjectRefType", 1) + ","
+	}
+	repeatedStringForHttpServerProfile += "}"
+	repeatedStringForHttpClientProfile := "[]*ObjectRefType{"
+	for _, f := range this.HttpClientProfile {
+		repeatedStringForHttpClientProfile += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "schema.ObjectRefType", 1) + ","
+	}
+	repeatedStringForHttpClientProfile += "}"
+	repeatedStringForTcpServerProfile := "[]*ObjectRefType{"
+	for _, f := range this.TcpServerProfile {
+		repeatedStringForTcpServerProfile += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "schema.ObjectRefType", 1) + ","
+	}
+	repeatedStringForTcpServerProfile += "}"
+	repeatedStringForClientSslProfile := "[]*ObjectRefType{"
+	for _, f := range this.ClientSslProfile {
+		repeatedStringForClientSslProfile += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "schema.ObjectRefType", 1) + ","
+	}
+	repeatedStringForClientSslProfile += "}"
+	repeatedStringForServerSslProfile := "[]*ObjectRefType{"
+	for _, f := range this.ServerSslProfile {
+		repeatedStringForServerSslProfile += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "schema.ObjectRefType", 1) + ","
+	}
+	repeatedStringForServerSslProfile += "}"
+	s := strings.Join([]string{`&HTTP3ProfileType{`,
+		`UdpClientProfile:` + repeatedStringForUdpClientProfile + `,`,
+		`UdpServerProfile:` + repeatedStringForUdpServerProfile + `,`,
+		`QuicProfile:` + repeatedStringForQuicProfile + `,`,
+		`Http3Profile:` + repeatedStringForHttp3Profile + `,`,
+		`HttpServerProfile:` + repeatedStringForHttpServerProfile + `,`,
+		`HttpClientProfile:` + repeatedStringForHttpClientProfile + `,`,
+		`TcpServerProfile:` + repeatedStringForTcpServerProfile + `,`,
+		`ClientSslProfile:` + repeatedStringForClientSslProfile + `,`,
+		`ServerSslProfile:` + repeatedStringForServerSslProfile + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *UDPProfileType) String() string {
+	if this == nil {
+		return "nil"
+	}
+	repeatedStringForUdpClientProfile := "[]*ObjectRefType{"
+	for _, f := range this.UdpClientProfile {
+		repeatedStringForUdpClientProfile += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "schema.ObjectRefType", 1) + ","
+	}
+	repeatedStringForUdpClientProfile += "}"
+	repeatedStringForUdpServerProfile := "[]*ObjectRefType{"
+	for _, f := range this.UdpServerProfile {
+		repeatedStringForUdpServerProfile += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "schema.ObjectRefType", 1) + ","
+	}
+	repeatedStringForUdpServerProfile += "}"
+	repeatedStringForClientSslProfile := "[]*ObjectRefType{"
+	for _, f := range this.ClientSslProfile {
+		repeatedStringForClientSslProfile += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "schema.ObjectRefType", 1) + ","
+	}
+	repeatedStringForClientSslProfile += "}"
+	repeatedStringForServerSslProfile := "[]*ObjectRefType{"
+	for _, f := range this.ServerSslProfile {
+		repeatedStringForServerSslProfile += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "schema.ObjectRefType", 1) + ","
+	}
+	repeatedStringForServerSslProfile += "}"
+	s := strings.Join([]string{`&UDPProfileType{`,
+		`UdpClientProfile:` + repeatedStringForUdpClientProfile + `,`,
+		`UdpServerProfile:` + repeatedStringForUdpServerProfile + `,`,
+		`ClientSslProfile:` + repeatedStringForClientSslProfile + `,`,
+		`ServerSslProfile:` + repeatedStringForServerSslProfile + `,`,
 		`}`,
 	}, "")
 	return s
@@ -4594,17 +5274,17 @@ func (this *CreateSpecType) String() string {
 		repeatedStringForIrules += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "schema.ObjectRefType", 1) + ","
 	}
 	repeatedStringForIrules += "}"
-	repeatedStringForTrafficPolicies := "[]*ObjectRefType{"
-	for _, f := range this.TrafficPolicies {
-		repeatedStringForTrafficPolicies += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "schema.ObjectRefType", 1) + ","
+	repeatedStringForPmfTrafficPolicies := "[]*ObjectRefType{"
+	for _, f := range this.PmfTrafficPolicies {
+		repeatedStringForPmfTrafficPolicies += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "schema.ObjectRefType", 1) + ","
 	}
-	repeatedStringForTrafficPolicies += "}"
+	repeatedStringForPmfTrafficPolicies += "}"
 	s := strings.Join([]string{`&CreateSpecType{`,
 		`DdosProfile:` + strings.Replace(this.DdosProfile.String(), "DDoSProfile", "DDoSProfile", 1) + `,`,
 		`AdvancedTcpProfile:` + strings.Replace(this.AdvancedTcpProfile.String(), "AdvancedTCPProfile", "AdvancedTCPProfile", 1) + `,`,
 		`Irules:` + repeatedStringForIrules + `,`,
 		`VirtualServer:` + strings.Replace(this.VirtualServer.String(), "VirtualServerType", "VirtualServerType", 1) + `,`,
-		`TrafficPolicies:` + repeatedStringForTrafficPolicies + `,`,
+		`PmfTrafficPolicies:` + repeatedStringForPmfTrafficPolicies + `,`,
 		`}`,
 	}, "")
 	return s
@@ -4618,17 +5298,17 @@ func (this *ReplaceSpecType) String() string {
 		repeatedStringForIrules += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "schema.ObjectRefType", 1) + ","
 	}
 	repeatedStringForIrules += "}"
-	repeatedStringForTrafficPolicies := "[]*ObjectRefType{"
-	for _, f := range this.TrafficPolicies {
-		repeatedStringForTrafficPolicies += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "schema.ObjectRefType", 1) + ","
+	repeatedStringForPmfTrafficPolicies := "[]*ObjectRefType{"
+	for _, f := range this.PmfTrafficPolicies {
+		repeatedStringForPmfTrafficPolicies += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "schema.ObjectRefType", 1) + ","
 	}
-	repeatedStringForTrafficPolicies += "}"
+	repeatedStringForPmfTrafficPolicies += "}"
 	s := strings.Join([]string{`&ReplaceSpecType{`,
 		`DdosProfile:` + strings.Replace(this.DdosProfile.String(), "DDoSProfile", "DDoSProfile", 1) + `,`,
 		`AdvancedTcpProfile:` + strings.Replace(this.AdvancedTcpProfile.String(), "AdvancedTCPProfile", "AdvancedTCPProfile", 1) + `,`,
 		`Irules:` + repeatedStringForIrules + `,`,
 		`VirtualServer:` + strings.Replace(this.VirtualServer.String(), "VirtualServerType", "VirtualServerType", 1) + `,`,
-		`TrafficPolicies:` + repeatedStringForTrafficPolicies + `,`,
+		`PmfTrafficPolicies:` + repeatedStringForPmfTrafficPolicies + `,`,
 		`}`,
 	}, "")
 	return s
@@ -4642,17 +5322,17 @@ func (this *GetSpecType) String() string {
 		repeatedStringForIrules += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "schema.ObjectRefType", 1) + ","
 	}
 	repeatedStringForIrules += "}"
-	repeatedStringForTrafficPolicies := "[]*ObjectRefType{"
-	for _, f := range this.TrafficPolicies {
-		repeatedStringForTrafficPolicies += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "schema.ObjectRefType", 1) + ","
+	repeatedStringForPmfTrafficPolicies := "[]*ObjectRefType{"
+	for _, f := range this.PmfTrafficPolicies {
+		repeatedStringForPmfTrafficPolicies += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "schema.ObjectRefType", 1) + ","
 	}
-	repeatedStringForTrafficPolicies += "}"
+	repeatedStringForPmfTrafficPolicies += "}"
 	s := strings.Join([]string{`&GetSpecType{`,
 		`DdosProfile:` + strings.Replace(this.DdosProfile.String(), "DDoSProfile", "DDoSProfile", 1) + `,`,
 		`AdvancedTcpProfile:` + strings.Replace(this.AdvancedTcpProfile.String(), "AdvancedTCPProfile", "AdvancedTCPProfile", 1) + `,`,
 		`Irules:` + repeatedStringForIrules + `,`,
 		`VirtualServer:` + strings.Replace(this.VirtualServer.String(), "VirtualServerType", "VirtualServerType", 1) + `,`,
-		`TrafficPolicies:` + repeatedStringForTrafficPolicies + `,`,
+		`PmfTrafficPolicies:` + repeatedStringForPmfTrafficPolicies + `,`,
 		`}`,
 	}, "")
 	return s
@@ -4836,9 +5516,9 @@ func (m *GlobalSpecType) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
-		case 5:
+		case 6:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field TrafficPolicies", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field PmfTrafficPolicies", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -4865,8 +5545,8 @@ func (m *GlobalSpecType) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.TrafficPolicies = append(m.TrafficPolicies, &schema.ObjectRefType{})
-			if err := m.TrafficPolicies[len(m.TrafficPolicies)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			m.PmfTrafficPolicies = append(m.PmfTrafficPolicies, &schema.ObjectRefType{})
+			if err := m.PmfTrafficPolicies[len(m.PmfTrafficPolicies)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -5570,7 +6250,7 @@ func (m *VirtualServerType) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			v := &HTTPSProfileType{}
+			v := &HTTPProfileType{}
 			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
@@ -5714,62 +6394,9 @@ func (m *VirtualServerType) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipTypes(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if skippy < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if (iNdEx + skippy) < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *HTTPSProfileType) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowTypes
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: HTTPSProfileType: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: HTTPSProfileType: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
+		case 29:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field TcpClientProfile", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Http3", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -5796,456 +6423,11 @@ func (m *HTTPSProfileType) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.TcpClientProfile = append(m.TcpClientProfile, &schema.ObjectRefType{})
-			if err := m.TcpClientProfile[len(m.TcpClientProfile)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			v := &HTTP3ProfileType{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
-			iNdEx = postIndex
-		case 2:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field TcpServerProfile", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTypes
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthTypes
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.TcpServerProfile = append(m.TcpServerProfile, &schema.ObjectRefType{})
-			if err := m.TcpServerProfile[len(m.TcpServerProfile)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		case 3:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field HttpClientProfile", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTypes
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthTypes
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.HttpClientProfile = append(m.HttpClientProfile, &schema.ObjectRefType{})
-			if err := m.HttpClientProfile[len(m.HttpClientProfile)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		case 4:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field HttpServerProfile", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTypes
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthTypes
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.HttpServerProfile = append(m.HttpServerProfile, &schema.ObjectRefType{})
-			if err := m.HttpServerProfile[len(m.HttpServerProfile)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		case 5:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field StreamProfile", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTypes
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthTypes
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.StreamProfile = append(m.StreamProfile, &schema.ObjectRefType{})
-			if err := m.StreamProfile[len(m.StreamProfile)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		case 6:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field WebsocketClientProfile", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTypes
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthTypes
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.WebsocketClientProfile = append(m.WebsocketClientProfile, &schema.ObjectRefType{})
-			if err := m.WebsocketClientProfile[len(m.WebsocketClientProfile)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		case 7:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field WebsocketServerProfile", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTypes
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthTypes
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.WebsocketServerProfile = append(m.WebsocketServerProfile, &schema.ObjectRefType{})
-			if err := m.WebsocketServerProfile[len(m.WebsocketServerProfile)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipTypes(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if skippy < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if (iNdEx + skippy) < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *TCPProfileType) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowTypes
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: TCPProfileType: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: TCPProfileType: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field TcpClientProfile", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTypes
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthTypes
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.TcpClientProfile = append(m.TcpClientProfile, &schema.ObjectRefType{})
-			if err := m.TcpClientProfile[len(m.TcpClientProfile)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		case 2:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field TcpServerProfile", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTypes
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthTypes
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.TcpServerProfile = append(m.TcpServerProfile, &schema.ObjectRefType{})
-			if err := m.TcpServerProfile[len(m.TcpServerProfile)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipTypes(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if skippy < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if (iNdEx + skippy) < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *UDPProfileType) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowTypes
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: UDPProfileType: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: UDPProfileType: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field TcpClientProfile", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTypes
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthTypes
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.TcpClientProfile = append(m.TcpClientProfile, &schema.ObjectRefType{})
-			if err := m.TcpClientProfile[len(m.TcpClientProfile)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		case 2:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field TcpServerProfile", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTypes
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthTypes
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.TcpServerProfile = append(m.TcpServerProfile, &schema.ObjectRefType{})
-			if err := m.TcpServerProfile[len(m.TcpServerProfile)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
+			m.VirtualServerType = &VirtualServerType_Http3{v}
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
@@ -6535,6 +6717,947 @@ func (m *HTTPProfileType) Unmarshal(dAtA []byte) error {
 			}
 			m.WebsocketServerProfile = append(m.WebsocketServerProfile, &schema.ObjectRefType{})
 			if err := m.WebsocketServerProfile[len(m.WebsocketServerProfile)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 8:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Http2ClientProfile", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Http2ClientProfile = append(m.Http2ClientProfile, &schema.ObjectRefType{})
+			if err := m.Http2ClientProfile[len(m.Http2ClientProfile)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 9:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Http2ServerProfile", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Http2ServerProfile = append(m.Http2ServerProfile, &schema.ObjectRefType{})
+			if err := m.Http2ServerProfile[len(m.Http2ServerProfile)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 10:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ClientSslProfile", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ClientSslProfile = append(m.ClientSslProfile, &schema.ObjectRefType{})
+			if err := m.ClientSslProfile[len(m.ClientSslProfile)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 11:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ServerSslProfile", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ServerSslProfile = append(m.ServerSslProfile, &schema.ObjectRefType{})
+			if err := m.ServerSslProfile[len(m.ServerSslProfile)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 12:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field OcspProfile", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.OcspProfile = append(m.OcspProfile, &schema.ObjectRefType{})
+			if err := m.OcspProfile[len(m.OcspProfile)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTypes(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *TCPProfileType) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTypes
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: TCPProfileType: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: TCPProfileType: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field TcpClientProfile", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.TcpClientProfile = append(m.TcpClientProfile, &schema.ObjectRefType{})
+			if err := m.TcpClientProfile[len(m.TcpClientProfile)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field TcpServerProfile", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.TcpServerProfile = append(m.TcpServerProfile, &schema.ObjectRefType{})
+			if err := m.TcpServerProfile[len(m.TcpServerProfile)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ClientSslProfile", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ClientSslProfile = append(m.ClientSslProfile, &schema.ObjectRefType{})
+			if err := m.ClientSslProfile[len(m.ClientSslProfile)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ServerSslProfile", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ServerSslProfile = append(m.ServerSslProfile, &schema.ObjectRefType{})
+			if err := m.ServerSslProfile[len(m.ServerSslProfile)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field OcspProfile", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.OcspProfile = append(m.OcspProfile, &schema.ObjectRefType{})
+			if err := m.OcspProfile[len(m.OcspProfile)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTypes(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *HTTP3ProfileType) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTypes
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: HTTP3ProfileType: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: HTTP3ProfileType: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field UdpClientProfile", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.UdpClientProfile = append(m.UdpClientProfile, &schema.ObjectRefType{})
+			if err := m.UdpClientProfile[len(m.UdpClientProfile)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field UdpServerProfile", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.UdpServerProfile = append(m.UdpServerProfile, &schema.ObjectRefType{})
+			if err := m.UdpServerProfile[len(m.UdpServerProfile)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field QuicProfile", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.QuicProfile = append(m.QuicProfile, &schema.ObjectRefType{})
+			if err := m.QuicProfile[len(m.QuicProfile)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Http3Profile", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Http3Profile = append(m.Http3Profile, &schema.ObjectRefType{})
+			if err := m.Http3Profile[len(m.Http3Profile)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field HttpServerProfile", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.HttpServerProfile = append(m.HttpServerProfile, &schema.ObjectRefType{})
+			if err := m.HttpServerProfile[len(m.HttpServerProfile)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 6:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field HttpClientProfile", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.HttpClientProfile = append(m.HttpClientProfile, &schema.ObjectRefType{})
+			if err := m.HttpClientProfile[len(m.HttpClientProfile)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 7:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field TcpServerProfile", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.TcpServerProfile = append(m.TcpServerProfile, &schema.ObjectRefType{})
+			if err := m.TcpServerProfile[len(m.TcpServerProfile)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 8:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ClientSslProfile", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ClientSslProfile = append(m.ClientSslProfile, &schema.ObjectRefType{})
+			if err := m.ClientSslProfile[len(m.ClientSslProfile)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 9:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ServerSslProfile", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ServerSslProfile = append(m.ServerSslProfile, &schema.ObjectRefType{})
+			if err := m.ServerSslProfile[len(m.ServerSslProfile)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTypes(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *UDPProfileType) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTypes
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: UDPProfileType: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: UDPProfileType: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field UdpClientProfile", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.UdpClientProfile = append(m.UdpClientProfile, &schema.ObjectRefType{})
+			if err := m.UdpClientProfile[len(m.UdpClientProfile)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field UdpServerProfile", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.UdpServerProfile = append(m.UdpServerProfile, &schema.ObjectRefType{})
+			if err := m.UdpServerProfile[len(m.UdpServerProfile)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ClientSslProfile", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ClientSslProfile = append(m.ClientSslProfile, &schema.ObjectRefType{})
+			if err := m.ClientSslProfile[len(m.ClientSslProfile)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ServerSslProfile", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ServerSslProfile = append(m.ServerSslProfile, &schema.ObjectRefType{})
+			if err := m.ServerSslProfile[len(m.ServerSslProfile)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -6979,9 +8102,9 @@ func (m *CreateSpecType) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
-		case 5:
+		case 6:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field TrafficPolicies", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field PmfTrafficPolicies", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -7008,8 +8131,8 @@ func (m *CreateSpecType) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.TrafficPolicies = append(m.TrafficPolicies, &schema.ObjectRefType{})
-			if err := m.TrafficPolicies[len(m.TrafficPolicies)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			m.PmfTrafficPolicies = append(m.PmfTrafficPolicies, &schema.ObjectRefType{})
+			if err := m.PmfTrafficPolicies[len(m.PmfTrafficPolicies)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -7208,9 +8331,9 @@ func (m *ReplaceSpecType) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
-		case 5:
+		case 6:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field TrafficPolicies", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field PmfTrafficPolicies", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -7237,8 +8360,8 @@ func (m *ReplaceSpecType) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.TrafficPolicies = append(m.TrafficPolicies, &schema.ObjectRefType{})
-			if err := m.TrafficPolicies[len(m.TrafficPolicies)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			m.PmfTrafficPolicies = append(m.PmfTrafficPolicies, &schema.ObjectRefType{})
+			if err := m.PmfTrafficPolicies[len(m.PmfTrafficPolicies)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -7437,9 +8560,9 @@ func (m *GetSpecType) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
-		case 5:
+		case 6:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field TrafficPolicies", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field PmfTrafficPolicies", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -7466,8 +8589,8 @@ func (m *GetSpecType) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.TrafficPolicies = append(m.TrafficPolicies, &schema.ObjectRefType{})
-			if err := m.TrafficPolicies[len(m.TrafficPolicies)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			m.PmfTrafficPolicies = append(m.PmfTrafficPolicies, &schema.ObjectRefType{})
+			if err := m.PmfTrafficPolicies[len(m.PmfTrafficPolicies)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex

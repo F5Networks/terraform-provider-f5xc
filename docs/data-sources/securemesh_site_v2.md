@@ -34,6 +34,7 @@ data "f5xc_securemesh_site_v2" "example" {
 ### Read-Only
 
 - `admin_user_credentials` (Attributes) Admin User Credentials Setup user credentials to manage access to nodes belonging to the site. When configured, 'admin' user will be setup and customers can access these nodes via either the node local WebUI or via SSH to access shell/CLI (see [below for nested schema](#nestedatt--admin_user_credentials))
+- `advanced_delivery_choice` (Attributes) Advanced Delivery Early access for Advanced Load Balancer - Please do not use in production. (see [below for nested schema](#nestedatt--advanced_delivery_choice))
 - `annotations` (Map of String) annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.
 - `blocked_services_choice` (Attributes) Node Local Services Manage node local services. You can enable WebUI, SSH and DNS on the nodes of the site for local management and troubleshooting. By default, these services are enabled. You can choose to disable these services on the Site Local Outside (SLO) local VRF (which is used to connect the site to F5 Distributed Cloud for management) or on the Site Local Inside (SLI) local VRF (if configured on the site). (see [below for nested schema](#nestedatt--blocked_services_choice))
 - `description` (String) description Human readable description for the object
@@ -113,6 +114,15 @@ Read-Only:
 
 
 
+<a id="nestedatt--advanced_delivery_choice"></a>
+### Nested Schema for `advanced_delivery_choice`
+
+Read-Only:
+
+- `disable_advanced_delivery` (Boolean) Disable Advanced Delivery
+- `enable_advanced_delivery` (Boolean) Enable Advanced Delivery
+
+
 <a id="nestedatt--blocked_services_choice"></a>
 ### Nested Schema for `blocked_services_choice`
 
@@ -155,7 +165,7 @@ Read-Only:
 Read-Only:
 
 - `dns_server_choice` (Attributes) DNS Servers Specify DNS Servers that will be used for resolving domains required for registration and upgrades. By default, 8.8.8.8 and 8.8.4.4 DNS nameservers will be used. (see [below for nested schema](#nestedatt--dns_ntp_config--dns_server_choice))
-- `ntp_server_choice` (Attributes) NTP Servers Specify NTP Servers that will be by the nodes of this Customer Edge site. By default, time.google.com is used during registration and once tunnels to REs are formed, NTP service hosted by F5 Distributed Cloud will be used. When custom is selected, NTP service hosted by F5 Distributed Cloud will not be used. (see [below for nested schema](#nestedatt--dns_ntp_config--ntp_server_choice))
+- `ntp_server_choice` (Attributes) NTP Servers Specify NTP Servers that will be used by the nodes of this Customer Edge site. By default, time.google.com is used during registration and once tunnels to REs are formed, NTP service hosted by F5 Distributed Cloud will be used. When custom is selected, NTP service hosted by F5 Distributed Cloud will not be used. (see [below for nested schema](#nestedatt--dns_ntp_config--ntp_server_choice))
 
 <a id="nestedatt--dns_ntp_config--dns_server_choice"></a>
 ### Nested Schema for `dns_ntp_config.dns_server_choice`

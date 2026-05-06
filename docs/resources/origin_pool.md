@@ -13,17 +13,8 @@ OriginPool resource
 
 ```terraform
 resource "f5xc_origin_pool" "example" {
-  namespace              = "example_namespace"
-  name                   = "example_origin_pool"
-  loadbalancer_algorithm = ["ENUM_VALUE"]
-  endpoint_selection     = ["ENUM_VALUE"]
-  origin_servers = [{
-    choice = {
-      public_ip = {
-        public_ip = "example_public_ip"
-      }
-    }
-  }]
+  namespace = "example_namespace"
+  name      = "example_origin_pool"
   tls_choice = {
     use_tls = {
       use_tls = "example_use_tls"
@@ -32,6 +23,15 @@ resource "f5xc_origin_pool" "example" {
   port_choice = {
     port = 1
   }
+  origin_servers = [{
+    choice = {
+      private_name = {
+        private_name = "example_private_name"
+      }
+    }
+  }]
+  loadbalancer_algorithm = ["ENUM_VALUE"]
+  endpoint_selection     = ["ENUM_VALUE"]
 }
 ```
 
@@ -42,7 +42,7 @@ resource "f5xc_origin_pool" "example" {
 
 ### Required
 
-- `endpoint_selection` (List of String) <br>**Allowed Values (choose one):** `["LOCAL_ONLY", "LOCAL_PREFERRED", "DISTRIBUTED"]`
+- `endpoint_selection` (List of String) <br>**Allowed Values (choose one):** `["DISTRIBUTED", "LOCAL_ONLY", "LOCAL_PREFERRED"]`
 - `loadbalancer_algorithm` (List of String) <br>**Allowed Values (choose one):** `["ROUND_ROBIN", "LEAST_REQUEST", "RING_HASH", "RANDOM", "LB_OVERRIDE"]`
 - `name` (String) name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.
 - `namespace` (String) namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''
@@ -841,8 +841,8 @@ Required:
 
 Optional:
 
-- `max_version` (List of String) <br>**Allowed Values (choose one):** `["TLS_AUTO", "TLSv1_0", "TLSv1_1", "TLSv1_2", "TLSv1_3"]`
-- `min_version` (List of String) <br>**Allowed Values (choose one):** `["TLS_AUTO", "TLSv1_0", "TLSv1_1", "TLSv1_2", "TLSv1_3"]`
+- `max_version` (List of String) <br>**Allowed Values (choose one):** `["TLSv1_1", "TLSv1_2", "TLSv1_3", "TLS_AUTO", "TLSv1_0"]`
+- `min_version` (List of String) <br>**Allowed Values (choose one):** `["TLSv1_0", "TLSv1_1", "TLSv1_2", "TLSv1_3", "TLS_AUTO"]`
 
 
 

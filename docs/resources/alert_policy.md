@@ -21,7 +21,7 @@ resource "f5xc_alert_policy" "example" {
   }]
   routes = [{
     action = {
-      dont_send = true
+      send = true
     }
   }]
 }
@@ -90,7 +90,7 @@ Optional:
 
 Optional:
 
-- `alertname` (List of String) <br>**Allowed Values (choose one):** `["RoutedDDoSAlertNotification", "WAFTooManyAttacks", "APISecuritySensitiveDataInResponseDetected", "SiteCustomerTunnelInterfaceDown", "ServiceClientError", "ServiceClientErrorPerSourceSite", "MaliciousUserDetected", "APISecurityTooManyAttacks", "ServiceHealthLow", "BotDefenseTooManySecurityEvents", "VesClientSideDefenseSuspiciousDomain", "VesClientSideDefenseSensitiveFieldRead", "TLSAutomaticCertificateExpired", "TLSCustomCertificateExpired", "APISecurityShadowAPIDetected", "ServiceUnavailable", "SyntheticMonitorHealthCritical", "WAFTooManyMaliciousBots", "TLSCustomCertificateExpiringSoon", "TunnelsToCustomerSiteDown", "ServiceServerError", "ServiceServerErrorPerSourceSite", "L7DDoS", "DNSZoneIgnoredDuplicateRecord", "APISecurityUnUsedAPIDetected", "SitePhysicalInterfaceDown", "ThreatCampaign", "TLSAutomaticCertificateRenewalFailure", "APISecurityRiskScoreHighDetected", "RoutedDDoSMitigationNotification", "ServiceEndpointHealthcheckFailure", "ServicePolicyTooManyAttacks", "TLSAutomaticCertificateRenewalStillFailing", "TLSCustomCertificateExpiring"]`
+- `alertname` (List of String) <br>**Allowed Values (choose one):** `["ServiceClientErrorPerSourceSite", "APISecurityTooManyAttacks", "VesClientSideDefenseSensitiveFieldRead", "ServiceServerErrorPerSourceSite", "MaliciousUserDetected", "WAFTooManyAttacks", "WAFTooManyMaliciousBots", "APISecurityShadowAPIDetected", "RoutedDDoSTunnelStatusUpdateNotification", "TunnelsToCustomerSiteDown", "ThreatCampaign", "TLSAutomaticCertificateRenewalStillFailing", "TLSCustomCertificateExpiring", "APISecurityRiskScoreHighDetected", "SiteCustomerTunnelInterfaceDown", "ServiceClientError", "BotDefenseTooManySecurityEvents", "VesClientSideDefenseSuspiciousDomain", "RoutedDDoSMitigationNotification", "SitePhysicalInterfaceDown", "ServiceServerError", "ServicePolicyTooManyAttacks", "RoutedDDoSAlertNotification", "TLSAutomaticCertificateRenewalFailure", "L7DDoS", "ServiceHealthLow", "SyntheticMonitorHealthCritical", "TLSAutomaticCertificateExpired", "TLSCustomCertificateExpiringSoon", "TLSCustomCertificateExpired", "APISecurityUnUsedAPIDetected", "ServiceUnavailable", "ServiceEndpointHealthcheckFailure", "DNSZoneIgnoredDuplicateRecord", "APISecuritySensitiveDataInResponseDetected"]`
 - `alertname_regex` (String) Alertname Regex Match Regular Expression match for the alertname
 - `any` (Boolean) Any Matches all alerts in the namespace
 - `custom` (Attributes) Custom Match A set of custom equality/regex matchers an alert has to fulfill to match the route. (see [below for nested schema](#nestedatt--routes--matcher_choice--custom))
@@ -181,7 +181,7 @@ Optional:
 
 Optional:
 
-- `groups` (List of String) <br>**Valid Options:** `["VIRTUAL_HOST", "TIMESERIES_ANOMALY", "SYNTHETIC_MONITORS", "SHAPE_SECURITY", "SECURITY_CSD", "SECURITY_BOT_DEFENSE", "CLOUD_LINK", "IAAS_CAAS", "VOLT_SHARE", "CDN", "TLS", "DNS", "INFRASTRUCTURE", "UAM", "SECURITY", "ROUTED_DDOS"]` (Multiple selection allowed)
+- `groups` (List of String) <br>**Valid Options:** `["VIRTUAL_HOST", "UAM", "TIMESERIES_ANOMALY", "DNS", "INFRASTRUCTURE", "VOLT_SHARE", "TLS", "SECURITY_BOT_DEFENSE", "CLOUD_LINK", "IAAS_CAAS", "SECURITY", "SHAPE_SECURITY", "SECURITY_CSD", "CDN", "SYNTHETIC_MONITORS", "ROUTED_DDOS"]` (Multiple selection allowed)
 
 
 <a id="nestedatt--routes--matcher_choice--severity"></a>

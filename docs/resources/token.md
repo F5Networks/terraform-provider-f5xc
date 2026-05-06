@@ -13,8 +13,8 @@ Token resource
 
 ```terraform
 resource "f5xc_token" "example" {
-  namespace = "example_namespace"
   name      = "example_token"
+  namespace = "example_namespace"
 }
 ```
 

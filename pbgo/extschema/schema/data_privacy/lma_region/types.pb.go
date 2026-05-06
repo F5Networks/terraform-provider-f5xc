@@ -5,18 +5,17 @@ package lma_region
 
 import (
 	fmt "fmt"
-	io "io"
-	math "math"
-	math_bits "math/bits"
-	reflect "reflect"
-	strings "strings"
-
 	_ "github.com/gogo/protobuf/gogoproto"
 	proto "github.com/gogo/protobuf/proto"
 	_ "github.com/gogo/protobuf/types"
 	golang_proto "github.com/golang/protobuf/proto"
 	schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views"
+	io "io"
+	math "math"
+	math_bits "math/bits"
+	reflect "reflect"
+	strings "strings"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -60,11 +59,17 @@ type GlobalSpecType struct {
 	// x-required
 	// Clickhouse Params
 	ClickhouseParams *ClickhouseParams `protobuf:"bytes,4,opt,name=clickhouse_params,json=clickhouseParams,proto3" json:"clickhouse_params,omitempty"`
-	// AWS params
+	// AWS S3 params for access logs
 	//
-	// x-displayName: "AWS params"
-	// AWS Params
-	AwsParams *AWSParams `protobuf:"bytes,5,opt,name=aws_params,json=awsParams,proto3" json:"aws_params,omitempty"`
+	// x-displayName: "AWS S3 params for access logs"
+	// AWS S3 params for access logs
+	AccessLogsS3Params *S3Params `protobuf:"bytes,6,opt,name=access_logs_s3_params,json=accessLogsS3Params,proto3" json:"access_logs_s3_params,omitempty"`
+	// Country
+	//
+	// x-displayName: "Country"
+	// x-example: "US"
+	// Country associated with this LMA region
+	Country string `protobuf:"bytes,7,opt,name=country,proto3" json:"country,omitempty"`
 }
 
 func (m *GlobalSpecType) Reset()      { *m = GlobalSpecType{} }
@@ -123,11 +128,18 @@ func (m *GlobalSpecType) GetClickhouseParams() *ClickhouseParams {
 	return nil
 }
 
-func (m *GlobalSpecType) GetAwsParams() *AWSParams {
+func (m *GlobalSpecType) GetAccessLogsS3Params() *S3Params {
 	if m != nil {
-		return m.AwsParams
+		return m.AccessLogsS3Params
 	}
 	return nil
+}
+
+func (m *GlobalSpecType) GetCountry() string {
+	if m != nil {
+		return m.Country
+	}
+	return ""
 }
 
 // Get LMA Region
@@ -135,11 +147,12 @@ func (m *GlobalSpecType) GetAwsParams() *AWSParams {
 // x-displayName: "Get LMA Region"
 // Shape of the lma region specification
 type GetSpecType struct {
-	IsDefault        bool              `protobuf:"varint,1,opt,name=is_default,json=isDefault,proto3" json:"is_default,omitempty"`
-	KafkaParams      *KafkaParams      `protobuf:"bytes,2,opt,name=kafka_params,json=kafkaParams,proto3" json:"kafka_params,omitempty"`
-	ElasticParams    *ElasticParams    `protobuf:"bytes,3,opt,name=elastic_params,json=elasticParams,proto3" json:"elastic_params,omitempty"`
-	ClickhouseParams *ClickhouseParams `protobuf:"bytes,4,opt,name=clickhouse_params,json=clickhouseParams,proto3" json:"clickhouse_params,omitempty"`
-	AwsParams        *AWSParams        `protobuf:"bytes,5,opt,name=aws_params,json=awsParams,proto3" json:"aws_params,omitempty"`
+	IsDefault          bool              `protobuf:"varint,1,opt,name=is_default,json=isDefault,proto3" json:"is_default,omitempty"`
+	KafkaParams        *KafkaParams      `protobuf:"bytes,2,opt,name=kafka_params,json=kafkaParams,proto3" json:"kafka_params,omitempty"`
+	ElasticParams      *ElasticParams    `protobuf:"bytes,3,opt,name=elastic_params,json=elasticParams,proto3" json:"elastic_params,omitempty"`
+	ClickhouseParams   *ClickhouseParams `protobuf:"bytes,4,opt,name=clickhouse_params,json=clickhouseParams,proto3" json:"clickhouse_params,omitempty"`
+	AccessLogsS3Params *S3Params         `protobuf:"bytes,6,opt,name=access_logs_s3_params,json=accessLogsS3Params,proto3" json:"access_logs_s3_params,omitempty"`
+	Country            string            `protobuf:"bytes,7,opt,name=country,proto3" json:"country,omitempty"`
 }
 
 func (m *GetSpecType) Reset()      { *m = GetSpecType{} }
@@ -198,11 +211,18 @@ func (m *GetSpecType) GetClickhouseParams() *ClickhouseParams {
 	return nil
 }
 
-func (m *GetSpecType) GetAwsParams() *AWSParams {
+func (m *GetSpecType) GetAccessLogsS3Params() *S3Params {
 	if m != nil {
-		return m.AwsParams
+		return m.AccessLogsS3Params
 	}
 	return nil
+}
+
+func (m *GetSpecType) GetCountry() string {
+	if m != nil {
+		return m.Country
+	}
+	return ""
 }
 
 // Kafka Params
@@ -388,11 +408,11 @@ func (m *ClickhouseParams) GetPassword() *schema.SecretType {
 	return nil
 }
 
-// AWS Params
+// AWS Credentials
 //
-// x-displayName: "AWS Params"
-// AWS parameters
-type AWSParams struct {
+// x-displayName: "AWS Credentials"
+// AWS Credentials
+type AWSCredentials struct {
 	// AWS Access key ID
 	//
 	// x-displayName: "AWS Access key ID"
@@ -413,15 +433,15 @@ type AWSParams struct {
 	Region string `protobuf:"bytes,3,opt,name=region,proto3" json:"region,omitempty"`
 }
 
-func (m *AWSParams) Reset()      { *m = AWSParams{} }
-func (*AWSParams) ProtoMessage() {}
-func (*AWSParams) Descriptor() ([]byte, []int) {
+func (m *AWSCredentials) Reset()      { *m = AWSCredentials{} }
+func (*AWSCredentials) ProtoMessage() {}
+func (*AWSCredentials) Descriptor() ([]byte, []int) {
 	return fileDescriptor_8c3f5102a035d7b1, []int{5}
 }
-func (m *AWSParams) XXX_Unmarshal(b []byte) error {
+func (m *AWSCredentials) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *AWSParams) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *AWSCredentials) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	b = b[:cap(b)]
 	n, err := m.MarshalToSizedBuffer(b)
 	if err != nil {
@@ -429,35 +449,96 @@ func (m *AWSParams) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	}
 	return b[:n], nil
 }
-func (m *AWSParams) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_AWSParams.Merge(m, src)
+func (m *AWSCredentials) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AWSCredentials.Merge(m, src)
 }
-func (m *AWSParams) XXX_Size() int {
+func (m *AWSCredentials) XXX_Size() int {
 	return m.Size()
 }
-func (m *AWSParams) XXX_DiscardUnknown() {
-	xxx_messageInfo_AWSParams.DiscardUnknown(m)
+func (m *AWSCredentials) XXX_DiscardUnknown() {
+	xxx_messageInfo_AWSCredentials.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_AWSParams proto.InternalMessageInfo
+var xxx_messageInfo_AWSCredentials proto.InternalMessageInfo
 
-func (m *AWSParams) GetAccessKeyId() string {
+func (m *AWSCredentials) GetAccessKeyId() string {
 	if m != nil {
 		return m.AccessKeyId
 	}
 	return ""
 }
 
-func (m *AWSParams) GetSecretAccessKey() *schema.SecretType {
+func (m *AWSCredentials) GetSecretAccessKey() *schema.SecretType {
 	if m != nil {
 		return m.SecretAccessKey
 	}
 	return nil
 }
 
-func (m *AWSParams) GetRegion() string {
+func (m *AWSCredentials) GetRegion() string {
 	if m != nil {
 		return m.Region
+	}
+	return ""
+}
+
+// AWS S3 Params
+//
+// x-displayName: "AWS S3 Params"
+// AWS S3 parameters
+type S3Params struct {
+	// AWS Credentials
+	//
+	// x-displayName: "AWS Credentials"
+	// x-required
+	// AWS Credentials
+	AwsCredentials *AWSCredentials `protobuf:"bytes,1,opt,name=aws_credentials,json=awsCredentials,proto3" json:"aws_credentials,omitempty"`
+	// S3 Bucket Name
+	//
+	// x-displayName: "S3 Bucket Name"
+	// x-required
+	// S3 Bucket Name
+	Bucket string `protobuf:"bytes,2,opt,name=bucket,proto3" json:"bucket,omitempty"`
+}
+
+func (m *S3Params) Reset()      { *m = S3Params{} }
+func (*S3Params) ProtoMessage() {}
+func (*S3Params) Descriptor() ([]byte, []int) {
+	return fileDescriptor_8c3f5102a035d7b1, []int{6}
+}
+func (m *S3Params) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *S3Params) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	b = b[:cap(b)]
+	n, err := m.MarshalToSizedBuffer(b)
+	if err != nil {
+		return nil, err
+	}
+	return b[:n], nil
+}
+func (m *S3Params) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_S3Params.Merge(m, src)
+}
+func (m *S3Params) XXX_Size() int {
+	return m.Size()
+}
+func (m *S3Params) XXX_DiscardUnknown() {
+	xxx_messageInfo_S3Params.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_S3Params proto.InternalMessageInfo
+
+func (m *S3Params) GetAwsCredentials() *AWSCredentials {
+	if m != nil {
+		return m.AwsCredentials
+	}
+	return nil
+}
+
+func (m *S3Params) GetBucket() string {
+	if m != nil {
+		return m.Bucket
 	}
 	return ""
 }
@@ -473,8 +554,10 @@ func init() {
 	golang_proto.RegisterType((*ElasticParams)(nil), "ves.io.schema.data_privacy.lma_region.ElasticParams")
 	proto.RegisterType((*ClickhouseParams)(nil), "ves.io.schema.data_privacy.lma_region.ClickhouseParams")
 	golang_proto.RegisterType((*ClickhouseParams)(nil), "ves.io.schema.data_privacy.lma_region.ClickhouseParams")
-	proto.RegisterType((*AWSParams)(nil), "ves.io.schema.data_privacy.lma_region.AWSParams")
-	golang_proto.RegisterType((*AWSParams)(nil), "ves.io.schema.data_privacy.lma_region.AWSParams")
+	proto.RegisterType((*AWSCredentials)(nil), "ves.io.schema.data_privacy.lma_region.AWSCredentials")
+	golang_proto.RegisterType((*AWSCredentials)(nil), "ves.io.schema.data_privacy.lma_region.AWSCredentials")
+	proto.RegisterType((*S3Params)(nil), "ves.io.schema.data_privacy.lma_region.S3Params")
+	golang_proto.RegisterType((*S3Params)(nil), "ves.io.schema.data_privacy.lma_region.S3Params")
 }
 
 func init() {
@@ -485,49 +568,55 @@ func init() {
 }
 
 var fileDescriptor_8c3f5102a035d7b1 = []byte{
-	// 669 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xec, 0x95, 0x3f, 0x6f, 0x13, 0x3f,
-	0x18, 0xc7, 0xe3, 0x5f, 0xda, 0xaa, 0x71, 0x7e, 0x2d, 0x8d, 0x07, 0x94, 0x06, 0x70, 0xa3, 0x48,
-	0x48, 0x5d, 0x7a, 0x07, 0x85, 0xaa, 0x12, 0x03, 0xa8, 0x85, 0x52, 0xa1, 0x0e, 0xa0, 0x04, 0x54,
-	0x09, 0x86, 0x93, 0x73, 0xe7, 0x5c, 0xac, 0xdc, 0xd5, 0x96, 0xed, 0x4b, 0x9a, 0x8d, 0x85, 0x15,
-	0xb1, 0xb0, 0x30, 0x31, 0x22, 0x5e, 0x02, 0x53, 0x47, 0xc4, 0xd4, 0xb1, 0x23, 0xbd, 0x2c, 0xb0,
-	0xf5, 0x25, 0xa0, 0xf8, 0x2e, 0x7f, 0x41, 0x55, 0x46, 0x06, 0xb6, 0xe7, 0xdf, 0xf7, 0xe3, 0xe7,
-	0x9e, 0xc7, 0x71, 0xe0, 0xed, 0x36, 0x55, 0x16, 0xe3, 0xb6, 0x72, 0x9b, 0x34, 0x24, 0xb6, 0x47,
-	0x34, 0x71, 0x84, 0x64, 0x6d, 0xe2, 0x76, 0xed, 0x20, 0x24, 0x8e, 0xa4, 0x3e, 0xe3, 0x47, 0xb6,
-	0xee, 0x0a, 0xaa, 0x2c, 0x21, 0xb9, 0xe6, 0xe8, 0x66, 0x22, 0xb1, 0x12, 0x89, 0x35, 0x2e, 0xb1,
-	0x46, 0x92, 0xd2, 0x86, 0xcf, 0x74, 0x33, 0xaa, 0x5b, 0x2e, 0x0f, 0x6d, 0x9f, 0xfb, 0xdc, 0x36,
-	0xea, 0x7a, 0xd4, 0x30, 0x9e, 0x71, 0x8c, 0x95, 0x50, 0x4b, 0x6b, 0x3e, 0xe7, 0x7e, 0x40, 0x47,
-	0x55, 0x9a, 0x85, 0x54, 0x69, 0x12, 0x8a, 0xb4, 0xe0, 0xda, 0x64, 0xa7, 0x5c, 0x68, 0xc6, 0x8f,
-	0xd2, 0x9e, 0x4a, 0xab, 0x93, 0xc9, 0xb1, 0x76, 0x4b, 0xd7, 0x27, 0x53, 0x6d, 0x12, 0x30, 0x8f,
-	0x68, 0x9a, 0x66, 0xcb, 0x53, 0x59, 0x46, 0x3b, 0xce, 0x24, 0x7a, 0xed, 0xf7, 0x0a, 0x35, 0x7e,
-	0x40, 0xe5, 0x43, 0x16, 0x2e, 0xef, 0x07, 0xbc, 0x4e, 0x82, 0x9a, 0xa0, 0xee, 0xf3, 0xae, 0xa0,
-	0xe8, 0x06, 0x84, 0x4c, 0x39, 0x1e, 0x6d, 0x90, 0x28, 0xd0, 0x45, 0x50, 0x06, 0xeb, 0x8b, 0xd5,
-	0x1c, 0x53, 0x8f, 0x92, 0x00, 0x7a, 0x01, 0xff, 0x6f, 0x91, 0x46, 0x8b, 0x38, 0x82, 0x48, 0x12,
-	0xaa, 0xe2, 0x7f, 0x65, 0xb0, 0x9e, 0xdf, 0xdc, 0xb4, 0x66, 0x1a, 0xac, 0x75, 0xd0, 0x97, 0x3e,
-	0x33, 0xca, 0x6a, 0xbe, 0x35, 0x72, 0xd0, 0x2b, 0xb8, 0x4c, 0x03, 0xa2, 0x34, 0x73, 0x07, 0xe0,
-	0xac, 0x01, 0xdf, 0x9d, 0x11, 0xbc, 0x97, 0x88, 0x53, 0xf4, 0x12, 0x1d, 0x77, 0x91, 0x07, 0x0b,
-	0x6e, 0xc0, 0xdc, 0x56, 0x93, 0x47, 0x8a, 0x0e, 0xf8, 0x73, 0x86, 0xbf, 0x3d, 0x23, 0xff, 0xe1,
-	0x50, 0x9f, 0x1e, 0xb1, 0xe2, 0x4e, 0x45, 0xd0, 0x53, 0x08, 0x49, 0x47, 0x0d, 0xf0, 0xf3, 0x06,
-	0x7f, 0x6b, 0x46, 0xfc, 0xce, 0x61, 0x2d, 0xe5, 0xe6, 0x48, 0x47, 0x25, 0x66, 0xe5, 0x73, 0x16,
-	0xe6, 0xf7, 0xa9, 0xfe, 0xb7, 0x99, 0xbf, 0x6d, 0x33, 0xf7, 0x0a, 0xdf, 0xee, 0x4f, 0xfd, 0x6c,
-	0x2a, 0x8f, 0x61, 0x7e, 0x6c, 0x84, 0x68, 0x1b, 0x16, 0xea, 0x9c, 0x6b, 0xa5, 0x25, 0x11, 0x8e,
-	0xa2, 0xb2, 0x4d, 0xa5, 0x2a, 0x82, 0x72, 0x76, 0x3d, 0xb7, 0x0b, 0xbf, 0xfc, 0x3c, 0xc9, 0xce,
-	0xcb, 0x6c, 0xf1, 0xe3, 0x83, 0xea, 0xca, 0xb0, 0xa8, 0x96, 0xd4, 0x54, 0x6c, 0xb8, 0x34, 0x31,
-	0x31, 0x84, 0xe1, 0x5c, 0x24, 0x83, 0x3f, 0x89, 0x4d, 0xbc, 0xf2, 0x06, 0xc0, 0x95, 0xe9, 0x19,
-	0x20, 0x04, 0xe7, 0x9a, 0x5c, 0x25, 0x97, 0x24, 0x57, 0x35, 0x76, 0x3f, 0x26, 0xb8, 0xd4, 0xe6,
-	0x5e, 0xcc, 0x57, 0x8d, 0xdd, 0x8f, 0x45, 0x8a, 0x4a, 0xb3, 0xd2, 0x5c, 0xd5, 0xd8, 0x68, 0x0b,
-	0x2e, 0x0a, 0xa2, 0x54, 0x87, 0x4b, 0x2f, 0x5d, 0xc5, 0xea, 0xd4, 0xac, 0x6a, 0xd4, 0x95, 0x54,
-	0xf7, 0x3f, 0xbb, 0x3a, 0x2c, 0xad, 0xbc, 0x05, 0x30, 0x37, 0x1c, 0x16, 0xaa, 0xc0, 0x25, 0xe2,
-	0xba, 0x54, 0x29, 0xa7, 0x45, 0xbb, 0x0e, 0xf3, 0xd2, 0x4e, 0xf2, 0x49, 0xf0, 0x80, 0x76, 0x9f,
-	0x78, 0x68, 0x0f, 0x16, 0x94, 0x21, 0x39, 0xa3, 0xd2, 0xf4, 0xd6, 0x5e, 0x72, 0xe2, 0x95, 0x44,
-	0xb3, 0x33, 0x00, 0xa1, 0xab, 0x70, 0x21, 0xd9, 0x55, 0xfa, 0x15, 0xa9, 0xb7, 0xfb, 0x1e, 0x9c,
-	0x9e, 0xe3, 0xcc, 0xd9, 0x39, 0xce, 0x5c, 0x9c, 0x63, 0xf0, 0x3a, 0xc6, 0xe0, 0x53, 0x8c, 0xc1,
-	0xd7, 0x18, 0x83, 0xd3, 0x18, 0x83, 0xb3, 0x18, 0x83, 0xef, 0x31, 0x06, 0x3f, 0x62, 0x9c, 0xb9,
-	0x88, 0x31, 0x78, 0xd7, 0xc3, 0x99, 0x93, 0x1e, 0x06, 0xa7, 0x3d, 0x9c, 0x39, 0xeb, 0xe1, 0xcc,
-	0xcb, 0x43, 0x9f, 0x8b, 0x96, 0x6f, 0xb5, 0x79, 0xa0, 0xa9, 0x94, 0xc4, 0x8a, 0x94, 0x6d, 0x8c,
-	0x06, 0x97, 0xe1, 0x86, 0x90, 0xbc, 0xcd, 0x3c, 0x2a, 0x37, 0x1a, 0x5b, 0xc7, 0xae, 0x2d, 0xea,
-	0x3e, 0xb7, 0xe9, 0xb1, 0x4e, 0x9f, 0xd9, 0xcb, 0xff, 0x8f, 0xea, 0x0b, 0xe6, 0xe9, 0xbd, 0xf3,
-	0x2b, 0x00, 0x00, 0xff, 0xff, 0x36, 0x95, 0x62, 0x87, 0xbf, 0x06, 0x00, 0x00,
+	// 755 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xec, 0x55, 0x4d, 0x6b, 0x1b, 0x47,
+	0x18, 0xd6, 0x54, 0xb2, 0x2c, 0x8d, 0x6a, 0x59, 0x1a, 0xa8, 0x91, 0xd5, 0x76, 0x2c, 0x04, 0x05,
+	0x5d, 0xbc, 0x4b, 0xed, 0x1a, 0x43, 0x0f, 0x2d, 0xb6, 0xeb, 0x9a, 0xd6, 0x3d, 0x94, 0x55, 0x8b,
+	0xa1, 0x85, 0x2e, 0xb3, 0xbb, 0xa3, 0xd5, 0xa2, 0x95, 0x66, 0x99, 0x99, 0x95, 0xac, 0x5b, 0x09,
+	0xe4, 0x1e, 0x08, 0xb9, 0xe7, 0x98, 0xdf, 0x90, 0x93, 0x8f, 0x21, 0x10, 0xf0, 0xd1, 0x97, 0x40,
+	0xbc, 0xba, 0x24, 0x37, 0xff, 0x84, 0xa0, 0xd9, 0xd5, 0x67, 0x82, 0xd1, 0x35, 0x90, 0xdb, 0xfb,
+	0xf5, 0x3c, 0xef, 0xe7, 0x30, 0xf0, 0xfb, 0x3e, 0x15, 0x9a, 0xc7, 0x74, 0x61, 0xb7, 0x69, 0x97,
+	0xe8, 0x0e, 0x91, 0xc4, 0x0c, 0xb8, 0xd7, 0x27, 0xf6, 0x50, 0xf7, 0xbb, 0xc4, 0xe4, 0xd4, 0xf5,
+	0x58, 0x4f, 0x97, 0xc3, 0x80, 0x0a, 0x2d, 0xe0, 0x4c, 0x32, 0xf4, 0x5d, 0x0c, 0xd1, 0x62, 0x88,
+	0x36, 0x0f, 0xd1, 0x66, 0x90, 0xea, 0xae, 0xeb, 0xc9, 0x76, 0x68, 0x69, 0x36, 0xeb, 0xea, 0x2e,
+	0x73, 0x99, 0xae, 0xd0, 0x56, 0xd8, 0x52, 0x9a, 0x52, 0x94, 0x14, 0xb3, 0x56, 0x77, 0x5c, 0xc6,
+	0x5c, 0x9f, 0xce, 0xa2, 0xa4, 0xd7, 0xa5, 0x42, 0x92, 0x6e, 0x90, 0x04, 0x7c, 0xbd, 0x58, 0x29,
+	0x0b, 0xa4, 0xc7, 0x7a, 0x49, 0x4d, 0xd5, 0xed, 0x45, 0xe7, 0x5c, 0xb9, 0xd5, 0x6f, 0x16, 0x5d,
+	0x7d, 0xe2, 0x7b, 0x0e, 0x91, 0x34, 0xf1, 0xd6, 0x96, 0xbc, 0x1e, 0x1d, 0x98, 0x8b, 0xd4, 0x3b,
+	0x1f, 0x46, 0x88, 0xf9, 0x04, 0xf5, 0x57, 0x69, 0x58, 0x3c, 0xf3, 0x99, 0x45, 0xfc, 0x66, 0x40,
+	0xed, 0xbf, 0x86, 0x01, 0x45, 0xdf, 0x42, 0xe8, 0x09, 0xd3, 0xa1, 0x2d, 0x12, 0xfa, 0xb2, 0x02,
+	0x6a, 0xa0, 0x91, 0x33, 0xf2, 0x9e, 0xf8, 0x25, 0x36, 0xa0, 0xbf, 0xe1, 0x97, 0x1d, 0xd2, 0xea,
+	0x10, 0x33, 0x20, 0x9c, 0x74, 0x45, 0xe5, 0x8b, 0x1a, 0x68, 0x14, 0xf6, 0xf6, 0xb4, 0x95, 0x06,
+	0xab, 0x9d, 0x8f, 0xa1, 0x7f, 0x2a, 0xa4, 0x51, 0xe8, 0xcc, 0x14, 0xf4, 0x2f, 0x2c, 0x52, 0x9f,
+	0x08, 0xe9, 0xd9, 0x13, 0xe2, 0xb4, 0x22, 0xfe, 0x61, 0x45, 0xe2, 0xd3, 0x18, 0x9c, 0x50, 0x6f,
+	0xd0, 0x79, 0x15, 0x39, 0xb0, 0x6c, 0xfb, 0x9e, 0xdd, 0x69, 0xb3, 0x50, 0xd0, 0x09, 0x7f, 0x46,
+	0xf1, 0x1f, 0xae, 0xc8, 0x7f, 0x32, 0xc5, 0x27, 0x29, 0x4a, 0xf6, 0x92, 0x05, 0x59, 0xf0, 0x2b,
+	0x62, 0xdb, 0x54, 0x08, 0xd3, 0x67, 0xae, 0x30, 0xc5, 0xfe, 0x24, 0x53, 0x56, 0x65, 0xd2, 0x57,
+	0xcc, 0xd4, 0xdc, 0x4f, 0x32, 0xa0, 0x98, 0xed, 0x0f, 0xe6, 0x8a, 0x89, 0x0d, 0x55, 0xe0, 0xba,
+	0xcd, 0xc2, 0x9e, 0xe4, 0xc3, 0xca, 0x7a, 0x0d, 0x34, 0xf2, 0xc6, 0x44, 0xfd, 0x3d, 0x93, 0x5b,
+	0x2b, 0x65, 0xeb, 0xaf, 0xd3, 0xb0, 0x70, 0x46, 0xe5, 0xe7, 0x65, 0x7e, 0xd2, 0xcb, 0xfc, 0xb1,
+	0xfc, 0xf2, 0xa7, 0xa5, 0x67, 0x99, 0xec, 0xf7, 0x57, 0x58, 0x98, 0x9b, 0x3a, 0x3a, 0x84, 0x65,
+	0x8b, 0x31, 0x29, 0x24, 0x27, 0x81, 0x29, 0x28, 0xef, 0x53, 0x2e, 0x2a, 0xa0, 0x96, 0x6e, 0xe4,
+	0x8f, 0xe1, 0xf3, 0x77, 0x57, 0xe9, 0x35, 0x9e, 0xae, 0x3c, 0xfd, 0xd9, 0x28, 0x4d, 0x83, 0x9a,
+	0x71, 0x4c, 0x5d, 0x87, 0x1b, 0x0b, 0x43, 0x46, 0x18, 0x66, 0x42, 0xee, 0x7f, 0x0c, 0xac, 0xec,
+	0xf5, 0x87, 0x00, 0x96, 0x96, 0xc7, 0x86, 0x10, 0xcc, 0xb4, 0x99, 0x88, 0xef, 0x2a, 0x6f, 0x28,
+	0x79, 0x6c, 0x0b, 0x18, 0x97, 0xea, 0x94, 0xd6, 0x0c, 0x25, 0x8f, 0x6d, 0xa1, 0xa0, 0x5c, 0x5d,
+	0x41, 0xde, 0x50, 0x32, 0x3a, 0x80, 0xb9, 0x80, 0x08, 0x31, 0x60, 0xdc, 0x49, 0xb6, 0xb7, 0xbd,
+	0x34, 0xd3, 0x26, 0xb5, 0x39, 0x95, 0xe3, 0xe6, 0x8d, 0x69, 0x68, 0xfd, 0x31, 0x80, 0xc5, 0xa3,
+	0x8b, 0xe6, 0x09, 0xa7, 0x0e, 0xed, 0x49, 0x8f, 0xf8, 0x02, 0xd5, 0xe1, 0x46, 0xb2, 0xaa, 0x0e,
+	0x1d, 0x9a, 0x9e, 0x93, 0x94, 0x53, 0x88, 0x8d, 0xe7, 0x74, 0xf8, 0x9b, 0x83, 0x4e, 0x61, 0x59,
+	0x28, 0x3a, 0x73, 0x16, 0x9a, 0x5c, 0xfb, 0x3d, 0x69, 0x37, 0x63, 0xcc, 0xd1, 0x84, 0x08, 0x6d,
+	0xc1, 0x6c, 0xbc, 0xd8, 0xa4, 0x95, 0x44, 0xab, 0x3f, 0x00, 0x30, 0x37, 0x5d, 0xeb, 0x7f, 0x70,
+	0x93, 0x0c, 0x84, 0x69, 0xcf, 0x4a, 0x54, 0x15, 0x15, 0xf6, 0x0e, 0x56, 0x3c, 0x9a, 0xc5, 0xfe,
+	0x8c, 0x22, 0x19, 0x88, 0xf9, 0x7e, 0xb7, 0x60, 0xd6, 0x0a, 0xed, 0x0e, 0x8d, 0x67, 0x9c, 0x37,
+	0x12, 0xed, 0xf8, 0x09, 0xb8, 0xbe, 0xc5, 0xa9, 0x9b, 0x5b, 0x9c, 0xba, 0xbb, 0xc5, 0xe0, 0xff,
+	0x08, 0x83, 0x67, 0x11, 0x06, 0x2f, 0x22, 0x0c, 0xae, 0x23, 0x0c, 0x6e, 0x22, 0x0c, 0xde, 0x44,
+	0x18, 0xbc, 0x8d, 0x70, 0xea, 0x2e, 0xc2, 0xe0, 0xd1, 0x08, 0xa7, 0xae, 0x46, 0x18, 0x5c, 0x8f,
+	0x70, 0xea, 0x66, 0x84, 0x53, 0xff, 0x5c, 0xb8, 0x2c, 0xe8, 0xb8, 0x5a, 0x9f, 0xf9, 0x92, 0x72,
+	0x4e, 0xb4, 0x50, 0xe8, 0x4a, 0x68, 0x31, 0xde, 0xdd, 0x0d, 0x38, 0xeb, 0x7b, 0x0e, 0xe5, 0xbb,
+	0xad, 0x83, 0x4b, 0x5b, 0x0f, 0x2c, 0x97, 0xe9, 0xf4, 0x52, 0x26, 0xdf, 0xca, 0xfd, 0xff, 0xaf,
+	0x95, 0x55, 0x5f, 0xcd, 0xfe, 0xfb, 0x00, 0x00, 0x00, 0xff, 0xff, 0xf5, 0xd6, 0x10, 0x2a, 0xaf,
+	0x07, 0x00, 0x00,
 }
 
 func (this *GlobalSpecType) Equal(that interface{}) bool {
@@ -561,7 +650,10 @@ func (this *GlobalSpecType) Equal(that interface{}) bool {
 	if !this.ClickhouseParams.Equal(that1.ClickhouseParams) {
 		return false
 	}
-	if !this.AwsParams.Equal(that1.AwsParams) {
+	if !this.AccessLogsS3Params.Equal(that1.AccessLogsS3Params) {
+		return false
+	}
+	if this.Country != that1.Country {
 		return false
 	}
 	return true
@@ -597,7 +689,10 @@ func (this *GetSpecType) Equal(that interface{}) bool {
 	if !this.ClickhouseParams.Equal(that1.ClickhouseParams) {
 		return false
 	}
-	if !this.AwsParams.Equal(that1.AwsParams) {
+	if !this.AccessLogsS3Params.Equal(that1.AccessLogsS3Params) {
+		return false
+	}
+	if this.Country != that1.Country {
 		return false
 	}
 	return true
@@ -693,14 +788,14 @@ func (this *ClickhouseParams) Equal(that interface{}) bool {
 	}
 	return true
 }
-func (this *AWSParams) Equal(that interface{}) bool {
+func (this *AWSCredentials) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
 	}
 
-	that1, ok := that.(*AWSParams)
+	that1, ok := that.(*AWSCredentials)
 	if !ok {
-		that2, ok := that.(AWSParams)
+		that2, ok := that.(AWSCredentials)
 		if ok {
 			that1 = &that2
 		} else {
@@ -723,11 +818,38 @@ func (this *AWSParams) Equal(that interface{}) bool {
 	}
 	return true
 }
+func (this *S3Params) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*S3Params)
+	if !ok {
+		that2, ok := that.(S3Params)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.AwsCredentials.Equal(that1.AwsCredentials) {
+		return false
+	}
+	if this.Bucket != that1.Bucket {
+		return false
+	}
+	return true
+}
 func (this *GlobalSpecType) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 9)
+	s := make([]string, 0, 10)
 	s = append(s, "&lma_region.GlobalSpecType{")
 	s = append(s, "IsDefault: "+fmt.Sprintf("%#v", this.IsDefault)+",\n")
 	if this.KafkaParams != nil {
@@ -739,9 +861,10 @@ func (this *GlobalSpecType) GoString() string {
 	if this.ClickhouseParams != nil {
 		s = append(s, "ClickhouseParams: "+fmt.Sprintf("%#v", this.ClickhouseParams)+",\n")
 	}
-	if this.AwsParams != nil {
-		s = append(s, "AwsParams: "+fmt.Sprintf("%#v", this.AwsParams)+",\n")
+	if this.AccessLogsS3Params != nil {
+		s = append(s, "AccessLogsS3Params: "+fmt.Sprintf("%#v", this.AccessLogsS3Params)+",\n")
 	}
+	s = append(s, "Country: "+fmt.Sprintf("%#v", this.Country)+",\n")
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
@@ -749,7 +872,7 @@ func (this *GetSpecType) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 9)
+	s := make([]string, 0, 10)
 	s = append(s, "&lma_region.GetSpecType{")
 	s = append(s, "IsDefault: "+fmt.Sprintf("%#v", this.IsDefault)+",\n")
 	if this.KafkaParams != nil {
@@ -761,9 +884,10 @@ func (this *GetSpecType) GoString() string {
 	if this.ClickhouseParams != nil {
 		s = append(s, "ClickhouseParams: "+fmt.Sprintf("%#v", this.ClickhouseParams)+",\n")
 	}
-	if this.AwsParams != nil {
-		s = append(s, "AwsParams: "+fmt.Sprintf("%#v", this.AwsParams)+",\n")
+	if this.AccessLogsS3Params != nil {
+		s = append(s, "AccessLogsS3Params: "+fmt.Sprintf("%#v", this.AccessLogsS3Params)+",\n")
 	}
+	s = append(s, "Country: "+fmt.Sprintf("%#v", this.Country)+",\n")
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
@@ -802,17 +926,30 @@ func (this *ClickhouseParams) GoString() string {
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
-func (this *AWSParams) GoString() string {
+func (this *AWSCredentials) GoString() string {
 	if this == nil {
 		return "nil"
 	}
 	s := make([]string, 0, 7)
-	s = append(s, "&lma_region.AWSParams{")
+	s = append(s, "&lma_region.AWSCredentials{")
 	s = append(s, "AccessKeyId: "+fmt.Sprintf("%#v", this.AccessKeyId)+",\n")
 	if this.SecretAccessKey != nil {
 		s = append(s, "SecretAccessKey: "+fmt.Sprintf("%#v", this.SecretAccessKey)+",\n")
 	}
 	s = append(s, "Region: "+fmt.Sprintf("%#v", this.Region)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *S3Params) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&lma_region.S3Params{")
+	if this.AwsCredentials != nil {
+		s = append(s, "AwsCredentials: "+fmt.Sprintf("%#v", this.AwsCredentials)+",\n")
+	}
+	s = append(s, "Bucket: "+fmt.Sprintf("%#v", this.Bucket)+",\n")
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
@@ -844,9 +981,16 @@ func (m *GlobalSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	if m.AwsParams != nil {
+	if len(m.Country) > 0 {
+		i -= len(m.Country)
+		copy(dAtA[i:], m.Country)
+		i = encodeVarintTypes(dAtA, i, uint64(len(m.Country)))
+		i--
+		dAtA[i] = 0x3a
+	}
+	if m.AccessLogsS3Params != nil {
 		{
-			size, err := m.AwsParams.MarshalToSizedBuffer(dAtA[:i])
+			size, err := m.AccessLogsS3Params.MarshalToSizedBuffer(dAtA[:i])
 			if err != nil {
 				return 0, err
 			}
@@ -854,7 +998,7 @@ func (m *GlobalSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 			i = encodeVarintTypes(dAtA, i, uint64(size))
 		}
 		i--
-		dAtA[i] = 0x2a
+		dAtA[i] = 0x32
 	}
 	if m.ClickhouseParams != nil {
 		{
@@ -925,9 +1069,16 @@ func (m *GetSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	if m.AwsParams != nil {
+	if len(m.Country) > 0 {
+		i -= len(m.Country)
+		copy(dAtA[i:], m.Country)
+		i = encodeVarintTypes(dAtA, i, uint64(len(m.Country)))
+		i--
+		dAtA[i] = 0x3a
+	}
+	if m.AccessLogsS3Params != nil {
 		{
-			size, err := m.AwsParams.MarshalToSizedBuffer(dAtA[:i])
+			size, err := m.AccessLogsS3Params.MarshalToSizedBuffer(dAtA[:i])
 			if err != nil {
 				return 0, err
 			}
@@ -935,7 +1086,7 @@ func (m *GetSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 			i = encodeVarintTypes(dAtA, i, uint64(size))
 		}
 		i--
-		dAtA[i] = 0x2a
+		dAtA[i] = 0x32
 	}
 	if m.ClickhouseParams != nil {
 		{
@@ -1104,7 +1255,7 @@ func (m *ClickhouseParams) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *AWSParams) Marshal() (dAtA []byte, err error) {
+func (m *AWSCredentials) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -1114,12 +1265,12 @@ func (m *AWSParams) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *AWSParams) MarshalTo(dAtA []byte) (int, error) {
+func (m *AWSCredentials) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *AWSParams) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *AWSCredentials) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -1147,6 +1298,48 @@ func (m *AWSParams) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i -= len(m.AccessKeyId)
 		copy(dAtA[i:], m.AccessKeyId)
 		i = encodeVarintTypes(dAtA, i, uint64(len(m.AccessKeyId)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *S3Params) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *S3Params) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *S3Params) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Bucket) > 0 {
+		i -= len(m.Bucket)
+		copy(dAtA[i:], m.Bucket)
+		i = encodeVarintTypes(dAtA, i, uint64(len(m.Bucket)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if m.AwsCredentials != nil {
+		{
+			size, err := m.AwsCredentials.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
 		i--
 		dAtA[i] = 0xa
 	}
@@ -1185,8 +1378,12 @@ func (m *GlobalSpecType) Size() (n int) {
 		l = m.ClickhouseParams.Size()
 		n += 1 + l + sovTypes(uint64(l))
 	}
-	if m.AwsParams != nil {
-		l = m.AwsParams.Size()
+	if m.AccessLogsS3Params != nil {
+		l = m.AccessLogsS3Params.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	l = len(m.Country)
+	if l > 0 {
 		n += 1 + l + sovTypes(uint64(l))
 	}
 	return n
@@ -1213,8 +1410,12 @@ func (m *GetSpecType) Size() (n int) {
 		l = m.ClickhouseParams.Size()
 		n += 1 + l + sovTypes(uint64(l))
 	}
-	if m.AwsParams != nil {
-		l = m.AwsParams.Size()
+	if m.AccessLogsS3Params != nil {
+		l = m.AccessLogsS3Params.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	l = len(m.Country)
+	if l > 0 {
 		n += 1 + l + sovTypes(uint64(l))
 	}
 	return n
@@ -1274,7 +1475,7 @@ func (m *ClickhouseParams) Size() (n int) {
 	return n
 }
 
-func (m *AWSParams) Size() (n int) {
+func (m *AWSCredentials) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -1289,6 +1490,23 @@ func (m *AWSParams) Size() (n int) {
 		n += 1 + l + sovTypes(uint64(l))
 	}
 	l = len(m.Region)
+	if l > 0 {
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+
+func (m *S3Params) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.AwsCredentials != nil {
+		l = m.AwsCredentials.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	l = len(m.Bucket)
 	if l > 0 {
 		n += 1 + l + sovTypes(uint64(l))
 	}
@@ -1310,7 +1528,8 @@ func (this *GlobalSpecType) String() string {
 		`KafkaParams:` + strings.Replace(this.KafkaParams.String(), "KafkaParams", "KafkaParams", 1) + `,`,
 		`ElasticParams:` + strings.Replace(this.ElasticParams.String(), "ElasticParams", "ElasticParams", 1) + `,`,
 		`ClickhouseParams:` + strings.Replace(this.ClickhouseParams.String(), "ClickhouseParams", "ClickhouseParams", 1) + `,`,
-		`AwsParams:` + strings.Replace(this.AwsParams.String(), "AWSParams", "AWSParams", 1) + `,`,
+		`AccessLogsS3Params:` + strings.Replace(this.AccessLogsS3Params.String(), "S3Params", "S3Params", 1) + `,`,
+		`Country:` + fmt.Sprintf("%v", this.Country) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -1324,7 +1543,8 @@ func (this *GetSpecType) String() string {
 		`KafkaParams:` + strings.Replace(this.KafkaParams.String(), "KafkaParams", "KafkaParams", 1) + `,`,
 		`ElasticParams:` + strings.Replace(this.ElasticParams.String(), "ElasticParams", "ElasticParams", 1) + `,`,
 		`ClickhouseParams:` + strings.Replace(this.ClickhouseParams.String(), "ClickhouseParams", "ClickhouseParams", 1) + `,`,
-		`AwsParams:` + strings.Replace(this.AwsParams.String(), "AWSParams", "AWSParams", 1) + `,`,
+		`AccessLogsS3Params:` + strings.Replace(this.AccessLogsS3Params.String(), "S3Params", "S3Params", 1) + `,`,
+		`Country:` + fmt.Sprintf("%v", this.Country) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -1362,14 +1582,25 @@ func (this *ClickhouseParams) String() string {
 	}, "")
 	return s
 }
-func (this *AWSParams) String() string {
+func (this *AWSCredentials) String() string {
 	if this == nil {
 		return "nil"
 	}
-	s := strings.Join([]string{`&AWSParams{`,
+	s := strings.Join([]string{`&AWSCredentials{`,
 		`AccessKeyId:` + fmt.Sprintf("%v", this.AccessKeyId) + `,`,
 		`SecretAccessKey:` + strings.Replace(fmt.Sprintf("%v", this.SecretAccessKey), "SecretType", "schema.SecretType", 1) + `,`,
 		`Region:` + fmt.Sprintf("%v", this.Region) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *S3Params) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&S3Params{`,
+		`AwsCredentials:` + strings.Replace(this.AwsCredentials.String(), "AWSCredentials", "AWSCredentials", 1) + `,`,
+		`Bucket:` + fmt.Sprintf("%v", this.Bucket) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -1539,9 +1770,9 @@ func (m *GlobalSpecType) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
-		case 5:
+		case 6:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field AwsParams", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field AccessLogsS3Params", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -1568,12 +1799,44 @@ func (m *GlobalSpecType) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.AwsParams == nil {
-				m.AwsParams = &AWSParams{}
+			if m.AccessLogsS3Params == nil {
+				m.AccessLogsS3Params = &S3Params{}
 			}
-			if err := m.AwsParams.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			if err := m.AccessLogsS3Params.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
+			iNdEx = postIndex
+		case 7:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Country", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Country = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
@@ -1756,9 +2019,9 @@ func (m *GetSpecType) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
-		case 5:
+		case 6:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field AwsParams", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field AccessLogsS3Params", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -1785,12 +2048,44 @@ func (m *GetSpecType) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.AwsParams == nil {
-				m.AwsParams = &AWSParams{}
+			if m.AccessLogsS3Params == nil {
+				m.AccessLogsS3Params = &S3Params{}
 			}
-			if err := m.AwsParams.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			if err := m.AccessLogsS3Params.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
+			iNdEx = postIndex
+		case 7:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Country", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Country = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
@@ -2158,7 +2453,7 @@ func (m *ClickhouseParams) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *AWSParams) Unmarshal(dAtA []byte) error {
+func (m *AWSCredentials) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -2181,10 +2476,10 @@ func (m *AWSParams) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: AWSParams: wiretype end group for non-group")
+			return fmt.Errorf("proto: AWSCredentials: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: AWSParams: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: AWSCredentials: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -2286,6 +2581,127 @@ func (m *AWSParams) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			m.Region = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTypes(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *S3Params) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTypes
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: S3Params: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: S3Params: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AwsCredentials", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.AwsCredentials == nil {
+				m.AwsCredentials = &AWSCredentials{}
+			}
+			if err := m.AwsCredentials.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Bucket", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Bucket = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex

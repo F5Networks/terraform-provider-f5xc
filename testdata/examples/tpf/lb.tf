@@ -1,6 +1,6 @@
-/*
 resource "f5xc_http_loadbalancer" "lb" {
-  name = "ck-lb-test-01"
+  count = local.create_http_loadbalancer ? 1 : 0
+  name  = "ck-lb-test-01"
   labels      = { "keyA" : "valueA", "keyB": "valueB" }
   namespace   = "default"
   annotations = { "annoA" : "annob" }
@@ -18,7 +18,6 @@ resource "f5xc_http_loadbalancer" "lb" {
       }
     }
   }
- */
 
   /*
   bot_defense_choice = {
@@ -64,7 +63,7 @@ resource "f5xc_http_loadbalancer" "lb" {
     }
   }
    */
-/*
+
   waf_choice = {
     #disable_waf = true
     app_firewall = {
@@ -111,9 +110,10 @@ resource "f5xc_http_loadbalancer" "lb" {
   }
 
   challenge_type_choice = {
-    //no_challenge = true
+    // no_challenge = true
     js_challenge = {
-      //js_script_delay = 5
+      custom_page = "http://www.example.com"
+      // js_script_delay = 5
     }
   }
 
@@ -122,14 +122,42 @@ resource "f5xc_http_loadbalancer" "lb" {
   }
 
   service_policy_choice = {
-    no_service_policies = true
+    //active_service_policies = {
+      //policies = [
+        //{
+          //name = f5xc_service_policy.sp1.name
+          //namespace = f5xc_service_policy.sp1.namespace
+        //}
+      //]
+    //}
+
+    service_policies_from_namespace = true
+    // no_service_policies = true
   }
 
   malware_protection_choice = {
     disable_malware_protection = true
   }
+
+  l7_ddos_protection = {
+    mitigation_action_choice = {
+      mitigation_block = true
+    }
+
+    rps_threshold_choice = {
+      default_rps_threshold = true
+      // rps_threshold = 0
+    }
+
+    clientside_action_choice = {
+      clientside_action_none = true
+    }
+
+    ddos_policy_choice = {
+      ddos_policy_none = true
+    }
+  }
 }
-*/
 
 /*
 resource "f5xc_tcp_loadbalancer" "tcp-lb1" {

@@ -15,8 +15,8 @@ The `f5xc_app_type` data source allows you to retrieve information about an exis
 
 ```terraform
 data "f5xc_app_type" "example" {
-  name      = "example_app_type"
   namespace = "example_namespace"
+  name      = "example_app_type"
 }
 ```
 

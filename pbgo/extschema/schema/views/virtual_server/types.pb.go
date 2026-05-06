@@ -5,18 +5,18 @@ package virtual_server
 
 import (
 	fmt "fmt"
-	io "io"
-	math "math"
-	math_bits "math/bits"
-	reflect "reflect"
-	strings "strings"
-
 	_ "github.com/gogo/protobuf/gogoproto"
 	proto "github.com/gogo/protobuf/proto"
 	golang_proto "github.com/golang/protobuf/proto"
 	schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/cluster"
 	views "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views"
+	vs_profiles "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/vs_profiles"
+	io "io"
+	math "math"
+	math_bits "math/bits"
+	reflect "reflect"
+	strings "strings"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -51,15 +51,43 @@ type GlobalSpecType struct {
 	//	*GlobalSpecType_Managed
 	//	*GlobalSpecType_NotManaged
 	DomainChoice isGlobalSpecType_DomainChoice `protobuf_oneof:"domain_choice"`
-	// Virtual Server Type
+	// Domains
 	//
-	// x-displayName: "Virtual Server Type"
+	// x-displayName: "Domains"
+	// x-example: "www.foo.com"
+	// x-required
+	// A list of Domains (host/authority header) that will be matched to load balancer.
+	//
+	// Supported Domains and search order:
+	//  1. Exact Domain names: www.foo.com.
+	//  2. Domains starting with a Wildcard: *.foo.com.
+	//
+	// Not supported Domains:
+	// - Just a Wildcard: *
+	// - A Wildcard and TLD with no root Domain: *.com.
+	// - A Wildcard not matching a whole DNS label.
+	// e.g. *.foo.com and *.bar.foo.com are valid Wildcards however *bar.foo.com, *-bar.foo.com, and bar*.foo.com are all invalid.
+	//
+	// Additional notes:
+	// A Wildcard will not match empty string.
+	// e.g. *.foo.com will match bar.foo.com and baz-bar.foo.com but not .foo.com.
+	// The longest Wildcards match first.
+	// Only a single virtual host in the entire route configuration can match on *.
+	// Also a Domain must be unique across all virtual hosts within an advertise policy.
+	//
+	// Domains are also used for SNI matching if the Loadbalancer type is HTTPS.
+	// Domains also indicate the list of names for which DNS resolution will be automatically resolved to IP addresses by the system.
+	Domains []string `protobuf:"bytes,5,rep,name=domains,proto3" json:"domains,omitempty"`
+	// App Type
+	//
+	// x-displayName: "App Type"
 	//
 	// Types that are valid to be assigned to VirtualServerType:
 	//	*GlobalSpecType_Https
 	//	*GlobalSpecType_Http
 	//	*GlobalSpecType_Tcp
 	//	*GlobalSpecType_Udp
+	//	*GlobalSpecType_Http3
 	VirtualServerType isGlobalSpecType_VirtualServerType `protobuf_oneof:"virtual_server_type"`
 	// Statistics Profile
 	//
@@ -87,6 +115,16 @@ type GlobalSpecType struct {
 	// x-displayName: "Auto Last Hop"
 	// When enabled, allows the system to send return traffic to the MAC address that transmitted the request, even if the routing table points to a different network or interface. As a result, the system can send return traffic to clients even when there is no matching route. For example, if the system does not have a default route configured and the client is located on a remote network. This setting is also useful when the system is load balancing transparent devices that do not modify the source IP address of the packet. Without the last hop option enabled, the system could return connections to a different transparent node, resulting in asymmetric routing. You can configure this setting globally and on an object level. You set the global Auto Last Hop value on the System :: Configuration :: Local Traffic :: General screen. To configure this setting globally, retain the Default setting. When you configure Auto Last Hop with a value other than Default at the object level, its setting takes precedence over the global setting. This enables you to configure auto last hop on a per-virtual server basis. The default is Default, meaning that the system uses the global auto-lasthop setting to send back the request.
 	AutoLastHop *schema.TMMVirtualServerAutoLastHopType `protobuf:"bytes,49,opt,name=auto_last_hop,json=autoLastHop,proto3" json:"auto_last_hop,omitempty"`
+	// sse
+	//
+	// x-displayName: "SSE"
+	// Specifies whether the SSE profile is enabled. Default value is False.
+	Sse vs_profiles.TrueFalseChoice `protobuf:"varint,50,opt,name=sse,proto3,enum=ves.io.schema.vs_profiles.TrueFalseChoice" json:"sse,omitempty"`
+	// json
+	//
+	// x-displayName: "JSON"
+	// Specifies whether the JSON profile is enabled. Default value is False.
+	Json vs_profiles.TrueFalseChoice `protobuf:"varint,51,opt,name=json,proto3,enum=ves.io.schema.vs_profiles.TrueFalseChoice" json:"json,omitempty"`
 	// Last Hop Pool
 	//
 	// x-displayName: "Last Hop Pool"
@@ -256,16 +294,19 @@ type GlobalSpecType_NotManaged struct {
 	NotManaged *NotManagedDomainsType `protobuf:"bytes,4,opt,name=not_managed,json=notManaged,proto3,oneof" json:"not_managed,omitempty"`
 }
 type GlobalSpecType_Https struct {
-	Https *Services `protobuf:"bytes,8,opt,name=https,proto3,oneof" json:"https,omitempty"`
+	Https *HTTPServices `protobuf:"bytes,8,opt,name=https,proto3,oneof" json:"https,omitempty"`
 }
 type GlobalSpecType_Http struct {
 	Http *HTTPServices `protobuf:"bytes,9,opt,name=http,proto3,oneof" json:"http,omitempty"`
 }
 type GlobalSpecType_Tcp struct {
-	Tcp *Services `protobuf:"bytes,10,opt,name=tcp,proto3,oneof" json:"tcp,omitempty"`
+	Tcp *TCPServices `protobuf:"bytes,10,opt,name=tcp,proto3,oneof" json:"tcp,omitempty"`
 }
 type GlobalSpecType_Udp struct {
-	Udp *Services `protobuf:"bytes,11,opt,name=udp,proto3,oneof" json:"udp,omitempty"`
+	Udp *UDPServices `protobuf:"bytes,11,opt,name=udp,proto3,oneof" json:"udp,omitempty"`
+}
+type GlobalSpecType_Http3 struct {
+	Http3 *HTTP3Services `protobuf:"bytes,25,opt,name=http3,proto3,oneof" json:"http3,omitempty"`
 }
 type GlobalSpecType_StatisticsProfileNone struct {
 	StatisticsProfileNone *schema.Empty `protobuf:"bytes,23,opt,name=statistics_profile_none,json=statisticsProfileNone,proto3,oneof" json:"statistics_profile_none,omitempty"`
@@ -310,6 +351,7 @@ func (*GlobalSpecType_Https) isGlobalSpecType_VirtualServerType()               
 func (*GlobalSpecType_Http) isGlobalSpecType_VirtualServerType()                                {}
 func (*GlobalSpecType_Tcp) isGlobalSpecType_VirtualServerType()                                 {}
 func (*GlobalSpecType_Udp) isGlobalSpecType_VirtualServerType()                                 {}
+func (*GlobalSpecType_Http3) isGlobalSpecType_VirtualServerType()                               {}
 func (*GlobalSpecType_StatisticsProfileNone) isGlobalSpecType_StatisticsProfileChoice()         {}
 func (*GlobalSpecType_StatisticsProfile) isGlobalSpecType_StatisticsProfileChoice()             {}
 func (*GlobalSpecType_LastHopPoolNone) isGlobalSpecType_LastHopPoolChoice()                     {}
@@ -396,7 +438,14 @@ func (m *GlobalSpecType) GetNotManaged() *NotManagedDomainsType {
 	return nil
 }
 
-func (m *GlobalSpecType) GetHttps() *Services {
+func (m *GlobalSpecType) GetDomains() []string {
+	if m != nil {
+		return m.Domains
+	}
+	return nil
+}
+
+func (m *GlobalSpecType) GetHttps() *HTTPServices {
 	if x, ok := m.GetVirtualServerType().(*GlobalSpecType_Https); ok {
 		return x.Https
 	}
@@ -410,16 +459,23 @@ func (m *GlobalSpecType) GetHttp() *HTTPServices {
 	return nil
 }
 
-func (m *GlobalSpecType) GetTcp() *Services {
+func (m *GlobalSpecType) GetTcp() *TCPServices {
 	if x, ok := m.GetVirtualServerType().(*GlobalSpecType_Tcp); ok {
 		return x.Tcp
 	}
 	return nil
 }
 
-func (m *GlobalSpecType) GetUdp() *Services {
+func (m *GlobalSpecType) GetUdp() *UDPServices {
 	if x, ok := m.GetVirtualServerType().(*GlobalSpecType_Udp); ok {
 		return x.Udp
+	}
+	return nil
+}
+
+func (m *GlobalSpecType) GetHttp3() *HTTP3Services {
+	if x, ok := m.GetVirtualServerType().(*GlobalSpecType_Http3); ok {
+		return x.Http3
 	}
 	return nil
 }
@@ -464,6 +520,20 @@ func (m *GlobalSpecType) GetAutoLastHop() *schema.TMMVirtualServerAutoLastHopTyp
 		return m.AutoLastHop
 	}
 	return nil
+}
+
+func (m *GlobalSpecType) GetSse() vs_profiles.TrueFalseChoice {
+	if m != nil {
+		return m.Sse
+	}
+	return vs_profiles.FALSE
+}
+
+func (m *GlobalSpecType) GetJson() vs_profiles.TrueFalseChoice {
+	if m != nil {
+		return m.Json
+	}
+	return vs_profiles.FALSE
 }
 
 func (m *GlobalSpecType) GetLastHopPoolNone() *schema.Empty {
@@ -594,6 +664,7 @@ func (*GlobalSpecType) XXX_OneofWrappers() []interface{} {
 		(*GlobalSpecType_Http)(nil),
 		(*GlobalSpecType_Tcp)(nil),
 		(*GlobalSpecType_Udp)(nil),
+		(*GlobalSpecType_Http3)(nil),
 		(*GlobalSpecType_StatisticsProfileNone)(nil),
 		(*GlobalSpecType_StatisticsProfile)(nil),
 		(*GlobalSpecType_LastHopPoolNone)(nil),
@@ -609,6 +680,411 @@ func (*GlobalSpecType) XXX_OneofWrappers() []interface{} {
 	}
 }
 
+// TCP Services
+//
+// x-displayName: "TCP Services"
+type TCPServices struct {
+	// Services
+	//
+	// x-displayName: "Services"
+	Services []*ServiceType `protobuf:"bytes,1,rep,name=services,proto3" json:"services,omitempty"`
+	// Protocol Profile (Client)
+	//
+	// x-displayName: "Protocol Profile (Client)"
+	// x-required
+	// Specifies that the selected profile is a client-side profile. The list contains entries for each already defined client protocol profile.
+	ProtocolClientProfile *views.ObjectRefType `protobuf:"bytes,2,opt,name=protocol_client_profile,json=protocolClientProfile,proto3" json:"protocol_client_profile,omitempty"`
+	// Client SSL Profile
+	//
+	// x-displayName: "SSL Profile (Client)"
+	// Specifies the SSL profile for managing client-side SSL traffic. The list contains entries for each already defined client-side SSL profile.
+	SslClientProfiles []*views.ObjectRefType `protobuf:"bytes,3,rep,name=ssl_client_profiles,json=sslClientProfiles,proto3" json:"ssl_client_profiles,omitempty"`
+	// Server App type Selection
+	//
+	// x-displayName: "Server App type"
+	// Specifies whether the system uses the same profile for both client-side and server-side protocol, or whether you want to select a different protocol for the server side. The default is (Use Client Protocol).
+	//
+	// Types that are valid to be assigned to ServerAppTypeChoice:
+	//	*TCPServices_ServerAppTypeSameAsClient
+	ServerAppTypeChoice isTCPServices_ServerAppTypeChoice `protobuf_oneof:"server_app_type_choice"`
+}
+
+func (m *TCPServices) Reset()      { *m = TCPServices{} }
+func (*TCPServices) ProtoMessage() {}
+func (*TCPServices) Descriptor() ([]byte, []int) {
+	return fileDescriptor_c98b987b494647eb, []int{1}
+}
+func (m *TCPServices) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *TCPServices) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	b = b[:cap(b)]
+	n, err := m.MarshalToSizedBuffer(b)
+	if err != nil {
+		return nil, err
+	}
+	return b[:n], nil
+}
+func (m *TCPServices) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TCPServices.Merge(m, src)
+}
+func (m *TCPServices) XXX_Size() int {
+	return m.Size()
+}
+func (m *TCPServices) XXX_DiscardUnknown() {
+	xxx_messageInfo_TCPServices.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_TCPServices proto.InternalMessageInfo
+
+type isTCPServices_ServerAppTypeChoice interface {
+	isTCPServices_ServerAppTypeChoice()
+	Equal(interface{}) bool
+	MarshalTo([]byte) (int, error)
+	Size() int
+}
+
+type TCPServices_ServerAppTypeSameAsClient struct {
+	ServerAppTypeSameAsClient *TCPDefaultServerSelection `protobuf:"bytes,5,opt,name=server_app_type_same_as_client,json=serverAppTypeSameAsClient,proto3,oneof" json:"server_app_type_same_as_client,omitempty"`
+}
+
+func (*TCPServices_ServerAppTypeSameAsClient) isTCPServices_ServerAppTypeChoice() {}
+
+func (m *TCPServices) GetServerAppTypeChoice() isTCPServices_ServerAppTypeChoice {
+	if m != nil {
+		return m.ServerAppTypeChoice
+	}
+	return nil
+}
+
+func (m *TCPServices) GetServices() []*ServiceType {
+	if m != nil {
+		return m.Services
+	}
+	return nil
+}
+
+func (m *TCPServices) GetProtocolClientProfile() *views.ObjectRefType {
+	if m != nil {
+		return m.ProtocolClientProfile
+	}
+	return nil
+}
+
+func (m *TCPServices) GetSslClientProfiles() []*views.ObjectRefType {
+	if m != nil {
+		return m.SslClientProfiles
+	}
+	return nil
+}
+
+func (m *TCPServices) GetServerAppTypeSameAsClient() *TCPDefaultServerSelection {
+	if x, ok := m.GetServerAppTypeChoice().(*TCPServices_ServerAppTypeSameAsClient); ok {
+		return x.ServerAppTypeSameAsClient
+	}
+	return nil
+}
+
+// XXX_OneofWrappers is for the internal use of the proto package.
+func (*TCPServices) XXX_OneofWrappers() []interface{} {
+	return []interface{}{
+		(*TCPServices_ServerAppTypeSameAsClient)(nil),
+	}
+}
+
+// UDP Services
+//
+// x-displayName: "UDP Services"
+type UDPServices struct {
+	// Services
+	//
+	// x-displayName: "Services"
+	Services []*ServiceType `protobuf:"bytes,1,rep,name=services,proto3" json:"services,omitempty"`
+	// Protocol Profile (Client)
+	//
+	// x-displayName: "Protocol Profile (Client)"
+	// x-required
+	// Specifies that the selected profile is a client-side profile. The list contains entries for each already defined client protocol profile.
+	ProtocolClientProfile *views.ObjectRefType `protobuf:"bytes,2,opt,name=protocol_client_profile,json=protocolClientProfile,proto3" json:"protocol_client_profile,omitempty"`
+	// Client SSL Profile
+	//
+	// x-displayName: "SSL Profile (Client)"
+	// Specifies the SSL profile for managing client-side SSL traffic. The list contains entries for each already defined client-side SSL profile.
+	SslClientProfiles []*views.ObjectRefType `protobuf:"bytes,3,rep,name=ssl_client_profiles,json=sslClientProfiles,proto3" json:"ssl_client_profiles,omitempty"`
+	// Server App type Selection
+	//
+	// x-displayName: "Server App type"
+	// Specifies whether the system uses the same profile for both client-side and server-side protocol, or whether you want to select a different protocol for the server side. The default is (Use Client Protocol).
+	//
+	// Types that are valid to be assigned to ServerAppTypeChoice:
+	//	*UDPServices_ServerAppTypeSameAsClient
+	ServerAppTypeChoice isUDPServices_ServerAppTypeChoice `protobuf_oneof:"server_app_type_choice"`
+}
+
+func (m *UDPServices) Reset()      { *m = UDPServices{} }
+func (*UDPServices) ProtoMessage() {}
+func (*UDPServices) Descriptor() ([]byte, []int) {
+	return fileDescriptor_c98b987b494647eb, []int{2}
+}
+func (m *UDPServices) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *UDPServices) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	b = b[:cap(b)]
+	n, err := m.MarshalToSizedBuffer(b)
+	if err != nil {
+		return nil, err
+	}
+	return b[:n], nil
+}
+func (m *UDPServices) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UDPServices.Merge(m, src)
+}
+func (m *UDPServices) XXX_Size() int {
+	return m.Size()
+}
+func (m *UDPServices) XXX_DiscardUnknown() {
+	xxx_messageInfo_UDPServices.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_UDPServices proto.InternalMessageInfo
+
+type isUDPServices_ServerAppTypeChoice interface {
+	isUDPServices_ServerAppTypeChoice()
+	Equal(interface{}) bool
+	MarshalTo([]byte) (int, error)
+	Size() int
+}
+
+type UDPServices_ServerAppTypeSameAsClient struct {
+	ServerAppTypeSameAsClient *UDPDefaultServerSelection `protobuf:"bytes,5,opt,name=server_app_type_same_as_client,json=serverAppTypeSameAsClient,proto3,oneof" json:"server_app_type_same_as_client,omitempty"`
+}
+
+func (*UDPServices_ServerAppTypeSameAsClient) isUDPServices_ServerAppTypeChoice() {}
+
+func (m *UDPServices) GetServerAppTypeChoice() isUDPServices_ServerAppTypeChoice {
+	if m != nil {
+		return m.ServerAppTypeChoice
+	}
+	return nil
+}
+
+func (m *UDPServices) GetServices() []*ServiceType {
+	if m != nil {
+		return m.Services
+	}
+	return nil
+}
+
+func (m *UDPServices) GetProtocolClientProfile() *views.ObjectRefType {
+	if m != nil {
+		return m.ProtocolClientProfile
+	}
+	return nil
+}
+
+func (m *UDPServices) GetSslClientProfiles() []*views.ObjectRefType {
+	if m != nil {
+		return m.SslClientProfiles
+	}
+	return nil
+}
+
+func (m *UDPServices) GetServerAppTypeSameAsClient() *UDPDefaultServerSelection {
+	if x, ok := m.GetServerAppTypeChoice().(*UDPServices_ServerAppTypeSameAsClient); ok {
+		return x.ServerAppTypeSameAsClient
+	}
+	return nil
+}
+
+// XXX_OneofWrappers is for the internal use of the proto package.
+func (*UDPServices) XXX_OneofWrappers() []interface{} {
+	return []interface{}{
+		(*UDPServices_ServerAppTypeSameAsClient)(nil),
+	}
+}
+
+// HTTP/3 Services
+//
+// x-displayName: "HTTP/3 Services"
+type HTTP3Services struct {
+	// Services
+	//
+	// x-displayName: "Services"
+	Services []*ServiceType `protobuf:"bytes,1,rep,name=services,proto3" json:"services,omitempty"`
+	// Protocol Profile (Client)
+	//
+	// x-displayName: "Protocol Profile (Client)"
+	// x-required
+	// Specifies that the selected profile is a client-side profile. The list contains entries for each already defined client protocol profile.
+	ProtocolClientProfile *views.ObjectRefType `protobuf:"bytes,2,opt,name=protocol_client_profile,json=protocolClientProfile,proto3" json:"protocol_client_profile,omitempty"`
+	// Client SSL Profile
+	//
+	// x-displayName: "SSL Profile (Client)"
+	// Specifies the SSL profile for managing client-side SSL traffic. The list contains entries for each already defined client-side SSL profile.
+	SslClientProfiles []*views.ObjectRefType `protobuf:"bytes,3,rep,name=ssl_client_profiles,json=sslClientProfiles,proto3" json:"ssl_client_profiles,omitempty"`
+	// HTTP Client Profile
+	//
+	// x-displayName: "HTTP Client Profile"
+	// Specifies that the selected profile is a client-side profile. The list contains entries for each already defined client protocol profile.
+	HttpClientProfile *views.ObjectRefType `protobuf:"bytes,7,opt,name=http_client_profile,json=httpClientProfile,proto3" json:"http_client_profile,omitempty"`
+	// HTTP/3 Profile
+	//
+	// x-displayName: "HTTP/3 Profile"
+	// Specifies that the selected profile is a client-side profile. The list contains entries for each already defined client protocol profile.
+	Http3ClientProfile *views.ObjectRefType `protobuf:"bytes,8,opt,name=http3_client_profile,json=http3ClientProfile,proto3" json:"http3_client_profile,omitempty"`
+	// QUIC Profile
+	//
+	// x-displayName: "QUIC Profile"
+	// Specifies that the selected profile is a client-side profile. The list contains entries for each already defined client protocol profile.
+	//
+	// Types that are valid to be assigned to QuicProfileChoice:
+	//	*HTTP3Services_QuicClientProfileNone
+	//	*HTTP3Services_QuicClientProfile
+	QuicProfileChoice isHTTP3Services_QuicProfileChoice `protobuf_oneof:"quic_profile_choice"`
+	// Server App type Selection
+	//
+	// x-displayName: "Server App type"
+	// Specifies whether the system uses the same profile for both client-side and server-side protocol, or whether you want to select a different protocol for the server side. The default is (Use Client Protocol).
+	//
+	// Types that are valid to be assigned to ServerAppTypeChoice:
+	//	*HTTP3Services_ServerAppTypeDefault
+	ServerAppTypeChoice isHTTP3Services_ServerAppTypeChoice `protobuf_oneof:"server_app_type_choice"`
+}
+
+func (m *HTTP3Services) Reset()      { *m = HTTP3Services{} }
+func (*HTTP3Services) ProtoMessage() {}
+func (*HTTP3Services) Descriptor() ([]byte, []int) {
+	return fileDescriptor_c98b987b494647eb, []int{3}
+}
+func (m *HTTP3Services) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *HTTP3Services) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	b = b[:cap(b)]
+	n, err := m.MarshalToSizedBuffer(b)
+	if err != nil {
+		return nil, err
+	}
+	return b[:n], nil
+}
+func (m *HTTP3Services) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_HTTP3Services.Merge(m, src)
+}
+func (m *HTTP3Services) XXX_Size() int {
+	return m.Size()
+}
+func (m *HTTP3Services) XXX_DiscardUnknown() {
+	xxx_messageInfo_HTTP3Services.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_HTTP3Services proto.InternalMessageInfo
+
+type isHTTP3Services_QuicProfileChoice interface {
+	isHTTP3Services_QuicProfileChoice()
+	Equal(interface{}) bool
+	MarshalTo([]byte) (int, error)
+	Size() int
+}
+type isHTTP3Services_ServerAppTypeChoice interface {
+	isHTTP3Services_ServerAppTypeChoice()
+	Equal(interface{}) bool
+	MarshalTo([]byte) (int, error)
+	Size() int
+}
+
+type HTTP3Services_QuicClientProfileNone struct {
+	QuicClientProfileNone *schema.Empty `protobuf:"bytes,12,opt,name=quic_client_profile_none,json=quicClientProfileNone,proto3,oneof" json:"quic_client_profile_none,omitempty"`
+}
+type HTTP3Services_QuicClientProfile struct {
+	QuicClientProfile *views.ObjectRefType `protobuf:"bytes,13,opt,name=quic_client_profile,json=quicClientProfile,proto3,oneof" json:"quic_client_profile,omitempty"`
+}
+type HTTP3Services_ServerAppTypeDefault struct {
+	ServerAppTypeDefault *HTTP3DefaultServerSelection `protobuf:"bytes,5,opt,name=server_app_type_default,json=serverAppTypeDefault,proto3,oneof" json:"server_app_type_default,omitempty"`
+}
+
+func (*HTTP3Services_QuicClientProfileNone) isHTTP3Services_QuicProfileChoice()  {}
+func (*HTTP3Services_QuicClientProfile) isHTTP3Services_QuicProfileChoice()      {}
+func (*HTTP3Services_ServerAppTypeDefault) isHTTP3Services_ServerAppTypeChoice() {}
+
+func (m *HTTP3Services) GetQuicProfileChoice() isHTTP3Services_QuicProfileChoice {
+	if m != nil {
+		return m.QuicProfileChoice
+	}
+	return nil
+}
+func (m *HTTP3Services) GetServerAppTypeChoice() isHTTP3Services_ServerAppTypeChoice {
+	if m != nil {
+		return m.ServerAppTypeChoice
+	}
+	return nil
+}
+
+func (m *HTTP3Services) GetServices() []*ServiceType {
+	if m != nil {
+		return m.Services
+	}
+	return nil
+}
+
+func (m *HTTP3Services) GetProtocolClientProfile() *views.ObjectRefType {
+	if m != nil {
+		return m.ProtocolClientProfile
+	}
+	return nil
+}
+
+func (m *HTTP3Services) GetSslClientProfiles() []*views.ObjectRefType {
+	if m != nil {
+		return m.SslClientProfiles
+	}
+	return nil
+}
+
+func (m *HTTP3Services) GetHttpClientProfile() *views.ObjectRefType {
+	if m != nil {
+		return m.HttpClientProfile
+	}
+	return nil
+}
+
+func (m *HTTP3Services) GetHttp3ClientProfile() *views.ObjectRefType {
+	if m != nil {
+		return m.Http3ClientProfile
+	}
+	return nil
+}
+
+func (m *HTTP3Services) GetQuicClientProfileNone() *schema.Empty {
+	if x, ok := m.GetQuicProfileChoice().(*HTTP3Services_QuicClientProfileNone); ok {
+		return x.QuicClientProfileNone
+	}
+	return nil
+}
+
+func (m *HTTP3Services) GetQuicClientProfile() *views.ObjectRefType {
+	if x, ok := m.GetQuicProfileChoice().(*HTTP3Services_QuicClientProfile); ok {
+		return x.QuicClientProfile
+	}
+	return nil
+}
+
+func (m *HTTP3Services) GetServerAppTypeDefault() *HTTP3DefaultServerSelection {
+	if x, ok := m.GetServerAppTypeChoice().(*HTTP3Services_ServerAppTypeDefault); ok {
+		return x.ServerAppTypeDefault
+	}
+	return nil
+}
+
+// XXX_OneofWrappers is for the internal use of the proto package.
+func (*HTTP3Services) XXX_OneofWrappers() []interface{} {
+	return []interface{}{
+		(*HTTP3Services_QuicClientProfileNone)(nil),
+		(*HTTP3Services_QuicClientProfile)(nil),
+		(*HTTP3Services_ServerAppTypeDefault)(nil),
+	}
+}
+
 // HTTPServices
 //
 // x-displayName: "HTTPServices"
@@ -617,21 +1093,49 @@ type HTTPServices struct {
 	//
 	// x-displayName: "Services"
 	Services []*ServiceType `protobuf:"bytes,1,rep,name=services,proto3" json:"services,omitempty"`
-	// TCP Protocol Profile
+	// Protocol Profile (Client)
 	//
-	// x-displayName: "TCP Profile"
-	// Specifies that the selected profile is a client-side and server-side profile. The list contains entries for each already defined protocol profile.
-	TcpProfiles *TCPProfileType `protobuf:"bytes,2,opt,name=tcp_profiles,json=tcpProfiles,proto3" json:"tcp_profiles,omitempty"`
-	// HTTP Profile
+	// x-displayName: "Protocol Profile (Client)"
+	// x-required
+	// Specifies that the selected profile is a client-side profile. The list contains entries for each already defined client protocol profile.
+	ProtocolClientProfile *views.ObjectRefType `protobuf:"bytes,5,opt,name=protocol_client_profile,json=protocolClientProfile,proto3" json:"protocol_client_profile,omitempty"`
+	// HTTP Profile (Client)
 	//
-	// x-displayName: "HTTP Profile"
-	// Specifies that the selected HTTP profile is a client-side and server-side profile. The list contains entries for each already defined protocol profile.
-	HttpProfiles *HTTPProfileType `protobuf:"bytes,3,opt,name=http_profiles,json=httpProfiles,proto3" json:"http_profiles,omitempty"`
-	// Websocket Profile
+	// x-displayName: "HTTP Profile (Client)"
+	// x-required
+	// Specifies that the selected profile is a client-side HTTP profile. The list contains entries for each already defined client protocol profile.
+	HttpClientProfile *views.ObjectRefType `protobuf:"bytes,16,opt,name=http_client_profile,json=httpClientProfile,proto3" json:"http_client_profile,omitempty"`
+	// WebSocket Profile (Client)
 	//
-	// x-displayName: "Websocket Profile"
-	// Specifies that the selected Websocket profile is a client-side and server-side profile. The list contains entries for each already defined protocol profile.
-	WebsocketProfiles *WebsocketProfileType `protobuf:"bytes,4,opt,name=websocket_profiles,json=websocketProfiles,proto3" json:"websocket_profiles,omitempty"`
+	// x-displayName: "WebSocket Profile (Client)"
+	// WebSocket Profile (Client)
+	//
+	// Types that are valid to be assigned to WebsocketClientProfileChoice:
+	//	*HTTPServices_WebsocketClientProfileNone
+	//	*HTTPServices_WebsocketClientProfile
+	WebsocketClientProfileChoice isHTTPServices_WebsocketClientProfileChoice `protobuf_oneof:"websocket_client_profile_choice"`
+	// Client SSL Profile
+	//
+	// x-displayName: "SSL Profile (Client)"
+	// Specifies the SSL profile for managing client-side SSL traffic. The list contains entries for each already defined client-side SSL profile.
+	SslClientProfiles []*views.ObjectRefType `protobuf:"bytes,9,rep,name=ssl_client_profiles,json=sslClientProfiles,proto3" json:"ssl_client_profiles,omitempty"`
+	// HTTP/2 Profile (Client)
+	//
+	// x-displayName: "HTTP/2 Profile (Client)"
+	// Specifies that the selected profile is a client-side profile. The list contains entries for each already defined client protocol profile.
+	//
+	// Types that are valid to be assigned to Http2ClientProfileChoice:
+	//	*HTTPServices_Http2ClientProfileNone
+	//	*HTTPServices_Http2ClientProfile
+	Http2ClientProfileChoice isHTTPServices_Http2ClientProfileChoice `protobuf_oneof:"http2_client_profile_choice"`
+	// Server App type Selection
+	//
+	// x-displayName: "Server App type"
+	// Specifies whether the system uses the same protocol for both client-side and server-side, or whether you want to select a different protocol for the server side. The default is (Use Client Protocol).
+	//
+	// Types that are valid to be assigned to ServerAppTypeChoice:
+	//	*HTTPServices_ServerAppTypeSameAsClient
+	ServerAppTypeChoice isHTTPServices_ServerAppTypeChoice `protobuf_oneof:"server_app_type_choice"`
 	// Stream Profile
 	//
 	// x-displayName: "Stream Profile"
@@ -650,12 +1154,21 @@ type HTTPServices struct {
 	//	*HTTPServices_FixProfileNone
 	//	*HTTPServices_FixProfile
 	FixProfileChoice isHTTPServices_FixProfileChoice `protobuf_oneof:"fix_profile_choice"`
+	// OCSP Profile
+	//
+	// x-displayName: "OCSP Profile"
+	// Specifies the OCSP profile to use for this virtual server. The list contains entries for each already defined OCSP profile.
+	//
+	// Types that are valid to be assigned to OcspProfileChoice:
+	//	*HTTPServices_OcspProfileNone
+	//	*HTTPServices_OcspProfile
+	OcspProfileChoice isHTTPServices_OcspProfileChoice `protobuf_oneof:"ocsp_profile_choice"`
 }
 
 func (m *HTTPServices) Reset()      { *m = HTTPServices{} }
 func (*HTTPServices) ProtoMessage() {}
 func (*HTTPServices) Descriptor() ([]byte, []int) {
-	return fileDescriptor_c98b987b494647eb, []int{1}
+	return fileDescriptor_c98b987b494647eb, []int{4}
 }
 func (m *HTTPServices) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -680,6 +1193,24 @@ func (m *HTTPServices) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_HTTPServices proto.InternalMessageInfo
 
+type isHTTPServices_WebsocketClientProfileChoice interface {
+	isHTTPServices_WebsocketClientProfileChoice()
+	Equal(interface{}) bool
+	MarshalTo([]byte) (int, error)
+	Size() int
+}
+type isHTTPServices_Http2ClientProfileChoice interface {
+	isHTTPServices_Http2ClientProfileChoice()
+	Equal(interface{}) bool
+	MarshalTo([]byte) (int, error)
+	Size() int
+}
+type isHTTPServices_ServerAppTypeChoice interface {
+	isHTTPServices_ServerAppTypeChoice()
+	Equal(interface{}) bool
+	MarshalTo([]byte) (int, error)
+	Size() int
+}
 type isHTTPServices_StreamProfileChoice interface {
 	isHTTPServices_StreamProfileChoice()
 	Equal(interface{}) bool
@@ -692,7 +1223,28 @@ type isHTTPServices_FixProfileChoice interface {
 	MarshalTo([]byte) (int, error)
 	Size() int
 }
+type isHTTPServices_OcspProfileChoice interface {
+	isHTTPServices_OcspProfileChoice()
+	Equal(interface{}) bool
+	MarshalTo([]byte) (int, error)
+	Size() int
+}
 
+type HTTPServices_WebsocketClientProfileNone struct {
+	WebsocketClientProfileNone *schema.Empty `protobuf:"bytes,7,opt,name=websocket_client_profile_none,json=websocketClientProfileNone,proto3,oneof" json:"websocket_client_profile_none,omitempty"`
+}
+type HTTPServices_WebsocketClientProfile struct {
+	WebsocketClientProfile *views.ObjectRefType `protobuf:"bytes,8,opt,name=websocket_client_profile,json=websocketClientProfile,proto3,oneof" json:"websocket_client_profile,omitempty"`
+}
+type HTTPServices_Http2ClientProfileNone struct {
+	Http2ClientProfileNone *schema.Empty `protobuf:"bytes,14,opt,name=http2_client_profile_none,json=http2ClientProfileNone,proto3,oneof" json:"http2_client_profile_none,omitempty"`
+}
+type HTTPServices_Http2ClientProfile struct {
+	Http2ClientProfile *views.ObjectRefType `protobuf:"bytes,15,opt,name=http2_client_profile,json=http2ClientProfile,proto3,oneof" json:"http2_client_profile,omitempty"`
+}
+type HTTPServices_ServerAppTypeSameAsClient struct {
+	ServerAppTypeSameAsClient *HTTPDefaultServerSelection `protobuf:"bytes,26,opt,name=server_app_type_same_as_client,json=serverAppTypeSameAsClient,proto3,oneof" json:"server_app_type_same_as_client,omitempty"`
+}
 type HTTPServices_StreamProfileNone struct {
 	StreamProfileNone *schema.Empty `protobuf:"bytes,11,opt,name=stream_profile_none,json=streamProfileNone,proto3,oneof" json:"stream_profile_none,omitempty"`
 }
@@ -705,12 +1257,43 @@ type HTTPServices_FixProfileNone struct {
 type HTTPServices_FixProfile struct {
 	FixProfile *views.ObjectRefType `protobuf:"bytes,21,opt,name=fix_profile,json=fixProfile,proto3,oneof" json:"fix_profile,omitempty"`
 }
+type HTTPServices_OcspProfileNone struct {
+	OcspProfileNone *schema.Empty `protobuf:"bytes,23,opt,name=ocsp_profile_none,json=ocspProfileNone,proto3,oneof" json:"ocsp_profile_none,omitempty"`
+}
+type HTTPServices_OcspProfile struct {
+	OcspProfile *views.ObjectRefType `protobuf:"bytes,24,opt,name=ocsp_profile,json=ocspProfile,proto3,oneof" json:"ocsp_profile,omitempty"`
+}
 
-func (*HTTPServices_StreamProfileNone) isHTTPServices_StreamProfileChoice() {}
-func (*HTTPServices_StreamProfile) isHTTPServices_StreamProfileChoice()     {}
-func (*HTTPServices_FixProfileNone) isHTTPServices_FixProfileChoice()       {}
-func (*HTTPServices_FixProfile) isHTTPServices_FixProfileChoice()           {}
+func (*HTTPServices_WebsocketClientProfileNone) isHTTPServices_WebsocketClientProfileChoice() {}
+func (*HTTPServices_WebsocketClientProfile) isHTTPServices_WebsocketClientProfileChoice()     {}
+func (*HTTPServices_Http2ClientProfileNone) isHTTPServices_Http2ClientProfileChoice()         {}
+func (*HTTPServices_Http2ClientProfile) isHTTPServices_Http2ClientProfileChoice()             {}
+func (*HTTPServices_ServerAppTypeSameAsClient) isHTTPServices_ServerAppTypeChoice()           {}
+func (*HTTPServices_StreamProfileNone) isHTTPServices_StreamProfileChoice()                   {}
+func (*HTTPServices_StreamProfile) isHTTPServices_StreamProfileChoice()                       {}
+func (*HTTPServices_FixProfileNone) isHTTPServices_FixProfileChoice()                         {}
+func (*HTTPServices_FixProfile) isHTTPServices_FixProfileChoice()                             {}
+func (*HTTPServices_OcspProfileNone) isHTTPServices_OcspProfileChoice()                       {}
+func (*HTTPServices_OcspProfile) isHTTPServices_OcspProfileChoice()                           {}
 
+func (m *HTTPServices) GetWebsocketClientProfileChoice() isHTTPServices_WebsocketClientProfileChoice {
+	if m != nil {
+		return m.WebsocketClientProfileChoice
+	}
+	return nil
+}
+func (m *HTTPServices) GetHttp2ClientProfileChoice() isHTTPServices_Http2ClientProfileChoice {
+	if m != nil {
+		return m.Http2ClientProfileChoice
+	}
+	return nil
+}
+func (m *HTTPServices) GetServerAppTypeChoice() isHTTPServices_ServerAppTypeChoice {
+	if m != nil {
+		return m.ServerAppTypeChoice
+	}
+	return nil
+}
 func (m *HTTPServices) GetStreamProfileChoice() isHTTPServices_StreamProfileChoice {
 	if m != nil {
 		return m.StreamProfileChoice
@@ -723,6 +1306,12 @@ func (m *HTTPServices) GetFixProfileChoice() isHTTPServices_FixProfileChoice {
 	}
 	return nil
 }
+func (m *HTTPServices) GetOcspProfileChoice() isHTTPServices_OcspProfileChoice {
+	if m != nil {
+		return m.OcspProfileChoice
+	}
+	return nil
+}
 
 func (m *HTTPServices) GetServices() []*ServiceType {
 	if m != nil {
@@ -731,23 +1320,58 @@ func (m *HTTPServices) GetServices() []*ServiceType {
 	return nil
 }
 
-func (m *HTTPServices) GetTcpProfiles() *TCPProfileType {
+func (m *HTTPServices) GetProtocolClientProfile() *views.ObjectRefType {
 	if m != nil {
-		return m.TcpProfiles
+		return m.ProtocolClientProfile
 	}
 	return nil
 }
 
-func (m *HTTPServices) GetHttpProfiles() *HTTPProfileType {
+func (m *HTTPServices) GetHttpClientProfile() *views.ObjectRefType {
 	if m != nil {
-		return m.HttpProfiles
+		return m.HttpClientProfile
 	}
 	return nil
 }
 
-func (m *HTTPServices) GetWebsocketProfiles() *WebsocketProfileType {
+func (m *HTTPServices) GetWebsocketClientProfileNone() *schema.Empty {
+	if x, ok := m.GetWebsocketClientProfileChoice().(*HTTPServices_WebsocketClientProfileNone); ok {
+		return x.WebsocketClientProfileNone
+	}
+	return nil
+}
+
+func (m *HTTPServices) GetWebsocketClientProfile() *views.ObjectRefType {
+	if x, ok := m.GetWebsocketClientProfileChoice().(*HTTPServices_WebsocketClientProfile); ok {
+		return x.WebsocketClientProfile
+	}
+	return nil
+}
+
+func (m *HTTPServices) GetSslClientProfiles() []*views.ObjectRefType {
 	if m != nil {
-		return m.WebsocketProfiles
+		return m.SslClientProfiles
+	}
+	return nil
+}
+
+func (m *HTTPServices) GetHttp2ClientProfileNone() *schema.Empty {
+	if x, ok := m.GetHttp2ClientProfileChoice().(*HTTPServices_Http2ClientProfileNone); ok {
+		return x.Http2ClientProfileNone
+	}
+	return nil
+}
+
+func (m *HTTPServices) GetHttp2ClientProfile() *views.ObjectRefType {
+	if x, ok := m.GetHttp2ClientProfileChoice().(*HTTPServices_Http2ClientProfile); ok {
+		return x.Http2ClientProfile
+	}
+	return nil
+}
+
+func (m *HTTPServices) GetServerAppTypeSameAsClient() *HTTPDefaultServerSelection {
+	if x, ok := m.GetServerAppTypeChoice().(*HTTPServices_ServerAppTypeSameAsClient); ok {
+		return x.ServerAppTypeSameAsClient
 	}
 	return nil
 }
@@ -780,13 +1404,601 @@ func (m *HTTPServices) GetFixProfile() *views.ObjectRefType {
 	return nil
 }
 
+func (m *HTTPServices) GetOcspProfileNone() *schema.Empty {
+	if x, ok := m.GetOcspProfileChoice().(*HTTPServices_OcspProfileNone); ok {
+		return x.OcspProfileNone
+	}
+	return nil
+}
+
+func (m *HTTPServices) GetOcspProfile() *views.ObjectRefType {
+	if x, ok := m.GetOcspProfileChoice().(*HTTPServices_OcspProfile); ok {
+		return x.OcspProfile
+	}
+	return nil
+}
+
 // XXX_OneofWrappers is for the internal use of the proto package.
 func (*HTTPServices) XXX_OneofWrappers() []interface{} {
 	return []interface{}{
+		(*HTTPServices_WebsocketClientProfileNone)(nil),
+		(*HTTPServices_WebsocketClientProfile)(nil),
+		(*HTTPServices_Http2ClientProfileNone)(nil),
+		(*HTTPServices_Http2ClientProfile)(nil),
+		(*HTTPServices_ServerAppTypeSameAsClient)(nil),
 		(*HTTPServices_StreamProfileNone)(nil),
 		(*HTTPServices_StreamProfile)(nil),
 		(*HTTPServices_FixProfileNone)(nil),
 		(*HTTPServices_FixProfile)(nil),
+		(*HTTPServices_OcspProfileNone)(nil),
+		(*HTTPServices_OcspProfile)(nil),
+	}
+}
+
+// UDPDefaultServerSelection
+//
+// x-displayName: "UDP Server Selection"
+type UDPDefaultServerSelection struct {
+	// Protocol Profile (Server)
+	//
+	// x-displayName: "Protocol Profile (Server)"
+	// x-required
+	// Specifies that the selected profile is a server-side profile. Options are: (Use Client Profile), and entries for each already defined server protocol profile. The default is (Use Client Profile).
+	//
+	// Types that are valid to be assigned to UdpServerProfileChoice:
+	//	*UDPDefaultServerSelection_UdpServerProfileUseClient
+	//	*UDPDefaultServerSelection_UdpServerProfile
+	UdpServerProfileChoice isUDPDefaultServerSelection_UdpServerProfileChoice `protobuf_oneof:"udp_server_profile_choice"`
+	// SSL Profile (Server)
+	//
+	// x-displayName: "SSL Profile (Server)"
+	// Specifies the SSL profile for managing server-side SSL traffic. The list contains entries for each already defined server-side SSL profile.
+	SslServerProfiles []*views.ObjectRefType `protobuf:"bytes,4,rep,name=ssl_server_profiles,json=sslServerProfiles,proto3" json:"ssl_server_profiles,omitempty"`
+}
+
+func (m *UDPDefaultServerSelection) Reset()      { *m = UDPDefaultServerSelection{} }
+func (*UDPDefaultServerSelection) ProtoMessage() {}
+func (*UDPDefaultServerSelection) Descriptor() ([]byte, []int) {
+	return fileDescriptor_c98b987b494647eb, []int{5}
+}
+func (m *UDPDefaultServerSelection) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *UDPDefaultServerSelection) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	b = b[:cap(b)]
+	n, err := m.MarshalToSizedBuffer(b)
+	if err != nil {
+		return nil, err
+	}
+	return b[:n], nil
+}
+func (m *UDPDefaultServerSelection) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UDPDefaultServerSelection.Merge(m, src)
+}
+func (m *UDPDefaultServerSelection) XXX_Size() int {
+	return m.Size()
+}
+func (m *UDPDefaultServerSelection) XXX_DiscardUnknown() {
+	xxx_messageInfo_UDPDefaultServerSelection.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_UDPDefaultServerSelection proto.InternalMessageInfo
+
+type isUDPDefaultServerSelection_UdpServerProfileChoice interface {
+	isUDPDefaultServerSelection_UdpServerProfileChoice()
+	Equal(interface{}) bool
+	MarshalTo([]byte) (int, error)
+	Size() int
+}
+
+type UDPDefaultServerSelection_UdpServerProfileUseClient struct {
+	UdpServerProfileUseClient *schema.Empty `protobuf:"bytes,2,opt,name=udp_server_profile_use_client,json=udpServerProfileUseClient,proto3,oneof" json:"udp_server_profile_use_client,omitempty"`
+}
+type UDPDefaultServerSelection_UdpServerProfile struct {
+	UdpServerProfile *views.ObjectRefType `protobuf:"bytes,3,opt,name=udp_server_profile,json=udpServerProfile,proto3,oneof" json:"udp_server_profile,omitempty"`
+}
+
+func (*UDPDefaultServerSelection_UdpServerProfileUseClient) isUDPDefaultServerSelection_UdpServerProfileChoice() {
+}
+func (*UDPDefaultServerSelection_UdpServerProfile) isUDPDefaultServerSelection_UdpServerProfileChoice() {
+}
+
+func (m *UDPDefaultServerSelection) GetUdpServerProfileChoice() isUDPDefaultServerSelection_UdpServerProfileChoice {
+	if m != nil {
+		return m.UdpServerProfileChoice
+	}
+	return nil
+}
+
+func (m *UDPDefaultServerSelection) GetUdpServerProfileUseClient() *schema.Empty {
+	if x, ok := m.GetUdpServerProfileChoice().(*UDPDefaultServerSelection_UdpServerProfileUseClient); ok {
+		return x.UdpServerProfileUseClient
+	}
+	return nil
+}
+
+func (m *UDPDefaultServerSelection) GetUdpServerProfile() *views.ObjectRefType {
+	if x, ok := m.GetUdpServerProfileChoice().(*UDPDefaultServerSelection_UdpServerProfile); ok {
+		return x.UdpServerProfile
+	}
+	return nil
+}
+
+func (m *UDPDefaultServerSelection) GetSslServerProfiles() []*views.ObjectRefType {
+	if m != nil {
+		return m.SslServerProfiles
+	}
+	return nil
+}
+
+// XXX_OneofWrappers is for the internal use of the proto package.
+func (*UDPDefaultServerSelection) XXX_OneofWrappers() []interface{} {
+	return []interface{}{
+		(*UDPDefaultServerSelection_UdpServerProfileUseClient)(nil),
+		(*UDPDefaultServerSelection_UdpServerProfile)(nil),
+	}
+}
+
+// TCPDefaultServerSelection
+//
+// x-displayName: "TCP Server Selection"
+type TCPDefaultServerSelection struct {
+	// Protocol Profile (Server)
+	//
+	// x-displayName: "Protocol Profile (Server)"
+	// x-required
+	// Specifies that the selected profile is a server-side profile. Options are: (Use Client Profile), and entries for each already defined server protocol profile. The default is (Use Client Profile).
+	//
+	// Types that are valid to be assigned to TcpServerProfileChoice:
+	//	*TCPDefaultServerSelection_TcpServerProfileUseClient
+	//	*TCPDefaultServerSelection_TcpServerProfile
+	TcpServerProfileChoice isTCPDefaultServerSelection_TcpServerProfileChoice `protobuf_oneof:"tcp_server_profile_choice"`
+	// SSL Profile (Server)
+	//
+	// x-displayName: "SSL Profile (Server)"
+	// Specifies the SSL profile for managing server-side SSL traffic. The list contains entries for each already defined server-side SSL profile.
+	SslServerProfiles []*views.ObjectRefType `protobuf:"bytes,4,rep,name=ssl_server_profiles,json=sslServerProfiles,proto3" json:"ssl_server_profiles,omitempty"`
+}
+
+func (m *TCPDefaultServerSelection) Reset()      { *m = TCPDefaultServerSelection{} }
+func (*TCPDefaultServerSelection) ProtoMessage() {}
+func (*TCPDefaultServerSelection) Descriptor() ([]byte, []int) {
+	return fileDescriptor_c98b987b494647eb, []int{6}
+}
+func (m *TCPDefaultServerSelection) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *TCPDefaultServerSelection) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	b = b[:cap(b)]
+	n, err := m.MarshalToSizedBuffer(b)
+	if err != nil {
+		return nil, err
+	}
+	return b[:n], nil
+}
+func (m *TCPDefaultServerSelection) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TCPDefaultServerSelection.Merge(m, src)
+}
+func (m *TCPDefaultServerSelection) XXX_Size() int {
+	return m.Size()
+}
+func (m *TCPDefaultServerSelection) XXX_DiscardUnknown() {
+	xxx_messageInfo_TCPDefaultServerSelection.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_TCPDefaultServerSelection proto.InternalMessageInfo
+
+type isTCPDefaultServerSelection_TcpServerProfileChoice interface {
+	isTCPDefaultServerSelection_TcpServerProfileChoice()
+	Equal(interface{}) bool
+	MarshalTo([]byte) (int, error)
+	Size() int
+}
+
+type TCPDefaultServerSelection_TcpServerProfileUseClient struct {
+	TcpServerProfileUseClient *schema.Empty `protobuf:"bytes,2,opt,name=tcp_server_profile_use_client,json=tcpServerProfileUseClient,proto3,oneof" json:"tcp_server_profile_use_client,omitempty"`
+}
+type TCPDefaultServerSelection_TcpServerProfile struct {
+	TcpServerProfile *views.ObjectRefType `protobuf:"bytes,3,opt,name=tcp_server_profile,json=tcpServerProfile,proto3,oneof" json:"tcp_server_profile,omitempty"`
+}
+
+func (*TCPDefaultServerSelection_TcpServerProfileUseClient) isTCPDefaultServerSelection_TcpServerProfileChoice() {
+}
+func (*TCPDefaultServerSelection_TcpServerProfile) isTCPDefaultServerSelection_TcpServerProfileChoice() {
+}
+
+func (m *TCPDefaultServerSelection) GetTcpServerProfileChoice() isTCPDefaultServerSelection_TcpServerProfileChoice {
+	if m != nil {
+		return m.TcpServerProfileChoice
+	}
+	return nil
+}
+
+func (m *TCPDefaultServerSelection) GetTcpServerProfileUseClient() *schema.Empty {
+	if x, ok := m.GetTcpServerProfileChoice().(*TCPDefaultServerSelection_TcpServerProfileUseClient); ok {
+		return x.TcpServerProfileUseClient
+	}
+	return nil
+}
+
+func (m *TCPDefaultServerSelection) GetTcpServerProfile() *views.ObjectRefType {
+	if x, ok := m.GetTcpServerProfileChoice().(*TCPDefaultServerSelection_TcpServerProfile); ok {
+		return x.TcpServerProfile
+	}
+	return nil
+}
+
+func (m *TCPDefaultServerSelection) GetSslServerProfiles() []*views.ObjectRefType {
+	if m != nil {
+		return m.SslServerProfiles
+	}
+	return nil
+}
+
+// XXX_OneofWrappers is for the internal use of the proto package.
+func (*TCPDefaultServerSelection) XXX_OneofWrappers() []interface{} {
+	return []interface{}{
+		(*TCPDefaultServerSelection_TcpServerProfileUseClient)(nil),
+		(*TCPDefaultServerSelection_TcpServerProfile)(nil),
+	}
+}
+
+// HTTPDefaultServerSelection
+//
+// x-displayName: "HTTP Server Selection"
+type HTTPDefaultServerSelection struct {
+	// Protocol Profile (Server)
+	//
+	// x-displayName: "Protocol Profile (Server)"
+	// x-required
+	// Specifies that the selected profile is a server-side profile. Options are: (Use Client Profile), and entries for each already defined server protocol profile. The default is (Use Client Profile).
+	//
+	// Types that are valid to be assigned to ProtocolServerProfileChoice:
+	//	*HTTPDefaultServerSelection_ProtocolServerProfileSameAsClient
+	//	*HTTPDefaultServerSelection_ProtocolServerProfile
+	ProtocolServerProfileChoice isHTTPDefaultServerSelection_ProtocolServerProfileChoice `protobuf_oneof:"protocol_server_profile_choice"`
+	// HTTP Profile (Server)
+	//
+	// x-displayName: "HTTP Profile (Server)"
+	//
+	// Types that are valid to be assigned to HttpServerProfileChoice:
+	//	*HTTPDefaultServerSelection_HttpServerProfileSameAsClient
+	//	*HTTPDefaultServerSelection_HttpServerProfile
+	HttpServerProfileChoice isHTTPDefaultServerSelection_HttpServerProfileChoice `protobuf_oneof:"http_server_profile_choice"`
+	// WebSocket Profile (Server)
+	//
+	// x-displayName: "WebSocket Profile (Server)"
+	// WebSocket Profile (Server)
+	//
+	// Types that are valid to be assigned to WebsocketServerProfileChoice:
+	//	*HTTPDefaultServerSelection_WebsocketServerProfileSameAsClient
+	//	*HTTPDefaultServerSelection_WebsocketServerProfile
+	WebsocketServerProfileChoice isHTTPDefaultServerSelection_WebsocketServerProfileChoice `protobuf_oneof:"websocket_server_profile_choice"`
+	// HTTP/2 Profile (Server)
+	//
+	// x-displayName: "HTTP/2 Profile (Server)"
+	// Specifies that the selected profile is a server-side profile. The list contains entries for each already defined client protocol profile.
+	//
+	// Types that are valid to be assigned to Http2ServerProfileChoice:
+	//	*HTTPDefaultServerSelection_Http2ServerProfileNone
+	//	*HTTPDefaultServerSelection_Http2ServerProfile
+	Http2ServerProfileChoice isHTTPDefaultServerSelection_Http2ServerProfileChoice `protobuf_oneof:"http2_server_profile_choice"`
+	// SSL Profile (Server)
+	//
+	// x-displayName: "SSL Profile (Server)"
+	// Specifies the SSL profile for managing server-side SSL traffic. The list contains entries for each already defined server-side SSL profile.
+	SslServerProfiles []*views.ObjectRefType `protobuf:"bytes,16,rep,name=ssl_server_profiles,json=sslServerProfiles,proto3" json:"ssl_server_profiles,omitempty"`
+}
+
+func (m *HTTPDefaultServerSelection) Reset()      { *m = HTTPDefaultServerSelection{} }
+func (*HTTPDefaultServerSelection) ProtoMessage() {}
+func (*HTTPDefaultServerSelection) Descriptor() ([]byte, []int) {
+	return fileDescriptor_c98b987b494647eb, []int{7}
+}
+func (m *HTTPDefaultServerSelection) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *HTTPDefaultServerSelection) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	b = b[:cap(b)]
+	n, err := m.MarshalToSizedBuffer(b)
+	if err != nil {
+		return nil, err
+	}
+	return b[:n], nil
+}
+func (m *HTTPDefaultServerSelection) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_HTTPDefaultServerSelection.Merge(m, src)
+}
+func (m *HTTPDefaultServerSelection) XXX_Size() int {
+	return m.Size()
+}
+func (m *HTTPDefaultServerSelection) XXX_DiscardUnknown() {
+	xxx_messageInfo_HTTPDefaultServerSelection.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_HTTPDefaultServerSelection proto.InternalMessageInfo
+
+type isHTTPDefaultServerSelection_ProtocolServerProfileChoice interface {
+	isHTTPDefaultServerSelection_ProtocolServerProfileChoice()
+	Equal(interface{}) bool
+	MarshalTo([]byte) (int, error)
+	Size() int
+}
+type isHTTPDefaultServerSelection_HttpServerProfileChoice interface {
+	isHTTPDefaultServerSelection_HttpServerProfileChoice()
+	Equal(interface{}) bool
+	MarshalTo([]byte) (int, error)
+	Size() int
+}
+type isHTTPDefaultServerSelection_WebsocketServerProfileChoice interface {
+	isHTTPDefaultServerSelection_WebsocketServerProfileChoice()
+	Equal(interface{}) bool
+	MarshalTo([]byte) (int, error)
+	Size() int
+}
+type isHTTPDefaultServerSelection_Http2ServerProfileChoice interface {
+	isHTTPDefaultServerSelection_Http2ServerProfileChoice()
+	Equal(interface{}) bool
+	MarshalTo([]byte) (int, error)
+	Size() int
+}
+
+type HTTPDefaultServerSelection_ProtocolServerProfileSameAsClient struct {
+	ProtocolServerProfileSameAsClient *schema.Empty `protobuf:"bytes,2,opt,name=protocol_server_profile_same_as_client,json=protocolServerProfileSameAsClient,proto3,oneof" json:"protocol_server_profile_same_as_client,omitempty"`
+}
+type HTTPDefaultServerSelection_ProtocolServerProfile struct {
+	ProtocolServerProfile *views.ObjectRefType `protobuf:"bytes,3,opt,name=protocol_server_profile,json=protocolServerProfile,proto3,oneof" json:"protocol_server_profile,omitempty"`
+}
+type HTTPDefaultServerSelection_HttpServerProfileSameAsClient struct {
+	HttpServerProfileSameAsClient *schema.Empty `protobuf:"bytes,5,opt,name=http_server_profile_same_as_client,json=httpServerProfileSameAsClient,proto3,oneof" json:"http_server_profile_same_as_client,omitempty"`
+}
+type HTTPDefaultServerSelection_HttpServerProfile struct {
+	HttpServerProfile *views.ObjectRefType `protobuf:"bytes,6,opt,name=http_server_profile,json=httpServerProfile,proto3,oneof" json:"http_server_profile,omitempty"`
+}
+type HTTPDefaultServerSelection_WebsocketServerProfileSameAsClient struct {
+	WebsocketServerProfileSameAsClient *schema.Empty `protobuf:"bytes,8,opt,name=websocket_server_profile_same_as_client,json=websocketServerProfileSameAsClient,proto3,oneof" json:"websocket_server_profile_same_as_client,omitempty"`
+}
+type HTTPDefaultServerSelection_WebsocketServerProfile struct {
+	WebsocketServerProfile *views.ObjectRefType `protobuf:"bytes,9,opt,name=websocket_server_profile,json=websocketServerProfile,proto3,oneof" json:"websocket_server_profile,omitempty"`
+}
+type HTTPDefaultServerSelection_Http2ServerProfileNone struct {
+	Http2ServerProfileNone *schema.Empty `protobuf:"bytes,14,opt,name=http2_server_profile_none,json=http2ServerProfileNone,proto3,oneof" json:"http2_server_profile_none,omitempty"`
+}
+type HTTPDefaultServerSelection_Http2ServerProfile struct {
+	Http2ServerProfile *views.ObjectRefType `protobuf:"bytes,15,opt,name=http2_server_profile,json=http2ServerProfile,proto3,oneof" json:"http2_server_profile,omitempty"`
+}
+
+func (*HTTPDefaultServerSelection_ProtocolServerProfileSameAsClient) isHTTPDefaultServerSelection_ProtocolServerProfileChoice() {
+}
+func (*HTTPDefaultServerSelection_ProtocolServerProfile) isHTTPDefaultServerSelection_ProtocolServerProfileChoice() {
+}
+func (*HTTPDefaultServerSelection_HttpServerProfileSameAsClient) isHTTPDefaultServerSelection_HttpServerProfileChoice() {
+}
+func (*HTTPDefaultServerSelection_HttpServerProfile) isHTTPDefaultServerSelection_HttpServerProfileChoice() {
+}
+func (*HTTPDefaultServerSelection_WebsocketServerProfileSameAsClient) isHTTPDefaultServerSelection_WebsocketServerProfileChoice() {
+}
+func (*HTTPDefaultServerSelection_WebsocketServerProfile) isHTTPDefaultServerSelection_WebsocketServerProfileChoice() {
+}
+func (*HTTPDefaultServerSelection_Http2ServerProfileNone) isHTTPDefaultServerSelection_Http2ServerProfileChoice() {
+}
+func (*HTTPDefaultServerSelection_Http2ServerProfile) isHTTPDefaultServerSelection_Http2ServerProfileChoice() {
+}
+
+func (m *HTTPDefaultServerSelection) GetProtocolServerProfileChoice() isHTTPDefaultServerSelection_ProtocolServerProfileChoice {
+	if m != nil {
+		return m.ProtocolServerProfileChoice
+	}
+	return nil
+}
+func (m *HTTPDefaultServerSelection) GetHttpServerProfileChoice() isHTTPDefaultServerSelection_HttpServerProfileChoice {
+	if m != nil {
+		return m.HttpServerProfileChoice
+	}
+	return nil
+}
+func (m *HTTPDefaultServerSelection) GetWebsocketServerProfileChoice() isHTTPDefaultServerSelection_WebsocketServerProfileChoice {
+	if m != nil {
+		return m.WebsocketServerProfileChoice
+	}
+	return nil
+}
+func (m *HTTPDefaultServerSelection) GetHttp2ServerProfileChoice() isHTTPDefaultServerSelection_Http2ServerProfileChoice {
+	if m != nil {
+		return m.Http2ServerProfileChoice
+	}
+	return nil
+}
+
+func (m *HTTPDefaultServerSelection) GetProtocolServerProfileSameAsClient() *schema.Empty {
+	if x, ok := m.GetProtocolServerProfileChoice().(*HTTPDefaultServerSelection_ProtocolServerProfileSameAsClient); ok {
+		return x.ProtocolServerProfileSameAsClient
+	}
+	return nil
+}
+
+func (m *HTTPDefaultServerSelection) GetProtocolServerProfile() *views.ObjectRefType {
+	if x, ok := m.GetProtocolServerProfileChoice().(*HTTPDefaultServerSelection_ProtocolServerProfile); ok {
+		return x.ProtocolServerProfile
+	}
+	return nil
+}
+
+func (m *HTTPDefaultServerSelection) GetHttpServerProfileSameAsClient() *schema.Empty {
+	if x, ok := m.GetHttpServerProfileChoice().(*HTTPDefaultServerSelection_HttpServerProfileSameAsClient); ok {
+		return x.HttpServerProfileSameAsClient
+	}
+	return nil
+}
+
+func (m *HTTPDefaultServerSelection) GetHttpServerProfile() *views.ObjectRefType {
+	if x, ok := m.GetHttpServerProfileChoice().(*HTTPDefaultServerSelection_HttpServerProfile); ok {
+		return x.HttpServerProfile
+	}
+	return nil
+}
+
+func (m *HTTPDefaultServerSelection) GetWebsocketServerProfileSameAsClient() *schema.Empty {
+	if x, ok := m.GetWebsocketServerProfileChoice().(*HTTPDefaultServerSelection_WebsocketServerProfileSameAsClient); ok {
+		return x.WebsocketServerProfileSameAsClient
+	}
+	return nil
+}
+
+func (m *HTTPDefaultServerSelection) GetWebsocketServerProfile() *views.ObjectRefType {
+	if x, ok := m.GetWebsocketServerProfileChoice().(*HTTPDefaultServerSelection_WebsocketServerProfile); ok {
+		return x.WebsocketServerProfile
+	}
+	return nil
+}
+
+func (m *HTTPDefaultServerSelection) GetHttp2ServerProfileNone() *schema.Empty {
+	if x, ok := m.GetHttp2ServerProfileChoice().(*HTTPDefaultServerSelection_Http2ServerProfileNone); ok {
+		return x.Http2ServerProfileNone
+	}
+	return nil
+}
+
+func (m *HTTPDefaultServerSelection) GetHttp2ServerProfile() *views.ObjectRefType {
+	if x, ok := m.GetHttp2ServerProfileChoice().(*HTTPDefaultServerSelection_Http2ServerProfile); ok {
+		return x.Http2ServerProfile
+	}
+	return nil
+}
+
+func (m *HTTPDefaultServerSelection) GetSslServerProfiles() []*views.ObjectRefType {
+	if m != nil {
+		return m.SslServerProfiles
+	}
+	return nil
+}
+
+// XXX_OneofWrappers is for the internal use of the proto package.
+func (*HTTPDefaultServerSelection) XXX_OneofWrappers() []interface{} {
+	return []interface{}{
+		(*HTTPDefaultServerSelection_ProtocolServerProfileSameAsClient)(nil),
+		(*HTTPDefaultServerSelection_ProtocolServerProfile)(nil),
+		(*HTTPDefaultServerSelection_HttpServerProfileSameAsClient)(nil),
+		(*HTTPDefaultServerSelection_HttpServerProfile)(nil),
+		(*HTTPDefaultServerSelection_WebsocketServerProfileSameAsClient)(nil),
+		(*HTTPDefaultServerSelection_WebsocketServerProfile)(nil),
+		(*HTTPDefaultServerSelection_Http2ServerProfileNone)(nil),
+		(*HTTPDefaultServerSelection_Http2ServerProfile)(nil),
+	}
+}
+
+// Http3DefaultServerSelection
+//
+// x-displayName: "HTTP/3 Server Selection"
+type HTTP3DefaultServerSelection struct {
+	// Protocol Profile (Server)
+	//
+	// x-displayName: "Protocol Profile (Server)"
+	// x-required
+	// Specifies that the selected profile is a server-side profile. Options are: (Use Client Profile), and entries for each already defined server protocol profile. The default is (Use Client Profile).
+	TcpServerProfile *views.ObjectRefType `protobuf:"bytes,1,opt,name=tcp_server_profile,json=tcpServerProfile,proto3" json:"tcp_server_profile,omitempty"`
+	// HTTP Profile (Server)
+	//
+	// x-displayName: "HTTP Profile (Server)"
+	//
+	// Types that are valid to be assigned to HttpServerProfileChoice:
+	//	*HTTP3DefaultServerSelection_HttpServerProfileSameAsClient
+	//	*HTTP3DefaultServerSelection_HttpServerProfile
+	HttpServerProfileChoice isHTTP3DefaultServerSelection_HttpServerProfileChoice `protobuf_oneof:"http_server_profile_choice"`
+	// SSL Profile (Server)
+	//
+	// x-displayName: "SSL Profile (Server)"
+	// Specifies the SSL profile for managing server-side SSL traffic. The list contains entries for each already defined server-side SSL profile.
+	SslServerProfiles []*views.ObjectRefType `protobuf:"bytes,5,rep,name=ssl_server_profiles,json=sslServerProfiles,proto3" json:"ssl_server_profiles,omitempty"`
+}
+
+func (m *HTTP3DefaultServerSelection) Reset()      { *m = HTTP3DefaultServerSelection{} }
+func (*HTTP3DefaultServerSelection) ProtoMessage() {}
+func (*HTTP3DefaultServerSelection) Descriptor() ([]byte, []int) {
+	return fileDescriptor_c98b987b494647eb, []int{8}
+}
+func (m *HTTP3DefaultServerSelection) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *HTTP3DefaultServerSelection) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	b = b[:cap(b)]
+	n, err := m.MarshalToSizedBuffer(b)
+	if err != nil {
+		return nil, err
+	}
+	return b[:n], nil
+}
+func (m *HTTP3DefaultServerSelection) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_HTTP3DefaultServerSelection.Merge(m, src)
+}
+func (m *HTTP3DefaultServerSelection) XXX_Size() int {
+	return m.Size()
+}
+func (m *HTTP3DefaultServerSelection) XXX_DiscardUnknown() {
+	xxx_messageInfo_HTTP3DefaultServerSelection.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_HTTP3DefaultServerSelection proto.InternalMessageInfo
+
+type isHTTP3DefaultServerSelection_HttpServerProfileChoice interface {
+	isHTTP3DefaultServerSelection_HttpServerProfileChoice()
+	Equal(interface{}) bool
+	MarshalTo([]byte) (int, error)
+	Size() int
+}
+
+type HTTP3DefaultServerSelection_HttpServerProfileSameAsClient struct {
+	HttpServerProfileSameAsClient *schema.Empty `protobuf:"bytes,3,opt,name=http_server_profile_same_as_client,json=httpServerProfileSameAsClient,proto3,oneof" json:"http_server_profile_same_as_client,omitempty"`
+}
+type HTTP3DefaultServerSelection_HttpServerProfile struct {
+	HttpServerProfile *views.ObjectRefType `protobuf:"bytes,4,opt,name=http_server_profile,json=httpServerProfile,proto3,oneof" json:"http_server_profile,omitempty"`
+}
+
+func (*HTTP3DefaultServerSelection_HttpServerProfileSameAsClient) isHTTP3DefaultServerSelection_HttpServerProfileChoice() {
+}
+func (*HTTP3DefaultServerSelection_HttpServerProfile) isHTTP3DefaultServerSelection_HttpServerProfileChoice() {
+}
+
+func (m *HTTP3DefaultServerSelection) GetHttpServerProfileChoice() isHTTP3DefaultServerSelection_HttpServerProfileChoice {
+	if m != nil {
+		return m.HttpServerProfileChoice
+	}
+	return nil
+}
+
+func (m *HTTP3DefaultServerSelection) GetTcpServerProfile() *views.ObjectRefType {
+	if m != nil {
+		return m.TcpServerProfile
+	}
+	return nil
+}
+
+func (m *HTTP3DefaultServerSelection) GetHttpServerProfileSameAsClient() *schema.Empty {
+	if x, ok := m.GetHttpServerProfileChoice().(*HTTP3DefaultServerSelection_HttpServerProfileSameAsClient); ok {
+		return x.HttpServerProfileSameAsClient
+	}
+	return nil
+}
+
+func (m *HTTP3DefaultServerSelection) GetHttpServerProfile() *views.ObjectRefType {
+	if x, ok := m.GetHttpServerProfileChoice().(*HTTP3DefaultServerSelection_HttpServerProfile); ok {
+		return x.HttpServerProfile
+	}
+	return nil
+}
+
+func (m *HTTP3DefaultServerSelection) GetSslServerProfiles() []*views.ObjectRefType {
+	if m != nil {
+		return m.SslServerProfiles
+	}
+	return nil
+}
+
+// XXX_OneofWrappers is for the internal use of the proto package.
+func (*HTTP3DefaultServerSelection) XXX_OneofWrappers() []interface{} {
+	return []interface{}{
+		(*HTTP3DefaultServerSelection_HttpServerProfileSameAsClient)(nil),
+		(*HTTP3DefaultServerSelection_HttpServerProfile)(nil),
 	}
 }
 
@@ -806,7 +2018,7 @@ type DomainsManagedByF5XC struct {
 func (m *DomainsManagedByF5XC) Reset()      { *m = DomainsManagedByF5XC{} }
 func (*DomainsManagedByF5XC) ProtoMessage() {}
 func (*DomainsManagedByF5XC) Descriptor() ([]byte, []int) {
-	return fileDescriptor_c98b987b494647eb, []int{2}
+	return fileDescriptor_c98b987b494647eb, []int{9}
 }
 func (m *DomainsManagedByF5XC) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -859,7 +2071,7 @@ type ManagedDomain struct {
 func (m *ManagedDomain) Reset()      { *m = ManagedDomain{} }
 func (*ManagedDomain) ProtoMessage() {}
 func (*ManagedDomain) Descriptor() ([]byte, []int) {
-	return fileDescriptor_c98b987b494647eb, []int{3}
+	return fileDescriptor_c98b987b494647eb, []int{10}
 }
 func (m *ManagedDomain) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -935,7 +2147,7 @@ type NotManagedDomainsType struct {
 func (m *NotManagedDomainsType) Reset()      { *m = NotManagedDomainsType{} }
 func (*NotManagedDomainsType) ProtoMessage() {}
 func (*NotManagedDomainsType) Descriptor() ([]byte, []int) {
-	return fileDescriptor_c98b987b494647eb, []int{4}
+	return fileDescriptor_c98b987b494647eb, []int{11}
 }
 func (m *NotManagedDomainsType) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -994,7 +2206,7 @@ type TranslationType struct {
 func (m *TranslationType) Reset()      { *m = TranslationType{} }
 func (*TranslationType) ProtoMessage() {}
 func (*TranslationType) Descriptor() ([]byte, []int) {
-	return fileDescriptor_c98b987b494647eb, []int{5}
+	return fileDescriptor_c98b987b494647eb, []int{12}
 }
 func (m *TranslationType) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1040,346 +2252,6 @@ func (m *TranslationType) GetSourcePort() *schema.TMMVirtualServerSourcePortType
 	return nil
 }
 
-// TCP Profile
-//
-// x-displayName: "TCP Profile"
-type TCPProfileType struct {
-	// Protocol Profile (Client)
-	//
-	// x-displayName: "Protocol Profile (Client)"
-	// x-required
-	// Specifies that the selected profile is a client-side profile. The list contains entries for each already defined client protocol profile.
-	ClientProfile *views.ObjectRefType `protobuf:"bytes,1,opt,name=client_profile,json=clientProfile,proto3" json:"client_profile,omitempty"`
-	// Protocol Profile (Server)
-	//
-	// x-displayName: "Protocol Profile (Server)"
-	// Specifies that the selected profile is a server-side profile. Options are: (Use Client Profile), and entries for each already defined server protocol profile. The default is (Use Client Profile).
-	//
-	// Types that are valid to be assigned to TcpServerProfileChoice:
-	//	*TCPProfileType_ServerProfileSameAsClient
-	//	*TCPProfileType_ServerProfile
-	TcpServerProfileChoice isTCPProfileType_TcpServerProfileChoice `protobuf_oneof:"tcp_server_profile_choice"`
-}
-
-func (m *TCPProfileType) Reset()      { *m = TCPProfileType{} }
-func (*TCPProfileType) ProtoMessage() {}
-func (*TCPProfileType) Descriptor() ([]byte, []int) {
-	return fileDescriptor_c98b987b494647eb, []int{6}
-}
-func (m *TCPProfileType) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *TCPProfileType) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	b = b[:cap(b)]
-	n, err := m.MarshalToSizedBuffer(b)
-	if err != nil {
-		return nil, err
-	}
-	return b[:n], nil
-}
-func (m *TCPProfileType) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_TCPProfileType.Merge(m, src)
-}
-func (m *TCPProfileType) XXX_Size() int {
-	return m.Size()
-}
-func (m *TCPProfileType) XXX_DiscardUnknown() {
-	xxx_messageInfo_TCPProfileType.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_TCPProfileType proto.InternalMessageInfo
-
-type isTCPProfileType_TcpServerProfileChoice interface {
-	isTCPProfileType_TcpServerProfileChoice()
-	Equal(interface{}) bool
-	MarshalTo([]byte) (int, error)
-	Size() int
-}
-
-type TCPProfileType_ServerProfileSameAsClient struct {
-	ServerProfileSameAsClient *schema.Empty `protobuf:"bytes,3,opt,name=server_profile_same_as_client,json=serverProfileSameAsClient,proto3,oneof" json:"server_profile_same_as_client,omitempty"`
-}
-type TCPProfileType_ServerProfile struct {
-	ServerProfile *views.ObjectRefType `protobuf:"bytes,4,opt,name=server_profile,json=serverProfile,proto3,oneof" json:"server_profile,omitempty"`
-}
-
-func (*TCPProfileType_ServerProfileSameAsClient) isTCPProfileType_TcpServerProfileChoice() {}
-func (*TCPProfileType_ServerProfile) isTCPProfileType_TcpServerProfileChoice()             {}
-
-func (m *TCPProfileType) GetTcpServerProfileChoice() isTCPProfileType_TcpServerProfileChoice {
-	if m != nil {
-		return m.TcpServerProfileChoice
-	}
-	return nil
-}
-
-func (m *TCPProfileType) GetClientProfile() *views.ObjectRefType {
-	if m != nil {
-		return m.ClientProfile
-	}
-	return nil
-}
-
-func (m *TCPProfileType) GetServerProfileSameAsClient() *schema.Empty {
-	if x, ok := m.GetTcpServerProfileChoice().(*TCPProfileType_ServerProfileSameAsClient); ok {
-		return x.ServerProfileSameAsClient
-	}
-	return nil
-}
-
-func (m *TCPProfileType) GetServerProfile() *views.ObjectRefType {
-	if x, ok := m.GetTcpServerProfileChoice().(*TCPProfileType_ServerProfile); ok {
-		return x.ServerProfile
-	}
-	return nil
-}
-
-// XXX_OneofWrappers is for the internal use of the proto package.
-func (*TCPProfileType) XXX_OneofWrappers() []interface{} {
-	return []interface{}{
-		(*TCPProfileType_ServerProfileSameAsClient)(nil),
-		(*TCPProfileType_ServerProfile)(nil),
-	}
-}
-
-// HTTP Profile
-//
-// x-displayName: "HTTP Profile"
-type HTTPProfileType struct {
-	// HTTP Profile (Client)
-	//
-	// x-displayName: "HTTP Profile (Client)"
-	// x-required
-	// Specifies that the selected profile is a client-side HTTP profile. The list contains entries for each already defined client protocol profile.
-	ClientProfile *views.ObjectRefType `protobuf:"bytes,1,opt,name=client_profile,json=clientProfile,proto3" json:"client_profile,omitempty"`
-	// HTTP Profile (Server)
-	//
-	// x-displayName: "HTTP Profile (Server)"
-	// Specifies that the selected profile is a server-side profile. Options are: (Use Client Profile), and entries for each already defined server protocol profile. The default is (Use Client Profile).
-	//
-	// Types that are valid to be assigned to HttpServerProfileChoice:
-	//	*HTTPProfileType_ServerProfileSameAsClient
-	//	*HTTPProfileType_ServerProfile
-	HttpServerProfileChoice isHTTPProfileType_HttpServerProfileChoice `protobuf_oneof:"http_server_profile_choice"`
-}
-
-func (m *HTTPProfileType) Reset()      { *m = HTTPProfileType{} }
-func (*HTTPProfileType) ProtoMessage() {}
-func (*HTTPProfileType) Descriptor() ([]byte, []int) {
-	return fileDescriptor_c98b987b494647eb, []int{7}
-}
-func (m *HTTPProfileType) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *HTTPProfileType) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	b = b[:cap(b)]
-	n, err := m.MarshalToSizedBuffer(b)
-	if err != nil {
-		return nil, err
-	}
-	return b[:n], nil
-}
-func (m *HTTPProfileType) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_HTTPProfileType.Merge(m, src)
-}
-func (m *HTTPProfileType) XXX_Size() int {
-	return m.Size()
-}
-func (m *HTTPProfileType) XXX_DiscardUnknown() {
-	xxx_messageInfo_HTTPProfileType.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_HTTPProfileType proto.InternalMessageInfo
-
-type isHTTPProfileType_HttpServerProfileChoice interface {
-	isHTTPProfileType_HttpServerProfileChoice()
-	Equal(interface{}) bool
-	MarshalTo([]byte) (int, error)
-	Size() int
-}
-
-type HTTPProfileType_ServerProfileSameAsClient struct {
-	ServerProfileSameAsClient *schema.Empty `protobuf:"bytes,3,opt,name=server_profile_same_as_client,json=serverProfileSameAsClient,proto3,oneof" json:"server_profile_same_as_client,omitempty"`
-}
-type HTTPProfileType_ServerProfile struct {
-	ServerProfile *views.ObjectRefType `protobuf:"bytes,4,opt,name=server_profile,json=serverProfile,proto3,oneof" json:"server_profile,omitempty"`
-}
-
-func (*HTTPProfileType_ServerProfileSameAsClient) isHTTPProfileType_HttpServerProfileChoice() {}
-func (*HTTPProfileType_ServerProfile) isHTTPProfileType_HttpServerProfileChoice()             {}
-
-func (m *HTTPProfileType) GetHttpServerProfileChoice() isHTTPProfileType_HttpServerProfileChoice {
-	if m != nil {
-		return m.HttpServerProfileChoice
-	}
-	return nil
-}
-
-func (m *HTTPProfileType) GetClientProfile() *views.ObjectRefType {
-	if m != nil {
-		return m.ClientProfile
-	}
-	return nil
-}
-
-func (m *HTTPProfileType) GetServerProfileSameAsClient() *schema.Empty {
-	if x, ok := m.GetHttpServerProfileChoice().(*HTTPProfileType_ServerProfileSameAsClient); ok {
-		return x.ServerProfileSameAsClient
-	}
-	return nil
-}
-
-func (m *HTTPProfileType) GetServerProfile() *views.ObjectRefType {
-	if x, ok := m.GetHttpServerProfileChoice().(*HTTPProfileType_ServerProfile); ok {
-		return x.ServerProfile
-	}
-	return nil
-}
-
-// XXX_OneofWrappers is for the internal use of the proto package.
-func (*HTTPProfileType) XXX_OneofWrappers() []interface{} {
-	return []interface{}{
-		(*HTTPProfileType_ServerProfileSameAsClient)(nil),
-		(*HTTPProfileType_ServerProfile)(nil),
-	}
-}
-
-// WebSocket Profile
-//
-// x-displayName: "WebSocket Profile"
-type WebsocketProfileType struct {
-	// WebSocket Profile (Client)
-	//
-	// x-displayName: "WebSocket Profile (Client)"
-	// WebSocket Profile (Client)
-	//
-	// Types that are valid to be assigned to WebsocketClientProfileChoice:
-	//	*WebsocketProfileType_ClientProfileNone
-	//	*WebsocketProfileType_ClientProfile
-	WebsocketClientProfileChoice isWebsocketProfileType_WebsocketClientProfileChoice `protobuf_oneof:"websocket_client_profile_choice"`
-	// WebSocket Profile (Server)
-	//
-	// x-displayName: "WebSocket Profile (Server)"
-	// WebSocket Profile (Server)
-	//
-	// Types that are valid to be assigned to WebsocketServerProfileChoice:
-	//	*WebsocketProfileType_ServerProfileSameAsClient
-	//	*WebsocketProfileType_ServerProfile
-	WebsocketServerProfileChoice isWebsocketProfileType_WebsocketServerProfileChoice `protobuf_oneof:"websocket_server_profile_choice"`
-}
-
-func (m *WebsocketProfileType) Reset()      { *m = WebsocketProfileType{} }
-func (*WebsocketProfileType) ProtoMessage() {}
-func (*WebsocketProfileType) Descriptor() ([]byte, []int) {
-	return fileDescriptor_c98b987b494647eb, []int{8}
-}
-func (m *WebsocketProfileType) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *WebsocketProfileType) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	b = b[:cap(b)]
-	n, err := m.MarshalToSizedBuffer(b)
-	if err != nil {
-		return nil, err
-	}
-	return b[:n], nil
-}
-func (m *WebsocketProfileType) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_WebsocketProfileType.Merge(m, src)
-}
-func (m *WebsocketProfileType) XXX_Size() int {
-	return m.Size()
-}
-func (m *WebsocketProfileType) XXX_DiscardUnknown() {
-	xxx_messageInfo_WebsocketProfileType.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_WebsocketProfileType proto.InternalMessageInfo
-
-type isWebsocketProfileType_WebsocketClientProfileChoice interface {
-	isWebsocketProfileType_WebsocketClientProfileChoice()
-	Equal(interface{}) bool
-	MarshalTo([]byte) (int, error)
-	Size() int
-}
-type isWebsocketProfileType_WebsocketServerProfileChoice interface {
-	isWebsocketProfileType_WebsocketServerProfileChoice()
-	Equal(interface{}) bool
-	MarshalTo([]byte) (int, error)
-	Size() int
-}
-
-type WebsocketProfileType_ClientProfileNone struct {
-	ClientProfileNone *schema.Empty `protobuf:"bytes,2,opt,name=client_profile_none,json=clientProfileNone,proto3,oneof" json:"client_profile_none,omitempty"`
-}
-type WebsocketProfileType_ClientProfile struct {
-	ClientProfile *views.ObjectRefType `protobuf:"bytes,3,opt,name=client_profile,json=clientProfile,proto3,oneof" json:"client_profile,omitempty"`
-}
-type WebsocketProfileType_ServerProfileSameAsClient struct {
-	ServerProfileSameAsClient *schema.Empty `protobuf:"bytes,5,opt,name=server_profile_same_as_client,json=serverProfileSameAsClient,proto3,oneof" json:"server_profile_same_as_client,omitempty"`
-}
-type WebsocketProfileType_ServerProfile struct {
-	ServerProfile *views.ObjectRefType `protobuf:"bytes,6,opt,name=server_profile,json=serverProfile,proto3,oneof" json:"server_profile,omitempty"`
-}
-
-func (*WebsocketProfileType_ClientProfileNone) isWebsocketProfileType_WebsocketClientProfileChoice() {
-}
-func (*WebsocketProfileType_ClientProfile) isWebsocketProfileType_WebsocketClientProfileChoice() {}
-func (*WebsocketProfileType_ServerProfileSameAsClient) isWebsocketProfileType_WebsocketServerProfileChoice() {
-}
-func (*WebsocketProfileType_ServerProfile) isWebsocketProfileType_WebsocketServerProfileChoice() {}
-
-func (m *WebsocketProfileType) GetWebsocketClientProfileChoice() isWebsocketProfileType_WebsocketClientProfileChoice {
-	if m != nil {
-		return m.WebsocketClientProfileChoice
-	}
-	return nil
-}
-func (m *WebsocketProfileType) GetWebsocketServerProfileChoice() isWebsocketProfileType_WebsocketServerProfileChoice {
-	if m != nil {
-		return m.WebsocketServerProfileChoice
-	}
-	return nil
-}
-
-func (m *WebsocketProfileType) GetClientProfileNone() *schema.Empty {
-	if x, ok := m.GetWebsocketClientProfileChoice().(*WebsocketProfileType_ClientProfileNone); ok {
-		return x.ClientProfileNone
-	}
-	return nil
-}
-
-func (m *WebsocketProfileType) GetClientProfile() *views.ObjectRefType {
-	if x, ok := m.GetWebsocketClientProfileChoice().(*WebsocketProfileType_ClientProfile); ok {
-		return x.ClientProfile
-	}
-	return nil
-}
-
-func (m *WebsocketProfileType) GetServerProfileSameAsClient() *schema.Empty {
-	if x, ok := m.GetWebsocketServerProfileChoice().(*WebsocketProfileType_ServerProfileSameAsClient); ok {
-		return x.ServerProfileSameAsClient
-	}
-	return nil
-}
-
-func (m *WebsocketProfileType) GetServerProfile() *views.ObjectRefType {
-	if x, ok := m.GetWebsocketServerProfileChoice().(*WebsocketProfileType_ServerProfile); ok {
-		return x.ServerProfile
-	}
-	return nil
-}
-
-// XXX_OneofWrappers is for the internal use of the proto package.
-func (*WebsocketProfileType) XXX_OneofWrappers() []interface{} {
-	return []interface{}{
-		(*WebsocketProfileType_ClientProfileNone)(nil),
-		(*WebsocketProfileType_ClientProfile)(nil),
-		(*WebsocketProfileType_ServerProfileSameAsClient)(nil),
-		(*WebsocketProfileType_ServerProfile)(nil),
-	}
-}
-
 // Clone Pool
 //
 // x-displayName: "Clone Pool"
@@ -1407,7 +2279,7 @@ type ClonePoolType struct {
 func (m *ClonePoolType) Reset()      { *m = ClonePoolType{} }
 func (*ClonePoolType) ProtoMessage() {}
 func (*ClonePoolType) Descriptor() ([]byte, []int) {
-	return fileDescriptor_c98b987b494647eb, []int{9}
+	return fileDescriptor_c98b987b494647eb, []int{13}
 }
 func (m *ClonePoolType) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1527,7 +2399,7 @@ type Services struct {
 func (m *Services) Reset()      { *m = Services{} }
 func (*Services) ProtoMessage() {}
 func (*Services) Descriptor() ([]byte, []int) {
-	return fileDescriptor_c98b987b494647eb, []int{10}
+	return fileDescriptor_c98b987b494647eb, []int{14}
 }
 func (m *Services) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1577,7 +2449,7 @@ type ServiceType struct {
 func (m *ServiceType) Reset()      { *m = ServiceType{} }
 func (*ServiceType) ProtoMessage() {}
 func (*ServiceType) Descriptor() ([]byte, []int) {
-	return fileDescriptor_c98b987b494647eb, []int{11}
+	return fileDescriptor_c98b987b494647eb, []int{15}
 }
 func (m *ServiceType) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1679,7 +2551,7 @@ type ConnectionLimitsType struct {
 func (m *ConnectionLimitsType) Reset()      { *m = ConnectionLimitsType{} }
 func (*ConnectionLimitsType) ProtoMessage() {}
 func (*ConnectionLimitsType) Descriptor() ([]byte, []int) {
-	return fileDescriptor_c98b987b494647eb, []int{12}
+	return fileDescriptor_c98b987b494647eb, []int{16}
 }
 func (m *ConnectionLimitsType) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1730,21 +2602,25 @@ func (m *ConnectionLimitsType) GetConnectionRateLimitMode() *schema.TMMVirtualSe
 // x-displayName: "Create Virtual Server"
 // Shape of the Virtual Server create specification
 type CreateSpecType struct {
-	State *schema.TMMStateType `protobuf:"bytes,1,opt,name=state,proto3" json:"state,omitempty"`
-	// Types that are valid to be assigned to DomainChoice:
-	//	*CreateSpecType_Managed
-	//	*CreateSpecType_NotManaged
-	DomainChoice isCreateSpecType_DomainChoice `protobuf_oneof:"domain_choice"`
+	State   *schema.TMMStateType `protobuf:"bytes,1,opt,name=state,proto3" json:"state,omitempty"`
+	Domains []string             `protobuf:"bytes,5,rep,name=domains,proto3" json:"domains,omitempty"`
 	// Types that are valid to be assigned to VirtualServerType:
 	//	*CreateSpecType_Https
 	//	*CreateSpecType_Http
 	//	*CreateSpecType_Tcp
 	//	*CreateSpecType_Udp
-	VirtualServerType      isCreateSpecType_VirtualServerType      `protobuf_oneof:"virtual_server_type"`
-	ConnectionLimitOptions *ConnectionLimitsType                   `protobuf:"bytes,12,opt,name=connection_limit_options,json=connectionLimitOptions,proto3" json:"connection_limit_options,omitempty"`
-	Translations           *TranslationType                        `protobuf:"bytes,34,opt,name=translations,proto3" json:"translations,omitempty"`
-	ClonePoolOptions       *ClonePoolType                          `protobuf:"bytes,41,opt,name=clone_pool_options,json=clonePoolOptions,proto3" json:"clone_pool_options,omitempty"`
-	AutoLastHop            *schema.TMMVirtualServerAutoLastHopType `protobuf:"bytes,49,opt,name=auto_last_hop,json=autoLastHop,proto3" json:"auto_last_hop,omitempty"`
+	//	*CreateSpecType_Http3
+	VirtualServerType isCreateSpecType_VirtualServerType `protobuf_oneof:"virtual_server_type"`
+	// Types that are valid to be assigned to StatisticsProfileChoice:
+	//	*CreateSpecType_StatisticsProfileNone
+	//	*CreateSpecType_StatisticsProfile
+	StatisticsProfileChoice isCreateSpecType_StatisticsProfileChoice `protobuf_oneof:"statistics_profile_choice"`
+	ConnectionLimitOptions  *ConnectionLimitsType                    `protobuf:"bytes,12,opt,name=connection_limit_options,json=connectionLimitOptions,proto3" json:"connection_limit_options,omitempty"`
+	Translations            *TranslationType                         `protobuf:"bytes,34,opt,name=translations,proto3" json:"translations,omitempty"`
+	ClonePoolOptions        *ClonePoolType                           `protobuf:"bytes,41,opt,name=clone_pool_options,json=clonePoolOptions,proto3" json:"clone_pool_options,omitempty"`
+	AutoLastHop             *schema.TMMVirtualServerAutoLastHopType  `protobuf:"bytes,49,opt,name=auto_last_hop,json=autoLastHop,proto3" json:"auto_last_hop,omitempty"`
+	Sse                     vs_profiles.TrueFalseChoice              `protobuf:"varint,50,opt,name=sse,proto3,enum=ves.io.schema.vs_profiles.TrueFalseChoice" json:"sse,omitempty"`
+	Json                    vs_profiles.TrueFalseChoice              `protobuf:"varint,51,opt,name=json,proto3,enum=ves.io.schema.vs_profiles.TrueFalseChoice" json:"json,omitempty"`
 	// Types that are valid to be assigned to LastHopPoolChoice:
 	//	*CreateSpecType_LastHopPoolNone
 	//	*CreateSpecType_LastHopPool
@@ -1776,7 +2652,7 @@ type CreateSpecType struct {
 func (m *CreateSpecType) Reset()      { *m = CreateSpecType{} }
 func (*CreateSpecType) ProtoMessage() {}
 func (*CreateSpecType) Descriptor() ([]byte, []int) {
-	return fileDescriptor_c98b987b494647eb, []int{13}
+	return fileDescriptor_c98b987b494647eb, []int{17}
 }
 func (m *CreateSpecType) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1801,14 +2677,14 @@ func (m *CreateSpecType) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_CreateSpecType proto.InternalMessageInfo
 
-type isCreateSpecType_DomainChoice interface {
-	isCreateSpecType_DomainChoice()
+type isCreateSpecType_VirtualServerType interface {
+	isCreateSpecType_VirtualServerType()
 	Equal(interface{}) bool
 	MarshalTo([]byte) (int, error)
 	Size() int
 }
-type isCreateSpecType_VirtualServerType interface {
-	isCreateSpecType_VirtualServerType()
+type isCreateSpecType_StatisticsProfileChoice interface {
+	isCreateSpecType_StatisticsProfileChoice()
 	Equal(interface{}) bool
 	MarshalTo([]byte) (int, error)
 	Size() int
@@ -1844,23 +2720,26 @@ type isCreateSpecType_FallbackPersistenceProfileChoice interface {
 	Size() int
 }
 
-type CreateSpecType_Managed struct {
-	Managed *DomainsManagedByF5XC `protobuf:"bytes,3,opt,name=managed,proto3,oneof" json:"managed,omitempty"`
-}
-type CreateSpecType_NotManaged struct {
-	NotManaged *NotManagedDomainsType `protobuf:"bytes,4,opt,name=not_managed,json=notManaged,proto3,oneof" json:"not_managed,omitempty"`
-}
 type CreateSpecType_Https struct {
-	Https *Services `protobuf:"bytes,8,opt,name=https,proto3,oneof" json:"https,omitempty"`
+	Https *HTTPServices `protobuf:"bytes,8,opt,name=https,proto3,oneof" json:"https,omitempty"`
 }
 type CreateSpecType_Http struct {
 	Http *HTTPServices `protobuf:"bytes,9,opt,name=http,proto3,oneof" json:"http,omitempty"`
 }
 type CreateSpecType_Tcp struct {
-	Tcp *Services `protobuf:"bytes,10,opt,name=tcp,proto3,oneof" json:"tcp,omitempty"`
+	Tcp *TCPServices `protobuf:"bytes,10,opt,name=tcp,proto3,oneof" json:"tcp,omitempty"`
 }
 type CreateSpecType_Udp struct {
-	Udp *Services `protobuf:"bytes,11,opt,name=udp,proto3,oneof" json:"udp,omitempty"`
+	Udp *UDPServices `protobuf:"bytes,11,opt,name=udp,proto3,oneof" json:"udp,omitempty"`
+}
+type CreateSpecType_Http3 struct {
+	Http3 *HTTP3Services `protobuf:"bytes,25,opt,name=http3,proto3,oneof" json:"http3,omitempty"`
+}
+type CreateSpecType_StatisticsProfileNone struct {
+	StatisticsProfileNone *schema.Empty `protobuf:"bytes,23,opt,name=statistics_profile_none,json=statisticsProfileNone,proto3,oneof" json:"statistics_profile_none,omitempty"`
+}
+type CreateSpecType_StatisticsProfile struct {
+	StatisticsProfile *views.ObjectRefType `protobuf:"bytes,24,opt,name=statistics_profile,json=statisticsProfile,proto3,oneof" json:"statistics_profile,omitempty"`
 }
 type CreateSpecType_LastHopPoolNone struct {
 	LastHopPoolNone *schema.Empty `protobuf:"bytes,54,opt,name=last_hop_pool_none,json=lastHopPoolNone,proto3,oneof" json:"last_hop_pool_none,omitempty"`
@@ -1893,12 +2772,13 @@ type CreateSpecType_FallbackPersistenceProfile struct {
 	FallbackPersistenceProfile *views.ObjectRefType `protobuf:"bytes,20,opt,name=fallback_persistence_profile,json=fallbackPersistenceProfile,proto3,oneof" json:"fallback_persistence_profile,omitempty"`
 }
 
-func (*CreateSpecType_Managed) isCreateSpecType_DomainChoice()                                  {}
-func (*CreateSpecType_NotManaged) isCreateSpecType_DomainChoice()                               {}
 func (*CreateSpecType_Https) isCreateSpecType_VirtualServerType()                               {}
 func (*CreateSpecType_Http) isCreateSpecType_VirtualServerType()                                {}
 func (*CreateSpecType_Tcp) isCreateSpecType_VirtualServerType()                                 {}
 func (*CreateSpecType_Udp) isCreateSpecType_VirtualServerType()                                 {}
+func (*CreateSpecType_Http3) isCreateSpecType_VirtualServerType()                               {}
+func (*CreateSpecType_StatisticsProfileNone) isCreateSpecType_StatisticsProfileChoice()         {}
+func (*CreateSpecType_StatisticsProfile) isCreateSpecType_StatisticsProfileChoice()             {}
 func (*CreateSpecType_LastHopPoolNone) isCreateSpecType_LastHopPoolChoice()                     {}
 func (*CreateSpecType_LastHopPool) isCreateSpecType_LastHopPoolChoice()                         {}
 func (*CreateSpecType_RequestLoggingProfileNone) isCreateSpecType_RequestLoggingProfileChoice() {}
@@ -1913,15 +2793,15 @@ func (*CreateSpecType_FallbackPersistenceProfileNone) isCreateSpecType_FallbackP
 func (*CreateSpecType_FallbackPersistenceProfile) isCreateSpecType_FallbackPersistenceProfileChoice() {
 }
 
-func (m *CreateSpecType) GetDomainChoice() isCreateSpecType_DomainChoice {
-	if m != nil {
-		return m.DomainChoice
-	}
-	return nil
-}
 func (m *CreateSpecType) GetVirtualServerType() isCreateSpecType_VirtualServerType {
 	if m != nil {
 		return m.VirtualServerType
+	}
+	return nil
+}
+func (m *CreateSpecType) GetStatisticsProfileChoice() isCreateSpecType_StatisticsProfileChoice {
+	if m != nil {
+		return m.StatisticsProfileChoice
 	}
 	return nil
 }
@@ -1963,21 +2843,14 @@ func (m *CreateSpecType) GetState() *schema.TMMStateType {
 	return nil
 }
 
-func (m *CreateSpecType) GetManaged() *DomainsManagedByF5XC {
-	if x, ok := m.GetDomainChoice().(*CreateSpecType_Managed); ok {
-		return x.Managed
+func (m *CreateSpecType) GetDomains() []string {
+	if m != nil {
+		return m.Domains
 	}
 	return nil
 }
 
-func (m *CreateSpecType) GetNotManaged() *NotManagedDomainsType {
-	if x, ok := m.GetDomainChoice().(*CreateSpecType_NotManaged); ok {
-		return x.NotManaged
-	}
-	return nil
-}
-
-func (m *CreateSpecType) GetHttps() *Services {
+func (m *CreateSpecType) GetHttps() *HTTPServices {
 	if x, ok := m.GetVirtualServerType().(*CreateSpecType_Https); ok {
 		return x.Https
 	}
@@ -1991,16 +2864,37 @@ func (m *CreateSpecType) GetHttp() *HTTPServices {
 	return nil
 }
 
-func (m *CreateSpecType) GetTcp() *Services {
+func (m *CreateSpecType) GetTcp() *TCPServices {
 	if x, ok := m.GetVirtualServerType().(*CreateSpecType_Tcp); ok {
 		return x.Tcp
 	}
 	return nil
 }
 
-func (m *CreateSpecType) GetUdp() *Services {
+func (m *CreateSpecType) GetUdp() *UDPServices {
 	if x, ok := m.GetVirtualServerType().(*CreateSpecType_Udp); ok {
 		return x.Udp
+	}
+	return nil
+}
+
+func (m *CreateSpecType) GetHttp3() *HTTP3Services {
+	if x, ok := m.GetVirtualServerType().(*CreateSpecType_Http3); ok {
+		return x.Http3
+	}
+	return nil
+}
+
+func (m *CreateSpecType) GetStatisticsProfileNone() *schema.Empty {
+	if x, ok := m.GetStatisticsProfileChoice().(*CreateSpecType_StatisticsProfileNone); ok {
+		return x.StatisticsProfileNone
+	}
+	return nil
+}
+
+func (m *CreateSpecType) GetStatisticsProfile() *views.ObjectRefType {
+	if x, ok := m.GetStatisticsProfileChoice().(*CreateSpecType_StatisticsProfile); ok {
+		return x.StatisticsProfile
 	}
 	return nil
 }
@@ -2031,6 +2925,20 @@ func (m *CreateSpecType) GetAutoLastHop() *schema.TMMVirtualServerAutoLastHopTyp
 		return m.AutoLastHop
 	}
 	return nil
+}
+
+func (m *CreateSpecType) GetSse() vs_profiles.TrueFalseChoice {
+	if m != nil {
+		return m.Sse
+	}
+	return vs_profiles.FALSE
+}
+
+func (m *CreateSpecType) GetJson() vs_profiles.TrueFalseChoice {
+	if m != nil {
+		return m.Json
+	}
+	return vs_profiles.FALSE
 }
 
 func (m *CreateSpecType) GetLastHopPoolNone() *schema.Empty {
@@ -2148,12 +3056,13 @@ func (m *CreateSpecType) GetTrafficPolicies() []*schema.ObjectRefType {
 // XXX_OneofWrappers is for the internal use of the proto package.
 func (*CreateSpecType) XXX_OneofWrappers() []interface{} {
 	return []interface{}{
-		(*CreateSpecType_Managed)(nil),
-		(*CreateSpecType_NotManaged)(nil),
 		(*CreateSpecType_Https)(nil),
 		(*CreateSpecType_Http)(nil),
 		(*CreateSpecType_Tcp)(nil),
 		(*CreateSpecType_Udp)(nil),
+		(*CreateSpecType_Http3)(nil),
+		(*CreateSpecType_StatisticsProfileNone)(nil),
+		(*CreateSpecType_StatisticsProfile)(nil),
 		(*CreateSpecType_LastHopPoolNone)(nil),
 		(*CreateSpecType_LastHopPool)(nil),
 		(*CreateSpecType_RequestLoggingProfileNone)(nil),
@@ -2172,21 +3081,25 @@ func (*CreateSpecType) XXX_OneofWrappers() []interface{} {
 // x-displayName: "Replace Virtual Server"
 // Shape of the Virtual Server create specification
 type ReplaceSpecType struct {
-	State *schema.TMMStateType `protobuf:"bytes,1,opt,name=state,proto3" json:"state,omitempty"`
-	// Types that are valid to be assigned to DomainChoice:
-	//	*ReplaceSpecType_Managed
-	//	*ReplaceSpecType_NotManaged
-	DomainChoice isReplaceSpecType_DomainChoice `protobuf_oneof:"domain_choice"`
+	State   *schema.TMMStateType `protobuf:"bytes,1,opt,name=state,proto3" json:"state,omitempty"`
+	Domains []string             `protobuf:"bytes,5,rep,name=domains,proto3" json:"domains,omitempty"`
 	// Types that are valid to be assigned to VirtualServerType:
 	//	*ReplaceSpecType_Https
 	//	*ReplaceSpecType_Http
 	//	*ReplaceSpecType_Tcp
 	//	*ReplaceSpecType_Udp
-	VirtualServerType      isReplaceSpecType_VirtualServerType     `protobuf_oneof:"virtual_server_type"`
-	ConnectionLimitOptions *ConnectionLimitsType                   `protobuf:"bytes,12,opt,name=connection_limit_options,json=connectionLimitOptions,proto3" json:"connection_limit_options,omitempty"`
-	Translations           *TranslationType                        `protobuf:"bytes,34,opt,name=translations,proto3" json:"translations,omitempty"`
-	ClonePoolOptions       *ClonePoolType                          `protobuf:"bytes,41,opt,name=clone_pool_options,json=clonePoolOptions,proto3" json:"clone_pool_options,omitempty"`
-	AutoLastHop            *schema.TMMVirtualServerAutoLastHopType `protobuf:"bytes,49,opt,name=auto_last_hop,json=autoLastHop,proto3" json:"auto_last_hop,omitempty"`
+	//	*ReplaceSpecType_Http3
+	VirtualServerType isReplaceSpecType_VirtualServerType `protobuf_oneof:"virtual_server_type"`
+	// Types that are valid to be assigned to StatisticsProfileChoice:
+	//	*ReplaceSpecType_StatisticsProfileNone
+	//	*ReplaceSpecType_StatisticsProfile
+	StatisticsProfileChoice isReplaceSpecType_StatisticsProfileChoice `protobuf_oneof:"statistics_profile_choice"`
+	ConnectionLimitOptions  *ConnectionLimitsType                     `protobuf:"bytes,12,opt,name=connection_limit_options,json=connectionLimitOptions,proto3" json:"connection_limit_options,omitempty"`
+	Translations            *TranslationType                          `protobuf:"bytes,34,opt,name=translations,proto3" json:"translations,omitempty"`
+	ClonePoolOptions        *ClonePoolType                            `protobuf:"bytes,41,opt,name=clone_pool_options,json=clonePoolOptions,proto3" json:"clone_pool_options,omitempty"`
+	AutoLastHop             *schema.TMMVirtualServerAutoLastHopType   `protobuf:"bytes,49,opt,name=auto_last_hop,json=autoLastHop,proto3" json:"auto_last_hop,omitempty"`
+	Sse                     vs_profiles.TrueFalseChoice               `protobuf:"varint,50,opt,name=sse,proto3,enum=ves.io.schema.vs_profiles.TrueFalseChoice" json:"sse,omitempty"`
+	Json                    vs_profiles.TrueFalseChoice               `protobuf:"varint,51,opt,name=json,proto3,enum=ves.io.schema.vs_profiles.TrueFalseChoice" json:"json,omitempty"`
 	// Types that are valid to be assigned to LastHopPoolChoice:
 	//	*ReplaceSpecType_LastHopPoolNone
 	//	*ReplaceSpecType_LastHopPool
@@ -2218,7 +3131,7 @@ type ReplaceSpecType struct {
 func (m *ReplaceSpecType) Reset()      { *m = ReplaceSpecType{} }
 func (*ReplaceSpecType) ProtoMessage() {}
 func (*ReplaceSpecType) Descriptor() ([]byte, []int) {
-	return fileDescriptor_c98b987b494647eb, []int{14}
+	return fileDescriptor_c98b987b494647eb, []int{18}
 }
 func (m *ReplaceSpecType) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -2243,14 +3156,14 @@ func (m *ReplaceSpecType) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_ReplaceSpecType proto.InternalMessageInfo
 
-type isReplaceSpecType_DomainChoice interface {
-	isReplaceSpecType_DomainChoice()
+type isReplaceSpecType_VirtualServerType interface {
+	isReplaceSpecType_VirtualServerType()
 	Equal(interface{}) bool
 	MarshalTo([]byte) (int, error)
 	Size() int
 }
-type isReplaceSpecType_VirtualServerType interface {
-	isReplaceSpecType_VirtualServerType()
+type isReplaceSpecType_StatisticsProfileChoice interface {
+	isReplaceSpecType_StatisticsProfileChoice()
 	Equal(interface{}) bool
 	MarshalTo([]byte) (int, error)
 	Size() int
@@ -2286,23 +3199,26 @@ type isReplaceSpecType_FallbackPersistenceProfileChoice interface {
 	Size() int
 }
 
-type ReplaceSpecType_Managed struct {
-	Managed *DomainsManagedByF5XC `protobuf:"bytes,3,opt,name=managed,proto3,oneof" json:"managed,omitempty"`
-}
-type ReplaceSpecType_NotManaged struct {
-	NotManaged *NotManagedDomainsType `protobuf:"bytes,4,opt,name=not_managed,json=notManaged,proto3,oneof" json:"not_managed,omitempty"`
-}
 type ReplaceSpecType_Https struct {
-	Https *Services `protobuf:"bytes,8,opt,name=https,proto3,oneof" json:"https,omitempty"`
+	Https *HTTPServices `protobuf:"bytes,8,opt,name=https,proto3,oneof" json:"https,omitempty"`
 }
 type ReplaceSpecType_Http struct {
 	Http *HTTPServices `protobuf:"bytes,9,opt,name=http,proto3,oneof" json:"http,omitempty"`
 }
 type ReplaceSpecType_Tcp struct {
-	Tcp *Services `protobuf:"bytes,10,opt,name=tcp,proto3,oneof" json:"tcp,omitempty"`
+	Tcp *TCPServices `protobuf:"bytes,10,opt,name=tcp,proto3,oneof" json:"tcp,omitempty"`
 }
 type ReplaceSpecType_Udp struct {
-	Udp *Services `protobuf:"bytes,11,opt,name=udp,proto3,oneof" json:"udp,omitempty"`
+	Udp *UDPServices `protobuf:"bytes,11,opt,name=udp,proto3,oneof" json:"udp,omitempty"`
+}
+type ReplaceSpecType_Http3 struct {
+	Http3 *HTTP3Services `protobuf:"bytes,25,opt,name=http3,proto3,oneof" json:"http3,omitempty"`
+}
+type ReplaceSpecType_StatisticsProfileNone struct {
+	StatisticsProfileNone *schema.Empty `protobuf:"bytes,23,opt,name=statistics_profile_none,json=statisticsProfileNone,proto3,oneof" json:"statistics_profile_none,omitempty"`
+}
+type ReplaceSpecType_StatisticsProfile struct {
+	StatisticsProfile *views.ObjectRefType `protobuf:"bytes,24,opt,name=statistics_profile,json=statisticsProfile,proto3,oneof" json:"statistics_profile,omitempty"`
 }
 type ReplaceSpecType_LastHopPoolNone struct {
 	LastHopPoolNone *schema.Empty `protobuf:"bytes,54,opt,name=last_hop_pool_none,json=lastHopPoolNone,proto3,oneof" json:"last_hop_pool_none,omitempty"`
@@ -2335,12 +3251,13 @@ type ReplaceSpecType_FallbackPersistenceProfile struct {
 	FallbackPersistenceProfile *views.ObjectRefType `protobuf:"bytes,20,opt,name=fallback_persistence_profile,json=fallbackPersistenceProfile,proto3,oneof" json:"fallback_persistence_profile,omitempty"`
 }
 
-func (*ReplaceSpecType_Managed) isReplaceSpecType_DomainChoice()                                  {}
-func (*ReplaceSpecType_NotManaged) isReplaceSpecType_DomainChoice()                               {}
 func (*ReplaceSpecType_Https) isReplaceSpecType_VirtualServerType()                               {}
 func (*ReplaceSpecType_Http) isReplaceSpecType_VirtualServerType()                                {}
 func (*ReplaceSpecType_Tcp) isReplaceSpecType_VirtualServerType()                                 {}
 func (*ReplaceSpecType_Udp) isReplaceSpecType_VirtualServerType()                                 {}
+func (*ReplaceSpecType_Http3) isReplaceSpecType_VirtualServerType()                               {}
+func (*ReplaceSpecType_StatisticsProfileNone) isReplaceSpecType_StatisticsProfileChoice()         {}
+func (*ReplaceSpecType_StatisticsProfile) isReplaceSpecType_StatisticsProfileChoice()             {}
 func (*ReplaceSpecType_LastHopPoolNone) isReplaceSpecType_LastHopPoolChoice()                     {}
 func (*ReplaceSpecType_LastHopPool) isReplaceSpecType_LastHopPoolChoice()                         {}
 func (*ReplaceSpecType_RequestLoggingProfileNone) isReplaceSpecType_RequestLoggingProfileChoice() {}
@@ -2356,15 +3273,15 @@ func (*ReplaceSpecType_FallbackPersistenceProfileNone) isReplaceSpecType_Fallbac
 func (*ReplaceSpecType_FallbackPersistenceProfile) isReplaceSpecType_FallbackPersistenceProfileChoice() {
 }
 
-func (m *ReplaceSpecType) GetDomainChoice() isReplaceSpecType_DomainChoice {
-	if m != nil {
-		return m.DomainChoice
-	}
-	return nil
-}
 func (m *ReplaceSpecType) GetVirtualServerType() isReplaceSpecType_VirtualServerType {
 	if m != nil {
 		return m.VirtualServerType
+	}
+	return nil
+}
+func (m *ReplaceSpecType) GetStatisticsProfileChoice() isReplaceSpecType_StatisticsProfileChoice {
+	if m != nil {
+		return m.StatisticsProfileChoice
 	}
 	return nil
 }
@@ -2406,21 +3323,14 @@ func (m *ReplaceSpecType) GetState() *schema.TMMStateType {
 	return nil
 }
 
-func (m *ReplaceSpecType) GetManaged() *DomainsManagedByF5XC {
-	if x, ok := m.GetDomainChoice().(*ReplaceSpecType_Managed); ok {
-		return x.Managed
+func (m *ReplaceSpecType) GetDomains() []string {
+	if m != nil {
+		return m.Domains
 	}
 	return nil
 }
 
-func (m *ReplaceSpecType) GetNotManaged() *NotManagedDomainsType {
-	if x, ok := m.GetDomainChoice().(*ReplaceSpecType_NotManaged); ok {
-		return x.NotManaged
-	}
-	return nil
-}
-
-func (m *ReplaceSpecType) GetHttps() *Services {
+func (m *ReplaceSpecType) GetHttps() *HTTPServices {
 	if x, ok := m.GetVirtualServerType().(*ReplaceSpecType_Https); ok {
 		return x.Https
 	}
@@ -2434,16 +3344,37 @@ func (m *ReplaceSpecType) GetHttp() *HTTPServices {
 	return nil
 }
 
-func (m *ReplaceSpecType) GetTcp() *Services {
+func (m *ReplaceSpecType) GetTcp() *TCPServices {
 	if x, ok := m.GetVirtualServerType().(*ReplaceSpecType_Tcp); ok {
 		return x.Tcp
 	}
 	return nil
 }
 
-func (m *ReplaceSpecType) GetUdp() *Services {
+func (m *ReplaceSpecType) GetUdp() *UDPServices {
 	if x, ok := m.GetVirtualServerType().(*ReplaceSpecType_Udp); ok {
 		return x.Udp
+	}
+	return nil
+}
+
+func (m *ReplaceSpecType) GetHttp3() *HTTP3Services {
+	if x, ok := m.GetVirtualServerType().(*ReplaceSpecType_Http3); ok {
+		return x.Http3
+	}
+	return nil
+}
+
+func (m *ReplaceSpecType) GetStatisticsProfileNone() *schema.Empty {
+	if x, ok := m.GetStatisticsProfileChoice().(*ReplaceSpecType_StatisticsProfileNone); ok {
+		return x.StatisticsProfileNone
+	}
+	return nil
+}
+
+func (m *ReplaceSpecType) GetStatisticsProfile() *views.ObjectRefType {
+	if x, ok := m.GetStatisticsProfileChoice().(*ReplaceSpecType_StatisticsProfile); ok {
+		return x.StatisticsProfile
 	}
 	return nil
 }
@@ -2474,6 +3405,20 @@ func (m *ReplaceSpecType) GetAutoLastHop() *schema.TMMVirtualServerAutoLastHopTy
 		return m.AutoLastHop
 	}
 	return nil
+}
+
+func (m *ReplaceSpecType) GetSse() vs_profiles.TrueFalseChoice {
+	if m != nil {
+		return m.Sse
+	}
+	return vs_profiles.FALSE
+}
+
+func (m *ReplaceSpecType) GetJson() vs_profiles.TrueFalseChoice {
+	if m != nil {
+		return m.Json
+	}
+	return vs_profiles.FALSE
 }
 
 func (m *ReplaceSpecType) GetLastHopPoolNone() *schema.Empty {
@@ -2591,12 +3536,13 @@ func (m *ReplaceSpecType) GetTrafficPolicies() []*schema.ObjectRefType {
 // XXX_OneofWrappers is for the internal use of the proto package.
 func (*ReplaceSpecType) XXX_OneofWrappers() []interface{} {
 	return []interface{}{
-		(*ReplaceSpecType_Managed)(nil),
-		(*ReplaceSpecType_NotManaged)(nil),
 		(*ReplaceSpecType_Https)(nil),
 		(*ReplaceSpecType_Http)(nil),
 		(*ReplaceSpecType_Tcp)(nil),
 		(*ReplaceSpecType_Udp)(nil),
+		(*ReplaceSpecType_Http3)(nil),
+		(*ReplaceSpecType_StatisticsProfileNone)(nil),
+		(*ReplaceSpecType_StatisticsProfile)(nil),
 		(*ReplaceSpecType_LastHopPoolNone)(nil),
 		(*ReplaceSpecType_LastHopPool)(nil),
 		(*ReplaceSpecType_RequestLoggingProfileNone)(nil),
@@ -2615,21 +3561,25 @@ func (*ReplaceSpecType) XXX_OneofWrappers() []interface{} {
 // x-displayName: "Get Virtual Server"
 // Shape of the Virtual Server get specification
 type GetSpecType struct {
-	State *schema.TMMStateType `protobuf:"bytes,1,opt,name=state,proto3" json:"state,omitempty"`
-	// Types that are valid to be assigned to DomainChoice:
-	//	*GetSpecType_Managed
-	//	*GetSpecType_NotManaged
-	DomainChoice isGetSpecType_DomainChoice `protobuf_oneof:"domain_choice"`
+	State   *schema.TMMStateType `protobuf:"bytes,1,opt,name=state,proto3" json:"state,omitempty"`
+	Domains []string             `protobuf:"bytes,5,rep,name=domains,proto3" json:"domains,omitempty"`
 	// Types that are valid to be assigned to VirtualServerType:
 	//	*GetSpecType_Https
 	//	*GetSpecType_Http
 	//	*GetSpecType_Tcp
 	//	*GetSpecType_Udp
-	VirtualServerType      isGetSpecType_VirtualServerType         `protobuf_oneof:"virtual_server_type"`
-	ConnectionLimitOptions *ConnectionLimitsType                   `protobuf:"bytes,12,opt,name=connection_limit_options,json=connectionLimitOptions,proto3" json:"connection_limit_options,omitempty"`
-	Translations           *TranslationType                        `protobuf:"bytes,34,opt,name=translations,proto3" json:"translations,omitempty"`
-	ClonePoolOptions       *ClonePoolType                          `protobuf:"bytes,41,opt,name=clone_pool_options,json=clonePoolOptions,proto3" json:"clone_pool_options,omitempty"`
-	AutoLastHop            *schema.TMMVirtualServerAutoLastHopType `protobuf:"bytes,49,opt,name=auto_last_hop,json=autoLastHop,proto3" json:"auto_last_hop,omitempty"`
+	//	*GetSpecType_Http3
+	VirtualServerType isGetSpecType_VirtualServerType `protobuf_oneof:"virtual_server_type"`
+	// Types that are valid to be assigned to StatisticsProfileChoice:
+	//	*GetSpecType_StatisticsProfileNone
+	//	*GetSpecType_StatisticsProfile
+	StatisticsProfileChoice isGetSpecType_StatisticsProfileChoice   `protobuf_oneof:"statistics_profile_choice"`
+	ConnectionLimitOptions  *ConnectionLimitsType                   `protobuf:"bytes,12,opt,name=connection_limit_options,json=connectionLimitOptions,proto3" json:"connection_limit_options,omitempty"`
+	Translations            *TranslationType                        `protobuf:"bytes,34,opt,name=translations,proto3" json:"translations,omitempty"`
+	ClonePoolOptions        *ClonePoolType                          `protobuf:"bytes,41,opt,name=clone_pool_options,json=clonePoolOptions,proto3" json:"clone_pool_options,omitempty"`
+	AutoLastHop             *schema.TMMVirtualServerAutoLastHopType `protobuf:"bytes,49,opt,name=auto_last_hop,json=autoLastHop,proto3" json:"auto_last_hop,omitempty"`
+	Sse                     vs_profiles.TrueFalseChoice             `protobuf:"varint,50,opt,name=sse,proto3,enum=ves.io.schema.vs_profiles.TrueFalseChoice" json:"sse,omitempty"`
+	Json                    vs_profiles.TrueFalseChoice             `protobuf:"varint,51,opt,name=json,proto3,enum=ves.io.schema.vs_profiles.TrueFalseChoice" json:"json,omitempty"`
 	// Types that are valid to be assigned to LastHopPoolChoice:
 	//	*GetSpecType_LastHopPoolNone
 	//	*GetSpecType_LastHopPool
@@ -2661,7 +3611,7 @@ type GetSpecType struct {
 func (m *GetSpecType) Reset()      { *m = GetSpecType{} }
 func (*GetSpecType) ProtoMessage() {}
 func (*GetSpecType) Descriptor() ([]byte, []int) {
-	return fileDescriptor_c98b987b494647eb, []int{15}
+	return fileDescriptor_c98b987b494647eb, []int{19}
 }
 func (m *GetSpecType) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -2686,14 +3636,14 @@ func (m *GetSpecType) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GetSpecType proto.InternalMessageInfo
 
-type isGetSpecType_DomainChoice interface {
-	isGetSpecType_DomainChoice()
+type isGetSpecType_VirtualServerType interface {
+	isGetSpecType_VirtualServerType()
 	Equal(interface{}) bool
 	MarshalTo([]byte) (int, error)
 	Size() int
 }
-type isGetSpecType_VirtualServerType interface {
-	isGetSpecType_VirtualServerType()
+type isGetSpecType_StatisticsProfileChoice interface {
+	isGetSpecType_StatisticsProfileChoice()
 	Equal(interface{}) bool
 	MarshalTo([]byte) (int, error)
 	Size() int
@@ -2729,23 +3679,26 @@ type isGetSpecType_FallbackPersistenceProfileChoice interface {
 	Size() int
 }
 
-type GetSpecType_Managed struct {
-	Managed *DomainsManagedByF5XC `protobuf:"bytes,3,opt,name=managed,proto3,oneof" json:"managed,omitempty"`
-}
-type GetSpecType_NotManaged struct {
-	NotManaged *NotManagedDomainsType `protobuf:"bytes,4,opt,name=not_managed,json=notManaged,proto3,oneof" json:"not_managed,omitempty"`
-}
 type GetSpecType_Https struct {
-	Https *Services `protobuf:"bytes,8,opt,name=https,proto3,oneof" json:"https,omitempty"`
+	Https *HTTPServices `protobuf:"bytes,8,opt,name=https,proto3,oneof" json:"https,omitempty"`
 }
 type GetSpecType_Http struct {
 	Http *HTTPServices `protobuf:"bytes,9,opt,name=http,proto3,oneof" json:"http,omitempty"`
 }
 type GetSpecType_Tcp struct {
-	Tcp *Services `protobuf:"bytes,10,opt,name=tcp,proto3,oneof" json:"tcp,omitempty"`
+	Tcp *TCPServices `protobuf:"bytes,10,opt,name=tcp,proto3,oneof" json:"tcp,omitempty"`
 }
 type GetSpecType_Udp struct {
-	Udp *Services `protobuf:"bytes,11,opt,name=udp,proto3,oneof" json:"udp,omitempty"`
+	Udp *UDPServices `protobuf:"bytes,11,opt,name=udp,proto3,oneof" json:"udp,omitempty"`
+}
+type GetSpecType_Http3 struct {
+	Http3 *HTTP3Services `protobuf:"bytes,25,opt,name=http3,proto3,oneof" json:"http3,omitempty"`
+}
+type GetSpecType_StatisticsProfileNone struct {
+	StatisticsProfileNone *schema.Empty `protobuf:"bytes,23,opt,name=statistics_profile_none,json=statisticsProfileNone,proto3,oneof" json:"statistics_profile_none,omitempty"`
+}
+type GetSpecType_StatisticsProfile struct {
+	StatisticsProfile *views.ObjectRefType `protobuf:"bytes,24,opt,name=statistics_profile,json=statisticsProfile,proto3,oneof" json:"statistics_profile,omitempty"`
 }
 type GetSpecType_LastHopPoolNone struct {
 	LastHopPoolNone *schema.Empty `protobuf:"bytes,54,opt,name=last_hop_pool_none,json=lastHopPoolNone,proto3,oneof" json:"last_hop_pool_none,omitempty"`
@@ -2778,12 +3731,13 @@ type GetSpecType_FallbackPersistenceProfile struct {
 	FallbackPersistenceProfile *views.ObjectRefType `protobuf:"bytes,20,opt,name=fallback_persistence_profile,json=fallbackPersistenceProfile,proto3,oneof" json:"fallback_persistence_profile,omitempty"`
 }
 
-func (*GetSpecType_Managed) isGetSpecType_DomainChoice()                                            {}
-func (*GetSpecType_NotManaged) isGetSpecType_DomainChoice()                                         {}
 func (*GetSpecType_Https) isGetSpecType_VirtualServerType()                                         {}
 func (*GetSpecType_Http) isGetSpecType_VirtualServerType()                                          {}
 func (*GetSpecType_Tcp) isGetSpecType_VirtualServerType()                                           {}
 func (*GetSpecType_Udp) isGetSpecType_VirtualServerType()                                           {}
+func (*GetSpecType_Http3) isGetSpecType_VirtualServerType()                                         {}
+func (*GetSpecType_StatisticsProfileNone) isGetSpecType_StatisticsProfileChoice()                   {}
+func (*GetSpecType_StatisticsProfile) isGetSpecType_StatisticsProfileChoice()                       {}
 func (*GetSpecType_LastHopPoolNone) isGetSpecType_LastHopPoolChoice()                               {}
 func (*GetSpecType_LastHopPool) isGetSpecType_LastHopPoolChoice()                                   {}
 func (*GetSpecType_RequestLoggingProfileNone) isGetSpecType_RequestLoggingProfileChoice()           {}
@@ -2795,15 +3749,15 @@ func (*GetSpecType_DefaultPersistenceProfile) isGetSpecType_DefaultPersistencePr
 func (*GetSpecType_FallbackPersistenceProfileNone) isGetSpecType_FallbackPersistenceProfileChoice() {}
 func (*GetSpecType_FallbackPersistenceProfile) isGetSpecType_FallbackPersistenceProfileChoice()     {}
 
-func (m *GetSpecType) GetDomainChoice() isGetSpecType_DomainChoice {
-	if m != nil {
-		return m.DomainChoice
-	}
-	return nil
-}
 func (m *GetSpecType) GetVirtualServerType() isGetSpecType_VirtualServerType {
 	if m != nil {
 		return m.VirtualServerType
+	}
+	return nil
+}
+func (m *GetSpecType) GetStatisticsProfileChoice() isGetSpecType_StatisticsProfileChoice {
+	if m != nil {
+		return m.StatisticsProfileChoice
 	}
 	return nil
 }
@@ -2845,21 +3799,14 @@ func (m *GetSpecType) GetState() *schema.TMMStateType {
 	return nil
 }
 
-func (m *GetSpecType) GetManaged() *DomainsManagedByF5XC {
-	if x, ok := m.GetDomainChoice().(*GetSpecType_Managed); ok {
-		return x.Managed
+func (m *GetSpecType) GetDomains() []string {
+	if m != nil {
+		return m.Domains
 	}
 	return nil
 }
 
-func (m *GetSpecType) GetNotManaged() *NotManagedDomainsType {
-	if x, ok := m.GetDomainChoice().(*GetSpecType_NotManaged); ok {
-		return x.NotManaged
-	}
-	return nil
-}
-
-func (m *GetSpecType) GetHttps() *Services {
+func (m *GetSpecType) GetHttps() *HTTPServices {
 	if x, ok := m.GetVirtualServerType().(*GetSpecType_Https); ok {
 		return x.Https
 	}
@@ -2873,16 +3820,37 @@ func (m *GetSpecType) GetHttp() *HTTPServices {
 	return nil
 }
 
-func (m *GetSpecType) GetTcp() *Services {
+func (m *GetSpecType) GetTcp() *TCPServices {
 	if x, ok := m.GetVirtualServerType().(*GetSpecType_Tcp); ok {
 		return x.Tcp
 	}
 	return nil
 }
 
-func (m *GetSpecType) GetUdp() *Services {
+func (m *GetSpecType) GetUdp() *UDPServices {
 	if x, ok := m.GetVirtualServerType().(*GetSpecType_Udp); ok {
 		return x.Udp
+	}
+	return nil
+}
+
+func (m *GetSpecType) GetHttp3() *HTTP3Services {
+	if x, ok := m.GetVirtualServerType().(*GetSpecType_Http3); ok {
+		return x.Http3
+	}
+	return nil
+}
+
+func (m *GetSpecType) GetStatisticsProfileNone() *schema.Empty {
+	if x, ok := m.GetStatisticsProfileChoice().(*GetSpecType_StatisticsProfileNone); ok {
+		return x.StatisticsProfileNone
+	}
+	return nil
+}
+
+func (m *GetSpecType) GetStatisticsProfile() *views.ObjectRefType {
+	if x, ok := m.GetStatisticsProfileChoice().(*GetSpecType_StatisticsProfile); ok {
+		return x.StatisticsProfile
 	}
 	return nil
 }
@@ -2913,6 +3881,20 @@ func (m *GetSpecType) GetAutoLastHop() *schema.TMMVirtualServerAutoLastHopType {
 		return m.AutoLastHop
 	}
 	return nil
+}
+
+func (m *GetSpecType) GetSse() vs_profiles.TrueFalseChoice {
+	if m != nil {
+		return m.Sse
+	}
+	return vs_profiles.FALSE
+}
+
+func (m *GetSpecType) GetJson() vs_profiles.TrueFalseChoice {
+	if m != nil {
+		return m.Json
+	}
+	return vs_profiles.FALSE
 }
 
 func (m *GetSpecType) GetLastHopPoolNone() *schema.Empty {
@@ -3030,12 +4012,13 @@ func (m *GetSpecType) GetTrafficPolicies() []*schema.ObjectRefType {
 // XXX_OneofWrappers is for the internal use of the proto package.
 func (*GetSpecType) XXX_OneofWrappers() []interface{} {
 	return []interface{}{
-		(*GetSpecType_Managed)(nil),
-		(*GetSpecType_NotManaged)(nil),
 		(*GetSpecType_Https)(nil),
 		(*GetSpecType_Http)(nil),
 		(*GetSpecType_Tcp)(nil),
 		(*GetSpecType_Udp)(nil),
+		(*GetSpecType_Http3)(nil),
+		(*GetSpecType_StatisticsProfileNone)(nil),
+		(*GetSpecType_StatisticsProfile)(nil),
 		(*GetSpecType_LastHopPoolNone)(nil),
 		(*GetSpecType_LastHopPool)(nil),
 		(*GetSpecType_RequestLoggingProfileNone)(nil),
@@ -3052,8 +4035,22 @@ func (*GetSpecType) XXX_OneofWrappers() []interface{} {
 func init() {
 	proto.RegisterType((*GlobalSpecType)(nil), "ves.io.schema.views.virtual_server.GlobalSpecType")
 	golang_proto.RegisterType((*GlobalSpecType)(nil), "ves.io.schema.views.virtual_server.GlobalSpecType")
+	proto.RegisterType((*TCPServices)(nil), "ves.io.schema.views.virtual_server.TCPServices")
+	golang_proto.RegisterType((*TCPServices)(nil), "ves.io.schema.views.virtual_server.TCPServices")
+	proto.RegisterType((*UDPServices)(nil), "ves.io.schema.views.virtual_server.UDPServices")
+	golang_proto.RegisterType((*UDPServices)(nil), "ves.io.schema.views.virtual_server.UDPServices")
+	proto.RegisterType((*HTTP3Services)(nil), "ves.io.schema.views.virtual_server.HTTP3Services")
+	golang_proto.RegisterType((*HTTP3Services)(nil), "ves.io.schema.views.virtual_server.HTTP3Services")
 	proto.RegisterType((*HTTPServices)(nil), "ves.io.schema.views.virtual_server.HTTPServices")
 	golang_proto.RegisterType((*HTTPServices)(nil), "ves.io.schema.views.virtual_server.HTTPServices")
+	proto.RegisterType((*UDPDefaultServerSelection)(nil), "ves.io.schema.views.virtual_server.UDPDefaultServerSelection")
+	golang_proto.RegisterType((*UDPDefaultServerSelection)(nil), "ves.io.schema.views.virtual_server.UDPDefaultServerSelection")
+	proto.RegisterType((*TCPDefaultServerSelection)(nil), "ves.io.schema.views.virtual_server.TCPDefaultServerSelection")
+	golang_proto.RegisterType((*TCPDefaultServerSelection)(nil), "ves.io.schema.views.virtual_server.TCPDefaultServerSelection")
+	proto.RegisterType((*HTTPDefaultServerSelection)(nil), "ves.io.schema.views.virtual_server.HTTPDefaultServerSelection")
+	golang_proto.RegisterType((*HTTPDefaultServerSelection)(nil), "ves.io.schema.views.virtual_server.HTTPDefaultServerSelection")
+	proto.RegisterType((*HTTP3DefaultServerSelection)(nil), "ves.io.schema.views.virtual_server.HTTP3DefaultServerSelection")
+	golang_proto.RegisterType((*HTTP3DefaultServerSelection)(nil), "ves.io.schema.views.virtual_server.HTTP3DefaultServerSelection")
 	proto.RegisterType((*DomainsManagedByF5XC)(nil), "ves.io.schema.views.virtual_server.DomainsManagedByF5XC")
 	golang_proto.RegisterType((*DomainsManagedByF5XC)(nil), "ves.io.schema.views.virtual_server.DomainsManagedByF5XC")
 	proto.RegisterType((*ManagedDomain)(nil), "ves.io.schema.views.virtual_server.ManagedDomain")
@@ -3062,12 +4059,6 @@ func init() {
 	golang_proto.RegisterType((*NotManagedDomainsType)(nil), "ves.io.schema.views.virtual_server.NotManagedDomainsType")
 	proto.RegisterType((*TranslationType)(nil), "ves.io.schema.views.virtual_server.TranslationType")
 	golang_proto.RegisterType((*TranslationType)(nil), "ves.io.schema.views.virtual_server.TranslationType")
-	proto.RegisterType((*TCPProfileType)(nil), "ves.io.schema.views.virtual_server.TCPProfileType")
-	golang_proto.RegisterType((*TCPProfileType)(nil), "ves.io.schema.views.virtual_server.TCPProfileType")
-	proto.RegisterType((*HTTPProfileType)(nil), "ves.io.schema.views.virtual_server.HTTPProfileType")
-	golang_proto.RegisterType((*HTTPProfileType)(nil), "ves.io.schema.views.virtual_server.HTTPProfileType")
-	proto.RegisterType((*WebsocketProfileType)(nil), "ves.io.schema.views.virtual_server.WebsocketProfileType")
-	golang_proto.RegisterType((*WebsocketProfileType)(nil), "ves.io.schema.views.virtual_server.WebsocketProfileType")
 	proto.RegisterType((*ClonePoolType)(nil), "ves.io.schema.views.virtual_server.ClonePoolType")
 	golang_proto.RegisterType((*ClonePoolType)(nil), "ves.io.schema.views.virtual_server.ClonePoolType")
 	proto.RegisterType((*Services)(nil), "ves.io.schema.views.virtual_server.Services")
@@ -3092,183 +4083,236 @@ func init() {
 }
 
 var fileDescriptor_c98b987b494647eb = []byte{
-	// 2816 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xec, 0x5b, 0x4d, 0x6c, 0x1b, 0xd7,
-	0xb5, 0xe6, 0x25, 0x87, 0x14, 0x75, 0x29, 0x92, 0xa3, 0xab, 0xbf, 0x91, 0xec, 0xd0, 0x32, 0x13,
-	0xbc, 0xf8, 0x25, 0x23, 0x4a, 0xa4, 0x44, 0xca, 0x76, 0xf2, 0x9c, 0x78, 0x64, 0x27, 0x0c, 0x61,
-	0x3b, 0xc6, 0x48, 0x79, 0xce, 0xf3, 0x73, 0x4b, 0x8c, 0x86, 0x97, 0xf4, 0xc4, 0xe4, 0xcc, 0x74,
-	0x66, 0x28, 0xcb, 0x41, 0x59, 0x18, 0x6e, 0x0b, 0x74, 0x59, 0x18, 0x68, 0xd1, 0x45, 0xf7, 0x2d,
-	0xb4, 0xea, 0x3a, 0xf4, 0x42, 0xe8, 0x2a, 0xc8, 0xa6, 0x5a, 0x15, 0x41, 0x56, 0x8d, 0x0c, 0x14,
-	0xe9, 0x2e, 0xe8, 0xaa, 0xf0, 0x26, 0xc5, 0xdc, 0x19, 0x92, 0x33, 0xfc, 0xd3, 0xc8, 0x3f, 0x49,
-	0x90, 0x72, 0x37, 0xc3, 0x7b, 0xbe, 0xef, 0x9c, 0x7b, 0xee, 0xdf, 0x37, 0xf7, 0x48, 0x30, 0xb5,
-	0x83, 0xf5, 0x94, 0xa4, 0x2c, 0xeb, 0xe2, 0x6d, 0x5c, 0x13, 0x96, 0x77, 0x24, 0x7c, 0x57, 0x5f,
-	0xde, 0x91, 0x34, 0xa3, 0x2e, 0x54, 0x8b, 0x3a, 0xd6, 0x76, 0xb0, 0xb6, 0x6c, 0xdc, 0x53, 0xb1,
-	0x9e, 0x52, 0x35, 0xc5, 0x50, 0x50, 0xd2, 0xb2, 0x4f, 0x59, 0xf6, 0x29, 0x62, 0x9f, 0x72, 0xdb,
-	0x2f, 0x2c, 0x55, 0x24, 0xe3, 0x76, 0x7d, 0x3b, 0x25, 0x2a, 0xb5, 0xe5, 0x8a, 0x52, 0x51, 0x96,
-	0x09, 0x74, 0xbb, 0x5e, 0x26, 0x6f, 0xe4, 0x85, 0x3c, 0x59, 0x94, 0x0b, 0xa7, 0xdc, 0x21, 0x6c,
-	0x4b, 0x15, 0x49, 0x2d, 0x3a, 0x7c, 0x2e, 0x9c, 0x76, 0x1b, 0x88, 0xd5, 0xba, 0x6e, 0xb8, 0xc3,
-	0x5a, 0x38, 0xe1, 0x36, 0x51, 0x54, 0x43, 0x52, 0xe4, 0x56, 0xe3, 0xbc, 0xbb, 0xd1, 0x89, 0x3b,
-	0xd9, 0xd5, 0x7d, 0xa1, 0x2a, 0x95, 0x04, 0x03, 0xdb, 0xad, 0x8b, 0xbd, 0xc9, 0x29, 0xba, 0xa9,
-	0x4f, 0xf5, 0x4b, 0x9f, 0xc3, 0x41, 0xf2, 0xef, 0xf3, 0x30, 0xf6, 0x6e, 0x55, 0xd9, 0x16, 0xaa,
-	0x9b, 0x2a, 0x16, 0xb7, 0xee, 0xa9, 0x18, 0xad, 0xc3, 0xa0, 0x6e, 0x08, 0x06, 0x66, 0xc0, 0x22,
-	0x38, 0x13, 0xc9, 0x9c, 0x48, 0xb9, 0x53, 0xba, 0x75, 0xf5, 0xea, 0xa6, 0xd9, 0x6c, 0xda, 0x72,
-	0xd4, 0xd7, 0x4d, 0x00, 0x78, 0xcb, 0x1e, 0x6d, 0xc1, 0xb1, 0x9a, 0x20, 0x0b, 0x15, 0x5c, 0x62,
-	0x02, 0x04, 0x7a, 0x36, 0x75, 0xf4, 0x68, 0xa4, 0x2e, 0x29, 0x35, 0x41, 0x92, 0xf5, 0xab, 0x16,
-	0x92, 0xbb, 0xf7, 0x4e, 0xf6, 0xc3, 0x8d, 0xbc, 0x8f, 0x6f, 0x51, 0xa1, 0x5b, 0x30, 0x22, 0x2b,
-	0x46, 0xb1, 0xc5, 0x4c, 0x11, 0xe6, 0x73, 0x5e, 0x98, 0xaf, 0x29, 0x86, 0xcd, 0x6a, 0xfb, 0x30,
-	0x43, 0xce, 0xfb, 0x78, 0x28, 0xb7, 0x1b, 0xd0, 0x25, 0x18, 0xbc, 0x6d, 0x18, 0xaa, 0xce, 0x84,
-	0x09, 0x2f, 0xeb, 0x85, 0x77, 0x13, 0x6b, 0x3b, 0x92, 0x88, 0xf5, 0x3c, 0xe0, 0x2d, 0x30, 0x7a,
-	0x07, 0x52, 0xe6, 0x03, 0x33, 0x4e, 0x48, 0x56, 0xbc, 0x90, 0xe4, 0xb7, 0xb6, 0xae, 0x3b, 0x88,
-	0x08, 0x1e, 0xbd, 0x0d, 0x03, 0x86, 0xa8, 0x32, 0xf0, 0xa9, 0x62, 0x31, 0xa1, 0x26, 0x43, 0xbd,
-	0xa4, 0x32, 0x91, 0xa7, 0x63, 0xa8, 0x97, 0x54, 0x74, 0x0d, 0xce, 0x99, 0xc3, 0x29, 0xe9, 0x86,
-	0x24, 0xea, 0x45, 0x55, 0x53, 0xca, 0x52, 0x15, 0x17, 0x65, 0x45, 0xc6, 0xcc, 0x1c, 0x61, 0x9d,
-	0xee, 0x62, 0xbd, 0x5c, 0x53, 0x8d, 0x7b, 0x79, 0x3f, 0x3f, 0xd3, 0x81, 0x5d, 0xb7, 0x50, 0xd7,
-	0x14, 0x19, 0xa3, 0x8f, 0x20, 0xea, 0xe5, 0x63, 0x18, 0x42, 0x95, 0xec, 0x1b, 0xe0, 0xfb, 0xdb,
-	0x1f, 0x61, 0xd1, 0xe0, 0x71, 0x99, 0x4c, 0xb1, 0x99, 0xbd, 0x46, 0x1f, 0x82, 0xbc, 0x9f, 0x9f,
-	0xec, 0xf1, 0x87, 0x76, 0x21, 0x23, 0x2a, 0xb2, 0x8c, 0x45, 0x73, 0x0d, 0x14, 0xab, 0x52, 0x4d,
-	0x32, 0x5a, 0x0b, 0x82, 0x99, 0xf0, 0x3e, 0x25, 0x37, 0xda, 0x1c, 0x57, 0x4c, 0x0a, 0xdd, 0x9a,
-	0xea, 0xfb, 0xe6, 0x54, 0x9f, 0x15, 0xdd, 0x6d, 0xef, 0x5b, 0xec, 0xe8, 0x47, 0x70, 0xc2, 0xd0,
-	0x04, 0x59, 0xaf, 0x0a, 0x96, 0xb7, 0x24, 0xf1, 0xb6, 0xea, 0xc5, 0xdb, 0x56, 0x07, 0xe7, 0x70,
-	0xe4, 0xa2, 0x43, 0x18, 0x22, 0xb1, 0xaa, 0xc8, 0xb8, 0xa8, 0x2a, 0x4a, 0xb5, 0xdd, 0xa5, 0xff,
-	0x26, 0x4e, 0xd2, 0x9e, 0xba, 0x64, 0xa2, 0xaf, 0x2b, 0x4a, 0xd5, 0xe1, 0x82, 0x16, 0x5b, 0x3f,
-	0xb6, 0x7a, 0x71, 0x0b, 0x46, 0x85, 0xba, 0xa1, 0x14, 0xab, 0x82, 0x6e, 0x14, 0x6f, 0x2b, 0x2a,
-	0x93, 0x26, 0x1e, 0x52, 0xbd, 0x5b, 0xc0, 0xff, 0x5a, 0xf4, 0x9b, 0x84, 0xfd, 0x62, 0xdd, 0x50,
-	0xae, 0x08, 0xba, 0x91, 0x57, 0x54, 0x42, 0x1f, 0x36, 0xe9, 0xc9, 0xce, 0x10, 0x11, 0x3a, 0x4d,
-	0x68, 0x03, 0xa2, 0x16, 0xb1, 0xd5, 0x0f, 0x32, 0xa9, 0x72, 0x43, 0x26, 0x55, 0x80, 0x8f, 0x57,
-	0x2d, 0xb0, 0x19, 0x25, 0x99, 0x4e, 0x1f, 0xc2, 0xa8, 0x8b, 0x84, 0x59, 0xf7, 0x3c, 0x93, 0x62,
-	0x7b, 0x8d, 0xb1, 0x1d, 0x9d, 0xa0, 0xee, 0x3f, 0x02, 0xbe, 0x7c, 0x80, 0x8f, 0x38, 0xd8, 0x51,
-	0x1e, 0x06, 0x65, 0xc1, 0xc8, 0xad, 0x31, 0x67, 0x09, 0xe3, 0x99, 0x23, 0x3a, 0x7d, 0xed, 0xe2,
-	0x56, 0x6e, 0xad, 0xab, 0xbb, 0x16, 0x01, 0xba, 0x01, 0x4f, 0x6a, 0xf8, 0x27, 0x75, 0xac, 0x1b,
-	0xc5, 0xaa, 0x52, 0xa9, 0x48, 0x72, 0xc5, 0xbd, 0x8e, 0xde, 0x1c, 0xd2, 0x65, 0x8a, 0x9f, 0xb7,
-	0xb1, 0x57, 0x2c, 0xa8, 0x73, 0x2d, 0xed, 0xc2, 0xb9, 0x01, 0xc4, 0xcc, 0xff, 0x78, 0x4e, 0xc3,
-	0xc2, 0x5e, 0x63, 0x10, 0x4b, 0x9e, 0xe2, 0x67, 0xfa, 0x7a, 0x47, 0xab, 0x30, 0xbc, 0xa3, 0x17,
-	0x75, 0x51, 0xd1, 0x30, 0x73, 0x61, 0x11, 0x9c, 0x89, 0x72, 0x8c, 0xd9, 0xeb, 0x2f, 0x9a, 0x00,
-	0xac, 0xfc, 0xab, 0x09, 0x7c, 0x9f, 0xfc, 0x63, 0x3f, 0x10, 0x7a, 0x8d, 0x62, 0xf6, 0xff, 0xf2,
-	0x0a, 0x3f, 0xb6, 0xa3, 0x6f, 0x9a, 0x86, 0xe8, 0x17, 0x00, 0x2e, 0x4a, 0xb5, 0x1a, 0x2e, 0x49,
-	0x82, 0x81, 0x8b, 0x82, 0xb5, 0x2a, 0x15, 0x99, 0xcc, 0x49, 0x49, 0xc4, 0xc5, 0x92, 0x72, 0x57,
-	0x66, 0xde, 0x22, 0x81, 0x67, 0x7a, 0xb3, 0xfd, 0x5e, 0x0b, 0x79, 0x91, 0x00, 0xdf, 0x97, 0xed,
-	0x9d, 0xea, 0x92, 0x72, 0x57, 0xee, 0xca, 0xfb, 0x49, 0x69, 0x88, 0x2d, 0xe2, 0xe0, 0x64, 0x09,
-	0x97, 0x85, 0x7a, 0xd5, 0x70, 0x4c, 0xbb, 0xcb, 0x43, 0xc6, 0x20, 0xc8, 0xc7, 0x6d, 0x40, 0x7b,
-	0xda, 0xdd, 0x80, 0x13, 0x4e, 0x0e, 0xe6, 0x9d, 0xa7, 0x9e, 0x75, 0x41, 0x3e, 0xe2, 0x20, 0x47,
-	0x15, 0x38, 0xd9, 0x5a, 0xaa, 0x42, 0xa9, 0xa4, 0x61, 0x5d, 0xc7, 0x3a, 0x13, 0x5d, 0x0c, 0x78,
-	0x64, 0x9f, 0xdd, 0x6b, 0xc4, 0xbb, 0xf0, 0xa6, 0x17, 0x9e, 0xb6, 0x7f, 0xbc, 0xd8, 0xe2, 0x44,
-	0x1c, 0x0c, 0x49, 0x5a, 0xbd, 0x8a, 0x75, 0x26, 0x46, 0xd8, 0x4f, 0x76, 0xb1, 0xbb, 0x79, 0x27,
-	0xf6, 0x1a, 0x41, 0x62, 0x7e, 0xff, 0x11, 0x00, 0xbc, 0x8d, 0x44, 0x45, 0xb8, 0xd8, 0xce, 0x02,
-	0xd6, 0x74, 0x49, 0x37, 0xb0, 0x2c, 0x62, 0xf7, 0xe4, 0xa6, 0x87, 0x24, 0x36, 0xc4, 0xbf, 0xd4,
-	0xea, 0x7b, 0x07, 0xee, 0x9c, 0xe0, 0x3f, 0x85, 0x27, 0x86, 0x38, 0x60, 0x26, 0x3d, 0x67, 0x7d,
-	0x76, 0xaf, 0x31, 0xd5, 0x87, 0x21, 0x1f, 0xe2, 0xe7, 0x07, 0x46, 0x80, 0x04, 0x78, 0xba, 0x2c,
-	0x54, 0xab, 0xdb, 0x82, 0x78, 0x67, 0x70, 0xff, 0xa6, 0x86, 0xf4, 0x6f, 0x8c, 0x4f, 0xb4, 0x08,
-	0x06, 0x74, 0xf0, 0x67, 0xf0, 0xe4, 0x30, 0x17, 0xcc, 0xf4, 0x33, 0xf7, 0x70, 0x8c, 0x5f, 0x18,
-	0x1c, 0x03, 0xba, 0x0d, 0x69, 0x43, 0x13, 0xca, 0x65, 0x49, 0x2c, 0xaa, 0x4a, 0x55, 0x12, 0x25,
-	0xac, 0x33, 0x33, 0x1e, 0xe6, 0xc3, 0xa9, 0xbd, 0x46, 0xcc, 0x05, 0xbc, 0x67, 0x4e, 0x0c, 0x73,
-	0xd5, 0x07, 0x1f, 0x02, 0x3f, 0xbd, 0xc8, 0xc7, 0xed, 0xd6, 0xeb, 0x36, 0x2b, 0xba, 0x09, 0xa3,
-	0x44, 0x90, 0x4a, 0xb2, 0x81, 0x35, 0x59, 0xa8, 0x32, 0x5f, 0x8d, 0x79, 0xee, 0x1b, 0xbd, 0xd7,
-	0x70, 0x83, 0xf9, 0x09, 0xf3, 0xf5, 0x3d, 0xfb, 0xed, 0xbc, 0xfa, 0xe7, 0x26, 0xa8, 0xc2, 0x35,
-	0x18, 0xdd, 0x50, 0xe4, 0xb2, 0x54, 0xa9, 0x6b, 0xe4, 0x98, 0x44, 0x2f, 0xa7, 0xd9, 0x0c, 0xbb,
-	0xce, 0x66, 0x32, 0x6c, 0x3a, 0xc3, 0xae, 0xae, 0xb1, 0x6b, 0x69, 0x76, 0xed, 0x1c, 0x9b, 0x5d,
-	0x65, 0xb3, 0x39, 0x36, 0x7b, 0x8e, 0xcd, 0x65, 0xd8, 0xdc, 0x2a, 0x9c, 0x83, 0x93, 0xf6, 0x3e,
-	0xbe, 0xd8, 0x59, 0x1c, 0xfe, 0xf4, 0x2a, 0x3c, 0x01, 0xc7, 0x79, 0xac, 0x2b, 0x75, 0x4d, 0xc4,
-	0x3a, 0x8a, 0xa5, 0xd7, 0xd8, 0xdc, 0x59, 0x36, 0x9d, 0x65, 0xd3, 0x67, 0xd9, 0x4c, 0x9a, 0x7b,
-	0x05, 0x46, 0x4b, 0x44, 0x44, 0x16, 0xc5, 0xdb, 0x8a, 0x24, 0x62, 0x34, 0xb5, 0xdf, 0x04, 0x81,
-	0x83, 0x26, 0xf0, 0x1f, 0x36, 0x41, 0x60, 0x95, 0x5d, 0xfb, 0xaa, 0x09, 0x00, 0xb7, 0x02, 0xa7,
-	0xdc, 0xe7, 0x2e, 0xf9, 0x4e, 0x40, 0xf3, 0xfb, 0x4d, 0x30, 0x7e, 0xd0, 0x04, 0x63, 0x87, 0x4d,
-	0x30, 0x7e, 0x96, 0x3d, 0xc7, 0xa6, 0x57, 0xd8, 0x74, 0x9a, 0x20, 0x32, 0x70, 0xbe, 0x8f, 0xda,
-	0xb2, 0x7d, 0xcc, 0xec, 0x37, 0xc1, 0xdc, 0xa7, 0x4d, 0x00, 0x0e, 0x9a, 0x60, 0xf6, 0xb0, 0x09,
-	0x82, 0x99, 0x55, 0x36, 0xb3, 0xc6, 0x2d, 0xc1, 0x69, 0xf7, 0x39, 0xea, 0x30, 0xcf, 0xd9, 0xe6,
-	0x59, 0xd3, 0x3c, 0xbb, 0xc6, 0x66, 0xb3, 0xdc, 0x3a, 0x4c, 0x0c, 0x3a, 0x8d, 0x1c, 0xc0, 0x37,
-	0x6d, 0xe0, 0x1b, 0x26, 0x30, 0xb7, 0xc2, 0xe6, 0xd2, 0xdc, 0x19, 0x38, 0xe5, 0xda, 0x37, 0x6d,
-	0xeb, 0xc9, 0xfd, 0x26, 0xb8, 0x7c, 0xd0, 0x04, 0x97, 0x88, 0xe5, 0x39, 0x76, 0x7d, 0x85, 0x5b,
-	0x87, 0xc9, 0x61, 0xfb, 0x82, 0x03, 0x48, 0x1f, 0x34, 0x41, 0xdc, 0x04, 0xa6, 0x73, 0x6c, 0x7a,
-	0x9d, 0x3b, 0x0b, 0x5f, 0x1e, 0xba, 0xe2, 0x1c, 0xc8, 0xa9, 0x83, 0x26, 0x40, 0x04, 0x79, 0x8e,
-	0xcd, 0xac, 0x14, 0xa8, 0xb0, 0x9f, 0x0e, 0x14, 0xa8, 0xf0, 0x18, 0x1d, 0x2e, 0x50, 0xe1, 0x59,
-	0x7a, 0xae, 0x40, 0x85, 0xb3, 0x74, 0xae, 0x40, 0x85, 0xdf, 0xa0, 0xdf, 0x2c, 0x50, 0xe1, 0x4b,
-	0xf4, 0xe5, 0x02, 0x15, 0x8e, 0xd3, 0x74, 0x81, 0x0a, 0x23, 0x7a, 0x2a, 0xf9, 0x28, 0x04, 0x27,
-	0x9c, 0x9a, 0x1b, 0x6d, 0xc3, 0xb0, 0x7d, 0x0e, 0xe9, 0x0c, 0x20, 0x2b, 0x60, 0xf9, 0x18, 0x72,
-	0xd9, 0x92, 0xa6, 0xe4, 0xd4, 0x7b, 0x08, 0x02, 0xf4, 0xfd, 0xf6, 0x52, 0x60, 0x00, 0xdf, 0xe6,
-	0x45, 0x1f, 0xc0, 0x09, 0x43, 0x54, 0x5b, 0xbd, 0xd1, 0x19, 0x7f, 0xdf, 0xb3, 0xae, 0xbf, 0x2a,
-	0xdc, 0xb8, 0x6e, 0xaf, 0x59, 0xd3, 0x15, 0x1f, 0x31, 0x44, 0xd5, 0x7e, 0xd7, 0x4d, 0x0d, 0x64,
-	0x7e, 0x2e, 0x74, 0x78, 0x03, 0xde, 0xd5, 0xa6, 0x99, 0x03, 0x27, 0xf1, 0x84, 0xc9, 0xd4, 0x66,
-	0xae, 0x41, 0x74, 0x17, 0x6f, 0xeb, 0x8a, 0x78, 0x07, 0x1b, 0x1d, 0x7a, 0xca, 0xbb, 0x74, 0xbe,
-	0xd1, 0x42, 0x3b, 0x7c, 0xd8, 0x72, 0x73, 0xf2, 0x6e, 0x57, 0x9b, 0xf9, 0xdd, 0x34, 0xa5, 0x1b,
-	0x1a, 0x16, 0x6a, 0xee, 0x2d, 0x36, 0x32, 0x64, 0x8b, 0xf5, 0x99, 0xba, 0xdf, 0x84, 0x38, 0x77,
-	0xd5, 0x1f, 0xc3, 0x98, 0x9b, 0xc7, 0x56, 0xfb, 0x5e, 0xf6, 0x9a, 0xc9, 0xbd, 0x46, 0x17, 0x38,
-	0xef, 0xe3, 0xa3, 0x2e, 0x1f, 0xe8, 0x6d, 0x48, 0x97, 0xa5, 0x5d, 0x77, 0x90, 0xd3, 0x43, 0x82,
-	0x04, 0x7c, 0xac, 0x2c, 0xed, 0x3a, 0x23, 0xfc, 0x00, 0x46, 0x1c, 0x0c, 0xcc, 0xcc, 0x71, 0xe4,
-	0x83, 0x13, 0x99, 0x07, 0x3c, 0xec, 0x50, 0x73, 0x29, 0x38, 0xd3, 0x95, 0x40, 0xc7, 0x92, 0x8e,
-	0xd8, 0x4b, 0x1a, 0x92, 0x55, 0x93, 0x66, 0xd3, 0x19, 0xee, 0x75, 0x88, 0x9c, 0x1d, 0x71, 0x18,
-	0x4f, 0xdb, 0xc6, 0x53, 0x64, 0x9f, 0x59, 0x61, 0x33, 0xe9, 0x02, 0x15, 0x86, 0x74, 0xa4, 0x40,
-	0x85, 0xa7, 0xe8, 0xe9, 0xe4, 0xcf, 0x01, 0x9c, 0xee, 0xf7, 0xa5, 0x8e, 0xee, 0xc0, 0x31, 0x6b,
-	0x63, 0x6c, 0xad, 0x22, 0x4f, 0x9f, 0x23, 0xae, 0xef, 0x72, 0x2e, 0xd1, 0x39, 0x47, 0x5a, 0x4f,
-	0x61, 0xe7, 0x82, 0x6a, 0x79, 0x48, 0xfe, 0x12, 0xc0, 0xa8, 0x0b, 0x8a, 0x66, 0x61, 0x48, 0xd5,
-	0x70, 0x59, 0xda, 0x25, 0xb7, 0x15, 0xe3, 0xbc, 0xfd, 0x86, 0x6e, 0xc1, 0x70, 0x49, 0xd6, 0x8b,
-	0x1f, 0x9b, 0x23, 0xe5, 0xf7, 0x9c, 0xec, 0x97, 0xf6, 0x1a, 0x6d, 0xd8, 0x27, 0x8f, 0x40, 0x2c,
-	0x0c, 0xce, 0x80, 0x15, 0x70, 0x3e, 0x24, 0x92, 0x63, 0x86, 0x1f, 0x2b, 0xc9, 0xfa, 0x4d, 0x45,
-	0xc6, 0xc9, 0x06, 0x9c, 0xe9, 0x7b, 0xb9, 0x80, 0x4a, 0xee, 0x6c, 0x8c, 0x73, 0x05, 0xb3, 0x1b,
-	0xf0, 0x21, 0x18, 0x4b, 0x06, 0xb5, 0x00, 0x73, 0xdf, 0x6f, 0xbe, 0x8e, 0x3f, 0x04, 0xa1, 0x24,
-	0xa5, 0xf9, 0x69, 0xe0, 0x6c, 0xfc, 0x95, 0x1f, 0x78, 0x4d, 0xc3, 0x27, 0x7e, 0x18, 0xef, 0xfa,
-	0x6a, 0x44, 0x55, 0x38, 0x65, 0xeb, 0xbf, 0xa2, 0xe3, 0xcb, 0xd1, 0xbe, 0xc3, 0xc9, 0x1e, 0xf5,
-	0x01, 0x67, 0x21, 0x7b, 0xbe, 0x44, 0x89, 0xb8, 0x46, 0x42, 0x4f, 0x2b, 0x12, 0x21, 0xad, 0x2a,
-	0x9a, 0xe1, 0x72, 0xe5, 0x1f, 0x24, 0xe4, 0x5d, 0xae, 0xae, 0x2b, 0x9a, 0xd1, 0xdf, 0x4f, 0x5c,
-	0x75, 0x37, 0xa1, 0x2d, 0x18, 0xb1, 0x8e, 0xe3, 0xa2, 0xd9, 0x62, 0x6f, 0x72, 0x4b, 0x47, 0xf0,
-	0x6f, 0x12, 0x04, 0xf1, 0xd2, 0xa1, 0x86, 0x7a, 0xfb, 0xd7, 0xe4, 0x5f, 0xfd, 0x30, 0xe6, 0xde,
-	0x5c, 0xd1, 0xff, 0xc1, 0x98, 0x58, 0x95, 0xb0, 0xdc, 0xde, 0xf2, 0xec, 0xb4, 0x79, 0x5d, 0x9f,
-	0x8e, 0x3d, 0x9e, 0x8f, 0x5a, 0x4c, 0xad, 0x9d, 0xe3, 0x43, 0xf8, 0x92, 0xad, 0x04, 0x5a, 0x6b,
-	0x4e, 0x17, 0x6a, 0xb8, 0x28, 0xe8, 0x45, 0xcb, 0xce, 0xee, 0xd5, 0xa0, 0xbd, 0x6e, 0xde, 0x02,
-	0xdb, 0x6c, 0x9b, 0x42, 0x0d, 0x5f, 0xd4, 0x37, 0x08, 0x10, 0xfd, 0x3f, 0x8c, 0xb9, 0x99, 0xed,
-	0x6d, 0xfa, 0x29, 0x82, 0x26, 0x1b, 0x9e, 0xd3, 0x11, 0xc7, 0xc2, 0x79, 0xb3, 0xbd, 0x2b, 0x74,
-	0x7b, 0xbb, 0x88, 0x77, 0x49, 0x1f, 0xeb, 0x2c, 0x4e, 0x7e, 0xe1, 0x87, 0xf1, 0xae, 0xd3, 0x05,
-	0xdd, 0x7c, 0x86, 0xcc, 0xc6, 0xf7, 0x1a, 0x13, 0xce, 0x63, 0xee, 0xdb, 0x4b, 0xed, 0xad, 0x67,
-	0x48, 0x6d, 0x77, 0xd4, 0xbd, 0xb9, 0x5d, 0x82, 0x0b, 0xc4, 0xe0, 0x58, 0xc9, 0xfd, 0x67, 0x00,
-	0x4e, 0xf7, 0x3b, 0x5b, 0xcd, 0x23, 0xd4, 0x9d, 0x61, 0xeb, 0x74, 0xf2, 0x0f, 0x3f, 0x42, 0x5d,
-	0x99, 0x24, 0x07, 0x94, 0xd0, 0x33, 0x52, 0x01, 0xcf, 0x7d, 0x9e, 0xde, 0x6b, 0x4c, 0xf6, 0xc8,
-	0x06, 0xb3, 0xe3, 0xc7, 0x1c, 0xb0, 0xe0, 0xd0, 0x23, 0x75, 0xc8, 0x80, 0x09, 0x3d, 0x03, 0x16,
-	0x7a, 0xc6, 0xe0, 0x41, 0xf7, 0xa8, 0x65, 0xe0, 0xa9, 0x8e, 0x55, 0x57, 0xc6, 0x1d, 0x43, 0xe7,
-	0x3f, 0x68, 0x02, 0x60, 0x0e, 0x5d, 0x86, 0x5d, 0x75, 0x63, 0x06, 0x0f, 0x77, 0xf0, 0xa0, 0x09,
-	0x28, 0x13, 0x93, 0x65, 0x4d, 0xfd, 0x0a, 0x68, 0x7f, 0x81, 0x0a, 0x53, 0x74, 0x30, 0xf9, 0x87,
-	0x00, 0x8c, 0xba, 0x2e, 0xee, 0x4c, 0x21, 0x62, 0x49, 0x71, 0x2b, 0x00, 0x0f, 0x43, 0x1d, 0x33,
-	0xed, 0xad, 0x34, 0xb5, 0x84, 0x88, 0x83, 0xe1, 0x18, 0x83, 0xdc, 0x7d, 0x8f, 0xe1, 0xe3, 0x61,
-	0x87, 0xba, 0x1d, 0x98, 0xdd, 0x4b, 0x12, 0xd8, 0xf0, 0xe1, 0x24, 0x81, 0xd9, 0x57, 0x69, 0xce,
-	0xc0, 0x2c, 0x86, 0x63, 0x0c, 0x60, 0x77, 0x60, 0xc0, 0x0a, 0xcc, 0xa2, 0xe6, 0x5e, 0x87, 0x8c,
-	0xe3, 0xe6, 0xd4, 0xce, 0xdb, 0xa0, 0x01, 0x73, 0x1b, 0xdb, 0x7d, 0xf1, 0x32, 0x52, 0x32, 0x0c,
-	0x7f, 0x9b, 0x1f, 0x16, 0xc9, 0x7d, 0x00, 0x23, 0x0e, 0x00, 0x3a, 0x0d, 0x29, 0x72, 0x46, 0x02,
-	0x72, 0x35, 0x17, 0x69, 0xdd, 0xc6, 0x7d, 0xf3, 0x4d, 0x20, 0xef, 0xe3, 0x49, 0x13, 0x7a, 0xcb,
-	0xcc, 0xaf, 0x66, 0x14, 0x35, 0x41, 0xae, 0xd8, 0x9f, 0x22, 0xe3, 0xdc, 0x49, 0xd3, 0x92, 0xd2,
-	0xfc, 0xcc, 0xa2, 0xfd, 0x60, 0x69, 0x92, 0xa0, 0x16, 0xf8, 0x13, 0x00, 0xd6, 0x10, 0x6b, 0x06,
-	0x4f, 0x10, 0xe7, 0x5f, 0xfd, 0xac, 0x09, 0x5e, 0x86, 0xa7, 0x21, 0x65, 0x1e, 0xa3, 0xaf, 0xcd,
-	0xc3, 0x39, 0x18, 0xb2, 0xbc, 0xc2, 0xa8, 0x8b, 0x9a, 0x4b, 0xd8, 0xaf, 0x8e, 0xc4, 0x99, 0xca,
-	0x32, 0x60, 0x26, 0x2e, 0xcd, 0x66, 0x0a, 0x54, 0x38, 0x40, 0x53, 0xc9, 0xdf, 0xfb, 0xe1, 0x74,
-	0xbf, 0x8b, 0x76, 0xf4, 0x16, 0xa4, 0xbb, 0x2f, 0xf1, 0x49, 0xb9, 0x20, 0xca, 0x4d, 0xf7, 0xbd,
-	0x6e, 0x8c, 0x77, 0x5d, 0xc9, 0xa3, 0x3c, 0x9c, 0x71, 0x10, 0x68, 0x82, 0x81, 0x6d, 0x96, 0xf9,
-	0x21, 0x2c, 0x53, 0x1d, 0x08, 0x2f, 0x18, 0xd8, 0x62, 0xba, 0x07, 0x17, 0xfa, 0x32, 0x15, 0x6b,
-	0x4a, 0x09, 0x33, 0x0b, 0x64, 0x8a, 0xe6, 0x8e, 0x10, 0x24, 0x1b, 0xbd, 0xbc, 0x57, 0x95, 0x52,
-	0x4b, 0x99, 0xcc, 0x89, 0xfd, 0x9b, 0x93, 0xbf, 0x99, 0x85, 0xb1, 0x0d, 0x0d, 0x0b, 0x06, 0x6e,
-	0x17, 0xe6, 0xd2, 0xde, 0x0b, 0x73, 0xa3, 0x92, 0xdc, 0x0f, 0xa9, 0x24, 0xa7, 0xbd, 0xb8, 0xb2,
-	0xd6, 0xc0, 0x82, 0xd6, 0x8d, 0xe7, 0x56, 0xd0, 0xea, 0x2a, 0x65, 0x15, 0x9f, 0x6b, 0x29, 0xab,
-	0x4f, 0x11, 0x8b, 0x7f, 0x2e, 0x45, 0xac, 0x67, 0x2d, 0x5d, 0xf9, 0x5f, 0x68, 0xe9, 0xca, 0xef,
-	0x2e, 0x5d, 0x5d, 0x78, 0xca, 0xd2, 0xd5, 0xf3, 0x28, 0x58, 0x05, 0xbe, 0xd3, 0x82, 0x55, 0x60,
-	0x50, 0xc1, 0x6a, 0xbe, 0xbb, 0x60, 0xd5, 0x29, 0x4b, 0x7d, 0xfc, 0x22, 0xab, 0x52, 0xcf, 0xbb,
-	0x16, 0x45, 0xf5, 0xd6, 0xa2, 0x36, 0x9f, 0xba, 0x16, 0x05, 0x3b, 0xd3, 0x28, 0x4f, 0xb9, 0xeb,
-	0x50, 0xe2, 0xb3, 0xd5, 0xa1, 0x50, 0x6f, 0x1d, 0xaa, 0x4f, 0x0d, 0xea, 0xc2, 0xb1, 0x6a, 0x50,
-	0xe1, 0x56, 0x0d, 0xea, 0xb9, 0xd5, 0x9f, 0x82, 0xdf, 0x79, 0xfd, 0x29, 0xf8, 0x42, 0xeb, 0x4f,
-	0xa1, 0xef, 0x41, 0xfd, 0x29, 0xf4, 0xfd, 0xa8, 0x3f, 0x9d, 0x9f, 0xfc, 0xec, 0x42, 0xd7, 0x5f,
-	0x36, 0x71, 0xc9, 0xee, 0x22, 0xce, 0xe4, 0x83, 0x27, 0xc0, 0xfd, 0x13, 0x97, 0xea, 0x5f, 0xc2,
-	0x99, 0x7b, 0xf0, 0x04, 0xf4, 0x6b, 0xe0, 0x56, 0x06, 0x14, 0x63, 0x98, 0x07, 0x4f, 0x40, 0xdf,
-	0x16, 0xee, 0xd2, 0x91, 0xf5, 0x98, 0xe4, 0x83, 0x27, 0xe0, 0x08, 0x1b, 0x33, 0xce, 0x7e, 0xc5,
-	0x19, 0x12, 0x67, 0x9f, 0x06, 0xee, 0x8a, 0xa7, 0x12, 0xcd, 0x7f, 0x3d, 0x78, 0x02, 0x3c, 0xd8,
-	0x71, 0xd7, 0xbc, 0xd5, 0x6d, 0x5e, 0x7d, 0xf0, 0x04, 0x78, 0x31, 0xec, 0xaa, 0xe6, 0x0c, 0xab,
-	0xe3, 0xfc, 0x76, 0x16, 0xc6, 0x79, 0xac, 0x56, 0x05, 0x71, 0x24, 0x8c, 0x47, 0xc2, 0x78, 0x24,
-	0x8c, 0x47, 0xc2, 0x78, 0x24, 0x8c, 0x47, 0xc2, 0x78, 0x24, 0x8c, 0x47, 0xc2, 0x78, 0x24, 0x8c,
-	0x47, 0xc2, 0xf8, 0x3f, 0x58, 0x18, 0xff, 0x6e, 0x16, 0x46, 0xde, 0xc5, 0xc6, 0x48, 0x14, 0x8f,
-	0x44, 0xf1, 0x48, 0x14, 0x8f, 0x44, 0xf1, 0x48, 0x14, 0x8f, 0x44, 0xf1, 0x48, 0x14, 0x8f, 0x44,
-	0xf1, 0x48, 0x14, 0x8f, 0x44, 0xf1, 0x0f, 0x5b, 0x14, 0xb3, 0xf4, 0xd2, 0x70, 0x69, 0xcc, 0x3d,
-	0x04, 0x07, 0x5f, 0x26, 0x7c, 0x9f, 0x7f, 0x99, 0xf0, 0x7d, 0xfd, 0x65, 0x02, 0xdc, 0x3f, 0x4c,
-	0x80, 0x3f, 0x1e, 0x26, 0xc0, 0xa7, 0x87, 0x09, 0x70, 0x70, 0x98, 0x00, 0x9f, 0x1f, 0x26, 0xc0,
-	0xdf, 0x0e, 0x13, 0xe0, 0xab, 0xc3, 0x84, 0xef, 0xeb, 0xc3, 0x04, 0xf8, 0xf5, 0xe3, 0x84, 0x6f,
-	0xff, 0x71, 0x02, 0x1c, 0x3c, 0x4e, 0xf8, 0x3e, 0x7f, 0x9c, 0xf0, 0xdd, 0xdc, 0xaa, 0x28, 0xea,
-	0x9d, 0x4a, 0x6a, 0x47, 0xa9, 0x1a, 0x58, 0xd3, 0x84, 0x54, 0x5d, 0x5f, 0x26, 0x0f, 0x65, 0x45,
-	0xab, 0x2d, 0xa9, 0x9a, 0xb2, 0x23, 0x95, 0xb0, 0xb6, 0x54, 0xce, 0xee, 0x8a, 0xcb, 0xea, 0x76,
-	0x45, 0x59, 0xc6, 0xbb, 0x86, 0xfd, 0xff, 0xd6, 0x43, 0xfe, 0x6b, 0x7d, 0x3b, 0x44, 0xfe, 0x01,
-	0x7b, 0xf5, 0xdf, 0x01, 0x00, 0x00, 0xff, 0xff, 0xc9, 0xa4, 0x32, 0xba, 0xe2, 0x3e, 0x00, 0x00,
+	// 3658 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xec, 0x5c, 0x4d, 0x6c, 0xdb, 0xd6,
+	0x1d, 0xd7, 0x93, 0x28, 0x4b, 0x7e, 0xb2, 0x64, 0x9a, 0xf2, 0x07, 0xe5, 0x24, 0xaa, 0xa3, 0x76,
+	0x8d, 0xdb, 0x32, 0xb2, 0x25, 0x5b, 0xb2, 0x93, 0xa6, 0xc9, 0x42, 0x3b, 0xa9, 0x22, 0xe4, 0xab,
+	0xb4, 0xb3, 0x66, 0x45, 0x37, 0x8d, 0xa6, 0x9e, 0x1d, 0x26, 0xb2, 0xa8, 0x92, 0x94, 0x93, 0x14,
+	0xf3, 0x10, 0xa4, 0x1b, 0xb0, 0xc3, 0x0e, 0x45, 0xce, 0xbb, 0x0e, 0x2d, 0x7c, 0x1a, 0xb0, 0x5b,
+	0x95, 0x83, 0xb1, 0x53, 0x51, 0x0c, 0x98, 0x8f, 0x45, 0x4f, 0xab, 0x73, 0xe9, 0xb6, 0x4b, 0x8f,
+	0x43, 0x80, 0xa1, 0x03, 0x1f, 0x29, 0x89, 0xa4, 0x28, 0x9a, 0x76, 0x9c, 0xb4, 0x43, 0x75, 0x13,
+	0xfd, 0xde, 0xff, 0xf7, 0x7f, 0x1f, 0xff, 0x4f, 0xf2, 0x97, 0xc0, 0xf4, 0x06, 0x52, 0xd2, 0xa2,
+	0x34, 0xa5, 0x08, 0xb7, 0xd0, 0x3a, 0x3f, 0xb5, 0x21, 0xa2, 0xbb, 0xca, 0xd4, 0x86, 0x28, 0xab,
+	0x75, 0xbe, 0x52, 0x52, 0x90, 0xbc, 0x81, 0xe4, 0x29, 0xf5, 0x7e, 0x0d, 0x29, 0xe9, 0x9a, 0x2c,
+	0xa9, 0x12, 0x95, 0xd2, 0xe7, 0xa7, 0xf5, 0xf9, 0x69, 0x3c, 0x3f, 0x6d, 0x9d, 0x3f, 0x7e, 0x72,
+	0x4d, 0x54, 0x6f, 0xd5, 0x57, 0xd2, 0x82, 0xb4, 0x3e, 0xb5, 0x26, 0xad, 0x49, 0x53, 0x58, 0x74,
+	0xa5, 0xbe, 0x8a, 0x9f, 0xf0, 0x03, 0xfe, 0xa5, 0x43, 0x8e, 0xbf, 0x64, 0x5d, 0xc2, 0x8a, 0xb8,
+	0x26, 0xd6, 0x4a, 0x26, 0x9d, 0xe3, 0xc7, 0xad, 0x13, 0x84, 0x4a, 0x5d, 0x51, 0xad, 0xcb, 0x1a,
+	0x3f, 0x62, 0x9d, 0x22, 0xd5, 0x54, 0x51, 0xaa, 0x36, 0x07, 0x13, 0xd6, 0x41, 0xb3, 0xdc, 0x51,
+	0xdb, 0xf6, 0xf9, 0x8a, 0x58, 0xe6, 0x55, 0x64, 0x8c, 0x4e, 0x74, 0x1e, 0x4e, 0xc9, 0x0a, 0xfd,
+	0x92, 0xd3, 0xf1, 0x99, 0x15, 0xfc, 0xc4, 0x36, 0x41, 0x29, 0xd5, 0x64, 0x69, 0x55, 0xac, 0x20,
+	0xcb, 0xb4, 0xd4, 0xdf, 0x8e, 0xc2, 0xd8, 0xdb, 0x15, 0x69, 0x85, 0xaf, 0x2c, 0xd5, 0x90, 0xb0,
+	0x7c, 0xbf, 0x86, 0xa8, 0x39, 0x18, 0x54, 0x54, 0x5e, 0x45, 0x34, 0x98, 0x00, 0x93, 0x91, 0xec,
+	0x91, 0xb4, 0xf5, 0xe4, 0x97, 0xaf, 0x5c, 0x59, 0xd2, 0x86, 0xb5, 0xb9, 0x2c, 0xf1, 0x6d, 0x03,
+	0x00, 0x4e, 0x9f, 0x4f, 0x2d, 0xc3, 0xd0, 0x3a, 0x5f, 0xe5, 0xd7, 0x50, 0x99, 0x0e, 0x60, 0xd1,
+	0xf9, 0xf4, 0xde, 0x97, 0x96, 0x5e, 0x94, 0xd6, 0x79, 0xb1, 0xaa, 0x5c, 0xd1, 0x25, 0xd9, 0xfb,
+	0x17, 0x73, 0x37, 0x17, 0x0a, 0x3e, 0xae, 0x09, 0x45, 0xbd, 0x0f, 0x23, 0x55, 0x49, 0x2d, 0x35,
+	0x91, 0x09, 0x8c, 0x7c, 0xca, 0x0b, 0xf2, 0x55, 0x49, 0x35, 0x50, 0x0d, 0x1d, 0xda, 0x92, 0x0b,
+	0x3e, 0x0e, 0x56, 0x5b, 0x03, 0x54, 0x19, 0x86, 0xca, 0xfa, 0x20, 0x1d, 0x9c, 0x08, 0x4c, 0xf6,
+	0xb3, 0xc5, 0xcf, 0xfe, 0xb9, 0x1d, 0x80, 0x8f, 0x40, 0x28, 0x15, 0x94, 0x03, 0xf4, 0x03, 0xbf,
+	0xf6, 0xd8, 0xff, 0x08, 0xf4, 0xa5, 0x08, 0xd9, 0x4f, 0x02, 0xf3, 0xe0, 0xef, 0xfd, 0xf8, 0x31,
+	0xf8, 0x08, 0xf8, 0xc9, 0x89, 0xe6, 0xaf, 0x70, 0xeb, 0x6f, 0x34, 0xe0, 0x9a, 0xd0, 0x54, 0x01,
+	0x06, 0x6f, 0xa9, 0x6a, 0x4d, 0xa1, 0xc3, 0x78, 0xf5, 0xd3, 0x5e, 0x56, 0x5f, 0x58, 0x5e, 0xbe,
+	0xbe, 0x84, 0xe4, 0x0d, 0x51, 0x40, 0x4a, 0x01, 0x70, 0x3a, 0x00, 0x75, 0x11, 0x12, 0xda, 0x0f,
+	0xba, 0xff, 0xc0, 0x40, 0x58, 0x9e, 0x5a, 0x80, 0x01, 0x55, 0xa8, 0xd1, 0x10, 0xc3, 0x4c, 0x79,
+	0x81, 0x59, 0x5e, 0x30, 0xa3, 0x68, 0xd2, 0x1a, 0x48, 0xbd, 0x5c, 0xa3, 0x23, 0xde, 0x41, 0x6e,
+	0x2c, 0x5a, 0x40, 0xea, 0xe5, 0x1a, 0x75, 0x49, 0x3f, 0x9b, 0x19, 0x3a, 0x81, 0x61, 0x32, 0x5e,
+	0xb7, 0x34, 0x63, 0x3f, 0x9c, 0x19, 0xea, 0x2a, 0x1c, 0xd3, 0x2c, 0x51, 0x54, 0x54, 0x51, 0x68,
+	0xd9, 0x7b, 0xa9, 0x2a, 0x55, 0x11, 0x3d, 0x86, 0xc1, 0x87, 0x6d, 0xe0, 0x17, 0xd6, 0x6b, 0xea,
+	0xfd, 0x82, 0x9f, 0x1b, 0x69, 0x8b, 0x5d, 0xd7, 0xa5, 0xae, 0x4a, 0x55, 0x44, 0xdd, 0x86, 0x54,
+	0x27, 0x1e, 0x4d, 0x63, 0xa8, 0x94, 0xe3, 0x3a, 0xaf, 0xad, 0xdc, 0x46, 0x82, 0xca, 0xa1, 0x55,
+	0xec, 0x1d, 0x23, 0x5b, 0x9b, 0x0e, 0x00, 0x05, 0x3f, 0x37, 0xd4, 0xa1, 0x8f, 0xba, 0x07, 0x69,
+	0x41, 0xaa, 0x56, 0x91, 0xa0, 0x79, 0x79, 0xa9, 0x22, 0xae, 0x8b, 0x6a, 0xd3, 0xe5, 0xe9, 0x01,
+	0xef, 0xde, 0xb4, 0xd0, 0xc2, 0xb8, 0xac, 0x41, 0x28, 0xba, 0x97, 0x6e, 0x6b, 0x5e, 0x3a, 0x2a,
+	0x58, 0xc7, 0xae, 0xe9, 0xe8, 0xd4, 0x2f, 0xe0, 0x80, 0x2a, 0xf3, 0x55, 0xa5, 0xc2, 0xeb, 0xda,
+	0x52, 0x58, 0xdb, 0x8c, 0x27, 0x9b, 0x68, 0xcb, 0x99, 0x14, 0x59, 0xe0, 0x28, 0x04, 0x29, 0xa1,
+	0x22, 0x55, 0x51, 0xa9, 0x26, 0x49, 0x95, 0xd6, 0x96, 0x5e, 0xf3, 0x7e, 0xd9, 0x0b, 0x9a, 0xf4,
+	0x75, 0x49, 0xaa, 0x98, 0x54, 0x90, 0x42, 0xf3, 0x8f, 0xcd, 0x5d, 0xbc, 0x0f, 0xa3, 0x7c, 0x5d,
+	0x95, 0x4a, 0x15, 0x5e, 0x51, 0x4b, 0xb7, 0xa4, 0x1a, 0x9d, 0xc1, 0x1a, 0xd2, 0x9d, 0xd1, 0xeb,
+	0x67, 0x3a, 0xfc, 0x12, 0x46, 0x3f, 0x5f, 0x57, 0xa5, 0xcb, 0xbc, 0xa2, 0x16, 0xa4, 0x1a, 0x86,
+	0x0f, 0x6b, 0xf0, 0x38, 0xa8, 0x45, 0xf8, 0xf6, 0x10, 0xf5, 0x36, 0x0c, 0x28, 0x0a, 0xa2, 0xb3,
+	0x13, 0x60, 0x32, 0x96, 0x7d, 0xdd, 0xbe, 0xea, 0x76, 0x6c, 0x4d, 0x2f, 0xcb, 0x75, 0x74, 0x91,
+	0xaf, 0x28, 0x68, 0xe1, 0x96, 0x24, 0x0a, 0x88, 0xed, 0xff, 0xaa, 0x01, 0x82, 0x17, 0xcf, 0x5f,
+	0x5e, 0xba, 0xc0, 0x69, 0x08, 0xd4, 0x25, 0x48, 0xdc, 0x56, 0xa4, 0x2a, 0x3d, 0xf3, 0x2c, 0x48,
+	0x18, 0x82, 0x5a, 0x80, 0x54, 0x73, 0xb3, 0xfa, 0xd9, 0x62, 0x43, 0xcf, 0xbb, 0x18, 0x7a, 0x80,
+	0x1b, 0xac, 0xe8, 0x1b, 0xd2, 0x4e, 0x0e, 0x9b, 0xf8, 0x4d, 0x18, 0xb5, 0x80, 0xd0, 0x73, 0x9e,
+	0xad, 0x3b, 0xb6, 0xb5, 0x19, 0xd2, 0x16, 0x2c, 0x49, 0x95, 0x07, 0x8f, 0x81, 0xaf, 0x10, 0xe0,
+	0x22, 0x26, 0x74, 0x2d, 0xe6, 0x55, 0x79, 0x35, 0x3f, 0x4b, 0xcf, 0x63, 0xc4, 0xc9, 0x3d, 0x2e,
+	0xe2, 0xea, 0xf9, 0xe5, 0xfc, 0xac, 0xed, 0x0a, 0x74, 0x00, 0xea, 0x5d, 0x78, 0x54, 0x46, 0x1f,
+	0xd4, 0x91, 0xa2, 0x96, 0x2a, 0xd2, 0xda, 0x9a, 0x58, 0x5d, 0xb3, 0xfa, 0xf6, 0x19, 0x97, 0x2d,
+	0x13, 0x5c, 0xc2, 0x90, 0xbd, 0xac, 0x8b, 0x9a, 0xfd, 0xfb, 0x1e, 0x1c, 0xeb, 0x02, 0x4c, 0xbf,
+	0xe5, 0xf9, 0x18, 0xc6, 0xb7, 0x36, 0xbb, 0xa1, 0x14, 0x08, 0x6e, 0xc4, 0x51, 0x3b, 0x35, 0x03,
+	0xc3, 0x1b, 0x4a, 0x49, 0x11, 0x24, 0x19, 0xd1, 0x67, 0x27, 0xc0, 0x64, 0x94, 0xa5, 0xb5, 0x5d,
+	0x7f, 0xd5, 0x00, 0x60, 0xfa, 0x3f, 0x0d, 0xe0, 0xd3, 0x92, 0x48, 0xdf, 0xeb, 0x04, 0xbd, 0xfd,
+	0xf7, 0x57, 0xb8, 0xd0, 0x86, 0xb2, 0xa4, 0x4d, 0xa4, 0x7e, 0x0b, 0xe0, 0x84, 0xb8, 0xbe, 0x8e,
+	0xca, 0x22, 0xaf, 0xa2, 0x12, 0xaf, 0x47, 0x0a, 0xa9, 0x8a, 0xfd, 0x44, 0x14, 0x50, 0xa9, 0x2c,
+	0xdd, 0xad, 0xd2, 0xe7, 0xf0, 0xc2, 0xb3, 0x9d, 0xa7, 0x7d, 0xa9, 0x29, 0x79, 0x1e, 0x0b, 0x5e,
+	0xab, 0x1a, 0xf1, 0x73, 0x51, 0xba, 0x5b, 0xb5, 0x9d, 0xfb, 0x51, 0xd1, 0x65, 0x2e, 0xc5, 0xc2,
+	0xa1, 0x32, 0x5a, 0xe5, 0xeb, 0x15, 0xd5, 0x64, 0x76, 0x17, 0x5c, 0xee, 0x20, 0xc8, 0x0d, 0x1a,
+	0x02, 0x2d, 0xb3, 0x7b, 0x17, 0x0e, 0x98, 0x31, 0xe8, 0x8b, 0x07, 0xb6, 0xba, 0x20, 0x17, 0x31,
+	0x81, 0x53, 0x6b, 0x70, 0xa8, 0x19, 0x3e, 0xf8, 0x72, 0x59, 0x46, 0x8a, 0x82, 0x14, 0x3a, 0x3a,
+	0x11, 0xf0, 0x88, 0x3e, 0xba, 0xb5, 0x39, 0x68, 0x93, 0xd7, 0xb4, 0x70, 0xa4, 0xf1, 0xc7, 0xf3,
+	0x4d, 0x4c, 0x8a, 0x85, 0x7d, 0xa2, 0x5c, 0xaf, 0x20, 0x85, 0x8e, 0x61, 0xf4, 0xa3, 0x36, 0x74,
+	0x2b, 0xee, 0xc0, 0xd6, 0x66, 0x10, 0x4f, 0x7f, 0xf0, 0x18, 0x00, 0xce, 0x90, 0xa4, 0x4a, 0x70,
+	0xa2, 0x75, 0x0a, 0x48, 0x56, 0x44, 0x45, 0x45, 0x55, 0x01, 0x59, 0x8d, 0x9b, 0x74, 0x39, 0xd8,
+	0x3e, 0xee, 0x58, 0x73, 0xef, 0x6d, 0x71, 0xb3, 0x81, 0xff, 0x1a, 0x1e, 0x71, 0x51, 0x40, 0x0f,
+	0x79, 0x3e, 0xf5, 0xd1, 0xad, 0xcd, 0xb8, 0x03, 0x42, 0xa1, 0x8f, 0x4b, 0x74, 0x5d, 0x01, 0xc5,
+	0xc3, 0xe3, 0xab, 0x7c, 0xa5, 0xb2, 0xc2, 0x0b, 0x77, 0xba, 0xef, 0x2f, 0xee, 0xb2, 0xbf, 0x10,
+	0x97, 0x6c, 0x02, 0x74, 0xd9, 0xe0, 0x6f, 0xe0, 0x51, 0x37, 0x15, 0xf4, 0xf0, 0x33, 0xef, 0x30,
+	0xc4, 0x8d, 0x77, 0x5f, 0x03, 0x55, 0x87, 0xa4, 0x2a, 0xf3, 0xab, 0xab, 0xa2, 0x50, 0xaa, 0x49,
+	0x15, 0x51, 0x10, 0x91, 0x42, 0x8f, 0x78, 0xb0, 0x07, 0x66, 0x6b, 0x33, 0x66, 0x11, 0xbc, 0xff,
+	0xaf, 0x4d, 0x58, 0x46, 0xeb, 0x52, 0x86, 0x51, 0x91, 0xa2, 0x6a, 0x56, 0xd2, 0xae, 0x2d, 0xb9,
+	0x41, 0x63, 0xea, 0x75, 0x43, 0x05, 0xf5, 0x1e, 0x8c, 0xe2, 0x9e, 0x40, 0xac, 0xaa, 0x48, 0xae,
+	0xf2, 0x15, 0xfa, 0x9b, 0x90, 0xe7, 0x8d, 0x92, 0x5b, 0x9b, 0x56, 0x61, 0x6e, 0x40, 0x7b, 0xbc,
+	0x64, 0x3c, 0x9d, 0xde, 0xf8, 0x6b, 0x03, 0xc8, 0xf0, 0x34, 0x8c, 0x2e, 0x48, 0xd5, 0x55, 0x71,
+	0xad, 0x2e, 0xe3, 0x3c, 0x4e, 0xbd, 0x96, 0x61, 0x72, 0xcc, 0x1c, 0x93, 0xcd, 0x32, 0x99, 0x2c,
+	0x33, 0x33, 0xcb, 0xcc, 0x66, 0x98, 0xd9, 0x53, 0x4c, 0x6e, 0x9a, 0xc9, 0x65, 0x98, 0xdc, 0x0c,
+	0x93, 0xcb, 0x33, 0xb9, 0x53, 0x4c, 0x3e, 0xcb, 0xe4, 0x67, 0xe0, 0x18, 0x1c, 0x32, 0x42, 0xfb,
+	0x44, 0xdb, 0x5f, 0xfc, 0x99, 0x19, 0x78, 0x04, 0xf6, 0x73, 0x48, 0x91, 0xea, 0xb2, 0x80, 0x14,
+	0x2a, 0x96, 0x99, 0x65, 0xf2, 0xf3, 0x4c, 0x26, 0xc7, 0x64, 0xe6, 0x99, 0x6c, 0x86, 0x9d, 0x84,
+	0x51, 0xbd, 0x5c, 0x2e, 0x09, 0x38, 0xe1, 0x51, 0x63, 0xdb, 0x0d, 0x10, 0xd8, 0x69, 0x00, 0xff,
+	0x6e, 0x03, 0x04, 0x66, 0x98, 0xd9, 0x6f, 0x8c, 0xf0, 0xc4, 0x4e, 0xc3, 0xb8, 0xb5, 0x44, 0xc0,
+	0x4d, 0x1b, 0x95, 0xd8, 0x6e, 0x80, 0xfe, 0x9d, 0x06, 0x08, 0xed, 0x36, 0x40, 0xff, 0x3c, 0x73,
+	0x8a, 0xc9, 0x4c, 0x33, 0x99, 0x8c, 0x26, 0xc5, 0x66, 0x61, 0xc2, 0xa1, 0x30, 0x34, 0xf4, 0x8c,
+	0x6c, 0x37, 0xc0, 0xd8, 0xe7, 0x0d, 0x00, 0x76, 0x1a, 0x60, 0x74, 0xb7, 0x01, 0x82, 0xd9, 0x19,
+	0x26, 0x3b, 0xcb, 0x9e, 0x84, 0xc3, 0xd6, 0xf4, 0x6a, 0x9a, 0x9e, 0x37, 0xa6, 0xe7, 0xb4, 0xe9,
+	0xb9, 0x59, 0x26, 0x97, 0x63, 0xe7, 0x60, 0xb2, 0x5b, 0x92, 0x32, 0x09, 0x9e, 0x31, 0x04, 0xdf,
+	0xd4, 0x04, 0xf3, 0xd3, 0x4c, 0x5e, 0xdb, 0x77, 0xdc, 0x12, 0x4e, 0x8d, 0xd9, 0x43, 0xdb, 0x0d,
+	0x70, 0x61, 0xa7, 0x01, 0x16, 0xf1, 0xcc, 0x53, 0xcc, 0xdc, 0x34, 0x3b, 0x07, 0x53, 0x6e, 0xe1,
+	0xc2, 0x24, 0x48, 0xee, 0x34, 0xc0, 0xa0, 0x26, 0x98, 0xc9, 0x33, 0x99, 0x39, 0x76, 0x1e, 0xbe,
+	0xec, 0xea, 0x88, 0x26, 0xc9, 0xf8, 0x4e, 0x03, 0x50, 0x58, 0xf2, 0x14, 0x93, 0x9d, 0x2e, 0x12,
+	0x61, 0x3f, 0x19, 0x28, 0x12, 0xe1, 0x10, 0x19, 0x2e, 0x12, 0xe1, 0x51, 0x72, 0xac, 0x48, 0x84,
+	0x73, 0x64, 0xbe, 0x48, 0x84, 0xdf, 0x24, 0xcf, 0x14, 0x89, 0xf0, 0x22, 0x79, 0xa1, 0x48, 0x84,
+	0x07, 0x49, 0xb2, 0x48, 0x84, 0x29, 0x32, 0x9e, 0xfa, 0x98, 0x80, 0x11, 0x53, 0xa3, 0x40, 0xad,
+	0xc0, 0xb0, 0x91, 0x9d, 0x14, 0x1a, 0x60, 0xbf, 0xf0, 0xd4, 0x26, 0x18, 0xf2, 0x7a, 0x11, 0x8d,
+	0x73, 0xe1, 0x23, 0x10, 0x20, 0x1f, 0x98, 0x7b, 0xab, 0x16, 0x2e, 0x75, 0x1b, 0x8e, 0xe1, 0x5e,
+	0x56, 0xd0, 0x0e, 0xaf, 0x22, 0xa2, 0xaa, 0xda, 0x72, 0x7f, 0xff, 0x7e, 0xd2, 0x4a, 0x44, 0x15,
+	0x6a, 0x4d, 0x49, 0x6e, 0xa4, 0x09, 0xb9, 0x80, 0x11, 0x9b, 0xfe, 0xbe, 0x09, 0xe3, 0x8a, 0x62,
+	0x57, 0xa3, 0xd0, 0x01, 0xcf, 0x09, 0xe6, 0x35, 0xad, 0x25, 0xe8, 0x40, 0xe8, 0xec, 0x23, 0x69,
+	0xc0, 0x0d, 0x29, 0x8a, 0x55, 0xbb, 0x42, 0x3d, 0x04, 0x30, 0x69, 0x98, 0x3c, 0x5f, 0xd3, 0xdf,
+	0x55, 0x94, 0x14, 0x7e, 0x1d, 0x95, 0x78, 0xc5, 0x40, 0xa4, 0x83, 0x78, 0xcb, 0x6f, 0x79, 0xec,
+	0xe8, 0x16, 0x75, 0x7b, 0xd2, 0x4b, 0xb0, 0x25, 0x54, 0xd1, 0xdb, 0x83, 0x82, 0x8f, 0x4b, 0xe8,
+	0x73, 0xce, 0xd7, 0x70, 0x59, 0xbc, 0xc4, 0xaf, 0xa3, 0xf3, 0x8a, 0xbe, 0x18, 0xf6, 0x04, 0x1c,
+	0xb5, 0xaf, 0xc1, 0x30, 0xa0, 0xe8, 0x76, 0x03, 0x04, 0x77, 0x1a, 0x80, 0xd8, 0x6d, 0x00, 0x90,
+	0x2b, 0x12, 0x61, 0x82, 0x0c, 0x62, 0x93, 0x30, 0xb5, 0x7d, 0xff, 0x5f, 0x26, 0x51, 0x2f, 0xff,
+	0xb8, 0x4c, 0xe2, 0xc6, 0xe2, 0x8b, 0x30, 0x89, 0xc7, 0x21, 0x18, 0xb5, 0xb4, 0xf0, 0x3d, 0xa3,
+	0x38, 0x5c, 0xa3, 0x10, 0x60, 0xfc, 0x96, 0xaa, 0xd6, 0xec, 0xdb, 0xf4, 0x5e, 0x24, 0x0c, 0x6e,
+	0x6d, 0x0e, 0x60, 0x84, 0xe6, 0x3e, 0x87, 0xb4, 0x27, 0xeb, 0x1e, 0x57, 0xe1, 0x30, 0x7e, 0xed,
+	0x62, 0xd7, 0x12, 0xde, 0x57, 0x29, 0xa2, 0x43, 0x34, 0xd5, 0x50, 0xf8, 0xd1, 0xaa, 0xe7, 0x1a,
+	0xa4, 0x3f, 0xa8, 0x8b, 0x82, 0x4d, 0x8d, 0x5e, 0x3d, 0x0e, 0xb8, 0x54, 0x8f, 0x3e, 0x6e, 0x44,
+	0x93, 0xb3, 0x80, 0xe1, 0xa2, 0x11, 0xc1, 0xb8, 0x03, 0x20, 0x1d, 0xdd, 0xd7, 0xe9, 0x60, 0x84,
+	0x66, 0x91, 0xe8, 0xe3, 0x86, 0x3a, 0x54, 0x69, 0xdd, 0xa5, 0xdd, 0x29, 0x8c, 0xf4, 0x6d, 0x78,
+	0xe4, 0x39, 0xcf, 0xaf, 0xba, 0xba, 0xf8, 0x24, 0xe0, 0x86, 0x2d, 0x3e, 0x69, 0x4c, 0xd3, 0x4a,
+	0x0a, 0xf3, 0xf2, 0xcc, 0xf9, 0x7d, 0x60, 0xa7, 0x01, 0x22, 0x38, 0xbf, 0x67, 0x99, 0xcc, 0xcc,
+	0x7e, 0x1c, 0x37, 0x42, 0x0e, 0x18, 0xee, 0xfb, 0x97, 0x18, 0x1c, 0x30, 0xbf, 0x54, 0xfc, 0xbe,
+	0xbd, 0x37, 0x78, 0xd8, 0x59, 0xbe, 0x8b, 0xfb, 0x90, 0x87, 0xea, 0x3e, 0x3f, 0x87, 0xc7, 0xee,
+	0xa2, 0x15, 0x45, 0x12, 0xee, 0x20, 0xd5, 0xd1, 0xb6, 0x43, 0xae, 0xb6, 0x3d, 0xde, 0x12, 0xee,
+	0x34, 0x70, 0x15, 0xd2, 0xdd, 0xa0, 0xf7, 0xe1, 0x9d, 0xc3, 0x5b, 0x9b, 0x43, 0x6d, 0x98, 0xb6,
+	0xa9, 0x8f, 0x3a, 0x6b, 0xa6, 0xfe, 0x04, 0x9c, 0x83, 0x5e, 0xbf, 0xe7, 0xa0, 0xf7, 0x8e, 0x63,
+	0xd0, 0xdb, 0x7a, 0x0c, 0x5e, 0x39, 0x9d, 0x82, 0x13, 0x90, 0x56, 0x6a, 0x48, 0x48, 0x3b, 0x95,
+	0xfe, 0xf8, 0x9d, 0xb6, 0xd7, 0xe0, 0xf8, 0x0e, 0x4c, 0x68, 0xd3, 0xb3, 0x8e, 0x87, 0x1e, 0x73,
+	0x39, 0x74, 0xc0, 0x8d, 0x62, 0xc1, 0xce, 0x03, 0xbf, 0xa5, 0x87, 0x42, 0x3b, 0x24, 0x3d, 0xb8,
+	0xef, 0x50, 0x98, 0x6d, 0x1d, 0x34, 0xd0, 0x83, 0xa1, 0x55, 0x1b, 0xf5, 0xd1, 0xde, 0xe9, 0x7e,
+	0x1c, 0x2b, 0x3d, 0xeb, 0x35, 0xb8, 0x74, 0x89, 0x2d, 0x7e, 0x97, 0x7c, 0x4f, 0x5d, 0x84, 0x71,
+	0x45, 0x95, 0x11, 0xbf, 0x6e, 0x3d, 0xbc, 0x88, 0xeb, 0xbb, 0xc7, 0x21, 0x5d, 0xc4, 0x7c, 0x6e,
+	0xbf, 0x84, 0x31, 0x2b, 0x8e, 0x11, 0xd0, 0xbd, 0x9c, 0xd8, 0xd0, 0xd6, 0xa6, 0x4d, 0xb8, 0x10,
+	0xe0, 0xa2, 0x16, 0x1d, 0xd4, 0x4f, 0x21, 0xb9, 0x2a, 0xde, 0xb3, 0x2e, 0x72, 0xd8, 0xf5, 0x6d,
+	0x61, 0x6c, 0x55, 0xbc, 0x67, 0x5e, 0xe1, 0x0d, 0x18, 0x31, 0x21, 0xd0, 0x23, 0xfb, 0x0a, 0x35,
+	0x26, 0xc9, 0x02, 0xc1, 0xc1, 0x36, 0x34, 0xc5, 0xc2, 0x21, 0x49, 0x50, 0x6a, 0xde, 0xbf, 0x51,
+	0x04, 0xb9, 0x41, 0x4d, 0xc0, 0xbc, 0xb4, 0x9b, 0x70, 0xc0, 0x8c, 0xb1, 0x8f, 0xef, 0x12, 0x5a,
+	0x78, 0x32, 0x8b, 0x16, 0x82, 0x5c, 0xc4, 0x84, 0xce, 0xe6, 0xe1, 0x4b, 0x5d, 0x43, 0x93, 0x91,
+	0x1e, 0xe2, 0xdb, 0x0d, 0x10, 0x32, 0x9a, 0xd9, 0x3e, 0xad, 0x41, 0x9f, 0x63, 0xe6, 0xd9, 0x69,
+	0x78, 0xc4, 0xd1, 0xb3, 0x4c, 0xf9, 0x27, 0xb6, 0xd3, 0x00, 0x51, 0x9c, 0x7f, 0x66, 0x99, 0x4c,
+	0x8e, 0x9d, 0xec, 0x9a, 0x7f, 0x62, 0xdb, 0x0d, 0x30, 0xbe, 0xd3, 0x00, 0x89, 0xdd, 0x06, 0xf0,
+	0x67, 0xf3, 0x6c, 0x1a, 0x8e, 0xd8, 0x4c, 0xce, 0xd4, 0x56, 0x47, 0x8c, 0x95, 0x40, 0x8c, 0x9c,
+	0x61, 0x32, 0x59, 0xf6, 0x0d, 0x48, 0x99, 0xaf, 0xde, 0x34, 0x79, 0xd8, 0x98, 0x1c, 0xc7, 0xbd,
+	0xfe, 0x34, 0x93, 0xcd, 0xb0, 0x0c, 0x8c, 0x5b, 0xae, 0xc3, 0xf5, 0xcd, 0x40, 0xab, 0x29, 0x0e,
+	0x90, 0x84, 0x9e, 0x11, 0x8b, 0x44, 0xb8, 0x8f, 0x0c, 0x15, 0x89, 0x70, 0x94, 0x8c, 0x15, 0x89,
+	0x70, 0x82, 0x1c, 0x2f, 0x12, 0x61, 0x48, 0x46, 0x8a, 0x44, 0x38, 0x4e, 0x0e, 0xeb, 0x8d, 0x73,
+	0xea, 0x0f, 0x01, 0x98, 0xe8, 0x5a, 0x5e, 0x53, 0x37, 0xe1, 0x31, 0xad, 0xac, 0x34, 0x0e, 0xa3,
+	0xb9, 0x8e, 0xba, 0x82, 0x9a, 0x5e, 0xed, 0x77, 0xcd, 0x06, 0x89, 0x7a, 0xb9, 0xa6, 0x43, 0x1a,
+	0x77, 0x78, 0x43, 0x41, 0x86, 0xaf, 0xae, 0x40, 0xaa, 0x13, 0xd9, 0xf8, 0x40, 0x7b, 0x80, 0x8a,
+	0xb7, 0xe0, 0xe3, 0x48, 0xbb, 0xb2, 0x66, 0xb9, 0x6b, 0xd5, 0xa1, 0xd0, 0xc4, 0xbe, 0xcb, 0x5d,
+	0x2b, 0x42, 0xd7, 0x88, 0x6e, 0xd1, 0xae, 0xb0, 0x0c, 0x4c, 0x38, 0x1c, 0x9e, 0x71, 0x89, 0x83,
+	0xdb, 0x0d, 0xe0, 0xdf, 0x69, 0x00, 0xa0, 0x59, 0x69, 0x96, 0x99, 0x29, 0x12, 0x61, 0x40, 0xfa,
+	0xf1, 0x75, 0x74, 0x6d, 0x80, 0xb5, 0xeb, 0xd0, 0xea, 0x84, 0x03, 0x5f, 0x87, 0x2a, 0xb8, 0x5c,
+	0x47, 0x27, 0xf2, 0x3e, 0xaf, 0xc3, 0x54, 0xc2, 0x68, 0xd7, 0x61, 0x57, 0xf6, 0x03, 0xb8, 0x0e,
+	0x87, 0xc3, 0x73, 0xbf, 0x8e, 0x7f, 0xf7, 0xc3, 0xf1, 0xee, 0xd9, 0x88, 0x12, 0xe1, 0xab, 0xad,
+	0xea, 0xcf, 0x86, 0x6b, 0xcb, 0x7e, 0xee, 0x17, 0x73, 0xbc, 0x89, 0x62, 0x59, 0xb2, 0x25, 0xb7,
+	0x55, 0x4c, 0x85, 0xe6, 0x21, 0xde, 0xd2, 0x88, 0xa3, 0x66, 0x8a, 0x87, 0x29, 0x5c, 0x28, 0xba,
+	0x6f, 0x2a, 0xe8, 0x5a, 0x95, 0x1c, 0xd3, 0x10, 0xba, 0x6f, 0x08, 0x19, 0xd5, 0xac, 0x6d, 0x33,
+	0x7d, 0x07, 0xae, 0x66, 0x0b, 0x40, 0xaf, 0x67, 0xad, 0x3b, 0xb9, 0x03, 0x4f, 0xb4, 0x93, 0x86,
+	0xfb, 0x76, 0xc2, 0xae, 0x1f, 0xe3, 0x53, 0x2d, 0x98, 0xee, 0x7b, 0xb2, 0x54, 0xb8, 0xb6, 0x8d,
+	0xf5, 0x3f, 0x63, 0x85, 0xeb, 0x37, 0x55, 0xb8, 0xd6, 0x2d, 0xb6, 0x2a, 0x47, 0xdb, 0xf6, 0xf6,
+	0xac, 0x1c, 0x03, 0x46, 0xe5, 0x68, 0x81, 0xb3, 0x56, 0x8e, 0xb6, 0x4d, 0x3c, 0x4b, 0xe5, 0x18,
+	0x30, 0x2a, 0x47, 0xeb, 0xe2, 0x9b, 0xe5, 0xb9, 0x3d, 0x2a, 0x90, 0xfb, 0x2e, 0xcf, 0xad, 0x08,
+	0xcf, 0x5c, 0x9e, 0xdb, 0xa2, 0x47, 0x06, 0x26, 0xbb, 0xb9, 0x7a, 0x97, 0x10, 0xc2, 0x9e, 0x84,
+	0xe3, 0x4e, 0x4e, 0x64, 0x9a, 0xde, 0xec, 0x64, 0x03, 0x39, 0x26, 0x6f, 0x2d, 0x6f, 0x9c, 0x65,
+	0xb4, 0xf2, 0x26, 0x6c, 0x64, 0xfe, 0x90, 0x26, 0x37, 0xcf, 0x9c, 0x6a, 0x97, 0x37, 0xce, 0x32,
+	0x9d, 0xe5, 0x8d, 0x1e, 0xdb, 0x5a, 0x35, 0x82, 0xfe, 0x12, 0x3d, 0x4a, 0xc6, 0x52, 0xff, 0x0d,
+	0xc0, 0x23, 0x2e, 0x8d, 0x3d, 0xf5, 0x2b, 0xc7, 0x24, 0x01, 0x0e, 0xdc, 0xe7, 0x76, 0xa6, 0x08,
+	0x6f, 0x71, 0x27, 0xe0, 0x1a, 0x4c, 0x0f, 0x16, 0x77, 0x88, 0x83, 0xc7, 0x1d, 0x9f, 0x53, 0xdc,
+	0xe9, 0x92, 0xec, 0x82, 0x2f, 0x28, 0xd9, 0xed, 0x6d, 0x7b, 0xe6, 0x6f, 0x58, 0x7a, 0xed, 0x98,
+	0xfa, 0x08, 0xc0, 0x61, 0x27, 0xde, 0x1b, 0x75, 0xa7, 0x4d, 0x47, 0xd3, 0x5f, 0xa4, 0x78, 0x62,
+	0xc8, 0x58, 0x58, 0x6e, 0x6c, 0xd2, 0x23, 0x2b, 0x2d, 0xf5, 0x3b, 0x00, 0xa3, 0x16, 0x51, 0x6a,
+	0x14, 0xf6, 0xd5, 0x64, 0xb4, 0x2a, 0xde, 0xc3, 0xb6, 0xd6, 0xcf, 0x19, 0x4f, 0xd4, 0xfb, 0x30,
+	0x5c, 0xae, 0x2a, 0xa5, 0x0f, 0xb5, 0x38, 0xe7, 0xfd, 0x5d, 0xe9, 0xb1, 0xad, 0xcd, 0x96, 0xd8,
+	0x67, 0x8f, 0x41, 0x2c, 0x0c, 0x26, 0xc1, 0x34, 0x38, 0xdd, 0x27, 0xe0, 0x0f, 0x8b, 0x5c, 0xa8,
+	0x5c, 0x55, 0xde, 0x93, 0xaa, 0x28, 0xb5, 0x09, 0x47, 0x1c, 0xa9, 0x7a, 0x66, 0x72, 0x1e, 0x78,
+	0x6e, 0xe4, 0xbc, 0xd4, 0x67, 0x7e, 0x38, 0x68, 0x23, 0x32, 0x51, 0x15, 0x18, 0x37, 0x3e, 0xff,
+	0x97, 0x4c, 0x64, 0x26, 0xc3, 0x03, 0x73, 0x7b, 0x71, 0x8a, 0x74, 0xc9, 0x0e, 0x72, 0x14, 0xe6,
+	0x56, 0x50, 0x7c, 0xc7, 0x28, 0x25, 0x40, 0xb2, 0x26, 0xc9, 0xaa, 0x45, 0x95, 0xbf, 0x1b, 0x8f,
+	0xc3, 0xa2, 0xea, 0xba, 0x24, 0xab, 0xce, 0x7a, 0x06, 0x6b, 0xd6, 0x21, 0x6a, 0x19, 0x46, 0xf4,
+	0x4f, 0xaf, 0x25, 0x6d, 0xc4, 0x70, 0xed, 0x93, 0x7b, 0xe0, 0x2f, 0x61, 0x09, 0xac, 0xa5, 0x0d,
+	0x0d, 0x95, 0xd6, 0x5f, 0x53, 0x9f, 0x04, 0x60, 0xd4, 0x42, 0xd0, 0xd2, 0x7a, 0x6e, 0xfd, 0x3b,
+	0xa6, 0xde, 0x03, 0x56, 0xdb, 0x36, 0xd3, 0x2d, 0x8e, 0xc4, 0xb4, 0xf9, 0x7a, 0xd0, 0x68, 0xf6,
+	0xdc, 0x26, 0x84, 0xfd, 0x55, 0x5d, 0x16, 0x6e, 0x88, 0x8f, 0x83, 0x6d, 0xe8, 0xd6, 0xc2, 0x0c,
+	0x4f, 0xc5, 0x0b, 0x73, 0x2f, 0xac, 0xf0, 0xc2, 0x0c, 0x7a, 0x92, 0x79, 0x61, 0x3a, 0xc2, 0x3e,
+	0x2a, 0x28, 0xfb, 0xc2, 0x80, 0xbe, 0x30, 0x1d, 0x9a, 0x7d, 0x03, 0xd2, 0x26, 0x86, 0x9c, 0x71,
+	0x6e, 0xdd, 0x72, 0x9d, 0x75, 0xb2, 0xb1, 0x97, 0x2e, 0x99, 0xce, 0x9c, 0x7f, 0x52, 0x55, 0x18,
+	0x7e, 0x91, 0x2f, 0x6c, 0x53, 0xdb, 0x00, 0x46, 0x4c, 0x02, 0xd4, 0x71, 0x48, 0x60, 0xc3, 0x03,
+	0x98, 0xee, 0x14, 0x69, 0x32, 0x9c, 0xbe, 0xfb, 0x2e, 0x50, 0xf0, 0x71, 0x78, 0x88, 0x3a, 0xa7,
+	0x9d, 0xaf, 0xac, 0x96, 0x64, 0xbe, 0xba, 0x86, 0x14, 0x6c, 0x35, 0xfd, 0xec, 0x51, 0x6d, 0x26,
+	0x21, 0xfb, 0xe9, 0x09, 0xe3, 0x87, 0xee, 0xe8, 0x41, 0x39, 0xf0, 0x67, 0x00, 0xf4, 0x2b, 0x96,
+	0x55, 0x0e, 0x4b, 0x9c, 0x3e, 0xf1, 0x45, 0x03, 0xbc, 0x0c, 0x8f, 0x43, 0x42, 0xb3, 0xcd, 0xd7,
+	0x13, 0x70, 0x0c, 0xf6, 0xe9, 0x5a, 0x61, 0xd4, 0x02, 0xcd, 0x26, 0x8d, 0x47, 0xd3, 0xc1, 0x69,
+	0xa9, 0x3e, 0xa0, 0x1d, 0x5c, 0x86, 0xc9, 0xea, 0xcd, 0x7d, 0xea, 0x8f, 0x7e, 0x38, 0xec, 0x44,
+	0xa8, 0xa4, 0xce, 0x41, 0xd2, 0x4e, 0xd6, 0xc4, 0xaf, 0x5f, 0xa2, 0xec, 0xb0, 0x23, 0x85, 0x6b,
+	0xd0, 0x46, 0xbd, 0xa4, 0x0a, 0x70, 0xc4, 0x04, 0x20, 0xf3, 0x2a, 0x32, 0x50, 0x12, 0x2e, 0x28,
+	0xf1, 0xb6, 0x08, 0xc7, 0xab, 0x48, 0x47, 0xba, 0x0f, 0xc7, 0x1d, 0x91, 0x4a, 0xeb, 0x52, 0x19,
+	0x19, 0xef, 0x02, 0xf3, 0x7b, 0x78, 0xf9, 0x42, 0x27, 0xee, 0x15, 0xa9, 0xdc, 0x74, 0xf7, 0x31,
+	0xc1, 0x79, 0x38, 0xf5, 0x09, 0x0d, 0x63, 0x0b, 0x32, 0xe2, 0x55, 0xd4, 0xe2, 0x8e, 0x67, 0xbc,
+	0x73, 0xc7, 0x9b, 0xac, 0x71, 0xda, 0xc6, 0xc0, 0x3e, 0x44, 0xd6, 0xb4, 0xef, 0xb0, 0x58, 0xd3,
+	0xbe, 0x43, 0x61, 0x4d, 0xfb, 0x0e, 0x83, 0x35, 0xed, 0x3b, 0x2c, 0xd6, 0xb4, 0xef, 0x19, 0x59,
+	0xd3, 0xe0, 0x05, 0xb3, 0xa6, 0x81, 0x13, 0x6b, 0x5a, 0x7e, 0x7e, 0xac, 0xe9, 0xae, 0x7c, 0xe9,
+	0x77, 0x0f, 0x8d, 0x2f, 0x6d, 0x63, 0x4a, 0x97, 0x0e, 0x95, 0x29, 0xed, 0xc0, 0x91, 0xe6, 0x0e,
+	0x85, 0x23, 0x6d, 0x65, 0x46, 0x9f, 0x39, 0x20, 0x33, 0x5a, 0xa7, 0x43, 0x9f, 0x3d, 0x28, 0x1d,
+	0xfa, 0xc0, 0x1c, 0x68, 0xff, 0x73, 0xe5, 0x40, 0xfb, 0xad, 0x1c, 0xe8, 0xb3, 0x07, 0xe4, 0x40,
+	0x1f, 0x06, 0xf3, 0x39, 0xf0, 0xbd, 0x32, 0x9f, 0x03, 0xdd, 0x98, 0xcf, 0x09, 0x3b, 0xf3, 0xb9,
+	0xcd, 0x6f, 0xfe, 0xf0, 0x79, 0xd2, 0x9b, 0x0f, 0x9b, 0xd4, 0x4c, 0x74, 0x92, 0x9a, 0x97, 0x0e,
+	0x4c, 0x6a, 0x86, 0x6d, 0x33, 0x2a, 0x10, 0x56, 0x42, 0xb3, 0xf0, 0x6c, 0x84, 0x66, 0xaa, 0x93,
+	0xd0, 0xec, 0x40, 0x66, 0x3e, 0xbb, 0x2f, 0x32, 0x73, 0xb8, 0x49, 0x66, 0x3e, 0x34, 0x22, 0x73,
+	0xf0, 0x7b, 0x27, 0x32, 0x07, 0x9f, 0x2b, 0x91, 0xb9, 0xef, 0x07, 0x40, 0x64, 0xee, 0x73, 0x25,
+	0x32, 0xaf, 0x1d, 0x90, 0xc8, 0x9c, 0x74, 0x27, 0x32, 0x77, 0x50, 0x97, 0x4f, 0x0f, 0x7d, 0x71,
+	0xd6, 0xf6, 0x0f, 0x0e, 0xd9, 0xb4, 0x33, 0x9f, 0x77, 0xec, 0xe1, 0x53, 0xe0, 0x34, 0xc0, 0x9e,
+	0x76, 0x63, 0xf3, 0x1e, 0x7b, 0xf8, 0x14, 0x74, 0x1f, 0x66, 0xa7, 0xbb, 0xb0, 0x7a, 0xe9, 0x87,
+	0x4f, 0x81, 0xe3, 0x08, 0xbb, 0xb8, 0x27, 0xb1, 0x37, 0xf5, 0xf0, 0x29, 0xd8, 0x63, 0x8e, 0xb6,
+	0x47, 0x27, 0x96, 0x2f, 0xde, 0xa3, 0xc3, 0x00, 0x7b, 0xd9, 0x13, 0xd7, 0xf7, 0xd5, 0x87, 0x4f,
+	0x81, 0x87, 0x79, 0xec, 0x55, 0x6f, 0x04, 0xe0, 0x13, 0x0f, 0x9f, 0x02, 0x2f, 0x13, 0xf7, 0x4d,
+	0x0b, 0xfe, 0x94, 0x86, 0x83, 0x1c, 0xaa, 0x55, 0x78, 0xa1, 0xd7, 0x2a, 0xf4, 0x5a, 0x85, 0x5e,
+	0xab, 0xd0, 0x6b, 0x15, 0x7a, 0xad, 0x42, 0xaf, 0x55, 0xe8, 0xb5, 0x0a, 0xbd, 0x56, 0xa1, 0xd7,
+	0x2a, 0xf4, 0x5a, 0x85, 0x5e, 0xab, 0xd0, 0x6b, 0x15, 0x5a, 0xad, 0xc2, 0x16, 0x0d, 0x23, 0x6f,
+	0x23, 0xb5, 0xd7, 0x26, 0xf4, 0xda, 0x84, 0x5e, 0x9b, 0xd0, 0x6b, 0x13, 0x7a, 0x6d, 0x42, 0xaf,
+	0x4d, 0xe8, 0xb5, 0x09, 0xbd, 0x36, 0xa1, 0xd7, 0x26, 0xf4, 0xda, 0x84, 0x5e, 0x9b, 0xf0, 0xe3,
+	0x6a, 0x13, 0x18, 0xf2, 0xa4, 0x7b, 0xb3, 0xc0, 0x3e, 0x02, 0x3b, 0x5f, 0x27, 0x7d, 0x5f, 0x7e,
+	0x9d, 0xf4, 0x7d, 0xfb, 0x75, 0x12, 0x3c, 0xd8, 0x4d, 0x82, 0x4f, 0x77, 0x93, 0xe0, 0xf3, 0xdd,
+	0x24, 0xd8, 0xd9, 0x4d, 0x82, 0x2f, 0x77, 0x93, 0xe0, 0x1f, 0xbb, 0x49, 0xf0, 0xcd, 0x6e, 0xd2,
+	0xf7, 0xed, 0x6e, 0x12, 0x7c, 0xfc, 0x24, 0xe9, 0xdb, 0x7e, 0x92, 0x04, 0x3b, 0x4f, 0x92, 0xbe,
+	0x2f, 0x9f, 0x24, 0x7d, 0xef, 0x2d, 0xaf, 0x49, 0xb5, 0x3b, 0x6b, 0xe9, 0x0d, 0xa9, 0xa2, 0x22,
+	0x59, 0xe6, 0xd3, 0x75, 0x65, 0x0a, 0xff, 0x58, 0x95, 0xe4, 0xf5, 0x93, 0x35, 0x59, 0xda, 0x10,
+	0xcb, 0x48, 0x3e, 0xb9, 0x9a, 0xbb, 0x27, 0x4c, 0xd5, 0x56, 0xd6, 0xa4, 0x29, 0x74, 0x4f, 0x35,
+	0xfe, 0x3b, 0x4d, 0x97, 0xff, 0xb5, 0x74, 0xa5, 0x0f, 0xd3, 0xd7, 0x67, 0xfe, 0x17, 0x00, 0x00,
+	0xff, 0xff, 0x36, 0x88, 0x51, 0x8f, 0xe2, 0x54, 0x00, 0x00,
 }
 
 func (this *GlobalSpecType) Equal(that interface{}) bool {
@@ -3302,6 +4346,14 @@ func (this *GlobalSpecType) Equal(that interface{}) bool {
 	} else if !this.DomainChoice.Equal(that1.DomainChoice) {
 		return false
 	}
+	if len(this.Domains) != len(that1.Domains) {
+		return false
+	}
+	for i := range this.Domains {
+		if this.Domains[i] != that1.Domains[i] {
+			return false
+		}
+	}
 	if that1.VirtualServerType == nil {
 		if this.VirtualServerType != nil {
 			return false
@@ -3330,6 +4382,12 @@ func (this *GlobalSpecType) Equal(that interface{}) bool {
 		return false
 	}
 	if !this.AutoLastHop.Equal(that1.AutoLastHop) {
+		return false
+	}
+	if this.Sse != that1.Sse {
+		return false
+	}
+	if this.Json != that1.Json {
 		return false
 	}
 	if that1.LastHopPoolChoice == nil {
@@ -3555,6 +4613,30 @@ func (this *GlobalSpecType_Udp) Equal(that interface{}) bool {
 		return false
 	}
 	if !this.Udp.Equal(that1.Udp) {
+		return false
+	}
+	return true
+}
+func (this *GlobalSpecType_Http3) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GlobalSpecType_Http3)
+	if !ok {
+		that2, ok := that.(GlobalSpecType_Http3)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.Http3.Equal(that1.Http3) {
 		return false
 	}
 	return true
@@ -3847,6 +4929,288 @@ func (this *GlobalSpecType_FallbackPersistenceProfile) Equal(that interface{}) b
 	}
 	return true
 }
+func (this *TCPServices) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*TCPServices)
+	if !ok {
+		that2, ok := that.(TCPServices)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if len(this.Services) != len(that1.Services) {
+		return false
+	}
+	for i := range this.Services {
+		if !this.Services[i].Equal(that1.Services[i]) {
+			return false
+		}
+	}
+	if !this.ProtocolClientProfile.Equal(that1.ProtocolClientProfile) {
+		return false
+	}
+	if len(this.SslClientProfiles) != len(that1.SslClientProfiles) {
+		return false
+	}
+	for i := range this.SslClientProfiles {
+		if !this.SslClientProfiles[i].Equal(that1.SslClientProfiles[i]) {
+			return false
+		}
+	}
+	if that1.ServerAppTypeChoice == nil {
+		if this.ServerAppTypeChoice != nil {
+			return false
+		}
+	} else if this.ServerAppTypeChoice == nil {
+		return false
+	} else if !this.ServerAppTypeChoice.Equal(that1.ServerAppTypeChoice) {
+		return false
+	}
+	return true
+}
+func (this *TCPServices_ServerAppTypeSameAsClient) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*TCPServices_ServerAppTypeSameAsClient)
+	if !ok {
+		that2, ok := that.(TCPServices_ServerAppTypeSameAsClient)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.ServerAppTypeSameAsClient.Equal(that1.ServerAppTypeSameAsClient) {
+		return false
+	}
+	return true
+}
+func (this *UDPServices) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*UDPServices)
+	if !ok {
+		that2, ok := that.(UDPServices)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if len(this.Services) != len(that1.Services) {
+		return false
+	}
+	for i := range this.Services {
+		if !this.Services[i].Equal(that1.Services[i]) {
+			return false
+		}
+	}
+	if !this.ProtocolClientProfile.Equal(that1.ProtocolClientProfile) {
+		return false
+	}
+	if len(this.SslClientProfiles) != len(that1.SslClientProfiles) {
+		return false
+	}
+	for i := range this.SslClientProfiles {
+		if !this.SslClientProfiles[i].Equal(that1.SslClientProfiles[i]) {
+			return false
+		}
+	}
+	if that1.ServerAppTypeChoice == nil {
+		if this.ServerAppTypeChoice != nil {
+			return false
+		}
+	} else if this.ServerAppTypeChoice == nil {
+		return false
+	} else if !this.ServerAppTypeChoice.Equal(that1.ServerAppTypeChoice) {
+		return false
+	}
+	return true
+}
+func (this *UDPServices_ServerAppTypeSameAsClient) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*UDPServices_ServerAppTypeSameAsClient)
+	if !ok {
+		that2, ok := that.(UDPServices_ServerAppTypeSameAsClient)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.ServerAppTypeSameAsClient.Equal(that1.ServerAppTypeSameAsClient) {
+		return false
+	}
+	return true
+}
+func (this *HTTP3Services) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*HTTP3Services)
+	if !ok {
+		that2, ok := that.(HTTP3Services)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if len(this.Services) != len(that1.Services) {
+		return false
+	}
+	for i := range this.Services {
+		if !this.Services[i].Equal(that1.Services[i]) {
+			return false
+		}
+	}
+	if !this.ProtocolClientProfile.Equal(that1.ProtocolClientProfile) {
+		return false
+	}
+	if len(this.SslClientProfiles) != len(that1.SslClientProfiles) {
+		return false
+	}
+	for i := range this.SslClientProfiles {
+		if !this.SslClientProfiles[i].Equal(that1.SslClientProfiles[i]) {
+			return false
+		}
+	}
+	if !this.HttpClientProfile.Equal(that1.HttpClientProfile) {
+		return false
+	}
+	if !this.Http3ClientProfile.Equal(that1.Http3ClientProfile) {
+		return false
+	}
+	if that1.QuicProfileChoice == nil {
+		if this.QuicProfileChoice != nil {
+			return false
+		}
+	} else if this.QuicProfileChoice == nil {
+		return false
+	} else if !this.QuicProfileChoice.Equal(that1.QuicProfileChoice) {
+		return false
+	}
+	if that1.ServerAppTypeChoice == nil {
+		if this.ServerAppTypeChoice != nil {
+			return false
+		}
+	} else if this.ServerAppTypeChoice == nil {
+		return false
+	} else if !this.ServerAppTypeChoice.Equal(that1.ServerAppTypeChoice) {
+		return false
+	}
+	return true
+}
+func (this *HTTP3Services_QuicClientProfileNone) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*HTTP3Services_QuicClientProfileNone)
+	if !ok {
+		that2, ok := that.(HTTP3Services_QuicClientProfileNone)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.QuicClientProfileNone.Equal(that1.QuicClientProfileNone) {
+		return false
+	}
+	return true
+}
+func (this *HTTP3Services_QuicClientProfile) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*HTTP3Services_QuicClientProfile)
+	if !ok {
+		that2, ok := that.(HTTP3Services_QuicClientProfile)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.QuicClientProfile.Equal(that1.QuicClientProfile) {
+		return false
+	}
+	return true
+}
+func (this *HTTP3Services_ServerAppTypeDefault) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*HTTP3Services_ServerAppTypeDefault)
+	if !ok {
+		that2, ok := that.(HTTP3Services_ServerAppTypeDefault)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.ServerAppTypeDefault.Equal(that1.ServerAppTypeDefault) {
+		return false
+	}
+	return true
+}
 func (this *HTTPServices) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
@@ -3874,13 +5238,45 @@ func (this *HTTPServices) Equal(that interface{}) bool {
 			return false
 		}
 	}
-	if !this.TcpProfiles.Equal(that1.TcpProfiles) {
+	if !this.ProtocolClientProfile.Equal(that1.ProtocolClientProfile) {
 		return false
 	}
-	if !this.HttpProfiles.Equal(that1.HttpProfiles) {
+	if !this.HttpClientProfile.Equal(that1.HttpClientProfile) {
 		return false
 	}
-	if !this.WebsocketProfiles.Equal(that1.WebsocketProfiles) {
+	if that1.WebsocketClientProfileChoice == nil {
+		if this.WebsocketClientProfileChoice != nil {
+			return false
+		}
+	} else if this.WebsocketClientProfileChoice == nil {
+		return false
+	} else if !this.WebsocketClientProfileChoice.Equal(that1.WebsocketClientProfileChoice) {
+		return false
+	}
+	if len(this.SslClientProfiles) != len(that1.SslClientProfiles) {
+		return false
+	}
+	for i := range this.SslClientProfiles {
+		if !this.SslClientProfiles[i].Equal(that1.SslClientProfiles[i]) {
+			return false
+		}
+	}
+	if that1.Http2ClientProfileChoice == nil {
+		if this.Http2ClientProfileChoice != nil {
+			return false
+		}
+	} else if this.Http2ClientProfileChoice == nil {
+		return false
+	} else if !this.Http2ClientProfileChoice.Equal(that1.Http2ClientProfileChoice) {
+		return false
+	}
+	if that1.ServerAppTypeChoice == nil {
+		if this.ServerAppTypeChoice != nil {
+			return false
+		}
+	} else if this.ServerAppTypeChoice == nil {
+		return false
+	} else if !this.ServerAppTypeChoice.Equal(that1.ServerAppTypeChoice) {
 		return false
 	}
 	if that1.StreamProfileChoice == nil {
@@ -3899,6 +5295,135 @@ func (this *HTTPServices) Equal(that interface{}) bool {
 	} else if this.FixProfileChoice == nil {
 		return false
 	} else if !this.FixProfileChoice.Equal(that1.FixProfileChoice) {
+		return false
+	}
+	if that1.OcspProfileChoice == nil {
+		if this.OcspProfileChoice != nil {
+			return false
+		}
+	} else if this.OcspProfileChoice == nil {
+		return false
+	} else if !this.OcspProfileChoice.Equal(that1.OcspProfileChoice) {
+		return false
+	}
+	return true
+}
+func (this *HTTPServices_WebsocketClientProfileNone) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*HTTPServices_WebsocketClientProfileNone)
+	if !ok {
+		that2, ok := that.(HTTPServices_WebsocketClientProfileNone)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.WebsocketClientProfileNone.Equal(that1.WebsocketClientProfileNone) {
+		return false
+	}
+	return true
+}
+func (this *HTTPServices_WebsocketClientProfile) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*HTTPServices_WebsocketClientProfile)
+	if !ok {
+		that2, ok := that.(HTTPServices_WebsocketClientProfile)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.WebsocketClientProfile.Equal(that1.WebsocketClientProfile) {
+		return false
+	}
+	return true
+}
+func (this *HTTPServices_Http2ClientProfileNone) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*HTTPServices_Http2ClientProfileNone)
+	if !ok {
+		that2, ok := that.(HTTPServices_Http2ClientProfileNone)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.Http2ClientProfileNone.Equal(that1.Http2ClientProfileNone) {
+		return false
+	}
+	return true
+}
+func (this *HTTPServices_Http2ClientProfile) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*HTTPServices_Http2ClientProfile)
+	if !ok {
+		that2, ok := that.(HTTPServices_Http2ClientProfile)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.Http2ClientProfile.Equal(that1.Http2ClientProfile) {
+		return false
+	}
+	return true
+}
+func (this *HTTPServices_ServerAppTypeSameAsClient) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*HTTPServices_ServerAppTypeSameAsClient)
+	if !ok {
+		that2, ok := that.(HTTPServices_ServerAppTypeSameAsClient)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.ServerAppTypeSameAsClient.Equal(that1.ServerAppTypeSameAsClient) {
 		return false
 	}
 	return true
@@ -3995,6 +5520,572 @@ func (this *HTTPServices_FixProfile) Equal(that interface{}) bool {
 		return false
 	}
 	if !this.FixProfile.Equal(that1.FixProfile) {
+		return false
+	}
+	return true
+}
+func (this *HTTPServices_OcspProfileNone) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*HTTPServices_OcspProfileNone)
+	if !ok {
+		that2, ok := that.(HTTPServices_OcspProfileNone)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.OcspProfileNone.Equal(that1.OcspProfileNone) {
+		return false
+	}
+	return true
+}
+func (this *HTTPServices_OcspProfile) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*HTTPServices_OcspProfile)
+	if !ok {
+		that2, ok := that.(HTTPServices_OcspProfile)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.OcspProfile.Equal(that1.OcspProfile) {
+		return false
+	}
+	return true
+}
+func (this *UDPDefaultServerSelection) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*UDPDefaultServerSelection)
+	if !ok {
+		that2, ok := that.(UDPDefaultServerSelection)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if that1.UdpServerProfileChoice == nil {
+		if this.UdpServerProfileChoice != nil {
+			return false
+		}
+	} else if this.UdpServerProfileChoice == nil {
+		return false
+	} else if !this.UdpServerProfileChoice.Equal(that1.UdpServerProfileChoice) {
+		return false
+	}
+	if len(this.SslServerProfiles) != len(that1.SslServerProfiles) {
+		return false
+	}
+	for i := range this.SslServerProfiles {
+		if !this.SslServerProfiles[i].Equal(that1.SslServerProfiles[i]) {
+			return false
+		}
+	}
+	return true
+}
+func (this *UDPDefaultServerSelection_UdpServerProfileUseClient) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*UDPDefaultServerSelection_UdpServerProfileUseClient)
+	if !ok {
+		that2, ok := that.(UDPDefaultServerSelection_UdpServerProfileUseClient)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.UdpServerProfileUseClient.Equal(that1.UdpServerProfileUseClient) {
+		return false
+	}
+	return true
+}
+func (this *UDPDefaultServerSelection_UdpServerProfile) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*UDPDefaultServerSelection_UdpServerProfile)
+	if !ok {
+		that2, ok := that.(UDPDefaultServerSelection_UdpServerProfile)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.UdpServerProfile.Equal(that1.UdpServerProfile) {
+		return false
+	}
+	return true
+}
+func (this *TCPDefaultServerSelection) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*TCPDefaultServerSelection)
+	if !ok {
+		that2, ok := that.(TCPDefaultServerSelection)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if that1.TcpServerProfileChoice == nil {
+		if this.TcpServerProfileChoice != nil {
+			return false
+		}
+	} else if this.TcpServerProfileChoice == nil {
+		return false
+	} else if !this.TcpServerProfileChoice.Equal(that1.TcpServerProfileChoice) {
+		return false
+	}
+	if len(this.SslServerProfiles) != len(that1.SslServerProfiles) {
+		return false
+	}
+	for i := range this.SslServerProfiles {
+		if !this.SslServerProfiles[i].Equal(that1.SslServerProfiles[i]) {
+			return false
+		}
+	}
+	return true
+}
+func (this *TCPDefaultServerSelection_TcpServerProfileUseClient) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*TCPDefaultServerSelection_TcpServerProfileUseClient)
+	if !ok {
+		that2, ok := that.(TCPDefaultServerSelection_TcpServerProfileUseClient)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.TcpServerProfileUseClient.Equal(that1.TcpServerProfileUseClient) {
+		return false
+	}
+	return true
+}
+func (this *TCPDefaultServerSelection_TcpServerProfile) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*TCPDefaultServerSelection_TcpServerProfile)
+	if !ok {
+		that2, ok := that.(TCPDefaultServerSelection_TcpServerProfile)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.TcpServerProfile.Equal(that1.TcpServerProfile) {
+		return false
+	}
+	return true
+}
+func (this *HTTPDefaultServerSelection) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*HTTPDefaultServerSelection)
+	if !ok {
+		that2, ok := that.(HTTPDefaultServerSelection)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if that1.ProtocolServerProfileChoice == nil {
+		if this.ProtocolServerProfileChoice != nil {
+			return false
+		}
+	} else if this.ProtocolServerProfileChoice == nil {
+		return false
+	} else if !this.ProtocolServerProfileChoice.Equal(that1.ProtocolServerProfileChoice) {
+		return false
+	}
+	if that1.HttpServerProfileChoice == nil {
+		if this.HttpServerProfileChoice != nil {
+			return false
+		}
+	} else if this.HttpServerProfileChoice == nil {
+		return false
+	} else if !this.HttpServerProfileChoice.Equal(that1.HttpServerProfileChoice) {
+		return false
+	}
+	if that1.WebsocketServerProfileChoice == nil {
+		if this.WebsocketServerProfileChoice != nil {
+			return false
+		}
+	} else if this.WebsocketServerProfileChoice == nil {
+		return false
+	} else if !this.WebsocketServerProfileChoice.Equal(that1.WebsocketServerProfileChoice) {
+		return false
+	}
+	if that1.Http2ServerProfileChoice == nil {
+		if this.Http2ServerProfileChoice != nil {
+			return false
+		}
+	} else if this.Http2ServerProfileChoice == nil {
+		return false
+	} else if !this.Http2ServerProfileChoice.Equal(that1.Http2ServerProfileChoice) {
+		return false
+	}
+	if len(this.SslServerProfiles) != len(that1.SslServerProfiles) {
+		return false
+	}
+	for i := range this.SslServerProfiles {
+		if !this.SslServerProfiles[i].Equal(that1.SslServerProfiles[i]) {
+			return false
+		}
+	}
+	return true
+}
+func (this *HTTPDefaultServerSelection_ProtocolServerProfileSameAsClient) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*HTTPDefaultServerSelection_ProtocolServerProfileSameAsClient)
+	if !ok {
+		that2, ok := that.(HTTPDefaultServerSelection_ProtocolServerProfileSameAsClient)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.ProtocolServerProfileSameAsClient.Equal(that1.ProtocolServerProfileSameAsClient) {
+		return false
+	}
+	return true
+}
+func (this *HTTPDefaultServerSelection_ProtocolServerProfile) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*HTTPDefaultServerSelection_ProtocolServerProfile)
+	if !ok {
+		that2, ok := that.(HTTPDefaultServerSelection_ProtocolServerProfile)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.ProtocolServerProfile.Equal(that1.ProtocolServerProfile) {
+		return false
+	}
+	return true
+}
+func (this *HTTPDefaultServerSelection_HttpServerProfileSameAsClient) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*HTTPDefaultServerSelection_HttpServerProfileSameAsClient)
+	if !ok {
+		that2, ok := that.(HTTPDefaultServerSelection_HttpServerProfileSameAsClient)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.HttpServerProfileSameAsClient.Equal(that1.HttpServerProfileSameAsClient) {
+		return false
+	}
+	return true
+}
+func (this *HTTPDefaultServerSelection_HttpServerProfile) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*HTTPDefaultServerSelection_HttpServerProfile)
+	if !ok {
+		that2, ok := that.(HTTPDefaultServerSelection_HttpServerProfile)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.HttpServerProfile.Equal(that1.HttpServerProfile) {
+		return false
+	}
+	return true
+}
+func (this *HTTPDefaultServerSelection_WebsocketServerProfileSameAsClient) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*HTTPDefaultServerSelection_WebsocketServerProfileSameAsClient)
+	if !ok {
+		that2, ok := that.(HTTPDefaultServerSelection_WebsocketServerProfileSameAsClient)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.WebsocketServerProfileSameAsClient.Equal(that1.WebsocketServerProfileSameAsClient) {
+		return false
+	}
+	return true
+}
+func (this *HTTPDefaultServerSelection_WebsocketServerProfile) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*HTTPDefaultServerSelection_WebsocketServerProfile)
+	if !ok {
+		that2, ok := that.(HTTPDefaultServerSelection_WebsocketServerProfile)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.WebsocketServerProfile.Equal(that1.WebsocketServerProfile) {
+		return false
+	}
+	return true
+}
+func (this *HTTPDefaultServerSelection_Http2ServerProfileNone) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*HTTPDefaultServerSelection_Http2ServerProfileNone)
+	if !ok {
+		that2, ok := that.(HTTPDefaultServerSelection_Http2ServerProfileNone)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.Http2ServerProfileNone.Equal(that1.Http2ServerProfileNone) {
+		return false
+	}
+	return true
+}
+func (this *HTTPDefaultServerSelection_Http2ServerProfile) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*HTTPDefaultServerSelection_Http2ServerProfile)
+	if !ok {
+		that2, ok := that.(HTTPDefaultServerSelection_Http2ServerProfile)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.Http2ServerProfile.Equal(that1.Http2ServerProfile) {
+		return false
+	}
+	return true
+}
+func (this *HTTP3DefaultServerSelection) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*HTTP3DefaultServerSelection)
+	if !ok {
+		that2, ok := that.(HTTP3DefaultServerSelection)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.TcpServerProfile.Equal(that1.TcpServerProfile) {
+		return false
+	}
+	if that1.HttpServerProfileChoice == nil {
+		if this.HttpServerProfileChoice != nil {
+			return false
+		}
+	} else if this.HttpServerProfileChoice == nil {
+		return false
+	} else if !this.HttpServerProfileChoice.Equal(that1.HttpServerProfileChoice) {
+		return false
+	}
+	if len(this.SslServerProfiles) != len(that1.SslServerProfiles) {
+		return false
+	}
+	for i := range this.SslServerProfiles {
+		if !this.SslServerProfiles[i].Equal(that1.SslServerProfiles[i]) {
+			return false
+		}
+	}
+	return true
+}
+func (this *HTTP3DefaultServerSelection_HttpServerProfileSameAsClient) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*HTTP3DefaultServerSelection_HttpServerProfileSameAsClient)
+	if !ok {
+		that2, ok := that.(HTTP3DefaultServerSelection_HttpServerProfileSameAsClient)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.HttpServerProfileSameAsClient.Equal(that1.HttpServerProfileSameAsClient) {
+		return false
+	}
+	return true
+}
+func (this *HTTP3DefaultServerSelection_HttpServerProfile) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*HTTP3DefaultServerSelection_HttpServerProfile)
+	if !ok {
+		that2, ok := that.(HTTP3DefaultServerSelection_HttpServerProfile)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.HttpServerProfile.Equal(that1.HttpServerProfile) {
 		return false
 	}
 	return true
@@ -4110,303 +6201,6 @@ func (this *TranslationType) Equal(that interface{}) bool {
 		return false
 	}
 	if !this.SourcePort.Equal(that1.SourcePort) {
-		return false
-	}
-	return true
-}
-func (this *TCPProfileType) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*TCPProfileType)
-	if !ok {
-		that2, ok := that.(TCPProfileType)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if !this.ClientProfile.Equal(that1.ClientProfile) {
-		return false
-	}
-	if that1.TcpServerProfileChoice == nil {
-		if this.TcpServerProfileChoice != nil {
-			return false
-		}
-	} else if this.TcpServerProfileChoice == nil {
-		return false
-	} else if !this.TcpServerProfileChoice.Equal(that1.TcpServerProfileChoice) {
-		return false
-	}
-	return true
-}
-func (this *TCPProfileType_ServerProfileSameAsClient) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*TCPProfileType_ServerProfileSameAsClient)
-	if !ok {
-		that2, ok := that.(TCPProfileType_ServerProfileSameAsClient)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if !this.ServerProfileSameAsClient.Equal(that1.ServerProfileSameAsClient) {
-		return false
-	}
-	return true
-}
-func (this *TCPProfileType_ServerProfile) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*TCPProfileType_ServerProfile)
-	if !ok {
-		that2, ok := that.(TCPProfileType_ServerProfile)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if !this.ServerProfile.Equal(that1.ServerProfile) {
-		return false
-	}
-	return true
-}
-func (this *HTTPProfileType) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*HTTPProfileType)
-	if !ok {
-		that2, ok := that.(HTTPProfileType)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if !this.ClientProfile.Equal(that1.ClientProfile) {
-		return false
-	}
-	if that1.HttpServerProfileChoice == nil {
-		if this.HttpServerProfileChoice != nil {
-			return false
-		}
-	} else if this.HttpServerProfileChoice == nil {
-		return false
-	} else if !this.HttpServerProfileChoice.Equal(that1.HttpServerProfileChoice) {
-		return false
-	}
-	return true
-}
-func (this *HTTPProfileType_ServerProfileSameAsClient) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*HTTPProfileType_ServerProfileSameAsClient)
-	if !ok {
-		that2, ok := that.(HTTPProfileType_ServerProfileSameAsClient)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if !this.ServerProfileSameAsClient.Equal(that1.ServerProfileSameAsClient) {
-		return false
-	}
-	return true
-}
-func (this *HTTPProfileType_ServerProfile) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*HTTPProfileType_ServerProfile)
-	if !ok {
-		that2, ok := that.(HTTPProfileType_ServerProfile)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if !this.ServerProfile.Equal(that1.ServerProfile) {
-		return false
-	}
-	return true
-}
-func (this *WebsocketProfileType) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*WebsocketProfileType)
-	if !ok {
-		that2, ok := that.(WebsocketProfileType)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if that1.WebsocketClientProfileChoice == nil {
-		if this.WebsocketClientProfileChoice != nil {
-			return false
-		}
-	} else if this.WebsocketClientProfileChoice == nil {
-		return false
-	} else if !this.WebsocketClientProfileChoice.Equal(that1.WebsocketClientProfileChoice) {
-		return false
-	}
-	if that1.WebsocketServerProfileChoice == nil {
-		if this.WebsocketServerProfileChoice != nil {
-			return false
-		}
-	} else if this.WebsocketServerProfileChoice == nil {
-		return false
-	} else if !this.WebsocketServerProfileChoice.Equal(that1.WebsocketServerProfileChoice) {
-		return false
-	}
-	return true
-}
-func (this *WebsocketProfileType_ClientProfileNone) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*WebsocketProfileType_ClientProfileNone)
-	if !ok {
-		that2, ok := that.(WebsocketProfileType_ClientProfileNone)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if !this.ClientProfileNone.Equal(that1.ClientProfileNone) {
-		return false
-	}
-	return true
-}
-func (this *WebsocketProfileType_ClientProfile) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*WebsocketProfileType_ClientProfile)
-	if !ok {
-		that2, ok := that.(WebsocketProfileType_ClientProfile)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if !this.ClientProfile.Equal(that1.ClientProfile) {
-		return false
-	}
-	return true
-}
-func (this *WebsocketProfileType_ServerProfileSameAsClient) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*WebsocketProfileType_ServerProfileSameAsClient)
-	if !ok {
-		that2, ok := that.(WebsocketProfileType_ServerProfileSameAsClient)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if !this.ServerProfileSameAsClient.Equal(that1.ServerProfileSameAsClient) {
-		return false
-	}
-	return true
-}
-func (this *WebsocketProfileType_ServerProfile) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*WebsocketProfileType_ServerProfile)
-	if !ok {
-		that2, ok := that.(WebsocketProfileType_ServerProfile)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if !this.ServerProfile.Equal(that1.ServerProfile) {
 		return false
 	}
 	return true
@@ -4705,14 +6499,13 @@ func (this *CreateSpecType) Equal(that interface{}) bool {
 	if !this.State.Equal(that1.State) {
 		return false
 	}
-	if that1.DomainChoice == nil {
-		if this.DomainChoice != nil {
+	if len(this.Domains) != len(that1.Domains) {
+		return false
+	}
+	for i := range this.Domains {
+		if this.Domains[i] != that1.Domains[i] {
 			return false
 		}
-	} else if this.DomainChoice == nil {
-		return false
-	} else if !this.DomainChoice.Equal(that1.DomainChoice) {
-		return false
 	}
 	if that1.VirtualServerType == nil {
 		if this.VirtualServerType != nil {
@@ -4721,6 +6514,15 @@ func (this *CreateSpecType) Equal(that interface{}) bool {
 	} else if this.VirtualServerType == nil {
 		return false
 	} else if !this.VirtualServerType.Equal(that1.VirtualServerType) {
+		return false
+	}
+	if that1.StatisticsProfileChoice == nil {
+		if this.StatisticsProfileChoice != nil {
+			return false
+		}
+	} else if this.StatisticsProfileChoice == nil {
+		return false
+	} else if !this.StatisticsProfileChoice.Equal(that1.StatisticsProfileChoice) {
 		return false
 	}
 	if !this.ConnectionLimitOptions.Equal(that1.ConnectionLimitOptions) {
@@ -4733,6 +6535,12 @@ func (this *CreateSpecType) Equal(that interface{}) bool {
 		return false
 	}
 	if !this.AutoLastHop.Equal(that1.AutoLastHop) {
+		return false
+	}
+	if this.Sse != that1.Sse {
+		return false
+	}
+	if this.Json != that1.Json {
 		return false
 	}
 	if that1.LastHopPoolChoice == nil {
@@ -4812,54 +6620,6 @@ func (this *CreateSpecType) Equal(that interface{}) bool {
 		if !this.TrafficPolicies[i].Equal(that1.TrafficPolicies[i]) {
 			return false
 		}
-	}
-	return true
-}
-func (this *CreateSpecType_Managed) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*CreateSpecType_Managed)
-	if !ok {
-		that2, ok := that.(CreateSpecType_Managed)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if !this.Managed.Equal(that1.Managed) {
-		return false
-	}
-	return true
-}
-func (this *CreateSpecType_NotManaged) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*CreateSpecType_NotManaged)
-	if !ok {
-		that2, ok := that.(CreateSpecType_NotManaged)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if !this.NotManaged.Equal(that1.NotManaged) {
-		return false
 	}
 	return true
 }
@@ -4955,6 +6715,78 @@ func (this *CreateSpecType_Udp) Equal(that interface{}) bool {
 		return false
 	}
 	if !this.Udp.Equal(that1.Udp) {
+		return false
+	}
+	return true
+}
+func (this *CreateSpecType_Http3) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*CreateSpecType_Http3)
+	if !ok {
+		that2, ok := that.(CreateSpecType_Http3)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.Http3.Equal(that1.Http3) {
+		return false
+	}
+	return true
+}
+func (this *CreateSpecType_StatisticsProfileNone) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*CreateSpecType_StatisticsProfileNone)
+	if !ok {
+		that2, ok := that.(CreateSpecType_StatisticsProfileNone)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.StatisticsProfileNone.Equal(that1.StatisticsProfileNone) {
+		return false
+	}
+	return true
+}
+func (this *CreateSpecType_StatisticsProfile) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*CreateSpecType_StatisticsProfile)
+	if !ok {
+		that2, ok := that.(CreateSpecType_StatisticsProfile)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.StatisticsProfile.Equal(that1.StatisticsProfile) {
 		return false
 	}
 	return true
@@ -5221,14 +7053,13 @@ func (this *ReplaceSpecType) Equal(that interface{}) bool {
 	if !this.State.Equal(that1.State) {
 		return false
 	}
-	if that1.DomainChoice == nil {
-		if this.DomainChoice != nil {
+	if len(this.Domains) != len(that1.Domains) {
+		return false
+	}
+	for i := range this.Domains {
+		if this.Domains[i] != that1.Domains[i] {
 			return false
 		}
-	} else if this.DomainChoice == nil {
-		return false
-	} else if !this.DomainChoice.Equal(that1.DomainChoice) {
-		return false
 	}
 	if that1.VirtualServerType == nil {
 		if this.VirtualServerType != nil {
@@ -5237,6 +7068,15 @@ func (this *ReplaceSpecType) Equal(that interface{}) bool {
 	} else if this.VirtualServerType == nil {
 		return false
 	} else if !this.VirtualServerType.Equal(that1.VirtualServerType) {
+		return false
+	}
+	if that1.StatisticsProfileChoice == nil {
+		if this.StatisticsProfileChoice != nil {
+			return false
+		}
+	} else if this.StatisticsProfileChoice == nil {
+		return false
+	} else if !this.StatisticsProfileChoice.Equal(that1.StatisticsProfileChoice) {
 		return false
 	}
 	if !this.ConnectionLimitOptions.Equal(that1.ConnectionLimitOptions) {
@@ -5249,6 +7089,12 @@ func (this *ReplaceSpecType) Equal(that interface{}) bool {
 		return false
 	}
 	if !this.AutoLastHop.Equal(that1.AutoLastHop) {
+		return false
+	}
+	if this.Sse != that1.Sse {
+		return false
+	}
+	if this.Json != that1.Json {
 		return false
 	}
 	if that1.LastHopPoolChoice == nil {
@@ -5328,54 +7174,6 @@ func (this *ReplaceSpecType) Equal(that interface{}) bool {
 		if !this.TrafficPolicies[i].Equal(that1.TrafficPolicies[i]) {
 			return false
 		}
-	}
-	return true
-}
-func (this *ReplaceSpecType_Managed) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*ReplaceSpecType_Managed)
-	if !ok {
-		that2, ok := that.(ReplaceSpecType_Managed)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if !this.Managed.Equal(that1.Managed) {
-		return false
-	}
-	return true
-}
-func (this *ReplaceSpecType_NotManaged) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*ReplaceSpecType_NotManaged)
-	if !ok {
-		that2, ok := that.(ReplaceSpecType_NotManaged)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if !this.NotManaged.Equal(that1.NotManaged) {
-		return false
 	}
 	return true
 }
@@ -5471,6 +7269,78 @@ func (this *ReplaceSpecType_Udp) Equal(that interface{}) bool {
 		return false
 	}
 	if !this.Udp.Equal(that1.Udp) {
+		return false
+	}
+	return true
+}
+func (this *ReplaceSpecType_Http3) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ReplaceSpecType_Http3)
+	if !ok {
+		that2, ok := that.(ReplaceSpecType_Http3)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.Http3.Equal(that1.Http3) {
+		return false
+	}
+	return true
+}
+func (this *ReplaceSpecType_StatisticsProfileNone) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ReplaceSpecType_StatisticsProfileNone)
+	if !ok {
+		that2, ok := that.(ReplaceSpecType_StatisticsProfileNone)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.StatisticsProfileNone.Equal(that1.StatisticsProfileNone) {
+		return false
+	}
+	return true
+}
+func (this *ReplaceSpecType_StatisticsProfile) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ReplaceSpecType_StatisticsProfile)
+	if !ok {
+		that2, ok := that.(ReplaceSpecType_StatisticsProfile)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.StatisticsProfile.Equal(that1.StatisticsProfile) {
 		return false
 	}
 	return true
@@ -5737,14 +7607,13 @@ func (this *GetSpecType) Equal(that interface{}) bool {
 	if !this.State.Equal(that1.State) {
 		return false
 	}
-	if that1.DomainChoice == nil {
-		if this.DomainChoice != nil {
+	if len(this.Domains) != len(that1.Domains) {
+		return false
+	}
+	for i := range this.Domains {
+		if this.Domains[i] != that1.Domains[i] {
 			return false
 		}
-	} else if this.DomainChoice == nil {
-		return false
-	} else if !this.DomainChoice.Equal(that1.DomainChoice) {
-		return false
 	}
 	if that1.VirtualServerType == nil {
 		if this.VirtualServerType != nil {
@@ -5753,6 +7622,15 @@ func (this *GetSpecType) Equal(that interface{}) bool {
 	} else if this.VirtualServerType == nil {
 		return false
 	} else if !this.VirtualServerType.Equal(that1.VirtualServerType) {
+		return false
+	}
+	if that1.StatisticsProfileChoice == nil {
+		if this.StatisticsProfileChoice != nil {
+			return false
+		}
+	} else if this.StatisticsProfileChoice == nil {
+		return false
+	} else if !this.StatisticsProfileChoice.Equal(that1.StatisticsProfileChoice) {
 		return false
 	}
 	if !this.ConnectionLimitOptions.Equal(that1.ConnectionLimitOptions) {
@@ -5765,6 +7643,12 @@ func (this *GetSpecType) Equal(that interface{}) bool {
 		return false
 	}
 	if !this.AutoLastHop.Equal(that1.AutoLastHop) {
+		return false
+	}
+	if this.Sse != that1.Sse {
+		return false
+	}
+	if this.Json != that1.Json {
 		return false
 	}
 	if that1.LastHopPoolChoice == nil {
@@ -5844,54 +7728,6 @@ func (this *GetSpecType) Equal(that interface{}) bool {
 		if !this.TrafficPolicies[i].Equal(that1.TrafficPolicies[i]) {
 			return false
 		}
-	}
-	return true
-}
-func (this *GetSpecType_Managed) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*GetSpecType_Managed)
-	if !ok {
-		that2, ok := that.(GetSpecType_Managed)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if !this.Managed.Equal(that1.Managed) {
-		return false
-	}
-	return true
-}
-func (this *GetSpecType_NotManaged) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*GetSpecType_NotManaged)
-	if !ok {
-		that2, ok := that.(GetSpecType_NotManaged)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if !this.NotManaged.Equal(that1.NotManaged) {
-		return false
 	}
 	return true
 }
@@ -5987,6 +7823,78 @@ func (this *GetSpecType_Udp) Equal(that interface{}) bool {
 		return false
 	}
 	if !this.Udp.Equal(that1.Udp) {
+		return false
+	}
+	return true
+}
+func (this *GetSpecType_Http3) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GetSpecType_Http3)
+	if !ok {
+		that2, ok := that.(GetSpecType_Http3)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.Http3.Equal(that1.Http3) {
+		return false
+	}
+	return true
+}
+func (this *GetSpecType_StatisticsProfileNone) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GetSpecType_StatisticsProfileNone)
+	if !ok {
+		that2, ok := that.(GetSpecType_StatisticsProfileNone)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.StatisticsProfileNone.Equal(that1.StatisticsProfileNone) {
+		return false
+	}
+	return true
+}
+func (this *GetSpecType_StatisticsProfile) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GetSpecType_StatisticsProfile)
+	if !ok {
+		that2, ok := that.(GetSpecType_StatisticsProfile)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.StatisticsProfile.Equal(that1.StatisticsProfile) {
 		return false
 	}
 	return true
@@ -6235,7 +8143,7 @@ func (this *GlobalSpecType) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 34)
+	s := make([]string, 0, 38)
 	s = append(s, "&virtual_server.GlobalSpecType{")
 	if this.State != nil {
 		s = append(s, "State: "+fmt.Sprintf("%#v", this.State)+",\n")
@@ -6243,6 +8151,7 @@ func (this *GlobalSpecType) GoString() string {
 	if this.DomainChoice != nil {
 		s = append(s, "DomainChoice: "+fmt.Sprintf("%#v", this.DomainChoice)+",\n")
 	}
+	s = append(s, "Domains: "+fmt.Sprintf("%#v", this.Domains)+",\n")
 	if this.VirtualServerType != nil {
 		s = append(s, "VirtualServerType: "+fmt.Sprintf("%#v", this.VirtualServerType)+",\n")
 	}
@@ -6261,6 +8170,8 @@ func (this *GlobalSpecType) GoString() string {
 	if this.AutoLastHop != nil {
 		s = append(s, "AutoLastHop: "+fmt.Sprintf("%#v", this.AutoLastHop)+",\n")
 	}
+	s = append(s, "Sse: "+fmt.Sprintf("%#v", this.Sse)+",\n")
+	s = append(s, "Json: "+fmt.Sprintf("%#v", this.Json)+",\n")
 	if this.LastHopPoolChoice != nil {
 		s = append(s, "LastHopPoolChoice: "+fmt.Sprintf("%#v", this.LastHopPoolChoice)+",\n")
 	}
@@ -6344,6 +8255,14 @@ func (this *GlobalSpecType_Udp) GoString() string {
 	}
 	s := strings.Join([]string{`&virtual_server.GlobalSpecType_Udp{` +
 		`Udp:` + fmt.Sprintf("%#v", this.Udp) + `}`}, ", ")
+	return s
+}
+func (this *GlobalSpecType_Http3) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&virtual_server.GlobalSpecType_Http3{` +
+		`Http3:` + fmt.Sprintf("%#v", this.Http3) + `}`}, ", ")
 	return s
 }
 func (this *GlobalSpecType_StatisticsProfileNone) GoString() string {
@@ -6442,23 +8361,144 @@ func (this *GlobalSpecType_FallbackPersistenceProfile) GoString() string {
 		`FallbackPersistenceProfile:` + fmt.Sprintf("%#v", this.FallbackPersistenceProfile) + `}`}, ", ")
 	return s
 }
-func (this *HTTPServices) GoString() string {
+func (this *TCPServices) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 8)
+	s = append(s, "&virtual_server.TCPServices{")
+	if this.Services != nil {
+		s = append(s, "Services: "+fmt.Sprintf("%#v", this.Services)+",\n")
+	}
+	if this.ProtocolClientProfile != nil {
+		s = append(s, "ProtocolClientProfile: "+fmt.Sprintf("%#v", this.ProtocolClientProfile)+",\n")
+	}
+	if this.SslClientProfiles != nil {
+		s = append(s, "SslClientProfiles: "+fmt.Sprintf("%#v", this.SslClientProfiles)+",\n")
+	}
+	if this.ServerAppTypeChoice != nil {
+		s = append(s, "ServerAppTypeChoice: "+fmt.Sprintf("%#v", this.ServerAppTypeChoice)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *TCPServices_ServerAppTypeSameAsClient) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&virtual_server.TCPServices_ServerAppTypeSameAsClient{` +
+		`ServerAppTypeSameAsClient:` + fmt.Sprintf("%#v", this.ServerAppTypeSameAsClient) + `}`}, ", ")
+	return s
+}
+func (this *UDPServices) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 8)
+	s = append(s, "&virtual_server.UDPServices{")
+	if this.Services != nil {
+		s = append(s, "Services: "+fmt.Sprintf("%#v", this.Services)+",\n")
+	}
+	if this.ProtocolClientProfile != nil {
+		s = append(s, "ProtocolClientProfile: "+fmt.Sprintf("%#v", this.ProtocolClientProfile)+",\n")
+	}
+	if this.SslClientProfiles != nil {
+		s = append(s, "SslClientProfiles: "+fmt.Sprintf("%#v", this.SslClientProfiles)+",\n")
+	}
+	if this.ServerAppTypeChoice != nil {
+		s = append(s, "ServerAppTypeChoice: "+fmt.Sprintf("%#v", this.ServerAppTypeChoice)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *UDPServices_ServerAppTypeSameAsClient) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&virtual_server.UDPServices_ServerAppTypeSameAsClient{` +
+		`ServerAppTypeSameAsClient:` + fmt.Sprintf("%#v", this.ServerAppTypeSameAsClient) + `}`}, ", ")
+	return s
+}
+func (this *HTTP3Services) GoString() string {
 	if this == nil {
 		return "nil"
 	}
 	s := make([]string, 0, 12)
+	s = append(s, "&virtual_server.HTTP3Services{")
+	if this.Services != nil {
+		s = append(s, "Services: "+fmt.Sprintf("%#v", this.Services)+",\n")
+	}
+	if this.ProtocolClientProfile != nil {
+		s = append(s, "ProtocolClientProfile: "+fmt.Sprintf("%#v", this.ProtocolClientProfile)+",\n")
+	}
+	if this.SslClientProfiles != nil {
+		s = append(s, "SslClientProfiles: "+fmt.Sprintf("%#v", this.SslClientProfiles)+",\n")
+	}
+	if this.HttpClientProfile != nil {
+		s = append(s, "HttpClientProfile: "+fmt.Sprintf("%#v", this.HttpClientProfile)+",\n")
+	}
+	if this.Http3ClientProfile != nil {
+		s = append(s, "Http3ClientProfile: "+fmt.Sprintf("%#v", this.Http3ClientProfile)+",\n")
+	}
+	if this.QuicProfileChoice != nil {
+		s = append(s, "QuicProfileChoice: "+fmt.Sprintf("%#v", this.QuicProfileChoice)+",\n")
+	}
+	if this.ServerAppTypeChoice != nil {
+		s = append(s, "ServerAppTypeChoice: "+fmt.Sprintf("%#v", this.ServerAppTypeChoice)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *HTTP3Services_QuicClientProfileNone) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&virtual_server.HTTP3Services_QuicClientProfileNone{` +
+		`QuicClientProfileNone:` + fmt.Sprintf("%#v", this.QuicClientProfileNone) + `}`}, ", ")
+	return s
+}
+func (this *HTTP3Services_QuicClientProfile) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&virtual_server.HTTP3Services_QuicClientProfile{` +
+		`QuicClientProfile:` + fmt.Sprintf("%#v", this.QuicClientProfile) + `}`}, ", ")
+	return s
+}
+func (this *HTTP3Services_ServerAppTypeDefault) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&virtual_server.HTTP3Services_ServerAppTypeDefault{` +
+		`ServerAppTypeDefault:` + fmt.Sprintf("%#v", this.ServerAppTypeDefault) + `}`}, ", ")
+	return s
+}
+func (this *HTTPServices) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 19)
 	s = append(s, "&virtual_server.HTTPServices{")
 	if this.Services != nil {
 		s = append(s, "Services: "+fmt.Sprintf("%#v", this.Services)+",\n")
 	}
-	if this.TcpProfiles != nil {
-		s = append(s, "TcpProfiles: "+fmt.Sprintf("%#v", this.TcpProfiles)+",\n")
+	if this.ProtocolClientProfile != nil {
+		s = append(s, "ProtocolClientProfile: "+fmt.Sprintf("%#v", this.ProtocolClientProfile)+",\n")
 	}
-	if this.HttpProfiles != nil {
-		s = append(s, "HttpProfiles: "+fmt.Sprintf("%#v", this.HttpProfiles)+",\n")
+	if this.HttpClientProfile != nil {
+		s = append(s, "HttpClientProfile: "+fmt.Sprintf("%#v", this.HttpClientProfile)+",\n")
 	}
-	if this.WebsocketProfiles != nil {
-		s = append(s, "WebsocketProfiles: "+fmt.Sprintf("%#v", this.WebsocketProfiles)+",\n")
+	if this.WebsocketClientProfileChoice != nil {
+		s = append(s, "WebsocketClientProfileChoice: "+fmt.Sprintf("%#v", this.WebsocketClientProfileChoice)+",\n")
+	}
+	if this.SslClientProfiles != nil {
+		s = append(s, "SslClientProfiles: "+fmt.Sprintf("%#v", this.SslClientProfiles)+",\n")
+	}
+	if this.Http2ClientProfileChoice != nil {
+		s = append(s, "Http2ClientProfileChoice: "+fmt.Sprintf("%#v", this.Http2ClientProfileChoice)+",\n")
+	}
+	if this.ServerAppTypeChoice != nil {
+		s = append(s, "ServerAppTypeChoice: "+fmt.Sprintf("%#v", this.ServerAppTypeChoice)+",\n")
 	}
 	if this.StreamProfileChoice != nil {
 		s = append(s, "StreamProfileChoice: "+fmt.Sprintf("%#v", this.StreamProfileChoice)+",\n")
@@ -6466,8 +8506,51 @@ func (this *HTTPServices) GoString() string {
 	if this.FixProfileChoice != nil {
 		s = append(s, "FixProfileChoice: "+fmt.Sprintf("%#v", this.FixProfileChoice)+",\n")
 	}
+	if this.OcspProfileChoice != nil {
+		s = append(s, "OcspProfileChoice: "+fmt.Sprintf("%#v", this.OcspProfileChoice)+",\n")
+	}
 	s = append(s, "}")
 	return strings.Join(s, "")
+}
+func (this *HTTPServices_WebsocketClientProfileNone) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&virtual_server.HTTPServices_WebsocketClientProfileNone{` +
+		`WebsocketClientProfileNone:` + fmt.Sprintf("%#v", this.WebsocketClientProfileNone) + `}`}, ", ")
+	return s
+}
+func (this *HTTPServices_WebsocketClientProfile) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&virtual_server.HTTPServices_WebsocketClientProfile{` +
+		`WebsocketClientProfile:` + fmt.Sprintf("%#v", this.WebsocketClientProfile) + `}`}, ", ")
+	return s
+}
+func (this *HTTPServices_Http2ClientProfileNone) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&virtual_server.HTTPServices_Http2ClientProfileNone{` +
+		`Http2ClientProfileNone:` + fmt.Sprintf("%#v", this.Http2ClientProfileNone) + `}`}, ", ")
+	return s
+}
+func (this *HTTPServices_Http2ClientProfile) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&virtual_server.HTTPServices_Http2ClientProfile{` +
+		`Http2ClientProfile:` + fmt.Sprintf("%#v", this.Http2ClientProfile) + `}`}, ", ")
+	return s
+}
+func (this *HTTPServices_ServerAppTypeSameAsClient) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&virtual_server.HTTPServices_ServerAppTypeSameAsClient{` +
+		`ServerAppTypeSameAsClient:` + fmt.Sprintf("%#v", this.ServerAppTypeSameAsClient) + `}`}, ", ")
+	return s
 }
 func (this *HTTPServices_StreamProfileNone) GoString() string {
 	if this == nil {
@@ -6499,6 +8582,206 @@ func (this *HTTPServices_FixProfile) GoString() string {
 	}
 	s := strings.Join([]string{`&virtual_server.HTTPServices_FixProfile{` +
 		`FixProfile:` + fmt.Sprintf("%#v", this.FixProfile) + `}`}, ", ")
+	return s
+}
+func (this *HTTPServices_OcspProfileNone) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&virtual_server.HTTPServices_OcspProfileNone{` +
+		`OcspProfileNone:` + fmt.Sprintf("%#v", this.OcspProfileNone) + `}`}, ", ")
+	return s
+}
+func (this *HTTPServices_OcspProfile) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&virtual_server.HTTPServices_OcspProfile{` +
+		`OcspProfile:` + fmt.Sprintf("%#v", this.OcspProfile) + `}`}, ", ")
+	return s
+}
+func (this *UDPDefaultServerSelection) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 7)
+	s = append(s, "&virtual_server.UDPDefaultServerSelection{")
+	if this.UdpServerProfileChoice != nil {
+		s = append(s, "UdpServerProfileChoice: "+fmt.Sprintf("%#v", this.UdpServerProfileChoice)+",\n")
+	}
+	if this.SslServerProfiles != nil {
+		s = append(s, "SslServerProfiles: "+fmt.Sprintf("%#v", this.SslServerProfiles)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *UDPDefaultServerSelection_UdpServerProfileUseClient) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&virtual_server.UDPDefaultServerSelection_UdpServerProfileUseClient{` +
+		`UdpServerProfileUseClient:` + fmt.Sprintf("%#v", this.UdpServerProfileUseClient) + `}`}, ", ")
+	return s
+}
+func (this *UDPDefaultServerSelection_UdpServerProfile) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&virtual_server.UDPDefaultServerSelection_UdpServerProfile{` +
+		`UdpServerProfile:` + fmt.Sprintf("%#v", this.UdpServerProfile) + `}`}, ", ")
+	return s
+}
+func (this *TCPDefaultServerSelection) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 7)
+	s = append(s, "&virtual_server.TCPDefaultServerSelection{")
+	if this.TcpServerProfileChoice != nil {
+		s = append(s, "TcpServerProfileChoice: "+fmt.Sprintf("%#v", this.TcpServerProfileChoice)+",\n")
+	}
+	if this.SslServerProfiles != nil {
+		s = append(s, "SslServerProfiles: "+fmt.Sprintf("%#v", this.SslServerProfiles)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *TCPDefaultServerSelection_TcpServerProfileUseClient) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&virtual_server.TCPDefaultServerSelection_TcpServerProfileUseClient{` +
+		`TcpServerProfileUseClient:` + fmt.Sprintf("%#v", this.TcpServerProfileUseClient) + `}`}, ", ")
+	return s
+}
+func (this *TCPDefaultServerSelection_TcpServerProfile) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&virtual_server.TCPDefaultServerSelection_TcpServerProfile{` +
+		`TcpServerProfile:` + fmt.Sprintf("%#v", this.TcpServerProfile) + `}`}, ", ")
+	return s
+}
+func (this *HTTPDefaultServerSelection) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 13)
+	s = append(s, "&virtual_server.HTTPDefaultServerSelection{")
+	if this.ProtocolServerProfileChoice != nil {
+		s = append(s, "ProtocolServerProfileChoice: "+fmt.Sprintf("%#v", this.ProtocolServerProfileChoice)+",\n")
+	}
+	if this.HttpServerProfileChoice != nil {
+		s = append(s, "HttpServerProfileChoice: "+fmt.Sprintf("%#v", this.HttpServerProfileChoice)+",\n")
+	}
+	if this.WebsocketServerProfileChoice != nil {
+		s = append(s, "WebsocketServerProfileChoice: "+fmt.Sprintf("%#v", this.WebsocketServerProfileChoice)+",\n")
+	}
+	if this.Http2ServerProfileChoice != nil {
+		s = append(s, "Http2ServerProfileChoice: "+fmt.Sprintf("%#v", this.Http2ServerProfileChoice)+",\n")
+	}
+	if this.SslServerProfiles != nil {
+		s = append(s, "SslServerProfiles: "+fmt.Sprintf("%#v", this.SslServerProfiles)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *HTTPDefaultServerSelection_ProtocolServerProfileSameAsClient) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&virtual_server.HTTPDefaultServerSelection_ProtocolServerProfileSameAsClient{` +
+		`ProtocolServerProfileSameAsClient:` + fmt.Sprintf("%#v", this.ProtocolServerProfileSameAsClient) + `}`}, ", ")
+	return s
+}
+func (this *HTTPDefaultServerSelection_ProtocolServerProfile) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&virtual_server.HTTPDefaultServerSelection_ProtocolServerProfile{` +
+		`ProtocolServerProfile:` + fmt.Sprintf("%#v", this.ProtocolServerProfile) + `}`}, ", ")
+	return s
+}
+func (this *HTTPDefaultServerSelection_HttpServerProfileSameAsClient) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&virtual_server.HTTPDefaultServerSelection_HttpServerProfileSameAsClient{` +
+		`HttpServerProfileSameAsClient:` + fmt.Sprintf("%#v", this.HttpServerProfileSameAsClient) + `}`}, ", ")
+	return s
+}
+func (this *HTTPDefaultServerSelection_HttpServerProfile) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&virtual_server.HTTPDefaultServerSelection_HttpServerProfile{` +
+		`HttpServerProfile:` + fmt.Sprintf("%#v", this.HttpServerProfile) + `}`}, ", ")
+	return s
+}
+func (this *HTTPDefaultServerSelection_WebsocketServerProfileSameAsClient) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&virtual_server.HTTPDefaultServerSelection_WebsocketServerProfileSameAsClient{` +
+		`WebsocketServerProfileSameAsClient:` + fmt.Sprintf("%#v", this.WebsocketServerProfileSameAsClient) + `}`}, ", ")
+	return s
+}
+func (this *HTTPDefaultServerSelection_WebsocketServerProfile) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&virtual_server.HTTPDefaultServerSelection_WebsocketServerProfile{` +
+		`WebsocketServerProfile:` + fmt.Sprintf("%#v", this.WebsocketServerProfile) + `}`}, ", ")
+	return s
+}
+func (this *HTTPDefaultServerSelection_Http2ServerProfileNone) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&virtual_server.HTTPDefaultServerSelection_Http2ServerProfileNone{` +
+		`Http2ServerProfileNone:` + fmt.Sprintf("%#v", this.Http2ServerProfileNone) + `}`}, ", ")
+	return s
+}
+func (this *HTTPDefaultServerSelection_Http2ServerProfile) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&virtual_server.HTTPDefaultServerSelection_Http2ServerProfile{` +
+		`Http2ServerProfile:` + fmt.Sprintf("%#v", this.Http2ServerProfile) + `}`}, ", ")
+	return s
+}
+func (this *HTTP3DefaultServerSelection) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 8)
+	s = append(s, "&virtual_server.HTTP3DefaultServerSelection{")
+	if this.TcpServerProfile != nil {
+		s = append(s, "TcpServerProfile: "+fmt.Sprintf("%#v", this.TcpServerProfile)+",\n")
+	}
+	if this.HttpServerProfileChoice != nil {
+		s = append(s, "HttpServerProfileChoice: "+fmt.Sprintf("%#v", this.HttpServerProfileChoice)+",\n")
+	}
+	if this.SslServerProfiles != nil {
+		s = append(s, "SslServerProfiles: "+fmt.Sprintf("%#v", this.SslServerProfiles)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *HTTP3DefaultServerSelection_HttpServerProfileSameAsClient) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&virtual_server.HTTP3DefaultServerSelection_HttpServerProfileSameAsClient{` +
+		`HttpServerProfileSameAsClient:` + fmt.Sprintf("%#v", this.HttpServerProfileSameAsClient) + `}`}, ", ")
+	return s
+}
+func (this *HTTP3DefaultServerSelection_HttpServerProfile) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&virtual_server.HTTP3DefaultServerSelection_HttpServerProfile{` +
+		`HttpServerProfile:` + fmt.Sprintf("%#v", this.HttpServerProfile) + `}`}, ", ")
 	return s
 }
 func (this *DomainsManagedByF5XC) GoString() string {
@@ -6553,115 +8836,6 @@ func (this *TranslationType) GoString() string {
 	}
 	s = append(s, "}")
 	return strings.Join(s, "")
-}
-func (this *TCPProfileType) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := make([]string, 0, 7)
-	s = append(s, "&virtual_server.TCPProfileType{")
-	if this.ClientProfile != nil {
-		s = append(s, "ClientProfile: "+fmt.Sprintf("%#v", this.ClientProfile)+",\n")
-	}
-	if this.TcpServerProfileChoice != nil {
-		s = append(s, "TcpServerProfileChoice: "+fmt.Sprintf("%#v", this.TcpServerProfileChoice)+",\n")
-	}
-	s = append(s, "}")
-	return strings.Join(s, "")
-}
-func (this *TCPProfileType_ServerProfileSameAsClient) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&virtual_server.TCPProfileType_ServerProfileSameAsClient{` +
-		`ServerProfileSameAsClient:` + fmt.Sprintf("%#v", this.ServerProfileSameAsClient) + `}`}, ", ")
-	return s
-}
-func (this *TCPProfileType_ServerProfile) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&virtual_server.TCPProfileType_ServerProfile{` +
-		`ServerProfile:` + fmt.Sprintf("%#v", this.ServerProfile) + `}`}, ", ")
-	return s
-}
-func (this *HTTPProfileType) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := make([]string, 0, 7)
-	s = append(s, "&virtual_server.HTTPProfileType{")
-	if this.ClientProfile != nil {
-		s = append(s, "ClientProfile: "+fmt.Sprintf("%#v", this.ClientProfile)+",\n")
-	}
-	if this.HttpServerProfileChoice != nil {
-		s = append(s, "HttpServerProfileChoice: "+fmt.Sprintf("%#v", this.HttpServerProfileChoice)+",\n")
-	}
-	s = append(s, "}")
-	return strings.Join(s, "")
-}
-func (this *HTTPProfileType_ServerProfileSameAsClient) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&virtual_server.HTTPProfileType_ServerProfileSameAsClient{` +
-		`ServerProfileSameAsClient:` + fmt.Sprintf("%#v", this.ServerProfileSameAsClient) + `}`}, ", ")
-	return s
-}
-func (this *HTTPProfileType_ServerProfile) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&virtual_server.HTTPProfileType_ServerProfile{` +
-		`ServerProfile:` + fmt.Sprintf("%#v", this.ServerProfile) + `}`}, ", ")
-	return s
-}
-func (this *WebsocketProfileType) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := make([]string, 0, 8)
-	s = append(s, "&virtual_server.WebsocketProfileType{")
-	if this.WebsocketClientProfileChoice != nil {
-		s = append(s, "WebsocketClientProfileChoice: "+fmt.Sprintf("%#v", this.WebsocketClientProfileChoice)+",\n")
-	}
-	if this.WebsocketServerProfileChoice != nil {
-		s = append(s, "WebsocketServerProfileChoice: "+fmt.Sprintf("%#v", this.WebsocketServerProfileChoice)+",\n")
-	}
-	s = append(s, "}")
-	return strings.Join(s, "")
-}
-func (this *WebsocketProfileType_ClientProfileNone) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&virtual_server.WebsocketProfileType_ClientProfileNone{` +
-		`ClientProfileNone:` + fmt.Sprintf("%#v", this.ClientProfileNone) + `}`}, ", ")
-	return s
-}
-func (this *WebsocketProfileType_ClientProfile) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&virtual_server.WebsocketProfileType_ClientProfile{` +
-		`ClientProfile:` + fmt.Sprintf("%#v", this.ClientProfile) + `}`}, ", ")
-	return s
-}
-func (this *WebsocketProfileType_ServerProfileSameAsClient) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&virtual_server.WebsocketProfileType_ServerProfileSameAsClient{` +
-		`ServerProfileSameAsClient:` + fmt.Sprintf("%#v", this.ServerProfileSameAsClient) + `}`}, ", ")
-	return s
-}
-func (this *WebsocketProfileType_ServerProfile) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&virtual_server.WebsocketProfileType_ServerProfile{` +
-		`ServerProfile:` + fmt.Sprintf("%#v", this.ServerProfile) + `}`}, ", ")
-	return s
 }
 func (this *ClonePoolType) GoString() string {
 	if this == nil {
@@ -6768,16 +8942,17 @@ func (this *CreateSpecType) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 31)
+	s := make([]string, 0, 35)
 	s = append(s, "&virtual_server.CreateSpecType{")
 	if this.State != nil {
 		s = append(s, "State: "+fmt.Sprintf("%#v", this.State)+",\n")
 	}
-	if this.DomainChoice != nil {
-		s = append(s, "DomainChoice: "+fmt.Sprintf("%#v", this.DomainChoice)+",\n")
-	}
+	s = append(s, "Domains: "+fmt.Sprintf("%#v", this.Domains)+",\n")
 	if this.VirtualServerType != nil {
 		s = append(s, "VirtualServerType: "+fmt.Sprintf("%#v", this.VirtualServerType)+",\n")
+	}
+	if this.StatisticsProfileChoice != nil {
+		s = append(s, "StatisticsProfileChoice: "+fmt.Sprintf("%#v", this.StatisticsProfileChoice)+",\n")
 	}
 	if this.ConnectionLimitOptions != nil {
 		s = append(s, "ConnectionLimitOptions: "+fmt.Sprintf("%#v", this.ConnectionLimitOptions)+",\n")
@@ -6791,6 +8966,8 @@ func (this *CreateSpecType) GoString() string {
 	if this.AutoLastHop != nil {
 		s = append(s, "AutoLastHop: "+fmt.Sprintf("%#v", this.AutoLastHop)+",\n")
 	}
+	s = append(s, "Sse: "+fmt.Sprintf("%#v", this.Sse)+",\n")
+	s = append(s, "Json: "+fmt.Sprintf("%#v", this.Json)+",\n")
 	if this.LastHopPoolChoice != nil {
 		s = append(s, "LastHopPoolChoice: "+fmt.Sprintf("%#v", this.LastHopPoolChoice)+",\n")
 	}
@@ -6825,22 +9002,6 @@ func (this *CreateSpecType) GoString() string {
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
-func (this *CreateSpecType_Managed) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&virtual_server.CreateSpecType_Managed{` +
-		`Managed:` + fmt.Sprintf("%#v", this.Managed) + `}`}, ", ")
-	return s
-}
-func (this *CreateSpecType_NotManaged) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&virtual_server.CreateSpecType_NotManaged{` +
-		`NotManaged:` + fmt.Sprintf("%#v", this.NotManaged) + `}`}, ", ")
-	return s
-}
 func (this *CreateSpecType_Https) GoString() string {
 	if this == nil {
 		return "nil"
@@ -6871,6 +9032,30 @@ func (this *CreateSpecType_Udp) GoString() string {
 	}
 	s := strings.Join([]string{`&virtual_server.CreateSpecType_Udp{` +
 		`Udp:` + fmt.Sprintf("%#v", this.Udp) + `}`}, ", ")
+	return s
+}
+func (this *CreateSpecType_Http3) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&virtual_server.CreateSpecType_Http3{` +
+		`Http3:` + fmt.Sprintf("%#v", this.Http3) + `}`}, ", ")
+	return s
+}
+func (this *CreateSpecType_StatisticsProfileNone) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&virtual_server.CreateSpecType_StatisticsProfileNone{` +
+		`StatisticsProfileNone:` + fmt.Sprintf("%#v", this.StatisticsProfileNone) + `}`}, ", ")
+	return s
+}
+func (this *CreateSpecType_StatisticsProfile) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&virtual_server.CreateSpecType_StatisticsProfile{` +
+		`StatisticsProfile:` + fmt.Sprintf("%#v", this.StatisticsProfile) + `}`}, ", ")
 	return s
 }
 func (this *CreateSpecType_LastHopPoolNone) GoString() string {
@@ -6957,16 +9142,17 @@ func (this *ReplaceSpecType) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 31)
+	s := make([]string, 0, 35)
 	s = append(s, "&virtual_server.ReplaceSpecType{")
 	if this.State != nil {
 		s = append(s, "State: "+fmt.Sprintf("%#v", this.State)+",\n")
 	}
-	if this.DomainChoice != nil {
-		s = append(s, "DomainChoice: "+fmt.Sprintf("%#v", this.DomainChoice)+",\n")
-	}
+	s = append(s, "Domains: "+fmt.Sprintf("%#v", this.Domains)+",\n")
 	if this.VirtualServerType != nil {
 		s = append(s, "VirtualServerType: "+fmt.Sprintf("%#v", this.VirtualServerType)+",\n")
+	}
+	if this.StatisticsProfileChoice != nil {
+		s = append(s, "StatisticsProfileChoice: "+fmt.Sprintf("%#v", this.StatisticsProfileChoice)+",\n")
 	}
 	if this.ConnectionLimitOptions != nil {
 		s = append(s, "ConnectionLimitOptions: "+fmt.Sprintf("%#v", this.ConnectionLimitOptions)+",\n")
@@ -6980,6 +9166,8 @@ func (this *ReplaceSpecType) GoString() string {
 	if this.AutoLastHop != nil {
 		s = append(s, "AutoLastHop: "+fmt.Sprintf("%#v", this.AutoLastHop)+",\n")
 	}
+	s = append(s, "Sse: "+fmt.Sprintf("%#v", this.Sse)+",\n")
+	s = append(s, "Json: "+fmt.Sprintf("%#v", this.Json)+",\n")
 	if this.LastHopPoolChoice != nil {
 		s = append(s, "LastHopPoolChoice: "+fmt.Sprintf("%#v", this.LastHopPoolChoice)+",\n")
 	}
@@ -7014,22 +9202,6 @@ func (this *ReplaceSpecType) GoString() string {
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
-func (this *ReplaceSpecType_Managed) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&virtual_server.ReplaceSpecType_Managed{` +
-		`Managed:` + fmt.Sprintf("%#v", this.Managed) + `}`}, ", ")
-	return s
-}
-func (this *ReplaceSpecType_NotManaged) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&virtual_server.ReplaceSpecType_NotManaged{` +
-		`NotManaged:` + fmt.Sprintf("%#v", this.NotManaged) + `}`}, ", ")
-	return s
-}
 func (this *ReplaceSpecType_Https) GoString() string {
 	if this == nil {
 		return "nil"
@@ -7060,6 +9232,30 @@ func (this *ReplaceSpecType_Udp) GoString() string {
 	}
 	s := strings.Join([]string{`&virtual_server.ReplaceSpecType_Udp{` +
 		`Udp:` + fmt.Sprintf("%#v", this.Udp) + `}`}, ", ")
+	return s
+}
+func (this *ReplaceSpecType_Http3) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&virtual_server.ReplaceSpecType_Http3{` +
+		`Http3:` + fmt.Sprintf("%#v", this.Http3) + `}`}, ", ")
+	return s
+}
+func (this *ReplaceSpecType_StatisticsProfileNone) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&virtual_server.ReplaceSpecType_StatisticsProfileNone{` +
+		`StatisticsProfileNone:` + fmt.Sprintf("%#v", this.StatisticsProfileNone) + `}`}, ", ")
+	return s
+}
+func (this *ReplaceSpecType_StatisticsProfile) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&virtual_server.ReplaceSpecType_StatisticsProfile{` +
+		`StatisticsProfile:` + fmt.Sprintf("%#v", this.StatisticsProfile) + `}`}, ", ")
 	return s
 }
 func (this *ReplaceSpecType_LastHopPoolNone) GoString() string {
@@ -7146,16 +9342,17 @@ func (this *GetSpecType) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 31)
+	s := make([]string, 0, 35)
 	s = append(s, "&virtual_server.GetSpecType{")
 	if this.State != nil {
 		s = append(s, "State: "+fmt.Sprintf("%#v", this.State)+",\n")
 	}
-	if this.DomainChoice != nil {
-		s = append(s, "DomainChoice: "+fmt.Sprintf("%#v", this.DomainChoice)+",\n")
-	}
+	s = append(s, "Domains: "+fmt.Sprintf("%#v", this.Domains)+",\n")
 	if this.VirtualServerType != nil {
 		s = append(s, "VirtualServerType: "+fmt.Sprintf("%#v", this.VirtualServerType)+",\n")
+	}
+	if this.StatisticsProfileChoice != nil {
+		s = append(s, "StatisticsProfileChoice: "+fmt.Sprintf("%#v", this.StatisticsProfileChoice)+",\n")
 	}
 	if this.ConnectionLimitOptions != nil {
 		s = append(s, "ConnectionLimitOptions: "+fmt.Sprintf("%#v", this.ConnectionLimitOptions)+",\n")
@@ -7169,6 +9366,8 @@ func (this *GetSpecType) GoString() string {
 	if this.AutoLastHop != nil {
 		s = append(s, "AutoLastHop: "+fmt.Sprintf("%#v", this.AutoLastHop)+",\n")
 	}
+	s = append(s, "Sse: "+fmt.Sprintf("%#v", this.Sse)+",\n")
+	s = append(s, "Json: "+fmt.Sprintf("%#v", this.Json)+",\n")
 	if this.LastHopPoolChoice != nil {
 		s = append(s, "LastHopPoolChoice: "+fmt.Sprintf("%#v", this.LastHopPoolChoice)+",\n")
 	}
@@ -7203,22 +9402,6 @@ func (this *GetSpecType) GoString() string {
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
-func (this *GetSpecType_Managed) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&virtual_server.GetSpecType_Managed{` +
-		`Managed:` + fmt.Sprintf("%#v", this.Managed) + `}`}, ", ")
-	return s
-}
-func (this *GetSpecType_NotManaged) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&virtual_server.GetSpecType_NotManaged{` +
-		`NotManaged:` + fmt.Sprintf("%#v", this.NotManaged) + `}`}, ", ")
-	return s
-}
 func (this *GetSpecType_Https) GoString() string {
 	if this == nil {
 		return "nil"
@@ -7249,6 +9432,30 @@ func (this *GetSpecType_Udp) GoString() string {
 	}
 	s := strings.Join([]string{`&virtual_server.GetSpecType_Udp{` +
 		`Udp:` + fmt.Sprintf("%#v", this.Udp) + `}`}, ", ")
+	return s
+}
+func (this *GetSpecType_Http3) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&virtual_server.GetSpecType_Http3{` +
+		`Http3:` + fmt.Sprintf("%#v", this.Http3) + `}`}, ", ")
+	return s
+}
+func (this *GetSpecType_StatisticsProfileNone) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&virtual_server.GetSpecType_StatisticsProfileNone{` +
+		`StatisticsProfileNone:` + fmt.Sprintf("%#v", this.StatisticsProfileNone) + `}`}, ", ")
+	return s
+}
+func (this *GetSpecType_StatisticsProfile) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&virtual_server.GetSpecType_StatisticsProfile{` +
+		`StatisticsProfile:` + fmt.Sprintf("%#v", this.StatisticsProfile) + `}`}, ", ")
 	return s
 }
 func (this *GetSpecType_LastHopPoolNone) GoString() string {
@@ -7435,6 +9642,20 @@ func (m *GlobalSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 			}
 		}
 	}
+	if m.Json != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.Json))
+		i--
+		dAtA[i] = 0x3
+		i--
+		dAtA[i] = 0x98
+	}
+	if m.Sse != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.Sse))
+		i--
+		dAtA[i] = 0x3
+		i--
+		dAtA[i] = 0x90
+	}
 	if m.AutoLastHop != nil {
 		{
 			size, err := m.AutoLastHop.MarshalToSizedBuffer(dAtA[:i])
@@ -7476,6 +9697,15 @@ func (m *GlobalSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		dAtA[i] = 0x2
 		i--
 		dAtA[i] = 0x92
+	}
+	if m.VirtualServerType != nil {
+		{
+			size := m.VirtualServerType.Size()
+			i -= size
+			if _, err := m.VirtualServerType.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
 	}
 	if m.StatisticsProfileChoice != nil {
 		{
@@ -7560,13 +9790,13 @@ func (m *GlobalSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x62
 	}
-	if m.VirtualServerType != nil {
-		{
-			size := m.VirtualServerType.Size()
-			i -= size
-			if _, err := m.VirtualServerType.MarshalTo(dAtA[i:]); err != nil {
-				return 0, err
-			}
+	if len(m.Domains) > 0 {
+		for iNdEx := len(m.Domains) - 1; iNdEx >= 0; iNdEx-- {
+			i -= len(m.Domains[iNdEx])
+			copy(dAtA[i:], m.Domains[iNdEx])
+			i = encodeVarintTypes(dAtA, i, uint64(len(m.Domains[iNdEx])))
+			i--
+			dAtA[i] = 0x2a
 		}
 	}
 	if m.DomainChoice != nil {
@@ -7857,6 +10087,29 @@ func (m *GlobalSpecType_StatisticsProfile) MarshalToSizedBuffer(dAtA []byte) (in
 	}
 	return len(dAtA) - i, nil
 }
+func (m *GlobalSpecType_Http3) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GlobalSpecType_Http3) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.Http3 != nil {
+		{
+			size, err := m.Http3.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1
+		i--
+		dAtA[i] = 0xca
+	}
+	return len(dAtA) - i, nil
+}
 func (m *GlobalSpecType_LastHopPoolNone) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
@@ -7995,7 +10248,7 @@ func (m *GlobalSpecType_DefaultPool) MarshalToSizedBuffer(dAtA []byte) (int, err
 	}
 	return len(dAtA) - i, nil
 }
-func (m *HTTPServices) Marshal() (dAtA []byte, err error) {
+func (m *TCPServices) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -8005,61 +10258,42 @@ func (m *HTTPServices) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *HTTPServices) MarshalTo(dAtA []byte) (int, error) {
+func (m *TCPServices) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *HTTPServices) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *TCPServices) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
-	if m.FixProfileChoice != nil {
+	if m.ServerAppTypeChoice != nil {
 		{
-			size := m.FixProfileChoice.Size()
+			size := m.ServerAppTypeChoice.Size()
 			i -= size
-			if _, err := m.FixProfileChoice.MarshalTo(dAtA[i:]); err != nil {
+			if _, err := m.ServerAppTypeChoice.MarshalTo(dAtA[i:]); err != nil {
 				return 0, err
 			}
 		}
 	}
-	if m.StreamProfileChoice != nil {
-		{
-			size := m.StreamProfileChoice.Size()
-			i -= size
-			if _, err := m.StreamProfileChoice.MarshalTo(dAtA[i:]); err != nil {
-				return 0, err
+	if len(m.SslClientProfiles) > 0 {
+		for iNdEx := len(m.SslClientProfiles) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.SslClientProfiles[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTypes(dAtA, i, uint64(size))
 			}
+			i--
+			dAtA[i] = 0x1a
 		}
 	}
-	if m.WebsocketProfiles != nil {
+	if m.ProtocolClientProfile != nil {
 		{
-			size, err := m.WebsocketProfiles.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintTypes(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0x22
-	}
-	if m.HttpProfiles != nil {
-		{
-			size, err := m.HttpProfiles.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintTypes(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0x1a
-	}
-	if m.TcpProfiles != nil {
-		{
-			size, err := m.TcpProfiles.MarshalToSizedBuffer(dAtA[:i])
+			size, err := m.ProtocolClientProfile.MarshalToSizedBuffer(dAtA[:i])
 			if err != nil {
 				return 0, err
 			}
@@ -8086,6 +10320,461 @@ func (m *HTTPServices) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
+func (m *TCPServices_ServerAppTypeSameAsClient) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *TCPServices_ServerAppTypeSameAsClient) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.ServerAppTypeSameAsClient != nil {
+		{
+			size, err := m.ServerAppTypeSameAsClient.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x2a
+	}
+	return len(dAtA) - i, nil
+}
+func (m *UDPServices) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *UDPServices) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *UDPServices) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.ServerAppTypeChoice != nil {
+		{
+			size := m.ServerAppTypeChoice.Size()
+			i -= size
+			if _, err := m.ServerAppTypeChoice.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
+	}
+	if len(m.SslClientProfiles) > 0 {
+		for iNdEx := len(m.SslClientProfiles) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.SslClientProfiles[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTypes(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x1a
+		}
+	}
+	if m.ProtocolClientProfile != nil {
+		{
+			size, err := m.ProtocolClientProfile.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Services) > 0 {
+		for iNdEx := len(m.Services) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Services[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTypes(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *UDPServices_ServerAppTypeSameAsClient) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *UDPServices_ServerAppTypeSameAsClient) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.ServerAppTypeSameAsClient != nil {
+		{
+			size, err := m.ServerAppTypeSameAsClient.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x2a
+	}
+	return len(dAtA) - i, nil
+}
+func (m *HTTP3Services) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *HTTP3Services) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *HTTP3Services) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.QuicProfileChoice != nil {
+		{
+			size := m.QuicProfileChoice.Size()
+			i -= size
+			if _, err := m.QuicProfileChoice.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
+	}
+	if m.Http3ClientProfile != nil {
+		{
+			size, err := m.Http3ClientProfile.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x42
+	}
+	if m.HttpClientProfile != nil {
+		{
+			size, err := m.HttpClientProfile.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x3a
+	}
+	if m.ServerAppTypeChoice != nil {
+		{
+			size := m.ServerAppTypeChoice.Size()
+			i -= size
+			if _, err := m.ServerAppTypeChoice.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
+	}
+	if len(m.SslClientProfiles) > 0 {
+		for iNdEx := len(m.SslClientProfiles) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.SslClientProfiles[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTypes(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x1a
+		}
+	}
+	if m.ProtocolClientProfile != nil {
+		{
+			size, err := m.ProtocolClientProfile.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Services) > 0 {
+		for iNdEx := len(m.Services) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Services[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTypes(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *HTTP3Services_ServerAppTypeDefault) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *HTTP3Services_ServerAppTypeDefault) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.ServerAppTypeDefault != nil {
+		{
+			size, err := m.ServerAppTypeDefault.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x2a
+	}
+	return len(dAtA) - i, nil
+}
+func (m *HTTP3Services_QuicClientProfileNone) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *HTTP3Services_QuicClientProfileNone) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.QuicClientProfileNone != nil {
+		{
+			size, err := m.QuicClientProfileNone.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x62
+	}
+	return len(dAtA) - i, nil
+}
+func (m *HTTP3Services_QuicClientProfile) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *HTTP3Services_QuicClientProfile) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.QuicClientProfile != nil {
+		{
+			size, err := m.QuicClientProfile.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x6a
+	}
+	return len(dAtA) - i, nil
+}
+func (m *HTTPServices) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *HTTPServices) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *HTTPServices) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.ServerAppTypeChoice != nil {
+		{
+			size := m.ServerAppTypeChoice.Size()
+			i -= size
+			if _, err := m.ServerAppTypeChoice.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
+	}
+	if m.OcspProfileChoice != nil {
+		{
+			size := m.OcspProfileChoice.Size()
+			i -= size
+			if _, err := m.OcspProfileChoice.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
+	}
+	if m.FixProfileChoice != nil {
+		{
+			size := m.FixProfileChoice.Size()
+			i -= size
+			if _, err := m.FixProfileChoice.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
+	}
+	if m.HttpClientProfile != nil {
+		{
+			size, err := m.HttpClientProfile.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1
+		i--
+		dAtA[i] = 0x82
+	}
+	if m.Http2ClientProfileChoice != nil {
+		{
+			size := m.Http2ClientProfileChoice.Size()
+			i -= size
+			if _, err := m.Http2ClientProfileChoice.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
+	}
+	if m.StreamProfileChoice != nil {
+		{
+			size := m.StreamProfileChoice.Size()
+			i -= size
+			if _, err := m.StreamProfileChoice.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
+	}
+	if len(m.SslClientProfiles) > 0 {
+		for iNdEx := len(m.SslClientProfiles) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.SslClientProfiles[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTypes(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x4a
+		}
+	}
+	if m.WebsocketClientProfileChoice != nil {
+		{
+			size := m.WebsocketClientProfileChoice.Size()
+			i -= size
+			if _, err := m.WebsocketClientProfileChoice.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
+	}
+	if m.ProtocolClientProfile != nil {
+		{
+			size, err := m.ProtocolClientProfile.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x2a
+	}
+	if len(m.Services) > 0 {
+		for iNdEx := len(m.Services) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Services[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTypes(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *HTTPServices_WebsocketClientProfileNone) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *HTTPServices_WebsocketClientProfileNone) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.WebsocketClientProfileNone != nil {
+		{
+			size, err := m.WebsocketClientProfileNone.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x3a
+	}
+	return len(dAtA) - i, nil
+}
+func (m *HTTPServices_WebsocketClientProfile) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *HTTPServices_WebsocketClientProfile) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.WebsocketClientProfile != nil {
+		{
+			size, err := m.WebsocketClientProfile.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x42
+	}
+	return len(dAtA) - i, nil
+}
 func (m *HTTPServices_StreamProfileNone) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
@@ -8125,6 +10814,48 @@ func (m *HTTPServices_StreamProfile) MarshalToSizedBuffer(dAtA []byte) (int, err
 		}
 		i--
 		dAtA[i] = 0x62
+	}
+	return len(dAtA) - i, nil
+}
+func (m *HTTPServices_Http2ClientProfileNone) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *HTTPServices_Http2ClientProfileNone) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.Http2ClientProfileNone != nil {
+		{
+			size, err := m.Http2ClientProfileNone.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x72
+	}
+	return len(dAtA) - i, nil
+}
+func (m *HTTPServices_Http2ClientProfile) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *HTTPServices_Http2ClientProfile) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.Http2ClientProfile != nil {
+		{
+			size, err := m.Http2ClientProfile.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x7a
 	}
 	return len(dAtA) - i, nil
 }
@@ -8171,6 +10902,594 @@ func (m *HTTPServices_FixProfile) MarshalToSizedBuffer(dAtA []byte) (int, error)
 		dAtA[i] = 0x1
 		i--
 		dAtA[i] = 0xaa
+	}
+	return len(dAtA) - i, nil
+}
+func (m *HTTPServices_OcspProfileNone) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *HTTPServices_OcspProfileNone) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.OcspProfileNone != nil {
+		{
+			size, err := m.OcspProfileNone.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1
+		i--
+		dAtA[i] = 0xba
+	}
+	return len(dAtA) - i, nil
+}
+func (m *HTTPServices_OcspProfile) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *HTTPServices_OcspProfile) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.OcspProfile != nil {
+		{
+			size, err := m.OcspProfile.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1
+		i--
+		dAtA[i] = 0xc2
+	}
+	return len(dAtA) - i, nil
+}
+func (m *HTTPServices_ServerAppTypeSameAsClient) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *HTTPServices_ServerAppTypeSameAsClient) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.ServerAppTypeSameAsClient != nil {
+		{
+			size, err := m.ServerAppTypeSameAsClient.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1
+		i--
+		dAtA[i] = 0xd2
+	}
+	return len(dAtA) - i, nil
+}
+func (m *UDPDefaultServerSelection) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *UDPDefaultServerSelection) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *UDPDefaultServerSelection) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.SslServerProfiles) > 0 {
+		for iNdEx := len(m.SslServerProfiles) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.SslServerProfiles[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTypes(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x22
+		}
+	}
+	if m.UdpServerProfileChoice != nil {
+		{
+			size := m.UdpServerProfileChoice.Size()
+			i -= size
+			if _, err := m.UdpServerProfileChoice.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *UDPDefaultServerSelection_UdpServerProfileUseClient) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *UDPDefaultServerSelection_UdpServerProfileUseClient) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.UdpServerProfileUseClient != nil {
+		{
+			size, err := m.UdpServerProfileUseClient.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	return len(dAtA) - i, nil
+}
+func (m *UDPDefaultServerSelection_UdpServerProfile) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *UDPDefaultServerSelection_UdpServerProfile) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.UdpServerProfile != nil {
+		{
+			size, err := m.UdpServerProfile.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1a
+	}
+	return len(dAtA) - i, nil
+}
+func (m *TCPDefaultServerSelection) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *TCPDefaultServerSelection) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *TCPDefaultServerSelection) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.SslServerProfiles) > 0 {
+		for iNdEx := len(m.SslServerProfiles) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.SslServerProfiles[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTypes(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x22
+		}
+	}
+	if m.TcpServerProfileChoice != nil {
+		{
+			size := m.TcpServerProfileChoice.Size()
+			i -= size
+			if _, err := m.TcpServerProfileChoice.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *TCPDefaultServerSelection_TcpServerProfileUseClient) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *TCPDefaultServerSelection_TcpServerProfileUseClient) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.TcpServerProfileUseClient != nil {
+		{
+			size, err := m.TcpServerProfileUseClient.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	return len(dAtA) - i, nil
+}
+func (m *TCPDefaultServerSelection_TcpServerProfile) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *TCPDefaultServerSelection_TcpServerProfile) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.TcpServerProfile != nil {
+		{
+			size, err := m.TcpServerProfile.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1a
+	}
+	return len(dAtA) - i, nil
+}
+func (m *HTTPDefaultServerSelection) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *HTTPDefaultServerSelection) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *HTTPDefaultServerSelection) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.SslServerProfiles) > 0 {
+		for iNdEx := len(m.SslServerProfiles) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.SslServerProfiles[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTypes(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x1
+			i--
+			dAtA[i] = 0x82
+		}
+	}
+	if m.Http2ServerProfileChoice != nil {
+		{
+			size := m.Http2ServerProfileChoice.Size()
+			i -= size
+			if _, err := m.Http2ServerProfileChoice.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
+	}
+	if m.WebsocketServerProfileChoice != nil {
+		{
+			size := m.WebsocketServerProfileChoice.Size()
+			i -= size
+			if _, err := m.WebsocketServerProfileChoice.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
+	}
+	if m.HttpServerProfileChoice != nil {
+		{
+			size := m.HttpServerProfileChoice.Size()
+			i -= size
+			if _, err := m.HttpServerProfileChoice.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
+	}
+	if m.ProtocolServerProfileChoice != nil {
+		{
+			size := m.ProtocolServerProfileChoice.Size()
+			i -= size
+			if _, err := m.ProtocolServerProfileChoice.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *HTTPDefaultServerSelection_ProtocolServerProfileSameAsClient) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *HTTPDefaultServerSelection_ProtocolServerProfileSameAsClient) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.ProtocolServerProfileSameAsClient != nil {
+		{
+			size, err := m.ProtocolServerProfileSameAsClient.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	return len(dAtA) - i, nil
+}
+func (m *HTTPDefaultServerSelection_ProtocolServerProfile) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *HTTPDefaultServerSelection_ProtocolServerProfile) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.ProtocolServerProfile != nil {
+		{
+			size, err := m.ProtocolServerProfile.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1a
+	}
+	return len(dAtA) - i, nil
+}
+func (m *HTTPDefaultServerSelection_HttpServerProfileSameAsClient) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *HTTPDefaultServerSelection_HttpServerProfileSameAsClient) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.HttpServerProfileSameAsClient != nil {
+		{
+			size, err := m.HttpServerProfileSameAsClient.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x2a
+	}
+	return len(dAtA) - i, nil
+}
+func (m *HTTPDefaultServerSelection_HttpServerProfile) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *HTTPDefaultServerSelection_HttpServerProfile) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.HttpServerProfile != nil {
+		{
+			size, err := m.HttpServerProfile.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x32
+	}
+	return len(dAtA) - i, nil
+}
+func (m *HTTPDefaultServerSelection_WebsocketServerProfileSameAsClient) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *HTTPDefaultServerSelection_WebsocketServerProfileSameAsClient) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.WebsocketServerProfileSameAsClient != nil {
+		{
+			size, err := m.WebsocketServerProfileSameAsClient.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x42
+	}
+	return len(dAtA) - i, nil
+}
+func (m *HTTPDefaultServerSelection_WebsocketServerProfile) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *HTTPDefaultServerSelection_WebsocketServerProfile) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.WebsocketServerProfile != nil {
+		{
+			size, err := m.WebsocketServerProfile.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x4a
+	}
+	return len(dAtA) - i, nil
+}
+func (m *HTTPDefaultServerSelection_Http2ServerProfileNone) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *HTTPDefaultServerSelection_Http2ServerProfileNone) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.Http2ServerProfileNone != nil {
+		{
+			size, err := m.Http2ServerProfileNone.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x72
+	}
+	return len(dAtA) - i, nil
+}
+func (m *HTTPDefaultServerSelection_Http2ServerProfile) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *HTTPDefaultServerSelection_Http2ServerProfile) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.Http2ServerProfile != nil {
+		{
+			size, err := m.Http2ServerProfile.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x7a
+	}
+	return len(dAtA) - i, nil
+}
+func (m *HTTP3DefaultServerSelection) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *HTTP3DefaultServerSelection) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *HTTP3DefaultServerSelection) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.SslServerProfiles) > 0 {
+		for iNdEx := len(m.SslServerProfiles) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.SslServerProfiles[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTypes(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x2a
+		}
+	}
+	if m.HttpServerProfileChoice != nil {
+		{
+			size := m.HttpServerProfileChoice.Size()
+			i -= size
+			if _, err := m.HttpServerProfileChoice.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
+	}
+	if m.TcpServerProfile != nil {
+		{
+			size, err := m.TcpServerProfile.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *HTTP3DefaultServerSelection_HttpServerProfileSameAsClient) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *HTTP3DefaultServerSelection_HttpServerProfileSameAsClient) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.HttpServerProfileSameAsClient != nil {
+		{
+			size, err := m.HttpServerProfileSameAsClient.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1a
+	}
+	return len(dAtA) - i, nil
+}
+func (m *HTTP3DefaultServerSelection_HttpServerProfile) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *HTTP3DefaultServerSelection_HttpServerProfile) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.HttpServerProfile != nil {
+		{
+			size, err := m.HttpServerProfile.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x22
 	}
 	return len(dAtA) - i, nil
 }
@@ -8344,303 +11663,6 @@ func (m *TranslationType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *TCPProfileType) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *TCPProfileType) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *TCPProfileType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if m.TcpServerProfileChoice != nil {
-		{
-			size := m.TcpServerProfileChoice.Size()
-			i -= size
-			if _, err := m.TcpServerProfileChoice.MarshalTo(dAtA[i:]); err != nil {
-				return 0, err
-			}
-		}
-	}
-	if m.ClientProfile != nil {
-		{
-			size, err := m.ClientProfile.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintTypes(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0xa
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *TCPProfileType_ServerProfileSameAsClient) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *TCPProfileType_ServerProfileSameAsClient) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	if m.ServerProfileSameAsClient != nil {
-		{
-			size, err := m.ServerProfileSameAsClient.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintTypes(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0x1a
-	}
-	return len(dAtA) - i, nil
-}
-func (m *TCPProfileType_ServerProfile) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *TCPProfileType_ServerProfile) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	if m.ServerProfile != nil {
-		{
-			size, err := m.ServerProfile.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintTypes(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0x22
-	}
-	return len(dAtA) - i, nil
-}
-func (m *HTTPProfileType) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *HTTPProfileType) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *HTTPProfileType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if m.HttpServerProfileChoice != nil {
-		{
-			size := m.HttpServerProfileChoice.Size()
-			i -= size
-			if _, err := m.HttpServerProfileChoice.MarshalTo(dAtA[i:]); err != nil {
-				return 0, err
-			}
-		}
-	}
-	if m.ClientProfile != nil {
-		{
-			size, err := m.ClientProfile.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintTypes(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0xa
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *HTTPProfileType_ServerProfileSameAsClient) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *HTTPProfileType_ServerProfileSameAsClient) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	if m.ServerProfileSameAsClient != nil {
-		{
-			size, err := m.ServerProfileSameAsClient.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintTypes(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0x1a
-	}
-	return len(dAtA) - i, nil
-}
-func (m *HTTPProfileType_ServerProfile) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *HTTPProfileType_ServerProfile) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	if m.ServerProfile != nil {
-		{
-			size, err := m.ServerProfile.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintTypes(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0x22
-	}
-	return len(dAtA) - i, nil
-}
-func (m *WebsocketProfileType) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *WebsocketProfileType) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *WebsocketProfileType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if m.WebsocketServerProfileChoice != nil {
-		{
-			size := m.WebsocketServerProfileChoice.Size()
-			i -= size
-			if _, err := m.WebsocketServerProfileChoice.MarshalTo(dAtA[i:]); err != nil {
-				return 0, err
-			}
-		}
-	}
-	if m.WebsocketClientProfileChoice != nil {
-		{
-			size := m.WebsocketClientProfileChoice.Size()
-			i -= size
-			if _, err := m.WebsocketClientProfileChoice.MarshalTo(dAtA[i:]); err != nil {
-				return 0, err
-			}
-		}
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *WebsocketProfileType_ClientProfileNone) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *WebsocketProfileType_ClientProfileNone) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	if m.ClientProfileNone != nil {
-		{
-			size, err := m.ClientProfileNone.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintTypes(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0x12
-	}
-	return len(dAtA) - i, nil
-}
-func (m *WebsocketProfileType_ClientProfile) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *WebsocketProfileType_ClientProfile) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	if m.ClientProfile != nil {
-		{
-			size, err := m.ClientProfile.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintTypes(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0x1a
-	}
-	return len(dAtA) - i, nil
-}
-func (m *WebsocketProfileType_ServerProfileSameAsClient) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *WebsocketProfileType_ServerProfileSameAsClient) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	if m.ServerProfileSameAsClient != nil {
-		{
-			size, err := m.ServerProfileSameAsClient.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintTypes(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0x2a
-	}
-	return len(dAtA) - i, nil
-}
-func (m *WebsocketProfileType_ServerProfile) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *WebsocketProfileType_ServerProfile) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	if m.ServerProfile != nil {
-		{
-			size, err := m.ServerProfile.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintTypes(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0x32
-	}
-	return len(dAtA) - i, nil
-}
 func (m *ClonePoolType) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -8994,6 +12016,20 @@ func (m *CreateSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 			}
 		}
 	}
+	if m.Json != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.Json))
+		i--
+		dAtA[i] = 0x3
+		i--
+		dAtA[i] = 0x98
+	}
+	if m.Sse != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.Sse))
+		i--
+		dAtA[i] = 0x3
+		i--
+		dAtA[i] = 0x90
+	}
 	if m.AutoLastHop != nil {
 		{
 			size, err := m.AutoLastHop.MarshalToSizedBuffer(dAtA[:i])
@@ -9035,6 +12071,24 @@ func (m *CreateSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		dAtA[i] = 0x2
 		i--
 		dAtA[i] = 0x92
+	}
+	if m.VirtualServerType != nil {
+		{
+			size := m.VirtualServerType.Size()
+			i -= size
+			if _, err := m.VirtualServerType.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
+	}
+	if m.StatisticsProfileChoice != nil {
+		{
+			size := m.StatisticsProfileChoice.Size()
+			i -= size
+			if _, err := m.StatisticsProfileChoice.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
 	}
 	if len(m.TrafficPolicies) > 0 {
 		for iNdEx := len(m.TrafficPolicies) - 1; iNdEx >= 0; iNdEx-- {
@@ -9110,22 +12164,13 @@ func (m *CreateSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x62
 	}
-	if m.VirtualServerType != nil {
-		{
-			size := m.VirtualServerType.Size()
-			i -= size
-			if _, err := m.VirtualServerType.MarshalTo(dAtA[i:]); err != nil {
-				return 0, err
-			}
-		}
-	}
-	if m.DomainChoice != nil {
-		{
-			size := m.DomainChoice.Size()
-			i -= size
-			if _, err := m.DomainChoice.MarshalTo(dAtA[i:]); err != nil {
-				return 0, err
-			}
+	if len(m.Domains) > 0 {
+		for iNdEx := len(m.Domains) - 1; iNdEx >= 0; iNdEx-- {
+			i -= len(m.Domains[iNdEx])
+			copy(dAtA[i:], m.Domains[iNdEx])
+			i = encodeVarintTypes(dAtA, i, uint64(len(m.Domains[iNdEx])))
+			i--
+			dAtA[i] = 0x2a
 		}
 	}
 	if m.State != nil {
@@ -9143,48 +12188,6 @@ func (m *CreateSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *CreateSpecType_Managed) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *CreateSpecType_Managed) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	if m.Managed != nil {
-		{
-			size, err := m.Managed.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintTypes(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0x1a
-	}
-	return len(dAtA) - i, nil
-}
-func (m *CreateSpecType_NotManaged) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *CreateSpecType_NotManaged) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	if m.NotManaged != nil {
-		{
-			size, err := m.NotManaged.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintTypes(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0x22
-	}
-	return len(dAtA) - i, nil
-}
 func (m *CreateSpecType_Https) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
@@ -9358,6 +12361,75 @@ func (m *CreateSpecType_FallbackPersistenceProfile) MarshalToSizedBuffer(dAtA []
 		dAtA[i] = 0x1
 		i--
 		dAtA[i] = 0xa2
+	}
+	return len(dAtA) - i, nil
+}
+func (m *CreateSpecType_StatisticsProfileNone) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *CreateSpecType_StatisticsProfileNone) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.StatisticsProfileNone != nil {
+		{
+			size, err := m.StatisticsProfileNone.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1
+		i--
+		dAtA[i] = 0xba
+	}
+	return len(dAtA) - i, nil
+}
+func (m *CreateSpecType_StatisticsProfile) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *CreateSpecType_StatisticsProfile) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.StatisticsProfile != nil {
+		{
+			size, err := m.StatisticsProfile.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1
+		i--
+		dAtA[i] = 0xc2
+	}
+	return len(dAtA) - i, nil
+}
+func (m *CreateSpecType_Http3) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *CreateSpecType_Http3) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.Http3 != nil {
+		{
+			size, err := m.Http3.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1
+		i--
+		dAtA[i] = 0xca
 	}
 	return len(dAtA) - i, nil
 }
@@ -9581,6 +12653,20 @@ func (m *ReplaceSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 			}
 		}
 	}
+	if m.Json != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.Json))
+		i--
+		dAtA[i] = 0x3
+		i--
+		dAtA[i] = 0x98
+	}
+	if m.Sse != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.Sse))
+		i--
+		dAtA[i] = 0x3
+		i--
+		dAtA[i] = 0x90
+	}
 	if m.AutoLastHop != nil {
 		{
 			size, err := m.AutoLastHop.MarshalToSizedBuffer(dAtA[:i])
@@ -9622,6 +12708,24 @@ func (m *ReplaceSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		dAtA[i] = 0x2
 		i--
 		dAtA[i] = 0x92
+	}
+	if m.VirtualServerType != nil {
+		{
+			size := m.VirtualServerType.Size()
+			i -= size
+			if _, err := m.VirtualServerType.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
+	}
+	if m.StatisticsProfileChoice != nil {
+		{
+			size := m.StatisticsProfileChoice.Size()
+			i -= size
+			if _, err := m.StatisticsProfileChoice.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
 	}
 	if len(m.TrafficPolicies) > 0 {
 		for iNdEx := len(m.TrafficPolicies) - 1; iNdEx >= 0; iNdEx-- {
@@ -9697,22 +12801,13 @@ func (m *ReplaceSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x62
 	}
-	if m.VirtualServerType != nil {
-		{
-			size := m.VirtualServerType.Size()
-			i -= size
-			if _, err := m.VirtualServerType.MarshalTo(dAtA[i:]); err != nil {
-				return 0, err
-			}
-		}
-	}
-	if m.DomainChoice != nil {
-		{
-			size := m.DomainChoice.Size()
-			i -= size
-			if _, err := m.DomainChoice.MarshalTo(dAtA[i:]); err != nil {
-				return 0, err
-			}
+	if len(m.Domains) > 0 {
+		for iNdEx := len(m.Domains) - 1; iNdEx >= 0; iNdEx-- {
+			i -= len(m.Domains[iNdEx])
+			copy(dAtA[i:], m.Domains[iNdEx])
+			i = encodeVarintTypes(dAtA, i, uint64(len(m.Domains[iNdEx])))
+			i--
+			dAtA[i] = 0x2a
 		}
 	}
 	if m.State != nil {
@@ -9730,48 +12825,6 @@ func (m *ReplaceSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *ReplaceSpecType_Managed) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *ReplaceSpecType_Managed) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	if m.Managed != nil {
-		{
-			size, err := m.Managed.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintTypes(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0x1a
-	}
-	return len(dAtA) - i, nil
-}
-func (m *ReplaceSpecType_NotManaged) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *ReplaceSpecType_NotManaged) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	if m.NotManaged != nil {
-		{
-			size, err := m.NotManaged.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintTypes(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0x22
-	}
-	return len(dAtA) - i, nil
-}
 func (m *ReplaceSpecType_Https) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
@@ -9945,6 +12998,75 @@ func (m *ReplaceSpecType_FallbackPersistenceProfile) MarshalToSizedBuffer(dAtA [
 		dAtA[i] = 0x1
 		i--
 		dAtA[i] = 0xa2
+	}
+	return len(dAtA) - i, nil
+}
+func (m *ReplaceSpecType_StatisticsProfileNone) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ReplaceSpecType_StatisticsProfileNone) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.StatisticsProfileNone != nil {
+		{
+			size, err := m.StatisticsProfileNone.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1
+		i--
+		dAtA[i] = 0xba
+	}
+	return len(dAtA) - i, nil
+}
+func (m *ReplaceSpecType_StatisticsProfile) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ReplaceSpecType_StatisticsProfile) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.StatisticsProfile != nil {
+		{
+			size, err := m.StatisticsProfile.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1
+		i--
+		dAtA[i] = 0xc2
+	}
+	return len(dAtA) - i, nil
+}
+func (m *ReplaceSpecType_Http3) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ReplaceSpecType_Http3) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.Http3 != nil {
+		{
+			size, err := m.Http3.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1
+		i--
+		dAtA[i] = 0xca
 	}
 	return len(dAtA) - i, nil
 }
@@ -10168,6 +13290,20 @@ func (m *GetSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 			}
 		}
 	}
+	if m.Json != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.Json))
+		i--
+		dAtA[i] = 0x3
+		i--
+		dAtA[i] = 0x98
+	}
+	if m.Sse != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.Sse))
+		i--
+		dAtA[i] = 0x3
+		i--
+		dAtA[i] = 0x90
+	}
 	if m.AutoLastHop != nil {
 		{
 			size, err := m.AutoLastHop.MarshalToSizedBuffer(dAtA[:i])
@@ -10209,6 +13345,24 @@ func (m *GetSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		dAtA[i] = 0x2
 		i--
 		dAtA[i] = 0x92
+	}
+	if m.VirtualServerType != nil {
+		{
+			size := m.VirtualServerType.Size()
+			i -= size
+			if _, err := m.VirtualServerType.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
+	}
+	if m.StatisticsProfileChoice != nil {
+		{
+			size := m.StatisticsProfileChoice.Size()
+			i -= size
+			if _, err := m.StatisticsProfileChoice.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
 	}
 	if len(m.TrafficPolicies) > 0 {
 		for iNdEx := len(m.TrafficPolicies) - 1; iNdEx >= 0; iNdEx-- {
@@ -10284,22 +13438,13 @@ func (m *GetSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x62
 	}
-	if m.VirtualServerType != nil {
-		{
-			size := m.VirtualServerType.Size()
-			i -= size
-			if _, err := m.VirtualServerType.MarshalTo(dAtA[i:]); err != nil {
-				return 0, err
-			}
-		}
-	}
-	if m.DomainChoice != nil {
-		{
-			size := m.DomainChoice.Size()
-			i -= size
-			if _, err := m.DomainChoice.MarshalTo(dAtA[i:]); err != nil {
-				return 0, err
-			}
+	if len(m.Domains) > 0 {
+		for iNdEx := len(m.Domains) - 1; iNdEx >= 0; iNdEx-- {
+			i -= len(m.Domains[iNdEx])
+			copy(dAtA[i:], m.Domains[iNdEx])
+			i = encodeVarintTypes(dAtA, i, uint64(len(m.Domains[iNdEx])))
+			i--
+			dAtA[i] = 0x2a
 		}
 	}
 	if m.State != nil {
@@ -10317,48 +13462,6 @@ func (m *GetSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *GetSpecType_Managed) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *GetSpecType_Managed) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	if m.Managed != nil {
-		{
-			size, err := m.Managed.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintTypes(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0x1a
-	}
-	return len(dAtA) - i, nil
-}
-func (m *GetSpecType_NotManaged) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *GetSpecType_NotManaged) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	if m.NotManaged != nil {
-		{
-			size, err := m.NotManaged.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintTypes(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0x22
-	}
-	return len(dAtA) - i, nil
-}
 func (m *GetSpecType_Https) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
@@ -10535,6 +13638,75 @@ func (m *GetSpecType_FallbackPersistenceProfile) MarshalToSizedBuffer(dAtA []byt
 	}
 	return len(dAtA) - i, nil
 }
+func (m *GetSpecType_StatisticsProfileNone) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetSpecType_StatisticsProfileNone) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.StatisticsProfileNone != nil {
+		{
+			size, err := m.StatisticsProfileNone.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1
+		i--
+		dAtA[i] = 0xba
+	}
+	return len(dAtA) - i, nil
+}
+func (m *GetSpecType_StatisticsProfile) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetSpecType_StatisticsProfile) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.StatisticsProfile != nil {
+		{
+			size, err := m.StatisticsProfile.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1
+		i--
+		dAtA[i] = 0xc2
+	}
+	return len(dAtA) - i, nil
+}
+func (m *GetSpecType_Http3) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetSpecType_Http3) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.Http3 != nil {
+		{
+			size, err := m.Http3.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1
+		i--
+		dAtA[i] = 0xca
+	}
+	return len(dAtA) - i, nil
+}
 func (m *GetSpecType_LastHopPoolNone) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
@@ -10697,6 +13869,12 @@ func (m *GlobalSpecType) Size() (n int) {
 	if m.DomainChoice != nil {
 		n += m.DomainChoice.Size()
 	}
+	if len(m.Domains) > 0 {
+		for _, s := range m.Domains {
+			l = len(s)
+			n += 1 + l + sovTypes(uint64(l))
+		}
+	}
 	if m.VirtualServerType != nil {
 		n += m.VirtualServerType.Size()
 	}
@@ -10742,6 +13920,12 @@ func (m *GlobalSpecType) Size() (n int) {
 	if m.AutoLastHop != nil {
 		l = m.AutoLastHop.Size()
 		n += 2 + l + sovTypes(uint64(l))
+	}
+	if m.Sse != 0 {
+		n += 2 + sovTypes(uint64(m.Sse))
+	}
+	if m.Json != 0 {
+		n += 2 + sovTypes(uint64(m.Json))
 	}
 	if m.LastHopPoolChoice != nil {
 		n += m.LastHopPoolChoice.Size()
@@ -10914,6 +14098,18 @@ func (m *GlobalSpecType_StatisticsProfile) Size() (n int) {
 	}
 	return n
 }
+func (m *GlobalSpecType_Http3) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Http3 != nil {
+		l = m.Http3.Size()
+		n += 2 + l + sovTypes(uint64(l))
+	}
+	return n
+}
 func (m *GlobalSpecType_LastHopPoolNone) Size() (n int) {
 	if m == nil {
 		return 0
@@ -10986,6 +14182,161 @@ func (m *GlobalSpecType_DefaultPool) Size() (n int) {
 	}
 	return n
 }
+func (m *TCPServices) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.Services) > 0 {
+		for _, e := range m.Services {
+			l = e.Size()
+			n += 1 + l + sovTypes(uint64(l))
+		}
+	}
+	if m.ProtocolClientProfile != nil {
+		l = m.ProtocolClientProfile.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	if len(m.SslClientProfiles) > 0 {
+		for _, e := range m.SslClientProfiles {
+			l = e.Size()
+			n += 1 + l + sovTypes(uint64(l))
+		}
+	}
+	if m.ServerAppTypeChoice != nil {
+		n += m.ServerAppTypeChoice.Size()
+	}
+	return n
+}
+
+func (m *TCPServices_ServerAppTypeSameAsClient) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.ServerAppTypeSameAsClient != nil {
+		l = m.ServerAppTypeSameAsClient.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *UDPServices) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.Services) > 0 {
+		for _, e := range m.Services {
+			l = e.Size()
+			n += 1 + l + sovTypes(uint64(l))
+		}
+	}
+	if m.ProtocolClientProfile != nil {
+		l = m.ProtocolClientProfile.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	if len(m.SslClientProfiles) > 0 {
+		for _, e := range m.SslClientProfiles {
+			l = e.Size()
+			n += 1 + l + sovTypes(uint64(l))
+		}
+	}
+	if m.ServerAppTypeChoice != nil {
+		n += m.ServerAppTypeChoice.Size()
+	}
+	return n
+}
+
+func (m *UDPServices_ServerAppTypeSameAsClient) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.ServerAppTypeSameAsClient != nil {
+		l = m.ServerAppTypeSameAsClient.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *HTTP3Services) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.Services) > 0 {
+		for _, e := range m.Services {
+			l = e.Size()
+			n += 1 + l + sovTypes(uint64(l))
+		}
+	}
+	if m.ProtocolClientProfile != nil {
+		l = m.ProtocolClientProfile.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	if len(m.SslClientProfiles) > 0 {
+		for _, e := range m.SslClientProfiles {
+			l = e.Size()
+			n += 1 + l + sovTypes(uint64(l))
+		}
+	}
+	if m.ServerAppTypeChoice != nil {
+		n += m.ServerAppTypeChoice.Size()
+	}
+	if m.HttpClientProfile != nil {
+		l = m.HttpClientProfile.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	if m.Http3ClientProfile != nil {
+		l = m.Http3ClientProfile.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	if m.QuicProfileChoice != nil {
+		n += m.QuicProfileChoice.Size()
+	}
+	return n
+}
+
+func (m *HTTP3Services_ServerAppTypeDefault) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.ServerAppTypeDefault != nil {
+		l = m.ServerAppTypeDefault.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *HTTP3Services_QuicClientProfileNone) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.QuicClientProfileNone != nil {
+		l = m.QuicClientProfileNone.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *HTTP3Services_QuicClientProfile) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.QuicClientProfile != nil {
+		l = m.QuicClientProfile.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
 func (m *HTTPServices) Size() (n int) {
 	if m == nil {
 		return 0
@@ -10998,27 +14349,65 @@ func (m *HTTPServices) Size() (n int) {
 			n += 1 + l + sovTypes(uint64(l))
 		}
 	}
-	if m.TcpProfiles != nil {
-		l = m.TcpProfiles.Size()
+	if m.ProtocolClientProfile != nil {
+		l = m.ProtocolClientProfile.Size()
 		n += 1 + l + sovTypes(uint64(l))
 	}
-	if m.HttpProfiles != nil {
-		l = m.HttpProfiles.Size()
-		n += 1 + l + sovTypes(uint64(l))
+	if m.WebsocketClientProfileChoice != nil {
+		n += m.WebsocketClientProfileChoice.Size()
 	}
-	if m.WebsocketProfiles != nil {
-		l = m.WebsocketProfiles.Size()
-		n += 1 + l + sovTypes(uint64(l))
+	if len(m.SslClientProfiles) > 0 {
+		for _, e := range m.SslClientProfiles {
+			l = e.Size()
+			n += 1 + l + sovTypes(uint64(l))
+		}
 	}
 	if m.StreamProfileChoice != nil {
 		n += m.StreamProfileChoice.Size()
 	}
+	if m.Http2ClientProfileChoice != nil {
+		n += m.Http2ClientProfileChoice.Size()
+	}
+	if m.HttpClientProfile != nil {
+		l = m.HttpClientProfile.Size()
+		n += 2 + l + sovTypes(uint64(l))
+	}
 	if m.FixProfileChoice != nil {
 		n += m.FixProfileChoice.Size()
+	}
+	if m.OcspProfileChoice != nil {
+		n += m.OcspProfileChoice.Size()
+	}
+	if m.ServerAppTypeChoice != nil {
+		n += m.ServerAppTypeChoice.Size()
 	}
 	return n
 }
 
+func (m *HTTPServices_WebsocketClientProfileNone) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.WebsocketClientProfileNone != nil {
+		l = m.WebsocketClientProfileNone.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *HTTPServices_WebsocketClientProfile) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.WebsocketClientProfile != nil {
+		l = m.WebsocketClientProfile.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
 func (m *HTTPServices_StreamProfileNone) Size() (n int) {
 	if m == nil {
 		return 0
@@ -11039,6 +14428,30 @@ func (m *HTTPServices_StreamProfile) Size() (n int) {
 	_ = l
 	if m.StreamProfile != nil {
 		l = m.StreamProfile.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *HTTPServices_Http2ClientProfileNone) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Http2ClientProfileNone != nil {
+		l = m.Http2ClientProfileNone.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *HTTPServices_Http2ClientProfile) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Http2ClientProfile != nil {
+		l = m.Http2ClientProfile.Size()
 		n += 1 + l + sovTypes(uint64(l))
 	}
 	return n
@@ -11064,6 +14477,295 @@ func (m *HTTPServices_FixProfile) Size() (n int) {
 	if m.FixProfile != nil {
 		l = m.FixProfile.Size()
 		n += 2 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *HTTPServices_OcspProfileNone) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.OcspProfileNone != nil {
+		l = m.OcspProfileNone.Size()
+		n += 2 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *HTTPServices_OcspProfile) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.OcspProfile != nil {
+		l = m.OcspProfile.Size()
+		n += 2 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *HTTPServices_ServerAppTypeSameAsClient) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.ServerAppTypeSameAsClient != nil {
+		l = m.ServerAppTypeSameAsClient.Size()
+		n += 2 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *UDPDefaultServerSelection) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.UdpServerProfileChoice != nil {
+		n += m.UdpServerProfileChoice.Size()
+	}
+	if len(m.SslServerProfiles) > 0 {
+		for _, e := range m.SslServerProfiles {
+			l = e.Size()
+			n += 1 + l + sovTypes(uint64(l))
+		}
+	}
+	return n
+}
+
+func (m *UDPDefaultServerSelection_UdpServerProfileUseClient) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.UdpServerProfileUseClient != nil {
+		l = m.UdpServerProfileUseClient.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *UDPDefaultServerSelection_UdpServerProfile) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.UdpServerProfile != nil {
+		l = m.UdpServerProfile.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *TCPDefaultServerSelection) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.TcpServerProfileChoice != nil {
+		n += m.TcpServerProfileChoice.Size()
+	}
+	if len(m.SslServerProfiles) > 0 {
+		for _, e := range m.SslServerProfiles {
+			l = e.Size()
+			n += 1 + l + sovTypes(uint64(l))
+		}
+	}
+	return n
+}
+
+func (m *TCPDefaultServerSelection_TcpServerProfileUseClient) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.TcpServerProfileUseClient != nil {
+		l = m.TcpServerProfileUseClient.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *TCPDefaultServerSelection_TcpServerProfile) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.TcpServerProfile != nil {
+		l = m.TcpServerProfile.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *HTTPDefaultServerSelection) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.ProtocolServerProfileChoice != nil {
+		n += m.ProtocolServerProfileChoice.Size()
+	}
+	if m.HttpServerProfileChoice != nil {
+		n += m.HttpServerProfileChoice.Size()
+	}
+	if m.WebsocketServerProfileChoice != nil {
+		n += m.WebsocketServerProfileChoice.Size()
+	}
+	if m.Http2ServerProfileChoice != nil {
+		n += m.Http2ServerProfileChoice.Size()
+	}
+	if len(m.SslServerProfiles) > 0 {
+		for _, e := range m.SslServerProfiles {
+			l = e.Size()
+			n += 2 + l + sovTypes(uint64(l))
+		}
+	}
+	return n
+}
+
+func (m *HTTPDefaultServerSelection_ProtocolServerProfileSameAsClient) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.ProtocolServerProfileSameAsClient != nil {
+		l = m.ProtocolServerProfileSameAsClient.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *HTTPDefaultServerSelection_ProtocolServerProfile) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.ProtocolServerProfile != nil {
+		l = m.ProtocolServerProfile.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *HTTPDefaultServerSelection_HttpServerProfileSameAsClient) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.HttpServerProfileSameAsClient != nil {
+		l = m.HttpServerProfileSameAsClient.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *HTTPDefaultServerSelection_HttpServerProfile) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.HttpServerProfile != nil {
+		l = m.HttpServerProfile.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *HTTPDefaultServerSelection_WebsocketServerProfileSameAsClient) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.WebsocketServerProfileSameAsClient != nil {
+		l = m.WebsocketServerProfileSameAsClient.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *HTTPDefaultServerSelection_WebsocketServerProfile) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.WebsocketServerProfile != nil {
+		l = m.WebsocketServerProfile.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *HTTPDefaultServerSelection_Http2ServerProfileNone) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Http2ServerProfileNone != nil {
+		l = m.Http2ServerProfileNone.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *HTTPDefaultServerSelection_Http2ServerProfile) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Http2ServerProfile != nil {
+		l = m.Http2ServerProfile.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *HTTP3DefaultServerSelection) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.TcpServerProfile != nil {
+		l = m.TcpServerProfile.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	if m.HttpServerProfileChoice != nil {
+		n += m.HttpServerProfileChoice.Size()
+	}
+	if len(m.SslServerProfiles) > 0 {
+		for _, e := range m.SslServerProfiles {
+			l = e.Size()
+			n += 1 + l + sovTypes(uint64(l))
+		}
+	}
+	return n
+}
+
+func (m *HTTP3DefaultServerSelection_HttpServerProfileSameAsClient) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.HttpServerProfileSameAsClient != nil {
+		l = m.HttpServerProfileSameAsClient.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *HTTP3DefaultServerSelection_HttpServerProfile) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.HttpServerProfile != nil {
+		l = m.HttpServerProfile.Size()
+		n += 1 + l + sovTypes(uint64(l))
 	}
 	return n
 }
@@ -11135,149 +14837,6 @@ func (m *TranslationType) Size() (n int) {
 	return n
 }
 
-func (m *TCPProfileType) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.ClientProfile != nil {
-		l = m.ClientProfile.Size()
-		n += 1 + l + sovTypes(uint64(l))
-	}
-	if m.TcpServerProfileChoice != nil {
-		n += m.TcpServerProfileChoice.Size()
-	}
-	return n
-}
-
-func (m *TCPProfileType_ServerProfileSameAsClient) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.ServerProfileSameAsClient != nil {
-		l = m.ServerProfileSameAsClient.Size()
-		n += 1 + l + sovTypes(uint64(l))
-	}
-	return n
-}
-func (m *TCPProfileType_ServerProfile) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.ServerProfile != nil {
-		l = m.ServerProfile.Size()
-		n += 1 + l + sovTypes(uint64(l))
-	}
-	return n
-}
-func (m *HTTPProfileType) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.ClientProfile != nil {
-		l = m.ClientProfile.Size()
-		n += 1 + l + sovTypes(uint64(l))
-	}
-	if m.HttpServerProfileChoice != nil {
-		n += m.HttpServerProfileChoice.Size()
-	}
-	return n
-}
-
-func (m *HTTPProfileType_ServerProfileSameAsClient) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.ServerProfileSameAsClient != nil {
-		l = m.ServerProfileSameAsClient.Size()
-		n += 1 + l + sovTypes(uint64(l))
-	}
-	return n
-}
-func (m *HTTPProfileType_ServerProfile) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.ServerProfile != nil {
-		l = m.ServerProfile.Size()
-		n += 1 + l + sovTypes(uint64(l))
-	}
-	return n
-}
-func (m *WebsocketProfileType) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.WebsocketClientProfileChoice != nil {
-		n += m.WebsocketClientProfileChoice.Size()
-	}
-	if m.WebsocketServerProfileChoice != nil {
-		n += m.WebsocketServerProfileChoice.Size()
-	}
-	return n
-}
-
-func (m *WebsocketProfileType_ClientProfileNone) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.ClientProfileNone != nil {
-		l = m.ClientProfileNone.Size()
-		n += 1 + l + sovTypes(uint64(l))
-	}
-	return n
-}
-func (m *WebsocketProfileType_ClientProfile) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.ClientProfile != nil {
-		l = m.ClientProfile.Size()
-		n += 1 + l + sovTypes(uint64(l))
-	}
-	return n
-}
-func (m *WebsocketProfileType_ServerProfileSameAsClient) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.ServerProfileSameAsClient != nil {
-		l = m.ServerProfileSameAsClient.Size()
-		n += 1 + l + sovTypes(uint64(l))
-	}
-	return n
-}
-func (m *WebsocketProfileType_ServerProfile) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.ServerProfile != nil {
-		l = m.ServerProfile.Size()
-		n += 1 + l + sovTypes(uint64(l))
-	}
-	return n
-}
 func (m *ClonePoolType) Size() (n int) {
 	if m == nil {
 		return 0
@@ -11416,8 +14975,11 @@ func (m *CreateSpecType) Size() (n int) {
 		l = m.State.Size()
 		n += 1 + l + sovTypes(uint64(l))
 	}
-	if m.DomainChoice != nil {
-		n += m.DomainChoice.Size()
+	if len(m.Domains) > 0 {
+		for _, s := range m.Domains {
+			l = len(s)
+			n += 1 + l + sovTypes(uint64(l))
+		}
 	}
 	if m.VirtualServerType != nil {
 		n += m.VirtualServerType.Size()
@@ -11450,6 +15012,9 @@ func (m *CreateSpecType) Size() (n int) {
 			n += 2 + l + sovTypes(uint64(l))
 		}
 	}
+	if m.StatisticsProfileChoice != nil {
+		n += m.StatisticsProfileChoice.Size()
+	}
 	if m.Translations != nil {
 		l = m.Translations.Size()
 		n += 2 + l + sovTypes(uint64(l))
@@ -11461,6 +15026,12 @@ func (m *CreateSpecType) Size() (n int) {
 	if m.AutoLastHop != nil {
 		l = m.AutoLastHop.Size()
 		n += 2 + l + sovTypes(uint64(l))
+	}
+	if m.Sse != 0 {
+		n += 2 + sovTypes(uint64(m.Sse))
+	}
+	if m.Json != 0 {
+		n += 2 + sovTypes(uint64(m.Json))
 	}
 	if m.LastHopPoolChoice != nil {
 		n += m.LastHopPoolChoice.Size()
@@ -11485,30 +15056,6 @@ func (m *CreateSpecType) Size() (n int) {
 	return n
 }
 
-func (m *CreateSpecType_Managed) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.Managed != nil {
-		l = m.Managed.Size()
-		n += 1 + l + sovTypes(uint64(l))
-	}
-	return n
-}
-func (m *CreateSpecType_NotManaged) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.NotManaged != nil {
-		l = m.NotManaged.Size()
-		n += 1 + l + sovTypes(uint64(l))
-	}
-	return n
-}
 func (m *CreateSpecType_Https) Size() (n int) {
 	if m == nil {
 		return 0
@@ -11605,6 +15152,42 @@ func (m *CreateSpecType_FallbackPersistenceProfile) Size() (n int) {
 	}
 	return n
 }
+func (m *CreateSpecType_StatisticsProfileNone) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.StatisticsProfileNone != nil {
+		l = m.StatisticsProfileNone.Size()
+		n += 2 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *CreateSpecType_StatisticsProfile) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.StatisticsProfile != nil {
+		l = m.StatisticsProfile.Size()
+		n += 2 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *CreateSpecType_Http3) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Http3 != nil {
+		l = m.Http3.Size()
+		n += 2 + l + sovTypes(uint64(l))
+	}
+	return n
+}
 func (m *CreateSpecType_LastHopPoolNone) Size() (n int) {
 	if m == nil {
 		return 0
@@ -11687,8 +15270,11 @@ func (m *ReplaceSpecType) Size() (n int) {
 		l = m.State.Size()
 		n += 1 + l + sovTypes(uint64(l))
 	}
-	if m.DomainChoice != nil {
-		n += m.DomainChoice.Size()
+	if len(m.Domains) > 0 {
+		for _, s := range m.Domains {
+			l = len(s)
+			n += 1 + l + sovTypes(uint64(l))
+		}
 	}
 	if m.VirtualServerType != nil {
 		n += m.VirtualServerType.Size()
@@ -11721,6 +15307,9 @@ func (m *ReplaceSpecType) Size() (n int) {
 			n += 2 + l + sovTypes(uint64(l))
 		}
 	}
+	if m.StatisticsProfileChoice != nil {
+		n += m.StatisticsProfileChoice.Size()
+	}
 	if m.Translations != nil {
 		l = m.Translations.Size()
 		n += 2 + l + sovTypes(uint64(l))
@@ -11732,6 +15321,12 @@ func (m *ReplaceSpecType) Size() (n int) {
 	if m.AutoLastHop != nil {
 		l = m.AutoLastHop.Size()
 		n += 2 + l + sovTypes(uint64(l))
+	}
+	if m.Sse != 0 {
+		n += 2 + sovTypes(uint64(m.Sse))
+	}
+	if m.Json != 0 {
+		n += 2 + sovTypes(uint64(m.Json))
 	}
 	if m.LastHopPoolChoice != nil {
 		n += m.LastHopPoolChoice.Size()
@@ -11756,30 +15351,6 @@ func (m *ReplaceSpecType) Size() (n int) {
 	return n
 }
 
-func (m *ReplaceSpecType_Managed) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.Managed != nil {
-		l = m.Managed.Size()
-		n += 1 + l + sovTypes(uint64(l))
-	}
-	return n
-}
-func (m *ReplaceSpecType_NotManaged) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.NotManaged != nil {
-		l = m.NotManaged.Size()
-		n += 1 + l + sovTypes(uint64(l))
-	}
-	return n
-}
 func (m *ReplaceSpecType_Https) Size() (n int) {
 	if m == nil {
 		return 0
@@ -11876,6 +15447,42 @@ func (m *ReplaceSpecType_FallbackPersistenceProfile) Size() (n int) {
 	}
 	return n
 }
+func (m *ReplaceSpecType_StatisticsProfileNone) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.StatisticsProfileNone != nil {
+		l = m.StatisticsProfileNone.Size()
+		n += 2 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *ReplaceSpecType_StatisticsProfile) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.StatisticsProfile != nil {
+		l = m.StatisticsProfile.Size()
+		n += 2 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *ReplaceSpecType_Http3) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Http3 != nil {
+		l = m.Http3.Size()
+		n += 2 + l + sovTypes(uint64(l))
+	}
+	return n
+}
 func (m *ReplaceSpecType_LastHopPoolNone) Size() (n int) {
 	if m == nil {
 		return 0
@@ -11958,8 +15565,11 @@ func (m *GetSpecType) Size() (n int) {
 		l = m.State.Size()
 		n += 1 + l + sovTypes(uint64(l))
 	}
-	if m.DomainChoice != nil {
-		n += m.DomainChoice.Size()
+	if len(m.Domains) > 0 {
+		for _, s := range m.Domains {
+			l = len(s)
+			n += 1 + l + sovTypes(uint64(l))
+		}
 	}
 	if m.VirtualServerType != nil {
 		n += m.VirtualServerType.Size()
@@ -11992,6 +15602,9 @@ func (m *GetSpecType) Size() (n int) {
 			n += 2 + l + sovTypes(uint64(l))
 		}
 	}
+	if m.StatisticsProfileChoice != nil {
+		n += m.StatisticsProfileChoice.Size()
+	}
 	if m.Translations != nil {
 		l = m.Translations.Size()
 		n += 2 + l + sovTypes(uint64(l))
@@ -12003,6 +15616,12 @@ func (m *GetSpecType) Size() (n int) {
 	if m.AutoLastHop != nil {
 		l = m.AutoLastHop.Size()
 		n += 2 + l + sovTypes(uint64(l))
+	}
+	if m.Sse != 0 {
+		n += 2 + sovTypes(uint64(m.Sse))
+	}
+	if m.Json != 0 {
+		n += 2 + sovTypes(uint64(m.Json))
 	}
 	if m.LastHopPoolChoice != nil {
 		n += m.LastHopPoolChoice.Size()
@@ -12027,30 +15646,6 @@ func (m *GetSpecType) Size() (n int) {
 	return n
 }
 
-func (m *GetSpecType_Managed) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.Managed != nil {
-		l = m.Managed.Size()
-		n += 1 + l + sovTypes(uint64(l))
-	}
-	return n
-}
-func (m *GetSpecType_NotManaged) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.NotManaged != nil {
-		l = m.NotManaged.Size()
-		n += 1 + l + sovTypes(uint64(l))
-	}
-	return n
-}
 func (m *GetSpecType_Https) Size() (n int) {
 	if m == nil {
 		return 0
@@ -12143,6 +15738,42 @@ func (m *GetSpecType_FallbackPersistenceProfile) Size() (n int) {
 	_ = l
 	if m.FallbackPersistenceProfile != nil {
 		l = m.FallbackPersistenceProfile.Size()
+		n += 2 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *GetSpecType_StatisticsProfileNone) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.StatisticsProfileNone != nil {
+		l = m.StatisticsProfileNone.Size()
+		n += 2 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *GetSpecType_StatisticsProfile) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.StatisticsProfile != nil {
+		l = m.StatisticsProfile.Size()
+		n += 2 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *GetSpecType_Http3) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Http3 != nil {
+		l = m.Http3.Size()
 		n += 2 + l + sovTypes(uint64(l))
 	}
 	return n
@@ -12248,6 +15879,7 @@ func (this *GlobalSpecType) String() string {
 	s := strings.Join([]string{`&GlobalSpecType{`,
 		`State:` + strings.Replace(fmt.Sprintf("%v", this.State), "TMMStateType", "schema.TMMStateType", 1) + `,`,
 		`DomainChoice:` + fmt.Sprintf("%v", this.DomainChoice) + `,`,
+		`Domains:` + fmt.Sprintf("%v", this.Domains) + `,`,
 		`VirtualServerType:` + fmt.Sprintf("%v", this.VirtualServerType) + `,`,
 		`ConnectionLimitOptions:` + strings.Replace(this.ConnectionLimitOptions.String(), "ConnectionLimitsType", "ConnectionLimitsType", 1) + `,`,
 		`VirtualAddresses:` + repeatedStringForVirtualAddresses + `,`,
@@ -12259,6 +15891,8 @@ func (this *GlobalSpecType) String() string {
 		`Translations:` + strings.Replace(this.Translations.String(), "TranslationType", "TranslationType", 1) + `,`,
 		`ClonePoolOptions:` + strings.Replace(this.ClonePoolOptions.String(), "ClonePoolType", "ClonePoolType", 1) + `,`,
 		`AutoLastHop:` + strings.Replace(fmt.Sprintf("%v", this.AutoLastHop), "TMMVirtualServerAutoLastHopType", "schema.TMMVirtualServerAutoLastHopType", 1) + `,`,
+		`Sse:` + fmt.Sprintf("%v", this.Sse) + `,`,
+		`Json:` + fmt.Sprintf("%v", this.Json) + `,`,
 		`LastHopPoolChoice:` + fmt.Sprintf("%v", this.LastHopPoolChoice) + `,`,
 		`Nat64:` + strings.Replace(fmt.Sprintf("%v", this.Nat64), "TMMVirtualServerNAT64Type", "schema.TMMVirtualServerNAT64Type", 1) + `,`,
 		`RequestLoggingProfileChoice:` + fmt.Sprintf("%v", this.RequestLoggingProfileChoice) + `,`,
@@ -12295,7 +15929,7 @@ func (this *GlobalSpecType_Https) String() string {
 		return "nil"
 	}
 	s := strings.Join([]string{`&GlobalSpecType_Https{`,
-		`Https:` + strings.Replace(fmt.Sprintf("%v", this.Https), "Services", "Services", 1) + `,`,
+		`Https:` + strings.Replace(fmt.Sprintf("%v", this.Https), "HTTPServices", "HTTPServices", 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -12315,7 +15949,7 @@ func (this *GlobalSpecType_Tcp) String() string {
 		return "nil"
 	}
 	s := strings.Join([]string{`&GlobalSpecType_Tcp{`,
-		`Tcp:` + strings.Replace(fmt.Sprintf("%v", this.Tcp), "Services", "Services", 1) + `,`,
+		`Tcp:` + strings.Replace(fmt.Sprintf("%v", this.Tcp), "TCPServices", "TCPServices", 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -12325,7 +15959,7 @@ func (this *GlobalSpecType_Udp) String() string {
 		return "nil"
 	}
 	s := strings.Join([]string{`&GlobalSpecType_Udp{`,
-		`Udp:` + strings.Replace(fmt.Sprintf("%v", this.Udp), "Services", "Services", 1) + `,`,
+		`Udp:` + strings.Replace(fmt.Sprintf("%v", this.Udp), "UDPServices", "UDPServices", 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -12390,6 +16024,16 @@ func (this *GlobalSpecType_StatisticsProfile) String() string {
 	}, "")
 	return s
 }
+func (this *GlobalSpecType_Http3) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GlobalSpecType_Http3{`,
+		`Http3:` + strings.Replace(fmt.Sprintf("%v", this.Http3), "HTTP3Services", "HTTP3Services", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
 func (this *GlobalSpecType_LastHopPoolNone) String() string {
 	if this == nil {
 		return "nil"
@@ -12450,6 +16094,128 @@ func (this *GlobalSpecType_DefaultPool) String() string {
 	}, "")
 	return s
 }
+func (this *TCPServices) String() string {
+	if this == nil {
+		return "nil"
+	}
+	repeatedStringForServices := "[]*ServiceType{"
+	for _, f := range this.Services {
+		repeatedStringForServices += strings.Replace(f.String(), "ServiceType", "ServiceType", 1) + ","
+	}
+	repeatedStringForServices += "}"
+	repeatedStringForSslClientProfiles := "[]*ObjectRefType{"
+	for _, f := range this.SslClientProfiles {
+		repeatedStringForSslClientProfiles += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "views.ObjectRefType", 1) + ","
+	}
+	repeatedStringForSslClientProfiles += "}"
+	s := strings.Join([]string{`&TCPServices{`,
+		`Services:` + repeatedStringForServices + `,`,
+		`ProtocolClientProfile:` + strings.Replace(fmt.Sprintf("%v", this.ProtocolClientProfile), "ObjectRefType", "views.ObjectRefType", 1) + `,`,
+		`SslClientProfiles:` + repeatedStringForSslClientProfiles + `,`,
+		`ServerAppTypeChoice:` + fmt.Sprintf("%v", this.ServerAppTypeChoice) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *TCPServices_ServerAppTypeSameAsClient) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&TCPServices_ServerAppTypeSameAsClient{`,
+		`ServerAppTypeSameAsClient:` + strings.Replace(fmt.Sprintf("%v", this.ServerAppTypeSameAsClient), "TCPDefaultServerSelection", "TCPDefaultServerSelection", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *UDPServices) String() string {
+	if this == nil {
+		return "nil"
+	}
+	repeatedStringForServices := "[]*ServiceType{"
+	for _, f := range this.Services {
+		repeatedStringForServices += strings.Replace(f.String(), "ServiceType", "ServiceType", 1) + ","
+	}
+	repeatedStringForServices += "}"
+	repeatedStringForSslClientProfiles := "[]*ObjectRefType{"
+	for _, f := range this.SslClientProfiles {
+		repeatedStringForSslClientProfiles += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "views.ObjectRefType", 1) + ","
+	}
+	repeatedStringForSslClientProfiles += "}"
+	s := strings.Join([]string{`&UDPServices{`,
+		`Services:` + repeatedStringForServices + `,`,
+		`ProtocolClientProfile:` + strings.Replace(fmt.Sprintf("%v", this.ProtocolClientProfile), "ObjectRefType", "views.ObjectRefType", 1) + `,`,
+		`SslClientProfiles:` + repeatedStringForSslClientProfiles + `,`,
+		`ServerAppTypeChoice:` + fmt.Sprintf("%v", this.ServerAppTypeChoice) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *UDPServices_ServerAppTypeSameAsClient) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&UDPServices_ServerAppTypeSameAsClient{`,
+		`ServerAppTypeSameAsClient:` + strings.Replace(fmt.Sprintf("%v", this.ServerAppTypeSameAsClient), "UDPDefaultServerSelection", "UDPDefaultServerSelection", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *HTTP3Services) String() string {
+	if this == nil {
+		return "nil"
+	}
+	repeatedStringForServices := "[]*ServiceType{"
+	for _, f := range this.Services {
+		repeatedStringForServices += strings.Replace(f.String(), "ServiceType", "ServiceType", 1) + ","
+	}
+	repeatedStringForServices += "}"
+	repeatedStringForSslClientProfiles := "[]*ObjectRefType{"
+	for _, f := range this.SslClientProfiles {
+		repeatedStringForSslClientProfiles += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "views.ObjectRefType", 1) + ","
+	}
+	repeatedStringForSslClientProfiles += "}"
+	s := strings.Join([]string{`&HTTP3Services{`,
+		`Services:` + repeatedStringForServices + `,`,
+		`ProtocolClientProfile:` + strings.Replace(fmt.Sprintf("%v", this.ProtocolClientProfile), "ObjectRefType", "views.ObjectRefType", 1) + `,`,
+		`SslClientProfiles:` + repeatedStringForSslClientProfiles + `,`,
+		`ServerAppTypeChoice:` + fmt.Sprintf("%v", this.ServerAppTypeChoice) + `,`,
+		`HttpClientProfile:` + strings.Replace(fmt.Sprintf("%v", this.HttpClientProfile), "ObjectRefType", "views.ObjectRefType", 1) + `,`,
+		`Http3ClientProfile:` + strings.Replace(fmt.Sprintf("%v", this.Http3ClientProfile), "ObjectRefType", "views.ObjectRefType", 1) + `,`,
+		`QuicProfileChoice:` + fmt.Sprintf("%v", this.QuicProfileChoice) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *HTTP3Services_ServerAppTypeDefault) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&HTTP3Services_ServerAppTypeDefault{`,
+		`ServerAppTypeDefault:` + strings.Replace(fmt.Sprintf("%v", this.ServerAppTypeDefault), "HTTP3DefaultServerSelection", "HTTP3DefaultServerSelection", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *HTTP3Services_QuicClientProfileNone) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&HTTP3Services_QuicClientProfileNone{`,
+		`QuicClientProfileNone:` + strings.Replace(fmt.Sprintf("%v", this.QuicClientProfileNone), "Empty", "schema.Empty", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *HTTP3Services_QuicClientProfile) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&HTTP3Services_QuicClientProfile{`,
+		`QuicClientProfile:` + strings.Replace(fmt.Sprintf("%v", this.QuicClientProfile), "ObjectRefType", "views.ObjectRefType", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
 func (this *HTTPServices) String() string {
 	if this == nil {
 		return "nil"
@@ -12459,13 +16225,42 @@ func (this *HTTPServices) String() string {
 		repeatedStringForServices += strings.Replace(f.String(), "ServiceType", "ServiceType", 1) + ","
 	}
 	repeatedStringForServices += "}"
+	repeatedStringForSslClientProfiles := "[]*ObjectRefType{"
+	for _, f := range this.SslClientProfiles {
+		repeatedStringForSslClientProfiles += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "views.ObjectRefType", 1) + ","
+	}
+	repeatedStringForSslClientProfiles += "}"
 	s := strings.Join([]string{`&HTTPServices{`,
 		`Services:` + repeatedStringForServices + `,`,
-		`TcpProfiles:` + strings.Replace(this.TcpProfiles.String(), "TCPProfileType", "TCPProfileType", 1) + `,`,
-		`HttpProfiles:` + strings.Replace(this.HttpProfiles.String(), "HTTPProfileType", "HTTPProfileType", 1) + `,`,
-		`WebsocketProfiles:` + strings.Replace(this.WebsocketProfiles.String(), "WebsocketProfileType", "WebsocketProfileType", 1) + `,`,
+		`ProtocolClientProfile:` + strings.Replace(fmt.Sprintf("%v", this.ProtocolClientProfile), "ObjectRefType", "views.ObjectRefType", 1) + `,`,
+		`WebsocketClientProfileChoice:` + fmt.Sprintf("%v", this.WebsocketClientProfileChoice) + `,`,
+		`SslClientProfiles:` + repeatedStringForSslClientProfiles + `,`,
 		`StreamProfileChoice:` + fmt.Sprintf("%v", this.StreamProfileChoice) + `,`,
+		`Http2ClientProfileChoice:` + fmt.Sprintf("%v", this.Http2ClientProfileChoice) + `,`,
+		`HttpClientProfile:` + strings.Replace(fmt.Sprintf("%v", this.HttpClientProfile), "ObjectRefType", "views.ObjectRefType", 1) + `,`,
 		`FixProfileChoice:` + fmt.Sprintf("%v", this.FixProfileChoice) + `,`,
+		`OcspProfileChoice:` + fmt.Sprintf("%v", this.OcspProfileChoice) + `,`,
+		`ServerAppTypeChoice:` + fmt.Sprintf("%v", this.ServerAppTypeChoice) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *HTTPServices_WebsocketClientProfileNone) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&HTTPServices_WebsocketClientProfileNone{`,
+		`WebsocketClientProfileNone:` + strings.Replace(fmt.Sprintf("%v", this.WebsocketClientProfileNone), "Empty", "schema.Empty", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *HTTPServices_WebsocketClientProfile) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&HTTPServices_WebsocketClientProfile{`,
+		`WebsocketClientProfile:` + strings.Replace(fmt.Sprintf("%v", this.WebsocketClientProfile), "ObjectRefType", "views.ObjectRefType", 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -12490,6 +16285,26 @@ func (this *HTTPServices_StreamProfile) String() string {
 	}, "")
 	return s
 }
+func (this *HTTPServices_Http2ClientProfileNone) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&HTTPServices_Http2ClientProfileNone{`,
+		`Http2ClientProfileNone:` + strings.Replace(fmt.Sprintf("%v", this.Http2ClientProfileNone), "Empty", "schema.Empty", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *HTTPServices_Http2ClientProfile) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&HTTPServices_Http2ClientProfile{`,
+		`Http2ClientProfile:` + strings.Replace(fmt.Sprintf("%v", this.Http2ClientProfile), "ObjectRefType", "views.ObjectRefType", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
 func (this *HTTPServices_FixProfileNone) String() string {
 	if this == nil {
 		return "nil"
@@ -12506,6 +16321,244 @@ func (this *HTTPServices_FixProfile) String() string {
 	}
 	s := strings.Join([]string{`&HTTPServices_FixProfile{`,
 		`FixProfile:` + strings.Replace(fmt.Sprintf("%v", this.FixProfile), "ObjectRefType", "views.ObjectRefType", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *HTTPServices_OcspProfileNone) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&HTTPServices_OcspProfileNone{`,
+		`OcspProfileNone:` + strings.Replace(fmt.Sprintf("%v", this.OcspProfileNone), "Empty", "schema.Empty", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *HTTPServices_OcspProfile) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&HTTPServices_OcspProfile{`,
+		`OcspProfile:` + strings.Replace(fmt.Sprintf("%v", this.OcspProfile), "ObjectRefType", "views.ObjectRefType", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *HTTPServices_ServerAppTypeSameAsClient) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&HTTPServices_ServerAppTypeSameAsClient{`,
+		`ServerAppTypeSameAsClient:` + strings.Replace(fmt.Sprintf("%v", this.ServerAppTypeSameAsClient), "HTTPDefaultServerSelection", "HTTPDefaultServerSelection", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *UDPDefaultServerSelection) String() string {
+	if this == nil {
+		return "nil"
+	}
+	repeatedStringForSslServerProfiles := "[]*ObjectRefType{"
+	for _, f := range this.SslServerProfiles {
+		repeatedStringForSslServerProfiles += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "views.ObjectRefType", 1) + ","
+	}
+	repeatedStringForSslServerProfiles += "}"
+	s := strings.Join([]string{`&UDPDefaultServerSelection{`,
+		`UdpServerProfileChoice:` + fmt.Sprintf("%v", this.UdpServerProfileChoice) + `,`,
+		`SslServerProfiles:` + repeatedStringForSslServerProfiles + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *UDPDefaultServerSelection_UdpServerProfileUseClient) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&UDPDefaultServerSelection_UdpServerProfileUseClient{`,
+		`UdpServerProfileUseClient:` + strings.Replace(fmt.Sprintf("%v", this.UdpServerProfileUseClient), "Empty", "schema.Empty", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *UDPDefaultServerSelection_UdpServerProfile) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&UDPDefaultServerSelection_UdpServerProfile{`,
+		`UdpServerProfile:` + strings.Replace(fmt.Sprintf("%v", this.UdpServerProfile), "ObjectRefType", "views.ObjectRefType", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *TCPDefaultServerSelection) String() string {
+	if this == nil {
+		return "nil"
+	}
+	repeatedStringForSslServerProfiles := "[]*ObjectRefType{"
+	for _, f := range this.SslServerProfiles {
+		repeatedStringForSslServerProfiles += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "views.ObjectRefType", 1) + ","
+	}
+	repeatedStringForSslServerProfiles += "}"
+	s := strings.Join([]string{`&TCPDefaultServerSelection{`,
+		`TcpServerProfileChoice:` + fmt.Sprintf("%v", this.TcpServerProfileChoice) + `,`,
+		`SslServerProfiles:` + repeatedStringForSslServerProfiles + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *TCPDefaultServerSelection_TcpServerProfileUseClient) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&TCPDefaultServerSelection_TcpServerProfileUseClient{`,
+		`TcpServerProfileUseClient:` + strings.Replace(fmt.Sprintf("%v", this.TcpServerProfileUseClient), "Empty", "schema.Empty", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *TCPDefaultServerSelection_TcpServerProfile) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&TCPDefaultServerSelection_TcpServerProfile{`,
+		`TcpServerProfile:` + strings.Replace(fmt.Sprintf("%v", this.TcpServerProfile), "ObjectRefType", "views.ObjectRefType", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *HTTPDefaultServerSelection) String() string {
+	if this == nil {
+		return "nil"
+	}
+	repeatedStringForSslServerProfiles := "[]*ObjectRefType{"
+	for _, f := range this.SslServerProfiles {
+		repeatedStringForSslServerProfiles += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "views.ObjectRefType", 1) + ","
+	}
+	repeatedStringForSslServerProfiles += "}"
+	s := strings.Join([]string{`&HTTPDefaultServerSelection{`,
+		`ProtocolServerProfileChoice:` + fmt.Sprintf("%v", this.ProtocolServerProfileChoice) + `,`,
+		`HttpServerProfileChoice:` + fmt.Sprintf("%v", this.HttpServerProfileChoice) + `,`,
+		`WebsocketServerProfileChoice:` + fmt.Sprintf("%v", this.WebsocketServerProfileChoice) + `,`,
+		`Http2ServerProfileChoice:` + fmt.Sprintf("%v", this.Http2ServerProfileChoice) + `,`,
+		`SslServerProfiles:` + repeatedStringForSslServerProfiles + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *HTTPDefaultServerSelection_ProtocolServerProfileSameAsClient) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&HTTPDefaultServerSelection_ProtocolServerProfileSameAsClient{`,
+		`ProtocolServerProfileSameAsClient:` + strings.Replace(fmt.Sprintf("%v", this.ProtocolServerProfileSameAsClient), "Empty", "schema.Empty", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *HTTPDefaultServerSelection_ProtocolServerProfile) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&HTTPDefaultServerSelection_ProtocolServerProfile{`,
+		`ProtocolServerProfile:` + strings.Replace(fmt.Sprintf("%v", this.ProtocolServerProfile), "ObjectRefType", "views.ObjectRefType", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *HTTPDefaultServerSelection_HttpServerProfileSameAsClient) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&HTTPDefaultServerSelection_HttpServerProfileSameAsClient{`,
+		`HttpServerProfileSameAsClient:` + strings.Replace(fmt.Sprintf("%v", this.HttpServerProfileSameAsClient), "Empty", "schema.Empty", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *HTTPDefaultServerSelection_HttpServerProfile) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&HTTPDefaultServerSelection_HttpServerProfile{`,
+		`HttpServerProfile:` + strings.Replace(fmt.Sprintf("%v", this.HttpServerProfile), "ObjectRefType", "views.ObjectRefType", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *HTTPDefaultServerSelection_WebsocketServerProfileSameAsClient) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&HTTPDefaultServerSelection_WebsocketServerProfileSameAsClient{`,
+		`WebsocketServerProfileSameAsClient:` + strings.Replace(fmt.Sprintf("%v", this.WebsocketServerProfileSameAsClient), "Empty", "schema.Empty", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *HTTPDefaultServerSelection_WebsocketServerProfile) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&HTTPDefaultServerSelection_WebsocketServerProfile{`,
+		`WebsocketServerProfile:` + strings.Replace(fmt.Sprintf("%v", this.WebsocketServerProfile), "ObjectRefType", "views.ObjectRefType", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *HTTPDefaultServerSelection_Http2ServerProfileNone) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&HTTPDefaultServerSelection_Http2ServerProfileNone{`,
+		`Http2ServerProfileNone:` + strings.Replace(fmt.Sprintf("%v", this.Http2ServerProfileNone), "Empty", "schema.Empty", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *HTTPDefaultServerSelection_Http2ServerProfile) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&HTTPDefaultServerSelection_Http2ServerProfile{`,
+		`Http2ServerProfile:` + strings.Replace(fmt.Sprintf("%v", this.Http2ServerProfile), "ObjectRefType", "views.ObjectRefType", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *HTTP3DefaultServerSelection) String() string {
+	if this == nil {
+		return "nil"
+	}
+	repeatedStringForSslServerProfiles := "[]*ObjectRefType{"
+	for _, f := range this.SslServerProfiles {
+		repeatedStringForSslServerProfiles += strings.Replace(fmt.Sprintf("%v", f), "ObjectRefType", "views.ObjectRefType", 1) + ","
+	}
+	repeatedStringForSslServerProfiles += "}"
+	s := strings.Join([]string{`&HTTP3DefaultServerSelection{`,
+		`TcpServerProfile:` + strings.Replace(fmt.Sprintf("%v", this.TcpServerProfile), "ObjectRefType", "views.ObjectRefType", 1) + `,`,
+		`HttpServerProfileChoice:` + fmt.Sprintf("%v", this.HttpServerProfileChoice) + `,`,
+		`SslServerProfiles:` + repeatedStringForSslServerProfiles + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *HTTP3DefaultServerSelection_HttpServerProfileSameAsClient) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&HTTP3DefaultServerSelection_HttpServerProfileSameAsClient{`,
+		`HttpServerProfileSameAsClient:` + strings.Replace(fmt.Sprintf("%v", this.HttpServerProfileSameAsClient), "Empty", "schema.Empty", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *HTTP3DefaultServerSelection_HttpServerProfile) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&HTTP3DefaultServerSelection_HttpServerProfile{`,
+		`HttpServerProfile:` + strings.Replace(fmt.Sprintf("%v", this.HttpServerProfile), "ObjectRefType", "views.ObjectRefType", 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -12554,119 +16607,6 @@ func (this *TranslationType) String() string {
 		`AddressTranslation:` + strings.Replace(fmt.Sprintf("%v", this.AddressTranslation), "TMMVirtualServerAddressTranslationType", "schema.TMMVirtualServerAddressTranslationType", 1) + `,`,
 		`PortTranslation:` + strings.Replace(fmt.Sprintf("%v", this.PortTranslation), "TMMVirtualServerPortTranslationType", "schema.TMMVirtualServerPortTranslationType", 1) + `,`,
 		`SourcePort:` + strings.Replace(fmt.Sprintf("%v", this.SourcePort), "TMMVirtualServerSourcePortType", "schema.TMMVirtualServerSourcePortType", 1) + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func (this *TCPProfileType) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&TCPProfileType{`,
-		`ClientProfile:` + strings.Replace(fmt.Sprintf("%v", this.ClientProfile), "ObjectRefType", "views.ObjectRefType", 1) + `,`,
-		`TcpServerProfileChoice:` + fmt.Sprintf("%v", this.TcpServerProfileChoice) + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func (this *TCPProfileType_ServerProfileSameAsClient) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&TCPProfileType_ServerProfileSameAsClient{`,
-		`ServerProfileSameAsClient:` + strings.Replace(fmt.Sprintf("%v", this.ServerProfileSameAsClient), "Empty", "schema.Empty", 1) + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func (this *TCPProfileType_ServerProfile) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&TCPProfileType_ServerProfile{`,
-		`ServerProfile:` + strings.Replace(fmt.Sprintf("%v", this.ServerProfile), "ObjectRefType", "views.ObjectRefType", 1) + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func (this *HTTPProfileType) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&HTTPProfileType{`,
-		`ClientProfile:` + strings.Replace(fmt.Sprintf("%v", this.ClientProfile), "ObjectRefType", "views.ObjectRefType", 1) + `,`,
-		`HttpServerProfileChoice:` + fmt.Sprintf("%v", this.HttpServerProfileChoice) + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func (this *HTTPProfileType_ServerProfileSameAsClient) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&HTTPProfileType_ServerProfileSameAsClient{`,
-		`ServerProfileSameAsClient:` + strings.Replace(fmt.Sprintf("%v", this.ServerProfileSameAsClient), "Empty", "schema.Empty", 1) + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func (this *HTTPProfileType_ServerProfile) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&HTTPProfileType_ServerProfile{`,
-		`ServerProfile:` + strings.Replace(fmt.Sprintf("%v", this.ServerProfile), "ObjectRefType", "views.ObjectRefType", 1) + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func (this *WebsocketProfileType) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&WebsocketProfileType{`,
-		`WebsocketClientProfileChoice:` + fmt.Sprintf("%v", this.WebsocketClientProfileChoice) + `,`,
-		`WebsocketServerProfileChoice:` + fmt.Sprintf("%v", this.WebsocketServerProfileChoice) + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func (this *WebsocketProfileType_ClientProfileNone) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&WebsocketProfileType_ClientProfileNone{`,
-		`ClientProfileNone:` + strings.Replace(fmt.Sprintf("%v", this.ClientProfileNone), "Empty", "schema.Empty", 1) + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func (this *WebsocketProfileType_ClientProfile) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&WebsocketProfileType_ClientProfile{`,
-		`ClientProfile:` + strings.Replace(fmt.Sprintf("%v", this.ClientProfile), "ObjectRefType", "views.ObjectRefType", 1) + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func (this *WebsocketProfileType_ServerProfileSameAsClient) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&WebsocketProfileType_ServerProfileSameAsClient{`,
-		`ServerProfileSameAsClient:` + strings.Replace(fmt.Sprintf("%v", this.ServerProfileSameAsClient), "Empty", "schema.Empty", 1) + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func (this *WebsocketProfileType_ServerProfile) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&WebsocketProfileType_ServerProfile{`,
-		`ServerProfile:` + strings.Replace(fmt.Sprintf("%v", this.ServerProfile), "ObjectRefType", "views.ObjectRefType", 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -12800,7 +16740,7 @@ func (this *CreateSpecType) String() string {
 	repeatedStringForTrafficPolicies += "}"
 	s := strings.Join([]string{`&CreateSpecType{`,
 		`State:` + strings.Replace(fmt.Sprintf("%v", this.State), "TMMStateType", "schema.TMMStateType", 1) + `,`,
-		`DomainChoice:` + fmt.Sprintf("%v", this.DomainChoice) + `,`,
+		`Domains:` + fmt.Sprintf("%v", this.Domains) + `,`,
 		`VirtualServerType:` + fmt.Sprintf("%v", this.VirtualServerType) + `,`,
 		`ConnectionLimitOptions:` + strings.Replace(this.ConnectionLimitOptions.String(), "ConnectionLimitsType", "ConnectionLimitsType", 1) + `,`,
 		`VirtualAddresses:` + repeatedStringForVirtualAddresses + `,`,
@@ -12808,9 +16748,12 @@ func (this *CreateSpecType) String() string {
 		`DefaultPersistenceProfileChoice:` + fmt.Sprintf("%v", this.DefaultPersistenceProfileChoice) + `,`,
 		`FallbackPersistenceProfileChoice:` + fmt.Sprintf("%v", this.FallbackPersistenceProfileChoice) + `,`,
 		`TrafficPolicies:` + repeatedStringForTrafficPolicies + `,`,
+		`StatisticsProfileChoice:` + fmt.Sprintf("%v", this.StatisticsProfileChoice) + `,`,
 		`Translations:` + strings.Replace(this.Translations.String(), "TranslationType", "TranslationType", 1) + `,`,
 		`ClonePoolOptions:` + strings.Replace(this.ClonePoolOptions.String(), "ClonePoolType", "ClonePoolType", 1) + `,`,
 		`AutoLastHop:` + strings.Replace(fmt.Sprintf("%v", this.AutoLastHop), "TMMVirtualServerAutoLastHopType", "schema.TMMVirtualServerAutoLastHopType", 1) + `,`,
+		`Sse:` + fmt.Sprintf("%v", this.Sse) + `,`,
+		`Json:` + fmt.Sprintf("%v", this.Json) + `,`,
 		`LastHopPoolChoice:` + fmt.Sprintf("%v", this.LastHopPoolChoice) + `,`,
 		`Nat64:` + strings.Replace(fmt.Sprintf("%v", this.Nat64), "TMMVirtualServerNAT64Type", "schema.TMMVirtualServerNAT64Type", 1) + `,`,
 		`RequestLoggingProfileChoice:` + fmt.Sprintf("%v", this.RequestLoggingProfileChoice) + `,`,
@@ -12821,32 +16764,12 @@ func (this *CreateSpecType) String() string {
 	}, "")
 	return s
 }
-func (this *CreateSpecType_Managed) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&CreateSpecType_Managed{`,
-		`Managed:` + strings.Replace(fmt.Sprintf("%v", this.Managed), "DomainsManagedByF5XC", "DomainsManagedByF5XC", 1) + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func (this *CreateSpecType_NotManaged) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&CreateSpecType_NotManaged{`,
-		`NotManaged:` + strings.Replace(fmt.Sprintf("%v", this.NotManaged), "NotManagedDomainsType", "NotManagedDomainsType", 1) + `,`,
-		`}`,
-	}, "")
-	return s
-}
 func (this *CreateSpecType_Https) String() string {
 	if this == nil {
 		return "nil"
 	}
 	s := strings.Join([]string{`&CreateSpecType_Https{`,
-		`Https:` + strings.Replace(fmt.Sprintf("%v", this.Https), "Services", "Services", 1) + `,`,
+		`Https:` + strings.Replace(fmt.Sprintf("%v", this.Https), "HTTPServices", "HTTPServices", 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -12866,7 +16789,7 @@ func (this *CreateSpecType_Tcp) String() string {
 		return "nil"
 	}
 	s := strings.Join([]string{`&CreateSpecType_Tcp{`,
-		`Tcp:` + strings.Replace(fmt.Sprintf("%v", this.Tcp), "Services", "Services", 1) + `,`,
+		`Tcp:` + strings.Replace(fmt.Sprintf("%v", this.Tcp), "TCPServices", "TCPServices", 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -12876,7 +16799,7 @@ func (this *CreateSpecType_Udp) String() string {
 		return "nil"
 	}
 	s := strings.Join([]string{`&CreateSpecType_Udp{`,
-		`Udp:` + strings.Replace(fmt.Sprintf("%v", this.Udp), "Services", "Services", 1) + `,`,
+		`Udp:` + strings.Replace(fmt.Sprintf("%v", this.Udp), "UDPServices", "UDPServices", 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -12917,6 +16840,36 @@ func (this *CreateSpecType_FallbackPersistenceProfile) String() string {
 	}
 	s := strings.Join([]string{`&CreateSpecType_FallbackPersistenceProfile{`,
 		`FallbackPersistenceProfile:` + strings.Replace(fmt.Sprintf("%v", this.FallbackPersistenceProfile), "ObjectRefType", "views.ObjectRefType", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *CreateSpecType_StatisticsProfileNone) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&CreateSpecType_StatisticsProfileNone{`,
+		`StatisticsProfileNone:` + strings.Replace(fmt.Sprintf("%v", this.StatisticsProfileNone), "Empty", "schema.Empty", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *CreateSpecType_StatisticsProfile) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&CreateSpecType_StatisticsProfile{`,
+		`StatisticsProfile:` + strings.Replace(fmt.Sprintf("%v", this.StatisticsProfile), "ObjectRefType", "views.ObjectRefType", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *CreateSpecType_Http3) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&CreateSpecType_Http3{`,
+		`Http3:` + strings.Replace(fmt.Sprintf("%v", this.Http3), "HTTP3Services", "HTTP3Services", 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -13002,7 +16955,7 @@ func (this *ReplaceSpecType) String() string {
 	repeatedStringForTrafficPolicies += "}"
 	s := strings.Join([]string{`&ReplaceSpecType{`,
 		`State:` + strings.Replace(fmt.Sprintf("%v", this.State), "TMMStateType", "schema.TMMStateType", 1) + `,`,
-		`DomainChoice:` + fmt.Sprintf("%v", this.DomainChoice) + `,`,
+		`Domains:` + fmt.Sprintf("%v", this.Domains) + `,`,
 		`VirtualServerType:` + fmt.Sprintf("%v", this.VirtualServerType) + `,`,
 		`ConnectionLimitOptions:` + strings.Replace(this.ConnectionLimitOptions.String(), "ConnectionLimitsType", "ConnectionLimitsType", 1) + `,`,
 		`VirtualAddresses:` + repeatedStringForVirtualAddresses + `,`,
@@ -13010,9 +16963,12 @@ func (this *ReplaceSpecType) String() string {
 		`DefaultPersistenceProfileChoice:` + fmt.Sprintf("%v", this.DefaultPersistenceProfileChoice) + `,`,
 		`FallbackPersistenceProfileChoice:` + fmt.Sprintf("%v", this.FallbackPersistenceProfileChoice) + `,`,
 		`TrafficPolicies:` + repeatedStringForTrafficPolicies + `,`,
+		`StatisticsProfileChoice:` + fmt.Sprintf("%v", this.StatisticsProfileChoice) + `,`,
 		`Translations:` + strings.Replace(this.Translations.String(), "TranslationType", "TranslationType", 1) + `,`,
 		`ClonePoolOptions:` + strings.Replace(this.ClonePoolOptions.String(), "ClonePoolType", "ClonePoolType", 1) + `,`,
 		`AutoLastHop:` + strings.Replace(fmt.Sprintf("%v", this.AutoLastHop), "TMMVirtualServerAutoLastHopType", "schema.TMMVirtualServerAutoLastHopType", 1) + `,`,
+		`Sse:` + fmt.Sprintf("%v", this.Sse) + `,`,
+		`Json:` + fmt.Sprintf("%v", this.Json) + `,`,
 		`LastHopPoolChoice:` + fmt.Sprintf("%v", this.LastHopPoolChoice) + `,`,
 		`Nat64:` + strings.Replace(fmt.Sprintf("%v", this.Nat64), "TMMVirtualServerNAT64Type", "schema.TMMVirtualServerNAT64Type", 1) + `,`,
 		`RequestLoggingProfileChoice:` + fmt.Sprintf("%v", this.RequestLoggingProfileChoice) + `,`,
@@ -13023,32 +16979,12 @@ func (this *ReplaceSpecType) String() string {
 	}, "")
 	return s
 }
-func (this *ReplaceSpecType_Managed) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&ReplaceSpecType_Managed{`,
-		`Managed:` + strings.Replace(fmt.Sprintf("%v", this.Managed), "DomainsManagedByF5XC", "DomainsManagedByF5XC", 1) + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func (this *ReplaceSpecType_NotManaged) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&ReplaceSpecType_NotManaged{`,
-		`NotManaged:` + strings.Replace(fmt.Sprintf("%v", this.NotManaged), "NotManagedDomainsType", "NotManagedDomainsType", 1) + `,`,
-		`}`,
-	}, "")
-	return s
-}
 func (this *ReplaceSpecType_Https) String() string {
 	if this == nil {
 		return "nil"
 	}
 	s := strings.Join([]string{`&ReplaceSpecType_Https{`,
-		`Https:` + strings.Replace(fmt.Sprintf("%v", this.Https), "Services", "Services", 1) + `,`,
+		`Https:` + strings.Replace(fmt.Sprintf("%v", this.Https), "HTTPServices", "HTTPServices", 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -13068,7 +17004,7 @@ func (this *ReplaceSpecType_Tcp) String() string {
 		return "nil"
 	}
 	s := strings.Join([]string{`&ReplaceSpecType_Tcp{`,
-		`Tcp:` + strings.Replace(fmt.Sprintf("%v", this.Tcp), "Services", "Services", 1) + `,`,
+		`Tcp:` + strings.Replace(fmt.Sprintf("%v", this.Tcp), "TCPServices", "TCPServices", 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -13078,7 +17014,7 @@ func (this *ReplaceSpecType_Udp) String() string {
 		return "nil"
 	}
 	s := strings.Join([]string{`&ReplaceSpecType_Udp{`,
-		`Udp:` + strings.Replace(fmt.Sprintf("%v", this.Udp), "Services", "Services", 1) + `,`,
+		`Udp:` + strings.Replace(fmt.Sprintf("%v", this.Udp), "UDPServices", "UDPServices", 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -13119,6 +17055,36 @@ func (this *ReplaceSpecType_FallbackPersistenceProfile) String() string {
 	}
 	s := strings.Join([]string{`&ReplaceSpecType_FallbackPersistenceProfile{`,
 		`FallbackPersistenceProfile:` + strings.Replace(fmt.Sprintf("%v", this.FallbackPersistenceProfile), "ObjectRefType", "views.ObjectRefType", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ReplaceSpecType_StatisticsProfileNone) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ReplaceSpecType_StatisticsProfileNone{`,
+		`StatisticsProfileNone:` + strings.Replace(fmt.Sprintf("%v", this.StatisticsProfileNone), "Empty", "schema.Empty", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ReplaceSpecType_StatisticsProfile) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ReplaceSpecType_StatisticsProfile{`,
+		`StatisticsProfile:` + strings.Replace(fmt.Sprintf("%v", this.StatisticsProfile), "ObjectRefType", "views.ObjectRefType", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ReplaceSpecType_Http3) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ReplaceSpecType_Http3{`,
+		`Http3:` + strings.Replace(fmt.Sprintf("%v", this.Http3), "HTTP3Services", "HTTP3Services", 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -13204,7 +17170,7 @@ func (this *GetSpecType) String() string {
 	repeatedStringForTrafficPolicies += "}"
 	s := strings.Join([]string{`&GetSpecType{`,
 		`State:` + strings.Replace(fmt.Sprintf("%v", this.State), "TMMStateType", "schema.TMMStateType", 1) + `,`,
-		`DomainChoice:` + fmt.Sprintf("%v", this.DomainChoice) + `,`,
+		`Domains:` + fmt.Sprintf("%v", this.Domains) + `,`,
 		`VirtualServerType:` + fmt.Sprintf("%v", this.VirtualServerType) + `,`,
 		`ConnectionLimitOptions:` + strings.Replace(this.ConnectionLimitOptions.String(), "ConnectionLimitsType", "ConnectionLimitsType", 1) + `,`,
 		`VirtualAddresses:` + repeatedStringForVirtualAddresses + `,`,
@@ -13212,9 +17178,12 @@ func (this *GetSpecType) String() string {
 		`DefaultPersistenceProfileChoice:` + fmt.Sprintf("%v", this.DefaultPersistenceProfileChoice) + `,`,
 		`FallbackPersistenceProfileChoice:` + fmt.Sprintf("%v", this.FallbackPersistenceProfileChoice) + `,`,
 		`TrafficPolicies:` + repeatedStringForTrafficPolicies + `,`,
+		`StatisticsProfileChoice:` + fmt.Sprintf("%v", this.StatisticsProfileChoice) + `,`,
 		`Translations:` + strings.Replace(this.Translations.String(), "TranslationType", "TranslationType", 1) + `,`,
 		`ClonePoolOptions:` + strings.Replace(this.ClonePoolOptions.String(), "ClonePoolType", "ClonePoolType", 1) + `,`,
 		`AutoLastHop:` + strings.Replace(fmt.Sprintf("%v", this.AutoLastHop), "TMMVirtualServerAutoLastHopType", "schema.TMMVirtualServerAutoLastHopType", 1) + `,`,
+		`Sse:` + fmt.Sprintf("%v", this.Sse) + `,`,
+		`Json:` + fmt.Sprintf("%v", this.Json) + `,`,
 		`LastHopPoolChoice:` + fmt.Sprintf("%v", this.LastHopPoolChoice) + `,`,
 		`Nat64:` + strings.Replace(fmt.Sprintf("%v", this.Nat64), "TMMVirtualServerNAT64Type", "schema.TMMVirtualServerNAT64Type", 1) + `,`,
 		`RequestLoggingProfileChoice:` + fmt.Sprintf("%v", this.RequestLoggingProfileChoice) + `,`,
@@ -13225,32 +17194,12 @@ func (this *GetSpecType) String() string {
 	}, "")
 	return s
 }
-func (this *GetSpecType_Managed) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&GetSpecType_Managed{`,
-		`Managed:` + strings.Replace(fmt.Sprintf("%v", this.Managed), "DomainsManagedByF5XC", "DomainsManagedByF5XC", 1) + `,`,
-		`}`,
-	}, "")
-	return s
-}
-func (this *GetSpecType_NotManaged) String() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&GetSpecType_NotManaged{`,
-		`NotManaged:` + strings.Replace(fmt.Sprintf("%v", this.NotManaged), "NotManagedDomainsType", "NotManagedDomainsType", 1) + `,`,
-		`}`,
-	}, "")
-	return s
-}
 func (this *GetSpecType_Https) String() string {
 	if this == nil {
 		return "nil"
 	}
 	s := strings.Join([]string{`&GetSpecType_Https{`,
-		`Https:` + strings.Replace(fmt.Sprintf("%v", this.Https), "Services", "Services", 1) + `,`,
+		`Https:` + strings.Replace(fmt.Sprintf("%v", this.Https), "HTTPServices", "HTTPServices", 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -13270,7 +17219,7 @@ func (this *GetSpecType_Tcp) String() string {
 		return "nil"
 	}
 	s := strings.Join([]string{`&GetSpecType_Tcp{`,
-		`Tcp:` + strings.Replace(fmt.Sprintf("%v", this.Tcp), "Services", "Services", 1) + `,`,
+		`Tcp:` + strings.Replace(fmt.Sprintf("%v", this.Tcp), "TCPServices", "TCPServices", 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -13280,7 +17229,7 @@ func (this *GetSpecType_Udp) String() string {
 		return "nil"
 	}
 	s := strings.Join([]string{`&GetSpecType_Udp{`,
-		`Udp:` + strings.Replace(fmt.Sprintf("%v", this.Udp), "Services", "Services", 1) + `,`,
+		`Udp:` + strings.Replace(fmt.Sprintf("%v", this.Udp), "UDPServices", "UDPServices", 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -13321,6 +17270,36 @@ func (this *GetSpecType_FallbackPersistenceProfile) String() string {
 	}
 	s := strings.Join([]string{`&GetSpecType_FallbackPersistenceProfile{`,
 		`FallbackPersistenceProfile:` + strings.Replace(fmt.Sprintf("%v", this.FallbackPersistenceProfile), "ObjectRefType", "views.ObjectRefType", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GetSpecType_StatisticsProfileNone) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GetSpecType_StatisticsProfileNone{`,
+		`StatisticsProfileNone:` + strings.Replace(fmt.Sprintf("%v", this.StatisticsProfileNone), "Empty", "schema.Empty", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GetSpecType_StatisticsProfile) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GetSpecType_StatisticsProfile{`,
+		`StatisticsProfile:` + strings.Replace(fmt.Sprintf("%v", this.StatisticsProfile), "ObjectRefType", "views.ObjectRefType", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GetSpecType_Http3) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GetSpecType_Http3{`,
+		`Http3:` + strings.Replace(fmt.Sprintf("%v", this.Http3), "HTTP3Services", "HTTP3Services", 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -13528,6 +17507,38 @@ func (m *GlobalSpecType) Unmarshal(dAtA []byte) error {
 			}
 			m.DomainChoice = &GlobalSpecType_NotManaged{v}
 			iNdEx = postIndex
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Domains", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Domains = append(m.Domains, string(dAtA[iNdEx:postIndex]))
+			iNdEx = postIndex
 		case 8:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Https", wireType)
@@ -13557,7 +17568,7 @@ func (m *GlobalSpecType) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			v := &Services{}
+			v := &HTTPServices{}
 			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
@@ -13627,7 +17638,7 @@ func (m *GlobalSpecType) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			v := &Services{}
+			v := &TCPServices{}
 			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
@@ -13662,7 +17673,7 @@ func (m *GlobalSpecType) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			v := &Services{}
+			v := &UDPServices{}
 			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
@@ -14016,6 +18027,41 @@ func (m *GlobalSpecType) Unmarshal(dAtA []byte) error {
 			}
 			m.StatisticsProfileChoice = &GlobalSpecType_StatisticsProfile{v}
 			iNdEx = postIndex
+		case 25:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Http3", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &HTTP3Services{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.VirtualServerType = &GlobalSpecType_Http3{v}
+			iNdEx = postIndex
 		case 34:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Translations", wireType)
@@ -14124,6 +18170,44 @@ func (m *GlobalSpecType) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
+		case 50:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Sse", wireType)
+			}
+			m.Sse = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Sse |= vs_profiles.TrueFalseChoice(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 51:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Json", wireType)
+			}
+			m.Json = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Json |= vs_profiles.TrueFalseChoice(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
 		case 54:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field LastHopPoolNone", wireType)
@@ -14485,6 +18569,724 @@ func (m *GlobalSpecType) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
+func (m *TCPServices) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTypes
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: TCPServices: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: TCPServices: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Services", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Services = append(m.Services, &ServiceType{})
+			if err := m.Services[len(m.Services)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ProtocolClientProfile", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.ProtocolClientProfile == nil {
+				m.ProtocolClientProfile = &views.ObjectRefType{}
+			}
+			if err := m.ProtocolClientProfile.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field SslClientProfiles", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.SslClientProfiles = append(m.SslClientProfiles, &views.ObjectRefType{})
+			if err := m.SslClientProfiles[len(m.SslClientProfiles)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ServerAppTypeSameAsClient", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &TCPDefaultServerSelection{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.ServerAppTypeChoice = &TCPServices_ServerAppTypeSameAsClient{v}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTypes(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *UDPServices) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTypes
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: UDPServices: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: UDPServices: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Services", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Services = append(m.Services, &ServiceType{})
+			if err := m.Services[len(m.Services)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ProtocolClientProfile", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.ProtocolClientProfile == nil {
+				m.ProtocolClientProfile = &views.ObjectRefType{}
+			}
+			if err := m.ProtocolClientProfile.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field SslClientProfiles", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.SslClientProfiles = append(m.SslClientProfiles, &views.ObjectRefType{})
+			if err := m.SslClientProfiles[len(m.SslClientProfiles)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ServerAppTypeSameAsClient", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &UDPDefaultServerSelection{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.ServerAppTypeChoice = &UDPServices_ServerAppTypeSameAsClient{v}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTypes(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *HTTP3Services) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTypes
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: HTTP3Services: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: HTTP3Services: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Services", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Services = append(m.Services, &ServiceType{})
+			if err := m.Services[len(m.Services)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ProtocolClientProfile", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.ProtocolClientProfile == nil {
+				m.ProtocolClientProfile = &views.ObjectRefType{}
+			}
+			if err := m.ProtocolClientProfile.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field SslClientProfiles", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.SslClientProfiles = append(m.SslClientProfiles, &views.ObjectRefType{})
+			if err := m.SslClientProfiles[len(m.SslClientProfiles)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ServerAppTypeDefault", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &HTTP3DefaultServerSelection{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.ServerAppTypeChoice = &HTTP3Services_ServerAppTypeDefault{v}
+			iNdEx = postIndex
+		case 7:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field HttpClientProfile", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.HttpClientProfile == nil {
+				m.HttpClientProfile = &views.ObjectRefType{}
+			}
+			if err := m.HttpClientProfile.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 8:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Http3ClientProfile", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Http3ClientProfile == nil {
+				m.Http3ClientProfile = &views.ObjectRefType{}
+			}
+			if err := m.Http3ClientProfile.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 12:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field QuicClientProfileNone", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &schema.Empty{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.QuicProfileChoice = &HTTP3Services_QuicClientProfileNone{v}
+			iNdEx = postIndex
+		case 13:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field QuicClientProfile", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &views.ObjectRefType{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.QuicProfileChoice = &HTTP3Services_QuicClientProfile{v}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTypes(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
 func (m *HTTPServices) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
@@ -14548,9 +19350,9 @@ func (m *HTTPServices) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
-		case 2:
+		case 5:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field TcpProfiles", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field ProtocolClientProfile", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -14577,16 +19379,16 @@ func (m *HTTPServices) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.TcpProfiles == nil {
-				m.TcpProfiles = &TCPProfileType{}
+			if m.ProtocolClientProfile == nil {
+				m.ProtocolClientProfile = &views.ObjectRefType{}
 			}
-			if err := m.TcpProfiles.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			if err := m.ProtocolClientProfile.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
-		case 3:
+		case 7:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field HttpProfiles", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field WebsocketClientProfileNone", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -14613,16 +19415,15 @@ func (m *HTTPServices) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.HttpProfiles == nil {
-				m.HttpProfiles = &HTTPProfileType{}
-			}
-			if err := m.HttpProfiles.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			v := &schema.Empty{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
+			m.WebsocketClientProfileChoice = &HTTPServices_WebsocketClientProfileNone{v}
 			iNdEx = postIndex
-		case 4:
+		case 8:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field WebsocketProfiles", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field WebsocketClientProfile", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -14649,10 +19450,43 @@ func (m *HTTPServices) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.WebsocketProfiles == nil {
-				m.WebsocketProfiles = &WebsocketProfileType{}
+			v := &views.ObjectRefType{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
 			}
-			if err := m.WebsocketProfiles.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			m.WebsocketClientProfileChoice = &HTTPServices_WebsocketClientProfile{v}
+			iNdEx = postIndex
+		case 9:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field SslClientProfiles", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.SslClientProfiles = append(m.SslClientProfiles, &views.ObjectRefType{})
+			if err := m.SslClientProfiles[len(m.SslClientProfiles)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -14726,6 +19560,112 @@ func (m *HTTPServices) Unmarshal(dAtA []byte) error {
 			}
 			m.StreamProfileChoice = &HTTPServices_StreamProfile{v}
 			iNdEx = postIndex
+		case 14:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Http2ClientProfileNone", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &schema.Empty{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.Http2ClientProfileChoice = &HTTPServices_Http2ClientProfileNone{v}
+			iNdEx = postIndex
+		case 15:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Http2ClientProfile", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &views.ObjectRefType{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.Http2ClientProfileChoice = &HTTPServices_Http2ClientProfile{v}
+			iNdEx = postIndex
+		case 16:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field HttpClientProfile", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.HttpClientProfile == nil {
+				m.HttpClientProfile = &views.ObjectRefType{}
+			}
+			if err := m.HttpClientProfile.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
 		case 20:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field FixProfileNone", wireType)
@@ -14795,6 +19735,985 @@ func (m *HTTPServices) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			m.FixProfileChoice = &HTTPServices_FixProfile{v}
+			iNdEx = postIndex
+		case 23:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field OcspProfileNone", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &schema.Empty{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.OcspProfileChoice = &HTTPServices_OcspProfileNone{v}
+			iNdEx = postIndex
+		case 24:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field OcspProfile", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &views.ObjectRefType{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.OcspProfileChoice = &HTTPServices_OcspProfile{v}
+			iNdEx = postIndex
+		case 26:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ServerAppTypeSameAsClient", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &HTTPDefaultServerSelection{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.ServerAppTypeChoice = &HTTPServices_ServerAppTypeSameAsClient{v}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTypes(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *UDPDefaultServerSelection) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTypes
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: UDPDefaultServerSelection: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: UDPDefaultServerSelection: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field UdpServerProfileUseClient", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &schema.Empty{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.UdpServerProfileChoice = &UDPDefaultServerSelection_UdpServerProfileUseClient{v}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field UdpServerProfile", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &views.ObjectRefType{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.UdpServerProfileChoice = &UDPDefaultServerSelection_UdpServerProfile{v}
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field SslServerProfiles", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.SslServerProfiles = append(m.SslServerProfiles, &views.ObjectRefType{})
+			if err := m.SslServerProfiles[len(m.SslServerProfiles)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTypes(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *TCPDefaultServerSelection) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTypes
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: TCPDefaultServerSelection: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: TCPDefaultServerSelection: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field TcpServerProfileUseClient", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &schema.Empty{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.TcpServerProfileChoice = &TCPDefaultServerSelection_TcpServerProfileUseClient{v}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field TcpServerProfile", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &views.ObjectRefType{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.TcpServerProfileChoice = &TCPDefaultServerSelection_TcpServerProfile{v}
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field SslServerProfiles", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.SslServerProfiles = append(m.SslServerProfiles, &views.ObjectRefType{})
+			if err := m.SslServerProfiles[len(m.SslServerProfiles)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTypes(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *HTTPDefaultServerSelection) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTypes
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: HTTPDefaultServerSelection: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: HTTPDefaultServerSelection: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ProtocolServerProfileSameAsClient", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &schema.Empty{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.ProtocolServerProfileChoice = &HTTPDefaultServerSelection_ProtocolServerProfileSameAsClient{v}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ProtocolServerProfile", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &views.ObjectRefType{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.ProtocolServerProfileChoice = &HTTPDefaultServerSelection_ProtocolServerProfile{v}
+			iNdEx = postIndex
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field HttpServerProfileSameAsClient", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &schema.Empty{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.HttpServerProfileChoice = &HTTPDefaultServerSelection_HttpServerProfileSameAsClient{v}
+			iNdEx = postIndex
+		case 6:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field HttpServerProfile", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &views.ObjectRefType{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.HttpServerProfileChoice = &HTTPDefaultServerSelection_HttpServerProfile{v}
+			iNdEx = postIndex
+		case 8:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field WebsocketServerProfileSameAsClient", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &schema.Empty{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.WebsocketServerProfileChoice = &HTTPDefaultServerSelection_WebsocketServerProfileSameAsClient{v}
+			iNdEx = postIndex
+		case 9:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field WebsocketServerProfile", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &views.ObjectRefType{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.WebsocketServerProfileChoice = &HTTPDefaultServerSelection_WebsocketServerProfile{v}
+			iNdEx = postIndex
+		case 14:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Http2ServerProfileNone", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &schema.Empty{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.Http2ServerProfileChoice = &HTTPDefaultServerSelection_Http2ServerProfileNone{v}
+			iNdEx = postIndex
+		case 15:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Http2ServerProfile", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &views.ObjectRefType{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.Http2ServerProfileChoice = &HTTPDefaultServerSelection_Http2ServerProfile{v}
+			iNdEx = postIndex
+		case 16:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field SslServerProfiles", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.SslServerProfiles = append(m.SslServerProfiles, &views.ObjectRefType{})
+			if err := m.SslServerProfiles[len(m.SslServerProfiles)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTypes(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *HTTP3DefaultServerSelection) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTypes
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: HTTP3DefaultServerSelection: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: HTTP3DefaultServerSelection: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field TcpServerProfile", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.TcpServerProfile == nil {
+				m.TcpServerProfile = &views.ObjectRefType{}
+			}
+			if err := m.TcpServerProfile.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field HttpServerProfileSameAsClient", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &schema.Empty{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.HttpServerProfileChoice = &HTTP3DefaultServerSelection_HttpServerProfileSameAsClient{v}
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field HttpServerProfile", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &views.ObjectRefType{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.HttpServerProfileChoice = &HTTP3DefaultServerSelection_HttpServerProfile{v}
+			iNdEx = postIndex
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field SslServerProfiles", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.SslServerProfiles = append(m.SslServerProfiles, &views.ObjectRefType{})
+			if err := m.SslServerProfiles[len(m.SslServerProfiles)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
@@ -15249,517 +21168,6 @@ func (m *TranslationType) Unmarshal(dAtA []byte) error {
 			if err := m.SourcePort.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipTypes(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if skippy < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if (iNdEx + skippy) < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *TCPProfileType) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowTypes
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: TCPProfileType: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: TCPProfileType: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ClientProfile", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTypes
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthTypes
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if m.ClientProfile == nil {
-				m.ClientProfile = &views.ObjectRefType{}
-			}
-			if err := m.ClientProfile.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		case 3:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ServerProfileSameAsClient", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTypes
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthTypes
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			v := &schema.Empty{}
-			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			m.TcpServerProfileChoice = &TCPProfileType_ServerProfileSameAsClient{v}
-			iNdEx = postIndex
-		case 4:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ServerProfile", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTypes
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthTypes
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			v := &views.ObjectRefType{}
-			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			m.TcpServerProfileChoice = &TCPProfileType_ServerProfile{v}
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipTypes(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if skippy < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if (iNdEx + skippy) < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *HTTPProfileType) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowTypes
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: HTTPProfileType: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: HTTPProfileType: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ClientProfile", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTypes
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthTypes
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if m.ClientProfile == nil {
-				m.ClientProfile = &views.ObjectRefType{}
-			}
-			if err := m.ClientProfile.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		case 3:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ServerProfileSameAsClient", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTypes
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthTypes
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			v := &schema.Empty{}
-			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			m.HttpServerProfileChoice = &HTTPProfileType_ServerProfileSameAsClient{v}
-			iNdEx = postIndex
-		case 4:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ServerProfile", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTypes
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthTypes
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			v := &views.ObjectRefType{}
-			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			m.HttpServerProfileChoice = &HTTPProfileType_ServerProfile{v}
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipTypes(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if skippy < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if (iNdEx + skippy) < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *WebsocketProfileType) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowTypes
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: WebsocketProfileType: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: WebsocketProfileType: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 2:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ClientProfileNone", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTypes
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthTypes
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			v := &schema.Empty{}
-			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			m.WebsocketClientProfileChoice = &WebsocketProfileType_ClientProfileNone{v}
-			iNdEx = postIndex
-		case 3:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ClientProfile", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTypes
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthTypes
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			v := &views.ObjectRefType{}
-			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			m.WebsocketClientProfileChoice = &WebsocketProfileType_ClientProfile{v}
-			iNdEx = postIndex
-		case 5:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ServerProfileSameAsClient", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTypes
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthTypes
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			v := &schema.Empty{}
-			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			m.WebsocketServerProfileChoice = &WebsocketProfileType_ServerProfileSameAsClient{v}
-			iNdEx = postIndex
-		case 6:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ServerProfile", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTypes
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthTypes
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			v := &views.ObjectRefType{}
-			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			m.WebsocketServerProfileChoice = &WebsocketProfileType_ServerProfile{v}
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
@@ -16362,11 +21770,11 @@ func (m *CreateSpecType) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
-		case 3:
+		case 5:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Managed", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Domains", wireType)
 			}
-			var msglen int
+			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowTypes
@@ -16376,61 +21784,23 @@ func (m *CreateSpecType) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				msglen |= int(b&0x7F) << shift
+				stringLen |= uint64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			if msglen < 0 {
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
 				return ErrInvalidLengthTypes
 			}
-			postIndex := iNdEx + msglen
+			postIndex := iNdEx + intStringLen
 			if postIndex < 0 {
 				return ErrInvalidLengthTypes
 			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			v := &DomainsManagedByF5XC{}
-			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			m.DomainChoice = &CreateSpecType_Managed{v}
-			iNdEx = postIndex
-		case 4:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field NotManaged", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTypes
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthTypes
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			v := &NotManagedDomainsType{}
-			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			m.DomainChoice = &CreateSpecType_NotManaged{v}
+			m.Domains = append(m.Domains, string(dAtA[iNdEx:postIndex]))
 			iNdEx = postIndex
 		case 8:
 			if wireType != 2 {
@@ -16461,7 +21831,7 @@ func (m *CreateSpecType) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			v := &Services{}
+			v := &HTTPServices{}
 			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
@@ -16531,7 +21901,7 @@ func (m *CreateSpecType) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			v := &Services{}
+			v := &TCPServices{}
 			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
@@ -16566,7 +21936,7 @@ func (m *CreateSpecType) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			v := &Services{}
+			v := &UDPServices{}
 			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
@@ -16850,6 +22220,111 @@ func (m *CreateSpecType) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
+		case 23:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field StatisticsProfileNone", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &schema.Empty{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.StatisticsProfileChoice = &CreateSpecType_StatisticsProfileNone{v}
+			iNdEx = postIndex
+		case 24:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field StatisticsProfile", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &views.ObjectRefType{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.StatisticsProfileChoice = &CreateSpecType_StatisticsProfile{v}
+			iNdEx = postIndex
+		case 25:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Http3", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &HTTP3Services{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.VirtualServerType = &CreateSpecType_Http3{v}
+			iNdEx = postIndex
 		case 34:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Translations", wireType)
@@ -16958,6 +22433,44 @@ func (m *CreateSpecType) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
+		case 50:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Sse", wireType)
+			}
+			m.Sse = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Sse |= vs_profiles.TrueFalseChoice(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 51:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Json", wireType)
+			}
+			m.Json = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Json |= vs_profiles.TrueFalseChoice(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
 		case 54:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field LastHopPoolNone", wireType)
@@ -17348,11 +22861,11 @@ func (m *ReplaceSpecType) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
-		case 3:
+		case 5:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Managed", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Domains", wireType)
 			}
-			var msglen int
+			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowTypes
@@ -17362,61 +22875,23 @@ func (m *ReplaceSpecType) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				msglen |= int(b&0x7F) << shift
+				stringLen |= uint64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			if msglen < 0 {
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
 				return ErrInvalidLengthTypes
 			}
-			postIndex := iNdEx + msglen
+			postIndex := iNdEx + intStringLen
 			if postIndex < 0 {
 				return ErrInvalidLengthTypes
 			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			v := &DomainsManagedByF5XC{}
-			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			m.DomainChoice = &ReplaceSpecType_Managed{v}
-			iNdEx = postIndex
-		case 4:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field NotManaged", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTypes
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthTypes
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			v := &NotManagedDomainsType{}
-			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			m.DomainChoice = &ReplaceSpecType_NotManaged{v}
+			m.Domains = append(m.Domains, string(dAtA[iNdEx:postIndex]))
 			iNdEx = postIndex
 		case 8:
 			if wireType != 2 {
@@ -17447,7 +22922,7 @@ func (m *ReplaceSpecType) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			v := &Services{}
+			v := &HTTPServices{}
 			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
@@ -17517,7 +22992,7 @@ func (m *ReplaceSpecType) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			v := &Services{}
+			v := &TCPServices{}
 			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
@@ -17552,7 +23027,7 @@ func (m *ReplaceSpecType) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			v := &Services{}
+			v := &UDPServices{}
 			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
@@ -17836,6 +23311,111 @@ func (m *ReplaceSpecType) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
+		case 23:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field StatisticsProfileNone", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &schema.Empty{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.StatisticsProfileChoice = &ReplaceSpecType_StatisticsProfileNone{v}
+			iNdEx = postIndex
+		case 24:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field StatisticsProfile", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &views.ObjectRefType{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.StatisticsProfileChoice = &ReplaceSpecType_StatisticsProfile{v}
+			iNdEx = postIndex
+		case 25:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Http3", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &HTTP3Services{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.VirtualServerType = &ReplaceSpecType_Http3{v}
+			iNdEx = postIndex
 		case 34:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Translations", wireType)
@@ -17944,6 +23524,44 @@ func (m *ReplaceSpecType) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
+		case 50:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Sse", wireType)
+			}
+			m.Sse = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Sse |= vs_profiles.TrueFalseChoice(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 51:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Json", wireType)
+			}
+			m.Json = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Json |= vs_profiles.TrueFalseChoice(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
 		case 54:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field LastHopPoolNone", wireType)
@@ -18334,11 +23952,11 @@ func (m *GetSpecType) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
-		case 3:
+		case 5:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Managed", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Domains", wireType)
 			}
-			var msglen int
+			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowTypes
@@ -18348,61 +23966,23 @@ func (m *GetSpecType) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				msglen |= int(b&0x7F) << shift
+				stringLen |= uint64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			if msglen < 0 {
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
 				return ErrInvalidLengthTypes
 			}
-			postIndex := iNdEx + msglen
+			postIndex := iNdEx + intStringLen
 			if postIndex < 0 {
 				return ErrInvalidLengthTypes
 			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			v := &DomainsManagedByF5XC{}
-			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			m.DomainChoice = &GetSpecType_Managed{v}
-			iNdEx = postIndex
-		case 4:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field NotManaged", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTypes
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthTypes
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			v := &NotManagedDomainsType{}
-			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			m.DomainChoice = &GetSpecType_NotManaged{v}
+			m.Domains = append(m.Domains, string(dAtA[iNdEx:postIndex]))
 			iNdEx = postIndex
 		case 8:
 			if wireType != 2 {
@@ -18433,7 +24013,7 @@ func (m *GetSpecType) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			v := &Services{}
+			v := &HTTPServices{}
 			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
@@ -18503,7 +24083,7 @@ func (m *GetSpecType) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			v := &Services{}
+			v := &TCPServices{}
 			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
@@ -18538,7 +24118,7 @@ func (m *GetSpecType) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			v := &Services{}
+			v := &UDPServices{}
 			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
@@ -18822,6 +24402,111 @@ func (m *GetSpecType) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
+		case 23:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field StatisticsProfileNone", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &schema.Empty{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.StatisticsProfileChoice = &GetSpecType_StatisticsProfileNone{v}
+			iNdEx = postIndex
+		case 24:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field StatisticsProfile", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &views.ObjectRefType{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.StatisticsProfileChoice = &GetSpecType_StatisticsProfile{v}
+			iNdEx = postIndex
+		case 25:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Http3", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &HTTP3Services{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.VirtualServerType = &GetSpecType_Http3{v}
+			iNdEx = postIndex
 		case 34:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Translations", wireType)
@@ -18930,6 +24615,44 @@ func (m *GetSpecType) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
+		case 50:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Sse", wireType)
+			}
+			m.Sse = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Sse |= vs_profiles.TrueFalseChoice(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 51:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Json", wireType)
+			}
+			m.Json = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Json |= vs_profiles.TrueFalseChoice(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
 		case 54:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field LastHopPoolNone", wireType)

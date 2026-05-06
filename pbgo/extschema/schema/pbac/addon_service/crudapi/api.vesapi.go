@@ -1109,7 +1109,6 @@ func (s *APISrv) List(ctx context.Context, req *ObjectListReq) (*ObjectListRsp, 
 			}
 		}
 	}
-	var merr error
 	rsrcReq := &server.ResourceListRequest{
 		TenantFilter:       req.TenantFilter,
 		NamespaceFilter:    req.NamespaceFilter,
@@ -1122,15 +1121,15 @@ func (s *APISrv) List(ctx context.Context, req *ObjectListReq) (*ObjectListRsp, 
 	}
 	rsrcRsp, err := s.opts.RsrcHandler.ListFn(ctx, rsrcReq, s.apiWrapper)
 	if err != nil {
-		merr = multierror.Append(merr, errors.Wrap(err, "List"))
+		return nil, errors.Wrap(err, "List")
 	}
 	rsp, err := NewObjectListRsp(req, rsrcRsp.Items)
 	if err != nil {
-		merr = multierror.Append(merr, err)
+		return rsp, err
 	}
 	rsp.Metadata.ResourceVersion = rsrcRsp.ResourceVersion
 	rsp.NextPage = rsrcRsp.NextPage
-	return rsp, merr
+	return rsp, nil
 }
 func (s *APISrv) ListStream(req *ObjectListReq, stream API_ListStreamServer) error {
 	var merr *multierror.Error
@@ -1143,6 +1142,7 @@ func (s *APISrv) ListStream(req *ObjectListReq, stream API_ListStreamServer) err
 	rsrcRsp, err := s.opts.RsrcHandler.ListFn(stream.Context(), rsrcReq, s.apiWrapper)
 	if err != nil {
 		merr = multierror.Append(merr, errors.Wrap(err, "ListStream"))
+		return errors.ErrOrNil(merr)
 	}
 	streamSvr := &crudAPIListStreamServer{stream}
 	for item := range rsrcRsp.ItemsCh {
@@ -1791,7 +1791,7 @@ var APISwaggerJSON string = `{
                     },
                     {
                         "name": "report_fields",
-                        "description": "TODO: currently even if one specified implementation will return all fields.",
+                        "description": "Which fields to report. If none specified, only\nuid, tenant, namespace, name, labels are reported.\nTODO: currently even if one specified implementation will return all fields.",
                         "in": "query",
                         "required": false,
                         "type": "array",
@@ -2015,7 +2015,7 @@ var APISwaggerJSON string = `{
                     },
                     {
                         "name": "report_fields",
-                        "description": "TODO: currently even if one specified implementation will return all fields.",
+                        "description": "Which fields to report. If none specified, only\nuid, tenant, namespace, name, labels are reported.\nTODO: currently even if one specified implementation will return all fields.",
                         "in": "query",
                         "required": false,
                         "type": "array",
@@ -2269,7 +2269,7 @@ var APISwaggerJSON string = `{
                     },
                     {
                         "name": "report_fields",
-                        "description": "TODO: currently even if one specified implementation will return all fields.",
+                        "description": "Which fields to report. If none specified, only\nuid, tenant, namespace, name, labels are reported.\nTODO: currently even if one specified implementation will return all fields.",
                         "in": "query",
                         "required": false,
                         "type": "array",
@@ -2963,7 +2963,7 @@ var APISwaggerJSON string = `{
         },
         "customer_supportSupportService": {
             "type": "string",
-            "description": "Indicates the list of support service\n\nUnknown Support Service\nAccount Protection Support Service\nAdministration Support Service\nApplication Traffic Insight Support Service\nAudit Logs \u0026 Alerts Support Service\nAuthentication Intelligence Support Service\nBilling Support Service\nClient Side Defense Support Service\nCloud \u0026 Edge Sites Support Service\ndeprecated: use SS_MULTI_CLOUD_NETWORK_CONNECT instead\nDDOS \u0026 Transit Support Service\nDeprecated: use SS_ROUTED_DDOS instead\nDistributed Apps Support Service\nDNS Management Support Service\nLoadBalancers Support Service\ndeprecated: use SS_MULTI_CLOUD_APP_CONNECT instead\nShared Configuration Support Service\nWeb App \u0026 API Protection Support Service\nOther Support Service\nBot Defense Support Service\nContent delivery network Support Service\nObservability Support Service\nDelegated Access Support Service\nNetworking \u0026 security across clouds, edge and on-premises\nConnect apps across clouds, edge and on-premises using Load Balancers\nBIG-IP Access Policy Manager (APM)\nData Intelligence Support Service\nNGINX One Support Service\nWeb App Scanning Support Service\nRouted DDoS Support Service\nMobile App Shield protects mobile apps from reverse engineering, tampering and malware",
+            "description": "Indicates the list of support service\n\nUnknown Support Service\nAccount Protection Support Service\nAdministration Support Service\nApplication Traffic Insight Support Service\nAudit Logs \u0026 Alerts Support Service\nAuthentication Intelligence Support Service\nBilling Support Service\nClient Side Defense Support Service\nCloud \u0026 Edge Sites Support Service\ndeprecated: use SS_MULTI_CLOUD_NETWORK_CONNECT instead\nDDOS \u0026 Transit Support Service\nDeprecated: use SS_ROUTED_DDOS instead\nDistributed Apps Support Service\nDNS Management Support Service\nLoadBalancers Support Service\ndeprecated: use SS_MULTI_CLOUD_APP_CONNECT instead\nShared Configuration Support Service\nWeb App \u0026 API Protection Support Service\nOther Support Service\nBot Defense Support Service\nContent delivery network Support Service\nObservability Support Service\nDelegated Access Support Service\nNetworking \u0026 security across clouds, edge and on-premises\nConnect apps across clouds, edge and on-premises using Load Balancers\nData Intelligence Support Service\nNGINX One Support Service\nWeb App Scanning Support Service\nRouted DDoS Support Service\nMobile App Shield protects mobile apps from reverse engineering, tampering and malware\nDefault for deprecated services\nAutomation Support Service for Terraform Provider",
             "title": "SupportService",
             "enum": [
                 "SS_UNKNOWN",
@@ -2988,12 +2988,13 @@ var APISwaggerJSON string = `{
                 "SS_DELEGATED_ACCESS",
                 "SS_MULTI_CLOUD_NETWORK_CONNECT",
                 "SS_MULTI_CLOUD_APP_CONNECT",
-                "SS_BIG_IP_APM",
                 "SS_DATA_INTELLIGENCE",
                 "SS_NGINX_ONE",
                 "SS_WEB_APP_SCANNING",
                 "SS_ROUTED_DDOS",
-                "SS_MOBILE_APP_SHIELD"
+                "SS_MOBILE_APP_SHIELD",
+                "SS_DEPRECATED",
+                "SS_AUTOMATION"
             ],
             "default": "SS_UNKNOWN",
             "x-displayname": "Support Service",

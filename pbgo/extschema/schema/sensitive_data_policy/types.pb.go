@@ -5,18 +5,17 @@ package sensitive_data_policy
 
 import (
 	fmt "fmt"
-	io "io"
-	math "math"
-	math_bits "math/bits"
-	reflect "reflect"
-	strings "strings"
-
 	_ "github.com/gogo/protobuf/gogoproto"
 	proto "github.com/gogo/protobuf/proto"
 	golang_proto "github.com/golang/protobuf/proto"
 	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	data_type "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/data_type"
 	views "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views"
+	io "io"
+	math "math"
+	math_bits "math/bits"
+	reflect "reflect"
+	strings "strings"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -342,6 +341,7 @@ type CustomDataTypeRef struct {
 	// custom_data_type_ref
 	//
 	// x-displayName: "Defined Custom Sensitive Data Type"
+	// x-required
 	// List of custom data types to monitor
 	CustomDataTypeRef *views.ObjectRefType `protobuf:"bytes,2,opt,name=custom_data_type_ref,json=customDataTypeRef,proto3" json:"custom_data_type_ref,omitempty"`
 }

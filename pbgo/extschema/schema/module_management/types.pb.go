@@ -5,15 +5,14 @@ package module_management
 
 import (
 	fmt "fmt"
-	math "math"
-	strconv "strconv"
-
 	_ "github.com/gogo/googleapis/google/api"
 	_ "github.com/gogo/protobuf/gogoproto"
 	proto "github.com/gogo/protobuf/proto"
 	golang_proto "github.com/golang/protobuf/proto"
 	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/vesenv"
+	math "math"
+	strconv "strconv"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.

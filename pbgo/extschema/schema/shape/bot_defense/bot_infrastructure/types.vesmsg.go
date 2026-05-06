@@ -1653,6 +1653,12 @@ func (v *ValidateGlobalSpecType) Validate(ctx context.Context, pm interface{}, o
 			return err
 		}
 	}
+	if fv, exists := v.FldValidators["cluster_tag"]; exists {
+		vOpts := append(opts, db.WithValidateField("cluster_tag"))
+		if err := fv(ctx, m.GetClusterTag(), vOpts...); err != nil {
+			return err
+		}
+	}
 
 	switch m.GetCreateBotInfraChoice().(type) {
 	case *GlobalSpecType_CreateCloudHosted:
@@ -2568,6 +2574,20 @@ func (v *ValidateIngress) RegionValidationRuleHandler(rules map[string]string) (
 
 	return validatorFn, nil
 }
+func (v *ValidateIngress) CertStatusValidationRuleHandler(rules map[string]string) (db.ValidatorFunc, error) {
+	var conv db.EnumConvFn
+	conv = func(v interface{}) int32 {
+		i := v.(CertificateStatus)
+		return int32(i)
+	}
+	// CertificateStatus_name is generated in .pb.go
+	validatorFn, err := db.NewEnumValidationRuleHandler(rules, CertificateStatus_name, conv)
+	if err != nil {
+		return nil, errors.Wrap(err, "ValidationRuleHandler for cert_status")
+	}
+
+	return validatorFn, nil
+}
 
 func (v *ValidateIngress) Validate(ctx context.Context, pm interface{}, opts ...db.ValidateOpt) error {
 	m, ok := pm.(*Ingress)
@@ -2581,6 +2601,18 @@ func (v *ValidateIngress) Validate(ctx context.Context, pm interface{}, opts ...
 	}
 	if m == nil {
 		return nil
+	}
+	if fv, exists := v.FldValidators["cert_id"]; exists {
+		vOpts := append(opts, db.WithValidateField("cert_id"))
+		if err := fv(ctx, m.GetCertId(), vOpts...); err != nil {
+			return err
+		}
+	}
+	if fv, exists := v.FldValidators["cert_status"]; exists {
+		vOpts := append(opts, db.WithValidateField("cert_status"))
+		if err := fv(ctx, m.GetCertStatus(), vOpts...); err != nil {
+			return err
+		}
 	}
 	if fv, exists := v.FldValidators["region"]; exists {
 		vOpts := append(opts, db.WithValidateField("region"))
@@ -2677,6 +2709,17 @@ var DefaultIngressValidator = func() *ValidateIngress {
 		panic(errMsg)
 	}
 	v.FldValidators["region"] = vFn
+
+	vrhCertStatus := v.CertStatusValidationRuleHandler
+	rulesCertStatus := map[string]string{
+		"ves.io.schema.rules.enum.defined_only": "true",
+	}
+	vFn, err = vrhCertStatus(rulesCertStatus)
+	if err != nil {
+		errMsg := fmt.Sprintf("ValidationRuleHandler for Ingress.cert_status: %s", err)
+		panic(errMsg)
+	}
+	v.FldValidators["cert_status"] = vFn
 
 	return v
 }()

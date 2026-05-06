@@ -6,8 +6,6 @@ package azure_vnet_site
 import (
 	context "context"
 	fmt "fmt"
-	math "math"
-
 	_ "github.com/gogo/googleapis/google/api"
 	_ "github.com/gogo/protobuf/gogoproto"
 	proto "github.com/gogo/protobuf/proto"
@@ -19,6 +17,7 @@ import (
 	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/vesenv"
 	views "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views"
 	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/virtual_host"
+	math "math"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.

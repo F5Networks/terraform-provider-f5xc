@@ -15,13 +15,13 @@ FastAclRule resource
 resource "f5xc_fast_acl_rule" "example" {
   name      = "example_fast_acl_rule"
   namespace = "example_namespace"
+  action    = {}
   port      = [{}]
   source = {
     prefix = {
       prefix = "example_prefix"
     }
   }
-  action = {}
 }
 ```
 

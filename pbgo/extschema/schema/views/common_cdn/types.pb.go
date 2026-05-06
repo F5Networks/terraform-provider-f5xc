@@ -5,13 +5,6 @@ package common_cdn
 
 import (
 	fmt "fmt"
-	io "io"
-	math "math"
-	math_bits "math/bits"
-	reflect "reflect"
-	strconv "strconv"
-	strings "strings"
-
 	_ "github.com/gogo/protobuf/gogoproto"
 	proto "github.com/gogo/protobuf/proto"
 	_ "github.com/gogo/protobuf/types"
@@ -20,6 +13,12 @@ import (
 	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/policy"
 	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views"
 	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/virtual_host"
+	io "io"
+	math "math"
+	math_bits "math/bits"
+	reflect "reflect"
+	strconv "strconv"
+	strings "strings"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -296,7 +295,7 @@ type LilacCDNCachePurgeRequest struct {
 	PurgeEpochTimestamp string `protobuf:"bytes,3,opt,name=purge_epoch_timestamp,json=purgeEpochTimestamp,proto3" json:"purge_epoch_timestamp,omitempty"`
 	// Purge Options
 	//
-	// x-displayName: "Purge Options"
+	// x-displayName: "Target"
 	// x-required
 	// Format: string
 	// Options to purge cache for a specific distribution
@@ -309,7 +308,7 @@ type LilacCDNCachePurgeRequest struct {
 	PatternType isLilacCDNCachePurgeRequest_PatternType `protobuf_oneof:"pattern_type"`
 	// Purge Type
 	//
-	// x-displayName: "Purge Type"
+	// x-displayName: "Type"
 	// x-required
 	// Purge type controls how the purge is performed
 	//

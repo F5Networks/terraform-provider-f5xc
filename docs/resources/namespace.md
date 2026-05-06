@@ -28,7 +28,7 @@ resource "f5xc_namespace" "example" {
 
 ### Optional
 
-- `allow_advertise_on_public` (List of String) <br>**Allowed Values (choose one):** `["Disable", "Default", "Enable"]`<br>**Default:** `Default`
+- `allow_advertise_on_public` (List of String) <br>**Allowed Values (choose one):** `["Default", "Enable", "Disable"]`<br>**Default:** `Default`
 - `annotations` (Map of String) annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.
 - `description` (String) description Human readable description for the object
 - `labels` (Map of String) labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression

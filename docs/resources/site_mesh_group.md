@@ -13,8 +13,8 @@ SiteMeshGroup resource
 
 ```terraform
 resource "f5xc_site_mesh_group" "example" {
-  namespace = "example_namespace"
   name      = "example_site_mesh_group"
+  namespace = "example_namespace"
   re_fallback = {
     disable_re_fallback = true
   }

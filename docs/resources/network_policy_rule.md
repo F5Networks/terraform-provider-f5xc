@@ -30,7 +30,7 @@ resource "f5xc_network_policy_rule" "example" {
 
 ### Optional
 
-- `action` (List of String) <br>**Allowed Values (choose one):** `["ALLOW", "DENY"]`<br>**Default:** `DENY`
+- `action` (List of String) <br>**Allowed Values (choose one):** `["DENY", "ALLOW"]`<br>**Default:** `DENY`
 - `advanced_action` (Attributes) advanced_action Enable or disable logging. (see [below for nested schema](#nestedatt--advanced_action))
 - `annotations` (Map of String) annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.
 - `description` (String) description Human readable description for the object

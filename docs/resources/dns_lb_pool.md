@@ -13,17 +13,17 @@ DnsLbPool resource
 
 ```terraform
 resource "f5xc_dns_lb_pool" "example" {
-  name      = "example_dns_lb_pool"
   namespace = "example_namespace"
+  name      = "example_dns_lb_pool"
+  ttl_choice = {
+    use_rrset_ttl = true
+  }
   pool_type_choice = {
     srv_pool = {
       srv_pool = "example_srv_pool"
     }
   }
   load_balancing_mode = ["ENUM_VALUE"]
-  ttl_choice = {
-    use_rrset_ttl = true
-  }
 }
 ```
 
@@ -173,12 +173,13 @@ Read-Only:
 
 Required:
 
-- `domain` (String) Domain
+- `domain` (String) FQDN Specifies the fully qualified domain name.
 
 Optional:
 
 - `final_translation` (Boolean) <br>**Default:** `false`
 - `name` (String) <br>**Validation:** `Length LengthAtMost(256)`
+- `priority` (Number) <br>**Default:** `10`
 - `ratio` (Number) <br>**Default:** `1`
 
 

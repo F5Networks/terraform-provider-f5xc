@@ -159,10 +159,11 @@ Read-Only:
 
 Read-Only:
 
-- `domain` (String) Domain
+- `domain` (String) FQDN Specifies the fully qualified domain name.
 - `final_translation` (Boolean) Final Translation If this flag is true, the CNAME record will not be translated further.
 - `name` (String) Name Pool member name
-- `ratio` (Number) Ratio Ratio
+- `priority` (Number) Priority Used if the pool’s load balancing mode is set to Priority. Determines the order in which traffic is routed to pool members. The lower the number, the higher the priority, making those members active while higher-numbered members act as backups.
+- `ratio` (Number) Ratio Used if the pool’s load balancing mode is set to Ratio-Member
 
 
 

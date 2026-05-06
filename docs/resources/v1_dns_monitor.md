@@ -13,14 +13,14 @@ V1DnsMonitor resource
 
 ```terraform
 resource "f5xc_v1_dns_monitor" "example" {
-  name      = "example_v1_dns_monitor"
   namespace = "example_namespace"
-  interval_choice = {
-    interval_1_hour = true
-  }
-  domain = "example_v1_dns_monitor"
+  name      = "example_v1_dns_monitor"
+  domain    = "example_v1_dns_monitor"
   on_failure_to_choice = {
-    on_failure_to_all = true
+    on_failure_to_any = true
+  }
+  interval_choice = {
+    interval_1_min = true
   }
   external_sources = [{
     source_choice = {
@@ -163,7 +163,7 @@ Optional:
 
 Required:
 
-- `eval_period` (List of String) <br>**Allowed Values (choose one):** `["EVAL_PERIOD_5_MINS", "EVAL_PERIOD_10_MINS", "EVAL_PERIOD_15_MINS", "EVAL_PERIOD_3_MINS"]`
+- `eval_period` (List of String) <br>**Allowed Values (choose one):** `["EVAL_PERIOD_10_MINS", "EVAL_PERIOD_15_MINS", "EVAL_PERIOD_3_MINS", "EVAL_PERIOD_5_MINS"]`
 
 Optional:
 
@@ -184,7 +184,7 @@ Optional:
 
 Required:
 
-- `eval_period` (List of String) <br>**Allowed Values (choose one):** `["EVAL_PERIOD_10_MINS", "EVAL_PERIOD_15_MINS", "EVAL_PERIOD_3_MINS", "EVAL_PERIOD_5_MINS"]`
+- `eval_period` (List of String) <br>**Allowed Values (choose one):** `["EVAL_PERIOD_15_MINS", "EVAL_PERIOD_3_MINS", "EVAL_PERIOD_5_MINS", "EVAL_PERIOD_10_MINS"]`
 
 Optional:
 

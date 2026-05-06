@@ -16,8 +16,8 @@ resource "f5xc_dns_lb_health_check" "example" {
   name      = "example_dns_lb_health_check"
   namespace = "example_namespace"
   health_check = {
-    http_health_check = {
-      http_health_check = "example_http_health_check"
+    udp_health_check = {
+      udp_health_check = "example_udp_health_check"
     }
   }
 }
@@ -78,6 +78,7 @@ Optional:
 Optional:
 
 - `disable_virtual_host` (Boolean) Disable Virtual Host
+- `inherit_load_balancer_fqdn` (Boolean) Inherit From Load Balancer FQDN Inherit load balancer FQDN as the virtual host to use for SNI.
 - `virtual_host` (String) <br>**Validation:** `Length LengthAtMost(2048)`
 
 
@@ -102,6 +103,7 @@ Optional:
 Optional:
 
 - `disable_virtual_host` (Boolean) Disable Virtual Host
+- `inherit_load_balancer_fqdn` (Boolean) Inherit From Load Balancer FQDN Inherit load balancer FQDN as the virtual host to use for SNI.
 - `virtual_host` (String) <br>**Validation:** `Length LengthAtMost(2048)`
 
 

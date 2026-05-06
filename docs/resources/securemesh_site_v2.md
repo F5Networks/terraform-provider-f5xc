@@ -15,16 +15,16 @@ SecuremeshSiteV2 resource
 resource "f5xc_securemesh_site_v2" "example" {
   name      = "example_securemesh_site_v2"
   namespace = "example_namespace"
+  blocked_services_choice = {
+    block_all_services = true
+  }
   logs_receiver_choice = {
     logs_streaming_disabled = true
   }
   provider_choice = {
-    aws = {
-      aws = "example_aws"
+    nutanix = {
+      nutanix = "example_nutanix"
     }
-  }
-  blocked_services_choice = {
-    block_all_services = true
   }
 }
 ```
@@ -45,6 +45,7 @@ resource "f5xc_securemesh_site_v2" "example" {
 ### Optional
 
 - `admin_user_credentials` (Attributes) Admin User Credentials Setup user credentials to manage access to nodes belonging to the site. When configured, 'admin' user will be setup and customers can access these nodes via either the node local WebUI or via SSH to access shell/CLI (see [below for nested schema](#nestedatt--admin_user_credentials))
+- `advanced_delivery_choice` (Attributes) Advanced Delivery Early access for Advanced Load Balancer - Please do not use in production. (see [below for nested schema](#nestedatt--advanced_delivery_choice))
 - `annotations` (Map of String) annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.
 - `description` (String) description Human readable description for the object
 - `dns_ntp_config` (Attributes) DNS & NTP Servers Specify DNS and NTP servers that will be used by the nodes in this Customer Edge site. (see [below for nested schema](#nestedatt--dns_ntp_config))
@@ -67,7 +68,7 @@ resource "f5xc_securemesh_site_v2" "example" {
 - `software_settings` (Attributes) F5XC Software Settings Select OS and Software version for the site. All nodes in the site will run the same OS and Software version. These settings cannot be changed after the site is created. (see [below for nested schema](#nestedatt--software_settings))
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
 - `tunnel_dead_timeout` (Number) tunnel_dead_timeout Time interval, in millisec, within which any ipsec / ssl connection from the site going down is detected. When not set (== 0), a default value of 10000 msec will be used.
-- `tunnel_type` (List of String) <br>**Allowed Values (choose one):** `["SITE_TO_SITE_TUNNEL_IPSEC", "SITE_TO_SITE_TUNNEL_SSL", "SITE_TO_SITE_TUNNEL_IPSEC_OR_SSL"]`<br>**Default:** `SITE_TO_SITE_TUNNEL_IPSEC_OR_SSL`
+- `tunnel_type` (List of String) <br>**Allowed Values (choose one):** `["SITE_TO_SITE_TUNNEL_IPSEC_OR_SSL", "SITE_TO_SITE_TUNNEL_IPSEC", "SITE_TO_SITE_TUNNEL_SSL"]`<br>**Default:** `SITE_TO_SITE_TUNNEL_IPSEC_OR_SSL`
 - `upgrade_settings` (Attributes) Upgrade Settings Specify how a site will be upgraded. (see [below for nested schema](#nestedatt--upgrade_settings))
 - `url_categorization_choice` (Attributes) URL Categorization Enable or disable URL categorization for this site. (see [below for nested schema](#nestedatt--url_categorization_choice))
 - `volterra_software_version` (String) <br>**Validation:** `Length LengthAtMost(256)`
@@ -97,7 +98,7 @@ Optional:
 Optional:
 
 - `blocked_services_value_type_choice` (Attributes) blocked_services_type_choice Choose the Nodel Local Service to disable (see [below for nested schema](#nestedatt--blocked_services_choice--blocked_services--blocked_sevice--blocked_services_value_type_choice))
-- `network_type` (List of String) <br>**Allowed Values (choose one):** `["VIRTUAL_NETWORK_SITE_LOCAL_INSIDE", "VIRTUAL_NETWORK_PER_SITE", "VIRTUAL_NETWORK_SITE_SERVICE", "VIRTUAL_NETWORK_VER_INTERNAL", "VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE", "VIRTUAL_NETWORK_IP_AUTO", "VIRTUAL_NETWORK_VOLTADN_PRIVATE_NETWORK", "VIRTUAL_NETWORK_MANAGEMENT", "VIRTUAL_NETWORK_SITE_LOCAL", "VIRTUAL_NETWORK_PUBLIC", "VIRTUAL_NETWORK_GLOBAL", "VIRTUAL_NETWORK_SRV6_NETWORK", "VIRTUAL_NETWORK_IP_FABRIC", "VIRTUAL_NETWORK_SEGMENT"]`
+- `network_type` (List of String) <br>**Allowed Values (choose one):** `["VIRTUAL_NETWORK_VER_INTERNAL", "VIRTUAL_NETWORK_VOLTADN_PRIVATE_NETWORK", "VIRTUAL_NETWORK_IP_FABRIC", "VIRTUAL_NETWORK_PUBLIC", "VIRTUAL_NETWORK_SITE_SERVICE", "VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE", "VIRTUAL_NETWORK_IP_AUTO", "VIRTUAL_NETWORK_SRV6_NETWORK", "VIRTUAL_NETWORK_SEGMENT", "VIRTUAL_NETWORK_MANAGEMENT", "VIRTUAL_NETWORK_SITE_LOCAL", "VIRTUAL_NETWORK_SITE_LOCAL_INSIDE", "VIRTUAL_NETWORK_PER_SITE", "VIRTUAL_NETWORK_GLOBAL"]`
 
 <a id="nestedatt--blocked_services_choice--blocked_services--blocked_sevice--blocked_services_value_type_choice"></a>
 ### Nested Schema for `blocked_services_choice.blocked_services.blocked_sevice.blocked_services_value_type_choice`
@@ -216,7 +217,7 @@ Optional:
 - `ipv6_address_choice` (Attributes) IPv6 Interface Addressing Optional, select how ipv6 address will be assigned to this interface. (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice))
 - `labels` (Map of String) Interface labels Add Labels for this Interface, these labels can be used in firewall policy
 - `monitoring_choice` (Attributes) Select Link Quality Monitoring configuration When enabled, probes will be sent on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes. (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--monitoring_choice))
-- `mtu` (Number) <br>**Default:** `1500`<br>**Validation:** `OneOf [0]`
+- `mtu` (Number) <br>**Default:** `0`<br>**Validation:** `OneOf [0]`
 - `name` (String) <br>**Validation:** `Length LengthAtMost(256)`
 - `priority` (Number) Priority For a node, if multiple interfaces are configured in a VRF, interfaces with highest priority will be used as active and interfaces with lower priority will be used as backup. If multiple interfaces have the same priority, ECMP will be used. Greater the value, higher the priority
 - `site_to_site_connectivity_interface_choice` (Attributes) Use for Site to Site Connectivity Interface with this field enabled will be used to connect to other sites. This setting is useful if a node has multiple interfaces configured in a VRF. Only one interface in a VRF can have this field enabled. (see [below for nested schema](#nestedatt--provider_choice--aws--orchestration_choice--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice))
@@ -610,7 +611,7 @@ Optional:
 - `ipv6_address_choice` (Attributes) IPv6 Interface Addressing Optional, select how ipv6 address will be assigned to this interface. (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice))
 - `labels` (Map of String) Interface labels Add Labels for this Interface, these labels can be used in firewall policy
 - `monitoring_choice` (Attributes) Select Link Quality Monitoring configuration When enabled, probes will be sent on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes. (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--monitoring_choice))
-- `mtu` (Number) <br>**Default:** `1500`<br>**Validation:** `OneOf [0]`
+- `mtu` (Number) <br>**Default:** `0`<br>**Validation:** `OneOf [0]`
 - `name` (String) <br>**Validation:** `Length LengthAtMost(256)`
 - `priority` (Number) Priority For a node, if multiple interfaces are configured in a VRF, interfaces with highest priority will be used as active and interfaces with lower priority will be used as backup. If multiple interfaces have the same priority, ECMP will be used. Greater the value, higher the priority
 - `site_to_site_connectivity_interface_choice` (Attributes) Use for Site to Site Connectivity Interface with this field enabled will be used to connect to other sites. This setting is useful if a node has multiple interfaces configured in a VRF. Only one interface in a VRF can have this field enabled. (see [below for nested schema](#nestedatt--provider_choice--azure--orchestration_choice--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice))
@@ -1004,7 +1005,7 @@ Optional:
 - `ipv6_address_choice` (Attributes) IPv6 Interface Addressing Optional, select how ipv6 address will be assigned to this interface. (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice))
 - `labels` (Map of String) Interface labels Add Labels for this Interface, these labels can be used in firewall policy
 - `monitoring_choice` (Attributes) Select Link Quality Monitoring configuration When enabled, probes will be sent on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes. (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--monitoring_choice))
-- `mtu` (Number) <br>**Default:** `1500`<br>**Validation:** `OneOf [0]`
+- `mtu` (Number) <br>**Default:** `0`<br>**Validation:** `OneOf [0]`
 - `name` (String) <br>**Validation:** `Length LengthAtMost(256)`
 - `priority` (Number) Priority For a node, if multiple interfaces are configured in a VRF, interfaces with highest priority will be used as active and interfaces with lower priority will be used as backup. If multiple interfaces have the same priority, ECMP will be used. Greater the value, higher the priority
 - `site_to_site_connectivity_interface_choice` (Attributes) Use for Site to Site Connectivity Interface with this field enabled will be used to connect to other sites. This setting is useful if a node has multiple interfaces configured in a VRF. Only one interface in a VRF can have this field enabled. (see [below for nested schema](#nestedatt--provider_choice--baremetal--orchestration_choice--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice))
@@ -1398,7 +1399,7 @@ Optional:
 - `ipv6_address_choice` (Attributes) IPv6 Interface Addressing Optional, select how ipv6 address will be assigned to this interface. (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice))
 - `labels` (Map of String) Interface labels Add Labels for this Interface, these labels can be used in firewall policy
 - `monitoring_choice` (Attributes) Select Link Quality Monitoring configuration When enabled, probes will be sent on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes. (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--monitoring_choice))
-- `mtu` (Number) <br>**Default:** `1500`<br>**Validation:** `OneOf [0]`
+- `mtu` (Number) <br>**Default:** `0`<br>**Validation:** `OneOf [0]`
 - `name` (String) <br>**Validation:** `Length LengthAtMost(256)`
 - `priority` (Number) Priority For a node, if multiple interfaces are configured in a VRF, interfaces with highest priority will be used as active and interfaces with lower priority will be used as backup. If multiple interfaces have the same priority, ECMP will be used. Greater the value, higher the priority
 - `site_to_site_connectivity_interface_choice` (Attributes) Use for Site to Site Connectivity Interface with this field enabled will be used to connect to other sites. This setting is useful if a node has multiple interfaces configured in a VRF. Only one interface in a VRF can have this field enabled. (see [below for nested schema](#nestedatt--provider_choice--equinix--orchestration_choice--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice))
@@ -1792,7 +1793,7 @@ Optional:
 - `ipv6_address_choice` (Attributes) IPv6 Interface Addressing Optional, select how ipv6 address will be assigned to this interface. (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice))
 - `labels` (Map of String) Interface labels Add Labels for this Interface, these labels can be used in firewall policy
 - `monitoring_choice` (Attributes) Select Link Quality Monitoring configuration When enabled, probes will be sent on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes. (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--monitoring_choice))
-- `mtu` (Number) <br>**Default:** `1500`<br>**Validation:** `OneOf [0]`
+- `mtu` (Number) <br>**Default:** `0`<br>**Validation:** `OneOf [0]`
 - `name` (String) <br>**Validation:** `Length LengthAtMost(256)`
 - `priority` (Number) Priority For a node, if multiple interfaces are configured in a VRF, interfaces with highest priority will be used as active and interfaces with lower priority will be used as backup. If multiple interfaces have the same priority, ECMP will be used. Greater the value, higher the priority
 - `site_to_site_connectivity_interface_choice` (Attributes) Use for Site to Site Connectivity Interface with this field enabled will be used to connect to other sites. This setting is useful if a node has multiple interfaces configured in a VRF. Only one interface in a VRF can have this field enabled. (see [below for nested schema](#nestedatt--provider_choice--gcp--orchestration_choice--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice))
@@ -2186,7 +2187,7 @@ Optional:
 - `ipv6_address_choice` (Attributes) IPv6 Interface Addressing Optional, select how ipv6 address will be assigned to this interface. (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice))
 - `labels` (Map of String) Interface labels Add Labels for this Interface, these labels can be used in firewall policy
 - `monitoring_choice` (Attributes) Select Link Quality Monitoring configuration When enabled, probes will be sent on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes. (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--monitoring_choice))
-- `mtu` (Number) <br>**Default:** `1500`<br>**Validation:** `OneOf [0]`
+- `mtu` (Number) <br>**Default:** `0`<br>**Validation:** `OneOf [0]`
 - `name` (String) <br>**Validation:** `Length LengthAtMost(256)`
 - `priority` (Number) Priority For a node, if multiple interfaces are configured in a VRF, interfaces with highest priority will be used as active and interfaces with lower priority will be used as backup. If multiple interfaces have the same priority, ECMP will be used. Greater the value, higher the priority
 - `site_to_site_connectivity_interface_choice` (Attributes) Use for Site to Site Connectivity Interface with this field enabled will be used to connect to other sites. This setting is useful if a node has multiple interfaces configured in a VRF. Only one interface in a VRF can have this field enabled. (see [below for nested schema](#nestedatt--provider_choice--kvm--orchestration_choice--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice))
@@ -2580,7 +2581,7 @@ Optional:
 - `ipv6_address_choice` (Attributes) IPv6 Interface Addressing Optional, select how ipv6 address will be assigned to this interface. (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice))
 - `labels` (Map of String) Interface labels Add Labels for this Interface, these labels can be used in firewall policy
 - `monitoring_choice` (Attributes) Select Link Quality Monitoring configuration When enabled, probes will be sent on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes. (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--monitoring_choice))
-- `mtu` (Number) <br>**Default:** `1500`<br>**Validation:** `OneOf [0]`
+- `mtu` (Number) <br>**Default:** `0`<br>**Validation:** `OneOf [0]`
 - `name` (String) <br>**Validation:** `Length LengthAtMost(256)`
 - `priority` (Number) Priority For a node, if multiple interfaces are configured in a VRF, interfaces with highest priority will be used as active and interfaces with lower priority will be used as backup. If multiple interfaces have the same priority, ECMP will be used. Greater the value, higher the priority
 - `site_to_site_connectivity_interface_choice` (Attributes) Use for Site to Site Connectivity Interface with this field enabled will be used to connect to other sites. This setting is useful if a node has multiple interfaces configured in a VRF. Only one interface in a VRF can have this field enabled. (see [below for nested schema](#nestedatt--provider_choice--nutanix--orchestration_choice--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice))
@@ -2974,7 +2975,7 @@ Optional:
 - `ipv6_address_choice` (Attributes) IPv6 Interface Addressing Optional, select how ipv6 address will be assigned to this interface. (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice))
 - `labels` (Map of String) Interface labels Add Labels for this Interface, these labels can be used in firewall policy
 - `monitoring_choice` (Attributes) Select Link Quality Monitoring configuration When enabled, probes will be sent on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes. (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--monitoring_choice))
-- `mtu` (Number) <br>**Default:** `1500`<br>**Validation:** `OneOf [0]`
+- `mtu` (Number) <br>**Default:** `0`<br>**Validation:** `OneOf [0]`
 - `name` (String) <br>**Validation:** `Length LengthAtMost(256)`
 - `priority` (Number) Priority For a node, if multiple interfaces are configured in a VRF, interfaces with highest priority will be used as active and interfaces with lower priority will be used as backup. If multiple interfaces have the same priority, ECMP will be used. Greater the value, higher the priority
 - `site_to_site_connectivity_interface_choice` (Attributes) Use for Site to Site Connectivity Interface with this field enabled will be used to connect to other sites. This setting is useful if a node has multiple interfaces configured in a VRF. Only one interface in a VRF can have this field enabled. (see [below for nested schema](#nestedatt--provider_choice--oci--orchestration_choice--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice))
@@ -3368,7 +3369,7 @@ Optional:
 - `ipv6_address_choice` (Attributes) IPv6 Interface Addressing Optional, select how ipv6 address will be assigned to this interface. (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice))
 - `labels` (Map of String) Interface labels Add Labels for this Interface, these labels can be used in firewall policy
 - `monitoring_choice` (Attributes) Select Link Quality Monitoring configuration When enabled, probes will be sent on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes. (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--monitoring_choice))
-- `mtu` (Number) <br>**Default:** `1500`<br>**Validation:** `OneOf [0]`
+- `mtu` (Number) <br>**Default:** `0`<br>**Validation:** `OneOf [0]`
 - `name` (String) <br>**Validation:** `Length LengthAtMost(256)`
 - `priority` (Number) Priority For a node, if multiple interfaces are configured in a VRF, interfaces with highest priority will be used as active and interfaces with lower priority will be used as backup. If multiple interfaces have the same priority, ECMP will be used. Greater the value, higher the priority
 - `site_to_site_connectivity_interface_choice` (Attributes) Use for Site to Site Connectivity Interface with this field enabled will be used to connect to other sites. This setting is useful if a node has multiple interfaces configured in a VRF. Only one interface in a VRF can have this field enabled. (see [below for nested schema](#nestedatt--provider_choice--openshift_virtualization--orchestration_choice--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice))
@@ -3762,7 +3763,7 @@ Optional:
 - `ipv6_address_choice` (Attributes) IPv6 Interface Addressing Optional, select how ipv6 address will be assigned to this interface. (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice))
 - `labels` (Map of String) Interface labels Add Labels for this Interface, these labels can be used in firewall policy
 - `monitoring_choice` (Attributes) Select Link Quality Monitoring configuration When enabled, probes will be sent on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes. (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--monitoring_choice))
-- `mtu` (Number) <br>**Default:** `1500`<br>**Validation:** `OneOf [0]`
+- `mtu` (Number) <br>**Default:** `0`<br>**Validation:** `OneOf [0]`
 - `name` (String) <br>**Validation:** `Length LengthAtMost(256)`
 - `priority` (Number) Priority For a node, if multiple interfaces are configured in a VRF, interfaces with highest priority will be used as active and interfaces with lower priority will be used as backup. If multiple interfaces have the same priority, ECMP will be used. Greater the value, higher the priority
 - `site_to_site_connectivity_interface_choice` (Attributes) Use for Site to Site Connectivity Interface with this field enabled will be used to connect to other sites. This setting is useful if a node has multiple interfaces configured in a VRF. Only one interface in a VRF can have this field enabled. (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice))
@@ -3947,7 +3948,7 @@ Optional:
 Required:
 
 - `network_prefix_choice` (Attributes) Network Prefix choice Select DHCP network prefix for a site (see [below for nested schema](#nestedatt--provider_choice--openstack--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks--network_prefix_choice))
-- `pool_settings` (List of String) <br>**Allowed Values (choose one):** `["INCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS", "EXCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS"]`
+- `pool_settings` (List of String) <br>**Allowed Values (choose one):** `["EXCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS", "INCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS"]`
 
 Optional:
 
@@ -4156,7 +4157,7 @@ Optional:
 - `ipv6_address_choice` (Attributes) IPv6 Interface Addressing Optional, select how ipv6 address will be assigned to this interface. (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice))
 - `labels` (Map of String) Interface labels Add Labels for this Interface, these labels can be used in firewall policy
 - `monitoring_choice` (Attributes) Select Link Quality Monitoring configuration When enabled, probes will be sent on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes. (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--monitoring_choice))
-- `mtu` (Number) <br>**Default:** `1500`<br>**Validation:** `OneOf [0]`
+- `mtu` (Number) <br>**Default:** `0`<br>**Validation:** `OneOf [0]`
 - `name` (String) <br>**Validation:** `Length LengthAtMost(256)`
 - `priority` (Number) Priority For a node, if multiple interfaces are configured in a VRF, interfaces with highest priority will be used as active and interfaces with lower priority will be used as backup. If multiple interfaces have the same priority, ECMP will be used. Greater the value, higher the priority
 - `site_to_site_connectivity_interface_choice` (Attributes) Use for Site to Site Connectivity Interface with this field enabled will be used to connect to other sites. This setting is useful if a node has multiple interfaces configured in a VRF. Only one interface in a VRF can have this field enabled. (see [below for nested schema](#nestedatt--provider_choice--rseries--orchestration_choice--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice))
@@ -4550,7 +4551,7 @@ Optional:
 - `ipv6_address_choice` (Attributes) IPv6 Interface Addressing Optional, select how ipv6 address will be assigned to this interface. (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--ipv6_address_choice))
 - `labels` (Map of String) Interface labels Add Labels for this Interface, these labels can be used in firewall policy
 - `monitoring_choice` (Attributes) Select Link Quality Monitoring configuration When enabled, probes will be sent on the network interface to monitor quality of the link. Links are assigned a score based on the result of probes. (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--monitoring_choice))
-- `mtu` (Number) <br>**Default:** `1500`<br>**Validation:** `OneOf [0]`
+- `mtu` (Number) <br>**Default:** `0`<br>**Validation:** `OneOf [0]`
 - `name` (String) <br>**Validation:** `Length LengthAtMost(256)`
 - `priority` (Number) Priority For a node, if multiple interfaces are configured in a VRF, interfaces with highest priority will be used as active and interfaces with lower priority will be used as backup. If multiple interfaces have the same priority, ECMP will be used. Greater the value, higher the priority
 - `site_to_site_connectivity_interface_choice` (Attributes) Use for Site to Site Connectivity Interface with this field enabled will be used to connect to other sites. This setting is useful if a node has multiple interfaces configured in a VRF. Only one interface in a VRF can have this field enabled. (see [below for nested schema](#nestedatt--provider_choice--vmware--orchestration_choice--not_managed--node_list--interface_list--site_to_site_connectivity_interface_choice))
@@ -4950,13 +4951,22 @@ Optional:
 
 
 
+<a id="nestedatt--advanced_delivery_choice"></a>
+### Nested Schema for `advanced_delivery_choice`
+
+Optional:
+
+- `disable_advanced_delivery` (Boolean) Disable Advanced Delivery
+- `enable_advanced_delivery` (Boolean) Enable Advanced Delivery
+
+
 <a id="nestedatt--dns_ntp_config"></a>
 ### Nested Schema for `dns_ntp_config`
 
 Optional:
 
 - `dns_server_choice` (Attributes) DNS Servers Specify DNS Servers that will be used for resolving domains required for registration and upgrades. By default, 8.8.8.8 and 8.8.4.4 DNS nameservers will be used. (see [below for nested schema](#nestedatt--dns_ntp_config--dns_server_choice))
-- `ntp_server_choice` (Attributes) NTP Servers Specify NTP Servers that will be by the nodes of this Customer Edge site. By default, time.google.com is used during registration and once tunnels to REs are formed, NTP service hosted by F5 Distributed Cloud will be used. When custom is selected, NTP service hosted by F5 Distributed Cloud will not be used. (see [below for nested schema](#nestedatt--dns_ntp_config--ntp_server_choice))
+- `ntp_server_choice` (Attributes) NTP Servers Specify NTP Servers that will be used by the nodes of this Customer Edge site. By default, time.google.com is used during registration and once tunnels to REs are formed, NTP service hosted by F5 Distributed Cloud will be used. When custom is selected, NTP service hosted by F5 Distributed Cloud will not be used. (see [below for nested schema](#nestedatt--dns_ntp_config--ntp_server_choice))
 
 <a id="nestedatt--dns_ntp_config--dns_server_choice"></a>
 ### Nested Schema for `dns_ntp_config.dns_server_choice`
@@ -5103,7 +5113,7 @@ Read-Only:
 
 Optional:
 
-- `vip_vrrp_mode` (List of String) <br>**Allowed Values (choose one):** `["VIP_VRRP_INVALID", "VIP_VRRP_ENABLE", "VIP_VRRP_DISABLE"]`<br>**Default:** `VIP_VRRP_ENABLE`
+- `vip_vrrp_mode` (List of String) <br>**Allowed Values (choose one):** `["VIP_VRRP_ENABLE", "VIP_VRRP_DISABLE", "VIP_VRRP_INVALID"]`<br>**Default:** `VIP_VRRP_ENABLE`
 
 
 <a id="nestedatt--local_vrf"></a>
@@ -5167,7 +5177,7 @@ Required:
 
 Optional:
 
-- `attrs` (List of String) <br>**Valid Options:** `["ROUTE_ATTR_MERGE_ONLY", "ROUTE_ATTR_NO_OP", "ROUTE_ATTR_ADVERTISE", "ROUTE_ATTR_INSTALL_HOST", "ROUTE_ATTR_INSTALL_FORWARDING"]` (Multiple selection allowed)
+- `attrs` (List of String) <br>**Valid Options:** `["ROUTE_ATTR_NO_OP", "ROUTE_ATTR_ADVERTISE", "ROUTE_ATTR_INSTALL_HOST", "ROUTE_ATTR_INSTALL_FORWARDING", "ROUTE_ATTR_MERGE_ONLY"]` (Multiple selection allowed)
 
 <a id="nestedatt--local_vrf--slo_choice--slo_config--static_route_choice--static_routes--static_routes--next_hop_choice"></a>
 ### Nested Schema for `local_vrf.slo_choice.slo_config.static_route_choice.static_routes.static_routes.next_hop_choice`
@@ -5237,7 +5247,7 @@ Required:
 
 Optional:
 
-- `attrs` (List of String) <br>**Valid Options:** `["ROUTE_ATTR_MERGE_ONLY", "ROUTE_ATTR_NO_OP", "ROUTE_ATTR_ADVERTISE", "ROUTE_ATTR_INSTALL_HOST", "ROUTE_ATTR_INSTALL_FORWARDING"]` (Multiple selection allowed)
+- `attrs` (List of String) <br>**Valid Options:** `["ROUTE_ATTR_ADVERTISE", "ROUTE_ATTR_INSTALL_HOST", "ROUTE_ATTR_INSTALL_FORWARDING", "ROUTE_ATTR_MERGE_ONLY", "ROUTE_ATTR_NO_OP"]` (Multiple selection allowed)
 
 <a id="nestedatt--local_vrf--slo_choice--slo_config--static_v6_route_choice--static_v6_routes--static_routes--next_hop_choice"></a>
 ### Nested Schema for `local_vrf.slo_choice.slo_config.static_v6_route_choice.static_v6_routes.static_routes.next_hop_choice`
@@ -5334,7 +5344,7 @@ Required:
 
 Optional:
 
-- `attrs` (List of String) <br>**Valid Options:** `["ROUTE_ATTR_NO_OP", "ROUTE_ATTR_ADVERTISE", "ROUTE_ATTR_INSTALL_HOST", "ROUTE_ATTR_INSTALL_FORWARDING", "ROUTE_ATTR_MERGE_ONLY"]` (Multiple selection allowed)
+- `attrs` (List of String) <br>**Valid Options:** `["ROUTE_ATTR_MERGE_ONLY", "ROUTE_ATTR_NO_OP", "ROUTE_ATTR_ADVERTISE", "ROUTE_ATTR_INSTALL_HOST", "ROUTE_ATTR_INSTALL_FORWARDING"]` (Multiple selection allowed)
 
 <a id="nestedatt--local_vrf--sli_choice--sli_config--static_route_choice--static_routes--static_routes--next_hop_choice"></a>
 ### Nested Schema for `local_vrf.sli_choice.sli_config.static_route_choice.static_routes.static_routes.next_hop_choice`
@@ -5404,7 +5414,7 @@ Required:
 
 Optional:
 
-- `attrs` (List of String) <br>**Valid Options:** `["ROUTE_ATTR_NO_OP", "ROUTE_ATTR_ADVERTISE", "ROUTE_ATTR_INSTALL_HOST", "ROUTE_ATTR_INSTALL_FORWARDING", "ROUTE_ATTR_MERGE_ONLY"]` (Multiple selection allowed)
+- `attrs` (List of String) <br>**Valid Options:** `["ROUTE_ATTR_ADVERTISE", "ROUTE_ATTR_INSTALL_HOST", "ROUTE_ATTR_INSTALL_FORWARDING", "ROUTE_ATTR_MERGE_ONLY", "ROUTE_ATTR_NO_OP"]` (Multiple selection allowed)
 
 <a id="nestedatt--local_vrf--sli_choice--sli_config--static_v6_route_choice--static_v6_routes--static_routes--next_hop_choice"></a>
 ### Nested Schema for `local_vrf.sli_choice.sli_config.static_v6_route_choice.static_v6_routes.static_routes.next_hop_choice`

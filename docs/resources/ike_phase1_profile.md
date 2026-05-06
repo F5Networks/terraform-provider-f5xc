@@ -16,13 +16,13 @@ resource "f5xc_ike_phase1_profile" "example" {
   name      = "example_ike_phase1_profile"
   namespace = "example_namespace"
   ike_key_lifetime = {
-    ike_keylifetime_minutes = {
-      ike_keylifetime_minutes = "example_ike_keylifetime_minutes"
+    ike_keylifetime_hours = {
+      ike_keylifetime_hours = "example_ike_keylifetime_hours"
     }
   }
   ike_reauth_timeout = {
-    reauth_timeout_hours = {
-      reauth_timeout_hours = "example_reauth_timeout_hours"
+    reauth_timeout_days = {
+      reauth_timeout_days = "example_reauth_timeout_days"
     }
   }
 }
@@ -45,8 +45,8 @@ resource "f5xc_ike_phase1_profile" "example" {
 - `annotations` (Map of String) annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.
 - `authentication_algos` (List of String) <br>**Valid Options:** `["SHA256_HMAC", "SHA384_HMAC", "SHA512_HMAC", "AUTH_ALG_NONE", "AUTH_ALG_DEFAULT"]` (Multiple selection allowed)<br>**Default:** `AUTH_ALG_NONE`
 - `description` (String) description Human readable description for the object
-- `dh_group` (List of String) <br>**Valid Options:** `["DH_GROUP_18", "DH_GROUP_20", "DH_GROUP_21", "DH_GROUP_14", "DH_GROUP_15", "DH_GROUP_19", "DH_GROUP_26", "DH_GROUP_DEFAULT", "DH_GROUP_16", "DH_GROUP_17"]` (Multiple selection allowed)<br>**Default:** `DH_GROUP_19`
-- `encryption_algos` (List of String) <br>**Valid Options:** `["TRIPLE_DES_CBC", "AES128_GCM", "AES192_GCM", "AES256_GCM", "ENC_ALG_DEFAULT", "AES128_CBC", "AES192_CBC", "AES256_CBC"]` (Multiple selection allowed)<br>**Default:** `AES256_GCM`
+- `dh_group` (List of String) <br>**Valid Options:** `["DH_GROUP_15", "DH_GROUP_16", "DH_GROUP_17", "DH_GROUP_18", "DH_GROUP_19", "DH_GROUP_20", "DH_GROUP_26", "DH_GROUP_DEFAULT", "DH_GROUP_21", "DH_GROUP_14"]` (Multiple selection allowed)<br>**Default:** `DH_GROUP_19`
+- `encryption_algos` (List of String) <br>**Valid Options:** `["AES192_GCM", "AES256_GCM", "ENC_ALG_DEFAULT", "AES128_CBC", "AES192_CBC", "AES256_CBC", "TRIPLE_DES_CBC", "AES128_GCM"]` (Multiple selection allowed)<br>**Default:** `AES256_GCM`
 - `labels` (Map of String) labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression
 - `prf` (List of String) <br>**Valid Options:** `["PRF_DEFAULT", "PRFSHA256", "PRFSHA384", "PRFSHA512"]` (Multiple selection allowed)<br>**Default:** `PRFSHA512`
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))

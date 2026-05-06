@@ -1,3 +1,4 @@
+/*
 resource "f5xc_securemesh_site_v2" "smv2" {
   name      = "ck-smv2-test-01"
   namespace = "system"
@@ -71,3 +72,4 @@ resource "f5xc_securemesh_site_v2" "smv2" {
     }
   }
 }
+*/

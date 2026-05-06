@@ -6,13 +6,6 @@ package crudapi
 import (
 	context "context"
 	fmt "fmt"
-	io "io"
-	math "math"
-	math_bits "math/bits"
-	reflect "reflect"
-	strconv "strconv"
-	strings "strings"
-
 	_ "github.com/gogo/googleapis/google/api"
 	_ "github.com/gogo/protobuf/gogoproto"
 	proto "github.com/gogo/protobuf/proto"
@@ -26,6 +19,12 @@ import (
 	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/vesenv"
 	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views"
 	voltstack_site "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views/voltstack_site"
+	io "io"
+	math "math"
+	math_bits "math/bits"
+	reflect "reflect"
+	strconv "strconv"
+	strings "strings"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -502,6 +501,8 @@ type ObjectListReq struct {
 	NamespaceFilter []string `protobuf:"bytes,10001,rep,name=namespace_filter,json=namespaceFilter,proto3" json:"namespace_filter,omitempty"`
 	// k8s style label selector expression
 	LabelFilter string `protobuf:"bytes,10002,opt,name=label_filter,json=labelFilter,proto3" json:"label_filter,omitempty"`
+	// Which fields to report. If none specified, only
+	// uid, tenant, namespace, name, labels are reported.
 	// TODO: currently even if one specified implementation will return all fields
 	ReportFields []string `protobuf:"bytes,10003,rep,name=report_fields,json=reportFields,proto3" json:"report_fields,omitempty"`
 	// Get the resource_version associated with the list

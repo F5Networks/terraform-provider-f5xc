@@ -18,8 +18,6 @@ package billing
 import (
 	context "context"
 	fmt "fmt"
-	math "math"
-
 	_ "github.com/gogo/googleapis/google/api"
 	_ "github.com/gogo/protobuf/gogoproto"
 	proto "github.com/gogo/protobuf/proto"
@@ -30,6 +28,11 @@ import (
 	status "google.golang.org/grpc/status"
 	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/vesenv"
+	io "io"
+	math "math"
+	math_bits "math/bits"
+	reflect "reflect"
+	strings "strings"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -44,6 +47,380 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
+// Billing Usage Summary Request
+//
+// x-displayName: "Billing Usage Summary Request"
+// Time interval to get the billing usage summary.
+type BillingUsageSummaryRequest struct {
+	// start_time
+	//
+	// x-displayName: "Start Time"
+	// x-example: "2019-09-23T12:30:11.733Z"
+	// fetch billing usage summary for timestamp >= start_time
+	// format: unix_timestamp|rfc 3339
+	//
+	// Optional: If not specified, then the start_time will be evaluated to end_time - 6 hours
+	//           If end_time is not specified, then the start_time will be evaluated to <current time> - 6 hours
+	StartTime string `protobuf:"bytes,1,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
+	// end_time
+	//
+	// x-displayName: "End Time"
+	// x-example: "2019-09-24T12:30:11.733Z"
+	// fetch alerts whose timestamp <= end_time
+	// format: unix_timestamp|rfc 3339
+	//
+	// Optional: If not specified, then the end_time will be evaluated to start_time + 6 hours
+	//           If start_time is not specified, then the end_time will be evaluated to <current time>
+	EndTime string `protobuf:"bytes,2,opt,name=end_time,json=endTime,proto3" json:"end_time,omitempty"`
+}
+
+func (m *BillingUsageSummaryRequest) Reset()      { *m = BillingUsageSummaryRequest{} }
+func (*BillingUsageSummaryRequest) ProtoMessage() {}
+func (*BillingUsageSummaryRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_8e27fa4ed3b7d162, []int{0}
+}
+func (m *BillingUsageSummaryRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *BillingUsageSummaryRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_BillingUsageSummaryRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *BillingUsageSummaryRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_BillingUsageSummaryRequest.Merge(m, src)
+}
+func (m *BillingUsageSummaryRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *BillingUsageSummaryRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_BillingUsageSummaryRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_BillingUsageSummaryRequest proto.InternalMessageInfo
+
+func (m *BillingUsageSummaryRequest) GetStartTime() string {
+	if m != nil {
+		return m.StartTime
+	}
+	return ""
+}
+
+func (m *BillingUsageSummaryRequest) GetEndTime() string {
+	if m != nil {
+		return m.EndTime
+	}
+	return ""
+}
+
+// Billing Usage Summary Response
+//
+// x-displayName: "Billing Usage Summary Response"
+// Contains list of usage summary items
+type BillingUsageSummaryResponse struct {
+	UsageSummaryItems []*UsageSummaryItem `protobuf:"bytes,1,rep,name=usage_summary_items,json=usageSummaryItems,proto3" json:"usage_summary_items,omitempty"`
+}
+
+func (m *BillingUsageSummaryResponse) Reset()      { *m = BillingUsageSummaryResponse{} }
+func (*BillingUsageSummaryResponse) ProtoMessage() {}
+func (*BillingUsageSummaryResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_8e27fa4ed3b7d162, []int{1}
+}
+func (m *BillingUsageSummaryResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *BillingUsageSummaryResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_BillingUsageSummaryResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *BillingUsageSummaryResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_BillingUsageSummaryResponse.Merge(m, src)
+}
+func (m *BillingUsageSummaryResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *BillingUsageSummaryResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_BillingUsageSummaryResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_BillingUsageSummaryResponse proto.InternalMessageInfo
+
+func (m *BillingUsageSummaryResponse) GetUsageSummaryItems() []*UsageSummaryItem {
+	if m != nil {
+		return m.UsageSummaryItems
+	}
+	return nil
+}
+
+// Billing Usage Details Request
+//
+// x-displayName: "Billing Usage Details Request"
+// Request to get billing usage details for the given tenant
+type BillingUsageDetailsRequest struct {
+	// Name
+	//
+	// x-displayName: "Usage Data Filter"
+	// x-required
+	// List of usage_type queries and the corresponding object/namespace filters
+	Filters []*UsageDataFilter `protobuf:"bytes,6,rep,name=filters,proto3" json:"filters,omitempty"`
+	// Start time
+	//
+	// x-displayName: "Start Time"
+	// x-example: "1570194000"
+	//
+	// start time of metric collection from which data will be considered to build graph.
+	// Format: unix_timestamp|rfc 3339
+	//
+	// Optional: If not specified, then the start_time will be evaluated to end_time-1h
+	//           If end_time is not specified, then the start_time will be evaluated to <current time>-1h
+	StartTime string `protobuf:"bytes,3,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
+	// End time
+	//
+	// x-displayName: "End Time"
+	// x-example: "1570197600"
+	// end time of metric collection from which data will be considered to build graph.
+	// Format: unix_timestamp|rfc 3339
+	//
+	// Optional: If not specified, then the end_time will be evaluated to start_time+1h
+	//           If start_time is not specified, then the end_time will be evaluated to <current time>
+	EndTime string `protobuf:"bytes,4,opt,name=end_time,json=endTime,proto3" json:"end_time,omitempty"`
+	// Step
+	//
+	// x-displayName: "Step"
+	// x-example: "5m"
+	// step is the resolution width, which determines the number of the data points [x-axis (time)] to be returned in the response.
+	// The timestamps in the response will be t1=start_time, t2=t1+step, ... tn=tn-1+step, where tn <= end_time.
+	// Format: [0-9][smhd], where s - seconds, m - minutes, h - hours, d - days
+	//
+	// Optional: If not specified, then step size is evaluated to <end_time - start_time>
+	Step string `protobuf:"bytes,5,opt,name=step,proto3" json:"step,omitempty"`
+}
+
+func (m *BillingUsageDetailsRequest) Reset()      { *m = BillingUsageDetailsRequest{} }
+func (*BillingUsageDetailsRequest) ProtoMessage() {}
+func (*BillingUsageDetailsRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_8e27fa4ed3b7d162, []int{2}
+}
+func (m *BillingUsageDetailsRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *BillingUsageDetailsRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_BillingUsageDetailsRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *BillingUsageDetailsRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_BillingUsageDetailsRequest.Merge(m, src)
+}
+func (m *BillingUsageDetailsRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *BillingUsageDetailsRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_BillingUsageDetailsRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_BillingUsageDetailsRequest proto.InternalMessageInfo
+
+func (m *BillingUsageDetailsRequest) GetFilters() []*UsageDataFilter {
+	if m != nil {
+		return m.Filters
+	}
+	return nil
+}
+
+func (m *BillingUsageDetailsRequest) GetStartTime() string {
+	if m != nil {
+		return m.StartTime
+	}
+	return ""
+}
+
+func (m *BillingUsageDetailsRequest) GetEndTime() string {
+	if m != nil {
+		return m.EndTime
+	}
+	return ""
+}
+
+func (m *BillingUsageDetailsRequest) GetStep() string {
+	if m != nil {
+		return m.Step
+	}
+	return ""
+}
+
+// Billing Usage Response
+//
+// x-displayName: "Billing Usage Response"
+// Billing Usage Response
+type BillingUsageDetailsResponse struct {
+	// Telemetry Data
+	//
+	// x-displayName: "Telemetry Data"
+	// Data contains time-series data for the billing usage
+	UsageData []*UsageData `protobuf:"bytes,1,rep,name=usage_data,json=usageData,proto3" json:"usage_data,omitempty"`
+	// step
+	//
+	// x-displayName: "Step"
+	// x-example: "30m"
+	// Actual step size used in the response. It could be higher than the requested step due to metric rollups and the query duration.
+	// Format: [0-9][smhd], where s - seconds, m - minutes, h - hours, d - days
+	Step string `protobuf:"bytes,2,opt,name=step,proto3" json:"step,omitempty"`
+}
+
+func (m *BillingUsageDetailsResponse) Reset()      { *m = BillingUsageDetailsResponse{} }
+func (*BillingUsageDetailsResponse) ProtoMessage() {}
+func (*BillingUsageDetailsResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_8e27fa4ed3b7d162, []int{3}
+}
+func (m *BillingUsageDetailsResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *BillingUsageDetailsResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_BillingUsageDetailsResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *BillingUsageDetailsResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_BillingUsageDetailsResponse.Merge(m, src)
+}
+func (m *BillingUsageDetailsResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *BillingUsageDetailsResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_BillingUsageDetailsResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_BillingUsageDetailsResponse proto.InternalMessageInfo
+
+func (m *BillingUsageDetailsResponse) GetUsageData() []*UsageData {
+	if m != nil {
+		return m.UsageData
+	}
+	return nil
+}
+
+func (m *BillingUsageDetailsResponse) GetStep() string {
+	if m != nil {
+		return m.Step
+	}
+	return ""
+}
+
+// Usage Data Filter
+//
+// x-displayName: "Usage Data Filter"
+// Usage Data Filter represents the usage type query and the corresponding filters
+// like object, namespace.
+type UsageDataFilter struct {
+	// Name
+	//
+	// x-displayName: "Name"
+	// x-required
+	// x-example: "re_container_flavor_large_usage"
+	// Name of the query is used to specify the usage data
+	// This can be referred in pluto ongoing.
+	UsageType UsageType `protobuf:"varint,1,opt,name=usage_type,json=usageType,proto3,enum=ves.io.schema.billing.UsageType" json:"usage_type,omitempty"`
+	// label_filter
+	//
+	// x-displayName: "Label Filter"
+	//
+	// List of label filter expressions of the form "label key" QueryOp "value" related to the usage_type.
+	// Response will only contain data that matches all the conditions specified in the label_filter. Filters
+	// corresponding to objects with default names like "CE Mesh Node - Medium" will be ignored.
+	//
+	// Optional: If not specified, glr status data for all global log receiver objects will be returned in the response.
+	LabelFilters []*LabelFilter `protobuf:"bytes,2,rep,name=label_filters,json=labelFilters,proto3" json:"label_filters,omitempty"`
+}
+
+func (m *UsageDataFilter) Reset()      { *m = UsageDataFilter{} }
+func (*UsageDataFilter) ProtoMessage() {}
+func (*UsageDataFilter) Descriptor() ([]byte, []int) {
+	return fileDescriptor_8e27fa4ed3b7d162, []int{4}
+}
+func (m *UsageDataFilter) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *UsageDataFilter) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_UsageDataFilter.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *UsageDataFilter) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UsageDataFilter.Merge(m, src)
+}
+func (m *UsageDataFilter) XXX_Size() int {
+	return m.Size()
+}
+func (m *UsageDataFilter) XXX_DiscardUnknown() {
+	xxx_messageInfo_UsageDataFilter.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_UsageDataFilter proto.InternalMessageInfo
+
+func (m *UsageDataFilter) GetUsageType() UsageType {
+	if m != nil {
+		return m.UsageType
+	}
+	return TENANT_INFO
+}
+
+func (m *UsageDataFilter) GetLabelFilters() []*LabelFilter {
+	if m != nil {
+		return m.LabelFilters
+	}
+	return nil
+}
+
+func init() {
+	proto.RegisterType((*BillingUsageSummaryRequest)(nil), "ves.io.schema.billing.BillingUsageSummaryRequest")
+	golang_proto.RegisterType((*BillingUsageSummaryRequest)(nil), "ves.io.schema.billing.BillingUsageSummaryRequest")
+	proto.RegisterType((*BillingUsageSummaryResponse)(nil), "ves.io.schema.billing.BillingUsageSummaryResponse")
+	golang_proto.RegisterType((*BillingUsageSummaryResponse)(nil), "ves.io.schema.billing.BillingUsageSummaryResponse")
+	proto.RegisterType((*BillingUsageDetailsRequest)(nil), "ves.io.schema.billing.BillingUsageDetailsRequest")
+	golang_proto.RegisterType((*BillingUsageDetailsRequest)(nil), "ves.io.schema.billing.BillingUsageDetailsRequest")
+	proto.RegisterType((*BillingUsageDetailsResponse)(nil), "ves.io.schema.billing.BillingUsageDetailsResponse")
+	golang_proto.RegisterType((*BillingUsageDetailsResponse)(nil), "ves.io.schema.billing.BillingUsageDetailsResponse")
+	proto.RegisterType((*UsageDataFilter)(nil), "ves.io.schema.billing.UsageDataFilter")
+	golang_proto.RegisterType((*UsageDataFilter)(nil), "ves.io.schema.billing.UsageDataFilter")
+}
+
 func init() {
 	proto.RegisterFile("ves.io/schema/billing/public_customapi.proto", fileDescriptor_8e27fa4ed3b7d162)
 }
@@ -52,35 +429,287 @@ func init() {
 }
 
 var fileDescriptor_8e27fa4ed3b7d162 = []byte{
-	// 447 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x92, 0x31, 0x6f, 0xd3, 0x40,
-	0x14, 0xc7, 0x7d, 0x41, 0x62, 0xc8, 0x82, 0x14, 0x84, 0x14, 0x42, 0x74, 0xd0, 0x8c, 0x55, 0x7d,
-	0x27, 0x0a, 0x2c, 0x6c, 0x94, 0x01, 0x31, 0x51, 0x81, 0x58, 0x58, 0xa2, 0xb3, 0xf3, 0x72, 0x3d,
-	0xf0, 0xf9, 0x1d, 0x7e, 0x67, 0xab, 0xd9, 0xa0, 0x9f, 0x00, 0x89, 0x99, 0x9d, 0xef, 0xd0, 0xa5,
-	0x1b, 0x4c, 0x28, 0x82, 0xa5, 0x0b, 0x12, 0x71, 0x18, 0x18, 0xfb, 0x11, 0x50, 0x6d, 0xb7, 0x8a,
-	0x91, 0x17, 0xb6, 0x7b, 0xfa, 0xff, 0xde, 0xff, 0x3d, 0xff, 0x9f, 0xfb, 0x3b, 0x05, 0x90, 0x30,
-	0x28, 0x29, 0x3e, 0x00, 0xab, 0x64, 0x64, 0x92, 0xc4, 0xa4, 0x5a, 0xba, 0x3c, 0x4a, 0x4c, 0x3c,
-	0x8d, 0x73, 0xf2, 0x68, 0x95, 0x33, 0xc2, 0x65, 0xe8, 0x71, 0x70, 0xa3, 0xa6, 0x45, 0x4d, 0x8b,
-	0x86, 0x1e, 0x85, 0xda, 0xf8, 0x83, 0x3c, 0x12, 0x31, 0x5a, 0xa9, 0x51, 0xa3, 0xac, 0xe8, 0x28,
-	0x9f, 0x57, 0x55, 0x55, 0x54, 0xaf, 0xda, 0x65, 0x34, 0xd6, 0x88, 0x3a, 0x01, 0xa9, 0x9c, 0x91,
-	0x2a, 0x4d, 0xd1, 0x2b, 0x6f, 0x30, 0xa5, 0x46, 0xbd, 0xdd, 0xa8, 0x97, 0x1e, 0xde, 0x58, 0x20,
-	0xaf, 0xac, 0x6b, 0x80, 0xad, 0xee, 0x95, 0xfd, 0xc2, 0xc1, 0x85, 0xc7, 0xad, 0x36, 0x82, 0x6e,
-	0x73, 0xc0, 0xcd, 0xb6, 0xb8, 0xd9, 0x37, 0x6e, 0x4b, 0x85, 0x4a, 0xcc, 0x4c, 0x79, 0x68, 0xd4,
-	0xc9, 0x3f, 0x2a, 0x10, 0xa4, 0x45, 0xdb, 0x7c, 0xf7, 0x53, 0xaf, 0x7f, 0xed, 0x71, 0x95, 0xda,
-	0x7e, 0x15, 0xe1, 0xa3, 0xfd, 0xa7, 0x83, 0x9f, 0xac, 0x7f, 0x7d, 0xaf, 0xde, 0xf2, 0x25, 0x29,
-	0x0d, 0x2f, 0x72, 0x6b, 0x55, 0xb6, 0x18, 0xdc, 0x15, 0x9d, 0x71, 0x8a, 0x0e, 0xf6, 0x39, 0xbc,
-	0xcd, 0x81, 0xfc, 0x68, 0xf7, 0x7f, 0x5a, 0xc8, 0x61, 0x4a, 0x30, 0x99, 0x96, 0x5f, 0x86, 0x5b,
-	0xf3, 0x07, 0x87, 0x71, 0xd8, 0xd0, 0x3b, 0x77, 0x0a, 0xa0, 0xd0, 0xe0, 0x45, 0x1d, 0x66, 0xa0,
-	0x66, 0x47, 0x3f, 0x7e, 0x7f, 0xec, 0xdd, 0x9f, 0xc8, 0xe6, 0xf4, 0x32, 0x55, 0x16, 0xc8, 0xa9,
-	0x18, 0x48, 0xd2, 0x82, 0x3c, 0xd8, 0xcb, 0xa0, 0xf3, 0xf3, 0x21, 0x53, 0xaa, 0xa7, 0x3c, 0x64,
-	0xdb, 0xa3, 0xed, 0x93, 0x63, 0x76, 0xe5, 0xfb, 0x31, 0x1b, 0x77, 0xef, 0xf6, 0x2c, 0x7a, 0x0d,
-	0xb1, 0x3f, 0xfa, 0x36, 0xec, 0x0d, 0xd9, 0xde, 0x7b, 0xb6, 0x5c, 0xf1, 0xe0, 0x74, 0xc5, 0x83,
-	0xb3, 0x15, 0x67, 0xef, 0x4a, 0xce, 0x3e, 0x97, 0x9c, 0x7d, 0x2d, 0x39, 0x5b, 0x96, 0x9c, 0xfd,
-	0x2a, 0x39, 0xfb, 0x53, 0xf2, 0xe0, 0xac, 0xe4, 0xec, 0xc3, 0x9a, 0x07, 0x27, 0x6b, 0xce, 0x96,
-	0x6b, 0x1e, 0x9c, 0xae, 0x79, 0xf0, 0xea, 0x89, 0x46, 0xf7, 0x46, 0x8b, 0x02, 0x13, 0x0f, 0x59,
-	0xa6, 0x44, 0x4e, 0xb2, 0x7a, 0xcc, 0x31, 0xb3, 0xa1, 0xcb, 0xb0, 0x30, 0x33, 0xc8, 0xc2, 0xf3,
-	0x0f, 0x95, 0x2e, 0xd2, 0x28, 0xe1, 0xd0, 0x37, 0x97, 0x6a, 0xff, 0x29, 0xd1, 0xd5, 0xea, 0x54,
-	0xf7, 0xfe, 0x06, 0x00, 0x00, 0xff, 0xff, 0x01, 0xae, 0xda, 0x04, 0xfc, 0x02, 0x00, 0x00,
+	// 780 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x55, 0xcd, 0x6e, 0xdb, 0x46,
+	0x10, 0xd6, 0x52, 0xf2, 0xdf, 0xf6, 0xc7, 0x2a, 0xdd, 0x02, 0xac, 0x6c, 0xb0, 0x32, 0x81, 0xb6,
+	0xae, 0x61, 0x91, 0xa8, 0xdb, 0x5e, 0x7c, 0x69, 0xab, 0x1a, 0x2d, 0x6c, 0x14, 0xa8, 0xa1, 0x3a,
+	0x08, 0x10, 0x20, 0x10, 0x96, 0xe4, 0x8a, 0xde, 0x84, 0xe4, 0x32, 0xdc, 0xa5, 0x62, 0x5d, 0x82,
+	0xd8, 0x4f, 0x10, 0x24, 0x97, 0x1c, 0x73, 0xcc, 0x23, 0x24, 0xf1, 0xc5, 0xb7, 0x18, 0x39, 0x04,
+	0x46, 0x72, 0xf1, 0x21, 0x01, 0x22, 0x2a, 0x87, 0xe4, 0xe6, 0x47, 0x08, 0xf8, 0x23, 0xd9, 0x64,
+	0x24, 0xc7, 0x39, 0xe4, 0x36, 0xdc, 0xf9, 0x76, 0xbe, 0xf9, 0x66, 0x67, 0x86, 0x70, 0xa9, 0x8d,
+	0x99, 0x4a, 0xa8, 0xc6, 0x8c, 0x2d, 0xec, 0x20, 0x4d, 0x27, 0xb6, 0x4d, 0x5c, 0x4b, 0xf3, 0x02,
+	0xdd, 0x26, 0x46, 0xd3, 0x08, 0x18, 0xa7, 0x0e, 0xf2, 0x88, 0xea, 0xf9, 0x94, 0x53, 0xf1, 0x9b,
+	0x04, 0xad, 0x26, 0x68, 0x35, 0x45, 0x57, 0x6a, 0x16, 0xe1, 0x5b, 0x81, 0xae, 0x1a, 0xd4, 0xd1,
+	0x2c, 0x6a, 0x51, 0x2d, 0x46, 0xeb, 0x41, 0x2b, 0xfe, 0x8a, 0x3f, 0x62, 0x2b, 0x89, 0x52, 0x99,
+	0xb3, 0x28, 0xb5, 0x6c, 0xac, 0x21, 0x8f, 0x68, 0xc8, 0x75, 0x29, 0x47, 0x9c, 0x50, 0x97, 0xa5,
+	0xde, 0xef, 0x52, 0xef, 0x20, 0x06, 0x27, 0x0e, 0x66, 0x1c, 0x39, 0x5e, 0x0a, 0x98, 0x1f, 0x9e,
+	0x32, 0xef, 0x78, 0xb8, 0x1f, 0x63, 0x36, 0x0b, 0xa1, 0xde, 0x69, 0x82, 0x6f, 0xb3, 0xce, 0xd3,
+	0xf7, 0xe6, 0xb2, 0xae, 0x36, 0xb2, 0x89, 0x89, 0x38, 0x4e, 0xbd, 0x4a, 0xce, 0x8b, 0x19, 0x76,
+	0xdb, 0xb9, 0xe0, 0xd5, 0x1c, 0x86, 0xe0, 0xeb, 0xcd, 0x0c, 0x42, 0x71, 0x61, 0xa5, 0x9e, 0xa4,
+	0x7c, 0x81, 0x21, 0x0b, 0xff, 0x1f, 0x38, 0x0e, 0xf2, 0x3b, 0x0d, 0x7c, 0x2d, 0xc0, 0x8c, 0x8b,
+	0x3f, 0x41, 0xc8, 0x38, 0xf2, 0x79, 0x33, 0x52, 0x2d, 0x81, 0x2a, 0x58, 0x98, 0xaa, 0xc3, 0x47,
+	0x6f, 0xf7, 0x8b, 0x63, 0x7e, 0xf1, 0x6e, 0x09, 0x34, 0xa6, 0x62, 0xef, 0x26, 0x71, 0xb0, 0xf8,
+	0x3d, 0x9c, 0xc4, 0xae, 0x99, 0x00, 0x85, 0xf7, 0x80, 0x13, 0xd8, 0x35, 0x23, 0x98, 0xd2, 0x86,
+	0xb3, 0x43, 0xf9, 0x98, 0x47, 0x5d, 0x86, 0xc5, 0x8b, 0x70, 0x26, 0x88, 0xce, 0x9b, 0x2c, 0x71,
+	0x34, 0x09, 0xc7, 0x0e, 0x93, 0x40, 0xb5, 0xb8, 0xf0, 0xd9, 0xf2, 0x8f, 0xea, 0xd0, 0x07, 0x57,
+	0x4f, 0x47, 0x5a, 0xe3, 0xd8, 0x69, 0x7c, 0x15, 0xe4, 0x4e, 0x98, 0xf2, 0x02, 0x64, 0x85, 0xae,
+	0x62, 0x8e, 0x88, 0xcd, 0xfa, 0x42, 0xff, 0x80, 0x13, 0x2d, 0x62, 0x73, 0xec, 0x33, 0x69, 0x3c,
+	0xe6, 0xfa, 0xe1, 0x2c, 0xae, 0x55, 0xc4, 0xd1, 0xdf, 0x31, 0xbc, 0xd1, 0xbf, 0x96, 0x2b, 0x55,
+	0xf1, 0xbc, 0xa5, 0x2a, 0x8d, 0x2c, 0x95, 0x28, 0xc3, 0x12, 0xe3, 0xd8, 0x93, 0xc6, 0x32, 0x90,
+	0x7b, 0x25, 0xd0, 0x88, 0xcf, 0xd7, 0x4b, 0x93, 0xa0, 0x2c, 0xac, 0x97, 0x26, 0x85, 0x72, 0x51,
+	0xb9, 0x91, 0x2d, 0xeb, 0x40, 0x5d, 0x5a, 0xd6, 0xdf, 0x21, 0x4c, 0xca, 0x6a, 0x22, 0x8e, 0xd2,
+	0x6a, 0x56, 0x3f, 0xa4, 0xb0, 0x31, 0x15, 0xf4, 0xcd, 0x41, 0x2e, 0xd9, 0x97, 0x3d, 0x16, 0xd2,
+	0x5c, 0x94, 0x87, 0x00, 0x4e, 0xe7, 0x4a, 0x73, 0x42, 0x1a, 0xf5, 0x74, 0xdc, 0x3c, 0x5f, 0x9e,
+	0x4d, 0xba, 0xd9, 0xf1, 0x70, 0x4a, 0x1a, 0x99, 0xe2, 0x65, 0xf8, 0x85, 0x8d, 0x74, 0x6c, 0x37,
+	0xfb, 0x4f, 0x23, 0xc4, 0x89, 0x2b, 0x23, 0x62, 0xfc, 0x1b, 0x61, 0x13, 0xee, 0xfa, 0xd7, 0x71,
+	0x86, 0xb7, 0x81, 0x50, 0x36, 0xfb, 0x96, 0x04, 0x1a, 0x9f, 0xdb, 0x27, 0x10, 0xb6, 0x32, 0xfe,
+	0x64, 0x0f, 0x08, 0x65, 0xb0, 0xbc, 0x53, 0x82, 0xd3, 0x7f, 0xc5, 0xab, 0x65, 0x23, 0xde, 0x33,
+	0x7f, 0x6e, 0xac, 0x89, 0x2f, 0x01, 0x9c, 0x19, 0xd2, 0xa7, 0xe2, 0xcf, 0x23, 0xb8, 0x47, 0xcf,
+	0x50, 0x65, 0xf9, 0x63, 0xae, 0x24, 0xef, 0xa5, 0x34, 0xc3, 0xc7, 0xd2, 0x7c, 0xeb, 0xb7, 0x6d,
+	0xa3, 0x96, 0xa2, 0x97, 0xa2, 0x49, 0xae, 0x11, 0xda, 0xff, 0xae, 0xf9, 0x18, 0x99, 0xbb, 0xcf,
+	0x5f, 0xdf, 0x11, 0x7e, 0x55, 0xb4, 0x74, 0x3f, 0x6a, 0x2e, 0x72, 0x30, 0xf3, 0x90, 0x81, 0x99,
+	0xc6, 0x3a, 0x8c, 0x63, 0x67, 0xb0, 0x8d, 0x32, 0x33, 0xb5, 0x02, 0x16, 0xc5, 0x6e, 0x4e, 0x5f,
+	0xda, 0x30, 0xe7, 0xd2, 0x97, 0x1d, 0x9d, 0x73, 0xe9, 0xcb, 0xf5, 0xa3, 0x62, 0x1c, 0x3c, 0x10,
+	0xc0, 0x27, 0xd1, 0x68, 0x26, 0x4c, 0x2b, 0x60, 0xb1, 0xb2, 0xb8, 0xbf, 0x07, 0x8a, 0xcf, 0xf6,
+	0xc0, 0xdc, 0xf0, 0xfc, 0xfe, 0xd3, 0xaf, 0x60, 0x83, 0xef, 0x3e, 0x95, 0x04, 0x09, 0xd4, 0x77,
+	0xc0, 0x61, 0x57, 0x2e, 0x1c, 0x75, 0xe5, 0xc2, 0x71, 0x57, 0x06, 0x37, 0x43, 0x19, 0xdc, 0x0f,
+	0x65, 0x70, 0x10, 0xca, 0xe0, 0x30, 0x94, 0xc1, 0xab, 0x50, 0x06, 0x6f, 0x42, 0xb9, 0x70, 0x1c,
+	0xca, 0xe0, 0x56, 0x4f, 0x2e, 0xec, 0xf7, 0x64, 0x70, 0xd8, 0x93, 0x0b, 0x47, 0x3d, 0xb9, 0x70,
+	0xe9, 0x1f, 0x8b, 0x7a, 0x57, 0x2d, 0xb5, 0x4d, 0xa3, 0xae, 0xf2, 0x91, 0x1a, 0x30, 0x2d, 0x36,
+	0x5a, 0xd4, 0x77, 0x6a, 0x9e, 0x4f, 0xdb, 0xc4, 0xc4, 0x7e, 0x2d, 0x12, 0xaa, 0x79, 0xba, 0x45,
+	0x35, 0xbc, 0xcd, 0xd3, 0x75, 0x9c, 0xfd, 0x65, 0xe8, 0xe3, 0xf1, 0x46, 0xfe, 0xe5, 0x5d, 0x00,
+	0x00, 0x00, 0xff, 0xff, 0xe9, 0x4c, 0xe6, 0x8c, 0x05, 0x07, 0x00, 0x00,
+}
+
+func (this *BillingUsageSummaryRequest) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*BillingUsageSummaryRequest)
+	if !ok {
+		that2, ok := that.(BillingUsageSummaryRequest)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.StartTime != that1.StartTime {
+		return false
+	}
+	if this.EndTime != that1.EndTime {
+		return false
+	}
+	return true
+}
+func (this *BillingUsageSummaryResponse) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*BillingUsageSummaryResponse)
+	if !ok {
+		that2, ok := that.(BillingUsageSummaryResponse)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if len(this.UsageSummaryItems) != len(that1.UsageSummaryItems) {
+		return false
+	}
+	for i := range this.UsageSummaryItems {
+		if !this.UsageSummaryItems[i].Equal(that1.UsageSummaryItems[i]) {
+			return false
+		}
+	}
+	return true
+}
+func (this *BillingUsageDetailsRequest) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*BillingUsageDetailsRequest)
+	if !ok {
+		that2, ok := that.(BillingUsageDetailsRequest)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if len(this.Filters) != len(that1.Filters) {
+		return false
+	}
+	for i := range this.Filters {
+		if !this.Filters[i].Equal(that1.Filters[i]) {
+			return false
+		}
+	}
+	if this.StartTime != that1.StartTime {
+		return false
+	}
+	if this.EndTime != that1.EndTime {
+		return false
+	}
+	if this.Step != that1.Step {
+		return false
+	}
+	return true
+}
+func (this *BillingUsageDetailsResponse) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*BillingUsageDetailsResponse)
+	if !ok {
+		that2, ok := that.(BillingUsageDetailsResponse)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if len(this.UsageData) != len(that1.UsageData) {
+		return false
+	}
+	for i := range this.UsageData {
+		if !this.UsageData[i].Equal(that1.UsageData[i]) {
+			return false
+		}
+	}
+	if this.Step != that1.Step {
+		return false
+	}
+	return true
+}
+func (this *UsageDataFilter) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*UsageDataFilter)
+	if !ok {
+		that2, ok := that.(UsageDataFilter)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.UsageType != that1.UsageType {
+		return false
+	}
+	if len(this.LabelFilters) != len(that1.LabelFilters) {
+		return false
+	}
+	for i := range this.LabelFilters {
+		if !this.LabelFilters[i].Equal(that1.LabelFilters[i]) {
+			return false
+		}
+	}
+	return true
+}
+func (this *BillingUsageSummaryRequest) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&billing.BillingUsageSummaryRequest{")
+	s = append(s, "StartTime: "+fmt.Sprintf("%#v", this.StartTime)+",\n")
+	s = append(s, "EndTime: "+fmt.Sprintf("%#v", this.EndTime)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *BillingUsageSummaryResponse) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 5)
+	s = append(s, "&billing.BillingUsageSummaryResponse{")
+	if this.UsageSummaryItems != nil {
+		s = append(s, "UsageSummaryItems: "+fmt.Sprintf("%#v", this.UsageSummaryItems)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *BillingUsageDetailsRequest) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 8)
+	s = append(s, "&billing.BillingUsageDetailsRequest{")
+	if this.Filters != nil {
+		s = append(s, "Filters: "+fmt.Sprintf("%#v", this.Filters)+",\n")
+	}
+	s = append(s, "StartTime: "+fmt.Sprintf("%#v", this.StartTime)+",\n")
+	s = append(s, "EndTime: "+fmt.Sprintf("%#v", this.EndTime)+",\n")
+	s = append(s, "Step: "+fmt.Sprintf("%#v", this.Step)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *BillingUsageDetailsResponse) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&billing.BillingUsageDetailsResponse{")
+	if this.UsageData != nil {
+		s = append(s, "UsageData: "+fmt.Sprintf("%#v", this.UsageData)+",\n")
+	}
+	s = append(s, "Step: "+fmt.Sprintf("%#v", this.Step)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *UsageDataFilter) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&billing.UsageDataFilter{")
+	s = append(s, "UsageType: "+fmt.Sprintf("%#v", this.UsageType)+",\n")
+	if this.LabelFilters != nil {
+		s = append(s, "LabelFilters: "+fmt.Sprintf("%#v", this.LabelFilters)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func valueToGoStringPublicCustomapi(v interface{}, typ string) string {
+	rv := reflect.ValueOf(v)
+	if rv.IsNil() {
+		return "nil"
+	}
+	pv := reflect.Indirect(rv).Interface()
+	return fmt.Sprintf("func(v %v) *%v { return &v } ( %#v )", typ, typ, pv)
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -100,6 +729,11 @@ type CustomPublicAPIClient interface {
 	// x-displayName: "Billing Usage Summary"
 	// Get the aggregated billing usage data for each feature/SKU over the specified duration.
 	BillingUsageSummary(ctx context.Context, in *BillingUsageSummaryRequest, opts ...grpc.CallOption) (*BillingUsageSummaryResponse, error)
+	// Usage Metrics
+	//
+	// x-displayName: "Telemetry Data Metrics"
+	// Get the billing usage details for each feature over the specified duration
+	BillingUsageDetails(ctx context.Context, in *BillingUsageDetailsRequest, opts ...grpc.CallOption) (*BillingUsageDetailsResponse, error)
 }
 
 type customPublicAPIClient struct {
@@ -119,6 +753,15 @@ func (c *customPublicAPIClient) BillingUsageSummary(ctx context.Context, in *Bil
 	return out, nil
 }
 
+func (c *customPublicAPIClient) BillingUsageDetails(ctx context.Context, in *BillingUsageDetailsRequest, opts ...grpc.CallOption) (*BillingUsageDetailsResponse, error) {
+	out := new(BillingUsageDetailsResponse)
+	err := c.cc.Invoke(ctx, "/ves.io.schema.billing.CustomPublicAPI/BillingUsageDetails", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CustomPublicAPIServer is the server API for CustomPublicAPI service.
 type CustomPublicAPIServer interface {
 	// Billing Usage Details
@@ -126,6 +769,11 @@ type CustomPublicAPIServer interface {
 	// x-displayName: "Billing Usage Summary"
 	// Get the aggregated billing usage data for each feature/SKU over the specified duration.
 	BillingUsageSummary(context.Context, *BillingUsageSummaryRequest) (*BillingUsageSummaryResponse, error)
+	// Usage Metrics
+	//
+	// x-displayName: "Telemetry Data Metrics"
+	// Get the billing usage details for each feature over the specified duration
+	BillingUsageDetails(context.Context, *BillingUsageDetailsRequest) (*BillingUsageDetailsResponse, error)
 }
 
 // UnimplementedCustomPublicAPIServer can be embedded to have forward compatible implementations.
@@ -134,6 +782,9 @@ type UnimplementedCustomPublicAPIServer struct {
 
 func (*UnimplementedCustomPublicAPIServer) BillingUsageSummary(ctx context.Context, req *BillingUsageSummaryRequest) (*BillingUsageSummaryResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method BillingUsageSummary not implemented")
+}
+func (*UnimplementedCustomPublicAPIServer) BillingUsageDetails(ctx context.Context, req *BillingUsageDetailsRequest) (*BillingUsageDetailsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method BillingUsageDetails not implemented")
 }
 
 func RegisterCustomPublicAPIServer(s *grpc.Server, srv CustomPublicAPIServer) {
@@ -158,6 +809,24 @@ func _CustomPublicAPI_BillingUsageSummary_Handler(srv interface{}, ctx context.C
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CustomPublicAPI_BillingUsageDetails_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(BillingUsageDetailsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CustomPublicAPIServer).BillingUsageDetails(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ves.io.schema.billing.CustomPublicAPI/BillingUsageDetails",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CustomPublicAPIServer).BillingUsageDetails(ctx, req.(*BillingUsageDetailsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _CustomPublicAPI_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "ves.io.schema.billing.CustomPublicAPI",
 	HandlerType: (*CustomPublicAPIServer)(nil),
@@ -166,7 +835,1123 @@ var _CustomPublicAPI_serviceDesc = grpc.ServiceDesc{
 			MethodName: "BillingUsageSummary",
 			Handler:    _CustomPublicAPI_BillingUsageSummary_Handler,
 		},
+		{
+			MethodName: "BillingUsageDetails",
+			Handler:    _CustomPublicAPI_BillingUsageDetails_Handler,
+		},
 	},
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "ves.io/schema/billing/public_customapi.proto",
 }
+
+func (m *BillingUsageSummaryRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *BillingUsageSummaryRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *BillingUsageSummaryRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.EndTime) > 0 {
+		i -= len(m.EndTime)
+		copy(dAtA[i:], m.EndTime)
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(len(m.EndTime)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.StartTime) > 0 {
+		i -= len(m.StartTime)
+		copy(dAtA[i:], m.StartTime)
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(len(m.StartTime)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *BillingUsageSummaryResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *BillingUsageSummaryResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *BillingUsageSummaryResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.UsageSummaryItems) > 0 {
+		for iNdEx := len(m.UsageSummaryItems) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.UsageSummaryItems[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintPublicCustomapi(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *BillingUsageDetailsRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *BillingUsageDetailsRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *BillingUsageDetailsRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Filters) > 0 {
+		for iNdEx := len(m.Filters) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Filters[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintPublicCustomapi(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x32
+		}
+	}
+	if len(m.Step) > 0 {
+		i -= len(m.Step)
+		copy(dAtA[i:], m.Step)
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(len(m.Step)))
+		i--
+		dAtA[i] = 0x2a
+	}
+	if len(m.EndTime) > 0 {
+		i -= len(m.EndTime)
+		copy(dAtA[i:], m.EndTime)
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(len(m.EndTime)))
+		i--
+		dAtA[i] = 0x22
+	}
+	if len(m.StartTime) > 0 {
+		i -= len(m.StartTime)
+		copy(dAtA[i:], m.StartTime)
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(len(m.StartTime)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *BillingUsageDetailsResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *BillingUsageDetailsResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *BillingUsageDetailsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Step) > 0 {
+		i -= len(m.Step)
+		copy(dAtA[i:], m.Step)
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(len(m.Step)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.UsageData) > 0 {
+		for iNdEx := len(m.UsageData) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.UsageData[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintPublicCustomapi(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *UsageDataFilter) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *UsageDataFilter) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *UsageDataFilter) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.LabelFilters) > 0 {
+		for iNdEx := len(m.LabelFilters) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.LabelFilters[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintPublicCustomapi(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x12
+		}
+	}
+	if m.UsageType != 0 {
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(m.UsageType))
+		i--
+		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
+func encodeVarintPublicCustomapi(dAtA []byte, offset int, v uint64) int {
+	offset -= sovPublicCustomapi(v)
+	base := offset
+	for v >= 1<<7 {
+		dAtA[offset] = uint8(v&0x7f | 0x80)
+		v >>= 7
+		offset++
+	}
+	dAtA[offset] = uint8(v)
+	return base
+}
+func (m *BillingUsageSummaryRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.StartTime)
+	if l > 0 {
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	l = len(m.EndTime)
+	if l > 0 {
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	return n
+}
+
+func (m *BillingUsageSummaryResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.UsageSummaryItems) > 0 {
+		for _, e := range m.UsageSummaryItems {
+			l = e.Size()
+			n += 1 + l + sovPublicCustomapi(uint64(l))
+		}
+	}
+	return n
+}
+
+func (m *BillingUsageDetailsRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.StartTime)
+	if l > 0 {
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	l = len(m.EndTime)
+	if l > 0 {
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	l = len(m.Step)
+	if l > 0 {
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	if len(m.Filters) > 0 {
+		for _, e := range m.Filters {
+			l = e.Size()
+			n += 1 + l + sovPublicCustomapi(uint64(l))
+		}
+	}
+	return n
+}
+
+func (m *BillingUsageDetailsResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.UsageData) > 0 {
+		for _, e := range m.UsageData {
+			l = e.Size()
+			n += 1 + l + sovPublicCustomapi(uint64(l))
+		}
+	}
+	l = len(m.Step)
+	if l > 0 {
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	return n
+}
+
+func (m *UsageDataFilter) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.UsageType != 0 {
+		n += 1 + sovPublicCustomapi(uint64(m.UsageType))
+	}
+	if len(m.LabelFilters) > 0 {
+		for _, e := range m.LabelFilters {
+			l = e.Size()
+			n += 1 + l + sovPublicCustomapi(uint64(l))
+		}
+	}
+	return n
+}
+
+func sovPublicCustomapi(x uint64) (n int) {
+	return (math_bits.Len64(x|1) + 6) / 7
+}
+func sozPublicCustomapi(x uint64) (n int) {
+	return sovPublicCustomapi(uint64((x << 1) ^ uint64((int64(x) >> 63))))
+}
+func (this *BillingUsageSummaryRequest) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&BillingUsageSummaryRequest{`,
+		`StartTime:` + fmt.Sprintf("%v", this.StartTime) + `,`,
+		`EndTime:` + fmt.Sprintf("%v", this.EndTime) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *BillingUsageSummaryResponse) String() string {
+	if this == nil {
+		return "nil"
+	}
+	repeatedStringForUsageSummaryItems := "[]*UsageSummaryItem{"
+	for _, f := range this.UsageSummaryItems {
+		repeatedStringForUsageSummaryItems += strings.Replace(fmt.Sprintf("%v", f), "UsageSummaryItem", "UsageSummaryItem", 1) + ","
+	}
+	repeatedStringForUsageSummaryItems += "}"
+	s := strings.Join([]string{`&BillingUsageSummaryResponse{`,
+		`UsageSummaryItems:` + repeatedStringForUsageSummaryItems + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *BillingUsageDetailsRequest) String() string {
+	if this == nil {
+		return "nil"
+	}
+	repeatedStringForFilters := "[]*UsageDataFilter{"
+	for _, f := range this.Filters {
+		repeatedStringForFilters += strings.Replace(f.String(), "UsageDataFilter", "UsageDataFilter", 1) + ","
+	}
+	repeatedStringForFilters += "}"
+	s := strings.Join([]string{`&BillingUsageDetailsRequest{`,
+		`StartTime:` + fmt.Sprintf("%v", this.StartTime) + `,`,
+		`EndTime:` + fmt.Sprintf("%v", this.EndTime) + `,`,
+		`Step:` + fmt.Sprintf("%v", this.Step) + `,`,
+		`Filters:` + repeatedStringForFilters + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *BillingUsageDetailsResponse) String() string {
+	if this == nil {
+		return "nil"
+	}
+	repeatedStringForUsageData := "[]*UsageData{"
+	for _, f := range this.UsageData {
+		repeatedStringForUsageData += strings.Replace(fmt.Sprintf("%v", f), "UsageData", "UsageData", 1) + ","
+	}
+	repeatedStringForUsageData += "}"
+	s := strings.Join([]string{`&BillingUsageDetailsResponse{`,
+		`UsageData:` + repeatedStringForUsageData + `,`,
+		`Step:` + fmt.Sprintf("%v", this.Step) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *UsageDataFilter) String() string {
+	if this == nil {
+		return "nil"
+	}
+	repeatedStringForLabelFilters := "[]*LabelFilter{"
+	for _, f := range this.LabelFilters {
+		repeatedStringForLabelFilters += strings.Replace(fmt.Sprintf("%v", f), "LabelFilter", "LabelFilter", 1) + ","
+	}
+	repeatedStringForLabelFilters += "}"
+	s := strings.Join([]string{`&UsageDataFilter{`,
+		`UsageType:` + fmt.Sprintf("%v", this.UsageType) + `,`,
+		`LabelFilters:` + repeatedStringForLabelFilters + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func valueToStringPublicCustomapi(v interface{}) string {
+	rv := reflect.ValueOf(v)
+	if rv.IsNil() {
+		return "nil"
+	}
+	pv := reflect.Indirect(rv).Interface()
+	return fmt.Sprintf("*%v", pv)
+}
+func (m *BillingUsageSummaryRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowPublicCustomapi
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: BillingUsageSummaryRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: BillingUsageSummaryRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field StartTime", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.StartTime = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field EndTime", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.EndTime = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipPublicCustomapi(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *BillingUsageSummaryResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowPublicCustomapi
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: BillingUsageSummaryResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: BillingUsageSummaryResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field UsageSummaryItems", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.UsageSummaryItems = append(m.UsageSummaryItems, &UsageSummaryItem{})
+			if err := m.UsageSummaryItems[len(m.UsageSummaryItems)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipPublicCustomapi(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *BillingUsageDetailsRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowPublicCustomapi
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: BillingUsageDetailsRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: BillingUsageDetailsRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field StartTime", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.StartTime = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field EndTime", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.EndTime = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Step", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Step = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 6:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Filters", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Filters = append(m.Filters, &UsageDataFilter{})
+			if err := m.Filters[len(m.Filters)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipPublicCustomapi(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *BillingUsageDetailsResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowPublicCustomapi
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: BillingUsageDetailsResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: BillingUsageDetailsResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field UsageData", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.UsageData = append(m.UsageData, &UsageData{})
+			if err := m.UsageData[len(m.UsageData)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Step", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Step = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipPublicCustomapi(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *UsageDataFilter) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowPublicCustomapi
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: UsageDataFilter: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: UsageDataFilter: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field UsageType", wireType)
+			}
+			m.UsageType = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.UsageType |= UsageType(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field LabelFilters", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.LabelFilters = append(m.LabelFilters, &LabelFilter{})
+			if err := m.LabelFilters[len(m.LabelFilters)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipPublicCustomapi(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func skipPublicCustomapi(dAtA []byte) (n int, err error) {
+	l := len(dAtA)
+	iNdEx := 0
+	depth := 0
+	for iNdEx < l {
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return 0, ErrIntOverflowPublicCustomapi
+			}
+			if iNdEx >= l {
+				return 0, io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= (uint64(b) & 0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		wireType := int(wire & 0x7)
+		switch wireType {
+		case 0:
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return 0, ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return 0, io.ErrUnexpectedEOF
+				}
+				iNdEx++
+				if dAtA[iNdEx-1] < 0x80 {
+					break
+				}
+			}
+		case 1:
+			iNdEx += 8
+		case 2:
+			var length int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return 0, ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return 0, io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				length |= (int(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if length < 0 {
+				return 0, ErrInvalidLengthPublicCustomapi
+			}
+			iNdEx += length
+		case 3:
+			depth++
+		case 4:
+			if depth == 0 {
+				return 0, ErrUnexpectedEndOfGroupPublicCustomapi
+			}
+			depth--
+		case 5:
+			iNdEx += 4
+		default:
+			return 0, fmt.Errorf("proto: illegal wireType %d", wireType)
+		}
+		if iNdEx < 0 {
+			return 0, ErrInvalidLengthPublicCustomapi
+		}
+		if depth == 0 {
+			return iNdEx, nil
+		}
+	}
+	return 0, io.ErrUnexpectedEOF
+}
+
+var (
+	ErrInvalidLengthPublicCustomapi        = fmt.Errorf("proto: negative length found during unmarshaling")
+	ErrIntOverflowPublicCustomapi          = fmt.Errorf("proto: integer overflow")
+	ErrUnexpectedEndOfGroupPublicCustomapi = fmt.Errorf("proto: unexpected end of group")
+)

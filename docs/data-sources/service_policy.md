@@ -15,8 +15,8 @@ The `f5xc_service_policy` data source allows you to retrieve information about a
 
 ```terraform
 data "f5xc_service_policy" "example" {
-  name      = "example_service_policy"
   namespace = "example_namespace"
+  name      = "example_service_policy"
 }
 ```
 
@@ -242,6 +242,7 @@ Read-Only:
 - `ip_choice` (Attributes) ip choice Match source IP address of the request (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--spec--ip_choice))
 - `jwt_claims` (Attributes List) JWT claims A list of predicates for various JWT claims that need to match. The criteria for matching each JWT claim are described in individual JWTClaimMatcherType instances. The actual JWT claims values are extracted from the JWT payload as a list of strings. Note that all specified JWT claim predicates must evaluate to true. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--spec--jwt_claims))
 - `label_matcher` (Attributes) label matcher A list of label keys that identify the label values that need to be the same for the client and server. Note that the actual label values are not specified here, just the label keys. This predicate facilitates reuse of rules and policies across multiple dimensions such as deployment, environment, and location. The predicate evaluates to true if the values of the client and server labels for all the keys specified in the label matcher are equal. The values of any other labels do not matter. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--spec--label_matcher))
+- `log_rule_evaluation` (Boolean) Log Rule Evaluation Log the rule match details along with the request and continue to evaluate rules in the sequence.
 - `mum_action` (Attributes) Malicious User Mitigation Action Specifies how Malicious User Mitigation is handled (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--spec--mum_action))
 - `path` (Attributes) path A list of exact values, prefixes and regular expressions for the expected value of the HTTP path. The actual value of the HTTP path is the unescaped path value extracted from the HTTP URL Resource, excluding any query and fragment information. The predicate evaluates to true if the actual path value matches any of the exact or prefix values or regular expressions in the path matcher. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--spec--path))
 - `port_matcher` (Attributes) port matcher The list of port ranges to which the destination port should belong. In case of an HTTP Connect, the port is extracted from the desired destination. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--spec--port_matcher))
@@ -570,6 +571,7 @@ Read-Only:
 
 Read-Only:
 
+- `encoded_path_matcher` (Boolean) Encoded_Path Match against the encoded, escaped path
 - `exact_values` (List of String) exact values A list of exact path values to match the input HTTP path against.
 - `invert_matcher` (Boolean) invert_matcher Invert the match result.
 - `prefix_values` (List of String) prefix values A list of path prefix values to match the input HTTP path against.

@@ -13,11 +13,11 @@ IkePhase2Profile resource
 
 ```terraform
 resource "f5xc_ike_phase2_profile" "example" {
-  name      = "example_ike_phase2_profile"
   namespace = "example_namespace"
+  name      = "example_ike_phase2_profile"
   ike_key_lifetime = {
-    ike_keylifetime_minutes = {
-      ike_keylifetime_minutes = "example_ike_keylifetime_minutes"
+    ike_keylifetime_hours = {
+      ike_keylifetime_hours = "example_ike_keylifetime_hours"
     }
   }
 }
@@ -37,9 +37,9 @@ resource "f5xc_ike_phase2_profile" "example" {
 ### Optional
 
 - `annotations` (Map of String) annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.
-- `authentication_algos` (List of String) <br>**Valid Options:** `["AUTH_ALG_NONE", "AUTH_ALG_DEFAULT", "SHA256_HMAC", "SHA384_HMAC", "SHA512_HMAC"]` (Multiple selection allowed)<br>**Default:** `AUTH_ALG_NONE`
+- `authentication_algos` (List of String) <br>**Valid Options:** `["AUTH_ALG_DEFAULT", "SHA256_HMAC", "SHA384_HMAC", "SHA512_HMAC", "AUTH_ALG_NONE"]` (Multiple selection allowed)<br>**Default:** `AUTH_ALG_NONE`
 - `description` (String) description Human readable description for the object
-- `encryption_algos` (List of String) <br>**Valid Options:** `["AES128_CBC", "AES192_CBC", "AES256_CBC", "TRIPLE_DES_CBC", "AES128_GCM", "AES192_GCM", "AES256_GCM", "ENC_ALG_DEFAULT"]` (Multiple selection allowed)<br>**Default:** `AES256_GCM`
+- `encryption_algos` (List of String) <br>**Valid Options:** `["AES192_CBC", "AES256_CBC", "TRIPLE_DES_CBC", "AES128_GCM", "AES192_GCM", "AES256_GCM", "ENC_ALG_DEFAULT", "AES128_CBC"]` (Multiple selection allowed)<br>**Default:** `AES256_GCM`
 - `labels` (Map of String) labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression
 - `pfs_mode_choice` (Attributes) Perfect Forward Secrecy (PFS) Configure Perfect Forward Secrecy for this tunnel (see [below for nested schema](#nestedatt--pfs_mode_choice))
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
@@ -87,7 +87,7 @@ Optional:
 
 Optional:
 
-- `dh_groups` (List of String) <br>**Valid Options:** `["DH_GROUP_18", "DH_GROUP_20", "DH_GROUP_21", "DH_GROUP_14", "DH_GROUP_15", "DH_GROUP_19", "DH_GROUP_26", "DH_GROUP_DEFAULT", "DH_GROUP_16", "DH_GROUP_17"]` (Multiple selection allowed)<br>**Default:** `DH_GROUP_19`
+- `dh_groups` (List of String) <br>**Valid Options:** `["DH_GROUP_14", "DH_GROUP_15", "DH_GROUP_16", "DH_GROUP_17", "DH_GROUP_18", "DH_GROUP_19", "DH_GROUP_20", "DH_GROUP_26", "DH_GROUP_DEFAULT", "DH_GROUP_21"]` (Multiple selection allowed)<br>**Default:** `DH_GROUP_19`
 
 
 

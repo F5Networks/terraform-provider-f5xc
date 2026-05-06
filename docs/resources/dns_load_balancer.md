@@ -24,8 +24,8 @@ resource "f5xc_dns_load_balancer" "example" {
         }
       }
       client_choice = {
-        geo_location_label_selector = {
-          geo_location_label_selector = "example_geo_location_label_selector"
+        geo_location_set = {
+          geo_location_set = "example_geo_location_set"
         }
       }
     }]

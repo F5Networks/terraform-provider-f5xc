@@ -5,21 +5,21 @@ package discovered_service
 
 import (
 	fmt "fmt"
-	io "io"
-	math "math"
-	math_bits "math/bits"
-	reflect "reflect"
-	strconv "strconv"
-	strings "strings"
-
 	_ "github.com/gogo/protobuf/gogoproto"
 	proto "github.com/gogo/protobuf/proto"
 	_ "github.com/gogo/protobuf/types"
 	golang_proto "github.com/golang/protobuf/proto"
 	schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	discovery "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/discovery"
+	discovery_cloud "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/discovery_cloud"
 	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/policy"
 	views "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views"
+	io "io"
+	math "math"
+	math_bits "math/bits"
+	reflect "reflect"
+	strconv "strconv"
+	strings "strings"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -204,6 +204,7 @@ type GlobalSpecType struct {
 	//	*GlobalSpecType_ConsulService
 	//	*GlobalSpecType_N1DiscoveredServer
 	//	*GlobalSpecType_ThirdParty
+	//	*GlobalSpecType_AwsService
 	ServiceType isGlobalSpecType_ServiceType `protobuf_oneof:"service_type"`
 	// Reference to the internally created vhost of type bigip_virtual_server
 	//
@@ -279,6 +280,9 @@ type GlobalSpecType_N1DiscoveredServer struct {
 type GlobalSpecType_ThirdParty struct {
 	ThirdParty *ThirdPartyApplicationDiscovery `protobuf:"bytes,12,opt,name=third_party,json=thirdParty,proto3,oneof" json:"third_party,omitempty"`
 }
+type GlobalSpecType_AwsService struct {
+	AwsService *AwsService `protobuf:"bytes,13,opt,name=aws_service,json=awsService,proto3,oneof" json:"aws_service,omitempty"`
+}
 
 func (*GlobalSpecType_VisibilityEnabled) isGlobalSpecType_VisibilityActionChoice()  {}
 func (*GlobalSpecType_VisibilityDisabled) isGlobalSpecType_VisibilityActionChoice() {}
@@ -287,6 +291,7 @@ func (*GlobalSpecType_K8SService) isGlobalSpecType_ServiceType()                
 func (*GlobalSpecType_ConsulService) isGlobalSpecType_ServiceType()                 {}
 func (*GlobalSpecType_N1DiscoveredServer) isGlobalSpecType_ServiceType()            {}
 func (*GlobalSpecType_ThirdParty) isGlobalSpecType_ServiceType()                    {}
+func (*GlobalSpecType_AwsService) isGlobalSpecType_ServiceType()                    {}
 
 func (m *GlobalSpecType) GetVisibilityActionChoice() isGlobalSpecType_VisibilityActionChoice {
 	if m != nil {
@@ -364,6 +369,13 @@ func (m *GlobalSpecType) GetThirdParty() *ThirdPartyApplicationDiscovery {
 	return nil
 }
 
+func (m *GlobalSpecType) GetAwsService() *AwsService {
+	if x, ok := m.GetServiceType().(*GlobalSpecType_AwsService); ok {
+		return x.AwsService
+	}
+	return nil
+}
+
 func (m *GlobalSpecType) GetInternalVirtualHost() *views.ObjectRefType {
 	if m != nil {
 		return m.InternalVirtualHost
@@ -388,6 +400,7 @@ func (*GlobalSpecType) XXX_OneofWrappers() []interface{} {
 		(*GlobalSpecType_ConsulService)(nil),
 		(*GlobalSpecType_N1DiscoveredServer)(nil),
 		(*GlobalSpecType_ThirdParty)(nil),
+		(*GlobalSpecType_AwsService)(nil),
 	}
 }
 
@@ -415,7 +428,7 @@ type VirtualServer struct {
 	Protocol TransmissionProtocol `protobuf:"varint,3,opt,name=protocol,proto3,enum=ves.io.schema.discovered_service.TransmissionProtocol" json:"protocol,omitempty"`
 	// Port
 	//
-	// x-displayName: "Port number"
+	// x-displayName: "Port Number"
 	// x-example: "8080"
 	// Port number on which the virtual-server is exposed
 	Port uint32 `protobuf:"varint,4,opt,name=port,proto3" json:"port,omitempty"`
@@ -922,6 +935,209 @@ func (m *ThirdPartyApplicationDiscovery) GetDiscoveryObject() *views.ObjectRefTy
 	return nil
 }
 
+// AWS Port Information
+//
+// x-displayName: "Port Information"
+// Information about a discovered port of a service
+type AwsPortInfo struct {
+	// Port
+	//
+	// x-displayName: "Port Number"
+	// x-required
+	// x-example: "8080"
+	// Port number on which the service is exposed
+	Port uint32 `protobuf:"varint,1,opt,name=port,proto3" json:"port,omitempty"`
+	// Protocol
+	//
+	// x-displayName: "Protocol"
+	// x-required
+	// x-example: "TCP"
+	// Protocol for the exposed service
+	Protocol string `protobuf:"bytes,2,opt,name=protocol,proto3" json:"protocol,omitempty"`
+}
+
+func (m *AwsPortInfo) Reset()      { *m = AwsPortInfo{} }
+func (*AwsPortInfo) ProtoMessage() {}
+func (*AwsPortInfo) Descriptor() ([]byte, []int) {
+	return fileDescriptor_5e612cab0245916d, []int{6}
+}
+func (m *AwsPortInfo) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *AwsPortInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	b = b[:cap(b)]
+	n, err := m.MarshalToSizedBuffer(b)
+	if err != nil {
+		return nil, err
+	}
+	return b[:n], nil
+}
+func (m *AwsPortInfo) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AwsPortInfo.Merge(m, src)
+}
+func (m *AwsPortInfo) XXX_Size() int {
+	return m.Size()
+}
+func (m *AwsPortInfo) XXX_DiscardUnknown() {
+	xxx_messageInfo_AwsPortInfo.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_AwsPortInfo proto.InternalMessageInfo
+
+func (m *AwsPortInfo) GetPort() uint32 {
+	if m != nil {
+		return m.Port
+	}
+	return 0
+}
+
+func (m *AwsPortInfo) GetProtocol() string {
+	if m != nil {
+		return m.Protocol
+	}
+	return ""
+}
+
+// AWS Service
+//
+// x-displayName: "AWS Service"
+// Service detailed discovered from AWS
+type AwsService struct {
+	// Discovery Cloud Object
+	//
+	// x-displayName: "Discovery Cloud Object"
+	// Discovery Cloud Object associated with this discovered service
+	DiscoveryCloudObject *views.ObjectRefType `protobuf:"bytes,1,opt,name=discovery_cloud_object,json=discoveryCloudObject,proto3" json:"discovery_cloud_object,omitempty"`
+	// Region
+	//
+	// x-displayName: "Region"
+	// x-required
+	// Region of discovered service
+	Region string `protobuf:"bytes,2,opt,name=region,proto3" json:"region,omitempty"`
+	// VPC ID
+	//
+	// x-displayName: "VPC ID"
+	// x-example: "vpc-12345678901234567"
+	// x-required
+	// ID of VPC to discover from
+	VpcId string `protobuf:"bytes,3,opt,name=vpc_id,json=vpcId,proto3" json:"vpc_id,omitempty"`
+	// Subnet ID
+	//
+	// x-displayName: "Subnet ID"
+	// x-example: "subnet-01234567890abcdef"
+	// Subnet ID of discovered service
+	SubnetId string `protobuf:"bytes,4,opt,name=subnet_id,json=subnetId,proto3" json:"subnet_id,omitempty"`
+	// Type
+	//
+	// x-displayName: "Type"
+	// x-required
+	// Type of discovered service
+	Type discovery_cloud.AwsServiceType `protobuf:"varint,5,opt,name=type,proto3,enum=ves.io.schema.discovery_cloud.AwsServiceType" json:"type,omitempty"`
+	// Service Name
+	//
+	// x-displayName: "Service"
+	// x-example: "myservice"
+	// x-required
+	// Name of discovered service
+	Name string `protobuf:"bytes,6,opt,name=name,proto3" json:"name,omitempty"`
+	// Endpoint Address
+	//
+	// x-displayName: "Endpoint Address"
+	// x-example: "my-service.example.amazonaws.com"
+	// x-required
+	// Endpoint address of discovered service, may be DNS name or IP address
+	EndpointAddress string `protobuf:"bytes,7,opt,name=endpoint_address,json=endpointAddress,proto3" json:"endpoint_address,omitempty"`
+	// Ports
+	//
+	// x-displayName: "Ports"
+	// Ports of discovered service
+	Ports []*AwsPortInfo `protobuf:"bytes,8,rep,name=ports,proto3" json:"ports,omitempty"`
+}
+
+func (m *AwsService) Reset()      { *m = AwsService{} }
+func (*AwsService) ProtoMessage() {}
+func (*AwsService) Descriptor() ([]byte, []int) {
+	return fileDescriptor_5e612cab0245916d, []int{7}
+}
+func (m *AwsService) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *AwsService) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	b = b[:cap(b)]
+	n, err := m.MarshalToSizedBuffer(b)
+	if err != nil {
+		return nil, err
+	}
+	return b[:n], nil
+}
+func (m *AwsService) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AwsService.Merge(m, src)
+}
+func (m *AwsService) XXX_Size() int {
+	return m.Size()
+}
+func (m *AwsService) XXX_DiscardUnknown() {
+	xxx_messageInfo_AwsService.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_AwsService proto.InternalMessageInfo
+
+func (m *AwsService) GetDiscoveryCloudObject() *views.ObjectRefType {
+	if m != nil {
+		return m.DiscoveryCloudObject
+	}
+	return nil
+}
+
+func (m *AwsService) GetRegion() string {
+	if m != nil {
+		return m.Region
+	}
+	return ""
+}
+
+func (m *AwsService) GetVpcId() string {
+	if m != nil {
+		return m.VpcId
+	}
+	return ""
+}
+
+func (m *AwsService) GetSubnetId() string {
+	if m != nil {
+		return m.SubnetId
+	}
+	return ""
+}
+
+func (m *AwsService) GetType() discovery_cloud.AwsServiceType {
+	if m != nil {
+		return m.Type
+	}
+	return discovery_cloud.INVALID_AWS_SERVICE
+}
+
+func (m *AwsService) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *AwsService) GetEndpointAddress() string {
+	if m != nil {
+		return m.EndpointAddress
+	}
+	return ""
+}
+
+func (m *AwsService) GetPorts() []*AwsPortInfo {
+	if m != nil {
+		return m.Ports
+	}
+	return nil
+}
+
 // Create Discovered Service Object
 //
 // x-displayName: "Create Discovered Service Object"
@@ -939,13 +1155,14 @@ type CreateSpecType struct {
 	//	*CreateSpecType_ConsulService
 	//	*CreateSpecType_N1DiscoveredServer
 	//	*CreateSpecType_ThirdParty
+	//	*CreateSpecType_AwsService
 	ServiceType isCreateSpecType_ServiceType `protobuf_oneof:"service_type"`
 }
 
 func (m *CreateSpecType) Reset()      { *m = CreateSpecType{} }
 func (*CreateSpecType) ProtoMessage() {}
 func (*CreateSpecType) Descriptor() ([]byte, []int) {
-	return fileDescriptor_5e612cab0245916d, []int{6}
+	return fileDescriptor_5e612cab0245916d, []int{8}
 }
 func (m *CreateSpecType) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1004,6 +1221,9 @@ type CreateSpecType_N1DiscoveredServer struct {
 type CreateSpecType_ThirdParty struct {
 	ThirdParty *ThirdPartyApplicationDiscovery `protobuf:"bytes,12,opt,name=third_party,json=thirdParty,proto3,oneof" json:"third_party,omitempty"`
 }
+type CreateSpecType_AwsService struct {
+	AwsService *AwsService `protobuf:"bytes,13,opt,name=aws_service,json=awsService,proto3,oneof" json:"aws_service,omitempty"`
+}
 
 func (*CreateSpecType_VisibilityEnabled) isCreateSpecType_VisibilityActionChoice()  {}
 func (*CreateSpecType_VisibilityDisabled) isCreateSpecType_VisibilityActionChoice() {}
@@ -1012,6 +1232,7 @@ func (*CreateSpecType_K8SService) isCreateSpecType_ServiceType()                
 func (*CreateSpecType_ConsulService) isCreateSpecType_ServiceType()                 {}
 func (*CreateSpecType_N1DiscoveredServer) isCreateSpecType_ServiceType()            {}
 func (*CreateSpecType_ThirdParty) isCreateSpecType_ServiceType()                    {}
+func (*CreateSpecType_AwsService) isCreateSpecType_ServiceType()                    {}
 
 func (m *CreateSpecType) GetVisibilityActionChoice() isCreateSpecType_VisibilityActionChoice {
 	if m != nil {
@@ -1089,6 +1310,13 @@ func (m *CreateSpecType) GetThirdParty() *ThirdPartyApplicationDiscovery {
 	return nil
 }
 
+func (m *CreateSpecType) GetAwsService() *AwsService {
+	if x, ok := m.GetServiceType().(*CreateSpecType_AwsService); ok {
+		return x.AwsService
+	}
+	return nil
+}
+
 // XXX_OneofWrappers is for the internal use of the proto package.
 func (*CreateSpecType) XXX_OneofWrappers() []interface{} {
 	return []interface{}{
@@ -1099,6 +1327,7 @@ func (*CreateSpecType) XXX_OneofWrappers() []interface{} {
 		(*CreateSpecType_ConsulService)(nil),
 		(*CreateSpecType_N1DiscoveredServer)(nil),
 		(*CreateSpecType_ThirdParty)(nil),
+		(*CreateSpecType_AwsService)(nil),
 	}
 }
 
@@ -1119,13 +1348,14 @@ type GetSpecType struct {
 	//	*GetSpecType_ConsulService
 	//	*GetSpecType_N1DiscoveredServer
 	//	*GetSpecType_ThirdParty
+	//	*GetSpecType_AwsService
 	ServiceType isGetSpecType_ServiceType `protobuf_oneof:"service_type"`
 }
 
 func (m *GetSpecType) Reset()      { *m = GetSpecType{} }
 func (*GetSpecType) ProtoMessage() {}
 func (*GetSpecType) Descriptor() ([]byte, []int) {
-	return fileDescriptor_5e612cab0245916d, []int{7}
+	return fileDescriptor_5e612cab0245916d, []int{9}
 }
 func (m *GetSpecType) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1184,6 +1414,9 @@ type GetSpecType_N1DiscoveredServer struct {
 type GetSpecType_ThirdParty struct {
 	ThirdParty *ThirdPartyApplicationDiscovery `protobuf:"bytes,12,opt,name=third_party,json=thirdParty,proto3,oneof" json:"third_party,omitempty"`
 }
+type GetSpecType_AwsService struct {
+	AwsService *AwsService `protobuf:"bytes,13,opt,name=aws_service,json=awsService,proto3,oneof" json:"aws_service,omitempty"`
+}
 
 func (*GetSpecType_VisibilityEnabled) isGetSpecType_VisibilityActionChoice()  {}
 func (*GetSpecType_VisibilityDisabled) isGetSpecType_VisibilityActionChoice() {}
@@ -1192,6 +1425,7 @@ func (*GetSpecType_K8SService) isGetSpecType_ServiceType()                    {}
 func (*GetSpecType_ConsulService) isGetSpecType_ServiceType()                 {}
 func (*GetSpecType_N1DiscoveredServer) isGetSpecType_ServiceType()            {}
 func (*GetSpecType_ThirdParty) isGetSpecType_ServiceType()                    {}
+func (*GetSpecType_AwsService) isGetSpecType_ServiceType()                    {}
 
 func (m *GetSpecType) GetVisibilityActionChoice() isGetSpecType_VisibilityActionChoice {
 	if m != nil {
@@ -1269,6 +1503,13 @@ func (m *GetSpecType) GetThirdParty() *ThirdPartyApplicationDiscovery {
 	return nil
 }
 
+func (m *GetSpecType) GetAwsService() *AwsService {
+	if x, ok := m.GetServiceType().(*GetSpecType_AwsService); ok {
+		return x.AwsService
+	}
+	return nil
+}
+
 // XXX_OneofWrappers is for the internal use of the proto package.
 func (*GetSpecType) XXX_OneofWrappers() []interface{} {
 	return []interface{}{
@@ -1279,6 +1520,7 @@ func (*GetSpecType) XXX_OneofWrappers() []interface{} {
 		(*GetSpecType_ConsulService)(nil),
 		(*GetSpecType_N1DiscoveredServer)(nil),
 		(*GetSpecType_ThirdParty)(nil),
+		(*GetSpecType_AwsService)(nil),
 	}
 }
 
@@ -1299,13 +1541,14 @@ type ReplaceSpecType struct {
 	//	*ReplaceSpecType_ConsulService
 	//	*ReplaceSpecType_N1DiscoveredServer
 	//	*ReplaceSpecType_ThirdParty
+	//	*ReplaceSpecType_AwsService
 	ServiceType isReplaceSpecType_ServiceType `protobuf_oneof:"service_type"`
 }
 
 func (m *ReplaceSpecType) Reset()      { *m = ReplaceSpecType{} }
 func (*ReplaceSpecType) ProtoMessage() {}
 func (*ReplaceSpecType) Descriptor() ([]byte, []int) {
-	return fileDescriptor_5e612cab0245916d, []int{8}
+	return fileDescriptor_5e612cab0245916d, []int{10}
 }
 func (m *ReplaceSpecType) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1364,6 +1607,9 @@ type ReplaceSpecType_N1DiscoveredServer struct {
 type ReplaceSpecType_ThirdParty struct {
 	ThirdParty *ThirdPartyApplicationDiscovery `protobuf:"bytes,12,opt,name=third_party,json=thirdParty,proto3,oneof" json:"third_party,omitempty"`
 }
+type ReplaceSpecType_AwsService struct {
+	AwsService *AwsService `protobuf:"bytes,13,opt,name=aws_service,json=awsService,proto3,oneof" json:"aws_service,omitempty"`
+}
 
 func (*ReplaceSpecType_VisibilityEnabled) isReplaceSpecType_VisibilityActionChoice()  {}
 func (*ReplaceSpecType_VisibilityDisabled) isReplaceSpecType_VisibilityActionChoice() {}
@@ -1372,6 +1618,7 @@ func (*ReplaceSpecType_K8SService) isReplaceSpecType_ServiceType()              
 func (*ReplaceSpecType_ConsulService) isReplaceSpecType_ServiceType()                 {}
 func (*ReplaceSpecType_N1DiscoveredServer) isReplaceSpecType_ServiceType()            {}
 func (*ReplaceSpecType_ThirdParty) isReplaceSpecType_ServiceType()                    {}
+func (*ReplaceSpecType_AwsService) isReplaceSpecType_ServiceType()                    {}
 
 func (m *ReplaceSpecType) GetVisibilityActionChoice() isReplaceSpecType_VisibilityActionChoice {
 	if m != nil {
@@ -1449,6 +1696,13 @@ func (m *ReplaceSpecType) GetThirdParty() *ThirdPartyApplicationDiscovery {
 	return nil
 }
 
+func (m *ReplaceSpecType) GetAwsService() *AwsService {
+	if x, ok := m.GetServiceType().(*ReplaceSpecType_AwsService); ok {
+		return x.AwsService
+	}
+	return nil
+}
+
 // XXX_OneofWrappers is for the internal use of the proto package.
 func (*ReplaceSpecType) XXX_OneofWrappers() []interface{} {
 	return []interface{}{
@@ -1459,6 +1713,7 @@ func (*ReplaceSpecType) XXX_OneofWrappers() []interface{} {
 		(*ReplaceSpecType_ConsulService)(nil),
 		(*ReplaceSpecType_N1DiscoveredServer)(nil),
 		(*ReplaceSpecType_ThirdParty)(nil),
+		(*ReplaceSpecType_AwsService)(nil),
 	}
 }
 
@@ -1481,6 +1736,10 @@ func init() {
 	golang_proto.RegisterType((*NginxOneDiscoveredServer)(nil), "ves.io.schema.discovered_service.NginxOneDiscoveredServer")
 	proto.RegisterType((*ThirdPartyApplicationDiscovery)(nil), "ves.io.schema.discovered_service.ThirdPartyApplicationDiscovery")
 	golang_proto.RegisterType((*ThirdPartyApplicationDiscovery)(nil), "ves.io.schema.discovered_service.ThirdPartyApplicationDiscovery")
+	proto.RegisterType((*AwsPortInfo)(nil), "ves.io.schema.discovered_service.AwsPortInfo")
+	golang_proto.RegisterType((*AwsPortInfo)(nil), "ves.io.schema.discovered_service.AwsPortInfo")
+	proto.RegisterType((*AwsService)(nil), "ves.io.schema.discovered_service.AwsService")
+	golang_proto.RegisterType((*AwsService)(nil), "ves.io.schema.discovered_service.AwsService")
 	proto.RegisterType((*CreateSpecType)(nil), "ves.io.schema.discovered_service.CreateSpecType")
 	golang_proto.RegisterType((*CreateSpecType)(nil), "ves.io.schema.discovered_service.CreateSpecType")
 	proto.RegisterType((*GetSpecType)(nil), "ves.io.schema.discovered_service.GetSpecType")
@@ -1497,108 +1756,122 @@ func init() {
 }
 
 var fileDescriptor_5e612cab0245916d = []byte{
-	// 1601 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xec, 0x59, 0x4f, 0x6f, 0x1b, 0xc7,
-	0x15, 0xe7, 0x90, 0x14, 0xff, 0x0c, 0x49, 0x79, 0x3d, 0x52, 0xe0, 0x8d, 0x13, 0x6c, 0x18, 0x35,
-	0x01, 0x58, 0x57, 0x26, 0x61, 0x19, 0x49, 0x0d, 0x17, 0x08, 0xa2, 0x15, 0x69, 0x89, 0x89, 0x4a,
-	0x09, 0x2b, 0xd9, 0x2d, 0xda, 0xc3, 0x76, 0xb9, 0x3b, 0x22, 0xa7, 0x5a, 0xee, 0x2c, 0x76, 0x87,
-	0xac, 0x79, 0x20, 0xa0, 0xe6, 0x13, 0x04, 0x05, 0x7a, 0x2a, 0xd0, 0x43, 0x4f, 0x85, 0x3e, 0x42,
-	0xdd, 0x83, 0x81, 0x02, 0x6d, 0xd1, 0x93, 0x8e, 0x3a, 0xd6, 0xd4, 0xc5, 0xbd, 0x05, 0x3d, 0xfa,
-	0x92, 0x62, 0x66, 0x97, 0x7f, 0x56, 0x12, 0x25, 0x05, 0x45, 0x0e, 0x06, 0x78, 0x9b, 0x99, 0xf7,
-	0x7e, 0xbf, 0xf7, 0xe6, 0xcd, 0x7b, 0x6f, 0x86, 0x4b, 0xb8, 0xda, 0xc3, 0x7e, 0x99, 0xd0, 0x8a,
-	0x6f, 0xb6, 0x71, 0xc7, 0xa8, 0x58, 0xc4, 0x37, 0x69, 0x0f, 0x7b, 0xd8, 0xd2, 0x7d, 0xec, 0xf5,
-	0x88, 0x89, 0x2b, 0xac, 0xef, 0x62, 0xbf, 0xec, 0x7a, 0x94, 0x51, 0x54, 0x0c, 0xb4, 0xcb, 0x81,
-	0x76, 0xf9, 0xa2, 0xf6, 0xdd, 0xfb, 0x2d, 0xc2, 0xda, 0xdd, 0x66, 0xd9, 0xa4, 0x9d, 0x4a, 0x8b,
-	0xb6, 0x68, 0x45, 0x00, 0x9b, 0xdd, 0x03, 0x31, 0x13, 0x13, 0x31, 0x0a, 0x08, 0xef, 0x7e, 0xd0,
-	0xa2, 0xb4, 0x65, 0xe3, 0x89, 0x16, 0x23, 0x1d, 0xec, 0x33, 0xa3, 0xe3, 0x86, 0x0a, 0x3f, 0xb8,
-	0xdc, 0xbf, 0xfe, 0xb4, 0x5b, 0x77, 0xef, 0x44, 0x95, 0x1c, 0xcc, 0x42, 0xc1, 0x7b, 0x51, 0x01,
-	0x75, 0x19, 0xa1, 0xce, 0x08, 0x55, 0x8c, 0x0a, 0x5d, 0x6a, 0x13, 0x33, 0xca, 0xfb, 0x6e, 0x54,
-	0x63, 0x5a, 0xf4, 0x7e, 0x54, 0xd4, 0x33, 0x6c, 0x62, 0x19, 0x0c, 0x5f, 0x4e, 0xdd, 0x23, 0xf8,
-	0x37, 0x7a, 0xd4, 0xf8, 0x07, 0x17, 0x35, 0xfc, 0x69, 0x03, 0x2b, 0x6f, 0x32, 0x70, 0x71, 0xd3,
-	0xa6, 0x4d, 0xc3, 0xde, 0x73, 0xb1, 0xb9, 0xdf, 0x77, 0x31, 0x6a, 0xc3, 0xa5, 0x36, 0x63, 0xae,
-	0x6e, 0x53, 0xc3, 0xd2, 0x9b, 0x86, 0x6d, 0x38, 0x26, 0xf6, 0x7c, 0x19, 0x14, 0x13, 0xa5, 0xdc,
-	0xda, 0x4a, 0x39, 0x7a, 0x36, 0x82, 0xb1, 0xbc, 0xd3, 0xfc, 0x35, 0x36, 0x99, 0x86, 0x0f, 0x38,
-	0x81, 0xba, 0x7c, 0x3c, 0xb8, 0x3d, 0x66, 0x18, 0x11, 0x68, 0x62, 0x69, 0x9b, 0x1a, 0x96, 0x3a,
-	0xa2, 0x44, 0x18, 0x22, 0x66, 0x5e, 0x30, 0x14, 0xbf, 0xb1, 0xa1, 0xa5, 0xe3, 0x81, 0x34, 0x22,
-	0x18, 0xdb, 0xe1, 0x2b, 0x51, 0x33, 0x35, 0x88, 0x7a, 0xc4, 0x27, 0x4d, 0x62, 0x13, 0xd6, 0xd7,
-	0xb1, 0x63, 0x34, 0x6d, 0x6c, 0xc9, 0xc9, 0x22, 0x28, 0xe5, 0xd6, 0x96, 0xcf, 0x99, 0xa9, 0x75,
-	0x5c, 0xd6, 0xdf, 0x8a, 0x69, 0xb7, 0x27, 0x88, 0x5a, 0x00, 0x40, 0x9b, 0x70, 0x69, 0x8a, 0xc6,
-	0x22, 0x7e, 0xc0, 0xb3, 0x70, 0x25, 0xcf, 0x94, 0xe5, 0x6a, 0x88, 0x40, 0x3f, 0x87, 0x8b, 0x3d,
-	0xe2, 0xb1, 0xae, 0x61, 0x8b, 0x7c, 0xc6, 0x9e, 0x9c, 0x16, 0x1c, 0x95, 0xf2, 0x75, 0x79, 0x5f,
-	0x7e, 0x16, 0xe0, 0xf6, 0x04, 0x6c, 0x0b, 0x68, 0x85, 0xde, 0xf4, 0x02, 0xda, 0x81, 0xb9, 0xc3,
-	0x47, 0xfe, 0x48, 0x5b, 0xce, 0x0a, 0xda, 0xd5, 0xeb, 0x69, 0xbf, 0x7c, 0xe4, 0xef, 0x05, 0xc3,
-	0x2d, 0xa0, 0xc1, 0xc3, 0xf1, 0x8c, 0xbb, 0x6a, 0x52, 0xc7, 0xef, 0xda, 0x63, 0x4e, 0x78, 0x53,
-	0x57, 0x37, 0x04, 0x6e, 0x42, 0x5b, 0x30, 0xa7, 0x17, 0x90, 0x03, 0x97, 0x9d, 0x07, 0xfa, 0x39,
-	0x1c, 0xf6, 0xe4, 0x9c, 0xe0, 0x7f, 0x7c, 0x3d, 0x7f, 0xa3, 0x45, 0x9c, 0xe7, 0x3b, 0x0e, 0xae,
-	0x8e, 0x45, 0xe3, 0xa8, 0x20, 0xe7, 0xc1, 0xf9, 0x55, 0x64, 0xc2, 0x1c, 0x6b, 0x13, 0xcf, 0xd2,
-	0x5d, 0xc3, 0x63, 0x7d, 0x39, 0x2f, 0xcc, 0x7c, 0x7e, 0xbd, 0x99, 0x7d, 0x0e, 0xda, 0xe5, 0x98,
-	0x75, 0xd7, 0xb5, 0x89, 0x69, 0xf0, 0xf2, 0x1a, 0xb1, 0xf7, 0x79, 0xb8, 0xd8, 0x58, 0x03, 0xf5,
-	0xe0, 0x3b, 0xc4, 0x61, 0xd8, 0x73, 0x0c, 0x5b, 0x1f, 0x1d, 0x71, 0x9b, 0xfa, 0x4c, 0xce, 0x08,
-	0x73, 0x37, 0xc9, 0x69, 0xe5, 0x78, 0xb0, 0xdc, 0x24, 0x2d, 0xe2, 0xea, 0xd1, 0x1c, 0x39, 0x1d,
-	0x80, 0xd7, 0x2f, 0x00, 0xd0, 0x96, 0x46, 0x06, 0xc2, 0x54, 0xd8, 0xa2, 0x3e, 0x43, 0x06, 0x2c,
-	0x88, 0xe2, 0x1f, 0xc9, 0xe4, 0xd7, 0xe9, 0x1b, 0x1b, 0xbc, 0x73, 0x3c, 0x88, 0x82, 0x47, 0x96,
-	0xf2, 0x7c, 0xb5, 0x1e, 0x2e, 0x3e, 0x86, 0xff, 0xfd, 0x2c, 0xfd, 0xe9, 0xea, 0x83, 0xd5, 0x87,
-	0xab, 0x6b, 0xea, 0x47, 0x50, 0x9e, 0xaa, 0x04, 0xc3, 0xe4, 0x21, 0xd1, 0xcd, 0x36, 0xe5, 0xe7,
-	0x9a, 0x79, 0xf9, 0x02, 0x24, 0x4f, 0x5e, 0x80, 0x84, 0xba, 0x0c, 0xf3, 0x61, 0x10, 0x75, 0xde,
-	0x71, 0x10, 0x5f, 0x4d, 0x7d, 0x91, 0xcc, 0x24, 0xa4, 0xe4, 0x17, 0xc9, 0x4c, 0x4a, 0x4a, 0xaf,
-	0xfc, 0x3e, 0x05, 0x0b, 0x91, 0x8c, 0x46, 0xbf, 0x84, 0xd2, 0xb8, 0xf7, 0xea, 0x54, 0xf8, 0x29,
-	0x83, 0x1b, 0x6f, 0x25, 0x7f, 0x3c, 0xc8, 0x8e, 0xe1, 0xda, 0xad, 0xf1, 0x30, 0xd0, 0x42, 0x25,
-	0x98, 0xe5, 0x87, 0x4f, 0xb8, 0xbb, 0x72, 0xbc, 0x08, 0x4a, 0x59, 0x15, 0xfe, 0xe5, 0x3f, 0x2f,
-	0x13, 0x0b, 0x5e, 0x42, 0x3e, 0x8a, 0x6b, 0x13, 0x21, 0x3a, 0x84, 0x19, 0xd1, 0x1e, 0x4d, 0x6a,
-	0xcb, 0x89, 0x22, 0x28, 0x2d, 0xae, 0x7d, 0x7a, 0x83, 0x4c, 0xf1, 0x0c, 0xc7, 0xef, 0x10, 0xdf,
-	0x27, 0xd4, 0xd9, 0x0d, 0xd1, 0xea, 0x9d, 0xd3, 0x01, 0x18, 0x0e, 0x0a, 0x0d, 0xca, 0x8a, 0x7e,
-	0xd7, 0x75, 0xa9, 0xc7, 0xb0, 0x25, 0xa2, 0x3b, 0x36, 0x80, 0x3e, 0x84, 0x49, 0xbe, 0x2e, 0x1a,
-	0x52, 0x41, 0x2d, 0x70, 0x8f, 0x32, 0xf7, 0x52, 0xf2, 0xb7, 0xdf, 0x26, 0x4a, 0x40, 0x13, 0x22,
-	0xf4, 0x53, 0x98, 0xf2, 0x99, 0xc1, 0xba, 0xbe, 0xe8, 0x36, 0x8b, 0x6b, 0x9f, 0x7c, 0xc7, 0x4e,
-	0xb1, 0x27, 0xc0, 0x5a, 0x48, 0x82, 0xee, 0xc3, 0xbc, 0xd9, 0x24, 0xae, 0x6e, 0xda, 0x5d, 0x9f,
-	0x61, 0x4f, 0x4e, 0x5d, 0x88, 0x45, 0x8e, 0xcb, 0x37, 0x02, 0x31, 0xaa, 0xc0, 0x42, 0x98, 0x91,
-	0xd8, 0xe3, 0x9b, 0x13, 0xed, 0x2a, 0xaa, 0x9f, 0x17, 0x0a, 0xcf, 0x02, 0x39, 0x2a, 0x41, 0x48,
-	0x5c, 0xdd, 0xb0, 0x2c, 0x0f, 0xfb, 0xbe, 0xc8, 0xfd, 0xac, 0x9a, 0xe5, 0xda, 0x49, 0x2f, 0xee,
-	0x02, 0x2d, 0x4b, 0xdc, 0xf5, 0x40, 0x86, 0x1e, 0xc2, 0x9c, 0x85, 0x7d, 0xd3, 0x23, 0xe2, 0xd6,
-	0x12, 0x0d, 0x2b, 0xab, 0xde, 0x0e, 0x33, 0x70, 0xcc, 0x9f, 0xd1, 0xa6, 0xb5, 0xd0, 0xaf, 0x60,
-	0x21, 0x6c, 0xe2, 0x3a, 0xdf, 0x50, 0xd0, 0x93, 0x16, 0xd7, 0x7e, 0xf2, 0x1d, 0x83, 0x12, 0xf6,
-	0x75, 0x1e, 0x1b, 0xac, 0xe5, 0xf1, 0xd4, 0x0c, 0xfd, 0x10, 0xa6, 0x3b, 0xad, 0x0e, 0xd3, 0x89,
-	0x2b, 0xfa, 0x51, 0x56, 0x95, 0xa6, 0x5c, 0x0a, 0x36, 0x91, 0xe2, 0x0a, 0x75, 0x17, 0xfd, 0x08,
-	0xe6, 0x82, 0x02, 0xd5, 0x1d, 0xa3, 0x83, 0x45, 0x5f, 0x99, 0x0e, 0x4d, 0x46, 0x83, 0x81, 0xb8,
-	0x61, 0x74, 0x30, 0xfa, 0x18, 0x66, 0xfc, 0x6e, 0x53, 0x77, 0x0d, 0xd6, 0x96, 0x0b, 0x17, 0x34,
-	0xd3, 0x7e, 0xb7, 0xb9, 0x6b, 0xb0, 0xf6, 0xca, 0x1f, 0xe2, 0x10, 0x4e, 0x5a, 0xf2, 0xf7, 0x5b,
-	0x14, 0x1f, 0x4e, 0xaa, 0x54, 0x6c, 0x40, 0xd4, 0x85, 0x96, 0x0b, 0xd7, 0x84, 0xd7, 0x55, 0x9e,
-	0xa0, 0x96, 0x2f, 0x27, 0xc4, 0xc5, 0xfc, 0xd1, 0x8c, 0x30, 0xf7, 0xcb, 0xbb, 0xd4, 0xaa, 0x3b,
-	0x07, 0x54, 0x58, 0x0d, 0xf6, 0xf5, 0x3b, 0x10, 0x97, 0xd6, 0x34, 0x81, 0x46, 0x9b, 0x70, 0x81,
-	0xe7, 0xb2, 0x2f, 0x27, 0x05, 0xcd, 0xc7, 0x57, 0xd0, 0x78, 0xec, 0x52, 0x9e, 0x00, 0xbf, 0xf2,
-	0xc7, 0x38, 0x2c, 0x44, 0x2e, 0x97, 0x79, 0x80, 0xa2, 0x01, 0xfa, 0x53, 0x02, 0xca, 0xb3, 0x6e,
-	0x47, 0xf4, 0xe3, 0x60, 0x3b, 0xd8, 0xd3, 0x9b, 0x36, 0x35, 0x0f, 0x45, 0x9c, 0xb2, 0xea, 0x72,
-	0x98, 0x86, 0xa5, 0xa3, 0x78, 0x38, 0x3a, 0x05, 0x40, 0x0b, 0x33, 0x5b, 0xe5, 0x8a, 0xe3, 0x36,
-	0x15, 0x9f, 0xdd, 0xa6, 0x36, 0xe0, 0x92, 0xc3, 0xed, 0xea, 0xd4, 0xc1, 0xe1, 0x39, 0xe8, 0xc4,
-	0x12, 0x1d, 0x74, 0x96, 0x09, 0xc9, 0x09, 0x1d, 0x0d, 0xa2, 0x5d, 0xb7, 0x50, 0x19, 0xa6, 0x2d,
-	0xda, 0x31, 0x88, 0x13, 0x04, 0x62, 0x04, 0xe4, 0x3b, 0x2c, 0x8e, 0x46, 0x32, 0xd0, 0x46, 0x4a,
-	0xe8, 0xb7, 0x00, 0xbe, 0x17, 0x58, 0x1d, 0x1d, 0xd3, 0x24, 0x17, 0x3c, 0x7c, 0x10, 0xbe, 0xcf,
-	0x6e, 0x78, 0xf5, 0xde, 0x99, 0xc1, 0x74, 0xf4, 0x57, 0x00, 0x34, 0x59, 0x08, 0xc3, 0xa4, 0x1b,
-	0x3f, 0x01, 0x34, 0x7c, 0x80, 0x1e, 0xc0, 0x77, 0x2e, 0x6c, 0x5c, 0x24, 0x8b, 0xe8, 0xac, 0x1a,
-	0x8a, 0x6e, 0x92, 0xe7, 0xcc, 0xca, 0x00, 0x2a, 0x57, 0x3f, 0x2d, 0xbe, 0xd7, 0xac, 0x5e, 0xf9,
-	0x7b, 0x1a, 0x2e, 0x6e, 0x78, 0xd8, 0x60, 0x78, 0xfe, 0xee, 0x9f, 0xbf, 0xfb, 0xe7, 0xef, 0xfe,
-	0xff, 0xeb, 0xdd, 0xff, 0xf8, 0xf6, 0xbf, 0x3e, 0x3b, 0xf7, 0x2b, 0x5a, 0x7d, 0x74, 0xc5, 0x1b,
-	0xf9, 0xfd, 0xaf, 0xde, 0x80, 0x99, 0x52, 0xb5, 0x78, 0xee, 0xdd, 0x2c, 0x7d, 0xf5, 0x06, 0x44,
-	0x56, 0x22, 0x6f, 0xe8, 0xbf, 0xa5, 0x61, 0x6e, 0x13, 0xb3, 0x79, 0x15, 0xcf, 0xab, 0x78, 0x5e,
-	0xc5, 0x6f, 0x6d, 0x15, 0xff, 0x23, 0x0d, 0x6f, 0x69, 0xd8, 0xb5, 0x0d, 0x73, 0x7e, 0x1f, 0xcf,
-	0x2b, 0x79, 0x5e, 0xc9, 0x6f, 0x6d, 0x25, 0xdf, 0xeb, 0xc0, 0xa5, 0x4b, 0x3e, 0xbd, 0xa0, 0x5b,
-	0x30, 0xf7, 0xb4, 0xb1, 0xb7, 0x5b, 0xdb, 0xa8, 0x3f, 0xa9, 0xd7, 0xaa, 0x52, 0x0c, 0x15, 0x60,
-	0x76, 0xfd, 0xd9, 0x7a, 0x7d, 0x7b, 0x5d, 0xdd, 0xae, 0x49, 0x00, 0xe5, 0x60, 0x7a, 0xe7, 0xc9,
-	0x93, 0xed, 0x7a, 0xa3, 0x26, 0xc5, 0xf9, 0xe4, 0x69, 0xe3, 0xcb, 0xc6, 0xce, 0xcf, 0x1a, 0x52,
-	0x22, 0x40, 0x4e, 0x54, 0x93, 0x5c, 0x5a, 0xad, 0x6d, 0xd7, 0xf6, 0x6b, 0x55, 0x69, 0xe1, 0xde,
-	0xe7, 0xf0, 0xdd, 0x99, 0x1f, 0x35, 0x50, 0x06, 0x26, 0x1b, 0x3b, 0x8d, 0x9a, 0x14, 0xe3, 0x98,
-	0x5a, 0x83, 0xe3, 0xab, 0x12, 0x40, 0x79, 0x98, 0xa9, 0xd6, 0xf7, 0x82, 0x59, 0xfc, 0xde, 0x06,
-	0x5c, 0xbe, 0xec, 0xcb, 0x15, 0x77, 0xf0, 0x69, 0xa3, 0x5a, 0x7b, 0x52, 0x6f, 0x08, 0x7f, 0x33,
-	0x30, 0xb9, 0xb5, 0xbf, 0xbf, 0x2b, 0x01, 0x94, 0x85, 0x0b, 0x7c, 0xb4, 0x27, 0xc5, 0x51, 0x1a,
-	0x26, 0xf6, 0x37, 0x76, 0xa5, 0x84, 0xfa, 0x35, 0x38, 0x79, 0xa5, 0xc4, 0x4e, 0x5f, 0x29, 0xb1,
-	0x6f, 0x5e, 0x29, 0xe0, 0x68, 0xa8, 0x80, 0x3f, 0x0f, 0x15, 0xf0, 0xcf, 0xa1, 0x02, 0x4e, 0x86,
-	0x0a, 0x38, 0x1d, 0x2a, 0xe0, 0xdf, 0x43, 0x05, 0xbc, 0x1e, 0x2a, 0xb1, 0x6f, 0x86, 0x0a, 0xf8,
-	0xfa, 0x4c, 0x89, 0xbd, 0x3c, 0x53, 0xc0, 0xc9, 0x99, 0x12, 0x3b, 0x3d, 0x53, 0x62, 0xbf, 0xd0,
-	0x5a, 0xd4, 0x3d, 0x6c, 0x95, 0x7b, 0xd4, 0x66, 0xd8, 0xf3, 0x8c, 0x72, 0xd7, 0xaf, 0x88, 0xc1,
-	0x01, 0xf5, 0x3a, 0xf7, 0x5d, 0x8f, 0xf6, 0x88, 0x85, 0xbd, 0xfb, 0x07, 0x9f, 0x3c, 0x37, 0x2b,
-	0x6e, 0xb3, 0x45, 0x2b, 0xf8, 0x39, 0x0b, 0xff, 0xd1, 0x98, 0xf9, 0x87, 0x52, 0x33, 0x25, 0x3e,
-	0xb0, 0x3d, 0xfc, 0x5f, 0x00, 0x00, 0x00, 0xff, 0xff, 0xa5, 0x1d, 0xd6, 0x73, 0x7b, 0x1a, 0x00,
-	0x00,
+	// 1837 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xec, 0x59, 0xcd, 0x6f, 0x1b, 0xc7,
+	0x15, 0xd7, 0x90, 0x14, 0x3f, 0x86, 0xa4, 0xb4, 0x1a, 0x29, 0xf1, 0x26, 0x0e, 0x18, 0x86, 0x75,
+	0x0a, 0xca, 0x15, 0xc9, 0x4a, 0x46, 0x12, 0xd7, 0x05, 0x02, 0x8b, 0x1f, 0xb6, 0x98, 0xa8, 0x94,
+	0xb0, 0x92, 0xdd, 0xa2, 0x41, 0xbb, 0x5d, 0xee, 0x8e, 0xc8, 0xad, 0x96, 0x3b, 0x8b, 0xdd, 0x21,
+	0x6d, 0xb5, 0x25, 0xe0, 0xe6, 0x2f, 0x08, 0x8a, 0x16, 0x2d, 0x50, 0xa0, 0x87, 0x9e, 0x0a, 0xfd,
+	0x09, 0x75, 0x0e, 0x3e, 0x16, 0xed, 0xc5, 0x47, 0x1d, 0x6b, 0xfa, 0xe2, 0xde, 0x82, 0x1e, 0x73,
+	0x49, 0x31, 0xb3, 0x1f, 0xe4, 0x4a, 0xa2, 0x4d, 0x1f, 0x02, 0xf4, 0xc0, 0xdb, 0xcc, 0xbc, 0xf7,
+	0x7e, 0xef, 0xcd, 0xdb, 0x37, 0xbf, 0x37, 0x43, 0xc2, 0x8d, 0x01, 0x76, 0xca, 0x3a, 0xa9, 0x38,
+	0x6a, 0x17, 0xf7, 0x94, 0x8a, 0xa6, 0x3b, 0x2a, 0x19, 0x60, 0x1b, 0x6b, 0xb2, 0x83, 0xed, 0x81,
+	0xae, 0xe2, 0x0a, 0x3d, 0xb1, 0xb0, 0x53, 0xb6, 0x6c, 0x42, 0x09, 0xca, 0xbb, 0xda, 0x65, 0x57,
+	0xbb, 0x7c, 0x51, 0xfb, 0xed, 0x52, 0x47, 0xa7, 0xdd, 0x7e, 0xbb, 0xac, 0x92, 0x5e, 0xa5, 0x43,
+	0x3a, 0xa4, 0xc2, 0x0d, 0xdb, 0xfd, 0x23, 0x3e, 0xe3, 0x13, 0x3e, 0x72, 0x01, 0xdf, 0x7e, 0xb7,
+	0x43, 0x48, 0xc7, 0xc0, 0x63, 0x2d, 0xaa, 0xf7, 0xb0, 0x43, 0x95, 0x9e, 0xe5, 0x29, 0x7c, 0xe7,
+	0xf2, 0xf8, 0x4e, 0x26, 0xc3, 0x7a, 0x7b, 0x7d, 0x8a, 0x92, 0xac, 0x1a, 0xa4, 0xaf, 0x85, 0x54,
+	0xaf, 0x84, 0x55, 0x4d, 0x4c, 0x3d, 0xc1, 0xd5, 0xb0, 0x80, 0x58, 0x54, 0x27, 0xa6, 0x6f, 0x95,
+	0x0f, 0x0b, 0x2d, 0x62, 0xe8, 0x6a, 0x38, 0x84, 0xb7, 0xc2, 0x1a, 0x93, 0xa2, 0x77, 0xc2, 0xa2,
+	0x81, 0x62, 0xe8, 0x9a, 0x42, 0xf1, 0xe5, 0xd0, 0x03, 0x1d, 0x3f, 0x90, 0xc3, 0xce, 0xdf, 0xbd,
+	0xa8, 0xe1, 0x4c, 0x3a, 0x28, 0xfc, 0x2b, 0x05, 0x97, 0xee, 0x1a, 0xa4, 0xad, 0x18, 0x07, 0x16,
+	0x56, 0x0f, 0x4f, 0x2c, 0x8c, 0xba, 0x70, 0xb5, 0x4b, 0xa9, 0x25, 0x1b, 0x44, 0xd1, 0xe4, 0xb6,
+	0x62, 0x28, 0xa6, 0x8a, 0x6d, 0x47, 0x04, 0xf9, 0x68, 0x31, 0xbd, 0x55, 0x28, 0x87, 0x3f, 0x23,
+	0x47, 0x2c, 0xef, 0xb5, 0x7f, 0x89, 0x55, 0x2a, 0xe1, 0x23, 0x06, 0x50, 0x5d, 0x3b, 0x1d, 0xae,
+	0x04, 0x08, 0x3e, 0x80, 0xc4, 0x97, 0x76, 0x89, 0xa2, 0x55, 0x7d, 0x48, 0x84, 0x21, 0xa2, 0xea,
+	0x05, 0x47, 0x91, 0x99, 0x1d, 0xad, 0x9e, 0x0e, 0x05, 0x1f, 0x20, 0xf0, 0xc3, 0x56, 0xc2, 0x6e,
+	0x1a, 0x10, 0x0d, 0x74, 0x47, 0x6f, 0xeb, 0x86, 0x4e, 0x4f, 0x64, 0x6c, 0x2a, 0x6d, 0x03, 0x6b,
+	0x62, 0x2c, 0x0f, 0x8a, 0xe9, 0xad, 0xb5, 0x73, 0x6e, 0x1a, 0x3d, 0x8b, 0x9e, 0xec, 0x2c, 0x48,
+	0x2b, 0x63, 0x8b, 0x86, 0x6b, 0x80, 0xee, 0xc2, 0xd5, 0x09, 0x18, 0x4d, 0x77, 0x5c, 0x9c, 0xc5,
+	0x97, 0xe2, 0x4c, 0x78, 0xae, 0x7b, 0x16, 0xe8, 0x27, 0x70, 0x69, 0xa0, 0xdb, 0xb4, 0xaf, 0x18,
+	0xbc, 0xf4, 0xb1, 0x2d, 0x26, 0x38, 0x46, 0xa5, 0xfc, 0xaa, 0x23, 0x52, 0xbe, 0xef, 0xda, 0x1d,
+	0x70, 0xb3, 0x1d, 0x20, 0x65, 0x07, 0x93, 0x0b, 0x68, 0x0f, 0xa6, 0x8f, 0x6f, 0x3a, 0xbe, 0xb6,
+	0x98, 0xe2, 0xb0, 0x1b, 0xaf, 0x86, 0xfd, 0xf4, 0xa6, 0x73, 0xe0, 0x0e, 0x77, 0x80, 0x04, 0x8f,
+	0x83, 0x19, 0x0b, 0x55, 0x25, 0xa6, 0xd3, 0x37, 0x02, 0x4c, 0x38, 0x6b, 0xa8, 0x35, 0x6e, 0x37,
+	0x86, 0xcd, 0xaa, 0x93, 0x0b, 0xc8, 0x84, 0x6b, 0xe6, 0xa6, 0x7c, 0xce, 0x0e, 0xdb, 0x62, 0x9a,
+	0xe3, 0xdf, 0x7a, 0x35, 0x7e, 0xab, 0xa3, 0x9b, 0x0f, 0xf7, 0x4c, 0x5c, 0x0f, 0x44, 0x41, 0x56,
+	0x90, 0xb9, 0x79, 0x7e, 0x15, 0xa9, 0x30, 0x4d, 0xbb, 0xba, 0xad, 0xc9, 0x96, 0x62, 0xd3, 0x13,
+	0x31, 0xc3, 0xdd, 0xdc, 0x7e, 0xb5, 0x9b, 0x43, 0x66, 0xb4, 0xcf, 0x6c, 0xb6, 0x2d, 0xcb, 0xd0,
+	0x55, 0x85, 0x1d, 0x2f, 0x1f, 0xfd, 0x84, 0xa5, 0x8b, 0x06, 0x1a, 0x2c, 0xff, 0xca, 0x83, 0x71,
+	0xfe, 0xb3, 0xb3, 0xe6, 0x7f, 0xfb, 0xc1, 0x64, 0xfe, 0x95, 0x60, 0x86, 0x06, 0xf0, 0x0d, 0xdd,
+	0xa4, 0xd8, 0x36, 0x15, 0x43, 0xf6, 0x6b, 0xa6, 0x4b, 0x1c, 0x2a, 0x26, 0x39, 0xf4, 0x2c, 0x87,
+	0x24, 0x77, 0x3a, 0x5c, 0x6b, 0xeb, 0x1d, 0xdd, 0x92, 0xc3, 0x45, 0x77, 0x36, 0x04, 0x2f, 0x1e,
+	0x03, 0x20, 0xad, 0xfa, 0x0e, 0xbc, 0xda, 0xda, 0x21, 0x0e, 0x45, 0x0a, 0xcc, 0x72, 0x36, 0xf1,
+	0x65, 0xe2, 0x8b, 0xc4, 0xcc, 0x0e, 0xaf, 0x9c, 0x0e, 0xc3, 0xc6, 0xbe, 0xa7, 0x0c, 0x5b, 0x6d,
+	0x7a, 0x8b, 0xb7, 0xe0, 0x7f, 0x3f, 0x4e, 0x7c, 0xb8, 0xb1, 0xb9, 0x71, 0x63, 0x63, 0xab, 0x7a,
+	0x0d, 0x8a, 0x13, 0x47, 0x4b, 0x51, 0x59, 0x8e, 0x65, 0xb5, 0x4b, 0x58, 0x0a, 0x92, 0x4f, 0x1e,
+	0x83, 0xd8, 0xd3, 0xc7, 0x20, 0x5a, 0x5d, 0x83, 0x19, 0x2f, 0x61, 0x32, 0xa3, 0x30, 0xc4, 0x56,
+	0xe3, 0x9f, 0xc4, 0x92, 0x51, 0x21, 0xf6, 0x49, 0x2c, 0x19, 0x17, 0x12, 0x85, 0x3f, 0xc4, 0x61,
+	0x36, 0x74, 0x44, 0xd0, 0x67, 0x50, 0x18, 0x53, 0x3a, 0xe1, 0x71, 0x8a, 0x60, 0xe6, 0xad, 0x64,
+	0x4e, 0x87, 0xa9, 0xc0, 0x5c, 0x5a, 0x0e, 0x86, 0xae, 0x16, 0x2a, 0xc2, 0x14, 0xab, 0x26, 0x9d,
+	0x85, 0x2b, 0x46, 0xf2, 0xa0, 0x98, 0xaa, 0xc2, 0xbf, 0xff, 0xe7, 0x49, 0x74, 0xd1, 0x8e, 0x8a,
+	0x8f, 0x22, 0xd2, 0x58, 0x88, 0x8e, 0x61, 0x92, 0xf3, 0xad, 0x4a, 0x0c, 0x31, 0x9a, 0x07, 0xc5,
+	0xa5, 0xad, 0x0f, 0x67, 0x28, 0x3d, 0x5b, 0x31, 0x9d, 0x9e, 0xee, 0x38, 0x3a, 0x31, 0xf7, 0x3d,
+	0xeb, 0xea, 0x95, 0xb3, 0x21, 0x18, 0x0d, 0xb3, 0x2d, 0x42, 0xf3, 0x4e, 0xdf, 0xb2, 0x88, 0x4d,
+	0xb1, 0xc6, 0xb3, 0x1b, 0x38, 0x40, 0xef, 0xc1, 0x18, 0x5b, 0xe7, 0x0c, 0x97, 0xad, 0x66, 0x59,
+	0x44, 0xc9, 0xeb, 0x71, 0xf1, 0x9b, 0x6f, 0xa2, 0x45, 0x20, 0x71, 0x11, 0xfa, 0x11, 0x8c, 0x3b,
+	0x54, 0xa1, 0x7d, 0x87, 0xd3, 0xd7, 0xd2, 0xd6, 0x07, 0xaf, 0x49, 0x3d, 0x07, 0xdc, 0x58, 0xf2,
+	0x40, 0x50, 0x09, 0x66, 0xd4, 0xb6, 0x6e, 0xc9, 0xaa, 0xd1, 0x77, 0x28, 0xb6, 0xc5, 0xf8, 0x85,
+	0x5c, 0xa4, 0x99, 0xbc, 0xe6, 0x8a, 0x51, 0x05, 0x66, 0xbd, 0x8a, 0xc4, 0x36, 0xdb, 0x1c, 0xe7,
+	0xbf, 0xb0, 0x7e, 0x86, 0x2b, 0xdc, 0x77, 0xe5, 0xa8, 0x08, 0xa1, 0x6e, 0xc9, 0x8a, 0xa6, 0xd9,
+	0xd8, 0x71, 0x78, 0xed, 0xa7, 0xaa, 0x29, 0xa6, 0x1d, 0xb3, 0x23, 0x16, 0x90, 0x52, 0xba, 0xb5,
+	0xed, 0xca, 0xd0, 0x0d, 0x98, 0xd6, 0xb0, 0xa3, 0xda, 0x3a, 0x6f, 0x83, 0x9c, 0x01, 0x53, 0xd5,
+	0x15, 0xaf, 0x02, 0x03, 0xfc, 0xa4, 0x34, 0xa9, 0x85, 0x7e, 0x01, 0xb3, 0x5e, 0x57, 0x90, 0xd9,
+	0x86, 0x5c, 0x92, 0x5b, 0xda, 0xfa, 0xe1, 0x6b, 0x26, 0xc5, 0x6b, 0x14, 0x2c, 0x37, 0x58, 0xca,
+	0xe0, 0x89, 0x19, 0x5a, 0x87, 0x89, 0x5e, 0xa7, 0x47, 0x65, 0xdd, 0xe2, 0x04, 0x97, 0xaa, 0x0a,
+	0x13, 0x21, 0xb9, 0x9b, 0x88, 0x33, 0x85, 0xa6, 0x85, 0xbe, 0x07, 0xd3, 0xee, 0x01, 0x95, 0x4d,
+	0xa5, 0x87, 0x39, 0x51, 0x4d, 0xa6, 0x26, 0x29, 0x41, 0x57, 0xdc, 0x52, 0x7a, 0x18, 0xbd, 0x0f,
+	0x93, 0x4e, 0xbf, 0x2d, 0x5b, 0x0a, 0xed, 0x72, 0xb6, 0x09, 0x6b, 0x26, 0x9c, 0x7e, 0x7b, 0x5f,
+	0xa1, 0xdd, 0xc2, 0x9f, 0x23, 0x10, 0x8e, 0x39, 0xfe, 0xdb, 0x3d, 0x14, 0xef, 0x8d, 0x4f, 0x29,
+	0xdf, 0x00, 0x3f, 0x17, 0x52, 0xda, 0x5b, 0xe3, 0x51, 0xd7, 0x59, 0x81, 0x6a, 0x8e, 0x18, 0xe5,
+	0x9d, 0xfe, 0xda, 0x94, 0x34, 0x9f, 0x94, 0xf7, 0x89, 0xd6, 0x34, 0x8f, 0x08, 0xf7, 0xea, 0xee,
+	0xeb, 0x77, 0x20, 0x22, 0x6c, 0x49, 0xdc, 0x1a, 0xdd, 0x85, 0x8b, 0xac, 0x96, 0x1d, 0x31, 0xc6,
+	0x61, 0xde, 0x7f, 0x09, 0x8c, 0x4d, 0x2f, 0xc5, 0x71, 0xed, 0x0b, 0x7f, 0x89, 0xc0, 0x6c, 0xa8,
+	0x5b, 0xcd, 0x13, 0x14, 0x4e, 0xd0, 0x5f, 0xa3, 0x50, 0x9c, 0xd6, 0x6e, 0xd1, 0x47, 0xee, 0x76,
+	0xb0, 0x2d, 0xb7, 0x0d, 0xa2, 0x1e, 0xf3, 0x3c, 0xa5, 0xaa, 0x6b, 0x5e, 0x19, 0x16, 0x1f, 0x45,
+	0xbc, 0xd1, 0x19, 0x00, 0x92, 0x57, 0xd9, 0x55, 0xa6, 0x18, 0xd0, 0x54, 0x64, 0x3a, 0x4d, 0xd5,
+	0xe0, 0xaa, 0xc9, 0xfc, 0xca, 0xc4, 0xc4, 0xde, 0x77, 0x90, 0x75, 0x8d, 0x33, 0xe8, 0x34, 0x17,
+	0x82, 0xe9, 0x05, 0xea, 0x66, 0xbb, 0xa9, 0xa1, 0x32, 0x4c, 0x68, 0xa4, 0xa7, 0xe8, 0xa6, 0x9b,
+	0x08, 0xdf, 0x90, 0xed, 0x30, 0xef, 0x8f, 0x44, 0x20, 0xf9, 0x4a, 0xe8, 0xb7, 0x00, 0x5e, 0x75,
+	0xbd, 0xfa, 0x9f, 0x69, 0x5c, 0x0b, 0x36, 0x3e, 0xf2, 0x2e, 0x7c, 0x33, 0xb6, 0xde, 0x2b, 0x53,
+	0x90, 0x1e, 0x7d, 0x09, 0x80, 0x24, 0x72, 0xa1, 0x57, 0x74, 0xc1, 0x9d, 0x42, 0xc2, 0x47, 0x68,
+	0x13, 0xbe, 0x71, 0x61, 0xe3, 0xbc, 0x58, 0x38, 0xb3, 0x4a, 0x28, 0xbc, 0x49, 0x56, 0x33, 0x85,
+	0x21, 0xcc, 0xbd, 0xfc, 0xae, 0xf2, 0xad, 0x56, 0x75, 0x41, 0x86, 0xe9, 0xed, 0x07, 0x8e, 0x5f,
+	0x49, 0xc1, 0xc7, 0x05, 0xd3, 0x3f, 0x6e, 0x69, 0xa2, 0x27, 0xba, 0xcd, 0x73, 0x85, 0xa9, 0x65,
+	0x6c, 0x28, 0x45, 0x0f, 0x6b, 0xfb, 0x52, 0xf4, 0x5e, 0x7d, 0x7f, 0xdc, 0xd5, 0x0a, 0x5f, 0x46,
+	0x21, 0x1c, 0xdf, 0x93, 0x90, 0x01, 0xdf, 0x3c, 0xf7, 0x56, 0x7b, 0xfd, 0x2d, 0xa1, 0xd3, 0xe1,
+	0xf2, 0x39, 0x10, 0x69, 0x2d, 0x58, 0xa8, 0xb1, 0xb9, 0x77, 0x66, 0xdf, 0x84, 0x71, 0x1b, 0x77,
+	0x82, 0x36, 0x2f, 0x79, 0x33, 0x54, 0x87, 0xf1, 0x81, 0xa5, 0x8e, 0x6b, 0xb2, 0xc4, 0x76, 0x50,
+	0xb4, 0xbf, 0x2b, 0xde, 0xde, 0x2a, 0xfc, 0xbc, 0x38, 0xb0, 0xd4, 0xd2, 0x7a, 0xf1, 0x33, 0xa5,
+	0xf4, 0xab, 0xef, 0x97, 0x7e, 0xf0, 0xb3, 0x5f, 0xdf, 0x1c, 0xfe, 0x26, 0x18, 0x6f, 0x7e, 0x34,
+	0x5c, 0xbf, 0x26, 0x2d, 0x0e, 0x2c, 0xb5, 0xa9, 0xa1, 0xab, 0x30, 0xe5, 0xf4, 0xdb, 0x26, 0xe6,
+	0xc5, 0x1d, 0xe3, 0x0e, 0x92, 0xee, 0x42, 0x53, 0x43, 0xdb, 0x30, 0xc6, 0x6e, 0x3b, 0x5e, 0xa3,
+	0x2e, 0x4d, 0x3b, 0xc4, 0x6e, 0xf8, 0x13, 0x37, 0x49, 0xb6, 0x43, 0x89, 0x9b, 0x22, 0x04, 0x63,
+	0x13, 0xc5, 0xc3, 0xc7, 0x68, 0x1d, 0x0a, 0xd8, 0xd4, 0x2c, 0xa2, 0x9b, 0x34, 0x68, 0xac, 0xbc,
+	0x0d, 0x4b, 0xcb, 0xfe, 0xba, 0xdf, 0x53, 0x6b, 0x3e, 0x8f, 0x24, 0x39, 0x8f, 0x94, 0x66, 0xba,
+	0xcf, 0xfa, 0x95, 0xe0, 0x73, 0xc8, 0x1f, 0x93, 0x70, 0xa9, 0x66, 0x63, 0x85, 0xe2, 0xf9, 0x43,
+	0x73, 0xfe, 0xd0, 0x9c, 0x3f, 0x34, 0xff, 0xbf, 0x1e, 0x9a, 0xb7, 0x56, 0xfe, 0xf9, 0xf1, 0xb9,
+	0xdf, 0x81, 0xaa, 0x37, 0x5f, 0xf2, 0x28, 0x7b, 0xe7, 0xf3, 0xaf, 0xc1, 0x54, 0x69, 0x35, 0x7f,
+	0xee, 0xa1, 0x26, 0x7c, 0xfe, 0x35, 0x08, 0xad, 0x84, 0x1e, 0x6d, 0xbf, 0x4f, 0xc2, 0xf4, 0x5d,
+	0x4c, 0xe7, 0xb4, 0x30, 0xa7, 0x85, 0x39, 0x2d, 0xcc, 0x69, 0xc1, 0xa7, 0x85, 0x3f, 0x25, 0xe1,
+	0xb2, 0x84, 0x2d, 0x43, 0x51, 0xe7, 0x37, 0x86, 0x39, 0x35, 0xcc, 0xa9, 0x61, 0x4e, 0x0d, 0x3e,
+	0x35, 0x5c, 0xef, 0xc1, 0xd5, 0x4b, 0x7e, 0x8d, 0x44, 0xcb, 0x30, 0x7d, 0xaf, 0x75, 0xb0, 0xdf,
+	0xa8, 0x35, 0xef, 0x34, 0x1b, 0x75, 0x61, 0x01, 0x65, 0x61, 0x6a, 0xfb, 0xfe, 0x76, 0x73, 0x77,
+	0xbb, 0xba, 0xdb, 0x10, 0x00, 0x4a, 0xc3, 0xc4, 0xde, 0x9d, 0x3b, 0xbb, 0xcd, 0x56, 0x43, 0x88,
+	0xb0, 0xc9, 0xbd, 0xd6, 0xa7, 0xad, 0xbd, 0x1f, 0xb7, 0x84, 0xa8, 0x6b, 0x39, 0x56, 0x8d, 0x31,
+	0x69, 0xbd, 0xb1, 0xdb, 0x38, 0x6c, 0xd4, 0x85, 0xc5, 0xeb, 0xb7, 0xe1, 0x5b, 0x53, 0x7f, 0xe7,
+	0x43, 0x49, 0x18, 0x6b, 0xed, 0xb5, 0x1a, 0xc2, 0x02, 0xb3, 0x69, 0xb4, 0x98, 0x7d, 0x5d, 0x00,
+	0x28, 0x03, 0x93, 0xf5, 0xe6, 0x81, 0x3b, 0x8b, 0x5c, 0xaf, 0xc1, 0xb5, 0xcb, 0x7e, 0xcc, 0x65,
+	0x01, 0xde, 0x6b, 0xd5, 0x1b, 0x77, 0x9a, 0x2d, 0x1e, 0x6f, 0x12, 0xc6, 0x76, 0x0e, 0x0f, 0xf7,
+	0x05, 0x80, 0x52, 0x70, 0x91, 0x8d, 0x0e, 0x84, 0x08, 0x4a, 0x40, 0xf6, 0x1a, 0x16, 0xa2, 0xd5,
+	0x2f, 0xc0, 0xd3, 0x67, 0xb9, 0x85, 0xb3, 0x67, 0xb9, 0x85, 0xaf, 0x9e, 0xe5, 0xc0, 0xa3, 0x51,
+	0x0e, 0xfc, 0x6d, 0x94, 0x03, 0xff, 0x18, 0xe5, 0xc0, 0xd3, 0x51, 0x0e, 0x9c, 0x8d, 0x72, 0xe0,
+	0xdf, 0xa3, 0x1c, 0x78, 0x31, 0xca, 0x2d, 0x7c, 0x35, 0xca, 0x81, 0x2f, 0x9e, 0xe7, 0x16, 0x9e,
+	0x3c, 0xcf, 0x81, 0xa7, 0xcf, 0x73, 0x0b, 0x67, 0xcf, 0x73, 0x0b, 0x3f, 0x95, 0x3a, 0xc4, 0x3a,
+	0xee, 0x94, 0x07, 0xc4, 0xa0, 0xd8, 0xb6, 0x95, 0x72, 0xdf, 0xa9, 0xf0, 0xc1, 0x11, 0xb1, 0x7b,
+	0x25, 0xcb, 0x26, 0x03, 0x5d, 0xc3, 0x76, 0xe9, 0xe8, 0x83, 0x87, 0x6a, 0xc5, 0x6a, 0x77, 0x48,
+	0x05, 0x3f, 0xa4, 0xde, 0xbf, 0x86, 0x53, 0xff, 0xdf, 0x6d, 0xc7, 0xf9, 0xeb, 0xfc, 0xc6, 0xff,
+	0x02, 0x00, 0x00, 0xff, 0xff, 0xc8, 0xf8, 0xe8, 0x07, 0x0a, 0x1e, 0x00, 0x00,
 }
 
 func (x VirtualServerStatus) String() string {
@@ -1851,6 +2124,30 @@ func (this *GlobalSpecType_ThirdParty) Equal(that interface{}) bool {
 	}
 	return true
 }
+func (this *GlobalSpecType_AwsService) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GlobalSpecType_AwsService)
+	if !ok {
+		that2, ok := that.(GlobalSpecType_AwsService)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.AwsService.Equal(that1.AwsService) {
+		return false
+	}
+	return true
+}
 func (this *VirtualServer) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
@@ -2062,6 +2359,83 @@ func (this *ThirdPartyApplicationDiscovery) Equal(that interface{}) bool {
 	}
 	if !this.DiscoveryObject.Equal(that1.DiscoveryObject) {
 		return false
+	}
+	return true
+}
+func (this *AwsPortInfo) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*AwsPortInfo)
+	if !ok {
+		that2, ok := that.(AwsPortInfo)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Port != that1.Port {
+		return false
+	}
+	if this.Protocol != that1.Protocol {
+		return false
+	}
+	return true
+}
+func (this *AwsService) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*AwsService)
+	if !ok {
+		that2, ok := that.(AwsService)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.DiscoveryCloudObject.Equal(that1.DiscoveryCloudObject) {
+		return false
+	}
+	if this.Region != that1.Region {
+		return false
+	}
+	if this.VpcId != that1.VpcId {
+		return false
+	}
+	if this.SubnetId != that1.SubnetId {
+		return false
+	}
+	if this.Type != that1.Type {
+		return false
+	}
+	if this.Name != that1.Name {
+		return false
+	}
+	if this.EndpointAddress != that1.EndpointAddress {
+		return false
+	}
+	if len(this.Ports) != len(that1.Ports) {
+		return false
+	}
+	for i := range this.Ports {
+		if !this.Ports[i].Equal(that1.Ports[i]) {
+			return false
+		}
 	}
 	return true
 }
@@ -2284,6 +2658,30 @@ func (this *CreateSpecType_ThirdParty) Equal(that interface{}) bool {
 		return false
 	}
 	if !this.ThirdParty.Equal(that1.ThirdParty) {
+		return false
+	}
+	return true
+}
+func (this *CreateSpecType_AwsService) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*CreateSpecType_AwsService)
+	if !ok {
+		that2, ok := that.(CreateSpecType_AwsService)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.AwsService.Equal(that1.AwsService) {
 		return false
 	}
 	return true
@@ -2511,6 +2909,30 @@ func (this *GetSpecType_ThirdParty) Equal(that interface{}) bool {
 	}
 	return true
 }
+func (this *GetSpecType_AwsService) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GetSpecType_AwsService)
+	if !ok {
+		that2, ok := that.(GetSpecType_AwsService)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.AwsService.Equal(that1.AwsService) {
+		return false
+	}
+	return true
+}
 func (this *ReplaceSpecType) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
@@ -2734,11 +3156,35 @@ func (this *ReplaceSpecType_ThirdParty) Equal(that interface{}) bool {
 	}
 	return true
 }
+func (this *ReplaceSpecType_AwsService) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ReplaceSpecType_AwsService)
+	if !ok {
+		that2, ok := that.(ReplaceSpecType_AwsService)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.AwsService.Equal(that1.AwsService) {
+		return false
+	}
+	return true
+}
 func (this *GlobalSpecType) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 15)
+	s := make([]string, 0, 16)
 	s = append(s, "&discovered_service.GlobalSpecType{")
 	if this.HttpLoadBalancers != nil {
 		s = append(s, "HttpLoadBalancers: "+fmt.Sprintf("%#v", this.HttpLoadBalancers)+",\n")
@@ -2815,6 +3261,14 @@ func (this *GlobalSpecType_ThirdParty) GoString() string {
 	}
 	s := strings.Join([]string{`&discovered_service.GlobalSpecType_ThirdParty{` +
 		`ThirdParty:` + fmt.Sprintf("%#v", this.ThirdParty) + `}`}, ", ")
+	return s
+}
+func (this *GlobalSpecType_AwsService) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&discovered_service.GlobalSpecType_AwsService{` +
+		`AwsService:` + fmt.Sprintf("%#v", this.AwsService) + `}`}, ", ")
 	return s
 }
 func (this *VirtualServer) GoString() string {
@@ -2908,11 +3362,43 @@ func (this *ThirdPartyApplicationDiscovery) GoString() string {
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
+func (this *AwsPortInfo) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&discovered_service.AwsPortInfo{")
+	s = append(s, "Port: "+fmt.Sprintf("%#v", this.Port)+",\n")
+	s = append(s, "Protocol: "+fmt.Sprintf("%#v", this.Protocol)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *AwsService) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 12)
+	s = append(s, "&discovered_service.AwsService{")
+	if this.DiscoveryCloudObject != nil {
+		s = append(s, "DiscoveryCloudObject: "+fmt.Sprintf("%#v", this.DiscoveryCloudObject)+",\n")
+	}
+	s = append(s, "Region: "+fmt.Sprintf("%#v", this.Region)+",\n")
+	s = append(s, "VpcId: "+fmt.Sprintf("%#v", this.VpcId)+",\n")
+	s = append(s, "SubnetId: "+fmt.Sprintf("%#v", this.SubnetId)+",\n")
+	s = append(s, "Type: "+fmt.Sprintf("%#v", this.Type)+",\n")
+	s = append(s, "Name: "+fmt.Sprintf("%#v", this.Name)+",\n")
+	s = append(s, "EndpointAddress: "+fmt.Sprintf("%#v", this.EndpointAddress)+",\n")
+	if this.Ports != nil {
+		s = append(s, "Ports: "+fmt.Sprintf("%#v", this.Ports)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
 func (this *CreateSpecType) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 13)
+	s := make([]string, 0, 14)
 	s = append(s, "&discovered_service.CreateSpecType{")
 	if this.HttpLoadBalancers != nil {
 		s = append(s, "HttpLoadBalancers: "+fmt.Sprintf("%#v", this.HttpLoadBalancers)+",\n")
@@ -2985,11 +3471,19 @@ func (this *CreateSpecType_ThirdParty) GoString() string {
 		`ThirdParty:` + fmt.Sprintf("%#v", this.ThirdParty) + `}`}, ", ")
 	return s
 }
+func (this *CreateSpecType_AwsService) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&discovered_service.CreateSpecType_AwsService{` +
+		`AwsService:` + fmt.Sprintf("%#v", this.AwsService) + `}`}, ", ")
+	return s
+}
 func (this *GetSpecType) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 13)
+	s := make([]string, 0, 14)
 	s = append(s, "&discovered_service.GetSpecType{")
 	if this.HttpLoadBalancers != nil {
 		s = append(s, "HttpLoadBalancers: "+fmt.Sprintf("%#v", this.HttpLoadBalancers)+",\n")
@@ -3062,11 +3556,19 @@ func (this *GetSpecType_ThirdParty) GoString() string {
 		`ThirdParty:` + fmt.Sprintf("%#v", this.ThirdParty) + `}`}, ", ")
 	return s
 }
+func (this *GetSpecType_AwsService) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&discovered_service.GetSpecType_AwsService{` +
+		`AwsService:` + fmt.Sprintf("%#v", this.AwsService) + `}`}, ", ")
+	return s
+}
 func (this *ReplaceSpecType) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 13)
+	s := make([]string, 0, 14)
 	s = append(s, "&discovered_service.ReplaceSpecType{")
 	if this.HttpLoadBalancers != nil {
 		s = append(s, "HttpLoadBalancers: "+fmt.Sprintf("%#v", this.HttpLoadBalancers)+",\n")
@@ -3137,6 +3639,14 @@ func (this *ReplaceSpecType_ThirdParty) GoString() string {
 	}
 	s := strings.Join([]string{`&discovered_service.ReplaceSpecType_ThirdParty{` +
 		`ThirdParty:` + fmt.Sprintf("%#v", this.ThirdParty) + `}`}, ", ")
+	return s
+}
+func (this *ReplaceSpecType_AwsService) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&discovered_service.ReplaceSpecType_AwsService{` +
+		`AwsService:` + fmt.Sprintf("%#v", this.AwsService) + `}`}, ", ")
 	return s
 }
 func valueToGoStringTypes(v interface{}, typ string) string {
@@ -3386,6 +3896,27 @@ func (m *GlobalSpecType_ThirdParty) MarshalToSizedBuffer(dAtA []byte) (int, erro
 		}
 		i--
 		dAtA[i] = 0x62
+	}
+	return len(dAtA) - i, nil
+}
+func (m *GlobalSpecType_AwsService) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GlobalSpecType_AwsService) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.AwsService != nil {
+		{
+			size, err := m.AwsService.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x6a
 	}
 	return len(dAtA) - i, nil
 }
@@ -3745,6 +4276,130 @@ func (m *ThirdPartyApplicationDiscovery) MarshalToSizedBuffer(dAtA []byte) (int,
 	return len(dAtA) - i, nil
 }
 
+func (m *AwsPortInfo) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *AwsPortInfo) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *AwsPortInfo) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Protocol) > 0 {
+		i -= len(m.Protocol)
+		copy(dAtA[i:], m.Protocol)
+		i = encodeVarintTypes(dAtA, i, uint64(len(m.Protocol)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if m.Port != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.Port))
+		i--
+		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *AwsService) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *AwsService) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *AwsService) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Ports) > 0 {
+		for iNdEx := len(m.Ports) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Ports[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTypes(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x42
+		}
+	}
+	if len(m.EndpointAddress) > 0 {
+		i -= len(m.EndpointAddress)
+		copy(dAtA[i:], m.EndpointAddress)
+		i = encodeVarintTypes(dAtA, i, uint64(len(m.EndpointAddress)))
+		i--
+		dAtA[i] = 0x3a
+	}
+	if len(m.Name) > 0 {
+		i -= len(m.Name)
+		copy(dAtA[i:], m.Name)
+		i = encodeVarintTypes(dAtA, i, uint64(len(m.Name)))
+		i--
+		dAtA[i] = 0x32
+	}
+	if m.Type != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.Type))
+		i--
+		dAtA[i] = 0x28
+	}
+	if len(m.SubnetId) > 0 {
+		i -= len(m.SubnetId)
+		copy(dAtA[i:], m.SubnetId)
+		i = encodeVarintTypes(dAtA, i, uint64(len(m.SubnetId)))
+		i--
+		dAtA[i] = 0x22
+	}
+	if len(m.VpcId) > 0 {
+		i -= len(m.VpcId)
+		copy(dAtA[i:], m.VpcId)
+		i = encodeVarintTypes(dAtA, i, uint64(len(m.VpcId)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.Region) > 0 {
+		i -= len(m.Region)
+		copy(dAtA[i:], m.Region)
+		i = encodeVarintTypes(dAtA, i, uint64(len(m.Region)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if m.DiscoveryCloudObject != nil {
+		{
+			size, err := m.DiscoveryCloudObject.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
 func (m *CreateSpecType) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -3958,6 +4613,27 @@ func (m *CreateSpecType_ThirdParty) MarshalToSizedBuffer(dAtA []byte) (int, erro
 		}
 		i--
 		dAtA[i] = 0x62
+	}
+	return len(dAtA) - i, nil
+}
+func (m *CreateSpecType_AwsService) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *CreateSpecType_AwsService) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.AwsService != nil {
+		{
+			size, err := m.AwsService.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x6a
 	}
 	return len(dAtA) - i, nil
 }
@@ -4177,6 +4853,27 @@ func (m *GetSpecType_ThirdParty) MarshalToSizedBuffer(dAtA []byte) (int, error) 
 	}
 	return len(dAtA) - i, nil
 }
+func (m *GetSpecType_AwsService) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetSpecType_AwsService) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.AwsService != nil {
+		{
+			size, err := m.AwsService.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x6a
+	}
+	return len(dAtA) - i, nil
+}
 func (m *ReplaceSpecType) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -4393,6 +5090,27 @@ func (m *ReplaceSpecType_ThirdParty) MarshalToSizedBuffer(dAtA []byte) (int, err
 	}
 	return len(dAtA) - i, nil
 }
+func (m *ReplaceSpecType_AwsService) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ReplaceSpecType_AwsService) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.AwsService != nil {
+		{
+			size, err := m.AwsService.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x6a
+	}
+	return len(dAtA) - i, nil
+}
 func encodeVarintTypes(dAtA []byte, offset int, v uint64) int {
 	offset -= sovTypes(v)
 	base := offset
@@ -4519,6 +5237,18 @@ func (m *GlobalSpecType_ThirdParty) Size() (n int) {
 	_ = l
 	if m.ThirdParty != nil {
 		l = m.ThirdParty.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *GlobalSpecType_AwsService) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.AwsService != nil {
+		l = m.AwsService.Size()
 		n += 1 + l + sovTypes(uint64(l))
 	}
 	return n
@@ -4685,6 +5415,64 @@ func (m *ThirdPartyApplicationDiscovery) Size() (n int) {
 	return n
 }
 
+func (m *AwsPortInfo) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Port != 0 {
+		n += 1 + sovTypes(uint64(m.Port))
+	}
+	l = len(m.Protocol)
+	if l > 0 {
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+
+func (m *AwsService) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.DiscoveryCloudObject != nil {
+		l = m.DiscoveryCloudObject.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	l = len(m.Region)
+	if l > 0 {
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	l = len(m.VpcId)
+	if l > 0 {
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	l = len(m.SubnetId)
+	if l > 0 {
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	if m.Type != 0 {
+		n += 1 + sovTypes(uint64(m.Type))
+	}
+	l = len(m.Name)
+	if l > 0 {
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	l = len(m.EndpointAddress)
+	if l > 0 {
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	if len(m.Ports) > 0 {
+		for _, e := range m.Ports {
+			l = e.Size()
+			n += 1 + l + sovTypes(uint64(l))
+		}
+	}
+	return n
+}
+
 func (m *CreateSpecType) Size() (n int) {
 	if m == nil {
 		return 0
@@ -4792,6 +5580,18 @@ func (m *CreateSpecType_ThirdParty) Size() (n int) {
 	_ = l
 	if m.ThirdParty != nil {
 		l = m.ThirdParty.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *CreateSpecType_AwsService) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.AwsService != nil {
+		l = m.AwsService.Size()
 		n += 1 + l + sovTypes(uint64(l))
 	}
 	return n
@@ -4907,6 +5707,18 @@ func (m *GetSpecType_ThirdParty) Size() (n int) {
 	}
 	return n
 }
+func (m *GetSpecType_AwsService) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.AwsService != nil {
+		l = m.AwsService.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
 func (m *ReplaceSpecType) Size() (n int) {
 	if m == nil {
 		return 0
@@ -5018,6 +5830,18 @@ func (m *ReplaceSpecType_ThirdParty) Size() (n int) {
 	}
 	return n
 }
+func (m *ReplaceSpecType_AwsService) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.AwsService != nil {
+		l = m.AwsService.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
 
 func sovTypes(x uint64) (n int) {
 	return (math_bits.Len64(x|1) + 6) / 7
@@ -5120,6 +5944,16 @@ func (this *GlobalSpecType_ThirdParty) String() string {
 	}, "")
 	return s
 }
+func (this *GlobalSpecType_AwsService) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GlobalSpecType_AwsService{`,
+		`AwsService:` + strings.Replace(fmt.Sprintf("%v", this.AwsService), "AwsService", "AwsService", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
 func (this *VirtualServer) String() string {
 	if this == nil {
 		return "nil"
@@ -5209,6 +6043,39 @@ func (this *ThirdPartyApplicationDiscovery) String() string {
 	}
 	s := strings.Join([]string{`&ThirdPartyApplicationDiscovery{`,
 		`DiscoveryObject:` + strings.Replace(fmt.Sprintf("%v", this.DiscoveryObject), "ObjectRefType", "views.ObjectRefType", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *AwsPortInfo) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&AwsPortInfo{`,
+		`Port:` + fmt.Sprintf("%v", this.Port) + `,`,
+		`Protocol:` + fmt.Sprintf("%v", this.Protocol) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *AwsService) String() string {
+	if this == nil {
+		return "nil"
+	}
+	repeatedStringForPorts := "[]*AwsPortInfo{"
+	for _, f := range this.Ports {
+		repeatedStringForPorts += strings.Replace(f.String(), "AwsPortInfo", "AwsPortInfo", 1) + ","
+	}
+	repeatedStringForPorts += "}"
+	s := strings.Join([]string{`&AwsService{`,
+		`DiscoveryCloudObject:` + strings.Replace(fmt.Sprintf("%v", this.DiscoveryCloudObject), "ObjectRefType", "views.ObjectRefType", 1) + `,`,
+		`Region:` + fmt.Sprintf("%v", this.Region) + `,`,
+		`VpcId:` + fmt.Sprintf("%v", this.VpcId) + `,`,
+		`SubnetId:` + fmt.Sprintf("%v", this.SubnetId) + `,`,
+		`Type:` + fmt.Sprintf("%v", this.Type) + `,`,
+		`Name:` + fmt.Sprintf("%v", this.Name) + `,`,
+		`EndpointAddress:` + fmt.Sprintf("%v", this.EndpointAddress) + `,`,
+		`Ports:` + repeatedStringForPorts + `,`,
 		`}`,
 	}, "")
 	return s
@@ -5306,6 +6173,16 @@ func (this *CreateSpecType_ThirdParty) String() string {
 	}, "")
 	return s
 }
+func (this *CreateSpecType_AwsService) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&CreateSpecType_AwsService{`,
+		`AwsService:` + strings.Replace(fmt.Sprintf("%v", this.AwsService), "AwsService", "AwsService", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
 func (this *GetSpecType) String() string {
 	if this == nil {
 		return "nil"
@@ -5399,6 +6276,16 @@ func (this *GetSpecType_ThirdParty) String() string {
 	}, "")
 	return s
 }
+func (this *GetSpecType_AwsService) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GetSpecType_AwsService{`,
+		`AwsService:` + strings.Replace(fmt.Sprintf("%v", this.AwsService), "AwsService", "AwsService", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
 func (this *ReplaceSpecType) String() string {
 	if this == nil {
 		return "nil"
@@ -5488,6 +6375,16 @@ func (this *ReplaceSpecType_ThirdParty) String() string {
 	}
 	s := strings.Join([]string{`&ReplaceSpecType_ThirdParty{`,
 		`ThirdParty:` + strings.Replace(fmt.Sprintf("%v", this.ThirdParty), "ThirdPartyApplicationDiscovery", "ThirdPartyApplicationDiscovery", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ReplaceSpecType_AwsService) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ReplaceSpecType_AwsService{`,
+		`AwsService:` + strings.Replace(fmt.Sprintf("%v", this.AwsService), "AwsService", "AwsService", 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -5877,6 +6774,41 @@ func (m *GlobalSpecType) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			m.ServiceType = &GlobalSpecType_ThirdParty{v}
+			iNdEx = postIndex
+		case 13:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AwsService", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &AwsService{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.ServiceType = &GlobalSpecType_AwsService{v}
 			iNdEx = postIndex
 		case 1000:
 			if wireType != 2 {
@@ -7062,6 +7994,412 @@ func (m *ThirdPartyApplicationDiscovery) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
+func (m *AwsPortInfo) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTypes
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: AwsPortInfo: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: AwsPortInfo: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Port", wireType)
+			}
+			m.Port = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Port |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Protocol", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Protocol = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTypes(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *AwsService) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTypes
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: AwsService: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: AwsService: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field DiscoveryCloudObject", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.DiscoveryCloudObject == nil {
+				m.DiscoveryCloudObject = &views.ObjectRefType{}
+			}
+			if err := m.DiscoveryCloudObject.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Region", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Region = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field VpcId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.VpcId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field SubnetId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.SubnetId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 5:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Type", wireType)
+			}
+			m.Type = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Type |= discovery_cloud.AwsServiceType(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 6:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Name", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Name = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 7:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field EndpointAddress", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.EndpointAddress = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 8:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Ports", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Ports = append(m.Ports, &AwsPortInfo{})
+			if err := m.Ports[len(m.Ports)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTypes(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
 func (m *CreateSpecType) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
@@ -7403,6 +8741,41 @@ func (m *CreateSpecType) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			m.ServiceType = &CreateSpecType_ThirdParty{v}
+			iNdEx = postIndex
+		case 13:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AwsService", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &AwsService{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.ServiceType = &CreateSpecType_AwsService{v}
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
@@ -7770,6 +9143,41 @@ func (m *GetSpecType) Unmarshal(dAtA []byte) error {
 			}
 			m.ServiceType = &GetSpecType_ThirdParty{v}
 			iNdEx = postIndex
+		case 13:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AwsService", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &AwsService{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.ServiceType = &GetSpecType_AwsService{v}
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipTypes(dAtA[iNdEx:])
@@ -8135,6 +9543,41 @@ func (m *ReplaceSpecType) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			m.ServiceType = &ReplaceSpecType_ThirdParty{v}
+			iNdEx = postIndex
+		case 13:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AwsService", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &AwsService{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.ServiceType = &ReplaceSpecType_AwsService{v}
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex

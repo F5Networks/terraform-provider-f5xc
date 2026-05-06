@@ -920,7 +920,7 @@ Read-Only:
 
 - `api_crawler` (Attributes) API Crawler Configure Discovered API Settings. (see [below for nested schema](#nestedatt--api_discovery_choice--enable_api_discovery--api_crawler))
 - `api_discovery_from_code_scan` (Attributes) Code Base Integration Select API code repositories to the load balancer to use them as a source for API endpoint discovery. (see [below for nested schema](#nestedatt--api_discovery_choice--enable_api_discovery--api_discovery_from_code_scan))
-- `api_discovery_settings_choice` (Attributes) API Auth Discovery Additional settings for API discovery (see [below for nested schema](#nestedatt--api_discovery_choice--enable_api_discovery--api_discovery_settings_choice))
+- `api_discovery_settings_choice` (Attributes) API Discovery Policy Additional settings for API discovery (see [below for nested schema](#nestedatt--api_discovery_choice--enable_api_discovery--api_discovery_settings_choice))
 - `discovered_api_settings` (Attributes) Discovered API Settings Configure Discovered API Settings. (see [below for nested schema](#nestedatt--api_discovery_choice--enable_api_discovery--discovered_api_settings))
 - `learn_from_redirect_traffic_choice` (Attributes) Include or Exclude data in machine learning from traffic with redirect response in Business Logic Markup By default, the system only learns API Endpoints and patterns from traffic with response code 2xx On enabling this, the AI engine will learn API Endpoints from traffic with response code 3xx in addition to 2xx (see [below for nested schema](#nestedatt--api_discovery_choice--enable_api_discovery--learn_from_redirect_traffic_choice))
 
@@ -1052,15 +1052,15 @@ Read-Only:
 
 Read-Only:
 
-- `custom_api_auth_discovery` (Attributes) Apply Specified Custom API Auth Discovery Apply custom API discovery settings (see [below for nested schema](#nestedatt--api_discovery_choice--enable_api_discovery--api_discovery_settings_choice--custom_api_auth_discovery))
-- `default_api_auth_discovery` (Boolean) default Apply system default API discovery settings
+- `custom_api_auth_discovery` (Attributes) Apply Specified Custom API Auth Discovery Define classification rules to better match your application architecture and reduce noise. (see [below for nested schema](#nestedatt--api_discovery_choice--enable_api_discovery--api_discovery_settings_choice--custom_api_auth_discovery))
+- `default_api_auth_discovery` (Boolean) default Automatically discovers APIs from traffic and auth signals. No setup needed and recommended for most environments.
 
 <a id="nestedatt--api_discovery_choice--enable_api_discovery--api_discovery_settings_choice--custom_api_auth_discovery"></a>
 ### Nested Schema for `api_discovery_choice.enable_api_discovery.api_discovery_settings_choice.custom_api_auth_discovery`
 
 Read-Only:
 
-- `api_discovery_ref` (Attributes) API Discovery Settings Object API Discovery Settings Object (see [below for nested schema](#nestedatt--api_discovery_choice--enable_api_discovery--api_discovery_settings_choice--custom_api_auth_discovery--api_discovery_ref))
+- `api_discovery_ref` (Attributes) API Discovery Settings Object Defines how discovery operates and how traffic is analyzed. Use policies to customize discovery behavior, authentication handling, and other related settings. (see [below for nested schema](#nestedatt--api_discovery_choice--enable_api_discovery--api_discovery_settings_choice--custom_api_auth_discovery--api_discovery_ref))
 
 <a id="nestedatt--api_discovery_choice--enable_api_discovery--api_discovery_settings_choice--custom_api_auth_discovery--api_discovery_ref"></a>
 ### Nested Schema for `api_discovery_choice.enable_api_discovery.api_discovery_settings_choice.custom_api_auth_discovery.api_discovery_ref`
@@ -3587,6 +3587,7 @@ Read-Only:
 
 Read-Only:
 
+- `encoded_path_matcher` (Boolean) Encoded_Path Match against the encoded, escaped path
 - `exact_values` (List of String) exact values A list of exact path values to match the input HTTP path against.
 - `invert_matcher` (Boolean) invert_matcher Invert the match result.
 - `prefix_values` (List of String) prefix values A list of path prefix values to match the input HTTP path against.
@@ -4503,7 +4504,7 @@ Read-Only:
 
 Read-Only:
 
-- `all_endpoint` (Boolean) all_endpoint Validation will be performed for all requests on this LB
+- `all_endpoint` (Boolean) all_endpoint JWT validation is applied to all requests handled by this Load Balancer. If JWT is missing or invalid, the configured action (Block or Report) will be applied.
 - `api_groups` (Attributes) api group Validation will be performed for the endpoints mentioned in the API Groups (see [below for nested schema](#nestedatt--jwt_validation--target--target_choice--api_groups))
 - `base_paths` (Attributes) base paths Validation will be performed for selected path prefixes (see [below for nested schema](#nestedatt--jwt_validation--target--target_choice--base_paths))
 
@@ -6032,7 +6033,7 @@ Read-Only:
 
 Read-Only:
 
-- `ip_threat_categories` (List of String) IP Threat Categories If the source IP matches on atleast one of the enabled IP threat categories, the request will be denied.
+- `ip_threat_categories` (List of String) IP Threat Categories The IP threat categories is obtained from the list and is used to auto-generate equivalent label selection expressions
 
 
 
@@ -6361,7 +6362,7 @@ Read-Only:
 
 Read-Only:
 
-- `ip_threat_categories` (List of String) IP Threat Categories If the source IP matches on atleast one of the enabled IP threat categories, the request will be denied.
+- `ip_threat_categories` (List of String) IP Threat Categories The IP threat categories is obtained from the list and is used to auto-generate equivalent label selection expressions
 
 
 
@@ -6684,7 +6685,7 @@ Read-Only:
 
 Read-Only:
 
-- `ip_threat_categories` (List of String) IP Threat Categories If the source IP matches on atleast one of the enabled IP threat categories, the request will be denied.
+- `ip_threat_categories` (List of String) IP Threat Categories The IP threat categories is obtained from the list and is used to auto-generate equivalent label selection expressions
 
 
 

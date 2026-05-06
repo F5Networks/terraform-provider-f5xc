@@ -5,18 +5,18 @@ package api_discovery
 
 import (
 	fmt "fmt"
+	_ "github.com/gogo/protobuf/gogoproto"
+	proto "github.com/gogo/protobuf/proto"
+	github_com_gogo_protobuf_sortkeys "github.com/gogo/protobuf/sortkeys"
+	golang_proto "github.com/golang/protobuf/proto"
+	schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
+	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views"
 	io "io"
 	math "math"
 	math_bits "math/bits"
 	reflect "reflect"
 	strconv "strconv"
 	strings "strings"
-
-	_ "github.com/gogo/protobuf/gogoproto"
-	proto "github.com/gogo/protobuf/proto"
-	golang_proto "github.com/golang/protobuf/proto"
-	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
-	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -62,6 +62,157 @@ func (AuthParameterType) EnumDescriptor() ([]byte, []int) {
 	return fileDescriptor_3ccd12d9c64560a6, []int{0}
 }
 
+// RuleLocation
+//
+// x-displayName: "Rule Location"
+// Specifies whether the rule criteria should be evaluated against request or response
+type RuleLocation int32
+
+const (
+	// x-displayName: "Request"
+	// Applies the rule to incoming traffic from the client.
+	REQUEST RuleLocation = 0
+	// x-displayName: "Response"
+	// Applies the rule to outgoing traffic sent back to the client.
+	RESPONSE RuleLocation = 1
+)
+
+var RuleLocation_name = map[int32]string{
+	0: "REQUEST",
+	1: "RESPONSE",
+}
+
+var RuleLocation_value = map[string]int32{
+	"REQUEST":  0,
+	"RESPONSE": 1,
+}
+
+func (RuleLocation) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_3ccd12d9c64560a6, []int{1}
+}
+
+// MatchType
+//
+// x-displayName: "Match Type"
+// Specifies how the value should be matched
+type MatchType int32
+
+const (
+	// x-displayName: "Exact Match"
+	EXACT_MATCH MatchType = 0
+	// x-displayName: "Substring Search"
+	SUBSTRING MatchType = 1
+	// x-displayName: "Regex Value"
+	REGEX MatchType = 2
+)
+
+var MatchType_name = map[int32]string{
+	0: "EXACT_MATCH",
+	1: "SUBSTRING",
+	2: "REGEX",
+}
+
+var MatchType_value = map[string]int32{
+	"EXACT_MATCH": 0,
+	"SUBSTRING":   1,
+	"REGEX":       2,
+}
+
+func (MatchType) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_3ccd12d9c64560a6, []int{2}
+}
+
+// ExclusionConfig
+//
+// x-displayName: "Exclusion Configuration"
+// Configuration for exclusion action
+type ExclusionConfig struct {
+	// action
+	//
+	// x-required
+	// x-displayName: "Exclusion Action"
+	// Specifies the action to take for excluded endpoints
+	//
+	// Types that are valid to be assigned to ActionChoice:
+	//	*ExclusionConfig_Ignore
+	//	*ExclusionConfig_Archive
+	ActionChoice isExclusionConfig_ActionChoice `protobuf_oneof:"action_choice"`
+}
+
+func (m *ExclusionConfig) Reset()      { *m = ExclusionConfig{} }
+func (*ExclusionConfig) ProtoMessage() {}
+func (*ExclusionConfig) Descriptor() ([]byte, []int) {
+	return fileDescriptor_3ccd12d9c64560a6, []int{0}
+}
+func (m *ExclusionConfig) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ExclusionConfig) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	b = b[:cap(b)]
+	n, err := m.MarshalToSizedBuffer(b)
+	if err != nil {
+		return nil, err
+	}
+	return b[:n], nil
+}
+func (m *ExclusionConfig) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ExclusionConfig.Merge(m, src)
+}
+func (m *ExclusionConfig) XXX_Size() int {
+	return m.Size()
+}
+func (m *ExclusionConfig) XXX_DiscardUnknown() {
+	xxx_messageInfo_ExclusionConfig.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ExclusionConfig proto.InternalMessageInfo
+
+type isExclusionConfig_ActionChoice interface {
+	isExclusionConfig_ActionChoice()
+	Equal(interface{}) bool
+	MarshalTo([]byte) (int, error)
+	Size() int
+}
+
+type ExclusionConfig_Ignore struct {
+	Ignore *schema.Empty `protobuf:"bytes,2,opt,name=ignore,proto3,oneof" json:"ignore,omitempty"`
+}
+type ExclusionConfig_Archive struct {
+	Archive *schema.Empty `protobuf:"bytes,3,opt,name=archive,proto3,oneof" json:"archive,omitempty"`
+}
+
+func (*ExclusionConfig_Ignore) isExclusionConfig_ActionChoice()  {}
+func (*ExclusionConfig_Archive) isExclusionConfig_ActionChoice() {}
+
+func (m *ExclusionConfig) GetActionChoice() isExclusionConfig_ActionChoice {
+	if m != nil {
+		return m.ActionChoice
+	}
+	return nil
+}
+
+func (m *ExclusionConfig) GetIgnore() *schema.Empty {
+	if x, ok := m.GetActionChoice().(*ExclusionConfig_Ignore); ok {
+		return x.Ignore
+	}
+	return nil
+}
+
+func (m *ExclusionConfig) GetArchive() *schema.Empty {
+	if x, ok := m.GetActionChoice().(*ExclusionConfig_Archive); ok {
+		return x.Archive
+	}
+	return nil
+}
+
+// XXX_OneofWrappers is for the internal use of the proto package.
+func (*ExclusionConfig) XXX_OneofWrappers() []interface{} {
+	return []interface{}{
+		(*ExclusionConfig_Ignore)(nil),
+		(*ExclusionConfig_Archive)(nil),
+	}
+}
+
 // CustomAuthType
 //
 // x-displayName: "Custom Auth Type"
@@ -84,7 +235,7 @@ type CustomAuthType struct {
 func (m *CustomAuthType) Reset()      { *m = CustomAuthType{} }
 func (*CustomAuthType) ProtoMessage() {}
 func (*CustomAuthType) Descriptor() ([]byte, []int) {
-	return fileDescriptor_3ccd12d9c64560a6, []int{0}
+	return fileDescriptor_3ccd12d9c64560a6, []int{1}
 }
 func (m *CustomAuthType) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -123,6 +274,401 @@ func (m *CustomAuthType) GetParameterName() string {
 	return ""
 }
 
+// HTTPHeaderCriteria
+//
+// x-displayName: "HTTP Header Criteria"
+// Criteria for matching HTTP headers
+type HTTPHeaderCriteria struct {
+	// field_name
+	//
+	// x-required
+	// x-displayName: "HTTP Header Name"
+	// x-inlineHint: "e.g. content-type, user-id"
+	FieldName string `protobuf:"bytes,1,opt,name=field_name,json=fieldName,proto3" json:"field_name,omitempty"`
+	// match_type
+	//
+	// x-displayName: "Match Type"
+	MatchType MatchType `protobuf:"varint,2,opt,name=match_type,json=matchType,proto3,enum=ves.io.schema.api_sec.api_discovery.MatchType" json:"match_type,omitempty"`
+	// value
+	//
+	// x-required
+	// x-displayName: "Value"
+	Value string `protobuf:"bytes,3,opt,name=value,proto3" json:"value,omitempty"`
+	// location
+	//
+	// x-displayName: "Location"
+	Location RuleLocation `protobuf:"varint,4,opt,name=location,proto3,enum=ves.io.schema.api_sec.api_discovery.RuleLocation" json:"location,omitempty"`
+}
+
+func (m *HTTPHeaderCriteria) Reset()      { *m = HTTPHeaderCriteria{} }
+func (*HTTPHeaderCriteria) ProtoMessage() {}
+func (*HTTPHeaderCriteria) Descriptor() ([]byte, []int) {
+	return fileDescriptor_3ccd12d9c64560a6, []int{2}
+}
+func (m *HTTPHeaderCriteria) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *HTTPHeaderCriteria) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	b = b[:cap(b)]
+	n, err := m.MarshalToSizedBuffer(b)
+	if err != nil {
+		return nil, err
+	}
+	return b[:n], nil
+}
+func (m *HTTPHeaderCriteria) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_HTTPHeaderCriteria.Merge(m, src)
+}
+func (m *HTTPHeaderCriteria) XXX_Size() int {
+	return m.Size()
+}
+func (m *HTTPHeaderCriteria) XXX_DiscardUnknown() {
+	xxx_messageInfo_HTTPHeaderCriteria.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_HTTPHeaderCriteria proto.InternalMessageInfo
+
+func (m *HTTPHeaderCriteria) GetFieldName() string {
+	if m != nil {
+		return m.FieldName
+	}
+	return ""
+}
+
+func (m *HTTPHeaderCriteria) GetMatchType() MatchType {
+	if m != nil {
+		return m.MatchType
+	}
+	return EXACT_MATCH
+}
+
+func (m *HTTPHeaderCriteria) GetValue() string {
+	if m != nil {
+		return m.Value
+	}
+	return ""
+}
+
+func (m *HTTPHeaderCriteria) GetLocation() RuleLocation {
+	if m != nil {
+		return m.Location
+	}
+	return REQUEST
+}
+
+// RuleProperties
+//
+// x-displayName: "Rule Properties"
+// Determines whether matching endpoints are included in API Discovery or excluded.
+type RuleProperties struct {
+	// rule_type_choice
+	//
+	// x-required
+	// x-displayName: "Rule Type"
+	// Determines whether matching endpoints are included in API Discovery or excluded.
+	//
+	// Types that are valid to be assigned to RuleTypeChoice:
+	//	*RuleProperties_Exclusion
+	//	*RuleProperties_Inclusion
+	RuleTypeChoice isRuleProperties_RuleTypeChoice `protobuf_oneof:"rule_type_choice"`
+	// criteria
+	//
+	// x-required
+	// x-displayName: "Criteria"
+	// Specifies what is used to match endpoints.
+	//
+	// Types that are valid to be assigned to Criteria:
+	//	*RuleProperties_HttpHeaderCriteria
+	//	*RuleProperties_Pattern
+	Criteria isRuleProperties_Criteria `protobuf_oneof:"criteria"`
+}
+
+func (m *RuleProperties) Reset()      { *m = RuleProperties{} }
+func (*RuleProperties) ProtoMessage() {}
+func (*RuleProperties) Descriptor() ([]byte, []int) {
+	return fileDescriptor_3ccd12d9c64560a6, []int{3}
+}
+func (m *RuleProperties) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *RuleProperties) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	b = b[:cap(b)]
+	n, err := m.MarshalToSizedBuffer(b)
+	if err != nil {
+		return nil, err
+	}
+	return b[:n], nil
+}
+func (m *RuleProperties) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_RuleProperties.Merge(m, src)
+}
+func (m *RuleProperties) XXX_Size() int {
+	return m.Size()
+}
+func (m *RuleProperties) XXX_DiscardUnknown() {
+	xxx_messageInfo_RuleProperties.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_RuleProperties proto.InternalMessageInfo
+
+type isRuleProperties_RuleTypeChoice interface {
+	isRuleProperties_RuleTypeChoice()
+	Equal(interface{}) bool
+	MarshalTo([]byte) (int, error)
+	Size() int
+}
+type isRuleProperties_Criteria interface {
+	isRuleProperties_Criteria()
+	Equal(interface{}) bool
+	MarshalTo([]byte) (int, error)
+	Size() int
+}
+
+type RuleProperties_Exclusion struct {
+	Exclusion *ExclusionConfig `protobuf:"bytes,2,opt,name=exclusion,proto3,oneof" json:"exclusion,omitempty"`
+}
+type RuleProperties_Inclusion struct {
+	Inclusion *schema.Empty `protobuf:"bytes,3,opt,name=inclusion,proto3,oneof" json:"inclusion,omitempty"`
+}
+type RuleProperties_HttpHeaderCriteria struct {
+	HttpHeaderCriteria *HTTPHeaderCriteria `protobuf:"bytes,6,opt,name=http_header_criteria,json=httpHeaderCriteria,proto3,oneof" json:"http_header_criteria,omitempty"`
+}
+type RuleProperties_Pattern struct {
+	Pattern string `protobuf:"bytes,7,opt,name=pattern,proto3,oneof" json:"pattern,omitempty"`
+}
+
+func (*RuleProperties_Exclusion) isRuleProperties_RuleTypeChoice()    {}
+func (*RuleProperties_Inclusion) isRuleProperties_RuleTypeChoice()    {}
+func (*RuleProperties_HttpHeaderCriteria) isRuleProperties_Criteria() {}
+func (*RuleProperties_Pattern) isRuleProperties_Criteria()            {}
+
+func (m *RuleProperties) GetRuleTypeChoice() isRuleProperties_RuleTypeChoice {
+	if m != nil {
+		return m.RuleTypeChoice
+	}
+	return nil
+}
+func (m *RuleProperties) GetCriteria() isRuleProperties_Criteria {
+	if m != nil {
+		return m.Criteria
+	}
+	return nil
+}
+
+func (m *RuleProperties) GetExclusion() *ExclusionConfig {
+	if x, ok := m.GetRuleTypeChoice().(*RuleProperties_Exclusion); ok {
+		return x.Exclusion
+	}
+	return nil
+}
+
+func (m *RuleProperties) GetInclusion() *schema.Empty {
+	if x, ok := m.GetRuleTypeChoice().(*RuleProperties_Inclusion); ok {
+		return x.Inclusion
+	}
+	return nil
+}
+
+func (m *RuleProperties) GetHttpHeaderCriteria() *HTTPHeaderCriteria {
+	if x, ok := m.GetCriteria().(*RuleProperties_HttpHeaderCriteria); ok {
+		return x.HttpHeaderCriteria
+	}
+	return nil
+}
+
+func (m *RuleProperties) GetPattern() string {
+	if x, ok := m.GetCriteria().(*RuleProperties_Pattern); ok {
+		return x.Pattern
+	}
+	return ""
+}
+
+// XXX_OneofWrappers is for the internal use of the proto package.
+func (*RuleProperties) XXX_OneofWrappers() []interface{} {
+	return []interface{}{
+		(*RuleProperties_Exclusion)(nil),
+		(*RuleProperties_Inclusion)(nil),
+		(*RuleProperties_HttpHeaderCriteria)(nil),
+		(*RuleProperties_Pattern)(nil),
+	}
+}
+
+// DiscoveryRule
+//
+// x-displayName: "Discovery Rule"
+// Defines a rule for classifying endpoints as API or Non-API
+type DiscoveryRule struct {
+	// metadata
+	//
+	// x-displayName: "Metadata"
+	// Standard object metadata including name, labels, and description
+	Metadata *schema.MessageMetaType `protobuf:"bytes,1,opt,name=metadata,proto3" json:"metadata,omitempty"`
+	// rule_properties
+	//
+	// x-displayName: "Rule Properties"
+	// Configuration for rule type and matching criteria
+	RuleProperties *RuleProperties `protobuf:"bytes,2,opt,name=rule_properties,json=ruleProperties,proto3" json:"rule_properties,omitempty"`
+	// labels
+	//
+	// x-displayName: "Labels"
+	// Map of string keys and values that can be used to organize and categorize the rule
+	Labels map[string]string `protobuf:"bytes,3,rep,name=labels,proto3" json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+}
+
+func (m *DiscoveryRule) Reset()      { *m = DiscoveryRule{} }
+func (*DiscoveryRule) ProtoMessage() {}
+func (*DiscoveryRule) Descriptor() ([]byte, []int) {
+	return fileDescriptor_3ccd12d9c64560a6, []int{4}
+}
+func (m *DiscoveryRule) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *DiscoveryRule) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	b = b[:cap(b)]
+	n, err := m.MarshalToSizedBuffer(b)
+	if err != nil {
+		return nil, err
+	}
+	return b[:n], nil
+}
+func (m *DiscoveryRule) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DiscoveryRule.Merge(m, src)
+}
+func (m *DiscoveryRule) XXX_Size() int {
+	return m.Size()
+}
+func (m *DiscoveryRule) XXX_DiscardUnknown() {
+	xxx_messageInfo_DiscoveryRule.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_DiscoveryRule proto.InternalMessageInfo
+
+func (m *DiscoveryRule) GetMetadata() *schema.MessageMetaType {
+	if m != nil {
+		return m.Metadata
+	}
+	return nil
+}
+
+func (m *DiscoveryRule) GetRuleProperties() *RuleProperties {
+	if m != nil {
+		return m.RuleProperties
+	}
+	return nil
+}
+
+func (m *DiscoveryRule) GetLabels() map[string]string {
+	if m != nil {
+		return m.Labels
+	}
+	return nil
+}
+
+// UserDefinedApiDiscoveryPolicy
+//
+// x-displayName: "User Defined API Discovery Policy"
+// Rules are evaluated sequentially, top to bottom. If no rules are added, all traffic will be discovered or ignored based on the selection in the 'Default Behaviour of the Rule Set' field.
+type UserDefinedApiDiscoveryPolicy struct {
+	// discovery_rules
+	//
+	// x-displayName: "Discovery Rules"
+	// Define rules to include or exclude endpoints by path, domain, or header. Rules run top to bottom; unmatched endpoints follow the default action.
+	DiscoveryRules []*DiscoveryRule `protobuf:"bytes,1,rep,name=discovery_rules,json=discoveryRules,proto3" json:"discovery_rules,omitempty"`
+	// default_behavior_choice
+	//
+	// x-required
+	// x-displayName: "Default Behaviour of the Rule Set"
+	// Define the default action for endpoints that do not match any rule, choosing to either include or exclude them from the discovery process.
+	//
+	// Types that are valid to be assigned to DefaultBehaviorChoice:
+	//	*UserDefinedApiDiscoveryPolicy_Inclusive
+	//	*UserDefinedApiDiscoveryPolicy_Exclusive
+	DefaultBehaviorChoice isUserDefinedApiDiscoveryPolicy_DefaultBehaviorChoice `protobuf_oneof:"default_behavior_choice"`
+}
+
+func (m *UserDefinedApiDiscoveryPolicy) Reset()      { *m = UserDefinedApiDiscoveryPolicy{} }
+func (*UserDefinedApiDiscoveryPolicy) ProtoMessage() {}
+func (*UserDefinedApiDiscoveryPolicy) Descriptor() ([]byte, []int) {
+	return fileDescriptor_3ccd12d9c64560a6, []int{5}
+}
+func (m *UserDefinedApiDiscoveryPolicy) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *UserDefinedApiDiscoveryPolicy) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	b = b[:cap(b)]
+	n, err := m.MarshalToSizedBuffer(b)
+	if err != nil {
+		return nil, err
+	}
+	return b[:n], nil
+}
+func (m *UserDefinedApiDiscoveryPolicy) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UserDefinedApiDiscoveryPolicy.Merge(m, src)
+}
+func (m *UserDefinedApiDiscoveryPolicy) XXX_Size() int {
+	return m.Size()
+}
+func (m *UserDefinedApiDiscoveryPolicy) XXX_DiscardUnknown() {
+	xxx_messageInfo_UserDefinedApiDiscoveryPolicy.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_UserDefinedApiDiscoveryPolicy proto.InternalMessageInfo
+
+type isUserDefinedApiDiscoveryPolicy_DefaultBehaviorChoice interface {
+	isUserDefinedApiDiscoveryPolicy_DefaultBehaviorChoice()
+	Equal(interface{}) bool
+	MarshalTo([]byte) (int, error)
+	Size() int
+}
+
+type UserDefinedApiDiscoveryPolicy_Inclusive struct {
+	Inclusive *schema.Empty `protobuf:"bytes,3,opt,name=inclusive,proto3,oneof" json:"inclusive,omitempty"`
+}
+type UserDefinedApiDiscoveryPolicy_Exclusive struct {
+	Exclusive *ExclusionConfig `protobuf:"bytes,4,opt,name=exclusive,proto3,oneof" json:"exclusive,omitempty"`
+}
+
+func (*UserDefinedApiDiscoveryPolicy_Inclusive) isUserDefinedApiDiscoveryPolicy_DefaultBehaviorChoice() {
+}
+func (*UserDefinedApiDiscoveryPolicy_Exclusive) isUserDefinedApiDiscoveryPolicy_DefaultBehaviorChoice() {
+}
+
+func (m *UserDefinedApiDiscoveryPolicy) GetDefaultBehaviorChoice() isUserDefinedApiDiscoveryPolicy_DefaultBehaviorChoice {
+	if m != nil {
+		return m.DefaultBehaviorChoice
+	}
+	return nil
+}
+
+func (m *UserDefinedApiDiscoveryPolicy) GetDiscoveryRules() []*DiscoveryRule {
+	if m != nil {
+		return m.DiscoveryRules
+	}
+	return nil
+}
+
+func (m *UserDefinedApiDiscoveryPolicy) GetInclusive() *schema.Empty {
+	if x, ok := m.GetDefaultBehaviorChoice().(*UserDefinedApiDiscoveryPolicy_Inclusive); ok {
+		return x.Inclusive
+	}
+	return nil
+}
+
+func (m *UserDefinedApiDiscoveryPolicy) GetExclusive() *ExclusionConfig {
+	if x, ok := m.GetDefaultBehaviorChoice().(*UserDefinedApiDiscoveryPolicy_Exclusive); ok {
+		return x.Exclusive
+	}
+	return nil
+}
+
+// XXX_OneofWrappers is for the internal use of the proto package.
+func (*UserDefinedApiDiscoveryPolicy) XXX_OneofWrappers() []interface{} {
+	return []interface{}{
+		(*UserDefinedApiDiscoveryPolicy_Inclusive)(nil),
+		(*UserDefinedApiDiscoveryPolicy_Exclusive)(nil),
+	}
+}
+
 // GlobalSpecType
 //
 // x-displayName: "Specification"
@@ -133,12 +679,17 @@ type GlobalSpecType struct {
 	// x-displayName: "Custom Authentication Types"
 	// Select your custom authentication types to be detected in the API discovery
 	CustomAuthTypes []*CustomAuthType `protobuf:"bytes,1,rep,name=custom_auth_types,json=customAuthTypes,proto3" json:"custom_auth_types,omitempty"`
+	// user_defined_api_discovery_policy
+	//
+	// x-displayName: "Rules Properties"
+	// Rules are evaluated sequentially, top to bottom. If no rules are added, all traffic will be discovered or ignored based on the selection in the 'Default Behaviour of the Rule Set' field.
+	UserDefinedApiDiscoveryPolicy *UserDefinedApiDiscoveryPolicy `protobuf:"bytes,2,opt,name=user_defined_api_discovery_policy,json=userDefinedApiDiscoveryPolicy,proto3" json:"user_defined_api_discovery_policy,omitempty"`
 }
 
 func (m *GlobalSpecType) Reset()      { *m = GlobalSpecType{} }
 func (*GlobalSpecType) ProtoMessage() {}
 func (*GlobalSpecType) Descriptor() ([]byte, []int) {
-	return fileDescriptor_3ccd12d9c64560a6, []int{1}
+	return fileDescriptor_3ccd12d9c64560a6, []int{6}
 }
 func (m *GlobalSpecType) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -170,18 +721,26 @@ func (m *GlobalSpecType) GetCustomAuthTypes() []*CustomAuthType {
 	return nil
 }
 
+func (m *GlobalSpecType) GetUserDefinedApiDiscoveryPolicy() *UserDefinedApiDiscoveryPolicy {
+	if m != nil {
+		return m.UserDefinedApiDiscoveryPolicy
+	}
+	return nil
+}
+
 // Create api discovery
 //
 // x-displayName: "Create Api Discovery"
 // Create api discovery creates a new object in the storage backend for metadata.namespace.
 type CreateSpecType struct {
-	CustomAuthTypes []*CustomAuthType `protobuf:"bytes,1,rep,name=custom_auth_types,json=customAuthTypes,proto3" json:"custom_auth_types,omitempty"`
+	CustomAuthTypes               []*CustomAuthType              `protobuf:"bytes,1,rep,name=custom_auth_types,json=customAuthTypes,proto3" json:"custom_auth_types,omitempty"`
+	UserDefinedApiDiscoveryPolicy *UserDefinedApiDiscoveryPolicy `protobuf:"bytes,2,opt,name=user_defined_api_discovery_policy,json=userDefinedApiDiscoveryPolicy,proto3" json:"user_defined_api_discovery_policy,omitempty"`
 }
 
 func (m *CreateSpecType) Reset()      { *m = CreateSpecType{} }
 func (*CreateSpecType) ProtoMessage() {}
 func (*CreateSpecType) Descriptor() ([]byte, []int) {
-	return fileDescriptor_3ccd12d9c64560a6, []int{2}
+	return fileDescriptor_3ccd12d9c64560a6, []int{7}
 }
 func (m *CreateSpecType) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -213,18 +772,26 @@ func (m *CreateSpecType) GetCustomAuthTypes() []*CustomAuthType {
 	return nil
 }
 
+func (m *CreateSpecType) GetUserDefinedApiDiscoveryPolicy() *UserDefinedApiDiscoveryPolicy {
+	if m != nil {
+		return m.UserDefinedApiDiscoveryPolicy
+	}
+	return nil
+}
+
 // Replace api discovery
 //
 // x-displayName: "Replace Api Discovery"
 // Replace api_discovery replaces an existing object in the storage backend for metadata.namespace.
 type ReplaceSpecType struct {
-	CustomAuthTypes []*CustomAuthType `protobuf:"bytes,1,rep,name=custom_auth_types,json=customAuthTypes,proto3" json:"custom_auth_types,omitempty"`
+	CustomAuthTypes               []*CustomAuthType              `protobuf:"bytes,1,rep,name=custom_auth_types,json=customAuthTypes,proto3" json:"custom_auth_types,omitempty"`
+	UserDefinedApiDiscoveryPolicy *UserDefinedApiDiscoveryPolicy `protobuf:"bytes,2,opt,name=user_defined_api_discovery_policy,json=userDefinedApiDiscoveryPolicy,proto3" json:"user_defined_api_discovery_policy,omitempty"`
 }
 
 func (m *ReplaceSpecType) Reset()      { *m = ReplaceSpecType{} }
 func (*ReplaceSpecType) ProtoMessage() {}
 func (*ReplaceSpecType) Descriptor() ([]byte, []int) {
-	return fileDescriptor_3ccd12d9c64560a6, []int{3}
+	return fileDescriptor_3ccd12d9c64560a6, []int{8}
 }
 func (m *ReplaceSpecType) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -256,18 +823,26 @@ func (m *ReplaceSpecType) GetCustomAuthTypes() []*CustomAuthType {
 	return nil
 }
 
+func (m *ReplaceSpecType) GetUserDefinedApiDiscoveryPolicy() *UserDefinedApiDiscoveryPolicy {
+	if m != nil {
+		return m.UserDefinedApiDiscoveryPolicy
+	}
+	return nil
+}
+
 // Get api discovery
 //
 // x-displayName: "Get Api Discovery"
 // Get api_discovery reads a given object from storage backend for metadata.namespace.
 type GetSpecType struct {
-	CustomAuthTypes []*CustomAuthType `protobuf:"bytes,1,rep,name=custom_auth_types,json=customAuthTypes,proto3" json:"custom_auth_types,omitempty"`
+	CustomAuthTypes               []*CustomAuthType              `protobuf:"bytes,1,rep,name=custom_auth_types,json=customAuthTypes,proto3" json:"custom_auth_types,omitempty"`
+	UserDefinedApiDiscoveryPolicy *UserDefinedApiDiscoveryPolicy `protobuf:"bytes,2,opt,name=user_defined_api_discovery_policy,json=userDefinedApiDiscoveryPolicy,proto3" json:"user_defined_api_discovery_policy,omitempty"`
 }
 
 func (m *GetSpecType) Reset()      { *m = GetSpecType{} }
 func (*GetSpecType) ProtoMessage() {}
 func (*GetSpecType) Descriptor() ([]byte, []int) {
-	return fileDescriptor_3ccd12d9c64560a6, []int{4}
+	return fileDescriptor_3ccd12d9c64560a6, []int{9}
 }
 func (m *GetSpecType) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -299,11 +874,34 @@ func (m *GetSpecType) GetCustomAuthTypes() []*CustomAuthType {
 	return nil
 }
 
+func (m *GetSpecType) GetUserDefinedApiDiscoveryPolicy() *UserDefinedApiDiscoveryPolicy {
+	if m != nil {
+		return m.UserDefinedApiDiscoveryPolicy
+	}
+	return nil
+}
+
 func init() {
 	proto.RegisterEnum("ves.io.schema.api_sec.api_discovery.AuthParameterType", AuthParameterType_name, AuthParameterType_value)
 	golang_proto.RegisterEnum("ves.io.schema.api_sec.api_discovery.AuthParameterType", AuthParameterType_name, AuthParameterType_value)
+	proto.RegisterEnum("ves.io.schema.api_sec.api_discovery.RuleLocation", RuleLocation_name, RuleLocation_value)
+	golang_proto.RegisterEnum("ves.io.schema.api_sec.api_discovery.RuleLocation", RuleLocation_name, RuleLocation_value)
+	proto.RegisterEnum("ves.io.schema.api_sec.api_discovery.MatchType", MatchType_name, MatchType_value)
+	golang_proto.RegisterEnum("ves.io.schema.api_sec.api_discovery.MatchType", MatchType_name, MatchType_value)
+	proto.RegisterType((*ExclusionConfig)(nil), "ves.io.schema.api_sec.api_discovery.ExclusionConfig")
+	golang_proto.RegisterType((*ExclusionConfig)(nil), "ves.io.schema.api_sec.api_discovery.ExclusionConfig")
 	proto.RegisterType((*CustomAuthType)(nil), "ves.io.schema.api_sec.api_discovery.CustomAuthType")
 	golang_proto.RegisterType((*CustomAuthType)(nil), "ves.io.schema.api_sec.api_discovery.CustomAuthType")
+	proto.RegisterType((*HTTPHeaderCriteria)(nil), "ves.io.schema.api_sec.api_discovery.HTTPHeaderCriteria")
+	golang_proto.RegisterType((*HTTPHeaderCriteria)(nil), "ves.io.schema.api_sec.api_discovery.HTTPHeaderCriteria")
+	proto.RegisterType((*RuleProperties)(nil), "ves.io.schema.api_sec.api_discovery.RuleProperties")
+	golang_proto.RegisterType((*RuleProperties)(nil), "ves.io.schema.api_sec.api_discovery.RuleProperties")
+	proto.RegisterType((*DiscoveryRule)(nil), "ves.io.schema.api_sec.api_discovery.DiscoveryRule")
+	golang_proto.RegisterType((*DiscoveryRule)(nil), "ves.io.schema.api_sec.api_discovery.DiscoveryRule")
+	proto.RegisterMapType((map[string]string)(nil), "ves.io.schema.api_sec.api_discovery.DiscoveryRule.LabelsEntry")
+	golang_proto.RegisterMapType((map[string]string)(nil), "ves.io.schema.api_sec.api_discovery.DiscoveryRule.LabelsEntry")
+	proto.RegisterType((*UserDefinedApiDiscoveryPolicy)(nil), "ves.io.schema.api_sec.api_discovery.UserDefinedApiDiscoveryPolicy")
+	golang_proto.RegisterType((*UserDefinedApiDiscoveryPolicy)(nil), "ves.io.schema.api_sec.api_discovery.UserDefinedApiDiscoveryPolicy")
 	proto.RegisterType((*GlobalSpecType)(nil), "ves.io.schema.api_sec.api_discovery.GlobalSpecType")
 	golang_proto.RegisterType((*GlobalSpecType)(nil), "ves.io.schema.api_sec.api_discovery.GlobalSpecType")
 	proto.RegisterType((*CreateSpecType)(nil), "ves.io.schema.api_sec.api_discovery.CreateSpecType")
@@ -322,44 +920,105 @@ func init() {
 }
 
 var fileDescriptor_3ccd12d9c64560a6 = []byte{
-	// 585 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xc4, 0x54, 0x41, 0x6b, 0x13, 0x41,
-	0x14, 0xde, 0x97, 0x60, 0xc1, 0x29, 0xa6, 0x69, 0x44, 0xa8, 0x51, 0xc6, 0x98, 0x56, 0x0d, 0x2d,
-	0xbb, 0x2b, 0x2d, 0x0a, 0x2a, 0x88, 0x49, 0x0d, 0x55, 0x44, 0x5b, 0x63, 0x7b, 0xb0, 0x6a, 0xd7,
-	0xd9, 0xed, 0x74, 0xb3, 0x98, 0xed, 0x0c, 0xb3, 0xb3, 0x6b, 0x2b, 0x22, 0x55, 0x14, 0x3c, 0x4a,
-	0xfd, 0x13, 0xfe, 0x06, 0xf1, 0xd0, 0x8b, 0x20, 0x9e, 0x7a, 0xcc, 0xcd, 0x76, 0x73, 0xd1, 0x5b,
-	0x7f, 0x82, 0xec, 0x34, 0x4a, 0xb6, 0x05, 0xe9, 0x41, 0xe8, 0x69, 0xdf, 0xf0, 0xbd, 0xef, 0x7d,
-	0xdf, 0xf7, 0xd8, 0x19, 0x64, 0x46, 0x34, 0x30, 0x3c, 0x66, 0x06, 0x4e, 0x93, 0xfa, 0xc4, 0x24,
-	0xdc, 0xb3, 0x02, 0xea, 0xa8, 0xef, 0xa2, 0x17, 0x38, 0x2c, 0xa2, 0x62, 0xd5, 0x94, 0xab, 0x9c,
-	0x06, 0x06, 0x17, 0x4c, 0xb2, 0xc2, 0xf0, 0x2e, 0xc1, 0xd8, 0x25, 0x18, 0x5d, 0x82, 0x91, 0x22,
-	0x14, 0x75, 0xd7, 0x93, 0xcd, 0xd0, 0x36, 0x1c, 0xe6, 0x9b, 0x2e, 0x73, 0x99, 0xa9, 0xb8, 0x76,
-	0xb8, 0xa4, 0x4e, 0xea, 0xa0, 0xaa, 0xdd, 0x99, 0xc5, 0x53, 0x69, 0x13, 0x8c, 0x4b, 0x8f, 0x2d,
-	0x77, 0x05, 0x8b, 0x27, 0xd3, 0x60, 0x8f, 0x97, 0xe2, 0xe9, 0x34, 0x14, 0x91, 0x96, 0xb7, 0x48,
-	0x24, 0xed, 0xa2, 0xa5, 0x3d, 0xa8, 0x47, 0x9f, 0x5b, 0xe9, 0xd1, 0x67, 0xf6, 0x77, 0x04, 0xbd,
-	0x02, 0xe5, 0x1f, 0x80, 0x72, 0x93, 0x61, 0x20, 0x99, 0x5f, 0x0d, 0x65, 0x73, 0x76, 0x95, 0xd3,
-	0x82, 0x87, 0x72, 0x9c, 0x08, 0xe2, 0x53, 0x49, 0x85, 0x95, 0xf4, 0x0e, 0x41, 0x09, 0x2a, 0xb9,
-	0xf1, 0xcb, 0xc6, 0x01, 0x16, 0x63, 0x24, 0x63, 0x66, 0xfe, 0xd0, 0x93, 0x79, 0x35, 0xf4, 0xf9,
-	0xd7, 0x46, 0xf6, 0xc8, 0x1b, 0xc8, 0xe4, 0xa1, 0x71, 0x8c, 0xf7, 0x42, 0x05, 0xbb, 0x57, 0x6a,
-	0x99, 0xf8, 0x74, 0x28, 0x53, 0x82, 0xca, 0xd1, 0xda, 0x35, 0x45, 0x11, 0xd9, 0xca, 0x5a, 0xa6,
-	0x5b, 0xb5, 0x01, 0x92, 0xaa, 0x2c, 0x4a, 0xe3, 0x78, 0xe1, 0xd1, 0xd9, 0xe1, 0x91, 0x73, 0xe7,
-	0x2f, 0x8c, 0x8e, 0x3d, 0xd6, 0x8d, 0x05, 0xeb, 0xe9, 0xcb, 0x57, 0x17, 0xf5, 0x2b, 0x55, 0x7d,
-	0x9e, 0xe8, 0x2f, 0x9e, 0x8c, 0x8d, 0xf4, 0x68, 0xdc, 0x23, 0x3e, 0x2d, 0xbf, 0x07, 0x94, 0x9b,
-	0x6a, 0x31, 0x9b, 0xb4, 0x1e, 0x70, 0xea, 0x28, 0xd9, 0x08, 0x0d, 0x3a, 0x2a, 0xb3, 0x45, 0x42,
-	0xd9, 0x54, 0x19, 0x83, 0x21, 0x28, 0x65, 0x2b, 0xfd, 0xe3, 0x13, 0x07, 0x0a, 0x99, 0xde, 0x58,
-	0xed, 0x84, 0x32, 0xb9, 0x0e, 0x99, 0x3c, 0x8a, 0xb7, 0xbe, 0x66, 0xfb, 0xd6, 0xbf, 0xa8, 0xb0,
-	0x03, 0x4e, 0xaa, 0x2d, 0x28, 0xbf, 0x4d, 0x96, 0x2d, 0x28, 0x91, 0xf4, 0xaf, 0x15, 0xeb, 0xff,
-	0x5a, 0xd9, 0xa7, 0x79, 0x75, 0xf0, 0xfb, 0xf5, 0x3d, 0xf1, 0xcb, 0xef, 0x00, 0x0d, 0x34, 0x28,
-	0x6f, 0x11, 0xe7, 0x70, 0x7d, 0xbc, 0x06, 0xd4, 0x3f, 0x45, 0xe5, 0x61, 0x7a, 0x18, 0xbd, 0x81,
-	0x06, 0xf7, 0xfd, 0xb1, 0x85, 0xe3, 0x68, 0xe0, 0xfe, 0x5c, 0xbd, 0xf1, 0xd0, 0x9a, 0xa9, 0x36,
-	0xaa, 0x77, 0xeb, 0xb3, 0xf5, 0x46, 0x5e, 0x2b, 0x20, 0xd4, 0x77, 0xab, 0x5e, 0xbd, 0x59, 0x6f,
-	0xe4, 0x21, 0xa9, 0x27, 0xa7, 0xa7, 0xef, 0xdc, 0xae, 0xe7, 0x33, 0xb5, 0x8f, 0xb0, 0xb9, 0x8d,
-	0xb5, 0xf6, 0x36, 0xd6, 0x76, 0xb6, 0x31, 0xac, 0xc5, 0x18, 0x3e, 0xc5, 0x18, 0xbe, 0xc5, 0x18,
-	0x36, 0x63, 0x0c, 0xed, 0x18, 0xc3, 0x56, 0x8c, 0xe1, 0x67, 0x8c, 0xb5, 0x9d, 0x18, 0xc3, 0x87,
-	0x0e, 0xd6, 0x36, 0x3a, 0x18, 0x36, 0x3b, 0x58, 0x6b, 0x77, 0xb0, 0x36, 0x3f, 0xe7, 0x32, 0xfe,
-	0xcc, 0x35, 0x22, 0xd6, 0x92, 0x54, 0x08, 0x62, 0x84, 0x81, 0xa9, 0x8a, 0x25, 0x26, 0x7c, 0x9d,
-	0x0b, 0x16, 0x79, 0x8b, 0x54, 0xe8, 0x4b, 0x97, 0x56, 0x1c, 0x93, 0xdb, 0x2e, 0x33, 0xe9, 0x8a,
-	0xec, 0x5e, 0xe6, 0x7f, 0x3d, 0x68, 0x76, 0x9f, 0xba, 0xde, 0x13, 0xbf, 0x03, 0x00, 0x00, 0xff,
-	0xff, 0x90, 0x40, 0x8d, 0x2f, 0xfe, 0x04, 0x00, 0x00,
+	// 1562 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xec, 0x57, 0x5d, 0x8f, 0x1b, 0x57,
+	0x19, 0xf6, 0x19, 0x7b, 0x1d, 0xfb, 0x75, 0xd6, 0x9e, 0x0e, 0x8b, 0xe2, 0x6c, 0xdb, 0xe9, 0x89,
+	0x53, 0xd8, 0xd5, 0x36, 0x3b, 0x4e, 0x9c, 0xf2, 0xd1, 0x80, 0x22, 0xec, 0xcd, 0x68, 0x9d, 0xd0,
+	0x4d, 0xdc, 0x59, 0xaf, 0xd4, 0x96, 0xd2, 0xe1, 0x78, 0xe6, 0xd8, 0x1e, 0xed, 0xd8, 0x33, 0xcc,
+	0x1c, 0xbb, 0x31, 0xaa, 0x50, 0x80, 0xbb, 0x08, 0x55, 0xa8, 0x20, 0x04, 0x88, 0x1f, 0xc0, 0x4f,
+	0x40, 0x75, 0x85, 0x56, 0x95, 0x40, 0x55, 0xaf, 0xf6, 0x82, 0x8b, 0x15, 0x17, 0xd0, 0x78, 0x6f,
+	0xe0, 0x2e, 0xe2, 0x17, 0xa0, 0x39, 0x33, 0xfe, 0x5c, 0xb4, 0x35, 0x02, 0x71, 0xd5, 0x2b, 0x1f,
+	0xcf, 0x79, 0xbf, 0xe6, 0x79, 0x9e, 0xf7, 0x3d, 0x67, 0xa0, 0xd8, 0xa7, 0xbe, 0x62, 0x39, 0x45,
+	0xdf, 0x68, 0xd3, 0x0e, 0x29, 0x12, 0xd7, 0xd2, 0x7d, 0x6a, 0xf0, 0x5f, 0xd3, 0xf2, 0x0d, 0xa7,
+	0x4f, 0xbd, 0x41, 0x91, 0x0d, 0x5c, 0xea, 0x2b, 0xae, 0xe7, 0x30, 0x47, 0xba, 0x1a, 0x3a, 0x28,
+	0xa1, 0x83, 0x12, 0x39, 0x28, 0x73, 0x0e, 0xeb, 0xdb, 0x2d, 0x8b, 0xb5, 0x7b, 0x0d, 0xc5, 0x70,
+	0x3a, 0xc5, 0x96, 0xd3, 0x72, 0x8a, 0xdc, 0xb7, 0xd1, 0x6b, 0xf2, 0x7f, 0xfc, 0x0f, 0x5f, 0x85,
+	0x31, 0xd7, 0x9f, 0x9d, 0x2f, 0xc2, 0x71, 0x99, 0xe5, 0x74, 0xa3, 0x84, 0xeb, 0x97, 0xe7, 0x37,
+	0x67, 0x6a, 0x59, 0x7f, 0x6e, 0x7e, 0xab, 0x4f, 0x6c, 0xcb, 0x24, 0x8c, 0x46, 0xbb, 0x78, 0x61,
+	0xd7, 0xa2, 0xef, 0xe8, 0xf3, 0xa1, 0x5f, 0x38, 0x6b, 0xe1, 0xcf, 0x26, 0x28, 0xfc, 0x02, 0x41,
+	0x4e, 0x7d, 0x68, 0xd8, 0x3d, 0xdf, 0x72, 0xba, 0x3b, 0x4e, 0xb7, 0x69, 0xb5, 0x24, 0x05, 0x92,
+	0x56, 0xab, 0xeb, 0x78, 0x34, 0x2f, 0x60, 0xb4, 0x99, 0x29, 0xad, 0x29, 0xf3, 0x88, 0xa8, 0x1d,
+	0x97, 0x0d, 0xaa, 0x31, 0x2d, 0xb2, 0x92, 0xae, 0xc3, 0x05, 0xe2, 0x19, 0x6d, 0xab, 0x4f, 0xf3,
+	0xf1, 0x73, 0x1d, 0xc6, 0x66, 0x95, 0xcb, 0xb0, 0x4a, 0x8c, 0xa0, 0x4e, 0xdd, 0x68, 0x3b, 0x96,
+	0x41, 0xa5, 0xd4, 0xd1, 0x10, 0x09, 0xc7, 0x43, 0x84, 0xee, 0x25, 0x52, 0x48, 0x14, 0x0a, 0x7f,
+	0x43, 0x90, 0xdd, 0xe9, 0xf9, 0xcc, 0xe9, 0x94, 0x7b, 0xac, 0x5d, 0x1f, 0xb8, 0x54, 0xb2, 0x20,
+	0xeb, 0x12, 0x8f, 0x74, 0x28, 0xa3, 0x9e, 0x1e, 0xbc, 0x42, 0x1e, 0x61, 0xb4, 0x99, 0x2d, 0x7d,
+	0x55, 0x59, 0x82, 0x2f, 0x25, 0x08, 0x53, 0x1b, 0xbb, 0x07, 0xf1, 0x2a, 0xf0, 0xc1, 0x3f, 0x8e,
+	0xe2, 0x2b, 0x3f, 0x46, 0x82, 0x88, 0xb4, 0x55, 0x77, 0x76, 0x4b, 0x6a, 0xcc, 0xa6, 0xea, 0x92,
+	0x4e, 0x08, 0x44, 0xba, 0xf2, 0x0d, 0xee, 0xe2, 0xc5, 0x37, 0x1f, 0x09, 0xd1, 0xea, 0x04, 0xa1,
+	0x60, 0x55, 0xf0, 0x70, 0x49, 0x7e, 0xfb, 0x3b, 0x57, 0xae, 0xbe, 0xf8, 0xa5, 0x2f, 0x6f, 0x6c,
+	0xbd, 0xf4, 0xd6, 0xb6, 0xf2, 0xb6, 0xfe, 0xbd, 0x77, 0x7f, 0x78, 0x7d, 0xfb, 0x95, 0xf2, 0xf6,
+	0x9b, 0x64, 0xfb, 0x07, 0xdf, 0x7d, 0xe9, 0xc5, 0x99, 0x1c, 0xf7, 0x49, 0x87, 0x16, 0x3e, 0x10,
+	0x40, 0xaa, 0xd6, 0xeb, 0xb5, 0x2a, 0x25, 0x26, 0xf5, 0x76, 0x3c, 0x8b, 0x51, 0xcf, 0x22, 0xd2,
+	0x4d, 0x80, 0xa6, 0x45, 0x6d, 0x33, 0x4c, 0x8b, 0x78, 0xda, 0xb5, 0x28, 0xd9, 0xc7, 0x61, 0xb2,
+	0xb0, 0x00, 0x2d, 0xcd, 0xed, 0x82, 0x58, 0x52, 0x1b, 0xa0, 0x43, 0x98, 0xd1, 0x0e, 0x61, 0x11,
+	0x38, 0x2c, 0xca, 0x52, 0xb0, 0xec, 0x05, 0x6e, 0x1c, 0x8e, 0xcb, 0x7f, 0x19, 0xa2, 0x8c, 0xfa,
+	0x7a, 0x79, 0xa7, 0xae, 0xef, 0x95, 0xeb, 0x3b, 0xd5, 0x19, 0x74, 0xd2, 0x9d, 0xb1, 0x95, 0xb4,
+	0x05, 0x2b, 0x7d, 0x62, 0xf7, 0x42, 0xa2, 0xa7, 0x95, 0x6d, 0x3e, 0x4a, 0x4d, 0x01, 0xd1, 0x42,
+	0x13, 0xe9, 0x0d, 0x48, 0xd9, 0x8e, 0x41, 0x02, 0x9a, 0xf3, 0x09, 0x5e, 0xd3, 0x8d, 0xa5, 0x6a,
+	0xd2, 0x7a, 0x36, 0x7d, 0x35, 0x72, 0x9c, 0x63, 0x69, 0x12, 0xae, 0xf0, 0xa3, 0x38, 0x64, 0x03,
+	0xb3, 0x9a, 0xe7, 0xb8, 0xd4, 0x63, 0x16, 0xf5, 0xa5, 0x3a, 0xa4, 0xe9, 0x58, 0xc7, 0x91, 0x6e,
+	0x5f, 0x5e, 0x2a, 0xdd, 0x82, 0xfa, 0xab, 0x31, 0x6d, 0x1a, 0x48, 0x7a, 0x19, 0xd2, 0x56, 0x77,
+	0x1c, 0xf5, 0x7c, 0x71, 0x4f, 0x0d, 0xa5, 0x43, 0x58, 0x6b, 0x33, 0xe6, 0xea, 0x6d, 0xce, 0xad,
+	0x6e, 0x44, 0xe4, 0xe6, 0x93, 0x3c, 0xc0, 0xd7, 0x96, 0x2a, 0xeb, 0xac, 0x36, 0xaa, 0x48, 0x93,
+	0x82, 0xb0, 0x0b, 0x8a, 0xb9, 0x0e, 0x17, 0x5c, 0xc2, 0x18, 0xf5, 0xba, 0xf9, 0x0b, 0x0b, 0xa4,
+	0x24, 0xa6, 0xa4, 0x54, 0x91, 0x36, 0x36, 0xab, 0x3c, 0x07, 0xa2, 0xd7, 0xb3, 0x29, 0x57, 0xcb,
+	0x99, 0x06, 0xac, 0xac, 0x41, 0x6a, 0x5c, 0x30, 0x7f, 0x9a, 0x3c, 0x1e, 0xa2, 0x44, 0xd8, 0x96,
+	0xf7, 0x12, 0xa9, 0x84, 0xb8, 0x72, 0x2f, 0x91, 0x5a, 0x11, 0x93, 0x85, 0xc7, 0x09, 0x58, 0xbd,
+	0x33, 0x2e, 0x37, 0x20, 0x43, 0xba, 0x05, 0xa9, 0x0e, 0x65, 0xc4, 0x24, 0x8c, 0x70, 0xe5, 0x66,
+	0x4a, 0xf2, 0xc2, 0xab, 0xee, 0x51, 0xdf, 0x27, 0x2d, 0xba, 0x47, 0x19, 0x09, 0xe4, 0xa4, 0x4d,
+	0xec, 0xa5, 0xb7, 0x20, 0xc7, 0x6b, 0x72, 0x27, 0x8c, 0x46, 0x24, 0xde, 0x5c, 0x5a, 0x33, 0x53,
+	0x31, 0x68, 0x59, 0x6f, 0x5e, 0x1c, 0x06, 0x24, 0x6d, 0xd2, 0xa0, 0xb6, 0x9f, 0x8f, 0xe3, 0xf8,
+	0x66, 0xa6, 0x74, 0x7b, 0xa9, 0xa0, 0x73, 0x6f, 0xa7, 0xbc, 0xca, 0x03, 0xa8, 0x5d, 0xe6, 0x0d,
+	0x2a, 0x99, 0xd1, 0xa7, 0x7f, 0x8c, 0x27, 0x1f, 0x7f, 0x88, 0x84, 0x54, 0x4c, 0x8b, 0x42, 0xaf,
+	0xbf, 0x02, 0x99, 0x19, 0x1b, 0x49, 0x84, 0xf8, 0x21, 0x1d, 0x84, 0x2d, 0xac, 0x05, 0x4b, 0x69,
+	0x6d, 0xdc, 0x3c, 0x7c, 0x9a, 0x44, 0x6d, 0x72, 0x4b, 0xf8, 0x3a, 0xba, 0xf5, 0x07, 0xf4, 0xd1,
+	0x10, 0x6d, 0x40, 0x0e, 0x52, 0x7b, 0x63, 0x40, 0xe2, 0x37, 0xae, 0xdd, 0x84, 0x35, 0xc8, 0x05,
+	0xb9, 0xf1, 0xcc, 0xab, 0xa0, 0xd2, 0x27, 0x43, 0xf4, 0x1e, 0x82, 0x4b, 0x90, 0x08, 0x7a, 0x7f,
+	0x3d, 0x07, 0xab, 0x63, 0x10, 0x95, 0x60, 0x66, 0x80, 0x0f, 0x89, 0x00, 0xdb, 0xad, 0x43, 0xb0,
+	0xe0, 0x36, 0x14, 0x17, 0x50, 0x55, 0xfe, 0x9d, 0x30, 0x95, 0xe9, 0xc8, 0x29, 0x65, 0x02, 0xe1,
+	0xe1, 0x50, 0x63, 0xb0, 0x01, 0x97, 0x16, 0xfd, 0x23, 0x11, 0x95, 0x2e, 0xd6, 0x08, 0x6b, 0xe3,
+	0x5a, 0xf8, 0xaf, 0xf0, 0x67, 0x01, 0x9e, 0x3f, 0xf0, 0xa9, 0x77, 0x87, 0x36, 0xad, 0x2e, 0x35,
+	0xcb, 0xae, 0x35, 0x01, 0xaf, 0xe6, 0xd8, 0x96, 0x31, 0x90, 0xde, 0x85, 0xdc, 0x04, 0x59, 0x3d,
+	0x08, 0xea, 0xe7, 0x11, 0xe7, 0xa2, 0xf4, 0x9f, 0x73, 0x51, 0x79, 0x81, 0x0b, 0xfb, 0x7d, 0x24,
+	0x88, 0xe6, 0x78, 0x95, 0x47, 0x9c, 0x93, 0xf7, 0x3f, 0xe4, 0xa3, 0x22, 0x6b, 0xce, 0xda, 0xfb,
+	0x33, 0x7d, 0xfc, 0x99, 0x87, 0xd4, 0xd4, 0x70, 0x66, 0xa6, 0xf4, 0x29, 0x1f, 0x61, 0xff, 0xfd,
+	0x4c, 0xe9, 0xd3, 0xca, 0x55, 0xb8, 0x64, 0xd2, 0x26, 0xe9, 0xd9, 0x4c, 0x6f, 0xd0, 0x36, 0xe9,
+	0x5b, 0x8e, 0x37, 0xdb, 0x85, 0xf1, 0xe3, 0x21, 0x0a, 0x3a, 0x4d, 0x10, 0xe3, 0x85, 0xdf, 0x27,
+	0x20, 0xbb, 0x6b, 0x3b, 0x0d, 0x62, 0xef, 0xbb, 0xd4, 0xe0, 0x13, 0xb8, 0x0f, 0xcf, 0x18, 0xfc,
+	0x60, 0xd4, 0x49, 0x8f, 0x85, 0x13, 0x7f, 0x8c, 0xe4, 0x72, 0xad, 0x32, 0x7f, 0xac, 0x56, 0xbe,
+	0x38, 0x81, 0x12, 0x66, 0x01, 0xcc, 0x19, 0x73, 0x66, 0xbe, 0xf4, 0x5b, 0x04, 0x57, 0x7a, 0x3e,
+	0xf5, 0x74, 0x33, 0xa4, 0x58, 0x9f, 0x8b, 0xaa, 0xbb, 0x9c, 0xe5, 0xa8, 0x67, 0x2b, 0x4b, 0x15,
+	0x72, 0xae, 0x5e, 0x2a, 0xd9, 0xa7, 0xc3, 0xe8, 0xb8, 0x7b, 0xcc, 0x0b, 0x7a, 0xbe, 0x77, 0x9e,
+	0xf9, 0xad, 0xf7, 0x84, 0x7f, 0xde, 0x8e, 0x97, 0xae, 0xdd, 0xf8, 0x68, 0x88, 0x7e, 0x22, 0xc0,
+	0x5f, 0x11, 0x88, 0x9c, 0xf8, 0xf9, 0xce, 0xa9, 0xfc, 0x09, 0xc1, 0xaf, 0x50, 0xb8, 0x41, 0x3c,
+	0x8a, 0x69, 0xd0, 0x81, 0x84, 0x51, 0x13, 0xfb, 0xf4, 0xfb, 0x3d, 0xda, 0x65, 0x16, 0xb1, 0xed,
+	0xc1, 0x35, 0xcc, 0x1c, 0x17, 0x33, 0x07, 0x37, 0x1c, 0xc6, 0x9c, 0x8e, 0x82, 0xef, 0x36, 0x71,
+	0xd7, 0xc1, 0xde, 0xc4, 0x8d, 0x98, 0x26, 0x35, 0xaf, 0x61, 0x62, 0xdb, 0x98, 0x79, 0xa4, 0xd9,
+	0xb4, 0x0c, 0xfc, 0x8e, 0x65, 0xdb, 0xb8, 0x41, 0xf1, 0xf8, 0xed, 0xa8, 0x89, 0x1d, 0x0f, 0x87,
+	0xf7, 0x23, 0x13, 0x37, 0x88, 0x1f, 0x3c, 0xe8, 0x62, 0xd6, 0xa6, 0xd8, 0xa7, 0x36, 0xe5, 0x77,
+	0x1f, 0x6c, 0x85, 0x0f, 0x36, 0xee, 0x84, 0x6a, 0x80, 0x2b, 0x95, 0x50, 0x0e, 0x3d, 0x0f, 0x3b,
+	0x4d, 0xbe, 0xc5, 0x9b, 0x7f, 0x9f, 0xb2, 0x0d, 0xcc, 0x3b, 0x54, 0x91, 0x92, 0x56, 0xd7, 0xb7,
+	0x4c, 0x0a, 0x18, 0x9e, 0x0d, 0x79, 0xc4, 0x01, 0x43, 0x41, 0xe5, 0xe1, 0xc9, 0x88, 0x43, 0xb2,
+	0xd0, 0x8d, 0xc2, 0xaf, 0x05, 0xc8, 0xee, 0x78, 0x94, 0x30, 0x3a, 0x91, 0x8e, 0xfe, 0xbf, 0x95,
+	0xce, 0x59, 0x8d, 0xfc, 0xf4, 0xff, 0xab, 0x91, 0xcf, 0xd2, 0xc4, 0xa5, 0x4f, 0x6e, 0x2f, 0x74,
+	0x4f, 0xa8, 0x91, 0xc2, 0x6f, 0x04, 0xc8, 0x69, 0xd4, 0xb5, 0x89, 0xf1, 0x39, 0x38, 0x67, 0xc0,
+	0xf9, 0xa5, 0x00, 0x99, 0x5d, 0xca, 0x3e, 0x07, 0x66, 0x01, 0x98, 0xad, 0x6f, 0xc1, 0x33, 0x67,
+	0xbe, 0x22, 0xa4, 0x2f, 0x40, 0xee, 0xb5, 0x03, 0x55, 0x7b, 0x43, 0xaf, 0x95, 0xb5, 0xf2, 0x9e,
+	0x5a, 0x57, 0x35, 0x31, 0x26, 0x01, 0x24, 0xab, 0x6a, 0xf9, 0x8e, 0xaa, 0x89, 0x28, 0x58, 0xef,
+	0x3c, 0x78, 0xf0, 0xed, 0xbb, 0xaa, 0x28, 0x6c, 0x15, 0xe1, 0xe2, 0xec, 0xe5, 0x56, 0xca, 0xc0,
+	0x05, 0x4d, 0x7d, 0xed, 0x40, 0xdd, 0xaf, 0x8b, 0x31, 0xe9, 0x22, 0xa4, 0x34, 0x75, 0xbf, 0xf6,
+	0xe0, 0xfe, 0xbe, 0x2a, 0xa2, 0xf5, 0xc4, 0xd1, 0x10, 0xc5, 0xb6, 0xbe, 0x09, 0xe9, 0xc9, 0x0d,
+	0x5d, 0xca, 0xc1, 0xec, 0xfd, 0x5c, 0x8c, 0x49, 0xab, 0x90, 0xde, 0x3f, 0xa8, 0xec, 0xd7, 0xb5,
+	0xbb, 0xf7, 0x77, 0x45, 0x24, 0xa5, 0x61, 0x45, 0x53, 0x77, 0xd5, 0xd7, 0x45, 0x21, 0xf4, 0xae,
+	0xfc, 0x1c, 0x1d, 0x3f, 0x91, 0x63, 0x27, 0x4f, 0xe4, 0xd8, 0xd3, 0x27, 0x32, 0x7a, 0x34, 0x92,
+	0xd1, 0xef, 0x46, 0x32, 0xfa, 0x78, 0x24, 0xa3, 0xe3, 0x91, 0x8c, 0x4e, 0x46, 0x32, 0xfa, 0x74,
+	0x24, 0xa3, 0xbf, 0x8f, 0xe4, 0xd8, 0xd3, 0x91, 0x8c, 0x7e, 0x76, 0x2a, 0xc7, 0x8e, 0x4e, 0x65,
+	0x74, 0x7c, 0x2a, 0xc7, 0x4e, 0x4e, 0xe5, 0xd8, 0x9b, 0x07, 0x2d, 0xc7, 0x3d, 0x6c, 0x29, 0x7d,
+	0xc7, 0x66, 0xd4, 0xf3, 0x88, 0xd2, 0xf3, 0x8b, 0x7c, 0xd1, 0x74, 0xbc, 0xce, 0xb6, 0xeb, 0x39,
+	0x7d, 0xcb, 0xa4, 0xde, 0x76, 0xf3, 0x2b, 0x0f, 0x8d, 0xa2, 0xdb, 0x68, 0x39, 0x45, 0xfa, 0x90,
+	0x45, 0x9f, 0x99, 0xe7, 0x7d, 0x6a, 0x37, 0x92, 0xfc, 0xc3, 0xf3, 0xe6, 0xbf, 0x02, 0x00, 0x00,
+	0xff, 0xff, 0x90, 0x3c, 0xcc, 0xec, 0x98, 0x0f, 0x00, 0x00,
 }
 
 func (x AuthParameterType) String() string {
@@ -368,6 +1027,98 @@ func (x AuthParameterType) String() string {
 		return s
 	}
 	return strconv.Itoa(int(x))
+}
+func (x RuleLocation) String() string {
+	s, ok := RuleLocation_name[int32(x)]
+	if ok {
+		return s
+	}
+	return strconv.Itoa(int(x))
+}
+func (x MatchType) String() string {
+	s, ok := MatchType_name[int32(x)]
+	if ok {
+		return s
+	}
+	return strconv.Itoa(int(x))
+}
+func (this *ExclusionConfig) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ExclusionConfig)
+	if !ok {
+		that2, ok := that.(ExclusionConfig)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if that1.ActionChoice == nil {
+		if this.ActionChoice != nil {
+			return false
+		}
+	} else if this.ActionChoice == nil {
+		return false
+	} else if !this.ActionChoice.Equal(that1.ActionChoice) {
+		return false
+	}
+	return true
+}
+func (this *ExclusionConfig_Ignore) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ExclusionConfig_Ignore)
+	if !ok {
+		that2, ok := that.(ExclusionConfig_Ignore)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.Ignore.Equal(that1.Ignore) {
+		return false
+	}
+	return true
+}
+func (this *ExclusionConfig_Archive) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ExclusionConfig_Archive)
+	if !ok {
+		that2, ok := that.(ExclusionConfig_Archive)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.Archive.Equal(that1.Archive) {
+		return false
+	}
+	return true
 }
 func (this *CustomAuthType) Equal(that interface{}) bool {
 	if that == nil {
@@ -392,6 +1143,295 @@ func (this *CustomAuthType) Equal(that interface{}) bool {
 		return false
 	}
 	if this.ParameterName != that1.ParameterName {
+		return false
+	}
+	return true
+}
+func (this *HTTPHeaderCriteria) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*HTTPHeaderCriteria)
+	if !ok {
+		that2, ok := that.(HTTPHeaderCriteria)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.FieldName != that1.FieldName {
+		return false
+	}
+	if this.MatchType != that1.MatchType {
+		return false
+	}
+	if this.Value != that1.Value {
+		return false
+	}
+	if this.Location != that1.Location {
+		return false
+	}
+	return true
+}
+func (this *RuleProperties) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*RuleProperties)
+	if !ok {
+		that2, ok := that.(RuleProperties)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if that1.RuleTypeChoice == nil {
+		if this.RuleTypeChoice != nil {
+			return false
+		}
+	} else if this.RuleTypeChoice == nil {
+		return false
+	} else if !this.RuleTypeChoice.Equal(that1.RuleTypeChoice) {
+		return false
+	}
+	if that1.Criteria == nil {
+		if this.Criteria != nil {
+			return false
+		}
+	} else if this.Criteria == nil {
+		return false
+	} else if !this.Criteria.Equal(that1.Criteria) {
+		return false
+	}
+	return true
+}
+func (this *RuleProperties_Exclusion) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*RuleProperties_Exclusion)
+	if !ok {
+		that2, ok := that.(RuleProperties_Exclusion)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.Exclusion.Equal(that1.Exclusion) {
+		return false
+	}
+	return true
+}
+func (this *RuleProperties_Inclusion) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*RuleProperties_Inclusion)
+	if !ok {
+		that2, ok := that.(RuleProperties_Inclusion)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.Inclusion.Equal(that1.Inclusion) {
+		return false
+	}
+	return true
+}
+func (this *RuleProperties_HttpHeaderCriteria) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*RuleProperties_HttpHeaderCriteria)
+	if !ok {
+		that2, ok := that.(RuleProperties_HttpHeaderCriteria)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.HttpHeaderCriteria.Equal(that1.HttpHeaderCriteria) {
+		return false
+	}
+	return true
+}
+func (this *RuleProperties_Pattern) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*RuleProperties_Pattern)
+	if !ok {
+		that2, ok := that.(RuleProperties_Pattern)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Pattern != that1.Pattern {
+		return false
+	}
+	return true
+}
+func (this *DiscoveryRule) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*DiscoveryRule)
+	if !ok {
+		that2, ok := that.(DiscoveryRule)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.Metadata.Equal(that1.Metadata) {
+		return false
+	}
+	if !this.RuleProperties.Equal(that1.RuleProperties) {
+		return false
+	}
+	if len(this.Labels) != len(that1.Labels) {
+		return false
+	}
+	for i := range this.Labels {
+		if this.Labels[i] != that1.Labels[i] {
+			return false
+		}
+	}
+	return true
+}
+func (this *UserDefinedApiDiscoveryPolicy) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*UserDefinedApiDiscoveryPolicy)
+	if !ok {
+		that2, ok := that.(UserDefinedApiDiscoveryPolicy)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if len(this.DiscoveryRules) != len(that1.DiscoveryRules) {
+		return false
+	}
+	for i := range this.DiscoveryRules {
+		if !this.DiscoveryRules[i].Equal(that1.DiscoveryRules[i]) {
+			return false
+		}
+	}
+	if that1.DefaultBehaviorChoice == nil {
+		if this.DefaultBehaviorChoice != nil {
+			return false
+		}
+	} else if this.DefaultBehaviorChoice == nil {
+		return false
+	} else if !this.DefaultBehaviorChoice.Equal(that1.DefaultBehaviorChoice) {
+		return false
+	}
+	return true
+}
+func (this *UserDefinedApiDiscoveryPolicy_Inclusive) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*UserDefinedApiDiscoveryPolicy_Inclusive)
+	if !ok {
+		that2, ok := that.(UserDefinedApiDiscoveryPolicy_Inclusive)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.Inclusive.Equal(that1.Inclusive) {
+		return false
+	}
+	return true
+}
+func (this *UserDefinedApiDiscoveryPolicy_Exclusive) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*UserDefinedApiDiscoveryPolicy_Exclusive)
+	if !ok {
+		that2, ok := that.(UserDefinedApiDiscoveryPolicy_Exclusive)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.Exclusive.Equal(that1.Exclusive) {
 		return false
 	}
 	return true
@@ -423,6 +1463,9 @@ func (this *GlobalSpecType) Equal(that interface{}) bool {
 			return false
 		}
 	}
+	if !this.UserDefinedApiDiscoveryPolicy.Equal(that1.UserDefinedApiDiscoveryPolicy) {
+		return false
+	}
 	return true
 }
 func (this *CreateSpecType) Equal(that interface{}) bool {
@@ -451,6 +1494,9 @@ func (this *CreateSpecType) Equal(that interface{}) bool {
 		if !this.CustomAuthTypes[i].Equal(that1.CustomAuthTypes[i]) {
 			return false
 		}
+	}
+	if !this.UserDefinedApiDiscoveryPolicy.Equal(that1.UserDefinedApiDiscoveryPolicy) {
+		return false
 	}
 	return true
 }
@@ -481,6 +1527,9 @@ func (this *ReplaceSpecType) Equal(that interface{}) bool {
 			return false
 		}
 	}
+	if !this.UserDefinedApiDiscoveryPolicy.Equal(that1.UserDefinedApiDiscoveryPolicy) {
+		return false
+	}
 	return true
 }
 func (this *GetSpecType) Equal(that interface{}) bool {
@@ -510,7 +1559,38 @@ func (this *GetSpecType) Equal(that interface{}) bool {
 			return false
 		}
 	}
+	if !this.UserDefinedApiDiscoveryPolicy.Equal(that1.UserDefinedApiDiscoveryPolicy) {
+		return false
+	}
 	return true
+}
+func (this *ExclusionConfig) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&api_discovery.ExclusionConfig{")
+	if this.ActionChoice != nil {
+		s = append(s, "ActionChoice: "+fmt.Sprintf("%#v", this.ActionChoice)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *ExclusionConfig_Ignore) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&api_discovery.ExclusionConfig_Ignore{` +
+		`Ignore:` + fmt.Sprintf("%#v", this.Ignore) + `}`}, ", ")
+	return s
+}
+func (this *ExclusionConfig_Archive) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&api_discovery.ExclusionConfig_Archive{` +
+		`Archive:` + fmt.Sprintf("%#v", this.Archive) + `}`}, ", ")
+	return s
 }
 func (this *CustomAuthType) GoString() string {
 	if this == nil {
@@ -523,14 +1603,136 @@ func (this *CustomAuthType) GoString() string {
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
+func (this *HTTPHeaderCriteria) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 8)
+	s = append(s, "&api_discovery.HTTPHeaderCriteria{")
+	s = append(s, "FieldName: "+fmt.Sprintf("%#v", this.FieldName)+",\n")
+	s = append(s, "MatchType: "+fmt.Sprintf("%#v", this.MatchType)+",\n")
+	s = append(s, "Value: "+fmt.Sprintf("%#v", this.Value)+",\n")
+	s = append(s, "Location: "+fmt.Sprintf("%#v", this.Location)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *RuleProperties) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 8)
+	s = append(s, "&api_discovery.RuleProperties{")
+	if this.RuleTypeChoice != nil {
+		s = append(s, "RuleTypeChoice: "+fmt.Sprintf("%#v", this.RuleTypeChoice)+",\n")
+	}
+	if this.Criteria != nil {
+		s = append(s, "Criteria: "+fmt.Sprintf("%#v", this.Criteria)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *RuleProperties_Exclusion) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&api_discovery.RuleProperties_Exclusion{` +
+		`Exclusion:` + fmt.Sprintf("%#v", this.Exclusion) + `}`}, ", ")
+	return s
+}
+func (this *RuleProperties_Inclusion) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&api_discovery.RuleProperties_Inclusion{` +
+		`Inclusion:` + fmt.Sprintf("%#v", this.Inclusion) + `}`}, ", ")
+	return s
+}
+func (this *RuleProperties_HttpHeaderCriteria) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&api_discovery.RuleProperties_HttpHeaderCriteria{` +
+		`HttpHeaderCriteria:` + fmt.Sprintf("%#v", this.HttpHeaderCriteria) + `}`}, ", ")
+	return s
+}
+func (this *RuleProperties_Pattern) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&api_discovery.RuleProperties_Pattern{` +
+		`Pattern:` + fmt.Sprintf("%#v", this.Pattern) + `}`}, ", ")
+	return s
+}
+func (this *DiscoveryRule) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 7)
+	s = append(s, "&api_discovery.DiscoveryRule{")
+	if this.Metadata != nil {
+		s = append(s, "Metadata: "+fmt.Sprintf("%#v", this.Metadata)+",\n")
+	}
+	if this.RuleProperties != nil {
+		s = append(s, "RuleProperties: "+fmt.Sprintf("%#v", this.RuleProperties)+",\n")
+	}
+	keysForLabels := make([]string, 0, len(this.Labels))
+	for k, _ := range this.Labels {
+		keysForLabels = append(keysForLabels, k)
+	}
+	github_com_gogo_protobuf_sortkeys.Strings(keysForLabels)
+	mapStringForLabels := "map[string]string{"
+	for _, k := range keysForLabels {
+		mapStringForLabels += fmt.Sprintf("%#v: %#v,", k, this.Labels[k])
+	}
+	mapStringForLabels += "}"
+	if this.Labels != nil {
+		s = append(s, "Labels: "+mapStringForLabels+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *UserDefinedApiDiscoveryPolicy) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 7)
+	s = append(s, "&api_discovery.UserDefinedApiDiscoveryPolicy{")
+	if this.DiscoveryRules != nil {
+		s = append(s, "DiscoveryRules: "+fmt.Sprintf("%#v", this.DiscoveryRules)+",\n")
+	}
+	if this.DefaultBehaviorChoice != nil {
+		s = append(s, "DefaultBehaviorChoice: "+fmt.Sprintf("%#v", this.DefaultBehaviorChoice)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *UserDefinedApiDiscoveryPolicy_Inclusive) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&api_discovery.UserDefinedApiDiscoveryPolicy_Inclusive{` +
+		`Inclusive:` + fmt.Sprintf("%#v", this.Inclusive) + `}`}, ", ")
+	return s
+}
+func (this *UserDefinedApiDiscoveryPolicy_Exclusive) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&api_discovery.UserDefinedApiDiscoveryPolicy_Exclusive{` +
+		`Exclusive:` + fmt.Sprintf("%#v", this.Exclusive) + `}`}, ", ")
+	return s
+}
 func (this *GlobalSpecType) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 5)
+	s := make([]string, 0, 6)
 	s = append(s, "&api_discovery.GlobalSpecType{")
 	if this.CustomAuthTypes != nil {
 		s = append(s, "CustomAuthTypes: "+fmt.Sprintf("%#v", this.CustomAuthTypes)+",\n")
+	}
+	if this.UserDefinedApiDiscoveryPolicy != nil {
+		s = append(s, "UserDefinedApiDiscoveryPolicy: "+fmt.Sprintf("%#v", this.UserDefinedApiDiscoveryPolicy)+",\n")
 	}
 	s = append(s, "}")
 	return strings.Join(s, "")
@@ -539,10 +1741,13 @@ func (this *CreateSpecType) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 5)
+	s := make([]string, 0, 6)
 	s = append(s, "&api_discovery.CreateSpecType{")
 	if this.CustomAuthTypes != nil {
 		s = append(s, "CustomAuthTypes: "+fmt.Sprintf("%#v", this.CustomAuthTypes)+",\n")
+	}
+	if this.UserDefinedApiDiscoveryPolicy != nil {
+		s = append(s, "UserDefinedApiDiscoveryPolicy: "+fmt.Sprintf("%#v", this.UserDefinedApiDiscoveryPolicy)+",\n")
 	}
 	s = append(s, "}")
 	return strings.Join(s, "")
@@ -551,10 +1756,13 @@ func (this *ReplaceSpecType) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 5)
+	s := make([]string, 0, 6)
 	s = append(s, "&api_discovery.ReplaceSpecType{")
 	if this.CustomAuthTypes != nil {
 		s = append(s, "CustomAuthTypes: "+fmt.Sprintf("%#v", this.CustomAuthTypes)+",\n")
+	}
+	if this.UserDefinedApiDiscoveryPolicy != nil {
+		s = append(s, "UserDefinedApiDiscoveryPolicy: "+fmt.Sprintf("%#v", this.UserDefinedApiDiscoveryPolicy)+",\n")
 	}
 	s = append(s, "}")
 	return strings.Join(s, "")
@@ -563,10 +1771,13 @@ func (this *GetSpecType) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 5)
+	s := make([]string, 0, 6)
 	s = append(s, "&api_discovery.GetSpecType{")
 	if this.CustomAuthTypes != nil {
 		s = append(s, "CustomAuthTypes: "+fmt.Sprintf("%#v", this.CustomAuthTypes)+",\n")
+	}
+	if this.UserDefinedApiDiscoveryPolicy != nil {
+		s = append(s, "UserDefinedApiDiscoveryPolicy: "+fmt.Sprintf("%#v", this.UserDefinedApiDiscoveryPolicy)+",\n")
 	}
 	s = append(s, "}")
 	return strings.Join(s, "")
@@ -578,6 +1789,80 @@ func valueToGoStringTypes(v interface{}, typ string) string {
 	}
 	pv := reflect.Indirect(rv).Interface()
 	return fmt.Sprintf("func(v %v) *%v { return &v } ( %#v )", typ, typ, pv)
+}
+func (m *ExclusionConfig) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ExclusionConfig) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ExclusionConfig) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.ActionChoice != nil {
+		{
+			size := m.ActionChoice.Size()
+			i -= size
+			if _, err := m.ActionChoice.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *ExclusionConfig_Ignore) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ExclusionConfig_Ignore) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.Ignore != nil {
+		{
+			size, err := m.Ignore.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	return len(dAtA) - i, nil
+}
+func (m *ExclusionConfig_Archive) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ExclusionConfig_Archive) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.Archive != nil {
+		{
+			size, err := m.Archive.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1a
+	}
+	return len(dAtA) - i, nil
 }
 func (m *CustomAuthType) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
@@ -614,6 +1899,330 @@ func (m *CustomAuthType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
+func (m *HTTPHeaderCriteria) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *HTTPHeaderCriteria) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *HTTPHeaderCriteria) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Location != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.Location))
+		i--
+		dAtA[i] = 0x20
+	}
+	if len(m.Value) > 0 {
+		i -= len(m.Value)
+		copy(dAtA[i:], m.Value)
+		i = encodeVarintTypes(dAtA, i, uint64(len(m.Value)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if m.MatchType != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.MatchType))
+		i--
+		dAtA[i] = 0x10
+	}
+	if len(m.FieldName) > 0 {
+		i -= len(m.FieldName)
+		copy(dAtA[i:], m.FieldName)
+		i = encodeVarintTypes(dAtA, i, uint64(len(m.FieldName)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *RuleProperties) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *RuleProperties) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *RuleProperties) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Criteria != nil {
+		{
+			size := m.Criteria.Size()
+			i -= size
+			if _, err := m.Criteria.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
+	}
+	if m.RuleTypeChoice != nil {
+		{
+			size := m.RuleTypeChoice.Size()
+			i -= size
+			if _, err := m.RuleTypeChoice.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *RuleProperties_Exclusion) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *RuleProperties_Exclusion) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.Exclusion != nil {
+		{
+			size, err := m.Exclusion.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	return len(dAtA) - i, nil
+}
+func (m *RuleProperties_Inclusion) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *RuleProperties_Inclusion) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.Inclusion != nil {
+		{
+			size, err := m.Inclusion.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1a
+	}
+	return len(dAtA) - i, nil
+}
+func (m *RuleProperties_HttpHeaderCriteria) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *RuleProperties_HttpHeaderCriteria) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.HttpHeaderCriteria != nil {
+		{
+			size, err := m.HttpHeaderCriteria.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x32
+	}
+	return len(dAtA) - i, nil
+}
+func (m *RuleProperties_Pattern) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *RuleProperties_Pattern) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	i -= len(m.Pattern)
+	copy(dAtA[i:], m.Pattern)
+	i = encodeVarintTypes(dAtA, i, uint64(len(m.Pattern)))
+	i--
+	dAtA[i] = 0x3a
+	return len(dAtA) - i, nil
+}
+func (m *DiscoveryRule) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *DiscoveryRule) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *DiscoveryRule) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Labels) > 0 {
+		keysForLabels := make([]string, 0, len(m.Labels))
+		for k := range m.Labels {
+			keysForLabels = append(keysForLabels, string(k))
+		}
+		github_com_gogo_protobuf_sortkeys.Strings(keysForLabels)
+		for iNdEx := len(keysForLabels) - 1; iNdEx >= 0; iNdEx-- {
+			v := m.Labels[string(keysForLabels[iNdEx])]
+			baseI := i
+			i -= len(v)
+			copy(dAtA[i:], v)
+			i = encodeVarintTypes(dAtA, i, uint64(len(v)))
+			i--
+			dAtA[i] = 0x12
+			i -= len(keysForLabels[iNdEx])
+			copy(dAtA[i:], keysForLabels[iNdEx])
+			i = encodeVarintTypes(dAtA, i, uint64(len(keysForLabels[iNdEx])))
+			i--
+			dAtA[i] = 0xa
+			i = encodeVarintTypes(dAtA, i, uint64(baseI-i))
+			i--
+			dAtA[i] = 0x1a
+		}
+	}
+	if m.RuleProperties != nil {
+		{
+			size, err := m.RuleProperties.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if m.Metadata != nil {
+		{
+			size, err := m.Metadata.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *UserDefinedApiDiscoveryPolicy) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *UserDefinedApiDiscoveryPolicy) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *UserDefinedApiDiscoveryPolicy) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.DefaultBehaviorChoice != nil {
+		{
+			size := m.DefaultBehaviorChoice.Size()
+			i -= size
+			if _, err := m.DefaultBehaviorChoice.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
+	}
+	if len(m.DiscoveryRules) > 0 {
+		for iNdEx := len(m.DiscoveryRules) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.DiscoveryRules[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTypes(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *UserDefinedApiDiscoveryPolicy_Inclusive) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *UserDefinedApiDiscoveryPolicy_Inclusive) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.Inclusive != nil {
+		{
+			size, err := m.Inclusive.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1a
+	}
+	return len(dAtA) - i, nil
+}
+func (m *UserDefinedApiDiscoveryPolicy_Exclusive) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *UserDefinedApiDiscoveryPolicy_Exclusive) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.Exclusive != nil {
+		{
+			size, err := m.Exclusive.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x22
+	}
+	return len(dAtA) - i, nil
+}
 func (m *GlobalSpecType) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -634,6 +2243,18 @@ func (m *GlobalSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if m.UserDefinedApiDiscoveryPolicy != nil {
+		{
+			size, err := m.UserDefinedApiDiscoveryPolicy.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
 	if len(m.CustomAuthTypes) > 0 {
 		for iNdEx := len(m.CustomAuthTypes) - 1; iNdEx >= 0; iNdEx-- {
 			{
@@ -671,6 +2292,18 @@ func (m *CreateSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if m.UserDefinedApiDiscoveryPolicy != nil {
+		{
+			size, err := m.UserDefinedApiDiscoveryPolicy.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
 	if len(m.CustomAuthTypes) > 0 {
 		for iNdEx := len(m.CustomAuthTypes) - 1; iNdEx >= 0; iNdEx-- {
 			{
@@ -708,6 +2341,18 @@ func (m *ReplaceSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if m.UserDefinedApiDiscoveryPolicy != nil {
+		{
+			size, err := m.UserDefinedApiDiscoveryPolicy.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
 	if len(m.CustomAuthTypes) > 0 {
 		for iNdEx := len(m.CustomAuthTypes) - 1; iNdEx >= 0; iNdEx-- {
 			{
@@ -745,6 +2390,18 @@ func (m *GetSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if m.UserDefinedApiDiscoveryPolicy != nil {
+		{
+			size, err := m.UserDefinedApiDiscoveryPolicy.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
 	if len(m.CustomAuthTypes) > 0 {
 		for iNdEx := len(m.CustomAuthTypes) - 1; iNdEx >= 0; iNdEx-- {
 			{
@@ -773,6 +2430,42 @@ func encodeVarintTypes(dAtA []byte, offset int, v uint64) int {
 	dAtA[offset] = uint8(v)
 	return base
 }
+func (m *ExclusionConfig) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.ActionChoice != nil {
+		n += m.ActionChoice.Size()
+	}
+	return n
+}
+
+func (m *ExclusionConfig_Ignore) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Ignore != nil {
+		l = m.Ignore.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *ExclusionConfig_Archive) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Archive != nil {
+		l = m.Archive.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
 func (m *CustomAuthType) Size() (n int) {
 	if m == nil {
 		return 0
@@ -789,6 +2482,157 @@ func (m *CustomAuthType) Size() (n int) {
 	return n
 }
 
+func (m *HTTPHeaderCriteria) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.FieldName)
+	if l > 0 {
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	if m.MatchType != 0 {
+		n += 1 + sovTypes(uint64(m.MatchType))
+	}
+	l = len(m.Value)
+	if l > 0 {
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	if m.Location != 0 {
+		n += 1 + sovTypes(uint64(m.Location))
+	}
+	return n
+}
+
+func (m *RuleProperties) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.RuleTypeChoice != nil {
+		n += m.RuleTypeChoice.Size()
+	}
+	if m.Criteria != nil {
+		n += m.Criteria.Size()
+	}
+	return n
+}
+
+func (m *RuleProperties_Exclusion) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Exclusion != nil {
+		l = m.Exclusion.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *RuleProperties_Inclusion) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Inclusion != nil {
+		l = m.Inclusion.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *RuleProperties_HttpHeaderCriteria) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.HttpHeaderCriteria != nil {
+		l = m.HttpHeaderCriteria.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *RuleProperties_Pattern) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Pattern)
+	n += 1 + l + sovTypes(uint64(l))
+	return n
+}
+func (m *DiscoveryRule) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Metadata != nil {
+		l = m.Metadata.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	if m.RuleProperties != nil {
+		l = m.RuleProperties.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	if len(m.Labels) > 0 {
+		for k, v := range m.Labels {
+			_ = k
+			_ = v
+			mapEntrySize := 1 + len(k) + sovTypes(uint64(len(k))) + 1 + len(v) + sovTypes(uint64(len(v)))
+			n += mapEntrySize + 1 + sovTypes(uint64(mapEntrySize))
+		}
+	}
+	return n
+}
+
+func (m *UserDefinedApiDiscoveryPolicy) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.DiscoveryRules) > 0 {
+		for _, e := range m.DiscoveryRules {
+			l = e.Size()
+			n += 1 + l + sovTypes(uint64(l))
+		}
+	}
+	if m.DefaultBehaviorChoice != nil {
+		n += m.DefaultBehaviorChoice.Size()
+	}
+	return n
+}
+
+func (m *UserDefinedApiDiscoveryPolicy_Inclusive) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Inclusive != nil {
+		l = m.Inclusive.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *UserDefinedApiDiscoveryPolicy_Exclusive) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Exclusive != nil {
+		l = m.Exclusive.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
 func (m *GlobalSpecType) Size() (n int) {
 	if m == nil {
 		return 0
@@ -800,6 +2644,10 @@ func (m *GlobalSpecType) Size() (n int) {
 			l = e.Size()
 			n += 1 + l + sovTypes(uint64(l))
 		}
+	}
+	if m.UserDefinedApiDiscoveryPolicy != nil {
+		l = m.UserDefinedApiDiscoveryPolicy.Size()
+		n += 1 + l + sovTypes(uint64(l))
 	}
 	return n
 }
@@ -816,6 +2664,10 @@ func (m *CreateSpecType) Size() (n int) {
 			n += 1 + l + sovTypes(uint64(l))
 		}
 	}
+	if m.UserDefinedApiDiscoveryPolicy != nil {
+		l = m.UserDefinedApiDiscoveryPolicy.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
 	return n
 }
 
@@ -830,6 +2682,10 @@ func (m *ReplaceSpecType) Size() (n int) {
 			l = e.Size()
 			n += 1 + l + sovTypes(uint64(l))
 		}
+	}
+	if m.UserDefinedApiDiscoveryPolicy != nil {
+		l = m.UserDefinedApiDiscoveryPolicy.Size()
+		n += 1 + l + sovTypes(uint64(l))
 	}
 	return n
 }
@@ -846,6 +2702,10 @@ func (m *GetSpecType) Size() (n int) {
 			n += 1 + l + sovTypes(uint64(l))
 		}
 	}
+	if m.UserDefinedApiDiscoveryPolicy != nil {
+		l = m.UserDefinedApiDiscoveryPolicy.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
 	return n
 }
 
@@ -855,6 +2715,36 @@ func sovTypes(x uint64) (n int) {
 func sozTypes(x uint64) (n int) {
 	return sovTypes(uint64((x << 1) ^ uint64((int64(x) >> 63))))
 }
+func (this *ExclusionConfig) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ExclusionConfig{`,
+		`ActionChoice:` + fmt.Sprintf("%v", this.ActionChoice) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ExclusionConfig_Ignore) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ExclusionConfig_Ignore{`,
+		`Ignore:` + strings.Replace(fmt.Sprintf("%v", this.Ignore), "Empty", "schema.Empty", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ExclusionConfig_Archive) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ExclusionConfig_Archive{`,
+		`Archive:` + strings.Replace(fmt.Sprintf("%v", this.Archive), "Empty", "schema.Empty", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
 func (this *CustomAuthType) String() string {
 	if this == nil {
 		return "nil"
@@ -862,6 +2752,128 @@ func (this *CustomAuthType) String() string {
 	s := strings.Join([]string{`&CustomAuthType{`,
 		`ParameterType:` + fmt.Sprintf("%v", this.ParameterType) + `,`,
 		`ParameterName:` + fmt.Sprintf("%v", this.ParameterName) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *HTTPHeaderCriteria) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&HTTPHeaderCriteria{`,
+		`FieldName:` + fmt.Sprintf("%v", this.FieldName) + `,`,
+		`MatchType:` + fmt.Sprintf("%v", this.MatchType) + `,`,
+		`Value:` + fmt.Sprintf("%v", this.Value) + `,`,
+		`Location:` + fmt.Sprintf("%v", this.Location) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *RuleProperties) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&RuleProperties{`,
+		`RuleTypeChoice:` + fmt.Sprintf("%v", this.RuleTypeChoice) + `,`,
+		`Criteria:` + fmt.Sprintf("%v", this.Criteria) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *RuleProperties_Exclusion) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&RuleProperties_Exclusion{`,
+		`Exclusion:` + strings.Replace(fmt.Sprintf("%v", this.Exclusion), "ExclusionConfig", "ExclusionConfig", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *RuleProperties_Inclusion) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&RuleProperties_Inclusion{`,
+		`Inclusion:` + strings.Replace(fmt.Sprintf("%v", this.Inclusion), "Empty", "schema.Empty", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *RuleProperties_HttpHeaderCriteria) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&RuleProperties_HttpHeaderCriteria{`,
+		`HttpHeaderCriteria:` + strings.Replace(fmt.Sprintf("%v", this.HttpHeaderCriteria), "HTTPHeaderCriteria", "HTTPHeaderCriteria", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *RuleProperties_Pattern) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&RuleProperties_Pattern{`,
+		`Pattern:` + fmt.Sprintf("%v", this.Pattern) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *DiscoveryRule) String() string {
+	if this == nil {
+		return "nil"
+	}
+	keysForLabels := make([]string, 0, len(this.Labels))
+	for k, _ := range this.Labels {
+		keysForLabels = append(keysForLabels, k)
+	}
+	github_com_gogo_protobuf_sortkeys.Strings(keysForLabels)
+	mapStringForLabels := "map[string]string{"
+	for _, k := range keysForLabels {
+		mapStringForLabels += fmt.Sprintf("%v: %v,", k, this.Labels[k])
+	}
+	mapStringForLabels += "}"
+	s := strings.Join([]string{`&DiscoveryRule{`,
+		`Metadata:` + strings.Replace(fmt.Sprintf("%v", this.Metadata), "MessageMetaType", "schema.MessageMetaType", 1) + `,`,
+		`RuleProperties:` + strings.Replace(this.RuleProperties.String(), "RuleProperties", "RuleProperties", 1) + `,`,
+		`Labels:` + mapStringForLabels + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *UserDefinedApiDiscoveryPolicy) String() string {
+	if this == nil {
+		return "nil"
+	}
+	repeatedStringForDiscoveryRules := "[]*DiscoveryRule{"
+	for _, f := range this.DiscoveryRules {
+		repeatedStringForDiscoveryRules += strings.Replace(f.String(), "DiscoveryRule", "DiscoveryRule", 1) + ","
+	}
+	repeatedStringForDiscoveryRules += "}"
+	s := strings.Join([]string{`&UserDefinedApiDiscoveryPolicy{`,
+		`DiscoveryRules:` + repeatedStringForDiscoveryRules + `,`,
+		`DefaultBehaviorChoice:` + fmt.Sprintf("%v", this.DefaultBehaviorChoice) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *UserDefinedApiDiscoveryPolicy_Inclusive) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&UserDefinedApiDiscoveryPolicy_Inclusive{`,
+		`Inclusive:` + strings.Replace(fmt.Sprintf("%v", this.Inclusive), "Empty", "schema.Empty", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *UserDefinedApiDiscoveryPolicy_Exclusive) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&UserDefinedApiDiscoveryPolicy_Exclusive{`,
+		`Exclusive:` + strings.Replace(fmt.Sprintf("%v", this.Exclusive), "ExclusionConfig", "ExclusionConfig", 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -877,6 +2889,7 @@ func (this *GlobalSpecType) String() string {
 	repeatedStringForCustomAuthTypes += "}"
 	s := strings.Join([]string{`&GlobalSpecType{`,
 		`CustomAuthTypes:` + repeatedStringForCustomAuthTypes + `,`,
+		`UserDefinedApiDiscoveryPolicy:` + strings.Replace(this.UserDefinedApiDiscoveryPolicy.String(), "UserDefinedApiDiscoveryPolicy", "UserDefinedApiDiscoveryPolicy", 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -892,6 +2905,7 @@ func (this *CreateSpecType) String() string {
 	repeatedStringForCustomAuthTypes += "}"
 	s := strings.Join([]string{`&CreateSpecType{`,
 		`CustomAuthTypes:` + repeatedStringForCustomAuthTypes + `,`,
+		`UserDefinedApiDiscoveryPolicy:` + strings.Replace(this.UserDefinedApiDiscoveryPolicy.String(), "UserDefinedApiDiscoveryPolicy", "UserDefinedApiDiscoveryPolicy", 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -907,6 +2921,7 @@ func (this *ReplaceSpecType) String() string {
 	repeatedStringForCustomAuthTypes += "}"
 	s := strings.Join([]string{`&ReplaceSpecType{`,
 		`CustomAuthTypes:` + repeatedStringForCustomAuthTypes + `,`,
+		`UserDefinedApiDiscoveryPolicy:` + strings.Replace(this.UserDefinedApiDiscoveryPolicy.String(), "UserDefinedApiDiscoveryPolicy", "UserDefinedApiDiscoveryPolicy", 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -922,6 +2937,7 @@ func (this *GetSpecType) String() string {
 	repeatedStringForCustomAuthTypes += "}"
 	s := strings.Join([]string{`&GetSpecType{`,
 		`CustomAuthTypes:` + repeatedStringForCustomAuthTypes + `,`,
+		`UserDefinedApiDiscoveryPolicy:` + strings.Replace(this.UserDefinedApiDiscoveryPolicy.String(), "UserDefinedApiDiscoveryPolicy", "UserDefinedApiDiscoveryPolicy", 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -933,6 +2949,129 @@ func valueToStringTypes(v interface{}) string {
 	}
 	pv := reflect.Indirect(rv).Interface()
 	return fmt.Sprintf("*%v", pv)
+}
+func (m *ExclusionConfig) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTypes
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ExclusionConfig: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ExclusionConfig: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Ignore", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &schema.Empty{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.ActionChoice = &ExclusionConfig_Ignore{v}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Archive", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &schema.Empty{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.ActionChoice = &ExclusionConfig_Archive{v}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTypes(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
 }
 func (m *CustomAuthType) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
@@ -1038,6 +3177,760 @@ func (m *CustomAuthType) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
+func (m *HTTPHeaderCriteria) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTypes
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: HTTPHeaderCriteria: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: HTTPHeaderCriteria: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field FieldName", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.FieldName = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field MatchType", wireType)
+			}
+			m.MatchType = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.MatchType |= MatchType(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Value", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Value = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 4:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Location", wireType)
+			}
+			m.Location = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Location |= RuleLocation(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTypes(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *RuleProperties) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTypes
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: RuleProperties: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: RuleProperties: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Exclusion", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &ExclusionConfig{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.RuleTypeChoice = &RuleProperties_Exclusion{v}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Inclusion", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &schema.Empty{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.RuleTypeChoice = &RuleProperties_Inclusion{v}
+			iNdEx = postIndex
+		case 6:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field HttpHeaderCriteria", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &HTTPHeaderCriteria{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.Criteria = &RuleProperties_HttpHeaderCriteria{v}
+			iNdEx = postIndex
+		case 7:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Pattern", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Criteria = &RuleProperties_Pattern{string(dAtA[iNdEx:postIndex])}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTypes(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *DiscoveryRule) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTypes
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: DiscoveryRule: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: DiscoveryRule: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Metadata", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Metadata == nil {
+				m.Metadata = &schema.MessageMetaType{}
+			}
+			if err := m.Metadata.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field RuleProperties", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.RuleProperties == nil {
+				m.RuleProperties = &RuleProperties{}
+			}
+			if err := m.RuleProperties.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Labels", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Labels == nil {
+				m.Labels = make(map[string]string)
+			}
+			var mapkey string
+			var mapvalue string
+			for iNdEx < postIndex {
+				entryPreIndex := iNdEx
+				var wire uint64
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return ErrIntOverflowTypes
+					}
+					if iNdEx >= l {
+						return io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					wire |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				fieldNum := int32(wire >> 3)
+				if fieldNum == 1 {
+					var stringLenmapkey uint64
+					for shift := uint(0); ; shift += 7 {
+						if shift >= 64 {
+							return ErrIntOverflowTypes
+						}
+						if iNdEx >= l {
+							return io.ErrUnexpectedEOF
+						}
+						b := dAtA[iNdEx]
+						iNdEx++
+						stringLenmapkey |= uint64(b&0x7F) << shift
+						if b < 0x80 {
+							break
+						}
+					}
+					intStringLenmapkey := int(stringLenmapkey)
+					if intStringLenmapkey < 0 {
+						return ErrInvalidLengthTypes
+					}
+					postStringIndexmapkey := iNdEx + intStringLenmapkey
+					if postStringIndexmapkey < 0 {
+						return ErrInvalidLengthTypes
+					}
+					if postStringIndexmapkey > l {
+						return io.ErrUnexpectedEOF
+					}
+					mapkey = string(dAtA[iNdEx:postStringIndexmapkey])
+					iNdEx = postStringIndexmapkey
+				} else if fieldNum == 2 {
+					var stringLenmapvalue uint64
+					for shift := uint(0); ; shift += 7 {
+						if shift >= 64 {
+							return ErrIntOverflowTypes
+						}
+						if iNdEx >= l {
+							return io.ErrUnexpectedEOF
+						}
+						b := dAtA[iNdEx]
+						iNdEx++
+						stringLenmapvalue |= uint64(b&0x7F) << shift
+						if b < 0x80 {
+							break
+						}
+					}
+					intStringLenmapvalue := int(stringLenmapvalue)
+					if intStringLenmapvalue < 0 {
+						return ErrInvalidLengthTypes
+					}
+					postStringIndexmapvalue := iNdEx + intStringLenmapvalue
+					if postStringIndexmapvalue < 0 {
+						return ErrInvalidLengthTypes
+					}
+					if postStringIndexmapvalue > l {
+						return io.ErrUnexpectedEOF
+					}
+					mapvalue = string(dAtA[iNdEx:postStringIndexmapvalue])
+					iNdEx = postStringIndexmapvalue
+				} else {
+					iNdEx = entryPreIndex
+					skippy, err := skipTypes(dAtA[iNdEx:])
+					if err != nil {
+						return err
+					}
+					if skippy < 0 {
+						return ErrInvalidLengthTypes
+					}
+					if (iNdEx + skippy) > postIndex {
+						return io.ErrUnexpectedEOF
+					}
+					iNdEx += skippy
+				}
+			}
+			m.Labels[mapkey] = mapvalue
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTypes(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *UserDefinedApiDiscoveryPolicy) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTypes
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: UserDefinedApiDiscoveryPolicy: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: UserDefinedApiDiscoveryPolicy: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field DiscoveryRules", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.DiscoveryRules = append(m.DiscoveryRules, &DiscoveryRule{})
+			if err := m.DiscoveryRules[len(m.DiscoveryRules)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Inclusive", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &schema.Empty{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.DefaultBehaviorChoice = &UserDefinedApiDiscoveryPolicy_Inclusive{v}
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Exclusive", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &ExclusionConfig{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.DefaultBehaviorChoice = &UserDefinedApiDiscoveryPolicy_Exclusive{v}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTypes(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
 func (m *GlobalSpecType) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
@@ -1098,6 +3991,42 @@ func (m *GlobalSpecType) Unmarshal(dAtA []byte) error {
 			}
 			m.CustomAuthTypes = append(m.CustomAuthTypes, &CustomAuthType{})
 			if err := m.CustomAuthTypes[len(m.CustomAuthTypes)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field UserDefinedApiDiscoveryPolicy", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.UserDefinedApiDiscoveryPolicy == nil {
+				m.UserDefinedApiDiscoveryPolicy = &UserDefinedApiDiscoveryPolicy{}
+			}
+			if err := m.UserDefinedApiDiscoveryPolicy.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -1188,6 +4117,42 @@ func (m *CreateSpecType) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field UserDefinedApiDiscoveryPolicy", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.UserDefinedApiDiscoveryPolicy == nil {
+				m.UserDefinedApiDiscoveryPolicy = &UserDefinedApiDiscoveryPolicy{}
+			}
+			if err := m.UserDefinedApiDiscoveryPolicy.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipTypes(dAtA[iNdEx:])
@@ -1275,6 +4240,42 @@ func (m *ReplaceSpecType) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field UserDefinedApiDiscoveryPolicy", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.UserDefinedApiDiscoveryPolicy == nil {
+				m.UserDefinedApiDiscoveryPolicy = &UserDefinedApiDiscoveryPolicy{}
+			}
+			if err := m.UserDefinedApiDiscoveryPolicy.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipTypes(dAtA[iNdEx:])
@@ -1359,6 +4360,42 @@ func (m *GetSpecType) Unmarshal(dAtA []byte) error {
 			}
 			m.CustomAuthTypes = append(m.CustomAuthTypes, &CustomAuthType{})
 			if err := m.CustomAuthTypes[len(m.CustomAuthTypes)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field UserDefinedApiDiscoveryPolicy", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.UserDefinedApiDiscoveryPolicy == nil {
+				m.UserDefinedApiDiscoveryPolicy = &UserDefinedApiDiscoveryPolicy{}
+			}
+			if err := m.UserDefinedApiDiscoveryPolicy.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex

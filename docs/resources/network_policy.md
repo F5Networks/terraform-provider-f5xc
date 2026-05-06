@@ -294,7 +294,7 @@ Optional:
 
 Optional:
 
-- `applications` (List of String) <br>**Valid Options:** `["APPLICATION_HTTP", "APPLICATION_HTTPS", "APPLICATION_SNMP", "APPLICATION_DNS"]` (Multiple selection allowed)
+- `applications` (List of String) <br>**Valid Options:** `["APPLICATION_HTTPS", "APPLICATION_SNMP", "APPLICATION_DNS", "APPLICATION_HTTP"]` (Multiple selection allowed)
 
 
 <a id="nestedatt--rule_choice--rules--egress_rules--traffic_choice--protocol_port_range"></a>
@@ -418,7 +418,7 @@ Optional:
 
 Optional:
 
-- `applications` (List of String) <br>**Valid Options:** `["APPLICATION_DNS", "APPLICATION_HTTP", "APPLICATION_HTTPS", "APPLICATION_SNMP"]` (Multiple selection allowed)
+- `applications` (List of String) <br>**Valid Options:** `["APPLICATION_HTTPS", "APPLICATION_SNMP", "APPLICATION_DNS", "APPLICATION_HTTP"]` (Multiple selection allowed)
 
 
 <a id="nestedatt--rule_choice--rules--ingress_rules--traffic_choice--protocol_port_range"></a>

@@ -73,6 +73,7 @@ Read-Only:
 - `http_method` (Attributes) (see [below for nested schema](#nestedatt--rules--spec--http_method))
 - `ip_choice` (Attributes) (see [below for nested schema](#nestedatt--rules--spec--ip_choice))
 - `path` (Attributes) (see [below for nested schema](#nestedatt--rules--spec--path))
+- `segment_policy` (Attributes) Segments Select source and destination segments where rule is applied Skip the configuration or set option as Any to ignore corresponding segment match (see [below for nested schema](#nestedatt--rules--spec--segment_policy))
 
 <a id="nestedatt--rules--spec--action_choice"></a>
 ### Nested Schema for `rules.spec.action_choice`
@@ -240,12 +241,74 @@ Read-Only:
 
 Read-Only:
 
+- `encoded_path_matcher` (Boolean) Encoded_Path Match against the encoded, escaped path
 - `exact_values` (List of String) exact values A list of exact path values to match the input HTTP path against.
 - `invert_matcher` (Boolean) invert_matcher Invert the match result.
 - `prefix_values` (List of String) prefix values A list of path prefix values to match the input HTTP path against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input HTTP path against.
 - `suffix_values` (List of String) Suffix values A list of path suffix values to match the input HTTP path against.
 - `transformers` (List of String) transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.
+
+
+<a id="nestedatt--rules--spec--segment_policy"></a>
+### Nested Schema for `rules.spec.segment_policy`
+
+Read-Only:
+
+- `dst_segment_choice` (Attributes) Destination Segments Select destination segment where rule is applied Configure option as Any to ignore segment match (see [below for nested schema](#nestedatt--rules--spec--segment_policy--dst_segment_choice))
+- `src_segment_choice` (Attributes) Source Segments Select source segment where rule is applied Configure option as Any to ignore segment match (see [below for nested schema](#nestedatt--rules--spec--segment_policy--src_segment_choice))
+
+<a id="nestedatt--rules--spec--segment_policy--dst_segment_choice"></a>
+### Nested Schema for `rules.spec.segment_policy.dst_segment_choice`
+
+Read-Only:
+
+- `dst_any` (Boolean) Any segment Traffic is not matched against any segment
+- `dst_segments` (Attributes) List of segments Traffic is matched against destination segment in selected segments (see [below for nested schema](#nestedatt--rules--spec--segment_policy--dst_segment_choice--dst_segments))
+- `intra_segment` (Boolean) Intra Segment Policy Traffic is matched for source and destination on the same segment
+
+<a id="nestedatt--rules--spec--segment_policy--dst_segment_choice--dst_segments"></a>
+### Nested Schema for `rules.spec.segment_policy.dst_segment_choice.dst_segments`
+
+Read-Only:
+
+- `segments` (Attributes List) Segments Select list of segments (see [below for nested schema](#nestedatt--rules--spec--segment_policy--dst_segment_choice--dst_segments--segments))
+
+<a id="nestedatt--rules--spec--segment_policy--dst_segment_choice--dst_segments--segments"></a>
+### Nested Schema for `rules.spec.segment_policy.dst_segment_choice.dst_segments.segments`
+
+Read-Only:
+
+- `name` (String)
+- `namespace` (String)
+- `tenant` (String)
+
+
+
+
+<a id="nestedatt--rules--spec--segment_policy--src_segment_choice"></a>
+### Nested Schema for `rules.spec.segment_policy.src_segment_choice`
+
+Read-Only:
+
+- `src_any` (Boolean) Any segment Traffic is not matched against any segment
+- `src_segments` (Attributes) List of segments Source traffic is matched against selected segments (see [below for nested schema](#nestedatt--rules--spec--segment_policy--src_segment_choice--src_segments))
+
+<a id="nestedatt--rules--spec--segment_policy--src_segment_choice--src_segments"></a>
+### Nested Schema for `rules.spec.segment_policy.src_segment_choice.src_segments`
+
+Read-Only:
+
+- `segments` (Attributes List) Segments Select list of segments (see [below for nested schema](#nestedatt--rules--spec--segment_policy--src_segment_choice--src_segments--segments))
+
+<a id="nestedatt--rules--spec--segment_policy--src_segment_choice--src_segments--segments"></a>
+### Nested Schema for `rules.spec.segment_policy.src_segment_choice.src_segments.segments`
+
+Read-Only:
+
+- `name` (String)
+- `namespace` (String)
+- `tenant` (String)
 
 ---
 

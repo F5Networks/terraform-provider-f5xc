@@ -5,14 +5,13 @@ package subscription
 
 import (
 	fmt "fmt"
+	proto "github.com/gogo/protobuf/proto"
+	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	io "io"
 	math "math"
 	math_bits "math/bits"
 	reflect "reflect"
 	strings "strings"
-
-	proto "github.com/gogo/protobuf/proto"
-	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.

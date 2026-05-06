@@ -83,7 +83,8 @@ Read-Only:
 Read-Only:
 
 - `disable_virtual_host` (Boolean) Disable Virtual Host
-- `virtual_host` (String) Virtual Host Name of the virtual host to use for SNI.
+- `inherit_load_balancer_fqdn` (Boolean) Inherit From Load Balancer FQDN Inherit load balancer FQDN as the virtual host to use for SNI.
+- `virtual_host` (String) Enable Virtual Host Name of the virtual host to use for SNI.
 
 
 
@@ -104,7 +105,8 @@ Read-Only:
 Read-Only:
 
 - `disable_virtual_host` (Boolean) Disable Virtual Host
-- `virtual_host` (String) Virtual Host Name of the virtual host to use for SNI.
+- `inherit_load_balancer_fqdn` (Boolean) Inherit From Load Balancer FQDN Inherit load balancer FQDN as the virtual host to use for SNI.
+- `virtual_host` (String) Enable Virtual Host Name of the virtual host to use for SNI.
 
 
 

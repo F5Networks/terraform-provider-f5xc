@@ -76,6 +76,7 @@ Optional:
 - `http_method` (Attributes) (see [below for nested schema](#nestedatt--rules--spec--http_method))
 - `ip_choice` (Attributes) (see [below for nested schema](#nestedatt--rules--spec--ip_choice))
 - `path` (Attributes) (see [below for nested schema](#nestedatt--rules--spec--path))
+- `segment_policy` (Attributes) Segments Select source and destination segments where rule is applied Skip the configuration or set option as Any to ignore corresponding segment match (see [below for nested schema](#nestedatt--rules--spec--segment_policy))
 
 <a id="nestedatt--rules--spec--action_choice"></a>
 ### Nested Schema for `rules.spec.action_choice`
@@ -113,7 +114,7 @@ Optional:
 
 Required:
 
-- `country_codes` (List of String) <br>**Valid Options:** `["COUNTRY_MU", "COUNTRY_AE", "COUNTRY_AX", "COUNTRY_FI", "COUNTRY_IO", "COUNTRY_LT", "COUNTRY_LV", "COUNTRY_MP", "COUNTRY_GE", "COUNTRY_PT", "COUNTRY_TD", "COUNTRY_GF", "COUNTRY_TN", "COUNTRY_TW", "COUNTRY_VU", "COUNTRY_IR", "COUNTRY_CY", "COUNTRY_EC", "COUNTRY_JP", "COUNTRY_NL", "COUNTRY_NR", "COUNTRY_NU", "COUNTRY_BT", "COUNTRY_GL", "COUNTRY_MK", "COUNTRY_UM", "COUNTRY_AF", "COUNTRY_IE", "COUNTRY_RE", "COUNTRY_SC", "COUNTRY_NE", "COUNTRY_RW", "COUNTRY_ST", "COUNTRY_AN", "COUNTRY_DO", "COUNTRY_KR", "COUNTRY_LI", "COUNTRY_MN", "COUNTRY_SA", "COUNTRY_AO", "COUNTRY_BO", "COUNTRY_VE", "COUNTRY_CW", "COUNTRY_LR", "COUNTRY_PR", "COUNTRY_TG", "COUNTRY_BA", "COUNTRY_BN", "COUNTRY_MF", "COUNTRY_SJ", "COUNTRY_BY", "COUNTRY_MW", "COUNTRY_NC", "COUNTRY_RO", "COUNTRY_AI", "COUNTRY_BR", "COUNTRY_CN", "COUNTRY_IM", "COUNTRY_SS", "COUNTRY_AT", "COUNTRY_AZ", "COUNTRY_KP", "COUNTRY_NF", "COUNTRY_TZ", "COUNTRY_VA", "COUNTRY_FR", "COUNTRY_JE", "COUNTRY_LY", "COUNTRY_MO", "COUNTRY_BI", "COUNTRY_CL", "COUNTRY_BB", "COUNTRY_EG", "COUNTRY_GB", "COUNTRY_GN", "COUNTRY_MG", "COUNTRY_AQ", "COUNTRY_AU", "COUNTRY_HR", "COUNTRY_MD", "COUNTRY_NI", "COUNTRY_CA", "COUNTRY_DM", "COUNTRY_ER", "COUNTRY_AL", "COUNTRY_BJ", "COUNTRY_BV", "COUNTRY_BZ", "COUNTRY_PK", "COUNTRY_XK", "COUNTRY_AS", "COUNTRY_CK", "COUNTRY_GG", "COUNTRY_IN", "COUNTRY_TC", "COUNTRY_CC", "COUNTRY_DE", "COUNTRY_KE", "COUNTRY_SK", "COUNTRY_TV", "COUNTRY_DJ", "COUNTRY_GA", "COUNTRY_HT", "COUNTRY_SE", "COUNTRY_SH", "COUNTRY_SL", "COUNTRY_TT", "COUNTRY_IL", "COUNTRY_TM", "COUNTRY_YT", "COUNTRY_MC", "COUNTRY_MH", "COUNTRY_MQ", "COUNTRY_VC", "COUNTRY_KZ", "COUNTRY_BE", "COUNTRY_MM", "COUNTRY_NA", "COUNTRY_OM", "COUNTRY_GU", "COUNTRY_MR", "COUNTRY_SG", "COUNTRY_IQ", "COUNTRY_KH", "COUNTRY_PE", "COUNTRY_PN", "COUNTRY_TJ", "COUNTRY_US", "COUNTRY_AM", "COUNTRY_HM", "COUNTRY_SI", "COUNTRY_GW", "COUNTRY_HU", "COUNTRY_KG", "COUNTRY_MA", "COUNTRY_MT", "COUNTRY_UZ", "COUNTRY_FK", "COUNTRY_PH", "COUNTRY_SB", "COUNTRY_VG", "COUNTRY_BW", "COUNTRY_CH", "COUNTRY_GI", "COUNTRY_PL", "COUNTRY_CD", "COUNTRY_CR", "COUNTRY_FJ", "COUNTRY_JO", "COUNTRY_NZ", "COUNTRY_PG", "COUNTRY_SZ", "COUNTRY_VI", "COUNTRY_AR", "COUNTRY_UA", "COUNTRY_AG", "COUNTRY_BQ", "COUNTRY_CG", "COUNTRY_CM", "COUNTRY_DK", "COUNTRY_TH", "COUNTRY_RS", "COUNTRY_UG", "COUNTRY_ZM", "COUNTRY_BD", "COUNTRY_PF", "COUNTRY_PM", "COUNTRY_PY", "COUNTRY_SX", "COUNTRY_VN", "COUNTRY_MS", "COUNTRY_PA", "COUNTRY_BH", "COUNTRY_BM", "COUNTRY_CZ", "COUNTRY_GT", "COUNTRY_LB", "COUNTRY_SM", "COUNTRY_TL", "COUNTRY_XT", "COUNTRY_NONE", "COUNTRY_ES", "COUNTRY_HN", "COUNTRY_ID", "COUNTRY_LS", "COUNTRY_GD", "COUNTRY_GP", "COUNTRY_KN", "COUNTRY_KW", "COUNTRY_LU", "COUNTRY_TR", "COUNTRY_YE", "COUNTRY_TF", "COUNTRY_AW", "COUNTRY_EE", "COUNTRY_HK", "COUNTRY_FO", "COUNTRY_GS", "COUNTRY_KM", "COUNTRY_LC", "COUNTRY_SR", "COUNTRY_ZW", "COUNTRY_IS", "COUNTRY_CS", "COUNTRY_AD", "COUNTRY_GM", "COUNTRY_ME", "COUNTRY_MZ", "COUNTRY_CF", "COUNTRY_RU", "COUNTRY_GH", "COUNTRY_BS", "COUNTRY_CU", "COUNTRY_CO", "COUNTRY_DZ", "COUNTRY_FM", "COUNTRY_GR", "COUNTRY_ML", "COUNTRY_SD", "COUNTRY_WF", "COUNTRY_KI", "COUNTRY_MV", "COUNTRY_MY", "COUNTRY_NO", "COUNTRY_GQ", "COUNTRY_QA", "COUNTRY_SV", "COUNTRY_SY", "COUNTRY_UY", "COUNTRY_ET", "COUNTRY_PS", "COUNTRY_BG", "COUNTRY_CI", "COUNTRY_EH", "COUNTRY_SO", "COUNTRY_TK", "COUNTRY_CV", "COUNTRY_CX", "COUNTRY_JM", "COUNTRY_LA", "COUNTRY_PW", "COUNTRY_TO", "COUNTRY_BL", "COUNTRY_KY", "COUNTRY_NG", "COUNTRY_NP", "COUNTRY_SN", "COUNTRY_WS", "COUNTRY_BF", "COUNTRY_GY", "COUNTRY_LK", "COUNTRY_MX", "COUNTRY_ZA", "COUNTRY_IT"]` (Multiple selection allowed)
+- `country_codes` (List of String) <br>**Valid Options:** `["COUNTRY_BG", "COUNTRY_IS", "COUNTRY_CW", "COUNTRY_ID", "COUNTRY_MC", "COUNTRY_PW", "COUNTRY_AX", "COUNTRY_EH", "COUNTRY_GB", "COUNTRY_NP", "COUNTRY_BH", "COUNTRY_CH", "COUNTRY_GR", "COUNTRY_MQ", "COUNTRY_VC", "COUNTRY_GU", "COUNTRY_NU", "COUNTRY_LV", "COUNTRY_SC", "COUNTRY_TG", "COUNTRY_AU", "COUNTRY_JE", "COUNTRY_SH", "COUNTRY_TL", "COUNTRY_BE", "COUNTRY_CR", "COUNTRY_CU", "COUNTRY_NC", "COUNTRY_PE", "COUNTRY_PK", "COUNTRY_CD", "COUNTRY_MS", "COUNTRY_BD", "COUNTRY_CC", "COUNTRY_GY", "COUNTRY_LI", "COUNTRY_SR", "COUNTRY_KI", "COUNTRY_RS", "COUNTRY_XK", "COUNTRY_AT", "COUNTRY_RU", "COUNTRY_TO", "COUNTRY_BO", "COUNTRY_KG", "COUNTRY_PG", "COUNTRY_SS", "COUNTRY_AW", "COUNTRY_BF", "COUNTRY_BL", "COUNTRY_GH", "COUNTRY_GL", "COUNTRY_ZW", "COUNTRY_AF", "COUNTRY_KH", "COUNTRY_KW", "COUNTRY_CL", "COUNTRY_FM", "COUNTRY_PS", "COUNTRY_SA", "COUNTRY_SO", "COUNTRY_SX", "COUNTRY_TM", "COUNTRY_DJ", "COUNTRY_EG", "COUNTRY_SY", "COUNTRY_MU", "COUNTRY_MY", "COUNTRY_BA", "COUNTRY_AE", "COUNTRY_HK", "COUNTRY_HM", "COUNTRY_KZ", "COUNTRY_UZ", "COUNTRY_XT", "COUNTRY_YT", "COUNTRY_AL", "COUNTRY_KY", "COUNTRY_LT", "COUNTRY_MH", "COUNTRY_PY", "COUNTRY_DO", "COUNTRY_GE", "COUNTRY_LA", "COUNTRY_ME", "COUNTRY_AS", "COUNTRY_CV", "COUNTRY_FK", "COUNTRY_FR", "COUNTRY_IR", "COUNTRY_LU", "COUNTRY_MV", "COUNTRY_BB", "COUNTRY_AN", "COUNTRY_BV", "COUNTRY_NZ", "COUNTRY_DK", "COUNTRY_GM", "COUNTRY_HT", "COUNTRY_IO", "COUNTRY_MP", "COUNTRY_TR", "COUNTRY_TV", "COUNTRY_CZ", "COUNTRY_CA", "COUNTRY_GW", "COUNTRY_IE", "COUNTRY_NO", "COUNTRY_SD", "COUNTRY_CK", "COUNTRY_CY", "COUNTRY_ES", "COUNTRY_FI", "COUNTRY_MO", "COUNTRY_TD", "COUNTRY_AD", "COUNTRY_JO", "COUNTRY_AR", "COUNTRY_GA", "COUNTRY_IM", "COUNTRY_NL", "COUNTRY_PN", "COUNTRY_ST", "COUNTRY_CI", "COUNTRY_CM", "COUNTRY_KN", "COUNTRY_KP", "COUNTRY_PF", "COUNTRY_RO", "COUNTRY_KM", "COUNTRY_TK", "COUNTRY_YE", "COUNTRY_HR", "COUNTRY_PM", "COUNTRY_PR", "COUNTRY_TH", "COUNTRY_BZ", "COUNTRY_GP", "COUNTRY_US", "COUNTRY_KR", "COUNTRY_PA", "COUNTRY_CF", "COUNTRY_CS", "COUNTRY_RE", "COUNTRY_SB", "COUNTRY_BQ", "COUNTRY_SE", "COUNTRY_NE", "COUNTRY_SZ", "COUNTRY_BJ", "COUNTRY_CX", "COUNTRY_DZ", "COUNTRY_MD", "COUNTRY_NG", "COUNTRY_TN", "COUNTRY_GS", "COUNTRY_LS", "COUNTRY_MM", "COUNTRY_RW", "COUNTRY_UY", "COUNTRY_ZM", "COUNTRY_BR", "COUNTRY_GD", "COUNTRY_TT", "COUNTRY_VU", "COUNTRY_AQ", "COUNTRY_BT", "COUNTRY_VG", "COUNTRY_AG", "COUNTRY_DE", "COUNTRY_EC", "COUNTRY_KE", "COUNTRY_MN", "COUNTRY_TF", "COUNTRY_VI", "COUNTRY_JP", "COUNTRY_PH", "COUNTRY_ZA", "COUNTRY_NONE", "COUNTRY_GG", "COUNTRY_LY", "COUNTRY_GI", "COUNTRY_HN", "COUNTRY_SL", "COUNTRY_AI", "COUNTRY_AM", "COUNTRY_GF", "COUNTRY_MA", "COUNTRY_WF", "COUNTRY_BW", "COUNTRY_CO", "COUNTRY_NA", "COUNTRY_NI", "COUNTRY_AO", "COUNTRY_MF", "COUNTRY_BN", "COUNTRY_BS", "COUNTRY_IL", "COUNTRY_ML", "COUNTRY_WS", "COUNTRY_IQ", "COUNTRY_SN", "COUNTRY_UG", "COUNTRY_ER", "COUNTRY_ET", "COUNTRY_JM", "COUNTRY_LC", "COUNTRY_MX", "COUNTRY_NR", "COUNTRY_SG", "COUNTRY_TJ", "COUNTRY_SV", "COUNTRY_TC", "COUNTRY_MG", "COUNTRY_NF", "COUNTRY_OM", "COUNTRY_TW", "COUNTRY_LK", "COUNTRY_QA", "COUNTRY_CN", "COUNTRY_DM", "COUNTRY_LB", "COUNTRY_MR", "COUNTRY_MT", "COUNTRY_UM", "COUNTRY_EE", "COUNTRY_TZ", "COUNTRY_VE", "COUNTRY_BI", "COUNTRY_FO", "COUNTRY_UA", "COUNTRY_MW", "COUNTRY_PL", "COUNTRY_VN", "COUNTRY_AZ", "COUNTRY_IT", "COUNTRY_MK", "COUNTRY_MZ", "COUNTRY_BY", "COUNTRY_GN", "COUNTRY_IN", "COUNTRY_LR", "COUNTRY_SI", "COUNTRY_BM", "COUNTRY_CG", "COUNTRY_FJ", "COUNTRY_VA", "COUNTRY_GT", "COUNTRY_SJ", "COUNTRY_SM", "COUNTRY_GQ", "COUNTRY_HU", "COUNTRY_PT", "COUNTRY_SK"]` (Multiple selection allowed)
 
 Optional:
 
@@ -197,7 +198,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["TRANSFORMER_NONE", "BASE64_DECODE", "URL_DECODE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["TRANSFORMER_NONE", "LOWER_CASE", "UPPER_CASE", "URL_DECODE", "TRIM_RIGHT", "TRIM", "BASE64_DECODE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_LEFT"]` (Multiple selection allowed)
 
 
 
@@ -208,7 +209,7 @@ Optional:
 Optional:
 
 - `invert_matcher` (Boolean) <br>**Default:** `false`
-- `methods` (List of String) <br>**Valid Options:** `["DELETE", "OPTIONS", "TRACE", "PATCH", "GET", "HEAD", "CONNECT", "COPY", "ANY", "POST", "PUT"]` (Multiple selection allowed)
+- `methods` (List of String) <br>**Valid Options:** `["POST", "CONNECT", "OPTIONS", "PATCH", "HEAD", "PUT", "DELETE", "TRACE", "COPY", "ANY", "GET"]` (Multiple selection allowed)
 
 
 <a id="nestedatt--rules--spec--ip_choice"></a>
@@ -261,12 +262,83 @@ Optional:
 
 Optional:
 
+- `encoded_path_matcher` (Boolean) <br>**Default:** `false`
 - `exact_values` (List of String) exact values A list of exact path values to match the input HTTP path against.
 - `invert_matcher` (Boolean) <br>**Default:** `false`
 - `prefix_values` (List of String) prefix values A list of path prefix values to match the input HTTP path against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input HTTP path against.
 - `suffix_values` (List of String) Suffix values A list of path suffix values to match the input HTTP path against.
-- `transformers` (List of String) <br>**Valid Options:** `["LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "BASE64_DECODE", "URL_DECODE"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_LEFT", "TRANSFORMER_NONE", "LOWER_CASE", "UPPER_CASE", "URL_DECODE", "TRIM_RIGHT", "TRIM", "BASE64_DECODE"]` (Multiple selection allowed)
+
+
+<a id="nestedatt--rules--spec--segment_policy"></a>
+### Nested Schema for `rules.spec.segment_policy`
+
+Optional:
+
+- `dst_segment_choice` (Attributes) Destination Segments Select destination segment where rule is applied Configure option as Any to ignore segment match (see [below for nested schema](#nestedatt--rules--spec--segment_policy--dst_segment_choice))
+- `src_segment_choice` (Attributes) Source Segments Select source segment where rule is applied Configure option as Any to ignore segment match (see [below for nested schema](#nestedatt--rules--spec--segment_policy--src_segment_choice))
+
+<a id="nestedatt--rules--spec--segment_policy--dst_segment_choice"></a>
+### Nested Schema for `rules.spec.segment_policy.dst_segment_choice`
+
+Optional:
+
+- `dst_any` (Boolean) Any segment Traffic is not matched against any segment
+- `dst_segments` (Attributes) List of segments Traffic is matched against destination segment in selected segments (see [below for nested schema](#nestedatt--rules--spec--segment_policy--dst_segment_choice--dst_segments))
+- `intra_segment` (Boolean) Intra Segment Policy Traffic is matched for source and destination on the same segment
+
+<a id="nestedatt--rules--spec--segment_policy--dst_segment_choice--dst_segments"></a>
+### Nested Schema for `rules.spec.segment_policy.dst_segment_choice.dst_segments`
+
+Required:
+
+- `segments` (Attributes List) Segments Select list of segments (see [below for nested schema](#nestedatt--rules--spec--segment_policy--dst_segment_choice--dst_segments--segments))
+
+<a id="nestedatt--rules--spec--segment_policy--dst_segment_choice--dst_segments--segments"></a>
+### Nested Schema for `rules.spec.segment_policy.dst_segment_choice.dst_segments.segments`
+
+Required:
+
+- `name` (String)
+- `namespace` (String)
+
+Read-Only:
+
+- `tenant` (String)
+
+
+
+
+<a id="nestedatt--rules--spec--segment_policy--src_segment_choice"></a>
+### Nested Schema for `rules.spec.segment_policy.src_segment_choice`
+
+Optional:
+
+- `src_any` (Boolean) Any segment Traffic is not matched against any segment
+- `src_segments` (Attributes) List of segments Source traffic is matched against selected segments (see [below for nested schema](#nestedatt--rules--spec--segment_policy--src_segment_choice--src_segments))
+
+<a id="nestedatt--rules--spec--segment_policy--src_segment_choice--src_segments"></a>
+### Nested Schema for `rules.spec.segment_policy.src_segment_choice.src_segments`
+
+Required:
+
+- `segments` (Attributes List) Segments Select list of segments (see [below for nested schema](#nestedatt--rules--spec--segment_policy--src_segment_choice--src_segments--segments))
+
+<a id="nestedatt--rules--spec--segment_policy--src_segment_choice--src_segments--segments"></a>
+### Nested Schema for `rules.spec.segment_policy.src_segment_choice.src_segments.segments`
+
+Required:
+
+- `name` (String)
+- `namespace` (String)
+
+Read-Only:
+
+- `tenant` (String)
+
+
+
 
 
 

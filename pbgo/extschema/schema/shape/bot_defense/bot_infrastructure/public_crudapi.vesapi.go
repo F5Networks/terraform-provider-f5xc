@@ -2130,6 +2130,19 @@ var APISwaggerJSON string = `{
                 }
             }
         },
+        "bot_infrastructureCertificateStatus": {
+            "type": "string",
+            "description": "The status of certificate application to the ingress\n\nCertificate status is undefined (initial state, before first sync)\nCertificate has been successfully applied to the ingress\nCertificate is not applied",
+            "title": "CertificateStatus",
+            "enum": [
+                "CERT_STATUS_UNDEFINED",
+                "CERT_STATUS_APPLIED",
+                "CERT_STATUS_NOT_APPLIED"
+            ],
+            "default": "CERT_STATUS_UNDEFINED",
+            "x-displayname": "Certificate Status",
+            "x-ves-proto-enum": "ves.io.schema.shape.bot_defense.bot_infrastructure.CertificateStatus"
+        },
         "bot_infrastructureClusterState": {
             "type": "string",
             "description": "The selection for cluster state\n\nState is Active\nState is Inactive\nState is Passive Proxy\nState is Emergency Stop\nState is unavailable\nState is reconcile\nState is starting active\nState is stopping active\nState is updating firmware\nState is updating policy\nState is waiting for all active\nState is waiting for start timeout",
@@ -2614,6 +2627,23 @@ var APISwaggerJSON string = `{
             "x-ves-oneof-field-type_choice": "[\"host_name\",\"ip_address\"]",
             "x-ves-proto-message": "ves.io.schema.shape.bot_defense.bot_infrastructure.Ingress",
             "properties": {
+                "cert_id": {
+                    "type": "string",
+                    "description": " The ID of the certificate to be applied to this ingress (desired state)\n\nExample: - \"6990a584f0526500012a1723\"-",
+                    "title": "Certificate ID",
+                    "x-displayname": "Certificate ID",
+                    "x-ves-example": "6990a584f0526500012a1723"
+                },
+                "cert_status": {
+                    "description": " Indicates if a custom certificate is currently applied or not applied.\n\nExample: - \"CERT_STATUS_APPLIED\"-\n\nValidation Rules:\n  ves.io.schema.rules.enum.defined_only: true\n",
+                    "title": "Certificate Status",
+                    "$ref": "#/definitions/bot_infrastructureCertificateStatus",
+                    "x-displayname": "Certificate Status",
+                    "x-ves-example": "CERT_STATUS_APPLIED",
+                    "x-ves-validation-rules": {
+                        "ves.io.schema.rules.enum.defined_only": "true"
+                    }
+                },
                 "host_name": {
                     "type": "string",
                     "description": "Exclusive with [ip_address]\n\n\nValidation Rules:\n  ves.io.schema.rules.string.hostname: true\n",

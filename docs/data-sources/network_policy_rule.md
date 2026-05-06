@@ -15,8 +15,8 @@ The `f5xc_network_policy_rule` data source allows you to retrieve information ab
 
 ```terraform
 data "f5xc_network_policy_rule" "example" {
-  name      = "example_network_policy_rule"
   namespace = "example_namespace"
+  name      = "example_network_policy_rule"
 }
 ```
 

@@ -15,8 +15,8 @@ The `f5xc_voltstack_site` data source allows you to retrieve information about a
 
 ```terraform
 data "f5xc_voltstack_site" "example" {
-  namespace = "example_namespace"
   name      = "example_voltstack_site"
+  namespace = "example_namespace"
 }
 ```
 

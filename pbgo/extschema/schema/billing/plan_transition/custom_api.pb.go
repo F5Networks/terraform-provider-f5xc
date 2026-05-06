@@ -12,13 +12,6 @@ package plan_transition
 import (
 	context "context"
 	fmt "fmt"
-	io "io"
-	math "math"
-	math_bits "math/bits"
-	reflect "reflect"
-	strconv "strconv"
-	strings "strings"
-
 	_ "github.com/gogo/googleapis/google/api"
 	proto "github.com/gogo/protobuf/proto"
 	_ "github.com/gogo/protobuf/types"
@@ -29,6 +22,12 @@ import (
 	contact "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/contact"
 	tenant "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/tenant"
 	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/vesenv"
+	io "io"
+	math "math"
+	math_bits "math/bits"
+	reflect "reflect"
+	strconv "strconv"
+	strings "strings"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.

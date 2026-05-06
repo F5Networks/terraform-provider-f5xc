@@ -13,25 +13,19 @@ AppFirewall resource
 
 ```terraform
 resource "f5xc_app_firewall" "example" {
-  namespace = "example_namespace"
   name      = "example_app_firewall"
+  namespace = "example_namespace"
   allowed_response_codes_choice = {
-    allowed_response_codes = {
-      allowed_response_codes = "example_allowed_response_codes"
-    }
+    allow_all_response_codes = true
   }
   anonymization_setting = {
-    custom_anonymization = {
-      custom_anonymization = "example_custom_anonymization"
-    }
+    disable_anonymization = true
   }
   blocking_page_choice = {
     use_default_blocking_page = true
   }
   enhance_with_ai_choice = {
-    enable_ai_enhancements = {
-      enable_ai_enhancements = "example_enable_ai_enhancements"
-    }
+    disable_ai_enhancements = true
   }
   enforcement_mode_choice = {
     blocking = true
@@ -160,7 +154,7 @@ Optional:
 Optional:
 
 - `blocking_page` (String) <br>**Default:** `string:///PGh0bWw+PGhlYWQ+PHRpdGxlPlJlcXVlc3QgUmVqZWN0ZWQ8L3RpdGxlPjwvaGVhZD48Ym9keT5UaGUgcmVxdWVzdGVkIFVSTCB3YXMgcmVqZWN0ZWQuIFBsZWFzZSBjb25zdWx0IHdpdGggeW91ciBhZG1pbmlzdHJhdG9yLjxici8+PGJyLz5Zb3VyIHN1cHBvcnQgSUQgaXM6IHt7cmVxdWVzdF9pZH19PGJyLz48YnIvPjxhIGhyZWY9ImphdmFzY3JpcHQ6aGlzdG9yeS5iYWNrKCkiPltHbyBCYWNrXTwvYT48L2JvZHk+PC9odG1sPg==`<br>**Validation:** `Length LengthAtMost(4096)`
-- `response_code` (List of String) <br>**Allowed Values (choose one):** `["AlreadyReported", "NotFound", "ExpectationFailed", "UpgradeRequired", "NonAuthoritativeInformation", "SeeOther", "PermanentRedirect", "Created", "Found", "LoopDetected", "EmptyStatusCode", "NotModified", "PreconditionFailed", "FailedDependency", "RequestHeaderFieldsTooLarge", "BadGateway", "GatewayTimeout", "Continue", "MovedPermanently", "ProxyAuthenticationRequired", "HTTPVersionNotSupported", "Conflict", "NotImplemented", "ResetContent", "MultipleChoices", "PreconditionRequired", "PaymentRequired", "IMUsed", "BadRequest", "MisdirectedRequest", "ServiceUnavailable", "OK", "MethodNotAllowed", "NotAcceptable", "NotExtended", "NoContent", "PartialContent", "LengthRequired", "URITooLong", "UnprocessableEntity", "TooManyRequests", "TemporaryRedirect", "Forbidden", "Locked", "InsufficientStorage", "RequestTimeout", "InternalServerError", "Unauthorized", "PayloadTooLarge", "NetworkAuthenticationRequired", "UseProxy", "Gone", "UnsupportedMediaType", "RangeNotSatisfiable", "VariantAlsoNegotiates", "Accepted", "MultiStatus"]`<br>**Default:** `OK`
+- `response_code` (List of String) <br>**Allowed Values (choose one):** `["MultiStatus", "NotFound", "ProxyAuthenticationRequired", "Locked", "BadGateway", "SeeOther", "URITooLong", "UpgradeRequired", "RequestHeaderFieldsTooLarge", "Accepted", "MovedPermanently", "PermanentRedirect", "PreconditionFailed", "FailedDependency", "IMUsed", "PaymentRequired", "RequestTimeout", "RangeNotSatisfiable", "GatewayTimeout", "HTTPVersionNotSupported", "PartialContent", "Conflict", "UnprocessableEntity", "NonAuthoritativeInformation", "Unauthorized", "NotImplemented", "InsufficientStorage", "NetworkAuthenticationRequired", "Continue", "UseProxy", "ServiceUnavailable", "UnsupportedMediaType", "Created", "InternalServerError", "Forbidden", "OK", "AlreadyReported", "BadRequest", "Gone", "PreconditionRequired", "NoContent", "MultipleChoices", "Found", "VariantAlsoNegotiates", "ResetContent", "LengthRequired", "MisdirectedRequest", "NotExtended", "NotAcceptable", "PayloadTooLarge", "TooManyRequests", "LoopDetected", "ExpectationFailed", "EmptyStatusCode", "NotModified", "TemporaryRedirect", "MethodNotAllowed"]`<br>**Default:** `OK`
 
 
 
@@ -202,7 +196,7 @@ Optional:
 
 - `good_bot_action` (List of String) <br>**Allowed Values (choose one):** `["BLOCK", "REPORT", "IGNORE"]`<br>**Default:** `IGNORE`
 - `malicious_bot_action` (List of String) <br>**Allowed Values (choose one):** `["BLOCK", "REPORT", "IGNORE"]`<br>**Default:** `BLOCK`
-- `suspicious_bot_action` (List of String) <br>**Allowed Values (choose one):** `["IGNORE", "BLOCK", "REPORT"]`<br>**Default:** `IGNORE`
+- `suspicious_bot_action` (List of String) <br>**Allowed Values (choose one):** `["BLOCK", "REPORT", "IGNORE"]`<br>**Default:** `IGNORE`
 
 
 
@@ -257,7 +251,7 @@ Optional:
 
 Required:
 
-- `disabled_attack_types` (List of String) <br>**Valid Options:** `["ATTACK_TYPE_INFORMATION_LEAKAGE", "ATTACK_TYPE_XPATH_INJECTION", "ATTACK_TYPE_SERVER_SIDE_CODE_INJECTION", "ATTACK_TYPE_COMMAND_EXECUTION", "ATTACK_TYPE_PATH_TRAVERSAL", "ATTACK_TYPE_SQL_INJECTION", "ATTACK_TYPE_CROSS_SITE_SCRIPTING", "ATTACK_TYPE_HTTP_PARSER_ATTACK", "ATTACK_TYPE_SESSION_HIJACKING", "ATTACK_TYPE_GRAPHQL_PARSER_ATTACK", "ATTACK_TYPE_OTHER_APPLICATION_ATTACKS", "ATTACK_TYPE_ABUSE_OF_FUNCTIONALITY", "ATTACK_TYPE_AUTHENTICATION_AUTHORIZATION_ATTACKS", "ATTACK_TYPE_DIRECTORY_INDEXING", "ATTACK_TYPE_LDAP_INJECTION", "ATTACK_TYPE_HTTP_RESPONSE_SPLITTING", "ATTACK_TYPE_FORCEFUL_BROWSING", "ATTACK_TYPE_REMOTE_FILE_INCLUDE", "ATTACK_TYPE_NONE", "ATTACK_TYPE_BUFFER_OVERFLOW", "ATTACK_TYPE_PREDICTABLE_RESOURCE_LOCATION", "ATTACK_TYPE_DENIAL_OF_SERVICE", "ATTACK_TYPE_MALICIOUS_FILE_UPLOAD", "ATTACK_TYPE_NON_BROWSER_CLIENT", "ATTACK_TYPE_TROJAN_BACKDOOR_SPYWARE", "ATTACK_TYPE_DETECTION_EVASION", "ATTACK_TYPE_VULNERABILITY_SCAN"]` (Multiple selection allowed)
+- `disabled_attack_types` (List of String) <br>**Valid Options:** `["ATTACK_TYPE_NON_BROWSER_CLIENT", "ATTACK_TYPE_DETECTION_EVASION", "ATTACK_TYPE_SESSION_HIJACKING", "ATTACK_TYPE_FORCEFUL_BROWSING", "ATTACK_TYPE_MALICIOUS_FILE_UPLOAD", "ATTACK_TYPE_GRAPHQL_PARSER_ATTACK", "ATTACK_TYPE_OTHER_APPLICATION_ATTACKS", "ATTACK_TYPE_COMMAND_EXECUTION", "ATTACK_TYPE_DENIAL_OF_SERVICE", "ATTACK_TYPE_REMOTE_FILE_INCLUDE", "ATTACK_TYPE_XPATH_INJECTION", "ATTACK_TYPE_NONE", "ATTACK_TYPE_TROJAN_BACKDOOR_SPYWARE", "ATTACK_TYPE_VULNERABILITY_SCAN", "ATTACK_TYPE_ABUSE_OF_FUNCTIONALITY", "ATTACK_TYPE_BUFFER_OVERFLOW", "ATTACK_TYPE_PREDICTABLE_RESOURCE_LOCATION", "ATTACK_TYPE_HTTP_RESPONSE_SPLITTING", "ATTACK_TYPE_AUTHENTICATION_AUTHORIZATION_ATTACKS", "ATTACK_TYPE_DIRECTORY_INDEXING", "ATTACK_TYPE_PATH_TRAVERSAL", "ATTACK_TYPE_LDAP_INJECTION", "ATTACK_TYPE_SERVER_SIDE_CODE_INJECTION", "ATTACK_TYPE_SQL_INJECTION", "ATTACK_TYPE_CROSS_SITE_SCRIPTING", "ATTACK_TYPE_HTTP_PARSER_ATTACK", "ATTACK_TYPE_INFORMATION_LEAKAGE"]` (Multiple selection allowed)
 
 
 

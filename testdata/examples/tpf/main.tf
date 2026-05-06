@@ -7,31 +7,48 @@ terraform {
   }
 }
 
-variable "f5xc_api_url" {
-  type = string
-}
-
-variable "f5xc_api_p12_file" {
-  type = string
-}
-
-variable "f5xc_api_token" {
-  type = string
-}
-
 provider "f5xc" {
   url     = var.f5xc_api_url
   timeout = "30s"
-  # api_token = var.f5xc_api_token
-  api_p12_file = var.f5xc_api_p12_file
+  api_token = var.f5xc_api_token
+  # api_p12_file = var.f5xc_api_p12_file
   limiter = {
     rate  = 30
     burst = 1
   }
 }
 
+##############################################################################
+# Local: resolve effective resource flags (master toggle overrides individual)
+##############################################################################
+locals {
+  create_route                    = var.f5xc_all_resources || var.f5xc_route
+  create_token                    = var.f5xc_all_resources || var.f5xc_token
+  create_namespace                = var.f5xc_all_resources || var.f5xc_namespace
+  create_nat_policy               = var.f5xc_all_resources || var.f5xc_nat_policy
+  create_app_setting              = var.f5xc_all_resources || var.f5xc_app_setting
+  create_healthcheck              = var.f5xc_all_resources || var.f5xc_healthcheck
+  create_virtual_k8s              = var.f5xc_all_resources || var.f5xc_virtual_k8s
+  create_origin_pool              = var.f5xc_all_resources || var.f5xc_origin_pool
+  create_alert_policy             = var.f5xc_all_resources || var.f5xc_alert_policy
+  create_virtual_site             = var.f5xc_all_resources || var.f5xc_virtual_site
+  create_app_firewall             = var.f5xc_all_resources || var.f5xc_app_firewall
+  create_service_policy           = var.f5xc_all_resources || var.f5xc_service_policy
+  create_v1_dns_monitor           = var.f5xc_all_resources || var.f5xc_v1_dns_monitor
+  create_voltstack_site           = var.f5xc_all_resources || var.f5xc_voltstack_site
+  create_alert_receiver           = var.f5xc_all_resources || var.f5xc_alert_receiver
+  create_virtual_network          = var.f5xc_all_resources || var.f5xc_virtual_network
+  create_site_mesh_group          = var.f5xc_all_resources || var.f5xc_site_mesh_group
+  create_network_firewall         = var.f5xc_all_resources || var.f5xc_network_firewall
+  create_http_loadbalancer        = var.f5xc_all_resources || var.f5xc_http_loadbalancer
+  create_network_policy_rule      = var.f5xc_all_resources || var.f5xc_network_policy_rule
+  create_forward_proxy_policy     = var.f5xc_all_resources || var.f5xc_forward_proxy_policy
+  create_api_definition_uploader  = var.f5xc_all_resources || var.f5xc_api_definition_uploader
+  create_enhanced_firewall_policy = var.f5xc_all_resources || var.f5xc_enhanced_firewall_policy
+}
 
 resource "f5xc_healthcheck" "hc1" {
+  count       = local.create_healthcheck ? 1 : 0
   name        = "test-hc-1"
   namespace   = "default"
   description = "healthcheck test1"
@@ -45,6 +62,7 @@ resource "f5xc_healthcheck" "hc1" {
 }
 
 resource "f5xc_origin_pool" "op" {
+  count                  = local.create_origin_pool ? 1 : 0
   name                   = "test-op-123"
   namespace              = "default"
   description            = "origin pool test"
@@ -80,13 +98,14 @@ resource "f5xc_origin_pool" "op" {
   ]
   healthcheck = [
     {
-      name      = f5xc_healthcheck.hc1.name
-      namespace = f5xc_healthcheck.hc1.namespace
+      name      = f5xc_healthcheck.hc1[0].name
+      namespace = f5xc_healthcheck.hc1[0].namespace
     }
   ]
 }
 
 resource "f5xc_alert_policy" "ap1" {
+  count     = local.create_alert_policy ? 1 : 0
   name      = "test-alert-policy-1"
   namespace = "default"
   receivers = [
@@ -104,8 +123,8 @@ resource "f5xc_alert_policy" "ap1" {
   ]
 }
 
-
 resource "f5xc_alert_receiver" "ar1" {
+  count     = local.create_alert_receiver ? 1 : 0
   name      = "ck-test-ar-1"
   namespace = "system"
   receiver_choice = {
@@ -123,22 +142,25 @@ resource "f5xc_alert_receiver" "ar1" {
   }
 }
 
-
 resource "f5xc_token" "t1" {
+  count     = local.create_token ? 1 : 0
   name      = "ck-test-token-01"
   namespace = "system"
 }
 
 resource "f5xc_namespace" "ns1" {
-  name = "ck-test-ns1"
+  count = local.create_namespace ? 1 : 0
+  name  = "ck-test-ns1"
 }
 
 resource "f5xc_virtual_k8s" "vk8s1" {
+  count     = local.create_virtual_k8s ? 1 : 0
   name      = "test-vk8s-1"
-  namespace = f5xc_namespace.ns1.name
+  namespace = f5xc_namespace.ns1[0].name //"ck-test-ns1"
 }
 
 resource "f5xc_virtual_network" "vn1" {
+  count     = local.create_virtual_network ? 1 : 0
   name      = "test-vn-1"
   namespace = "system"
   network_choice = {
@@ -148,6 +170,7 @@ resource "f5xc_virtual_network" "vn1" {
 }
 
 resource "f5xc_voltstack_site" "vss1" {
+  count     = local.create_voltstack_site ? 1 : 0
   name      = "test-site-1"
   namespace = "system"
   sriov_interface_choice = {
@@ -185,6 +208,7 @@ resource "f5xc_voltstack_site" "vss1" {
 }
 
 resource "f5xc_virtual_site" "vs1" {
+  count     = local.create_virtual_site ? 1 : 0
   name      = "test-virtual-site-1"
   namespace = "system"
   site_selector = {
@@ -194,6 +218,7 @@ resource "f5xc_virtual_site" "vs1" {
 }
 
 resource "f5xc_enhanced_firewall_policy" "efp1" {
+  count     = local.create_enhanced_firewall_policy ? 1 : 0
   name      = "ck-test-efp1"
   namespace = "system"
   rule_choice = {
@@ -202,16 +227,19 @@ resource "f5xc_enhanced_firewall_policy" "efp1" {
 }
 
 resource "f5xc_network_firewall" "nfw1" {
+  count     = local.create_network_firewall ? 1 : 0
   name      = "ck-test-nfw-1"
   namespace = "system"
 }
 
 resource "f5xc_network_policy_rule" "nfwr1" {
+  count     = local.create_network_policy_rule ? 1 : 0
   name      = "ck-test-nfwr1"
   namespace = "system"
 }
 
 resource "f5xc_service_policy" "sp1" {
+  count     = local.create_service_policy ? 1 : 0
   name      = "ck-sp-01"
   namespace = "default"
   rule_choice = {
@@ -223,6 +251,7 @@ resource "f5xc_service_policy" "sp1" {
 }
 
 resource "f5xc_forward_proxy_policy" "fpp1" {
+  count     = local.create_forward_proxy_policy ? 1 : 0
   name      = "ck-fpp-01"
   namespace = "system"
   proxy_choice = {
@@ -243,6 +272,7 @@ resource "f5xc_forward_proxy_policy" "fpp1" {
 }
 
 resource "f5xc_v1_dns_monitor" "v1_dns_mon1" {
+  count     = local.create_v1_dns_monitor ? 1 : 0
   name      = "ck-test-dns-mon-01"
   namespace = "system"
   domain    = "example.com"
@@ -264,6 +294,7 @@ resource "f5xc_v1_dns_monitor" "v1_dns_mon1" {
 }
 
 resource "f5xc_site_mesh_group" "smg1" {
+  count     = local.create_site_mesh_group ? 1 : 0
   name      = "ck-smg-01"
   namespace = "system"
   mesh_choice = {
@@ -282,7 +313,8 @@ resource "f5xc_site_mesh_group" "smg1" {
 }
 
 resource "f5xc_app_firewall" "app-fw1" {
-  name = "ck-app-fw-1"
+  count     = local.create_app_firewall ? 1 : 0
+  name      = "ck-app-fw-1"
   namespace = "system"
   enforcement_mode_choice = {
     monitoring = true
@@ -305,6 +337,7 @@ resource "f5xc_app_firewall" "app-fw1" {
 }
 
 resource "f5xc_app_setting" "apps-1" {
+  count     = local.create_app_setting ? 1 : 0
   name      = "ck-app-setting-1"
   namespace = "default"
   app_type_settings = [{
@@ -316,6 +349,7 @@ resource "f5xc_app_setting" "apps-1" {
 }
 
 resource "f5xc_nat_policy" "natp1" {
+  count     = local.create_nat_policy ? 1 : 0
   name      = "ck-nat-policy-1"
   namespace = "system"
   applies_to_choice = {
@@ -347,15 +381,13 @@ resource "f5xc_nat_policy" "natp1" {
       name = "ck-nat-policy-rule-1"
       scope_choice = {
         virtual_network = {
-          virtual_network = f5xc_virtual_network.vn1.name
+          virtual_network = f5xc_virtual_network.vn1[0].name
         }
       }
       criteria = {
-        /*
-        protocol_choice = {
-          any = true
-        }
-         */
+        //protocol_choice = {
+        //  any = true
+        //}
         source_cidr = ["192.168.0.0/24"]
       }
     }
@@ -363,9 +395,35 @@ resource "f5xc_nat_policy" "natp1" {
 }
 
 resource "f5xc_api_definition_uploader" "swagger" {
+  count = local.create_api_definition_uploader ? 1 : 0
   metadata = {
-    name = "test126"
+    name      = "test126"
     namespace = "default"
   }
   string_value = file("/Users/c.klewar/Projects/gitlab.com/F5/volterra/ves.io/terraform-provider-f5xc/testdata/examples/tpf/openapi.json")
+}
+
+resource "f5xc_route" "example" {
+  count     = local.create_route ? 1 : 0
+  name      = "ck-test-route-1"
+  namespace = "default"
+  routes = [
+    {
+      route_action_choice = {
+        route_destination = {
+          destinations = [
+            {
+              cluster = [{
+                name      = "cbip-internal-op-bigip-service-discovery-35-183-240-250"
+                namespace = "default"
+              }]
+            }
+          ]
+          host_rewrite_params_choice = {
+            auto_host_rewrite = true
+          }
+        }
+      }
+    }
+  ]
 }

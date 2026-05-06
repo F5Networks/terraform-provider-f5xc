@@ -5,12 +5,6 @@ package bigip_instance_site
 
 import (
 	fmt "fmt"
-	io "io"
-	math "math"
-	math_bits "math/bits"
-	reflect "reflect"
-	strings "strings"
-
 	_ "github.com/gogo/protobuf/gogoproto"
 	proto "github.com/gogo/protobuf/proto"
 	golang_proto "github.com/golang/protobuf/proto"
@@ -18,6 +12,11 @@ import (
 	site "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/site"
 	views "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views"
 	common_node "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views/common_node"
+	io "io"
+	math "math"
+	math_bits "math/bits"
+	reflect "reflect"
+	strings "strings"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.

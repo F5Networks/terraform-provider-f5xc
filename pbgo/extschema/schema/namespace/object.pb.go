@@ -5,17 +5,18 @@ package namespace
 
 import (
 	fmt "fmt"
+	_ "github.com/gogo/protobuf/gogoproto"
+	proto "github.com/gogo/protobuf/proto"
+	github_com_gogo_protobuf_sortkeys "github.com/gogo/protobuf/sortkeys"
+	types "github.com/gogo/protobuf/types"
+	golang_proto "github.com/golang/protobuf/proto"
+	schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
+	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/vesenv"
 	io "io"
 	math "math"
 	math_bits "math/bits"
 	reflect "reflect"
 	strings "strings"
-
-	_ "github.com/gogo/protobuf/gogoproto"
-	proto "github.com/gogo/protobuf/proto"
-	golang_proto "github.com/golang/protobuf/proto"
-	schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
-	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/vesenv"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -168,6 +169,16 @@ type StatusObject struct {
 	// x-displayName: "Conditions"
 	// Conditions represent the normalized status values for configuration object.
 	Conditions []*schema.ConditionType `protobuf:"bytes,3,rep,name=conditions,proto3" json:"conditions,omitempty"`
+	// Initializers
+	//
+	// x-displayName: "Initializers"
+	// It specifies programming information of all the initializers
+	Initializers map[string]*InitializerInfo `protobuf:"bytes,4,rep,name=initializers,proto3" json:"initializers,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	// Finalizers
+	//
+	// x-displayName: "Finalizers"
+	// It specifies programming information of all the finalizers
+	Finalizers map[string]*FinalizersInfo `protobuf:"bytes,5,rep,name=finalizers,proto3" json:"finalizers,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 }
 
 func (m *StatusObject) Reset()      { *m = StatusObject{} }
@@ -219,6 +230,233 @@ func (m *StatusObject) GetConditions() []*schema.ConditionType {
 	return nil
 }
 
+func (m *StatusObject) GetInitializers() map[string]*InitializerInfo {
+	if m != nil {
+		return m.Initializers
+	}
+	return nil
+}
+
+func (m *StatusObject) GetFinalizers() map[string]*FinalizersInfo {
+	if m != nil {
+		return m.Finalizers
+	}
+	return nil
+}
+
+// Initializer Info
+//
+// x-displayName: "Initializer Info"
+// It gives information about the initializers
+type InitializerInfo struct {
+	// Programming Start Initiated
+	//
+	// x-displayName: "Programming Start Initiated"
+	// timestamp at which first programming attempt was made to the remote service
+	ProgrammingInitiated *types.Timestamp `protobuf:"bytes,1,opt,name=programming_initiated,json=programmingInitiated,proto3" json:"programming_initiated,omitempty"`
+	// Initializer Status
+	//
+	// x-displayName: "Initializer Status"
+	// it specifies initializer status that whether the programming done in remote service or not
+	Status InitializerStatus `protobuf:"varint,2,opt,name=status,proto3,enum=ves.io.schema.namespace.InitializerStatus" json:"status,omitempty"`
+	// Last Update
+	//
+	// x-displayName: "Last Update"
+	// it specifies the details regarding the last programming attempt
+	LastUpdate *LastProgrammingUpdate `protobuf:"bytes,3,opt,name=last_update,json=lastUpdate,proto3" json:"last_update,omitempty"`
+}
+
+func (m *InitializerInfo) Reset()      { *m = InitializerInfo{} }
+func (*InitializerInfo) ProtoMessage() {}
+func (*InitializerInfo) Descriptor() ([]byte, []int) {
+	return fileDescriptor_978a1e5827ea263d, []int{3}
+}
+func (m *InitializerInfo) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *InitializerInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	b = b[:cap(b)]
+	n, err := m.MarshalToSizedBuffer(b)
+	if err != nil {
+		return nil, err
+	}
+	return b[:n], nil
+}
+func (m *InitializerInfo) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_InitializerInfo.Merge(m, src)
+}
+func (m *InitializerInfo) XXX_Size() int {
+	return m.Size()
+}
+func (m *InitializerInfo) XXX_DiscardUnknown() {
+	xxx_messageInfo_InitializerInfo.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_InitializerInfo proto.InternalMessageInfo
+
+func (m *InitializerInfo) GetProgrammingInitiated() *types.Timestamp {
+	if m != nil {
+		return m.ProgrammingInitiated
+	}
+	return nil
+}
+
+func (m *InitializerInfo) GetStatus() InitializerStatus {
+	if m != nil {
+		return m.Status
+	}
+	return INITIALIZER_UNKNOWN
+}
+
+func (m *InitializerInfo) GetLastUpdate() *LastProgrammingUpdate {
+	if m != nil {
+		return m.LastUpdate
+	}
+	return nil
+}
+
+// Finalizers Info
+//
+// x-displayName: "Finalizers Info"
+// It gives information about the finalizers
+type FinalizersInfo struct {
+	// Programming Start Initiated
+	//
+	// x-displayName: "Programming Start Initiated"
+	// timestamp at which first programming attempt was made to the remote service
+	ProgrammingInitiated *types.Timestamp `protobuf:"bytes,1,opt,name=programming_initiated,json=programmingInitiated,proto3" json:"programming_initiated,omitempty"`
+	// Finalizers Status
+	//
+	// x-displayName: "Finalizers Status"
+	// it specifies finalizer status that whether the programming done in remote service or not
+	Status FinalizerStatus `protobuf:"varint,2,opt,name=status,proto3,enum=ves.io.schema.namespace.FinalizerStatus" json:"status,omitempty"`
+	// Last Update
+	//
+	// x-displayName: "Last Update"
+	// it specifies the details regarding the last programming attempt
+	LastUpdate *LastProgrammingUpdate `protobuf:"bytes,3,opt,name=last_update,json=lastUpdate,proto3" json:"last_update,omitempty"`
+}
+
+func (m *FinalizersInfo) Reset()      { *m = FinalizersInfo{} }
+func (*FinalizersInfo) ProtoMessage() {}
+func (*FinalizersInfo) Descriptor() ([]byte, []int) {
+	return fileDescriptor_978a1e5827ea263d, []int{4}
+}
+func (m *FinalizersInfo) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *FinalizersInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	b = b[:cap(b)]
+	n, err := m.MarshalToSizedBuffer(b)
+	if err != nil {
+		return nil, err
+	}
+	return b[:n], nil
+}
+func (m *FinalizersInfo) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_FinalizersInfo.Merge(m, src)
+}
+func (m *FinalizersInfo) XXX_Size() int {
+	return m.Size()
+}
+func (m *FinalizersInfo) XXX_DiscardUnknown() {
+	xxx_messageInfo_FinalizersInfo.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_FinalizersInfo proto.InternalMessageInfo
+
+func (m *FinalizersInfo) GetProgrammingInitiated() *types.Timestamp {
+	if m != nil {
+		return m.ProgrammingInitiated
+	}
+	return nil
+}
+
+func (m *FinalizersInfo) GetStatus() FinalizerStatus {
+	if m != nil {
+		return m.Status
+	}
+	return FINALIZER_UNKNOWN
+}
+
+func (m *FinalizersInfo) GetLastUpdate() *LastProgrammingUpdate {
+	if m != nil {
+		return m.LastUpdate
+	}
+	return nil
+}
+
+// Last Programming Update
+//
+// x-displayName: "Last Programming Update"
+// It specifies the information regarding the last retry of programming to service
+type LastProgrammingUpdate struct {
+	// Last retry timestamp
+	//
+	// x-displayName: "Last retry timestamp"
+	// timestamp of last retry of programming to service
+	Time *types.Timestamp `protobuf:"bytes,1,opt,name=time,proto3" json:"time,omitempty"`
+	// Message
+	//
+	// x-displayName: "Message"
+	// any successful or any error message
+	Message string `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	// Total Retries
+	//
+	// x-displayName: "Total Retries"
+	// total number of retries done
+	TotalRetries int32 `protobuf:"varint,3,opt,name=total_retries,json=totalRetries,proto3" json:"total_retries,omitempty"`
+}
+
+func (m *LastProgrammingUpdate) Reset()      { *m = LastProgrammingUpdate{} }
+func (*LastProgrammingUpdate) ProtoMessage() {}
+func (*LastProgrammingUpdate) Descriptor() ([]byte, []int) {
+	return fileDescriptor_978a1e5827ea263d, []int{5}
+}
+func (m *LastProgrammingUpdate) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *LastProgrammingUpdate) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	b = b[:cap(b)]
+	n, err := m.MarshalToSizedBuffer(b)
+	if err != nil {
+		return nil, err
+	}
+	return b[:n], nil
+}
+func (m *LastProgrammingUpdate) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_LastProgrammingUpdate.Merge(m, src)
+}
+func (m *LastProgrammingUpdate) XXX_Size() int {
+	return m.Size()
+}
+func (m *LastProgrammingUpdate) XXX_DiscardUnknown() {
+	xxx_messageInfo_LastProgrammingUpdate.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_LastProgrammingUpdate proto.InternalMessageInfo
+
+func (m *LastProgrammingUpdate) GetTime() *types.Timestamp {
+	if m != nil {
+		return m.Time
+	}
+	return nil
+}
+
+func (m *LastProgrammingUpdate) GetMessage() string {
+	if m != nil {
+		return m.Message
+	}
+	return ""
+}
+
+func (m *LastProgrammingUpdate) GetTotalRetries() int32 {
+	if m != nil {
+		return m.TotalRetries
+	}
+	return 0
+}
+
 func init() {
 	proto.RegisterType((*Object)(nil), "ves.io.schema.namespace.Object")
 	golang_proto.RegisterType((*Object)(nil), "ves.io.schema.namespace.Object")
@@ -226,6 +464,16 @@ func init() {
 	golang_proto.RegisterType((*SpecType)(nil), "ves.io.schema.namespace.SpecType")
 	proto.RegisterType((*StatusObject)(nil), "ves.io.schema.namespace.StatusObject")
 	golang_proto.RegisterType((*StatusObject)(nil), "ves.io.schema.namespace.StatusObject")
+	proto.RegisterMapType((map[string]*FinalizersInfo)(nil), "ves.io.schema.namespace.StatusObject.FinalizersEntry")
+	golang_proto.RegisterMapType((map[string]*FinalizersInfo)(nil), "ves.io.schema.namespace.StatusObject.FinalizersEntry")
+	proto.RegisterMapType((map[string]*InitializerInfo)(nil), "ves.io.schema.namespace.StatusObject.InitializersEntry")
+	golang_proto.RegisterMapType((map[string]*InitializerInfo)(nil), "ves.io.schema.namespace.StatusObject.InitializersEntry")
+	proto.RegisterType((*InitializerInfo)(nil), "ves.io.schema.namespace.InitializerInfo")
+	golang_proto.RegisterType((*InitializerInfo)(nil), "ves.io.schema.namespace.InitializerInfo")
+	proto.RegisterType((*FinalizersInfo)(nil), "ves.io.schema.namespace.FinalizersInfo")
+	golang_proto.RegisterType((*FinalizersInfo)(nil), "ves.io.schema.namespace.FinalizersInfo")
+	proto.RegisterType((*LastProgrammingUpdate)(nil), "ves.io.schema.namespace.LastProgrammingUpdate")
+	golang_proto.RegisterType((*LastProgrammingUpdate)(nil), "ves.io.schema.namespace.LastProgrammingUpdate")
 }
 
 func init() {
@@ -236,45 +484,64 @@ func init() {
 }
 
 var fileDescriptor_978a1e5827ea263d = []byte{
-	// 594 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x93, 0x41, 0x4f, 0xd4, 0x40,
-	0x14, 0xc7, 0x3b, 0x2c, 0x59, 0x70, 0x20, 0x68, 0xea, 0xc1, 0x8a, 0x3a, 0xc1, 0xc5, 0x44, 0x12,
-	0x6d, 0x6b, 0x20, 0x1c, 0x44, 0x43, 0x0c, 0x1c, 0x88, 0x71, 0x89, 0xc9, 0xa2, 0x17, 0x2f, 0x64,
-	0x3a, 0x7d, 0x2d, 0xd5, 0xb6, 0xd3, 0x74, 0xa6, 0x05, 0x0e, 0x26, 0x7e, 0x02, 0xe3, 0xc7, 0x30,
-	0x7e, 0x02, 0x8f, 0xe2, 0xc9, 0x78, 0x22, 0x9c, 0x38, 0x4a, 0xf7, 0xa2, 0x07, 0x13, 0x3e, 0x82,
-	0xd9, 0xe9, 0xb6, 0x61, 0x37, 0xbb, 0x89, 0x7a, 0x7b, 0x33, 0xef, 0xf7, 0xff, 0xf7, 0xcd, 0xeb,
-	0x7b, 0xf8, 0x4e, 0x0e, 0xc2, 0x0a, 0xb8, 0x2d, 0xd8, 0x1e, 0x44, 0xd4, 0x8e, 0x69, 0x04, 0x22,
-	0xa1, 0x0c, 0x6c, 0xee, 0xbc, 0x06, 0x26, 0xad, 0x24, 0xe5, 0x92, 0xeb, 0xd7, 0x4a, 0xca, 0x2a,
-	0x29, 0xab, 0xa6, 0xe6, 0x4d, 0x3f, 0x90, 0x7b, 0x99, 0x63, 0x31, 0x1e, 0xd9, 0x3e, 0xf7, 0xb9,
-	0xad, 0x78, 0x27, 0xf3, 0xd4, 0x49, 0x1d, 0x54, 0x54, 0xfa, 0xcc, 0x2f, 0x8e, 0xfb, 0x9a, 0x3c,
-	0x4c, 0x40, 0xf4, 0xa1, 0x1b, 0x83, 0x10, 0x4f, 0x64, 0xc0, 0xe3, 0x2a, 0x79, 0x7d, 0x30, 0x79,
-	0x51, 0xd7, 0x1a, 0x4c, 0xe5, 0x20, 0x20, 0xce, 0x07, 0xe5, 0xad, 0xcf, 0x0d, 0xdc, 0x7c, 0xae,
-	0x5e, 0xa6, 0x3f, 0xc4, 0xd3, 0x11, 0x48, 0xea, 0x52, 0x49, 0x0d, 0xb4, 0x80, 0x96, 0x66, 0x96,
-	0x6f, 0x59, 0x83, 0xcf, 0x2c, 0xc1, 0x6d, 0x90, 0xf4, 0xc5, 0x61, 0x02, 0x9d, 0x1a, 0xd7, 0xdb,
-	0xf8, 0xb2, 0x38, 0x14, 0x12, 0xa2, 0xdd, 0xda, 0x61, 0x42, 0x39, 0x2c, 0x0e, 0x39, 0xec, 0x28,
-	0x6a, 0xc8, 0x67, 0xae, 0xd4, 0x6e, 0x57, 0x6e, 0xab, 0x78, 0x52, 0x24, 0xc0, 0x8c, 0x86, 0xb2,
-	0xb8, 0x6d, 0x8d, 0xe9, 0xb5, 0xb5, 0x93, 0x00, 0x53, 0x06, 0x0a, 0x5f, 0xfb, 0x8d, 0xbe, 0x1e,
-	0x19, 0x13, 0x7b, 0xe8, 0xe4, 0xc8, 0x28, 0x10, 0x5e, 0xc3, 0xcd, 0xcd, 0x14, 0xa8, 0x04, 0xfd,
-	0x81, 0xb7, 0x7a, 0xc0, 0x4c, 0xc6, 0x63, 0xc1, 0x43, 0x30, 0x1d, 0x2a, 0x02, 0x66, 0x52, 0x37,
-	0x0a, 0xe2, 0xfb, 0x0b, 0x39, 0x08, 0x33, 0xe0, 0x66, 0x46, 0xa3, 0xf2, 0xc6, 0xdc, 0x4f, 0x03,
-	0x09, 0x78, 0x19, 0x37, 0xb6, 0x40, 0xea, 0xf7, 0x94, 0xd0, 0x05, 0x8f, 0x66, 0xa1, 0x34, 0x29,
-	0x63, 0x20, 0x44, 0xad, 0xd9, 0x07, 0xa7, 0x7f, 0x65, 0xa6, 0x40, 0x5d, 0xbc, 0x82, 0x27, 0xdb,
-	0x81, 0xf8, 0x47, 0xd1, 0x23, 0x3c, 0xd5, 0x81, 0x24, 0xa4, 0xec, 0x3f, 0xaa, 0x6c, 0xb5, 0xf1,
-	0x74, 0xd5, 0x01, 0xfd, 0x09, 0x9e, 0xf2, 0xd9, 0xae, 0xea, 0x5a, 0xd9, 0xf8, 0xbb, 0x63, 0xbb,
-	0xb6, 0x15, 0x72, 0x87, 0x86, 0x75, 0xef, 0x9a, 0x3e, 0xeb, 0xc5, 0xad, 0x5f, 0x08, 0xcf, 0xee,
-	0x48, 0x2a, 0x33, 0xf1, 0xd7, 0xe3, 0x50, 0xe2, 0x23, 0xc6, 0xe1, 0x19, 0x9e, 0x29, 0xb7, 0x65,
-	0x37, 0x05, 0x4f, 0x18, 0x13, 0x0b, 0x8d, 0xa5, 0x99, 0xe5, 0x9b, 0x23, 0x87, 0xa9, 0x03, 0x5e,
-	0x4f, 0xbc, 0x31, 0xfb, 0xe9, 0xed, 0xa5, 0xba, 0xc6, 0x0e, 0xe6, 0x55, 0x52, 0xe8, 0x8f, 0x31,
-	0x66, 0x3c, 0x76, 0x03, 0x35, 0xb5, 0x46, 0x63, 0xa4, 0xd7, 0x66, 0x05, 0xa8, 0x42, 0x2e, 0xf0,
-	0x6b, 0x57, 0x4f, 0xd6, 0xaf, 0xe0, 0x39, 0x3c, 0x5b, 0xd5, 0x66, 0x65, 0x81, 0xbb, 0xf1, 0x1e,
-	0x7d, 0x5f, 0x9f, 0xdc, 0xec, 0xbc, 0x6c, 0x1f, 0x9f, 0x11, 0xed, 0xf4, 0x8c, 0x68, 0xe7, 0x67,
-	0x04, 0xbd, 0x2b, 0x08, 0xfa, 0x58, 0x10, 0xf4, 0xad, 0x20, 0xe8, 0xb8, 0x20, 0xe8, 0xb4, 0x20,
-	0xe8, 0x47, 0x41, 0xd0, 0xcf, 0x82, 0x68, 0xe7, 0x05, 0x41, 0x1f, 0xba, 0x44, 0xfb, 0xd2, 0x25,
-	0xe8, 0xb8, 0x4b, 0xb4, 0xd3, 0x2e, 0xd1, 0x5e, 0x3d, 0xf5, 0x79, 0xf2, 0xc6, 0xb7, 0x72, 0x1e,
-	0x4a, 0x48, 0x53, 0x6a, 0x65, 0xc2, 0x56, 0x81, 0xc7, 0xd3, 0xc8, 0x4c, 0x52, 0x9e, 0x07, 0x2e,
-	0xa4, 0x66, 0xef, 0xb7, 0xda, 0x89, 0xe3, 0x73, 0x1b, 0x0e, 0x64, 0x7f, 0x13, 0x87, 0xb7, 0xdd,
-	0x69, 0xaa, 0x65, 0x5c, 0xf9, 0x13, 0x00, 0x00, 0xff, 0xff, 0x94, 0x30, 0x0f, 0xee, 0x7d, 0x04,
-	0x00, 0x00,
+	// 912 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x56, 0xcf, 0x6f, 0xe3, 0x44,
+	0x14, 0x8e, 0x93, 0x34, 0xdd, 0xbe, 0x86, 0x76, 0x31, 0xac, 0x08, 0x01, 0x4c, 0x49, 0x91, 0xa8,
+	0x00, 0x3b, 0xa8, 0xab, 0x0a, 0xa8, 0xa0, 0x5a, 0xb5, 0x82, 0x55, 0x45, 0xaa, 0x22, 0x77, 0x2b,
+	0x21, 0x38, 0x44, 0x13, 0xfb, 0xd9, 0x1d, 0xd6, 0xf6, 0x58, 0x33, 0xe3, 0xec, 0x06, 0x09, 0x89,
+	0x13, 0x07, 0x0e, 0x88, 0x3f, 0x03, 0xf1, 0x57, 0xb0, 0x9c, 0x10, 0xa7, 0x6a, 0x25, 0xa4, 0x1e,
+	0x69, 0x7a, 0xe1, 0xd8, 0x03, 0x12, 0x47, 0x50, 0x66, 0xe2, 0x34, 0x09, 0x89, 0xe8, 0x4a, 0x70,
+	0x9b, 0x1f, 0xdf, 0xf7, 0xcd, 0x7b, 0xdf, 0x7b, 0x79, 0x0e, 0xbc, 0xda, 0x45, 0xe1, 0x50, 0xd6,
+	0x14, 0xde, 0x09, 0xc6, 0xa4, 0x99, 0x90, 0x18, 0x45, 0x4a, 0x3c, 0x6c, 0xb2, 0xce, 0xe7, 0xe8,
+	0x49, 0x27, 0xe5, 0x4c, 0x32, 0xf3, 0x39, 0x8d, 0x72, 0x34, 0xca, 0x19, 0xa1, 0xea, 0x76, 0x48,
+	0xe5, 0x49, 0xd6, 0x71, 0x3c, 0x16, 0x37, 0x43, 0x16, 0xb2, 0xa6, 0xc2, 0x77, 0xb2, 0x40, 0xed,
+	0xd4, 0x46, 0xad, 0xb4, 0x4e, 0xfd, 0xe5, 0x90, 0xb1, 0x30, 0xc2, 0x2b, 0x94, 0xa4, 0x31, 0x0a,
+	0x49, 0xe2, 0x74, 0x08, 0x58, 0x9f, 0x17, 0x8e, 0xec, 0xa5, 0x28, 0x86, 0xa0, 0x17, 0x26, 0x41,
+	0x2c, 0x95, 0x94, 0x25, 0xf9, 0xe5, 0xf3, 0x93, 0x97, 0xe3, 0xbc, 0xc6, 0xe4, 0x55, 0x17, 0x05,
+	0x26, 0xdd, 0x49, 0x7a, 0xe3, 0xd7, 0x12, 0x54, 0x0e, 0x55, 0xea, 0xe6, 0xbb, 0x70, 0x23, 0x46,
+	0x49, 0x7c, 0x22, 0x49, 0xcd, 0x58, 0x33, 0x36, 0x96, 0x37, 0x5f, 0x72, 0x26, 0x7d, 0xd0, 0xc0,
+	0x03, 0x94, 0xe4, 0x5e, 0x2f, 0x45, 0x77, 0x04, 0x37, 0x5b, 0xb0, 0x2a, 0x7a, 0x42, 0x62, 0xdc,
+	0x1e, 0x29, 0x14, 0x95, 0xc2, 0xfa, 0x94, 0xc2, 0x91, 0x42, 0x4d, 0xe9, 0xac, 0x68, 0xee, 0x41,
+	0xae, 0xb6, 0x05, 0x65, 0x91, 0xa2, 0x57, 0x2b, 0x29, 0x89, 0x57, 0x9c, 0x39, 0xc5, 0x70, 0x8e,
+	0x52, 0xf4, 0x94, 0x80, 0x82, 0x6f, 0x7f, 0x53, 0xfc, 0xe9, 0x51, 0xad, 0x78, 0x62, 0x3c, 0x7e,
+	0x54, 0xfb, 0xcb, 0x80, 0x6d, 0xa8, 0xec, 0x71, 0x24, 0x12, 0xcd, 0xb7, 0x82, 0xad, 0x87, 0x9e,
+	0xed, 0xb1, 0x44, 0xb0, 0x08, 0xed, 0x0e, 0x11, 0xd4, 0xb3, 0x89, 0x1f, 0xd3, 0xe4, 0xcd, 0xb5,
+	0x2e, 0x0a, 0x9b, 0x32, 0x3b, 0x23, 0xb1, 0x3e, 0xb1, 0x1f, 0x70, 0x2a, 0x11, 0x36, 0xa1, 0x74,
+	0x17, 0xa5, 0xf9, 0x86, 0x22, 0xfa, 0x18, 0x90, 0x2c, 0x92, 0x36, 0xf1, 0x3c, 0x14, 0x62, 0xc4,
+	0x79, 0x80, 0x9d, 0xe1, 0x91, 0xcd, 0x91, 0xf8, 0x70, 0x1b, 0xca, 0x2d, 0x2a, 0x9e, 0x90, 0xf4,
+	0x09, 0x2c, 0xba, 0x98, 0x46, 0xc4, 0x43, 0xf3, 0xe0, 0x49, 0xa3, 0x1c, 0x9d, 0xd3, 0x24, 0xe0,
+	0x44, 0x48, 0x9e, 0x79, 0x32, 0xe3, 0xa8, 0x2f, 0x1b, 0x2d, 0xb8, 0x91, 0xdb, 0x63, 0xde, 0x81,
+	0xc5, 0xd0, 0x6b, 0x2b, 0x4b, 0x75, 0x55, 0x5e, 0x9b, 0x6b, 0xe9, 0xdd, 0x88, 0x75, 0x48, 0x34,
+	0x32, 0xb6, 0x12, 0x7a, 0x83, 0x75, 0xe3, 0xb2, 0x0c, 0xd5, 0x23, 0x49, 0x64, 0x26, 0xae, 0xdd,
+	0x2b, 0x1a, 0x3e, 0xa3, 0x57, 0x3e, 0x82, 0x65, 0xfd, 0x5b, 0x6b, 0x73, 0x0c, 0x44, 0xad, 0xb8,
+	0x56, 0xda, 0x58, 0xde, 0x7c, 0x71, 0x66, 0xa7, 0xb9, 0x18, 0x0c, 0xc8, 0xbb, 0xd5, 0x1f, 0xbe,
+	0x5c, 0x1a, 0xc5, 0xe8, 0x02, 0xcb, 0x2f, 0x85, 0xf9, 0x1e, 0x80, 0xc7, 0x12, 0x9f, 0xaa, 0x96,
+	0xae, 0x95, 0x66, 0x6a, 0xed, 0xe5, 0x00, 0x15, 0xc8, 0x18, 0xde, 0xfc, 0x0c, 0xaa, 0x34, 0xa1,
+	0x92, 0x92, 0x88, 0x7e, 0x81, 0x5c, 0xd4, 0xca, 0x8a, 0xff, 0xf6, 0xfc, 0x86, 0x1b, 0xb3, 0xc0,
+	0xd9, 0x1f, 0x63, 0x7e, 0x90, 0x48, 0xde, 0x73, 0x27, 0xc4, 0xcc, 0x63, 0x80, 0x80, 0x26, 0xb9,
+	0xf4, 0x82, 0x92, 0xde, 0xba, 0x9e, 0xf4, 0x87, 0x23, 0x9e, 0x16, 0x1e, 0x13, 0xaa, 0x53, 0x78,
+	0xfa, 0x1f, 0x2f, 0x9b, 0x37, 0xa1, 0x74, 0x1f, 0x7b, 0xaa, 0x12, 0x4b, 0xee, 0x60, 0x69, 0xee,
+	0xc0, 0x42, 0x97, 0x44, 0x19, 0x0e, 0x2b, 0xbe, 0x31, 0xf7, 0xe1, 0x31, 0xb1, 0xfd, 0x24, 0x60,
+	0xae, 0xa6, 0x6d, 0x17, 0xdf, 0x31, 0xea, 0x01, 0xac, 0x4e, 0x45, 0x32, 0xe3, 0xa1, 0xf7, 0x27,
+	0x1f, 0x9a, 0xdf, 0x5a, 0x57, 0x52, 0x53, 0xef, 0x6c, 0x3f, 0xf3, 0x78, 0xe7, 0x26, 0xac, 0x40,
+	0x35, 0x6f, 0x11, 0x27, 0xa3, 0x7e, 0xe3, 0x4f, 0x03, 0x56, 0xa7, 0x62, 0x33, 0x0f, 0xe1, 0x56,
+	0xca, 0x59, 0xc8, 0x49, 0x1c, 0xd3, 0x24, 0x6c, 0x6b, 0xbb, 0x25, 0xfa, 0xc3, 0x16, 0xac, 0x3b,
+	0x7a, 0xdc, 0x3a, 0xf9, 0xb8, 0x75, 0xee, 0xe5, 0xe3, 0xd6, 0x7d, 0x76, 0x8c, 0xb8, 0x9f, 0xf3,
+	0xcc, 0x5d, 0xa8, 0x08, 0x65, 0xbc, 0x8a, 0x7e, 0x65, 0xf3, 0xf5, 0xeb, 0xd8, 0xa4, 0x4b, 0xe5,
+	0x0e, 0x99, 0xe6, 0x21, 0x2c, 0x47, 0x44, 0xc8, 0x76, 0x96, 0xfa, 0x44, 0xe2, 0x70, 0x68, 0x39,
+	0x73, 0x85, 0x5a, 0x44, 0xc8, 0x8f, 0xaf, 0x62, 0x39, 0x56, 0x2c, 0x17, 0x06, 0x12, 0x7a, 0xdd,
+	0xf8, 0xc3, 0x80, 0x95, 0x49, 0xb3, 0xfe, 0xfb, 0xc4, 0xef, 0x4c, 0x25, 0xbe, 0xf1, 0xef, 0x65,
+	0xfb, 0xbf, 0xd3, 0xfe, 0xda, 0x80, 0x5b, 0x33, 0x51, 0xa6, 0x03, 0xe5, 0xc1, 0x77, 0xf3, 0x1a,
+	0xc9, 0x2a, 0x9c, 0x59, 0x83, 0xc5, 0x18, 0x85, 0x20, 0xa1, 0x6e, 0xca, 0x25, 0x37, 0xdf, 0x9a,
+	0xeb, 0xf0, 0x94, 0x64, 0x92, 0x44, 0x6d, 0x8e, 0x92, 0x53, 0x14, 0x2a, 0xec, 0x05, 0xb7, 0xaa,
+	0x0e, 0x5d, 0x7d, 0xb6, 0xfb, 0xad, 0xf1, 0xcb, 0x4e, 0x79, 0xcf, 0x3d, 0x6e, 0x9d, 0x9e, 0x5b,
+	0x85, 0xb3, 0x73, 0xab, 0x70, 0x79, 0x6e, 0x19, 0x5f, 0xf5, 0x2d, 0xe3, 0xfb, 0xbe, 0x65, 0xfc,
+	0xdc, 0xb7, 0x8c, 0xd3, 0xbe, 0x65, 0x9c, 0xf5, 0x2d, 0xe3, 0xb7, 0xbe, 0x65, 0xfc, 0xde, 0xb7,
+	0x0a, 0x97, 0x7d, 0xcb, 0xf8, 0xee, 0xc2, 0x2a, 0xfc, 0x78, 0x61, 0x19, 0xa7, 0x17, 0x56, 0xe1,
+	0xec, 0xc2, 0x2a, 0x7c, 0xba, 0x1f, 0xb2, 0xf4, 0x7e, 0xe8, 0x74, 0x59, 0x24, 0x91, 0x73, 0xe2,
+	0x64, 0xa2, 0xa9, 0x16, 0x01, 0xe3, 0xb1, 0x9d, 0x72, 0xd6, 0xa5, 0x3e, 0x72, 0x7b, 0x30, 0xf4,
+	0x9b, 0x69, 0x27, 0x64, 0x4d, 0x7c, 0x28, 0x87, 0xdf, 0xe9, 0xe9, 0xff, 0x02, 0x9d, 0x8a, 0xca,
+	0xf4, 0xf6, 0xdf, 0x01, 0x00, 0x00, 0xff, 0xff, 0x0c, 0x41, 0xff, 0x46, 0xbc, 0x08, 0x00, 0x00,
 }
 
 func (this *Object) Equal(that interface{}) bool {
@@ -369,6 +636,112 @@ func (this *StatusObject) Equal(that interface{}) bool {
 			return false
 		}
 	}
+	if len(this.Initializers) != len(that1.Initializers) {
+		return false
+	}
+	for i := range this.Initializers {
+		if !this.Initializers[i].Equal(that1.Initializers[i]) {
+			return false
+		}
+	}
+	if len(this.Finalizers) != len(that1.Finalizers) {
+		return false
+	}
+	for i := range this.Finalizers {
+		if !this.Finalizers[i].Equal(that1.Finalizers[i]) {
+			return false
+		}
+	}
+	return true
+}
+func (this *InitializerInfo) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*InitializerInfo)
+	if !ok {
+		that2, ok := that.(InitializerInfo)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.ProgrammingInitiated.Equal(that1.ProgrammingInitiated) {
+		return false
+	}
+	if this.Status != that1.Status {
+		return false
+	}
+	if !this.LastUpdate.Equal(that1.LastUpdate) {
+		return false
+	}
+	return true
+}
+func (this *FinalizersInfo) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*FinalizersInfo)
+	if !ok {
+		that2, ok := that.(FinalizersInfo)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.ProgrammingInitiated.Equal(that1.ProgrammingInitiated) {
+		return false
+	}
+	if this.Status != that1.Status {
+		return false
+	}
+	if !this.LastUpdate.Equal(that1.LastUpdate) {
+		return false
+	}
+	return true
+}
+func (this *LastProgrammingUpdate) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*LastProgrammingUpdate)
+	if !ok {
+		that2, ok := that.(LastProgrammingUpdate)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.Time.Equal(that1.Time) {
+		return false
+	}
+	if this.Message != that1.Message {
+		return false
+	}
+	if this.TotalRetries != that1.TotalRetries {
+		return false
+	}
 	return true
 }
 func (this *Object) GoString() string {
@@ -405,7 +778,7 @@ func (this *StatusObject) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 7)
+	s := make([]string, 0, 9)
 	s = append(s, "&namespace.StatusObject{")
 	if this.Metadata != nil {
 		s = append(s, "Metadata: "+fmt.Sprintf("%#v", this.Metadata)+",\n")
@@ -416,6 +789,78 @@ func (this *StatusObject) GoString() string {
 	if this.Conditions != nil {
 		s = append(s, "Conditions: "+fmt.Sprintf("%#v", this.Conditions)+",\n")
 	}
+	keysForInitializers := make([]string, 0, len(this.Initializers))
+	for k, _ := range this.Initializers {
+		keysForInitializers = append(keysForInitializers, k)
+	}
+	github_com_gogo_protobuf_sortkeys.Strings(keysForInitializers)
+	mapStringForInitializers := "map[string]*InitializerInfo{"
+	for _, k := range keysForInitializers {
+		mapStringForInitializers += fmt.Sprintf("%#v: %#v,", k, this.Initializers[k])
+	}
+	mapStringForInitializers += "}"
+	if this.Initializers != nil {
+		s = append(s, "Initializers: "+mapStringForInitializers+",\n")
+	}
+	keysForFinalizers := make([]string, 0, len(this.Finalizers))
+	for k, _ := range this.Finalizers {
+		keysForFinalizers = append(keysForFinalizers, k)
+	}
+	github_com_gogo_protobuf_sortkeys.Strings(keysForFinalizers)
+	mapStringForFinalizers := "map[string]*FinalizersInfo{"
+	for _, k := range keysForFinalizers {
+		mapStringForFinalizers += fmt.Sprintf("%#v: %#v,", k, this.Finalizers[k])
+	}
+	mapStringForFinalizers += "}"
+	if this.Finalizers != nil {
+		s = append(s, "Finalizers: "+mapStringForFinalizers+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *InitializerInfo) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 7)
+	s = append(s, "&namespace.InitializerInfo{")
+	if this.ProgrammingInitiated != nil {
+		s = append(s, "ProgrammingInitiated: "+fmt.Sprintf("%#v", this.ProgrammingInitiated)+",\n")
+	}
+	s = append(s, "Status: "+fmt.Sprintf("%#v", this.Status)+",\n")
+	if this.LastUpdate != nil {
+		s = append(s, "LastUpdate: "+fmt.Sprintf("%#v", this.LastUpdate)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *FinalizersInfo) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 7)
+	s = append(s, "&namespace.FinalizersInfo{")
+	if this.ProgrammingInitiated != nil {
+		s = append(s, "ProgrammingInitiated: "+fmt.Sprintf("%#v", this.ProgrammingInitiated)+",\n")
+	}
+	s = append(s, "Status: "+fmt.Sprintf("%#v", this.Status)+",\n")
+	if this.LastUpdate != nil {
+		s = append(s, "LastUpdate: "+fmt.Sprintf("%#v", this.LastUpdate)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *LastProgrammingUpdate) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 7)
+	s = append(s, "&namespace.LastProgrammingUpdate{")
+	if this.Time != nil {
+		s = append(s, "Time: "+fmt.Sprintf("%#v", this.Time)+",\n")
+	}
+	s = append(s, "Message: "+fmt.Sprintf("%#v", this.Message)+",\n")
+	s = append(s, "TotalRetries: "+fmt.Sprintf("%#v", this.TotalRetries)+",\n")
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
@@ -541,6 +986,68 @@ func (m *StatusObject) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if len(m.Finalizers) > 0 {
+		keysForFinalizers := make([]string, 0, len(m.Finalizers))
+		for k := range m.Finalizers {
+			keysForFinalizers = append(keysForFinalizers, string(k))
+		}
+		github_com_gogo_protobuf_sortkeys.Strings(keysForFinalizers)
+		for iNdEx := len(keysForFinalizers) - 1; iNdEx >= 0; iNdEx-- {
+			v := m.Finalizers[string(keysForFinalizers[iNdEx])]
+			baseI := i
+			if v != nil {
+				{
+					size, err := v.MarshalToSizedBuffer(dAtA[:i])
+					if err != nil {
+						return 0, err
+					}
+					i -= size
+					i = encodeVarintObject(dAtA, i, uint64(size))
+				}
+				i--
+				dAtA[i] = 0x12
+			}
+			i -= len(keysForFinalizers[iNdEx])
+			copy(dAtA[i:], keysForFinalizers[iNdEx])
+			i = encodeVarintObject(dAtA, i, uint64(len(keysForFinalizers[iNdEx])))
+			i--
+			dAtA[i] = 0xa
+			i = encodeVarintObject(dAtA, i, uint64(baseI-i))
+			i--
+			dAtA[i] = 0x2a
+		}
+	}
+	if len(m.Initializers) > 0 {
+		keysForInitializers := make([]string, 0, len(m.Initializers))
+		for k := range m.Initializers {
+			keysForInitializers = append(keysForInitializers, string(k))
+		}
+		github_com_gogo_protobuf_sortkeys.Strings(keysForInitializers)
+		for iNdEx := len(keysForInitializers) - 1; iNdEx >= 0; iNdEx-- {
+			v := m.Initializers[string(keysForInitializers[iNdEx])]
+			baseI := i
+			if v != nil {
+				{
+					size, err := v.MarshalToSizedBuffer(dAtA[:i])
+					if err != nil {
+						return 0, err
+					}
+					i -= size
+					i = encodeVarintObject(dAtA, i, uint64(size))
+				}
+				i--
+				dAtA[i] = 0x12
+			}
+			i -= len(keysForInitializers[iNdEx])
+			copy(dAtA[i:], keysForInitializers[iNdEx])
+			i = encodeVarintObject(dAtA, i, uint64(len(keysForInitializers[iNdEx])))
+			i--
+			dAtA[i] = 0xa
+			i = encodeVarintObject(dAtA, i, uint64(baseI-i))
+			i--
+			dAtA[i] = 0x22
+		}
+	}
 	if len(m.Conditions) > 0 {
 		for iNdEx := len(m.Conditions) - 1; iNdEx >= 0; iNdEx-- {
 			{
@@ -572,6 +1079,157 @@ func (m *StatusObject) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	if m.Metadata != nil {
 		{
 			size, err := m.Metadata.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintObject(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *InitializerInfo) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *InitializerInfo) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *InitializerInfo) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.LastUpdate != nil {
+		{
+			size, err := m.LastUpdate.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintObject(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1a
+	}
+	if m.Status != 0 {
+		i = encodeVarintObject(dAtA, i, uint64(m.Status))
+		i--
+		dAtA[i] = 0x10
+	}
+	if m.ProgrammingInitiated != nil {
+		{
+			size, err := m.ProgrammingInitiated.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintObject(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *FinalizersInfo) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *FinalizersInfo) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *FinalizersInfo) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.LastUpdate != nil {
+		{
+			size, err := m.LastUpdate.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintObject(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1a
+	}
+	if m.Status != 0 {
+		i = encodeVarintObject(dAtA, i, uint64(m.Status))
+		i--
+		dAtA[i] = 0x10
+	}
+	if m.ProgrammingInitiated != nil {
+		{
+			size, err := m.ProgrammingInitiated.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintObject(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *LastProgrammingUpdate) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *LastProgrammingUpdate) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *LastProgrammingUpdate) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.TotalRetries != 0 {
+		i = encodeVarintObject(dAtA, i, uint64(m.TotalRetries))
+		i--
+		dAtA[i] = 0x18
+	}
+	if len(m.Message) > 0 {
+		i -= len(m.Message)
+		copy(dAtA[i:], m.Message)
+		i = encodeVarintObject(dAtA, i, uint64(len(m.Message)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if m.Time != nil {
+		{
+			size, err := m.Time.MarshalToSizedBuffer(dAtA[:i])
 			if err != nil {
 				return 0, err
 			}
@@ -651,6 +1309,92 @@ func (m *StatusObject) Size() (n int) {
 			n += 1 + l + sovObject(uint64(l))
 		}
 	}
+	if len(m.Initializers) > 0 {
+		for k, v := range m.Initializers {
+			_ = k
+			_ = v
+			l = 0
+			if v != nil {
+				l = v.Size()
+				l += 1 + sovObject(uint64(l))
+			}
+			mapEntrySize := 1 + len(k) + sovObject(uint64(len(k))) + l
+			n += mapEntrySize + 1 + sovObject(uint64(mapEntrySize))
+		}
+	}
+	if len(m.Finalizers) > 0 {
+		for k, v := range m.Finalizers {
+			_ = k
+			_ = v
+			l = 0
+			if v != nil {
+				l = v.Size()
+				l += 1 + sovObject(uint64(l))
+			}
+			mapEntrySize := 1 + len(k) + sovObject(uint64(len(k))) + l
+			n += mapEntrySize + 1 + sovObject(uint64(mapEntrySize))
+		}
+	}
+	return n
+}
+
+func (m *InitializerInfo) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.ProgrammingInitiated != nil {
+		l = m.ProgrammingInitiated.Size()
+		n += 1 + l + sovObject(uint64(l))
+	}
+	if m.Status != 0 {
+		n += 1 + sovObject(uint64(m.Status))
+	}
+	if m.LastUpdate != nil {
+		l = m.LastUpdate.Size()
+		n += 1 + l + sovObject(uint64(l))
+	}
+	return n
+}
+
+func (m *FinalizersInfo) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.ProgrammingInitiated != nil {
+		l = m.ProgrammingInitiated.Size()
+		n += 1 + l + sovObject(uint64(l))
+	}
+	if m.Status != 0 {
+		n += 1 + sovObject(uint64(m.Status))
+	}
+	if m.LastUpdate != nil {
+		l = m.LastUpdate.Size()
+		n += 1 + l + sovObject(uint64(l))
+	}
+	return n
+}
+
+func (m *LastProgrammingUpdate) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Time != nil {
+		l = m.Time.Size()
+		n += 1 + l + sovObject(uint64(l))
+	}
+	l = len(m.Message)
+	if l > 0 {
+		n += 1 + l + sovObject(uint64(l))
+	}
+	if m.TotalRetries != 0 {
+		n += 1 + sovObject(uint64(m.TotalRetries))
+	}
 	return n
 }
 
@@ -696,10 +1440,68 @@ func (this *StatusObject) String() string {
 		repeatedStringForConditions += strings.Replace(fmt.Sprintf("%v", f), "ConditionType", "schema.ConditionType", 1) + ","
 	}
 	repeatedStringForConditions += "}"
+	keysForInitializers := make([]string, 0, len(this.Initializers))
+	for k, _ := range this.Initializers {
+		keysForInitializers = append(keysForInitializers, k)
+	}
+	github_com_gogo_protobuf_sortkeys.Strings(keysForInitializers)
+	mapStringForInitializers := "map[string]*InitializerInfo{"
+	for _, k := range keysForInitializers {
+		mapStringForInitializers += fmt.Sprintf("%v: %v,", k, this.Initializers[k])
+	}
+	mapStringForInitializers += "}"
+	keysForFinalizers := make([]string, 0, len(this.Finalizers))
+	for k, _ := range this.Finalizers {
+		keysForFinalizers = append(keysForFinalizers, k)
+	}
+	github_com_gogo_protobuf_sortkeys.Strings(keysForFinalizers)
+	mapStringForFinalizers := "map[string]*FinalizersInfo{"
+	for _, k := range keysForFinalizers {
+		mapStringForFinalizers += fmt.Sprintf("%v: %v,", k, this.Finalizers[k])
+	}
+	mapStringForFinalizers += "}"
 	s := strings.Join([]string{`&StatusObject{`,
 		`Metadata:` + strings.Replace(fmt.Sprintf("%v", this.Metadata), "StatusMetaType", "schema.StatusMetaType", 1) + `,`,
 		`ObjectRefs:` + repeatedStringForObjectRefs + `,`,
 		`Conditions:` + repeatedStringForConditions + `,`,
+		`Initializers:` + mapStringForInitializers + `,`,
+		`Finalizers:` + mapStringForFinalizers + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *InitializerInfo) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&InitializerInfo{`,
+		`ProgrammingInitiated:` + strings.Replace(fmt.Sprintf("%v", this.ProgrammingInitiated), "Timestamp", "types.Timestamp", 1) + `,`,
+		`Status:` + fmt.Sprintf("%v", this.Status) + `,`,
+		`LastUpdate:` + strings.Replace(this.LastUpdate.String(), "LastProgrammingUpdate", "LastProgrammingUpdate", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *FinalizersInfo) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&FinalizersInfo{`,
+		`ProgrammingInitiated:` + strings.Replace(fmt.Sprintf("%v", this.ProgrammingInitiated), "Timestamp", "types.Timestamp", 1) + `,`,
+		`Status:` + fmt.Sprintf("%v", this.Status) + `,`,
+		`LastUpdate:` + strings.Replace(this.LastUpdate.String(), "LastProgrammingUpdate", "LastProgrammingUpdate", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *LastProgrammingUpdate) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&LastProgrammingUpdate{`,
+		`Time:` + strings.Replace(fmt.Sprintf("%v", this.Time), "Timestamp", "types.Timestamp", 1) + `,`,
+		`Message:` + fmt.Sprintf("%v", this.Message) + `,`,
+		`TotalRetries:` + fmt.Sprintf("%v", this.TotalRetries) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -1095,6 +1897,692 @@ func (m *StatusObject) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Initializers", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowObject
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthObject
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthObject
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Initializers == nil {
+				m.Initializers = make(map[string]*InitializerInfo)
+			}
+			var mapkey string
+			var mapvalue *InitializerInfo
+			for iNdEx < postIndex {
+				entryPreIndex := iNdEx
+				var wire uint64
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return ErrIntOverflowObject
+					}
+					if iNdEx >= l {
+						return io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					wire |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				fieldNum := int32(wire >> 3)
+				if fieldNum == 1 {
+					var stringLenmapkey uint64
+					for shift := uint(0); ; shift += 7 {
+						if shift >= 64 {
+							return ErrIntOverflowObject
+						}
+						if iNdEx >= l {
+							return io.ErrUnexpectedEOF
+						}
+						b := dAtA[iNdEx]
+						iNdEx++
+						stringLenmapkey |= uint64(b&0x7F) << shift
+						if b < 0x80 {
+							break
+						}
+					}
+					intStringLenmapkey := int(stringLenmapkey)
+					if intStringLenmapkey < 0 {
+						return ErrInvalidLengthObject
+					}
+					postStringIndexmapkey := iNdEx + intStringLenmapkey
+					if postStringIndexmapkey < 0 {
+						return ErrInvalidLengthObject
+					}
+					if postStringIndexmapkey > l {
+						return io.ErrUnexpectedEOF
+					}
+					mapkey = string(dAtA[iNdEx:postStringIndexmapkey])
+					iNdEx = postStringIndexmapkey
+				} else if fieldNum == 2 {
+					var mapmsglen int
+					for shift := uint(0); ; shift += 7 {
+						if shift >= 64 {
+							return ErrIntOverflowObject
+						}
+						if iNdEx >= l {
+							return io.ErrUnexpectedEOF
+						}
+						b := dAtA[iNdEx]
+						iNdEx++
+						mapmsglen |= int(b&0x7F) << shift
+						if b < 0x80 {
+							break
+						}
+					}
+					if mapmsglen < 0 {
+						return ErrInvalidLengthObject
+					}
+					postmsgIndex := iNdEx + mapmsglen
+					if postmsgIndex < 0 {
+						return ErrInvalidLengthObject
+					}
+					if postmsgIndex > l {
+						return io.ErrUnexpectedEOF
+					}
+					mapvalue = &InitializerInfo{}
+					if err := mapvalue.Unmarshal(dAtA[iNdEx:postmsgIndex]); err != nil {
+						return err
+					}
+					iNdEx = postmsgIndex
+				} else {
+					iNdEx = entryPreIndex
+					skippy, err := skipObject(dAtA[iNdEx:])
+					if err != nil {
+						return err
+					}
+					if skippy < 0 {
+						return ErrInvalidLengthObject
+					}
+					if (iNdEx + skippy) > postIndex {
+						return io.ErrUnexpectedEOF
+					}
+					iNdEx += skippy
+				}
+			}
+			m.Initializers[mapkey] = mapvalue
+			iNdEx = postIndex
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Finalizers", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowObject
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthObject
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthObject
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Finalizers == nil {
+				m.Finalizers = make(map[string]*FinalizersInfo)
+			}
+			var mapkey string
+			var mapvalue *FinalizersInfo
+			for iNdEx < postIndex {
+				entryPreIndex := iNdEx
+				var wire uint64
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return ErrIntOverflowObject
+					}
+					if iNdEx >= l {
+						return io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					wire |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				fieldNum := int32(wire >> 3)
+				if fieldNum == 1 {
+					var stringLenmapkey uint64
+					for shift := uint(0); ; shift += 7 {
+						if shift >= 64 {
+							return ErrIntOverflowObject
+						}
+						if iNdEx >= l {
+							return io.ErrUnexpectedEOF
+						}
+						b := dAtA[iNdEx]
+						iNdEx++
+						stringLenmapkey |= uint64(b&0x7F) << shift
+						if b < 0x80 {
+							break
+						}
+					}
+					intStringLenmapkey := int(stringLenmapkey)
+					if intStringLenmapkey < 0 {
+						return ErrInvalidLengthObject
+					}
+					postStringIndexmapkey := iNdEx + intStringLenmapkey
+					if postStringIndexmapkey < 0 {
+						return ErrInvalidLengthObject
+					}
+					if postStringIndexmapkey > l {
+						return io.ErrUnexpectedEOF
+					}
+					mapkey = string(dAtA[iNdEx:postStringIndexmapkey])
+					iNdEx = postStringIndexmapkey
+				} else if fieldNum == 2 {
+					var mapmsglen int
+					for shift := uint(0); ; shift += 7 {
+						if shift >= 64 {
+							return ErrIntOverflowObject
+						}
+						if iNdEx >= l {
+							return io.ErrUnexpectedEOF
+						}
+						b := dAtA[iNdEx]
+						iNdEx++
+						mapmsglen |= int(b&0x7F) << shift
+						if b < 0x80 {
+							break
+						}
+					}
+					if mapmsglen < 0 {
+						return ErrInvalidLengthObject
+					}
+					postmsgIndex := iNdEx + mapmsglen
+					if postmsgIndex < 0 {
+						return ErrInvalidLengthObject
+					}
+					if postmsgIndex > l {
+						return io.ErrUnexpectedEOF
+					}
+					mapvalue = &FinalizersInfo{}
+					if err := mapvalue.Unmarshal(dAtA[iNdEx:postmsgIndex]); err != nil {
+						return err
+					}
+					iNdEx = postmsgIndex
+				} else {
+					iNdEx = entryPreIndex
+					skippy, err := skipObject(dAtA[iNdEx:])
+					if err != nil {
+						return err
+					}
+					if skippy < 0 {
+						return ErrInvalidLengthObject
+					}
+					if (iNdEx + skippy) > postIndex {
+						return io.ErrUnexpectedEOF
+					}
+					iNdEx += skippy
+				}
+			}
+			m.Finalizers[mapkey] = mapvalue
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipObject(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthObject
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthObject
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *InitializerInfo) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowObject
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: InitializerInfo: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: InitializerInfo: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ProgrammingInitiated", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowObject
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthObject
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthObject
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.ProgrammingInitiated == nil {
+				m.ProgrammingInitiated = &types.Timestamp{}
+			}
+			if err := m.ProgrammingInitiated.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Status", wireType)
+			}
+			m.Status = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowObject
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Status |= InitializerStatus(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field LastUpdate", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowObject
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthObject
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthObject
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.LastUpdate == nil {
+				m.LastUpdate = &LastProgrammingUpdate{}
+			}
+			if err := m.LastUpdate.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipObject(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthObject
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthObject
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *FinalizersInfo) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowObject
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: FinalizersInfo: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: FinalizersInfo: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ProgrammingInitiated", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowObject
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthObject
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthObject
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.ProgrammingInitiated == nil {
+				m.ProgrammingInitiated = &types.Timestamp{}
+			}
+			if err := m.ProgrammingInitiated.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Status", wireType)
+			}
+			m.Status = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowObject
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Status |= FinalizerStatus(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field LastUpdate", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowObject
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthObject
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthObject
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.LastUpdate == nil {
+				m.LastUpdate = &LastProgrammingUpdate{}
+			}
+			if err := m.LastUpdate.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipObject(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthObject
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthObject
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *LastProgrammingUpdate) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowObject
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: LastProgrammingUpdate: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: LastProgrammingUpdate: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Time", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowObject
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthObject
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthObject
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Time == nil {
+				m.Time = &types.Timestamp{}
+			}
+			if err := m.Time.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Message", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowObject
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthObject
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthObject
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Message = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field TotalRetries", wireType)
+			}
+			m.TotalRetries = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowObject
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.TotalRetries |= int32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
 		default:
 			iNdEx = preIndex
 			skippy, err := skipObject(dAtA[iNdEx:])

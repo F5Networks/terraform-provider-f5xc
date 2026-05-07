@@ -1,19 +1,23 @@
 resource "f5xc_service_policy_rule" "example" {
   name      = "example_service_policy_rule"
   namespace = "example_namespace"
-  asn_choice = {
-    any_asn = true
-  }
-  action = ["ENUM_VALUE"]
   waf_action = {
     action_type = {
-      none = true
+      waf_skip_processing = true
     }
   }
-  client_choice = {
-    any_client = true
-  }
   ip_choice = {
-    any_ip = true
+    ip_prefix_list = {
+      ip_prefix_list = "example_ip_prefix_list"
+    }
+  }
+  action = ["ENUM_VALUE"]
+  client_choice = {
+    client_name = "example_client_name"
+  }
+  asn_choice = {
+    asn_list = {
+      asn_list = "example_asn_list"
+    }
   }
 }

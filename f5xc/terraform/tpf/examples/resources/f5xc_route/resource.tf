@@ -3,8 +3,8 @@ resource "f5xc_route" "example" {
   namespace = "example_namespace"
   routes = [{
     route_action = {
-      route_direct_response = {
-        route_direct_response = "example_route_direct_response"
+      route_destination = {
+        route_destination = "example_route_destination"
       }
     }
   }]

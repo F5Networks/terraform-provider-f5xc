@@ -35,19 +35,19 @@ type AlertPolicyAlertPolicyRoute struct {
 }
 
 type AlertPolicyRouteMatcherChoice struct {
-	Alertname      types.List   `tfsdk:"alertname"`
-	AlertnameRegex types.String `tfsdk:"alertname_regex"`
 	Custom         types.Object `tfsdk:"custom"`
 	Any            types.Bool   `tfsdk:"any"`
 	Severity       types.Object `tfsdk:"severity"`
 	Group          types.Object `tfsdk:"group"`
+	Alertname      types.List   `tfsdk:"alertname"`
+	AlertnameRegex types.String `tfsdk:"alertname_regex"`
 }
 
 type AlertPolicyRouteCustom struct {
-	Alertlabel types.Map    `tfsdk:"alertlabel"`
 	Severity   types.Object `tfsdk:"severity"`
 	Group      types.Object `tfsdk:"group"`
 	Alertname  types.Object `tfsdk:"alertname"`
+	Alertlabel types.Map    `tfsdk:"alertlabel"`
 }
 
 type AlertPolicyAlertPolicyLabelMatcher struct {
@@ -55,8 +55,8 @@ type AlertPolicyAlertPolicyLabelMatcher struct {
 }
 
 type AlertPolicyLabelMatcherMatcherTypeChoice struct {
-	RegexMatch types.String `tfsdk:"regex_match"`
 	ExactMatch types.String `tfsdk:"exact_match"`
+	RegexMatch types.String `tfsdk:"regex_match"`
 }
 
 type AlertPolicyRouteSeverity struct {
@@ -80,10 +80,10 @@ type AlertPolicyAlertPolicyNotificationParameters struct {
 }
 
 type AlertPolicyNotificationParametersGroupByChoice struct {
-	Default    types.Bool   `tfsdk:"default"`
-	Individual types.Bool   `tfsdk:"individual"`
 	VesIoGroup types.Bool   `tfsdk:"ves_io_group"`
 	Custom     types.Object `tfsdk:"custom"`
+	Default    types.Bool   `tfsdk:"default"`
+	Individual types.Bool   `tfsdk:"individual"`
 }
 
 type AlertPolicyNotificationParametersCustom struct {
@@ -92,12 +92,12 @@ type AlertPolicyNotificationParametersCustom struct {
 
 // DataSourceF5XCAlertPolicyModel describes the resource data model.
 type DataSourceF5XCAlertPolicyModel struct {
+	Name                   types.String   `tfsdk:"name"`
 	Namespace              types.String   `tfsdk:"namespace"`
 	Uid                    types.String   `tfsdk:"uid"`
 	Labels                 types.Map      `tfsdk:"labels"`
 	Annotations            types.Map      `tfsdk:"annotations"`
 	Description            types.String   `tfsdk:"description"`
-	Name                   types.String   `tfsdk:"name"`
 	Receivers              types.List     `tfsdk:"receivers"`
 	Routes                 types.List     `tfsdk:"routes"`
 	NotificationParameters types.Object   `tfsdk:"notification_parameters"`
@@ -108,9 +108,9 @@ type DataSourceF5XCAlertPolicyModel struct {
 // Attribute map for RequiredArrayOfPointerField --> Receivers
 var AlertPolicyReceiversObjectRefModelAttributeMap = map[string]attr.Type{
 
+	"namespace": types.StringType,
 	"name":      types.StringType,
 	"tenant":    types.StringType,
-	"namespace": types.StringType,
 }
 
 // Attribute map for RequiredArrayOfPointerField --> Routes
@@ -135,10 +135,6 @@ var AlertPolicyRoutesModelAttributeMap = map[string]attr.Type{
 // Attribute map for OneOfField --> Matcher
 var AlertPolicyRoutesMatcherModelAttributeMap = map[string]attr.Type{
 
-	"alertname": types.ListType{
-		ElemType: types.StringType,
-	},
-	"alertname_regex": types.StringType,
 	"custom": types.ObjectType{
 		AttrTypes: AlertPolicyRoutesMatcherCustomModelAttributeMap,
 	},
@@ -149,16 +145,15 @@ var AlertPolicyRoutesMatcherModelAttributeMap = map[string]attr.Type{
 	"group": types.ObjectType{
 		AttrTypes: AlertPolicyRoutesMatcherGroupModelAttributeMap,
 	},
+	"alertname": types.ListType{
+		ElemType: types.StringType,
+	},
+	"alertname_regex": types.StringType,
 }
 
 // Attribute map for PointerOfOneOfField --> Custom
 var AlertPolicyRoutesMatcherCustomModelAttributeMap = map[string]attr.Type{
-
-	"alertlabel": types.MapType{
-		ElemType: types.ObjectType{
-			AttrTypes: AlertPolicyRoutesMatcherCustomAlertlabelModelAttributeMap,
-		},
-	}, "severity": types.ObjectType{
+	"severity": types.ObjectType{
 		AttrTypes: map[string]attr.Type{
 			"matcher_type_choice": types.ObjectType{
 				AttrTypes: AlertPolicyRoutesMatcherCustomSeverityMatcherTypeModelAttributeMap,
@@ -174,21 +169,11 @@ var AlertPolicyRoutesMatcherCustomModelAttributeMap = map[string]attr.Type{
 				AttrTypes: AlertPolicyRoutesMatcherCustomAlertnameMatcherTypeModelAttributeMap,
 			}},
 	},
-}
-
-// Attribute map for MapOfPointerField --> Alertlabel
-var AlertPolicyRoutesMatcherCustomAlertlabelModelAttributeMap = map[string]attr.Type{
-
-	"matcher_type_choice": types.ObjectType{
-		AttrTypes: AlertPolicyRoutesMatcherCustomAlertlabelMatcherTypeModelAttributeMap,
+	"alertlabel": types.MapType{
+		ElemType: types.ObjectType{
+			AttrTypes: AlertPolicyRoutesMatcherCustomAlertlabelModelAttributeMap,
+		},
 	},
-}
-
-// Attribute map for RequiredOneOfField --> MatcherType
-var AlertPolicyRoutesMatcherCustomAlertlabelMatcherTypeModelAttributeMap = map[string]attr.Type{
-
-	"regex_match": types.StringType,
-	"exact_match": types.StringType,
 }
 
 // Attribute map for PointerField --> Severity
@@ -232,6 +217,21 @@ var AlertPolicyRoutesMatcherCustomAlertnameModelAttributeMap = map[string]attr.T
 // Attribute map for RequiredOneOfField --> MatcherType
 var AlertPolicyRoutesMatcherCustomAlertnameMatcherTypeModelAttributeMap = map[string]attr.Type{
 
+	"exact_match": types.StringType,
+	"regex_match": types.StringType,
+}
+
+// Attribute map for MapOfPointerField --> Alertlabel
+var AlertPolicyRoutesMatcherCustomAlertlabelModelAttributeMap = map[string]attr.Type{
+
+	"matcher_type_choice": types.ObjectType{
+		AttrTypes: AlertPolicyRoutesMatcherCustomAlertlabelMatcherTypeModelAttributeMap,
+	},
+}
+
+// Attribute map for RequiredOneOfField --> MatcherType
+var AlertPolicyRoutesMatcherCustomAlertlabelMatcherTypeModelAttributeMap = map[string]attr.Type{
+
 	"regex_match": types.StringType,
 	"exact_match": types.StringType,
 }
@@ -273,12 +273,12 @@ var AlertPolicyRoutesNotificationParametersModelAttributeMap = map[string]attr.T
 // Attribute map for RequiredOneOfField --> GroupBy
 var AlertPolicyRoutesNotificationParametersGroupByModelAttributeMap = map[string]attr.Type{
 
-	"default":      types.BoolType,
-	"individual":   types.BoolType,
 	"ves_io_group": types.BoolType,
 	"custom": types.ObjectType{
 		AttrTypes: AlertPolicyRoutesNotificationParametersGroupByCustomModelAttributeMap,
 	},
+	"default":    types.BoolType,
+	"individual": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> Custom
@@ -303,12 +303,12 @@ var AlertPolicyNotificationParametersModelAttributeMap = map[string]attr.Type{
 // Attribute map for RequiredOneOfField --> GroupBy
 var AlertPolicyNotificationParametersGroupByModelAttributeMap = map[string]attr.Type{
 
-	"default":      types.BoolType,
 	"individual":   types.BoolType,
 	"ves_io_group": types.BoolType,
 	"custom": types.ObjectType{
 		AttrTypes: AlertPolicyNotificationParametersGroupByCustomModelAttributeMap,
 	},
+	"default": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> Custom
@@ -337,6 +337,12 @@ func (r *DataSourceF5XCAlertPolicy) Schema(ctx context.Context, request datasour
 		Description:         "AlertPolicy data source",
 
 		Attributes: map[string]schema.Attribute{
+			"name": schema.StringAttribute{
+				Description: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
+				Required:    false,
+				Optional:    true,
+				Computed:    true,
+			},
 			"namespace": schema.StringAttribute{
 				Description: "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
 				Required:    false,
@@ -369,12 +375,6 @@ func (r *DataSourceF5XCAlertPolicy) Schema(ctx context.Context, request datasour
 				Optional:    false,
 				Computed:    true,
 			},
-			"name": schema.StringAttribute{
-				Description: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
-				Required:    false,
-				Optional:    true,
-				Computed:    true,
-			},
 			"receivers": schema.ListNestedAttribute{
 				Description: "Receivers list of Alert Receivers where the alerts will be sent",
 				Required:    false,
@@ -382,6 +382,12 @@ func (r *DataSourceF5XCAlertPolicy) Schema(ctx context.Context, request datasour
 				Computed:    true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
+						"namespace": schema.StringAttribute{
+							Description: "",
+							Required:    false,
+							Optional:    false,
+							Computed:    true,
+						},
 						"name": schema.StringAttribute{
 							Description: "",
 							Required:    false,
@@ -389,12 +395,6 @@ func (r *DataSourceF5XCAlertPolicy) Schema(ctx context.Context, request datasour
 							Computed:    true,
 						},
 						"tenant": schema.StringAttribute{
-							Description: "",
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-						},
-						"namespace": schema.StringAttribute{
 							Description: "",
 							Required:    false,
 							Optional:    false,
@@ -416,55 +416,12 @@ func (r *DataSourceF5XCAlertPolicy) Schema(ctx context.Context, request datasour
 							Optional:    false,
 							Computed:    true,
 							Attributes: map[string]schema.Attribute{
-								"alertname": schema.ListAttribute{
-									Description: "Alertname Matches the alertname of the alert",
-									ElementType: types.StringType,
-									Required:    false,
-									Optional:    false,
-									Computed:    true,
-								},
-								"alertname_regex": schema.StringAttribute{
-									Description: "Alertname Regex Match Regular Expression match for the alertname",
-									Required:    false,
-									Optional:    false,
-									Computed:    true,
-								},
 								"custom": schema.SingleNestedAttribute{
 									Description: "Custom Match A set of custom equality/regex matchers an alert has to fulfill to match the route.",
 									Required:    false,
 									Optional:    false,
 									Computed:    true,
 									Attributes: map[string]schema.Attribute{
-										"alertlabel": schema.MapNestedAttribute{
-											Description: "AlertLabel AlertLabel to configure the alert policy rule",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-											NestedObject: schema.NestedAttributeObject{
-												Attributes: map[string]schema.Attribute{
-													"matcher_type_choice": schema.SingleNestedAttribute{
-														Description: "Matcher Type Either exact or regex match for the label",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-														Attributes: map[string]schema.Attribute{
-															"regex_match": schema.StringAttribute{
-																Description: "Regex Match Regular expression match value for the label",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-															"exact_match": schema.StringAttribute{
-																Description: "Exact Match Equality match value for the label",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-														},
-													},
-												},
-											},
-										},
 										"severity": schema.SingleNestedAttribute{
 											Description: "Severity Severity Matcher",
 											Required:    false,
@@ -533,17 +490,47 @@ func (r *DataSourceF5XCAlertPolicy) Schema(ctx context.Context, request datasour
 													Optional:    false,
 													Computed:    true,
 													Attributes: map[string]schema.Attribute{
+														"exact_match": schema.StringAttribute{
+															Description: "Exact Match Equality match value for the label",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
 														"regex_match": schema.StringAttribute{
 															Description: "Regex Match Regular expression match value for the label",
 															Required:    false,
 															Optional:    false,
 															Computed:    true,
 														},
-														"exact_match": schema.StringAttribute{
-															Description: "Exact Match Equality match value for the label",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
+													},
+												},
+											},
+										},
+										"alertlabel": schema.MapNestedAttribute{
+											Description: "AlertLabel AlertLabel to configure the alert policy rule",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+											NestedObject: schema.NestedAttributeObject{
+												Attributes: map[string]schema.Attribute{
+													"matcher_type_choice": schema.SingleNestedAttribute{
+														Description: "Matcher Type Either exact or regex match for the label",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+														Attributes: map[string]schema.Attribute{
+															"regex_match": schema.StringAttribute{
+																Description: "Regex Match Regular expression match value for the label",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
+															},
+															"exact_match": schema.StringAttribute{
+																Description: "Exact Match Equality match value for the label",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
+															},
 														},
 													},
 												},
@@ -587,6 +574,19 @@ func (r *DataSourceF5XCAlertPolicy) Schema(ctx context.Context, request datasour
 										},
 									},
 								},
+								"alertname": schema.ListAttribute{
+									Description: "Alertname Matches the alertname of the alert",
+									ElementType: types.StringType,
+									Required:    false,
+									Optional:    false,
+									Computed:    true,
+								},
+								"alertname_regex": schema.StringAttribute{
+									Description: "Alertname Regex Match Regular Expression match for the alertname",
+									Required:    false,
+									Optional:    false,
+									Computed:    true,
+								},
 							},
 						},
 						"action_choice": schema.SingleNestedAttribute{
@@ -621,18 +621,6 @@ func (r *DataSourceF5XCAlertPolicy) Schema(ctx context.Context, request datasour
 									Optional:    false,
 									Computed:    true,
 									Attributes: map[string]schema.Attribute{
-										"default": schema.BoolAttribute{
-											Description: "Default Group the alerts by severity, group name and alert name",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
-										"individual": schema.BoolAttribute{
-											Description: "Individual This option disables grouping of alerts",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
 										"ves_io_group": schema.BoolAttribute{
 											Description: "F5XC Defined Group Group the alerts by severity, group name and alert name",
 											Required:    false,
@@ -653,6 +641,18 @@ func (r *DataSourceF5XCAlertPolicy) Schema(ctx context.Context, request datasour
 													Computed:    true,
 												},
 											},
+										},
+										"default": schema.BoolAttribute{
+											Description: "Default Group the alerts by severity, group name and alert name",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+										},
+										"individual": schema.BoolAttribute{
+											Description: "Individual This option disables grouping of alerts",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
 										},
 									},
 								},
@@ -691,12 +691,6 @@ func (r *DataSourceF5XCAlertPolicy) Schema(ctx context.Context, request datasour
 						Optional:    false,
 						Computed:    true,
 						Attributes: map[string]schema.Attribute{
-							"default": schema.BoolAttribute{
-								Description: "Default Group the alerts by severity, group name and alert name",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-							},
 							"individual": schema.BoolAttribute{
 								Description: "Individual This option disables grouping of alerts",
 								Required:    false,
@@ -723,6 +717,12 @@ func (r *DataSourceF5XCAlertPolicy) Schema(ctx context.Context, request datasour
 										Computed:    true,
 									},
 								},
+							},
+							"default": schema.BoolAttribute{
+								Description: "Default Group the alerts by severity, group name and alert name",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
 							},
 						},
 					},
@@ -817,6 +817,9 @@ func (d *DataSourceF5XCAlertPolicy) Read(ctx context.Context, request datasource
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
+	// data SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
+
 	// data SpecToModelRoot Meta RequiredStringField --> Namespace
 	data.Namespace = types.StringValue(metaData.GetNamespace())
 
@@ -862,14 +865,19 @@ func (d *DataSourceF5XCAlertPolicy) Read(ctx context.Context, request datasource
 	// data SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
 
-	// data SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
-
 	// data SpecToModelRoot RequiredArrayOfPointerField --> Receivers
 	receiversElementsSpectToModel := make([]ObjectRefTypeModel, 0, len(specData.Receivers))
 
 	for _, receiversElement := range specData.Receivers {
 		objectRefTypeModelModel := ObjectRefTypeModel{}
+
+		// data specToModelNested RequiredStringField --> Namespace
+		if receiversElement.GetNamespace() != "" {
+			objectRefTypeModelModel.Namespace = types.StringValue(receiversElement.GetNamespace())
+		} else {
+			// Empty string, set to null
+			objectRefTypeModelModel.Namespace = types.StringNull()
+		}
 
 		// data specToModelNested RequiredStringField --> Name
 		if receiversElement.GetName() != "" {
@@ -885,14 +893,6 @@ func (d *DataSourceF5XCAlertPolicy) Read(ctx context.Context, request datasource
 		} else {
 			// Empty string, set to null
 			objectRefTypeModelModel.Tenant = types.StringNull()
-		}
-
-		// data specToModelNested RequiredStringField --> Namespace
-		if receiversElement.GetNamespace() != "" {
-			objectRefTypeModelModel.Namespace = types.StringValue(receiversElement.GetNamespace())
-		} else {
-			// Empty string, set to null
-			objectRefTypeModelModel.Namespace = types.StringNull()
 		}
 
 		receiversElementsSpectToModel = append(receiversElementsSpectToModel, objectRefTypeModelModel)
@@ -928,44 +928,6 @@ func (d *DataSourceF5XCAlertPolicy) Read(ctx context.Context, request datasource
 
 			// Process nested choices, populating the temporary attribute map
 
-			// data specToModelNested EnumOfOneOfField --> Alertname
-			{
-				alertnameItem, isAlertname := routesmatcherChoiceChoices.(*ves_io_schema_alert_policy.Route_Alertname)
-				if isAlertname && alertnameItem != nil {
-
-					alertnameIntVal := int32(alertnameItem.Alertname)
-
-					if strVal, exists := ves_io_schema_alert_policy.AlertName_name[alertnameIntVal]; exists {
-						alertnameTfStr := types.StringValue(strVal)
-						alertnameSlice := []types.String{alertnameTfStr}
-
-						alertnameList, diags := types.ListValueFrom(ctx, types.StringType, alertnameSlice)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						routesmatcherChoiceChoicesAttributeMap["alertname"] = alertnameList
-					} else {
-
-						routesmatcherChoiceChoicesAttributeMap["alertname"] = types.ListNull(types.StringType)
-					}
-				} else {
-
-					routesmatcherChoiceChoicesAttributeMap["alertname"] = types.ListNull(types.StringType)
-				}
-			}
-
-			// data specToModelNested StringOfOneOfField --> AlertnameRegex
-			alertnameRegexItem, isAlertnameRegex := routesmatcherChoiceChoices.(*ves_io_schema_alert_policy.Route_AlertnameRegex)
-
-			if isAlertnameRegex {
-				routesmatcherChoiceChoicesAttributeMap["alertname_regex"] = types.StringValue(string(alertnameRegexItem.AlertnameRegex))
-			} else {
-				// Empty string, set to null
-				routesmatcherChoiceChoicesAttributeMap["alertname_regex"] = types.StringNull()
-			}
-
 			// data specToModelNested PointerOfOneOfField --> Custom
 			// <no value>
 			// false
@@ -974,83 +936,6 @@ func (d *DataSourceF5XCAlertPolicy) Read(ctx context.Context, request datasource
 				customAttributeMap := make(map[string]attr.Value)
 
 				if isCustom && customOptions != nil {
-
-					// data specToModelNested MapOfPointerField --> Alertlabel
-					if len(customOptions.Custom.GetAlertlabel()) > 0 {
-						alertlabelGoMap := make(map[string]AlertPolicyAlertPolicyLabelMatcher, len(customOptions.Custom.GetAlertlabel()))
-
-						for key, alertlabelElement := range customOptions.Custom.GetAlertlabel() {
-							alertlabelItem := AlertPolicyAlertPolicyLabelMatcher{}
-
-							// data specToModelNested RequiredOneOfField --> MatcherType
-							// <no value>
-							if alertlabelElement.GetMatcherType() != nil {
-								// Create a temporary attribute map for the choices within this OneOf
-								alertlabelmatcherTypeChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-								// Define a variable for the spec choices to be passed down to nested templates.
-								// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-								alertlabelmatcherTypeChoiceChoices := alertlabelElement.GetMatcherType()
-
-								// Process nested choices, populating the temporary attribute map
-
-								// data specToModelNested StringOfOneOfField --> RegexMatch
-								regexMatchItem, isRegexMatch := alertlabelmatcherTypeChoiceChoices.(*ves_io_schema_alert_policy.LabelMatcher_RegexMatch)
-
-								if isRegexMatch {
-									alertlabelmatcherTypeChoiceChoicesAttributeMap["regex_match"] = types.StringValue(string(regexMatchItem.RegexMatch))
-								} else {
-									// Empty string, set to null
-									alertlabelmatcherTypeChoiceChoicesAttributeMap["regex_match"] = types.StringNull()
-								}
-
-								// data specToModelNested StringOfOneOfField --> ExactMatch
-								exactMatchItem, isExactMatch := alertlabelmatcherTypeChoiceChoices.(*ves_io_schema_alert_policy.LabelMatcher_ExactMatch)
-
-								if isExactMatch {
-									alertlabelmatcherTypeChoiceChoicesAttributeMap["exact_match"] = types.StringValue(string(exactMatchItem.ExactMatch))
-								} else {
-									// Empty string, set to null
-									alertlabelmatcherTypeChoiceChoicesAttributeMap["exact_match"] = types.StringNull()
-								}
-
-								// --- End of Choices ---
-
-								// Create the final ObjectValue for this OneOf field
-								finalObj, alertlabelmatcherTypeChoiceChoicesObjDiags := types.ObjectValue(
-									AlertPolicyRoutesMatcherCustomAlertlabelMatcherTypeModelAttributeMap, // The attribute schema for the OneOf choices
-									alertlabelmatcherTypeChoiceChoicesAttributeMap,
-								)
-								response.Diagnostics.Append(alertlabelmatcherTypeChoiceChoicesObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-
-								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								alertlabelItem.MatcherTypeChoice = finalObj
-							} else {
-								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								alertlabelItem.MatcherTypeChoice = types.ObjectNull(AlertPolicyRoutesMatcherCustomAlertlabelMatcherTypeModelAttributeMap)
-							}
-
-							alertlabelGoMap[key] = alertlabelItem
-						}
-
-						// Convert to Terraform MapValue using the Utility function
-						alertlabelMapValue, d := utils.GoMapToObjectMapValue(ctx, AlertPolicyRoutesMatcherCustomAlertlabelModelAttributeMap, alertlabelGoMap)
-						response.Diagnostics.Append(d...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						customAttributeMap["alertlabel"] = alertlabelMapValue
-					} else {
-						// If empty, set Terraform Null Map (using the extracted element type)
-						AlertlabelObjType := types.ObjectType{
-							AttrTypes: AlertPolicyRoutesMatcherCustomAlertlabelModelAttributeMap,
-						}
-						customAttributeMap["alertlabel"] = types.MapNull(AlertlabelObjType)
-					}
 
 					// data specToModelNested PointerField --> Severity
 					if customOptions.Custom.GetSeverity() != nil {
@@ -1226,16 +1111,6 @@ func (d *DataSourceF5XCAlertPolicy) Read(ctx context.Context, request datasource
 
 							// Process nested choices, populating the temporary attribute map
 
-							// data specToModelNested StringOfOneOfField --> RegexMatch
-							regexMatchItem, isRegexMatch := alertnamematcherTypeChoiceChoices.(*ves_io_schema_alert_policy.LabelMatcher_RegexMatch)
-
-							if isRegexMatch {
-								alertnamematcherTypeChoiceChoicesAttributeMap["regex_match"] = types.StringValue(string(regexMatchItem.RegexMatch))
-							} else {
-								// Empty string, set to null
-								alertnamematcherTypeChoiceChoicesAttributeMap["regex_match"] = types.StringNull()
-							}
-
 							// data specToModelNested StringOfOneOfField --> ExactMatch
 							exactMatchItem, isExactMatch := alertnamematcherTypeChoiceChoices.(*ves_io_schema_alert_policy.LabelMatcher_ExactMatch)
 
@@ -1244,6 +1119,16 @@ func (d *DataSourceF5XCAlertPolicy) Read(ctx context.Context, request datasource
 							} else {
 								// Empty string, set to null
 								alertnamematcherTypeChoiceChoicesAttributeMap["exact_match"] = types.StringNull()
+							}
+
+							// data specToModelNested StringOfOneOfField --> RegexMatch
+							regexMatchItem, isRegexMatch := alertnamematcherTypeChoiceChoices.(*ves_io_schema_alert_policy.LabelMatcher_RegexMatch)
+
+							if isRegexMatch {
+								alertnamematcherTypeChoiceChoicesAttributeMap["regex_match"] = types.StringValue(string(regexMatchItem.RegexMatch))
+							} else {
+								// Empty string, set to null
+								alertnamematcherTypeChoiceChoicesAttributeMap["regex_match"] = types.StringNull()
 							}
 
 							// --- End of Choices ---
@@ -1281,6 +1166,83 @@ func (d *DataSourceF5XCAlertPolicy) Read(ctx context.Context, request datasource
 						// making this else-branch unreachable. The child OneOf handles the actual healing.
 						// The target is a types.Object, so we use types.ObjectNull.
 						customAttributeMap["alertname"] = types.ObjectNull(AlertPolicyRoutesMatcherCustomAlertnameModelAttributeMap)
+					}
+
+					// data specToModelNested MapOfPointerField --> Alertlabel
+					if len(customOptions.Custom.GetAlertlabel()) > 0 {
+						alertlabelGoMap := make(map[string]AlertPolicyAlertPolicyLabelMatcher, len(customOptions.Custom.GetAlertlabel()))
+
+						for key, alertlabelElement := range customOptions.Custom.GetAlertlabel() {
+							alertlabelItem := AlertPolicyAlertPolicyLabelMatcher{}
+
+							// data specToModelNested RequiredOneOfField --> MatcherType
+							// <no value>
+							if alertlabelElement.GetMatcherType() != nil {
+								// Create a temporary attribute map for the choices within this OneOf
+								alertlabelmatcherTypeChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+								// Define a variable for the spec choices to be passed down to nested templates.
+								// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+								alertlabelmatcherTypeChoiceChoices := alertlabelElement.GetMatcherType()
+
+								// Process nested choices, populating the temporary attribute map
+
+								// data specToModelNested StringOfOneOfField --> RegexMatch
+								regexMatchItem, isRegexMatch := alertlabelmatcherTypeChoiceChoices.(*ves_io_schema_alert_policy.LabelMatcher_RegexMatch)
+
+								if isRegexMatch {
+									alertlabelmatcherTypeChoiceChoicesAttributeMap["regex_match"] = types.StringValue(string(regexMatchItem.RegexMatch))
+								} else {
+									// Empty string, set to null
+									alertlabelmatcherTypeChoiceChoicesAttributeMap["regex_match"] = types.StringNull()
+								}
+
+								// data specToModelNested StringOfOneOfField --> ExactMatch
+								exactMatchItem, isExactMatch := alertlabelmatcherTypeChoiceChoices.(*ves_io_schema_alert_policy.LabelMatcher_ExactMatch)
+
+								if isExactMatch {
+									alertlabelmatcherTypeChoiceChoicesAttributeMap["exact_match"] = types.StringValue(string(exactMatchItem.ExactMatch))
+								} else {
+									// Empty string, set to null
+									alertlabelmatcherTypeChoiceChoicesAttributeMap["exact_match"] = types.StringNull()
+								}
+
+								// --- End of Choices ---
+
+								// Create the final ObjectValue for this OneOf field
+								finalObj, alertlabelmatcherTypeChoiceChoicesObjDiags := types.ObjectValue(
+									AlertPolicyRoutesMatcherCustomAlertlabelMatcherTypeModelAttributeMap, // The attribute schema for the OneOf choices
+									alertlabelmatcherTypeChoiceChoicesAttributeMap,
+								)
+								response.Diagnostics.Append(alertlabelmatcherTypeChoiceChoicesObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+
+								// Assign the final object to the correct place (either the root model or a parent's attribute map)
+								alertlabelItem.MatcherTypeChoice = finalObj
+							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
+								alertlabelItem.MatcherTypeChoice = types.ObjectNull(AlertPolicyRoutesMatcherCustomAlertlabelMatcherTypeModelAttributeMap)
+							}
+
+							alertlabelGoMap[key] = alertlabelItem
+						}
+
+						// Convert to Terraform MapValue using the Utility function
+						alertlabelMapValue, d := utils.GoMapToObjectMapValue(ctx, AlertPolicyRoutesMatcherCustomAlertlabelModelAttributeMap, alertlabelGoMap)
+						response.Diagnostics.Append(d...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						customAttributeMap["alertlabel"] = alertlabelMapValue
+					} else {
+						// If empty, set Terraform Null Map (using the extracted element type)
+						AlertlabelObjType := types.ObjectType{
+							AttrTypes: AlertPolicyRoutesMatcherCustomAlertlabelModelAttributeMap,
+						}
+						customAttributeMap["alertlabel"] = types.MapNull(AlertlabelObjType)
 					}
 
 					customObj, diags := types.ObjectValue(AlertPolicyRoutesMatcherCustomModelAttributeMap, customAttributeMap)
@@ -1379,6 +1341,44 @@ func (d *DataSourceF5XCAlertPolicy) Read(ctx context.Context, request datasource
 				}
 			}
 
+			// data specToModelNested EnumOfOneOfField --> Alertname
+			{
+				alertnameItem, isAlertname := routesmatcherChoiceChoices.(*ves_io_schema_alert_policy.Route_Alertname)
+				if isAlertname && alertnameItem != nil {
+
+					alertnameIntVal := int32(alertnameItem.Alertname)
+
+					if strVal, exists := ves_io_schema_alert_policy.AlertName_name[alertnameIntVal]; exists {
+						alertnameTfStr := types.StringValue(strVal)
+						alertnameSlice := []types.String{alertnameTfStr}
+
+						alertnameList, diags := types.ListValueFrom(ctx, types.StringType, alertnameSlice)
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						routesmatcherChoiceChoicesAttributeMap["alertname"] = alertnameList
+					} else {
+
+						routesmatcherChoiceChoicesAttributeMap["alertname"] = types.ListNull(types.StringType)
+					}
+				} else {
+
+					routesmatcherChoiceChoicesAttributeMap["alertname"] = types.ListNull(types.StringType)
+				}
+			}
+
+			// data specToModelNested StringOfOneOfField --> AlertnameRegex
+			alertnameRegexItem, isAlertnameRegex := routesmatcherChoiceChoices.(*ves_io_schema_alert_policy.Route_AlertnameRegex)
+
+			if isAlertnameRegex {
+				routesmatcherChoiceChoicesAttributeMap["alertname_regex"] = types.StringValue(string(alertnameRegexItem.AlertnameRegex))
+			} else {
+				// Empty string, set to null
+				routesmatcherChoiceChoicesAttributeMap["alertname_regex"] = types.StringNull()
+			}
+
 			// --- End of Choices ---
 
 			// Create the final ObjectValue for this OneOf field
@@ -1467,24 +1467,6 @@ func (d *DataSourceF5XCAlertPolicy) Read(ctx context.Context, request datasource
 
 				// Process nested choices, populating the temporary attribute map
 
-				// data specToModelNested BoolOfOneOfPointerField --> Default
-				_, isDefault := notificationParametersgroupByChoiceChoices.(*ves_io_schema_alert_policy.NotificationParameters_Default)
-
-				if isDefault {
-					notificationParametersgroupByChoiceChoicesAttributeMap["default"] = types.BoolValue(true)
-				} else {
-					notificationParametersgroupByChoiceChoicesAttributeMap["default"] = types.BoolNull()
-				}
-
-				// data specToModelNested BoolOfOneOfPointerField --> Individual
-				_, isIndividual := notificationParametersgroupByChoiceChoices.(*ves_io_schema_alert_policy.NotificationParameters_Individual)
-
-				if isIndividual {
-					notificationParametersgroupByChoiceChoicesAttributeMap["individual"] = types.BoolValue(true)
-				} else {
-					notificationParametersgroupByChoiceChoicesAttributeMap["individual"] = types.BoolNull()
-				}
-
 				// data specToModelNested BoolOfOneOfPointerField --> VesIoGroup
 				_, isVesIoGroup := notificationParametersgroupByChoiceChoices.(*ves_io_schema_alert_policy.NotificationParameters_VesIoGroup)
 
@@ -1524,6 +1506,24 @@ func (d *DataSourceF5XCAlertPolicy) Read(ctx context.Context, request datasource
 					} else {
 						notificationParametersgroupByChoiceChoicesAttributeMap["custom"] = types.ObjectNull(AlertPolicyRoutesNotificationParametersGroupByCustomModelAttributeMap)
 					}
+				}
+
+				// data specToModelNested BoolOfOneOfPointerField --> Default
+				_, isDefault := notificationParametersgroupByChoiceChoices.(*ves_io_schema_alert_policy.NotificationParameters_Default)
+
+				if isDefault {
+					notificationParametersgroupByChoiceChoicesAttributeMap["default"] = types.BoolValue(true)
+				} else {
+					notificationParametersgroupByChoiceChoicesAttributeMap["default"] = types.BoolNull()
+				}
+
+				// data specToModelNested BoolOfOneOfPointerField --> Individual
+				_, isIndividual := notificationParametersgroupByChoiceChoices.(*ves_io_schema_alert_policy.NotificationParameters_Individual)
+
+				if isIndividual {
+					notificationParametersgroupByChoiceChoicesAttributeMap["individual"] = types.BoolValue(true)
+				} else {
+					notificationParametersgroupByChoiceChoicesAttributeMap["individual"] = types.BoolNull()
 				}
 
 				// --- End of Choices ---
@@ -1620,15 +1620,6 @@ func (d *DataSourceF5XCAlertPolicy) Read(ctx context.Context, request datasource
 
 			// Process nested choices, populating the temporary attribute map
 
-			// data specToModelNested BoolOfOneOfPointerField --> Default
-			_, isDefault := notificationParametersgroupByChoiceChoices.(*ves_io_schema_alert_policy.NotificationParameters_Default)
-
-			if isDefault {
-				notificationParametersgroupByChoiceChoicesAttributeMap["default"] = types.BoolValue(true)
-			} else {
-				notificationParametersgroupByChoiceChoicesAttributeMap["default"] = types.BoolNull()
-			}
-
 			// data specToModelNested BoolOfOneOfPointerField --> Individual
 			_, isIndividual := notificationParametersgroupByChoiceChoices.(*ves_io_schema_alert_policy.NotificationParameters_Individual)
 
@@ -1677,6 +1668,15 @@ func (d *DataSourceF5XCAlertPolicy) Read(ctx context.Context, request datasource
 				} else {
 					notificationParametersgroupByChoiceChoicesAttributeMap["custom"] = types.ObjectNull(AlertPolicyNotificationParametersGroupByCustomModelAttributeMap)
 				}
+			}
+
+			// data specToModelNested BoolOfOneOfPointerField --> Default
+			_, isDefault := notificationParametersgroupByChoiceChoices.(*ves_io_schema_alert_policy.NotificationParameters_Default)
+
+			if isDefault {
+				notificationParametersgroupByChoiceChoicesAttributeMap["default"] = types.BoolValue(true)
+			} else {
+				notificationParametersgroupByChoiceChoicesAttributeMap["default"] = types.BoolNull()
 			}
 
 			// --- End of Choices ---

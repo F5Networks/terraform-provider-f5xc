@@ -45,9 +45,9 @@ type DataSourceF5XCServicePolicySetModel struct {
 // Attribute map for ArrayOfPointerField --> Policies
 var ServicePolicySetPoliciesObjectRefModelAttributeMap = map[string]attr.Type{
 
+	"name":      types.StringType,
 	"tenant":    types.StringType,
 	"namespace": types.StringType,
-	"name":      types.StringType,
 }
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -113,6 +113,12 @@ func (r *DataSourceF5XCServicePolicySet) Schema(ctx context.Context, request dat
 				Computed:    true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
+						"name": schema.StringAttribute{
+							Description: "",
+							Required:    false,
+							Optional:    false,
+							Computed:    true,
+						},
 						"tenant": schema.StringAttribute{
 							Description: "",
 							Required:    false,
@@ -120,12 +126,6 @@ func (r *DataSourceF5XCServicePolicySet) Schema(ctx context.Context, request dat
 							Computed:    true,
 						},
 						"namespace": schema.StringAttribute{
-							Description: "",
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-						},
-						"name": schema.StringAttribute{
 							Description: "",
 							Required:    false,
 							Optional:    false,
@@ -260,6 +260,14 @@ func (d *DataSourceF5XCServicePolicySet) Read(ctx context.Context, request datas
 		for _, policiesElement := range specData.Policies {
 			objectRefTypeModelModel := ObjectRefTypeModel{}
 
+			// data specToModelNested RequiredStringField --> Name
+			if policiesElement.GetName() != "" {
+				objectRefTypeModelModel.Name = types.StringValue(policiesElement.GetName())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Name = types.StringNull()
+			}
+
 			// data specToModelNested StringField --> Tenant
 			if policiesElement.GetTenant() != "" {
 				objectRefTypeModelModel.Tenant = types.StringValue(policiesElement.GetTenant())
@@ -274,14 +282,6 @@ func (d *DataSourceF5XCServicePolicySet) Read(ctx context.Context, request datas
 			} else {
 				// Empty string, set to null
 				objectRefTypeModelModel.Namespace = types.StringNull()
-			}
-
-			// data specToModelNested RequiredStringField --> Name
-			if policiesElement.GetName() != "" {
-				objectRefTypeModelModel.Name = types.StringValue(policiesElement.GetName())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Name = types.StringNull()
 			}
 
 			policiesElements = append(policiesElements, objectRefTypeModelModel)

@@ -154,14 +154,14 @@ func (r *ResourceF5XCNamespace) Schema(ctx context.Context, request resource.Sch
 			},
 			"allow_advertise_on_public": schema.ListAttribute{
 				Description:         "Allow advertisement on public. Config choice to allow advertisement on the public.",
-				MarkdownDescription: "<br>**Allowed Values (choose one):** `[\"Default\", \"Enable\", \"Disable\"]`<br>**Default:** `Default`",
+				MarkdownDescription: "<br>**Allowed Values (choose one):** `[\"Enable\", \"Disable\", \"Default\"]`<br>**Default:** `Default`",
 				Required:            false,
 				Optional:            true,
 				Computed:            true,
 				ElementType:         types.StringType,
 				Default:             listdefault.StaticValue(types.ListValueMust(types.StringType, []attr.Value{types.StringValue("Default")})),
 				Validators: []validator.List{
-					listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"Default", "Enable", "Disable"}...)),
+					listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"Enable", "Disable", "Default"}...)),
 					listvalidator.SizeAtMost(1),
 				},
 			},

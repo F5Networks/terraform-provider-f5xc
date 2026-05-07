@@ -29,8 +29,8 @@ type DataSourceF5XCInfraprotectAsn struct {
 }
 
 type InfraprotectAsnGlobalSpecTypeBgpSessionChoice struct {
-	BgpSessionDisabled types.Bool `tfsdk:"bgp_session_disabled"`
 	BgpSessionEnabled  types.Bool `tfsdk:"bgp_session_enabled"`
+	BgpSessionDisabled types.Bool `tfsdk:"bgp_session_disabled"`
 }
 
 type InfraprotectAsnGlobalSpecTypeReviewTypeChoice struct {
@@ -57,8 +57,8 @@ type DataSourceF5XCInfraprotectAsnModel struct {
 // Attribute map for RequiredOneOfField --> BgpSession
 var InfraprotectAsnBgpSessionModelAttributeMap = map[string]attr.Type{
 
-	"bgp_session_disabled": types.BoolType,
 	"bgp_session_enabled":  types.BoolType,
+	"bgp_session_disabled": types.BoolType,
 }
 
 // Attribute map for RequiredOneOfField --> ReviewType
@@ -137,14 +137,14 @@ func (r *DataSourceF5XCInfraprotectAsn) Schema(ctx context.Context, request data
 				Optional:    false,
 				Computed:    true,
 				Attributes: map[string]schema.Attribute{
-					"bgp_session_disabled": schema.BoolAttribute{
-						Description: "BGP Sessions Not Enabled BGP Sessions Not Enabled",
+					"bgp_session_enabled": schema.BoolAttribute{
+						Description: "BGP Sessions Enabled BGP Sessions Enabled",
 						Required:    false,
 						Optional:    false,
 						Computed:    true,
 					},
-					"bgp_session_enabled": schema.BoolAttribute{
-						Description: "BGP Sessions Enabled BGP Sessions Enabled",
+					"bgp_session_disabled": schema.BoolAttribute{
+						Description: "BGP Sessions Not Enabled BGP Sessions Not Enabled",
 						Required:    false,
 						Optional:    false,
 						Computed:    true,
@@ -316,15 +316,6 @@ func (d *DataSourceF5XCInfraprotectAsn) Read(ctx context.Context, request dataso
 
 		// Recursively call the nested template to process the oneof choices.
 
-		// data specToModelNested BoolOfOneOfPointerField --> BgpSessionDisabled
-		_, isBgpSessionDisabled := bgpSessionChoiceChoices.(*ves_io_schema_infraprotect_asn.GlobalSpecType_BgpSessionDisabled)
-
-		if isBgpSessionDisabled {
-			bgpSessionChoiceChoicesModel.BgpSessionDisabled = types.BoolValue(true)
-		} else {
-			bgpSessionChoiceChoicesModel.BgpSessionDisabled = types.BoolNull()
-		}
-
 		// data specToModelNested BoolOfOneOfPointerField --> BgpSessionEnabled
 		_, isBgpSessionEnabled := bgpSessionChoiceChoices.(*ves_io_schema_infraprotect_asn.GlobalSpecType_BgpSessionEnabled)
 
@@ -332,6 +323,15 @@ func (d *DataSourceF5XCInfraprotectAsn) Read(ctx context.Context, request dataso
 			bgpSessionChoiceChoicesModel.BgpSessionEnabled = types.BoolValue(true)
 		} else {
 			bgpSessionChoiceChoicesModel.BgpSessionEnabled = types.BoolNull()
+		}
+
+		// data specToModelNested BoolOfOneOfPointerField --> BgpSessionDisabled
+		_, isBgpSessionDisabled := bgpSessionChoiceChoices.(*ves_io_schema_infraprotect_asn.GlobalSpecType_BgpSessionDisabled)
+
+		if isBgpSessionDisabled {
+			bgpSessionChoiceChoicesModel.BgpSessionDisabled = types.BoolValue(true)
+		} else {
+			bgpSessionChoiceChoicesModel.BgpSessionDisabled = types.BoolNull()
 		}
 
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.

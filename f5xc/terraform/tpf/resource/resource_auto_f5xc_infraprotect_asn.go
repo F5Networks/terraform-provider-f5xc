@@ -51,24 +51,24 @@ type ResourceF5XCInfraprotectAsn struct {
 }
 
 type InfraprotectAsnGlobalSpecTypeBgpSessionChoice struct {
-	BgpSessionDisabled types.Bool `tfsdk:"bgp_session_disabled"`
 	BgpSessionEnabled  types.Bool `tfsdk:"bgp_session_enabled"`
+	BgpSessionDisabled types.Bool `tfsdk:"bgp_session_disabled"`
 }
 
 type InfraprotectAsnGlobalSpecTypeReviewTypeChoice struct {
+	ReviewTypeRejected types.Bool `tfsdk:"review_type_rejected"`
 	ReviewTypePending  types.Bool `tfsdk:"review_type_pending"`
 	ReviewTypeApproved types.Bool `tfsdk:"review_type_approved"`
-	ReviewTypeRejected types.Bool `tfsdk:"review_type_rejected"`
 }
 
 // ResourceF5XCInfraprotectAsnModel describes the resource data model.
 type ResourceF5XCInfraprotectAsnModel struct {
+	Labels           types.Map      `tfsdk:"labels"`
+	Annotations      types.Map      `tfsdk:"annotations"`
 	Description      types.String   `tfsdk:"description"`
 	Name             types.String   `tfsdk:"name"`
 	Namespace        types.String   `tfsdk:"namespace"`
 	Uid              types.String   `tfsdk:"uid"`
-	Labels           types.Map      `tfsdk:"labels"`
-	Annotations      types.Map      `tfsdk:"annotations"`
 	Asn              types.Int64    `tfsdk:"asn"`
 	BgpSessionChoice types.Object   `tfsdk:"bgp_session_choice"`
 	ReviewTypeChoice types.Object   `tfsdk:"review_type_choice"`
@@ -88,16 +88,16 @@ var (
 // Attribute map for RequiredOneOfField --> BgpSession
 var InfraprotectAsnBgpSessionModelAttributeMap = map[string]attr.Type{
 
-	"bgp_session_disabled": types.BoolType,
 	"bgp_session_enabled":  types.BoolType,
+	"bgp_session_disabled": types.BoolType,
 }
 
 // Attribute map for RequiredOneOfField --> ReviewType
 var InfraprotectAsnReviewTypeModelAttributeMap = map[string]attr.Type{
 
+	"review_type_rejected": types.BoolType,
 	"review_type_pending":  types.BoolType,
 	"review_type_approved": types.BoolType,
-	"review_type_rejected": types.BoolType,
 }
 
 func NewResourceF5XCInfraprotectAsn() resource.Resource {
@@ -115,6 +115,29 @@ func (r *ResourceF5XCInfraprotectAsn) Schema(ctx context.Context, request resour
 		Description:         "InfraprotectAsn resource",
 
 		Attributes: map[string]schema.Attribute{
+			"labels": schema.MapAttribute{
+				Description:         "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				MarkdownDescription: "",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				ElementType:         types.StringType,
+				PlanModifiers: []planmodifier.Map{
+					mapmergemodifier.New(),
+				},
+			},
+			"annotations": schema.MapAttribute{
+				Description:         "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
+				MarkdownDescription: "",
+				Required:            false,
+				Optional:            true,
+				Computed:            false,
+				ElementType:         types.StringType,
+				Validators: []validator.Map{
+					mapvalidator.KeysAre(stringvalidator.LengthBetween(1, 64)),
+					mapvalidator.ValueStringsAre(stringvalidator.LengthBetween(1, 1024)),
+				},
+			},
 			"description": schema.StringAttribute{
 				Description:         "description Human readable description for the object",
 				MarkdownDescription: "",
@@ -147,29 +170,6 @@ func (r *ResourceF5XCInfraprotectAsn) Schema(ctx context.Context, request resour
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"labels": schema.MapAttribute{
-				Description:         "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            true,
-				ElementType:         types.StringType,
-				PlanModifiers: []planmodifier.Map{
-					mapmergemodifier.New(),
-				},
-			},
-			"annotations": schema.MapAttribute{
-				Description:         "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            false,
-				ElementType:         types.StringType,
-				Validators: []validator.Map{
-					mapvalidator.KeysAre(stringvalidator.LengthBetween(1, 64)),
-					mapvalidator.ValueStringsAre(stringvalidator.LengthBetween(1, 1024)),
-				},
-			},
 			"asn": schema.Int64Attribute{
 				Description:         "ASN 2-byte or 4-byte Autonomous System Number (ASN)",
 				MarkdownDescription: "",
@@ -188,13 +188,13 @@ func (r *ResourceF5XCInfraprotectAsn) Schema(ctx context.Context, request resour
 				Computed:            false,
 				Validators: []validator.Object{
 					atmostoneofvalidator.AtMostOneOf(
-						"bgp_session_disabled",
 						"bgp_session_enabled",
+						"bgp_session_disabled",
 					),
 				},
 				Attributes: map[string]schema.Attribute{
-					"bgp_session_disabled": schema.BoolAttribute{
-						Description:         "BGP Sessions Not Enabled BGP Sessions Not Enabled",
+					"bgp_session_enabled": schema.BoolAttribute{
+						Description:         "BGP Sessions Enabled BGP Sessions Enabled",
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
@@ -203,8 +203,8 @@ func (r *ResourceF5XCInfraprotectAsn) Schema(ctx context.Context, request resour
 							boolvalidator.Equals(true),
 						},
 					},
-					"bgp_session_enabled": schema.BoolAttribute{
-						Description:         "BGP Sessions Enabled BGP Sessions Enabled",
+					"bgp_session_disabled": schema.BoolAttribute{
+						Description:         "BGP Sessions Not Enabled BGP Sessions Not Enabled",
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
@@ -229,6 +229,16 @@ func (r *ResourceF5XCInfraprotectAsn) Schema(ctx context.Context, request resour
 					),
 				},
 				Attributes: map[string]schema.Attribute{
+					"review_type_rejected": schema.BoolAttribute{
+						Description:         "Rejected Rejected",
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Validators: []validator.Bool{
+							boolvalidator.Equals(true),
+						},
+					},
 					"review_type_pending": schema.BoolAttribute{
 						Description:         "Pending Pending",
 						MarkdownDescription: "",
@@ -241,16 +251,6 @@ func (r *ResourceF5XCInfraprotectAsn) Schema(ctx context.Context, request resour
 					},
 					"review_type_approved": schema.BoolAttribute{
 						Description:         "Approved Approved",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Validators: []validator.Bool{
-							boolvalidator.Equals(true),
-						},
-					},
-					"review_type_rejected": schema.BoolAttribute{
-						Description:         "Rejected Rejected",
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
@@ -363,6 +363,20 @@ func (r *ResourceF5XCInfraprotectAsn) Create(ctx context.Context, request resour
 
 	// Populate createReq from data model
 
+	// resource modelToMetaRoot MapOfStringField --> Annotations
+	if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
+		var labels map[string]string
+		diags = data.Annotations.ElementsAs(ctx, &labels, false)
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			tflog.Error(ctx, "Failed to convert annotations from map to model")
+			return
+		}
+		meta.Annotations = labels
+	} else {
+		meta.Annotations = nil
+	}
+
 	// resource modelToMetaRoot StringField --> Description
 	if !data.Description.IsNull() && !data.Description.IsUnknown() {
 		meta.Description = string(data.Description.ValueString())
@@ -378,20 +392,6 @@ func (r *ResourceF5XCInfraprotectAsn) Create(ctx context.Context, request resour
 		meta.Namespace = string(data.Namespace.ValueString())
 	}
 
-	// resource modelToMetaRoot MapOfStringField --> Annotations
-	if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
-		var labels map[string]string
-		diags = data.Annotations.ElementsAs(ctx, &labels, false)
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			tflog.Error(ctx, "Failed to convert annotations from map to model")
-			return
-		}
-		meta.Annotations = labels
-	} else {
-		meta.Annotations = nil
-	}
-
 	// resource modelToSpecRoot RequiredUintField --> Asn
 	spec.Asn = uint32(data.Asn.ValueInt64())
 
@@ -403,18 +403,18 @@ func (r *ResourceF5XCInfraprotectAsn) Create(ctx context.Context, request resour
 			return
 		}
 
-		// resource modelToSpecNested BoolOfOneOfPointerField --> BgpSessionDisabled
-		if !bgpSessionChoiceModel.BgpSessionDisabled.IsNull() && !bgpSessionChoiceModel.BgpSessionDisabled.IsUnknown() {
-			bgpSessionDisabledSpecBool := &ves_io_schema_infraprotect_asn.CreateSpecType_BgpSessionDisabled{}
-			bgpSessionDisabledSpecBool.BgpSessionDisabled = &ves_io_schema.Empty{}
-			spec.BgpSession = bgpSessionDisabledSpecBool
-		}
-
 		// resource modelToSpecNested BoolOfOneOfPointerField --> BgpSessionEnabled
 		if !bgpSessionChoiceModel.BgpSessionEnabled.IsNull() && !bgpSessionChoiceModel.BgpSessionEnabled.IsUnknown() {
 			bgpSessionEnabledSpecBool := &ves_io_schema_infraprotect_asn.CreateSpecType_BgpSessionEnabled{}
 			bgpSessionEnabledSpecBool.BgpSessionEnabled = &ves_io_schema.Empty{}
 			spec.BgpSession = bgpSessionEnabledSpecBool
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> BgpSessionDisabled
+		if !bgpSessionChoiceModel.BgpSessionDisabled.IsNull() && !bgpSessionChoiceModel.BgpSessionDisabled.IsUnknown() {
+			bgpSessionDisabledSpecBool := &ves_io_schema_infraprotect_asn.CreateSpecType_BgpSessionDisabled{}
+			bgpSessionDisabledSpecBool.BgpSessionDisabled = &ves_io_schema.Empty{}
+			spec.BgpSession = bgpSessionDisabledSpecBool
 		}
 
 	}
@@ -451,18 +451,6 @@ func (r *ResourceF5XCInfraprotectAsn) Create(ctx context.Context, request resour
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
-
-	// resource SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
-
-	// resource SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
-
-	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
-	data.Namespace = types.StringValue(metaData.GetNamespace())
-
-	// resource SpecToModelRoot Meta StringField --> Uid
-	data.Uid = types.StringValue(systemMetaData.GetUid())
 
 	// resource SpecToModelRoot Meta MapOfStringField --> Labels
 	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
@@ -542,6 +530,18 @@ func (r *ResourceF5XCInfraprotectAsn) Create(ctx context.Context, request resour
 		data.Annotations = types.MapNull(types.StringType)
 	}
 
+	// resource SpecToModelRoot Meta StringField --> Description
+	data.Description = types.StringValue(metaData.GetDescription())
+
+	// resource SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
+
+	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
+	data.Namespace = types.StringValue(metaData.GetNamespace())
+
+	// resource SpecToModelRoot Meta StringField --> Uid
+	data.Uid = types.StringValue(systemMetaData.GetUid())
+
 	// resource SpecToModelRoot RequiredUintField --> Asn
 	asnValue := specData.GetAsn()
 	if asnValue > 0 {
@@ -561,15 +561,6 @@ func (r *ResourceF5XCInfraprotectAsn) Create(ctx context.Context, request resour
 
 		// Recursively call the nested template to process the oneof choices.
 
-		// resource specToModelNested BoolOfOneOfPointerField --> BgpSessionDisabled
-		_, isBgpSessionDisabled := bgpSessionChoiceChoices.(*ves_io_schema_infraprotect_asn.GlobalSpecType_BgpSessionDisabled)
-
-		if isBgpSessionDisabled {
-			bgpSessionChoiceChoicesModel.BgpSessionDisabled = types.BoolValue(true)
-		} else {
-			bgpSessionChoiceChoicesModel.BgpSessionDisabled = types.BoolNull()
-		}
-
 		// resource specToModelNested BoolOfOneOfPointerField --> BgpSessionEnabled
 		_, isBgpSessionEnabled := bgpSessionChoiceChoices.(*ves_io_schema_infraprotect_asn.GlobalSpecType_BgpSessionEnabled)
 
@@ -577,6 +568,15 @@ func (r *ResourceF5XCInfraprotectAsn) Create(ctx context.Context, request resour
 			bgpSessionChoiceChoicesModel.BgpSessionEnabled = types.BoolValue(true)
 		} else {
 			bgpSessionChoiceChoicesModel.BgpSessionEnabled = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> BgpSessionDisabled
+		_, isBgpSessionDisabled := bgpSessionChoiceChoices.(*ves_io_schema_infraprotect_asn.GlobalSpecType_BgpSessionDisabled)
+
+		if isBgpSessionDisabled {
+			bgpSessionChoiceChoicesModel.BgpSessionDisabled = types.BoolValue(true)
+		} else {
+			bgpSessionChoiceChoicesModel.BgpSessionDisabled = types.BoolNull()
 		}
 
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
@@ -610,6 +610,15 @@ func (r *ResourceF5XCInfraprotectAsn) Create(ctx context.Context, request resour
 
 		// Recursively call the nested template to process the oneof choices.
 
+		// resource specToModelNested BoolOfOneOfPointerField --> ReviewTypeRejected
+		_, isReviewTypeRejected := reviewTypeChoiceChoices.(*ves_io_schema_infraprotect_asn.GlobalSpecType_ReviewTypeRejected)
+
+		if isReviewTypeRejected {
+			reviewTypeChoiceChoicesModel.ReviewTypeRejected = types.BoolValue(true)
+		} else {
+			reviewTypeChoiceChoicesModel.ReviewTypeRejected = types.BoolNull()
+		}
+
 		// resource specToModelNested BoolOfOneOfPointerField --> ReviewTypePending
 		_, isReviewTypePending := reviewTypeChoiceChoices.(*ves_io_schema_infraprotect_asn.GlobalSpecType_ReviewTypePending)
 
@@ -626,15 +635,6 @@ func (r *ResourceF5XCInfraprotectAsn) Create(ctx context.Context, request resour
 			reviewTypeChoiceChoicesModel.ReviewTypeApproved = types.BoolValue(true)
 		} else {
 			reviewTypeChoiceChoicesModel.ReviewTypeApproved = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> ReviewTypeRejected
-		_, isReviewTypeRejected := reviewTypeChoiceChoices.(*ves_io_schema_infraprotect_asn.GlobalSpecType_ReviewTypeRejected)
-
-		if isReviewTypeRejected {
-			reviewTypeChoiceChoicesModel.ReviewTypeRejected = types.BoolValue(true)
-		} else {
-			reviewTypeChoiceChoicesModel.ReviewTypeRejected = types.BoolNull()
 		}
 
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
@@ -718,18 +718,6 @@ func (r *ResourceF5XCInfraprotectAsn) Read(ctx context.Context, request resource
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
-	// resource SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
-
-	// resource SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
-
-	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
-	data.Namespace = types.StringValue(metaData.GetNamespace())
-
-	// resource SpecToModelRoot Meta StringField --> Uid
-	data.Uid = types.StringValue(systemMetaData.GetUid())
-
 	// resource SpecToModelRoot Meta MapOfStringField --> Labels
 	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
 	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
@@ -824,6 +812,18 @@ func (r *ResourceF5XCInfraprotectAsn) Read(ctx context.Context, request resource
 		data.Annotations = types.MapNull(types.StringType)
 	}
 
+	// resource SpecToModelRoot Meta StringField --> Description
+	data.Description = types.StringValue(metaData.GetDescription())
+
+	// resource SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
+
+	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
+	data.Namespace = types.StringValue(metaData.GetNamespace())
+
+	// resource SpecToModelRoot Meta StringField --> Uid
+	data.Uid = types.StringValue(systemMetaData.GetUid())
+
 	// resource SpecToModelRoot RequiredUintField --> Asn
 	asnValue := specData.GetAsn()
 	if asnValue > 0 {
@@ -843,15 +843,6 @@ func (r *ResourceF5XCInfraprotectAsn) Read(ctx context.Context, request resource
 
 		// Recursively call the nested template to process the oneof choices.
 
-		// resource specToModelNested BoolOfOneOfPointerField --> BgpSessionDisabled
-		_, isBgpSessionDisabled := bgpSessionChoiceChoices.(*ves_io_schema_infraprotect_asn.GlobalSpecType_BgpSessionDisabled)
-
-		if isBgpSessionDisabled {
-			bgpSessionChoiceChoicesModel.BgpSessionDisabled = types.BoolValue(true)
-		} else {
-			bgpSessionChoiceChoicesModel.BgpSessionDisabled = types.BoolNull()
-		}
-
 		// resource specToModelNested BoolOfOneOfPointerField --> BgpSessionEnabled
 		_, isBgpSessionEnabled := bgpSessionChoiceChoices.(*ves_io_schema_infraprotect_asn.GlobalSpecType_BgpSessionEnabled)
 
@@ -859,6 +850,15 @@ func (r *ResourceF5XCInfraprotectAsn) Read(ctx context.Context, request resource
 			bgpSessionChoiceChoicesModel.BgpSessionEnabled = types.BoolValue(true)
 		} else {
 			bgpSessionChoiceChoicesModel.BgpSessionEnabled = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> BgpSessionDisabled
+		_, isBgpSessionDisabled := bgpSessionChoiceChoices.(*ves_io_schema_infraprotect_asn.GlobalSpecType_BgpSessionDisabled)
+
+		if isBgpSessionDisabled {
+			bgpSessionChoiceChoicesModel.BgpSessionDisabled = types.BoolValue(true)
+		} else {
+			bgpSessionChoiceChoicesModel.BgpSessionDisabled = types.BoolNull()
 		}
 
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
@@ -892,6 +892,15 @@ func (r *ResourceF5XCInfraprotectAsn) Read(ctx context.Context, request resource
 
 		// Recursively call the nested template to process the oneof choices.
 
+		// resource specToModelNested BoolOfOneOfPointerField --> ReviewTypeRejected
+		_, isReviewTypeRejected := reviewTypeChoiceChoices.(*ves_io_schema_infraprotect_asn.GlobalSpecType_ReviewTypeRejected)
+
+		if isReviewTypeRejected {
+			reviewTypeChoiceChoicesModel.ReviewTypeRejected = types.BoolValue(true)
+		} else {
+			reviewTypeChoiceChoicesModel.ReviewTypeRejected = types.BoolNull()
+		}
+
 		// resource specToModelNested BoolOfOneOfPointerField --> ReviewTypePending
 		_, isReviewTypePending := reviewTypeChoiceChoices.(*ves_io_schema_infraprotect_asn.GlobalSpecType_ReviewTypePending)
 
@@ -908,15 +917,6 @@ func (r *ResourceF5XCInfraprotectAsn) Read(ctx context.Context, request resource
 			reviewTypeChoiceChoicesModel.ReviewTypeApproved = types.BoolValue(true)
 		} else {
 			reviewTypeChoiceChoicesModel.ReviewTypeApproved = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> ReviewTypeRejected
-		_, isReviewTypeRejected := reviewTypeChoiceChoices.(*ves_io_schema_infraprotect_asn.GlobalSpecType_ReviewTypeRejected)
-
-		if isReviewTypeRejected {
-			reviewTypeChoiceChoicesModel.ReviewTypeRejected = types.BoolValue(true)
-		} else {
-			reviewTypeChoiceChoicesModel.ReviewTypeRejected = types.BoolNull()
 		}
 
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
@@ -984,6 +984,20 @@ func (r *ResourceF5XCInfraprotectAsn) Update(ctx context.Context, request resour
 
 	// Populate updateReq from data model
 
+	// resource modelToMetaRoot MapOfStringField --> Annotations
+	if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
+		var labels map[string]string
+		diags = data.Annotations.ElementsAs(ctx, &labels, false)
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			tflog.Error(ctx, "Failed to convert annotations from map to model")
+			return
+		}
+		meta.Annotations = labels
+	} else {
+		meta.Annotations = nil
+	}
+
 	// resource modelToMetaRoot StringField --> Description
 	if !data.Description.IsNull() && !data.Description.IsUnknown() {
 		meta.Description = string(data.Description.ValueString())
@@ -997,20 +1011,6 @@ func (r *ResourceF5XCInfraprotectAsn) Update(ctx context.Context, request resour
 	// resource modelToMetaRoot RequiredStringField --> Namespace
 	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
 		meta.Namespace = string(data.Namespace.ValueString())
-	}
-
-	// resource modelToMetaRoot MapOfStringField --> Annotations
-	if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
-		var labels map[string]string
-		diags = data.Annotations.ElementsAs(ctx, &labels, false)
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			tflog.Error(ctx, "Failed to convert annotations from map to model")
-			return
-		}
-		meta.Annotations = labels
-	} else {
-		meta.Annotations = nil
 	}
 
 	if response.Diagnostics.HasError() {
@@ -1046,18 +1046,6 @@ func (r *ResourceF5XCInfraprotectAsn) Update(ctx context.Context, request resour
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
-
-	// resource SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
-
-	// resource SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
-
-	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
-	data.Namespace = types.StringValue(metaData.GetNamespace())
-
-	// resource SpecToModelRoot Meta StringField --> Uid
-	data.Uid = types.StringValue(systemMetaData.GetUid())
 
 	// resource SpecToModelRoot Meta MapOfStringField --> Labels
 	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
@@ -1153,6 +1141,18 @@ func (r *ResourceF5XCInfraprotectAsn) Update(ctx context.Context, request resour
 		data.Annotations = types.MapNull(types.StringType)
 	}
 
+	// resource SpecToModelRoot Meta StringField --> Description
+	data.Description = types.StringValue(metaData.GetDescription())
+
+	// resource SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
+
+	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
+	data.Namespace = types.StringValue(metaData.GetNamespace())
+
+	// resource SpecToModelRoot Meta StringField --> Uid
+	data.Uid = types.StringValue(systemMetaData.GetUid())
+
 	// resource SpecToModelRoot RequiredUintField --> Asn
 	asnValue := specData.GetAsn()
 	if asnValue > 0 {
@@ -1172,15 +1172,6 @@ func (r *ResourceF5XCInfraprotectAsn) Update(ctx context.Context, request resour
 
 		// Recursively call the nested template to process the oneof choices.
 
-		// resource specToModelNested BoolOfOneOfPointerField --> BgpSessionDisabled
-		_, isBgpSessionDisabled := bgpSessionChoiceChoices.(*ves_io_schema_infraprotect_asn.GlobalSpecType_BgpSessionDisabled)
-
-		if isBgpSessionDisabled {
-			bgpSessionChoiceChoicesModel.BgpSessionDisabled = types.BoolValue(true)
-		} else {
-			bgpSessionChoiceChoicesModel.BgpSessionDisabled = types.BoolNull()
-		}
-
 		// resource specToModelNested BoolOfOneOfPointerField --> BgpSessionEnabled
 		_, isBgpSessionEnabled := bgpSessionChoiceChoices.(*ves_io_schema_infraprotect_asn.GlobalSpecType_BgpSessionEnabled)
 
@@ -1188,6 +1179,15 @@ func (r *ResourceF5XCInfraprotectAsn) Update(ctx context.Context, request resour
 			bgpSessionChoiceChoicesModel.BgpSessionEnabled = types.BoolValue(true)
 		} else {
 			bgpSessionChoiceChoicesModel.BgpSessionEnabled = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> BgpSessionDisabled
+		_, isBgpSessionDisabled := bgpSessionChoiceChoices.(*ves_io_schema_infraprotect_asn.GlobalSpecType_BgpSessionDisabled)
+
+		if isBgpSessionDisabled {
+			bgpSessionChoiceChoicesModel.BgpSessionDisabled = types.BoolValue(true)
+		} else {
+			bgpSessionChoiceChoicesModel.BgpSessionDisabled = types.BoolNull()
 		}
 
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
@@ -1221,6 +1221,15 @@ func (r *ResourceF5XCInfraprotectAsn) Update(ctx context.Context, request resour
 
 		// Recursively call the nested template to process the oneof choices.
 
+		// resource specToModelNested BoolOfOneOfPointerField --> ReviewTypeRejected
+		_, isReviewTypeRejected := reviewTypeChoiceChoices.(*ves_io_schema_infraprotect_asn.GlobalSpecType_ReviewTypeRejected)
+
+		if isReviewTypeRejected {
+			reviewTypeChoiceChoicesModel.ReviewTypeRejected = types.BoolValue(true)
+		} else {
+			reviewTypeChoiceChoicesModel.ReviewTypeRejected = types.BoolNull()
+		}
+
 		// resource specToModelNested BoolOfOneOfPointerField --> ReviewTypePending
 		_, isReviewTypePending := reviewTypeChoiceChoices.(*ves_io_schema_infraprotect_asn.GlobalSpecType_ReviewTypePending)
 
@@ -1237,15 +1246,6 @@ func (r *ResourceF5XCInfraprotectAsn) Update(ctx context.Context, request resour
 			reviewTypeChoiceChoicesModel.ReviewTypeApproved = types.BoolValue(true)
 		} else {
 			reviewTypeChoiceChoicesModel.ReviewTypeApproved = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> ReviewTypeRejected
-		_, isReviewTypeRejected := reviewTypeChoiceChoices.(*ves_io_schema_infraprotect_asn.GlobalSpecType_ReviewTypeRejected)
-
-		if isReviewTypeRejected {
-			reviewTypeChoiceChoicesModel.ReviewTypeRejected = types.BoolValue(true)
-		} else {
-			reviewTypeChoiceChoicesModel.ReviewTypeRejected = types.BoolNull()
 		}
 
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.

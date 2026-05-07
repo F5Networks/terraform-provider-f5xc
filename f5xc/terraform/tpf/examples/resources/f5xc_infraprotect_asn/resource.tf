@@ -3,9 +3,9 @@ resource "f5xc_infraprotect_asn" "example" {
   namespace = "example_namespace"
   asn       = 1
   bgp_session = {
-    bgp_session_disabled = true
+    bgp_session_enabled = true
   }
   review_type = {
-    review_type_pending = true
+    review_type_rejected = true
   }
 }

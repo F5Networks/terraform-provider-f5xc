@@ -10,8 +10,8 @@ resource "f5xc_dns_load_balancer" "example" {
         }
       }
       client_choice = {
-        ip_prefix_list = {
-          ip_prefix_list = "example_ip_prefix_list"
+        asn_list = {
+          asn_list = "example_asn_list"
         }
       }
     }]

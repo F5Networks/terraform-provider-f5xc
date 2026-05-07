@@ -51,18 +51,18 @@ type ResourceF5XCVirtualK8S struct {
 }
 
 type VirtualK8SGlobalSpecTypeServiceIsolationChoice struct {
-	Disabled types.Bool `tfsdk:"disabled"`
 	Isolated types.Bool `tfsdk:"isolated"`
+	Disabled types.Bool `tfsdk:"disabled"`
 }
 
 // ResourceF5XCVirtualK8SModel describes the resource data model.
 type ResourceF5XCVirtualK8SModel struct {
-	Description            types.String   `tfsdk:"description"`
 	Name                   types.String   `tfsdk:"name"`
 	Namespace              types.String   `tfsdk:"namespace"`
 	Uid                    types.String   `tfsdk:"uid"`
 	Labels                 types.Map      `tfsdk:"labels"`
 	Annotations            types.Map      `tfsdk:"annotations"`
+	Description            types.String   `tfsdk:"description"`
 	VsiteRefs              types.List     `tfsdk:"vsite_refs"`
 	ServiceIsolationChoice types.Object   `tfsdk:"service_isolation_choice"`
 	DefaultFlavorRef       types.Object   `tfsdk:"default_flavor_ref"`
@@ -82,24 +82,24 @@ var (
 // Attribute map for ArrayOfPointerField --> VsiteRefs
 var VirtualK8sVsiteRefsObjectRefModelAttributeMap = map[string]attr.Type{
 
-	"tenant":    types.StringType,
 	"namespace": types.StringType,
 	"name":      types.StringType,
+	"tenant":    types.StringType,
 }
 
 // Attribute map for OneOfField --> ServiceIsolationChoice
 var VirtualK8sServiceIsolationChoiceModelAttributeMap = map[string]attr.Type{
 
-	"disabled": types.BoolType,
 	"isolated": types.BoolType,
+	"disabled": types.BoolType,
 }
 
 // Attribute map for PointerField --> DefaultFlavorRef
 var VirtualK8sDefaultFlavorRefModelAttributeMap = map[string]attr.Type{
 
-	"namespace": types.StringType,
 	"name":      types.StringType,
 	"tenant":    types.StringType,
+	"namespace": types.StringType,
 }
 
 func NewResourceF5XCVirtualK8S() resource.Resource {
@@ -117,14 +117,6 @@ func (r *ResourceF5XCVirtualK8S) Schema(ctx context.Context, request resource.Sc
 		Description:         "VirtualK8S resource",
 
 		Attributes: map[string]schema.Attribute{
-			"description": schema.StringAttribute{
-				Description:         "description Human readable description for the object",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            true,
-				Default:             stringdefault.StaticString(""),
-			},
 			"name": schema.StringAttribute{
 				Description:         "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
 				MarkdownDescription: "",
@@ -172,6 +164,14 @@ func (r *ResourceF5XCVirtualK8S) Schema(ctx context.Context, request resource.Sc
 					mapvalidator.ValueStringsAre(stringvalidator.LengthBetween(1, 1024)),
 				},
 			},
+			"description": schema.StringAttribute{
+				Description:         "description Human readable description for the object",
+				MarkdownDescription: "",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				Default:             stringdefault.StaticString(""),
+			},
 			"vsite_refs": schema.ListNestedAttribute{
 				Description:         "vsite_refs Reference to virtual-sites Default virtual-site of the Virtual K8s object. If no virtual-site is specified in the Kubernetes API resource object annotations via ves.io/virtual-sites, then this virtual-site is used select sites on which to instantiate the Kubernetes API resource object",
 				MarkdownDescription: "",
@@ -180,16 +180,6 @@ func (r *ResourceF5XCVirtualK8S) Schema(ctx context.Context, request resource.Sc
 				Computed:            false,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
-						"tenant": schema.StringAttribute{
-							Description:         "",
-							MarkdownDescription: "",
-							Required:            false,
-							Optional:            false,
-							Computed:            true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
-							},
-						},
 						"namespace": schema.StringAttribute{
 							Description:         "",
 							MarkdownDescription: "",
@@ -204,6 +194,16 @@ func (r *ResourceF5XCVirtualK8S) Schema(ctx context.Context, request resource.Sc
 							Optional:            false,
 							Computed:            false,
 						},
+						"tenant": schema.StringAttribute{
+							Description:         "",
+							MarkdownDescription: "",
+							Required:            false,
+							Optional:            false,
+							Computed:            true,
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+						},
 					},
 				},
 			},
@@ -215,13 +215,13 @@ func (r *ResourceF5XCVirtualK8S) Schema(ctx context.Context, request resource.Sc
 				Computed:            false,
 				Validators: []validator.Object{
 					atmostoneofvalidator.AtMostOneOf(
-						"disabled",
 						"isolated",
+						"disabled",
 					),
 				},
 				Attributes: map[string]schema.Attribute{
-					"disabled": schema.BoolAttribute{
-						Description:         "Disabled K8s services are not restricted and communcation can happen across namespaces unless overridden by the K8s service via setting the ves.io/serviceIsolation annotation to true",
+					"isolated": schema.BoolAttribute{
+						Description:         "Isolated Isolated K8s services restrict any K8s services created in the Virtual K8s from communicating outside the namespace unless overridden by the K8s service via setting the ves.io/serviceIsolation annotation to false",
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
@@ -230,8 +230,8 @@ func (r *ResourceF5XCVirtualK8S) Schema(ctx context.Context, request resource.Sc
 							boolvalidator.Equals(true),
 						},
 					},
-					"isolated": schema.BoolAttribute{
-						Description:         "Isolated Isolated K8s services restrict any K8s services created in the Virtual K8s from communicating outside the namespace unless overridden by the K8s service via setting the ves.io/serviceIsolation annotation to false",
+					"disabled": schema.BoolAttribute{
+						Description:         "Disabled K8s services are not restricted and communcation can happen across namespaces unless overridden by the K8s service via setting the ves.io/serviceIsolation annotation to true",
 						MarkdownDescription: "",
 						Required:            false,
 						Optional:            true,
@@ -249,13 +249,6 @@ func (r *ResourceF5XCVirtualK8S) Schema(ctx context.Context, request resource.Sc
 				Optional:            true,
 				Computed:            false,
 				Attributes: map[string]schema.Attribute{
-					"namespace": schema.StringAttribute{
-						Description:         "",
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-					},
 					"name": schema.StringAttribute{
 						Description:         "",
 						MarkdownDescription: "",
@@ -272,6 +265,13 @@ func (r *ResourceF5XCVirtualK8S) Schema(ctx context.Context, request resource.Sc
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
+					},
+					"namespace": schema.StringAttribute{
+						Description:         "",
+						MarkdownDescription: "",
+						Required:            true,
+						Optional:            false,
+						Computed:            false,
 					},
 				},
 			},
@@ -377,11 +377,6 @@ func (r *ResourceF5XCVirtualK8S) Create(ctx context.Context, request resource.Cr
 
 	// Populate createReq from data model
 
-	// resource modelToMetaRoot StringField --> Description
-	if !data.Description.IsNull() && !data.Description.IsUnknown() {
-		meta.Description = string(data.Description.ValueString())
-	}
-
 	// resource modelToMetaRoot RequiredStringField --> Name
 	if !data.Name.IsNull() && !data.Name.IsUnknown() {
 		meta.Name = string(data.Name.ValueString())
@@ -404,6 +399,11 @@ func (r *ResourceF5XCVirtualK8S) Create(ctx context.Context, request resource.Cr
 		meta.Annotations = labels
 	} else {
 		meta.Annotations = nil
+	}
+
+	// resource modelToMetaRoot StringField --> Description
+	if !data.Description.IsNull() && !data.Description.IsUnknown() {
+		meta.Description = string(data.Description.ValueString())
 	}
 
 	{
@@ -445,18 +445,18 @@ func (r *ResourceF5XCVirtualK8S) Create(ctx context.Context, request resource.Cr
 			return
 		}
 
-		// resource modelToSpecNested BoolOfOneOfPointerField --> Disabled
-		if !serviceIsolationChoiceModel.Disabled.IsNull() && !serviceIsolationChoiceModel.Disabled.IsUnknown() {
-			disabledSpecBool := &ves_io_schema_virtual_k8s.CreateSpecType_Disabled{}
-			disabledSpecBool.Disabled = &ves_io_schema.Empty{}
-			spec.ServiceIsolationChoice = disabledSpecBool
-		}
-
 		// resource modelToSpecNested BoolOfOneOfPointerField --> Isolated
 		if !serviceIsolationChoiceModel.Isolated.IsNull() && !serviceIsolationChoiceModel.Isolated.IsUnknown() {
 			isolatedSpecBool := &ves_io_schema_virtual_k8s.CreateSpecType_Isolated{}
 			isolatedSpecBool.Isolated = &ves_io_schema.Empty{}
 			spec.ServiceIsolationChoice = isolatedSpecBool
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> Disabled
+		if !serviceIsolationChoiceModel.Disabled.IsNull() && !serviceIsolationChoiceModel.Disabled.IsUnknown() {
+			disabledSpecBool := &ves_io_schema_virtual_k8s.CreateSpecType_Disabled{}
+			disabledSpecBool.Disabled = &ves_io_schema.Empty{}
+			spec.ServiceIsolationChoice = disabledSpecBool
 		}
 
 	}
@@ -475,14 +475,14 @@ func (r *ResourceF5XCVirtualK8S) Create(ctx context.Context, request resource.Cr
 				return
 			}
 
-			// resource modelToSpecNested RequiredStringField --> Namespace
-			if !defaultFlavorRefModel.Namespace.IsNull() && !defaultFlavorRefModel.Namespace.IsUnknown() {
-				defaultFlavorRefSpec.Namespace = string(defaultFlavorRefModel.Namespace.ValueString())
-			}
-
 			// resource modelToSpecNested RequiredStringField --> Name
 			if !defaultFlavorRefModel.Name.IsNull() && !defaultFlavorRefModel.Name.IsUnknown() {
 				defaultFlavorRefSpec.Name = string(defaultFlavorRefModel.Name.ValueString())
+			}
+
+			// resource modelToSpecNested RequiredStringField --> Namespace
+			if !defaultFlavorRefModel.Namespace.IsNull() && !defaultFlavorRefModel.Namespace.IsUnknown() {
+				defaultFlavorRefSpec.Namespace = string(defaultFlavorRefModel.Namespace.ValueString())
 			}
 
 		}
@@ -548,9 +548,6 @@ func (r *ResourceF5XCVirtualK8S) Create(ctx context.Context, request resource.Cr
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
-
-	// resource SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
 
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
 	data.Name = types.StringValue(metaData.GetName())
@@ -639,20 +636,15 @@ func (r *ResourceF5XCVirtualK8S) Create(ctx context.Context, request resource.Cr
 		data.Annotations = types.MapNull(types.StringType)
 	}
 
+	// resource SpecToModelRoot Meta StringField --> Description
+	data.Description = types.StringValue(metaData.GetDescription())
+
 	// resource SpecToModelRoot ArrayOfPointerField --> VsiteRefs
 	if len(specData.VsiteRefs) > 0 {
 		vsiteRefsElements := make([]ObjectRefTypeModel, 0, len(specData.VsiteRefs))
 
 		for _, vsiteRefsElement := range specData.VsiteRefs {
 			objectRefTypeModelModel := ObjectRefTypeModel{}
-
-			// resource specToModelNested StringField --> Tenant
-			if vsiteRefsElement.GetTenant() != "" {
-				objectRefTypeModelModel.Tenant = types.StringValue(vsiteRefsElement.GetTenant())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Tenant = types.StringNull()
-			}
 
 			// resource specToModelNested RequiredStringField --> Namespace
 			if vsiteRefsElement.GetNamespace() != "" {
@@ -668,6 +660,14 @@ func (r *ResourceF5XCVirtualK8S) Create(ctx context.Context, request resource.Cr
 			} else {
 				// Empty string, set to null
 				objectRefTypeModelModel.Name = types.StringNull()
+			}
+
+			// resource specToModelNested StringField --> Tenant
+			if vsiteRefsElement.GetTenant() != "" {
+				objectRefTypeModelModel.Tenant = types.StringValue(vsiteRefsElement.GetTenant())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Tenant = types.StringNull()
 			}
 
 			vsiteRefsElements = append(vsiteRefsElements, objectRefTypeModelModel)
@@ -706,15 +706,6 @@ func (r *ResourceF5XCVirtualK8S) Create(ctx context.Context, request resource.Cr
 
 		// Recursively call the nested template to process the oneof choices.
 
-		// resource specToModelNested BoolOfOneOfPointerField --> Disabled
-		_, isDisabled := serviceIsolationChoiceChoices.(*ves_io_schema_virtual_k8s.GlobalSpecType_Disabled)
-
-		if isDisabled {
-			serviceIsolationChoiceChoicesModel.Disabled = types.BoolValue(true)
-		} else {
-			serviceIsolationChoiceChoicesModel.Disabled = types.BoolNull()
-		}
-
 		// resource specToModelNested BoolOfOneOfPointerField --> Isolated
 		_, isIsolated := serviceIsolationChoiceChoices.(*ves_io_schema_virtual_k8s.GlobalSpecType_Isolated)
 
@@ -722,6 +713,15 @@ func (r *ResourceF5XCVirtualK8S) Create(ctx context.Context, request resource.Cr
 			serviceIsolationChoiceChoicesModel.Isolated = types.BoolValue(true)
 		} else {
 			serviceIsolationChoiceChoicesModel.Isolated = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> Disabled
+		_, isDisabled := serviceIsolationChoiceChoices.(*ves_io_schema_virtual_k8s.GlobalSpecType_Disabled)
+
+		if isDisabled {
+			serviceIsolationChoiceChoicesModel.Disabled = types.BoolValue(true)
+		} else {
+			serviceIsolationChoiceChoicesModel.Disabled = types.BoolNull()
 		}
 
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
@@ -747,14 +747,6 @@ func (r *ResourceF5XCVirtualK8S) Create(ctx context.Context, request resource.Cr
 		var objectRefTypeModelModel = &ObjectRefTypeModel{}
 		defaultFlavorRefElement := specData.GetDefaultFlavorRef()
 
-		// resource specToModelNested RequiredStringField --> Namespace
-		if defaultFlavorRefElement.GetNamespace() != "" {
-			objectRefTypeModelModel.Namespace = types.StringValue(defaultFlavorRefElement.GetNamespace())
-		} else {
-			// Empty string, set to null
-			objectRefTypeModelModel.Namespace = types.StringNull()
-		}
-
 		// resource specToModelNested RequiredStringField --> Name
 		if defaultFlavorRefElement.GetName() != "" {
 			objectRefTypeModelModel.Name = types.StringValue(defaultFlavorRefElement.GetName())
@@ -769,6 +761,14 @@ func (r *ResourceF5XCVirtualK8S) Create(ctx context.Context, request resource.Cr
 		} else {
 			// Empty string, set to null
 			objectRefTypeModelModel.Tenant = types.StringNull()
+		}
+
+		// resource specToModelNested RequiredStringField --> Namespace
+		if defaultFlavorRefElement.GetNamespace() != "" {
+			objectRefTypeModelModel.Namespace = types.StringValue(defaultFlavorRefElement.GetNamespace())
+		} else {
+			// Empty string, set to null
+			objectRefTypeModelModel.Namespace = types.StringNull()
 		}
 
 		defaultFlavorRefObj, defaultFlavorRefDiags := utils.GoStructToObjectValue(
@@ -848,9 +848,6 @@ func (r *ResourceF5XCVirtualK8S) Read(ctx context.Context, request resource.Read
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
-	// resource SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
-
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
 	data.Name = types.StringValue(metaData.GetName())
 
@@ -954,20 +951,15 @@ func (r *ResourceF5XCVirtualK8S) Read(ctx context.Context, request resource.Read
 		data.Annotations = types.MapNull(types.StringType)
 	}
 
+	// resource SpecToModelRoot Meta StringField --> Description
+	data.Description = types.StringValue(metaData.GetDescription())
+
 	// resource SpecToModelRoot ArrayOfPointerField --> VsiteRefs
 	if len(specData.VsiteRefs) > 0 {
 		vsiteRefsElements := make([]ObjectRefTypeModel, 0, len(specData.VsiteRefs))
 
 		for _, vsiteRefsElement := range specData.VsiteRefs {
 			objectRefTypeModelModel := ObjectRefTypeModel{}
-
-			// resource specToModelNested StringField --> Tenant
-			if vsiteRefsElement.GetTenant() != "" {
-				objectRefTypeModelModel.Tenant = types.StringValue(vsiteRefsElement.GetTenant())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Tenant = types.StringNull()
-			}
 
 			// resource specToModelNested RequiredStringField --> Namespace
 			if vsiteRefsElement.GetNamespace() != "" {
@@ -983,6 +975,14 @@ func (r *ResourceF5XCVirtualK8S) Read(ctx context.Context, request resource.Read
 			} else {
 				// Empty string, set to null
 				objectRefTypeModelModel.Name = types.StringNull()
+			}
+
+			// resource specToModelNested StringField --> Tenant
+			if vsiteRefsElement.GetTenant() != "" {
+				objectRefTypeModelModel.Tenant = types.StringValue(vsiteRefsElement.GetTenant())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Tenant = types.StringNull()
 			}
 
 			vsiteRefsElements = append(vsiteRefsElements, objectRefTypeModelModel)
@@ -1021,15 +1021,6 @@ func (r *ResourceF5XCVirtualK8S) Read(ctx context.Context, request resource.Read
 
 		// Recursively call the nested template to process the oneof choices.
 
-		// resource specToModelNested BoolOfOneOfPointerField --> Disabled
-		_, isDisabled := serviceIsolationChoiceChoices.(*ves_io_schema_virtual_k8s.GlobalSpecType_Disabled)
-
-		if isDisabled {
-			serviceIsolationChoiceChoicesModel.Disabled = types.BoolValue(true)
-		} else {
-			serviceIsolationChoiceChoicesModel.Disabled = types.BoolNull()
-		}
-
 		// resource specToModelNested BoolOfOneOfPointerField --> Isolated
 		_, isIsolated := serviceIsolationChoiceChoices.(*ves_io_schema_virtual_k8s.GlobalSpecType_Isolated)
 
@@ -1037,6 +1028,15 @@ func (r *ResourceF5XCVirtualK8S) Read(ctx context.Context, request resource.Read
 			serviceIsolationChoiceChoicesModel.Isolated = types.BoolValue(true)
 		} else {
 			serviceIsolationChoiceChoicesModel.Isolated = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> Disabled
+		_, isDisabled := serviceIsolationChoiceChoices.(*ves_io_schema_virtual_k8s.GlobalSpecType_Disabled)
+
+		if isDisabled {
+			serviceIsolationChoiceChoicesModel.Disabled = types.BoolValue(true)
+		} else {
+			serviceIsolationChoiceChoicesModel.Disabled = types.BoolNull()
 		}
 
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
@@ -1062,14 +1062,6 @@ func (r *ResourceF5XCVirtualK8S) Read(ctx context.Context, request resource.Read
 		var objectRefTypeModelModel = &ObjectRefTypeModel{}
 		defaultFlavorRefElement := specData.GetDefaultFlavorRef()
 
-		// resource specToModelNested RequiredStringField --> Namespace
-		if defaultFlavorRefElement.GetNamespace() != "" {
-			objectRefTypeModelModel.Namespace = types.StringValue(defaultFlavorRefElement.GetNamespace())
-		} else {
-			// Empty string, set to null
-			objectRefTypeModelModel.Namespace = types.StringNull()
-		}
-
 		// resource specToModelNested RequiredStringField --> Name
 		if defaultFlavorRefElement.GetName() != "" {
 			objectRefTypeModelModel.Name = types.StringValue(defaultFlavorRefElement.GetName())
@@ -1084,6 +1076,14 @@ func (r *ResourceF5XCVirtualK8S) Read(ctx context.Context, request resource.Read
 		} else {
 			// Empty string, set to null
 			objectRefTypeModelModel.Tenant = types.StringNull()
+		}
+
+		// resource specToModelNested RequiredStringField --> Namespace
+		if defaultFlavorRefElement.GetNamespace() != "" {
+			objectRefTypeModelModel.Namespace = types.StringValue(defaultFlavorRefElement.GetNamespace())
+		} else {
+			// Empty string, set to null
+			objectRefTypeModelModel.Namespace = types.StringNull()
 		}
 
 		defaultFlavorRefObj, defaultFlavorRefDiags := utils.GoStructToObjectValue(
@@ -1147,11 +1147,6 @@ func (r *ResourceF5XCVirtualK8S) Update(ctx context.Context, request resource.Up
 
 	// Populate updateReq from data model
 
-	// resource modelToMetaRoot StringField --> Description
-	if !data.Description.IsNull() && !data.Description.IsUnknown() {
-		meta.Description = string(data.Description.ValueString())
-	}
-
 	// resource modelToMetaRoot RequiredStringField --> Name
 	if !data.Name.IsNull() && !data.Name.IsUnknown() {
 		meta.Name = string(data.Name.ValueString())
@@ -1174,6 +1169,11 @@ func (r *ResourceF5XCVirtualK8S) Update(ctx context.Context, request resource.Up
 		meta.Annotations = labels
 	} else {
 		meta.Annotations = nil
+	}
+
+	// resource modelToMetaRoot StringField --> Description
+	if !data.Description.IsNull() && !data.Description.IsUnknown() {
+		meta.Description = string(data.Description.ValueString())
 	}
 
 	{
@@ -1215,18 +1215,18 @@ func (r *ResourceF5XCVirtualK8S) Update(ctx context.Context, request resource.Up
 			return
 		}
 
-		// resource modelToSpecNested BoolOfOneOfPointerField --> Disabled
-		if !serviceIsolationChoiceModel.Disabled.IsNull() && !serviceIsolationChoiceModel.Disabled.IsUnknown() {
-			disabledSpecBool := &ves_io_schema_virtual_k8s.ReplaceSpecType_Disabled{}
-			disabledSpecBool.Disabled = &ves_io_schema.Empty{}
-			spec.ServiceIsolationChoice = disabledSpecBool
-		}
-
 		// resource modelToSpecNested BoolOfOneOfPointerField --> Isolated
 		if !serviceIsolationChoiceModel.Isolated.IsNull() && !serviceIsolationChoiceModel.Isolated.IsUnknown() {
 			isolatedSpecBool := &ves_io_schema_virtual_k8s.ReplaceSpecType_Isolated{}
 			isolatedSpecBool.Isolated = &ves_io_schema.Empty{}
 			spec.ServiceIsolationChoice = isolatedSpecBool
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> Disabled
+		if !serviceIsolationChoiceModel.Disabled.IsNull() && !serviceIsolationChoiceModel.Disabled.IsUnknown() {
+			disabledSpecBool := &ves_io_schema_virtual_k8s.ReplaceSpecType_Disabled{}
+			disabledSpecBool.Disabled = &ves_io_schema.Empty{}
+			spec.ServiceIsolationChoice = disabledSpecBool
 		}
 
 	}
@@ -1245,14 +1245,14 @@ func (r *ResourceF5XCVirtualK8S) Update(ctx context.Context, request resource.Up
 				return
 			}
 
-			// resource modelToSpecNested RequiredStringField --> Namespace
-			if !defaultFlavorRefModel.Namespace.IsNull() && !defaultFlavorRefModel.Namespace.IsUnknown() {
-				defaultFlavorRefSpec.Namespace = string(defaultFlavorRefModel.Namespace.ValueString())
-			}
-
 			// resource modelToSpecNested RequiredStringField --> Name
 			if !defaultFlavorRefModel.Name.IsNull() && !defaultFlavorRefModel.Name.IsUnknown() {
 				defaultFlavorRefSpec.Name = string(defaultFlavorRefModel.Name.ValueString())
+			}
+
+			// resource modelToSpecNested RequiredStringField --> Namespace
+			if !defaultFlavorRefModel.Namespace.IsNull() && !defaultFlavorRefModel.Namespace.IsUnknown() {
+				defaultFlavorRefSpec.Namespace = string(defaultFlavorRefModel.Namespace.ValueString())
 			}
 
 		}
@@ -1291,9 +1291,6 @@ func (r *ResourceF5XCVirtualK8S) Update(ctx context.Context, request resource.Up
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
-
-	// resource SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
 
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
 	data.Name = types.StringValue(metaData.GetName())
@@ -1398,20 +1395,15 @@ func (r *ResourceF5XCVirtualK8S) Update(ctx context.Context, request resource.Up
 		data.Annotations = types.MapNull(types.StringType)
 	}
 
+	// resource SpecToModelRoot Meta StringField --> Description
+	data.Description = types.StringValue(metaData.GetDescription())
+
 	// resource SpecToModelRoot ArrayOfPointerField --> VsiteRefs
 	if len(specData.VsiteRefs) > 0 {
 		vsiteRefsElements := make([]ObjectRefTypeModel, 0, len(specData.VsiteRefs))
 
 		for _, vsiteRefsElement := range specData.VsiteRefs {
 			objectRefTypeModelModel := ObjectRefTypeModel{}
-
-			// resource specToModelNested StringField --> Tenant
-			if vsiteRefsElement.GetTenant() != "" {
-				objectRefTypeModelModel.Tenant = types.StringValue(vsiteRefsElement.GetTenant())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Tenant = types.StringNull()
-			}
 
 			// resource specToModelNested RequiredStringField --> Namespace
 			if vsiteRefsElement.GetNamespace() != "" {
@@ -1427,6 +1419,14 @@ func (r *ResourceF5XCVirtualK8S) Update(ctx context.Context, request resource.Up
 			} else {
 				// Empty string, set to null
 				objectRefTypeModelModel.Name = types.StringNull()
+			}
+
+			// resource specToModelNested StringField --> Tenant
+			if vsiteRefsElement.GetTenant() != "" {
+				objectRefTypeModelModel.Tenant = types.StringValue(vsiteRefsElement.GetTenant())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Tenant = types.StringNull()
 			}
 
 			vsiteRefsElements = append(vsiteRefsElements, objectRefTypeModelModel)
@@ -1465,15 +1465,6 @@ func (r *ResourceF5XCVirtualK8S) Update(ctx context.Context, request resource.Up
 
 		// Recursively call the nested template to process the oneof choices.
 
-		// resource specToModelNested BoolOfOneOfPointerField --> Disabled
-		_, isDisabled := serviceIsolationChoiceChoices.(*ves_io_schema_virtual_k8s.GlobalSpecType_Disabled)
-
-		if isDisabled {
-			serviceIsolationChoiceChoicesModel.Disabled = types.BoolValue(true)
-		} else {
-			serviceIsolationChoiceChoicesModel.Disabled = types.BoolNull()
-		}
-
 		// resource specToModelNested BoolOfOneOfPointerField --> Isolated
 		_, isIsolated := serviceIsolationChoiceChoices.(*ves_io_schema_virtual_k8s.GlobalSpecType_Isolated)
 
@@ -1481,6 +1472,15 @@ func (r *ResourceF5XCVirtualK8S) Update(ctx context.Context, request resource.Up
 			serviceIsolationChoiceChoicesModel.Isolated = types.BoolValue(true)
 		} else {
 			serviceIsolationChoiceChoicesModel.Isolated = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> Disabled
+		_, isDisabled := serviceIsolationChoiceChoices.(*ves_io_schema_virtual_k8s.GlobalSpecType_Disabled)
+
+		if isDisabled {
+			serviceIsolationChoiceChoicesModel.Disabled = types.BoolValue(true)
+		} else {
+			serviceIsolationChoiceChoicesModel.Disabled = types.BoolNull()
 		}
 
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
@@ -1506,14 +1506,6 @@ func (r *ResourceF5XCVirtualK8S) Update(ctx context.Context, request resource.Up
 		var objectRefTypeModelModel = &ObjectRefTypeModel{}
 		defaultFlavorRefElement := specData.GetDefaultFlavorRef()
 
-		// resource specToModelNested RequiredStringField --> Namespace
-		if defaultFlavorRefElement.GetNamespace() != "" {
-			objectRefTypeModelModel.Namespace = types.StringValue(defaultFlavorRefElement.GetNamespace())
-		} else {
-			// Empty string, set to null
-			objectRefTypeModelModel.Namespace = types.StringNull()
-		}
-
 		// resource specToModelNested RequiredStringField --> Name
 		if defaultFlavorRefElement.GetName() != "" {
 			objectRefTypeModelModel.Name = types.StringValue(defaultFlavorRefElement.GetName())
@@ -1528,6 +1520,14 @@ func (r *ResourceF5XCVirtualK8S) Update(ctx context.Context, request resource.Up
 		} else {
 			// Empty string, set to null
 			objectRefTypeModelModel.Tenant = types.StringNull()
+		}
+
+		// resource specToModelNested RequiredStringField --> Namespace
+		if defaultFlavorRefElement.GetNamespace() != "" {
+			objectRefTypeModelModel.Namespace = types.StringValue(defaultFlavorRefElement.GetNamespace())
+		} else {
+			// Empty string, set to null
+			objectRefTypeModelModel.Namespace = types.StringNull()
 		}
 
 		defaultFlavorRefObj, defaultFlavorRefDiags := utils.GoStructToObjectValue(

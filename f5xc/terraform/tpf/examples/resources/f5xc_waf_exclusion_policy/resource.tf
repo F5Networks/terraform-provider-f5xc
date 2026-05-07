@@ -9,7 +9,7 @@ resource "f5xc_waf_exclusion_policy" "example" {
       name = "example_waf_exclusion_policy"
     }
     path_choice = {
-      any_path = true
+      path_regex = "example_path_regex"
     }
   }]
 }

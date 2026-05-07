@@ -60,12 +60,12 @@ type DcClusterGroupDCClusterGroupMeshTypeDcClusterGroupMeshChoice struct {
 
 // ResourceF5XCDcClusterGroupModel describes the resource data model.
 type ResourceF5XCDcClusterGroupModel struct {
-	Name        types.String   `tfsdk:"name"`
 	Namespace   types.String   `tfsdk:"namespace"`
 	Uid         types.String   `tfsdk:"uid"`
 	Labels      types.Map      `tfsdk:"labels"`
 	Annotations types.Map      `tfsdk:"annotations"`
 	Description types.String   `tfsdk:"description"`
+	Name        types.String   `tfsdk:"name"`
 	Type        types.Object   `tfsdk:"type"`
 	Timeouts    timeouts.Value `tfsdk:"timeouts"`
 }
@@ -110,13 +110,6 @@ func (r *ResourceF5XCDcClusterGroup) Schema(ctx context.Context, request resourc
 		Description:         "DcClusterGroup resource",
 
 		Attributes: map[string]schema.Attribute{
-			"name": schema.StringAttribute{
-				Description:         "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
-				MarkdownDescription: "",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
-			},
 			"namespace": schema.StringAttribute{
 				Description:         "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
 				MarkdownDescription: "",
@@ -164,6 +157,13 @@ func (r *ResourceF5XCDcClusterGroup) Schema(ctx context.Context, request resourc
 				Optional:            true,
 				Computed:            true,
 				Default:             stringdefault.StaticString(""),
+			},
+			"name": schema.StringAttribute{
+				Description:         "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
+				MarkdownDescription: "",
+				Required:            true,
+				Optional:            false,
+				Computed:            false,
 			},
 			"type": schema.SingleNestedAttribute{
 				Description:         "DC Cluster Group Mesh Choice DC Cluster Group Mesh Choice",
@@ -311,11 +311,6 @@ func (r *ResourceF5XCDcClusterGroup) Create(ctx context.Context, request resourc
 
 	// Populate createReq from data model
 
-	// resource modelToMetaRoot RequiredStringField --> Name
-	if !data.Name.IsNull() && !data.Name.IsUnknown() {
-		meta.Name = string(data.Name.ValueString())
-	}
-
 	// resource modelToMetaRoot RequiredStringField --> Namespace
 	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
 		meta.Namespace = string(data.Namespace.ValueString())
@@ -338,6 +333,11 @@ func (r *ResourceF5XCDcClusterGroup) Create(ctx context.Context, request resourc
 	// resource modelToMetaRoot StringField --> Description
 	if !data.Description.IsNull() && !data.Description.IsUnknown() {
 		meta.Description = string(data.Description.ValueString())
+	}
+
+	// resource modelToMetaRoot RequiredStringField --> Name
+	if !data.Name.IsNull() && !data.Name.IsUnknown() {
+		meta.Name = string(data.Name.ValueString())
 	}
 
 	{
@@ -413,9 +413,6 @@ func (r *ResourceF5XCDcClusterGroup) Create(ctx context.Context, request resourc
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
-
-	// resource SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
 
 	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
 	data.Namespace = types.StringValue(metaData.GetNamespace())
@@ -503,6 +500,9 @@ func (r *ResourceF5XCDcClusterGroup) Create(ctx context.Context, request resourc
 
 	// resource SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
+
+	// resource SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
 
 	// resource SpecToModelRoot PointerField --> Type
 	if specData.GetType() != nil {
@@ -633,9 +633,6 @@ func (r *ResourceF5XCDcClusterGroup) Read(ctx context.Context, request resource.
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
-	// resource SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
-
 	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
 	data.Namespace = types.StringValue(metaData.GetNamespace())
 
@@ -738,6 +735,9 @@ func (r *ResourceF5XCDcClusterGroup) Read(ctx context.Context, request resource.
 
 	// resource SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
+
+	// resource SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
 
 	// resource SpecToModelRoot PointerField --> Type
 	if specData.GetType() != nil {
@@ -852,11 +852,6 @@ func (r *ResourceF5XCDcClusterGroup) Update(ctx context.Context, request resourc
 
 	// Populate updateReq from data model
 
-	// resource modelToMetaRoot RequiredStringField --> Name
-	if !data.Name.IsNull() && !data.Name.IsUnknown() {
-		meta.Name = string(data.Name.ValueString())
-	}
-
 	// resource modelToMetaRoot RequiredStringField --> Namespace
 	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
 		meta.Namespace = string(data.Namespace.ValueString())
@@ -879,6 +874,11 @@ func (r *ResourceF5XCDcClusterGroup) Update(ctx context.Context, request resourc
 	// resource modelToMetaRoot StringField --> Description
 	if !data.Description.IsNull() && !data.Description.IsUnknown() {
 		meta.Description = string(data.Description.ValueString())
+	}
+
+	// resource modelToMetaRoot RequiredStringField --> Name
+	if !data.Name.IsNull() && !data.Name.IsUnknown() {
+		meta.Name = string(data.Name.ValueString())
 	}
 
 	{
@@ -955,9 +955,6 @@ func (r *ResourceF5XCDcClusterGroup) Update(ctx context.Context, request resourc
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
-
-	// resource SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
 
 	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
 	data.Namespace = types.StringValue(metaData.GetNamespace())
@@ -1061,6 +1058,9 @@ func (r *ResourceF5XCDcClusterGroup) Update(ctx context.Context, request resourc
 
 	// resource SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
+
+	// resource SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
 
 	// resource SpecToModelRoot PointerField --> Type
 	if specData.GetType() != nil {

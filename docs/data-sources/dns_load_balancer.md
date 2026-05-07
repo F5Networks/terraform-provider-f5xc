@@ -15,8 +15,8 @@ The `f5xc_dns_load_balancer` data source allows you to retrieve information abou
 
 ```terraform
 data "f5xc_dns_load_balancer" "example" {
-  namespace = "example_namespace"
   name      = "example_dns_load_balancer"
+  namespace = "example_namespace"
 }
 ```
 

@@ -15,8 +15,8 @@ The `f5xc_user` data source allows you to retrieve information about an existing
 
 ```terraform
 data "f5xc_user" "example" {
-  name      = "example_user"
   namespace = "example_namespace"
+  name      = "example_user"
 }
 ```
 

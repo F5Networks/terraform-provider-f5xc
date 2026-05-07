@@ -103,7 +103,7 @@ Optional:
 
 Required:
 
-- `action` (List of String) <br>**Allowed Values (choose one):** `["DENY", "ALLOW", "NEXT_POLICY_SET", "NEXT_POLICY", "LAST_POLICY", "GOTO_POLICY"]`
+- `action` (List of String) <br>**Allowed Values (choose one):** `["LAST_POLICY", "GOTO_POLICY", "DENY", "ALLOW", "NEXT_POLICY_SET", "NEXT_POLICY"]`
 - `client_choice` (Attributes) client choice Select clients for which the rule will be applied. The actual names/labels of the client are extracted from its TLS certificate. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--spec--client_choice))
 
 <a id="nestedatt--rule_choice--rule_list--rules--spec--client_choice"></a>
@@ -122,7 +122,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["URL_DECODE", "TRIM_RIGHT", "TRIM", "BASE64_DECODE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_LEFT", "TRANSFORMER_NONE", "LOWER_CASE", "UPPER_CASE"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["LOWER_CASE", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "UPPER_CASE", "BASE64_DECODE", "NORMALIZE_PATH", "REMOVE_WHITESPACE"]` (Multiple selection allowed)
 
 
 <a id="nestedatt--rule_choice--rule_list--rules--spec--client_choice--client_selector"></a>
@@ -145,4 +145,5 @@ Optional:
 
 - `create` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 - `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
 - `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).

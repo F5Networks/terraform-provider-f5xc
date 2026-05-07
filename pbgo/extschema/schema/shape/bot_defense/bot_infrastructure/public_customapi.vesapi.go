@@ -252,6 +252,7 @@ func (c *CustomAPIRestClient) doRPCDeployPoliciesToBotInfra(ctx context.Context,
 		for _, item := range req.PolicyMetadata {
 			q.Add("policy_metadata", fmt.Sprintf("%v", item))
 		}
+		q.Add("ti_package_metadata", fmt.Sprintf("%v", req.TiPackageMetadata))
 
 		hReq.URL.RawQuery += q.Encode()
 	case "delete":
@@ -1617,6 +1618,12 @@ var CustomAPISwaggerJSON string = `{
                         "$ref": "#/definitions/bot_infrastructureDeployPolicyMetadata"
                     },
                     "x-displayname": "Deployed Policy"
+                },
+                "ti_package_metadata": {
+                    "description": " Optional: TI Package Metadata for this deployment(deliver). Applicable only to the Kubernetes bot infrastructure.",
+                    "title": "TI Package Metadata",
+                    "$ref": "#/definitions/bot_infrastructureTIPackageMetadata",
+                    "x-displayname": "TI Package Metadata"
                 }
             }
         },
@@ -1801,11 +1808,29 @@ var CustomAPISwaggerJSON string = `{
                         "ves.io.schema.rules.string.max_len": "2048"
                     }
                 },
+                "generated_link": {
+                    "type": "string",
+                    "description": " Generated Link\n\nExample: - \"Generated Link\"-",
+                    "title": "Generated Link",
+                    "x-displayname": "Generated Link",
+                    "x-ves-example": "Generated Link"
+                },
                 "organization": {
                     "type": "string",
                     "description": "Exclusive with [user]\n Organization name must be \"F5\"",
                     "title": "Organization",
                     "x-displayname": "Organization"
+                },
+                "policy_id": {
+                    "type": "string",
+                    "description": " Policy ID\n\nExample: - \"Some_Policy-ID-1212\"-\n\nValidation Rules:\n  ves.io.schema.rules.string.min_len: 1\n",
+                    "title": "Policy ID",
+                    "minLength": 1,
+                    "x-displayname": "Policy ID",
+                    "x-ves-example": "Some_Policy-ID-1212",
+                    "x-ves-validation-rules": {
+                        "ves.io.schema.rules.string.min_len": "1"
+                    }
                 },
                 "policy_metadata": {
                     "type": "array",
@@ -1822,6 +1847,13 @@ var CustomAPISwaggerJSON string = `{
                     "title": "Status",
                     "x-displayname": "Status",
                     "x-ves-example": "Success"
+                },
+                "ti_package_name": {
+                    "type": "string",
+                    "description": " TI Package Name for this deployment(deliver), which will be only support for Kubernetes bot infrastructure\n\nExample: - \"TI_Package_1\"-",
+                    "title": "TI Package Name",
+                    "x-displayname": "TI Package Name",
+                    "x-ves-example": "TI_Package_1"
                 },
                 "timestamp": {
                     "type": "string",
@@ -1872,12 +1904,13 @@ var CustomAPISwaggerJSON string = `{
         },
         "bot_infrastructureDeploymentType": {
             "type": "string",
-            "description": "The type of bot infra\n\n - CLOUD_HOSTED: F5 Cloud Hosted\n\n - HOSTED: F5 Hosted\n\n - ON_PREM: F5 On Prem\n",
+            "description": "The type of bot infra\n\n - CLOUD_HOSTED: F5 Cloud Hosted\n\n - HOSTED: F5 Hosted\n\n - ON_PREM: F5 On Prem\n\n - KUBERNETES: Kubernetes\n",
             "title": "DeploymentResponseType",
             "enum": [
                 "CLOUD_HOSTED",
                 "HOSTED",
-                "ON_PREM"
+                "ON_PREM",
+                "KUBERNETES"
             ],
             "default": "CLOUD_HOSTED",
             "x-displayname": "Deployment Response Type",
@@ -1957,6 +1990,48 @@ var CustomAPISwaggerJSON string = `{
                         "ves.io.schema.rules.repeated.min_items": "1",
                         "ves.io.schema.rules.repeated.unique": "true"
                     }
+                }
+            }
+        },
+        "bot_infrastructureTIPackageMetadata": {
+            "type": "object",
+            "description": "The metadata for TI package, which will be only support for Kubernetes bot infrastructure",
+            "title": "TI Package Metadata",
+            "x-displayname": "TI Package Metadata",
+            "x-ves-proto-message": "ves.io.schema.shape.bot_defense.bot_infrastructure.TIPackageMetadata",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "description": " TI Package ID\n\nExample: - \"1234567\"-\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n  ves.io.schema.rules.string.min_len: 1\n",
+                    "title": "TI Package ID",
+                    "minLength": 1,
+                    "x-displayname": "TI Package ID",
+                    "x-ves-example": "1234567",
+                    "x-ves-required": "true",
+                    "x-ves-validation-rules": {
+                        "ves.io.schema.rules.message.required": "true",
+                        "ves.io.schema.rules.string.min_len": "1"
+                    }
+                },
+                "name": {
+                    "type": "string",
+                    "description": " TI Package Name\n\nExample: - \"TI_Package_1\"-\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n  ves.io.schema.rules.string.min_len: 1\n",
+                    "title": "TI Package Name",
+                    "minLength": 1,
+                    "x-displayname": "TI Package Name",
+                    "x-ves-example": "TI_Package_1",
+                    "x-ves-required": "true",
+                    "x-ves-validation-rules": {
+                        "ves.io.schema.rules.message.required": "true",
+                        "ves.io.schema.rules.string.min_len": "1"
+                    }
+                },
+                "version": {
+                    "type": "string",
+                    "description": " TI Package Version\n\nExample: - \"1.0\"-",
+                    "title": "TI Package Version",
+                    "x-displayname": "TI Package Version",
+                    "x-ves-example": "1.0"
                 }
             }
         }

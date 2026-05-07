@@ -84,6 +84,8 @@ func initializeValidatorRegistry(vr map[string]db.Validator) {
 	vr["ves.io.schema.shape.bot_defense.WebClientContinueMitigationHeader"] = WebClientContinueMitigationHeaderValidator()
 	vr["ves.io.schema.shape.bot_defense.WebClientRedirectMitigationActionType"] = WebClientRedirectMitigationActionTypeValidator()
 	vr["ves.io.schema.shape.bot_defense.WebClientTransformMitigationActionChoiceType"] = WebClientTransformMitigationActionChoiceTypeValidator()
+	vr["ves.io.schema.shape.bot_defense.GetArtifactRegistryTokenReq"] = GetArtifactRegistryTokenReqValidator()
+	vr["ves.io.schema.shape.bot_defense.GetArtifactRegistryTokenResp"] = GetArtifactRegistryTokenRespValidator()
 	vr["ves.io.schema.shape.bot_defense.SuggestValuesReq"] = SuggestValuesReqValidator()
 	vr["ves.io.schema.shape.bot_defense.SuggestValuesResp"] = SuggestValuesRespValidator()
 	vr["ves.io.schema.shape.bot_defense.SuggestedItem"] = SuggestedItemValidator()

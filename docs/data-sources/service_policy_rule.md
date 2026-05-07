@@ -15,8 +15,8 @@ The `f5xc_service_policy_rule` data source allows you to retrieve information ab
 
 ```terraform
 data "f5xc_service_policy_rule" "example" {
-  name      = "example_service_policy_rule"
   namespace = "example_namespace"
+  name      = "example_service_policy_rule"
 }
 ```
 

@@ -5551,6 +5551,15 @@ func (v *ValidateListDetectedDomainsRequest) Validate(ctx context.Context, pm in
 			return err
 		}
 	}
+	if fv, exists := v.FldValidators["sorts"]; exists {
+		vOpts := append(opts, db.WithValidateField("sorts"))
+		for idx, item := range m.GetSorts() {
+			vOpts := append(vOpts, db.WithValidateRepItem(idx), db.WithValidateIsRepItem(true))
+			if err := fv(ctx, item, vOpts...); err != nil {
+				return err
+			}
+		}
+	}
 	if fv, exists := v.FldValidators["start_time"]; exists {
 		vOpts := append(opts, db.WithValidateField("start_time"))
 		if err := fv(ctx, m.GetStartTime(), vOpts...); err != nil {

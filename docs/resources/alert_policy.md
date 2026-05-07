@@ -90,7 +90,7 @@ Optional:
 
 Optional:
 
-- `alertname` (List of String) <br>**Allowed Values (choose one):** `["ServiceClientErrorPerSourceSite", "APISecurityTooManyAttacks", "VesClientSideDefenseSensitiveFieldRead", "ServiceServerErrorPerSourceSite", "MaliciousUserDetected", "WAFTooManyAttacks", "WAFTooManyMaliciousBots", "APISecurityShadowAPIDetected", "RoutedDDoSTunnelStatusUpdateNotification", "TunnelsToCustomerSiteDown", "ThreatCampaign", "TLSAutomaticCertificateRenewalStillFailing", "TLSCustomCertificateExpiring", "APISecurityRiskScoreHighDetected", "SiteCustomerTunnelInterfaceDown", "ServiceClientError", "BotDefenseTooManySecurityEvents", "VesClientSideDefenseSuspiciousDomain", "RoutedDDoSMitigationNotification", "SitePhysicalInterfaceDown", "ServiceServerError", "ServicePolicyTooManyAttacks", "RoutedDDoSAlertNotification", "TLSAutomaticCertificateRenewalFailure", "L7DDoS", "ServiceHealthLow", "SyntheticMonitorHealthCritical", "TLSAutomaticCertificateExpired", "TLSCustomCertificateExpiringSoon", "TLSCustomCertificateExpired", "APISecurityUnUsedAPIDetected", "ServiceUnavailable", "ServiceEndpointHealthcheckFailure", "DNSZoneIgnoredDuplicateRecord", "APISecuritySensitiveDataInResponseDetected"]`
+- `alertname` (List of String) <br>**Allowed Values (choose one):** `["ServicePolicyTooManyAttacks", "VesClientSideDefenseSensitiveFieldRead", "APISecurityShadowAPIDetected", "ServiceUnavailable", "APISecurityTooManyAttacks", "ThreatCampaign", "APISecuritySensitiveDataInResponseDetected", "WAFTooManyAttacks", "TLSCustomCertificateExpiring", "SitePhysicalInterfaceDown", "TunnelsToCustomerSiteDown", "SyntheticMonitorHealthCritical", "MaliciousUserDetected", "BotDefenseTooManySecurityEvents", "TLSAutomaticCertificateRenewalStillFailing", "TLSCustomCertificateExpiringSoon", "L7DDoS", "SiteCustomerTunnelInterfaceDown", "ServiceClientError", "VesClientSideDefenseSuspiciousDomain", "TLSCustomCertificateExpired", "APISecurityUnUsedAPIDetected", "APISecurityRiskScoreHighDetected", "RoutedDDoSAlertNotification", "RoutedDDoSTunnelStatusUpdateNotification", "ServiceClientErrorPerSourceSite", "ServiceEndpointHealthcheckFailure", "WAFTooManyMaliciousBots", "TLSAutomaticCertificateRenewalFailure", "TLSAutomaticCertificateExpired", "DNSZoneIgnoredDuplicateRecord", "RoutedDDoSMitigationNotification", "ServiceServerError", "ServiceServerErrorPerSourceSite", "ServiceHealthLow"]`
 - `alertname_regex` (String) Alertname Regex Match Regular Expression match for the alertname
 - `any` (Boolean) Any Matches all alerts in the namespace
 - `custom` (Attributes) Custom Match A set of custom equality/regex matchers an alert has to fulfill to match the route. (see [below for nested schema](#nestedatt--routes--matcher_choice--custom))
@@ -181,7 +181,7 @@ Optional:
 
 Optional:
 
-- `groups` (List of String) <br>**Valid Options:** `["VIRTUAL_HOST", "UAM", "TIMESERIES_ANOMALY", "DNS", "INFRASTRUCTURE", "VOLT_SHARE", "TLS", "SECURITY_BOT_DEFENSE", "CLOUD_LINK", "IAAS_CAAS", "SECURITY", "SHAPE_SECURITY", "SECURITY_CSD", "CDN", "SYNTHETIC_MONITORS", "ROUTED_DDOS"]` (Multiple selection allowed)
+- `groups` (List of String) <br>**Valid Options:** `["INFRASTRUCTURE", "SHAPE_SECURITY", "SECURITY_CSD", "ROUTED_DDOS", "VOLT_SHARE", "UAM", "TIMESERIES_ANOMALY", "DNS", "IAAS_CAAS", "CDN", "TLS", "SECURITY_BOT_DEFENSE", "VIRTUAL_HOST", "SECURITY", "SYNTHETIC_MONITORS", "CLOUD_LINK"]` (Multiple selection allowed)
 
 
 <a id="nestedatt--routes--matcher_choice--severity"></a>
@@ -267,4 +267,5 @@ Optional:
 
 - `create` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 - `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
 - `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).

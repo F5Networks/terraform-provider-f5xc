@@ -13,8 +13,8 @@ AppSetting resource
 
 ```terraform
 resource "f5xc_app_setting" "example" {
-  namespace = "example_namespace"
   name      = "example_app_setting"
+  namespace = "example_namespace"
   app_type_settings = [{
     app_type_ref = [{
       name      = "example_app_setting"
@@ -100,8 +100,8 @@ Optional:
 
 Optional:
 
-- `metric` (List of String) <br>**Valid Options:** `["NO_METRICS", "REQUEST_RATE", "ERROR_RATE", "LATENCY", "THROUGHPUT"]` (Multiple selection allowed)
-- `metrics_source` (List of String) <br>**Allowed Values (choose one):** `["VIRTUAL_HOSTS", "NONE", "NODES", "EDGES"]`
+- `metric` (List of String) <br>**Valid Options:** `["ERROR_RATE", "LATENCY", "THROUGHPUT", "NO_METRICS", "REQUEST_RATE"]` (Multiple selection allowed)
+- `metrics_source` (List of String) <br>**Allowed Values (choose one):** `["NONE", "NODES", "EDGES", "VIRTUAL_HOSTS"]`
 
 
 
@@ -157,7 +157,7 @@ Optional:
 
 Optional:
 
-- `cooling_off_period` (Number) <br>**Default:** `20`
+- `cooling_off_period` (Number) Cooling Off Period Malicious user detection assigns a threat level to each user based on their activity. Once a threat level is assigned, the system continues tracking activity from this user and if no further malicious activity is seen, it gradually reduces the threat assesment to lower levels. This field specifies the time period, in minutes, used by the system to decay a user's threat level from a high to medium or medium to low or low to none.
 
 
 <a id="nestedatt--app_type_settings--user_behavior_analysis_setting--malicious_user_detection_choice--enable_detection--failed_login_activity_choice"></a>
@@ -232,4 +232,5 @@ Optional:
 
 - `create` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 - `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
 - `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).

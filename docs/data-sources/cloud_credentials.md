@@ -15,8 +15,8 @@ The `f5xc_cloud_credentials` data source allows you to retrieve information abou
 
 ```terraform
 data "f5xc_cloud_credentials" "example" {
-  name      = "example_cloud_credentials"
   namespace = "example_namespace"
+  name      = "example_cloud_credentials"
 }
 ```
 

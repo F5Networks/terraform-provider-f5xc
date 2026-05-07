@@ -13,15 +13,15 @@ LogReceiver resource
 
 ```terraform
 resource "f5xc_log_receiver" "example" {
-  name      = "example_log_receiver"
   namespace = "example_namespace"
-  where_choice = {
-    site_local = true
-  }
+  name      = "example_log_receiver"
   log_receiver_choice = {
     syslog = {
       syslog = "example_syslog"
     }
+  }
+  where_choice = {
+    site_local = true
   }
 }
 ```
@@ -69,7 +69,7 @@ Required:
 
 Optional:
 
-- `syslog_rfc5424` (Number) <br>**Default:** `10485760`
+- `syslog_rfc5424` (Number) Syslog RFC5424 Format Select RFC5424 syslog format and maximum message length.
 
 
 <a id="nestedatt--log_receiver_choice--syslog--mode_choice"></a>
@@ -179,7 +179,7 @@ Optional:
 
 - `default_https_port` (Boolean) Default HTTPS Port Default port number for HTTPS is 443.
 - `default_syslog_tls_port` (Boolean) Default Syslog Port Default port number for syslog TLS is 6514
-- `port` (Number) <br>**Default:** `443`
+- `port` (Number) Custom Port Number Custom port number used for communication
 
 
 
@@ -213,4 +213,5 @@ Optional:
 
 - `create` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 - `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
 - `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).

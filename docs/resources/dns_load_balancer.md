@@ -24,8 +24,8 @@ resource "f5xc_dns_load_balancer" "example" {
         }
       }
       client_choice = {
-        geo_location_set = {
-          geo_location_set = "example_geo_location_set"
+        ip_prefix_list = {
+          ip_prefix_list = "example_ip_prefix_list"
         }
       }
     }]
@@ -42,7 +42,7 @@ resource "f5xc_dns_load_balancer" "example" {
 
 - `name` (String) name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.
 - `namespace` (String) namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''
-- `record_type` (List of String) <br>**Allowed Values (choose one):** `["CNAME", "SRV", "A", "AAAA", "MX"]`
+- `record_type` (List of String) <br>**Allowed Values (choose one):** `["SRV", "A", "AAAA", "MX", "CNAME"]`
 - `rule_list` (Attributes) Rule List Load Balancing Rules (see [below for nested schema](#nestedatt--rule_list))
 
 ### Optional
@@ -259,4 +259,5 @@ Optional:
 
 - `create` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 - `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
 - `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).

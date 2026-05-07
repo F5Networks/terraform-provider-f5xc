@@ -15,8 +15,8 @@ The `f5xc_fast_acl_rule` data source allows you to retrieve information about an
 
 ```terraform
 data "f5xc_fast_acl_rule" "example" {
-  namespace = "example_namespace"
   name      = "example_fast_acl_rule"
+  namespace = "example_namespace"
 }
 ```
 

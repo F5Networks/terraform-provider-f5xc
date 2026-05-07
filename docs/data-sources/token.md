@@ -15,8 +15,8 @@ The `f5xc_token` data source allows you to retrieve information about an existin
 
 ```terraform
 data "f5xc_token" "example" {
-  namespace = "example_namespace"
   name      = "example_token"
+  namespace = "example_namespace"
 }
 ```
 

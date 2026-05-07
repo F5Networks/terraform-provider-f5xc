@@ -15,8 +15,8 @@ The `f5xc_app_setting` data source allows you to retrieve information about an e
 
 ```terraform
 data "f5xc_app_setting" "example" {
-  namespace = "example_namespace"
   name      = "example_app_setting"
+  namespace = "example_namespace"
 }
 ```
 

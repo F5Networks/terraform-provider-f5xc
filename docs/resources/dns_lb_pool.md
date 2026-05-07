@@ -13,17 +13,17 @@ DnsLbPool resource
 
 ```terraform
 resource "f5xc_dns_lb_pool" "example" {
-  namespace = "example_namespace"
-  name      = "example_dns_lb_pool"
+  name                = "example_dns_lb_pool"
+  namespace           = "example_namespace"
+  load_balancing_mode = ["ENUM_VALUE"]
   ttl_choice = {
     use_rrset_ttl = true
   }
   pool_type_choice = {
-    srv_pool = {
-      srv_pool = "example_srv_pool"
+    aaaa_pool = {
+      aaaa_pool = "example_aaaa_pool"
     }
   }
-  load_balancing_mode = ["ENUM_VALUE"]
 }
 ```
 
@@ -245,7 +245,7 @@ Optional:
 
 Optional:
 
-- `ttl` (Number) <br>**Default:** `30`
+- `ttl` (Number) Custom TTL Custom TTL in seconds (default 30) for responses from this pool
 - `use_rrset_ttl` (Boolean) Use RRSet TTL Use TTL specified in the RRSet of the DNS Load Balancer Record which uses the pool
 
 
@@ -269,4 +269,5 @@ Optional:
 
 - `create` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 - `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
 - `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).

@@ -216,7 +216,7 @@ Optional:
 
 Optional:
 
-- `action` (List of String) <br>**Allowed Values (choose one):** `["NOLOG", "LOG"]`<br>**Default:** `NOLOG`
+- `action` (List of String) <br>**Allowed Values (choose one):** `["LOG", "NOLOG"]`<br>**Default:** `NOLOG`
 
 
 <a id="nestedatt--rule_choice--rules--egress_rules--label_matcher"></a>
@@ -294,7 +294,7 @@ Optional:
 
 Optional:
 
-- `applications` (List of String) <br>**Valid Options:** `["APPLICATION_HTTPS", "APPLICATION_SNMP", "APPLICATION_DNS", "APPLICATION_HTTP"]` (Multiple selection allowed)
+- `applications` (List of String) <br>**Valid Options:** `["APPLICATION_HTTP", "APPLICATION_HTTPS", "APPLICATION_SNMP", "APPLICATION_DNS"]` (Multiple selection allowed)
 
 
 <a id="nestedatt--rule_choice--rules--egress_rules--traffic_choice--protocol_port_range"></a>
@@ -418,7 +418,7 @@ Optional:
 
 Optional:
 
-- `applications` (List of String) <br>**Valid Options:** `["APPLICATION_HTTPS", "APPLICATION_SNMP", "APPLICATION_DNS", "APPLICATION_HTTP"]` (Multiple selection allowed)
+- `applications` (List of String) <br>**Valid Options:** `["APPLICATION_HTTP", "APPLICATION_HTTPS", "APPLICATION_SNMP", "APPLICATION_DNS"]` (Multiple selection allowed)
 
 
 <a id="nestedatt--rule_choice--rules--ingress_rules--traffic_choice--protocol_port_range"></a>
@@ -441,4 +441,5 @@ Optional:
 
 - `create` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 - `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
 - `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).

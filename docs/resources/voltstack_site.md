@@ -15,45 +15,39 @@ VoltstackSite resource
 resource "f5xc_voltstack_site" "example" {
   name      = "example_voltstack_site"
   namespace = "example_namespace"
-  network_cfg_choice = {
-    default_network_config = true
-  }
-  logs_receiver_choice = {
-    logs_streaming_disabled = true
-  }
   storage_cfg_choice = {
-    custom_storage_config = {
-      custom_storage_config = "example_custom_storage_config"
+    default_storage_config = true
+  }
+  sriov_interface_choice = {
+    default_sriov_interface = true
+  }
+  bond_choice = {
+    no_bond_devices = true
+  }
+  usb_policy_choice = {
+    usb_policy = {
+      usb_policy = "example_usb_policy"
     }
   }
-  master_node_configuration = [{
-    name = "example_voltstack_site"
-  }]
-  gpu_choice = {
-    disable_gpu = true
+  network_cfg_choice = {
+    default_network_config = true
   }
   k8s_cluster_choice = {
     k8s_cluster = {
       k8s_cluster = "example_k8s_cluster"
     }
   }
-  usb_policy_choice = {
-    deny_all_usb = true
-  }
-  sriov_interface_choice = {
-    sriov_interfaces = {
-      sriov_interfaces = "example_sriov_interfaces"
-    }
-  }
-  bond_choice = {
-    bond_device_list = {
-      bond_device_list = "example_bond_device_list"
-    }
+  logs_receiver_choice = {
+    logs_streaming_disabled = true
   }
   blocked_services_choice = {
-    blocked_services = {
-      blocked_services = "example_blocked_services"
-    }
+    default_blocked_services = true
+  }
+  master_node_configuration = [{
+    name = "example_voltstack_site"
+  }]
+  gpu_choice = {
+    enable_gpu = true
   }
 }
 ```
@@ -123,7 +117,7 @@ Optional:
 Optional:
 
 - `blocked_services_value_type_choice` (Attributes) blocked_services_type_choice Choose the Nodel Local Service to disable (see [below for nested schema](#nestedatt--blocked_services_choice--blocked_services--blocked_sevice--blocked_services_value_type_choice))
-- `network_type` (List of String) <br>**Allowed Values (choose one):** `["VIRTUAL_NETWORK_IP_FABRIC", "VIRTUAL_NETWORK_PUBLIC", "VIRTUAL_NETWORK_SITE_SERVICE", "VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE", "VIRTUAL_NETWORK_IP_AUTO", "VIRTUAL_NETWORK_SRV6_NETWORK", "VIRTUAL_NETWORK_SEGMENT", "VIRTUAL_NETWORK_MANAGEMENT", "VIRTUAL_NETWORK_SITE_LOCAL", "VIRTUAL_NETWORK_SITE_LOCAL_INSIDE", "VIRTUAL_NETWORK_PER_SITE", "VIRTUAL_NETWORK_GLOBAL", "VIRTUAL_NETWORK_VER_INTERNAL", "VIRTUAL_NETWORK_VOLTADN_PRIVATE_NETWORK"]`
+- `network_type` (List of String) <br>**Allowed Values (choose one):** `["VIRTUAL_NETWORK_MANAGEMENT", "VIRTUAL_NETWORK_SITE_LOCAL", "VIRTUAL_NETWORK_SITE_LOCAL_INSIDE", "VIRTUAL_NETWORK_PUBLIC", "VIRTUAL_NETWORK_GLOBAL", "VIRTUAL_NETWORK_SITE_SERVICE", "VIRTUAL_NETWORK_VER_INTERNAL", "VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE", "VIRTUAL_NETWORK_IP_AUTO", "VIRTUAL_NETWORK_PER_SITE", "VIRTUAL_NETWORK_VOLTADN_PRIVATE_NETWORK", "VIRTUAL_NETWORK_SRV6_NETWORK", "VIRTUAL_NETWORK_IP_FABRIC", "VIRTUAL_NETWORK_SEGMENT"]`
 
 <a id="nestedatt--blocked_services_choice--blocked_services--blocked_sevice--blocked_services_value_type_choice"></a>
 ### Nested Schema for `blocked_services_choice.blocked_services.blocked_sevice.blocked_services_value_type_choice`
@@ -201,7 +195,7 @@ Optional:
 
 Required:
 
-- `feature_type` (List of String) <br>**Allowed Values (choose one):** `["VCS", "UNLICENSED", "VGPU", "VWS"]`
+- `feature_type` (List of String) <br>**Allowed Values (choose one):** `["UNLICENSED", "VGPU", "VWS", "VCS"]`
 
 Optional:
 
@@ -789,7 +783,7 @@ Optional:
 Required:
 
 - `network_prefix_choice` (Attributes) Network Prefix choice Select DHCP network prefix for a site (see [below for nested schema](#nestedatt--network_cfg_choice--custom_network_config--interface_choice--interface_list--interfaces--interface_choice--ethernet_interface--ipv6_address_choice--ipv6_auto_config--autoconfig_choice--router--address_choice--stateful--dhcp_networks--network_prefix_choice))
-- `pool_settings` (List of String) <br>**Allowed Values (choose one):** `["INCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS", "EXCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS"]`
+- `pool_settings` (List of String) <br>**Allowed Values (choose one):** `["EXCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS", "INCLUDE_IP_ADDRESSES_FROM_DHCP_POOLS"]`
 
 Optional:
 
@@ -1168,7 +1162,7 @@ Required:
 
 Optional:
 
-- `attrs` (List of String) <br>**Valid Options:** `["ROUTE_ATTR_INSTALL_FORWARDING", "ROUTE_ATTR_MERGE_ONLY", "ROUTE_ATTR_NO_OP", "ROUTE_ATTR_ADVERTISE", "ROUTE_ATTR_INSTALL_HOST"]` (Multiple selection allowed)
+- `attrs` (List of String) <br>**Valid Options:** `["ROUTE_ATTR_MERGE_ONLY", "ROUTE_ATTR_NO_OP", "ROUTE_ATTR_ADVERTISE", "ROUTE_ATTR_INSTALL_HOST", "ROUTE_ATTR_INSTALL_FORWARDING"]` (Multiple selection allowed)
 
 <a id="nestedatt--network_cfg_choice--custom_network_config--slo_choice--slo_config--static_route_choice--static_routes--static_routes--next_hop_choice"></a>
 ### Nested Schema for `network_cfg_choice.custom_network_config.slo_choice.slo_config.static_route_choice.static_routes.static_routes.next_hop_choice`
@@ -1238,7 +1232,7 @@ Required:
 
 Optional:
 
-- `attrs` (List of String) <br>**Valid Options:** `["ROUTE_ATTR_NO_OP", "ROUTE_ATTR_ADVERTISE", "ROUTE_ATTR_INSTALL_HOST", "ROUTE_ATTR_INSTALL_FORWARDING", "ROUTE_ATTR_MERGE_ONLY"]` (Multiple selection allowed)
+- `attrs` (List of String) <br>**Valid Options:** `["ROUTE_ATTR_INSTALL_HOST", "ROUTE_ATTR_INSTALL_FORWARDING", "ROUTE_ATTR_MERGE_ONLY", "ROUTE_ATTR_NO_OP", "ROUTE_ATTR_ADVERTISE"]` (Multiple selection allowed)
 
 <a id="nestedatt--network_cfg_choice--custom_network_config--slo_choice--slo_config--static_v6_route_choice--static_v6_routes--static_routes--next_hop_choice"></a>
 ### Nested Schema for `network_cfg_choice.custom_network_config.slo_choice.slo_config.static_v6_route_choice.static_v6_routes.static_routes.next_hop_choice`
@@ -1360,7 +1354,7 @@ Required:
 
 Optional:
 
-- `attrs` (List of String) <br>**Valid Options:** `["ROUTE_ATTR_NO_OP", "ROUTE_ATTR_ADVERTISE", "ROUTE_ATTR_INSTALL_HOST", "ROUTE_ATTR_INSTALL_FORWARDING", "ROUTE_ATTR_MERGE_ONLY"]` (Multiple selection allowed)
+- `attrs` (List of String) <br>**Valid Options:** `["ROUTE_ATTR_INSTALL_HOST", "ROUTE_ATTR_INSTALL_FORWARDING", "ROUTE_ATTR_MERGE_ONLY", "ROUTE_ATTR_NO_OP", "ROUTE_ATTR_ADVERTISE"]` (Multiple selection allowed)
 
 <a id="nestedatt--storage_cfg_choice--custom_storage_config--static_route_choice--static_routes--static_routes--next_hop_choice"></a>
 ### Nested Schema for `storage_cfg_choice.custom_storage_config.static_route_choice.static_routes.static_routes.next_hop_choice`
@@ -2898,7 +2892,7 @@ Optional:
 
 Optional:
 
-- `drain_max_unavailable_node_count` (Number) <br>**Default:** `1`
+- `drain_max_unavailable_node_count` (Number) Node Batch Size Count
 
 
 
@@ -2962,6 +2956,7 @@ Optional:
 
 - `create` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 - `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
 - `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
 

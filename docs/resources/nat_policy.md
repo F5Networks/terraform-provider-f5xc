@@ -15,11 +15,6 @@ NatPolicy resource
 resource "f5xc_nat_policy" "example" {
   name      = "example_nat_policy"
   namespace = "example_namespace"
-  applies_to_choice = {
-    site = {
-      site = "example_site"
-    }
-  }
   rules = [{
     action = {}
     enable_choice = {
@@ -27,11 +22,16 @@ resource "f5xc_nat_policy" "example" {
     }
     name = "example_nat_policy"
     scope_choice = {
-      cloud_connect = {
-        cloud_connect = "example_cloud_connect"
+      node_interface = {
+        node_interface = "example_node_interface"
       }
     }
   }]
+  applies_to_choice = {
+    site = {
+      site = "example_site"
+    }
+  }
 }
 ```
 
@@ -406,4 +406,5 @@ Optional:
 
 - `create` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 - `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
 - `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).

@@ -13,9 +13,9 @@ User resource
 
 ```terraform
 resource "f5xc_user" "example" {
-  first_name = "example_user"
   last_name  = "example_user"
   email      = "example_user"
+  first_name = "example_user"
 }
 ```
 
@@ -33,7 +33,7 @@ resource "f5xc_user" "example" {
 ### Optional
 
 - `group_names` (List of String) Groups Group list must be associated to this user.
-- `idm_type` (List of String) <br>**Allowed Values (choose one):** `["SSO", "VOLTERRA_MANAGED", "UNDEFINED"]`
+- `idm_type` (List of String) <br>**Allowed Values (choose one):** `["VOLTERRA_MANAGED", "UNDEFINED", "SSO"]`
 - `name` (String) Username This is an optional field meant to be used as username. Inside Volterra's UAM, email is already treated as user's username and as best practice, recommendation is to keep this same as email field. if not specified, this field will be set same as email field.
 - `namespace` (String) <br>**Default:** `system`
 - `namespace_roles` (Attributes List) Namespace roles List of directly attached roles that the user has for each namespace. (see [below for nested schema](#nestedatt--namespace_roles))
@@ -56,4 +56,5 @@ Optional:
 
 - `create` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 - `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
 - `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).

@@ -2293,12 +2293,9 @@ var APISwaggerJSON string = `{
                     }
                 },
                 "user_defined_api_discovery_policy": {
-                    "description": " Rules are evaluated sequentially, top to bottom. If no rules are added, all traffic will be discovered or ignored based on the selection in the 'Default Behaviour of the Rule Set' field.\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n",
+                    "description": " Rules are evaluated sequentially, top to bottom. If no rules are added, all traffic will be discovered or ignored based on the selection in the 'Default Behaviour of the Rule Set' field.",
                     "$ref": "#/definitions/api_discoveryUserDefinedApiDiscoveryPolicy",
-                    "x-displayname": "Rules Properties",
-                    "x-ves-validation-rules": {
-                        "ves.io.schema.rules.message.required": "true"
-                    }
+                    "x-displayname": "Rules Properties"
                 }
             }
         },
@@ -2527,12 +2524,9 @@ var APISwaggerJSON string = `{
                     }
                 },
                 "user_defined_api_discovery_policy": {
-                    "description": " Rules are evaluated sequentially, top to bottom. If no rules are added, all traffic will be discovered or ignored based on the selection in the 'Default Behaviour of the Rule Set' field.\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n",
+                    "description": " Rules are evaluated sequentially, top to bottom. If no rules are added, all traffic will be discovered or ignored based on the selection in the 'Default Behaviour of the Rule Set' field.",
                     "$ref": "#/definitions/api_discoveryUserDefinedApiDiscoveryPolicy",
-                    "x-displayname": "Rules Properties",
-                    "x-ves-validation-rules": {
-                        "ves.io.schema.rules.message.required": "true"
-                    }
+                    "x-displayname": "Rules Properties"
                 }
             }
         },
@@ -2770,12 +2764,9 @@ var APISwaggerJSON string = `{
                     }
                 },
                 "user_defined_api_discovery_policy": {
-                    "description": " Rules are evaluated sequentially, top to bottom. If no rules are added, all traffic will be discovered or ignored based on the selection in the 'Default Behaviour of the Rule Set' field.\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n",
+                    "description": " Rules are evaluated sequentially, top to bottom. If no rules are added, all traffic will be discovered or ignored based on the selection in the 'Default Behaviour of the Rule Set' field.",
                     "$ref": "#/definitions/api_discoveryUserDefinedApiDiscoveryPolicy",
-                    "x-displayname": "Rules Properties",
-                    "x-ves-validation-rules": {
-                        "ves.io.schema.rules.message.required": "true"
-                    }
+                    "x-displayname": "Rules Properties"
                 }
             }
         },

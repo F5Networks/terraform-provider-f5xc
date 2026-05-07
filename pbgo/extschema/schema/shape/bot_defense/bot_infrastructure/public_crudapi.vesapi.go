@@ -1990,7 +1990,7 @@ var APISwaggerJSON string = `{
             "description": "Get Bot Infrastructure",
             "title": "Get Bot Infrastructure",
             "x-displayname": "Get Bot Infrastructure",
-            "x-ves-oneof-field-bot_infra_choice": "[\"cloud_hosted\",\"on_prem\",\"physical_hosted\"]",
+            "x-ves-oneof-field-bot_infra_choice": "[\"cloud_hosted\",\"kubernetes\",\"on_prem\",\"physical_hosted\"]",
             "x-ves-proto-message": "ves.io.schema.shape.bot_defense.bot_infrastructure.GetSpecType",
             "properties": {
                 "bot_allowlist_policy_metadata": {
@@ -2005,8 +2005,13 @@ var APISwaggerJSON string = `{
                     "$ref": "#/definitions/bot_infrastructurePolicyMetadata",
                     "x-displayname": "Bot Network Policy Metadata"
                 },
+                "bot_ti_package_information": {
+                    "description": " Specifies the threat intelligence package to be used for bot detection and mitigation.",
+                    "$ref": "#/definitions/bot_infrastructureTIPackageInformation",
+                    "x-displayname": "Bot Threat Intelligence Package"
+                },
                 "cloud_hosted": {
-                    "description": "Exclusive with [on_prem physical_hosted]\n Associates an F5 Cloud Hosted service node to the Bot Defense infrastructure",
+                    "description": "Exclusive with [kubernetes on_prem physical_hosted]\n Associates an F5 Cloud Hosted service node to the Bot Defense infrastructure",
                     "$ref": "#/definitions/bot_infrastructureInfraCloudHosted",
                     "x-displayname": "F5 Cloud Hosted"
                 },
@@ -2026,13 +2031,18 @@ var APISwaggerJSON string = `{
                     "x-displayname": "Environment Type",
                     "x-ves-example": "Production"
                 },
+                "kubernetes": {
+                    "description": "Exclusive with [cloud_hosted on_prem physical_hosted]\n Kubernetes is coSSE automated deploying, scaling and managing containers.",
+                    "$ref": "#/definitions/bot_infrastructureInfraContainerizedHosted",
+                    "x-displayname": "Kubernetes"
+                },
                 "on_prem": {
-                    "description": "Exclusive with [cloud_hosted physical_hosted]\n",
+                    "description": "Exclusive with [cloud_hosted kubernetes physical_hosted]\n",
                     "$ref": "#/definitions/bot_infrastructureInfraF5HostedOnPrem",
                     "x-displayname": "F5 On Premises"
                 },
                 "physical_hosted": {
-                    "description": "Exclusive with [cloud_hosted on_prem]\n",
+                    "description": "Exclusive with [cloud_hosted kubernetes on_prem]\n",
                     "$ref": "#/definitions/bot_infrastructureInfraF5HostedOnPrem",
                     "x-displayname": "F5 Hosted"
                 },
@@ -2098,11 +2108,11 @@ var APISwaggerJSON string = `{
             "description": "Replace Bot Infrastructure",
             "title": "Replace Bot Infrastructure",
             "x-displayname": "Replace Bot Infrastructure",
-            "x-ves-oneof-field-bot_infra_choice": "[\"cloud_hosted\",\"on_prem\",\"physical_hosted\"]",
+            "x-ves-oneof-field-bot_infra_choice": "[\"cloud_hosted\",\"kubernetes\",\"on_prem\",\"physical_hosted\"]",
             "x-ves-proto-message": "ves.io.schema.shape.bot_defense.bot_infrastructure.ReplaceSpecType",
             "properties": {
                 "cloud_hosted": {
-                    "description": "Exclusive with [on_prem physical_hosted]\n Associates an F5 Cloud Hosted service node to the Bot Defense infrastructure",
+                    "description": "Exclusive with [kubernetes on_prem physical_hosted]\n Associates an F5 Cloud Hosted service node to the Bot Defense infrastructure",
                     "$ref": "#/definitions/bot_infrastructureInfraCloudHosted",
                     "x-displayname": "F5 Cloud Hosted"
                 },
@@ -2112,13 +2122,18 @@ var APISwaggerJSON string = `{
                     "x-displayname": "Environment Type",
                     "x-ves-example": "Production"
                 },
+                "kubernetes": {
+                    "description": "Exclusive with [cloud_hosted on_prem physical_hosted]\n Kubernetes is coSSE automated deploying, scaling and managing containers.",
+                    "$ref": "#/definitions/bot_infrastructureInfraContainerizedHosted",
+                    "x-displayname": "Kubernetes"
+                },
                 "on_prem": {
-                    "description": "Exclusive with [cloud_hosted physical_hosted]\n",
+                    "description": "Exclusive with [cloud_hosted kubernetes physical_hosted]\n",
                     "$ref": "#/definitions/bot_infrastructureInfraF5HostedOnPrem",
                     "x-displayname": "F5 On Premises"
                 },
                 "physical_hosted": {
-                    "description": "Exclusive with [cloud_hosted on_prem]\n",
+                    "description": "Exclusive with [cloud_hosted kubernetes on_prem]\n",
                     "$ref": "#/definitions/bot_infrastructureInfraF5HostedOnPrem",
                     "x-displayname": "F5 Hosted"
                 },
@@ -2353,12 +2368,6 @@ var APISwaggerJSON string = `{
                         "ves.io.schema.rules.string.not_empty": "true"
                     }
                 },
-                "type": {
-                    "description": " Policy Type",
-                    "title": "Policy Type",
-                    "$ref": "#/definitions/bot_infrastructureTrafficType",
-                    "x-displayname": "Type"
-                },
                 "version": {
                     "type": "string",
                     "description": " Policy Version\n\nValidation Rules:\n  ves.io.schema.rules.string.not_empty: true\n",
@@ -2580,6 +2589,39 @@ var APISwaggerJSON string = `{
                 }
             }
         },
+        "bot_infrastructureInfraContainerizedHosted": {
+            "type": "object",
+            "title": "F5 Containerized Hosted",
+            "x-displayname": "Containerized Hosted",
+            "x-ves-proto-message": "ves.io.schema.shape.bot_defense.bot_infrastructure.InfraContainerizedHosted",
+            "properties": {
+                "infra_host_name": {
+                    "type": "string",
+                    "description": "\n\nExample: - \"www.example.com\"-",
+                    "title": "Infra host name",
+                    "x-displayname": "Infra Host Name",
+                    "x-ves-example": "www.example.com"
+                },
+                "kubernetes_cluster": {
+                    "type": "array",
+                    "description": " A list of Kubernetes Clusters.\n\nValidation Rules:\n  ves.io.schema.rules.repeated.unique: true\n",
+                    "title": "Kubernetes Clusters",
+                    "items": {
+                        "$ref": "#/definitions/bot_infrastructureKubernetesCluster"
+                    },
+                    "x-displayname": "Kubernetes Clusters",
+                    "x-ves-validation-rules": {
+                        "ves.io.schema.rules.repeated.unique": "true"
+                    }
+                },
+                "target_firmware_version": {
+                    "type": "string",
+                    "description": " Targeted Firmware Version is the new version.",
+                    "title": "Target Firmware Version",
+                    "x-displayname": "Target Firmware Version"
+                }
+            }
+        },
         "bot_infrastructureInfraF5HostedOnPrem": {
             "type": "object",
             "description": "Bot infra type is F5 Hosted/F5 On Premises",
@@ -2672,6 +2714,57 @@ var APISwaggerJSON string = `{
                     "x-ves-validation-rules": {
                         "ves.io.schema.rules.message.required": "true"
                     }
+                }
+            }
+        },
+        "bot_infrastructureKubernetesCluster": {
+            "type": "object",
+            "description": "Represents a single Kubernetes cluster associated with the Containerized Hosted infrastructure.\nIncludes identifiers, current firmware version, and deployed policy, version details and sync status for documentation and UI.",
+            "title": "Kubernetes Cluster",
+            "x-displayname": "Kubernetes Cluster",
+            "x-ves-proto-message": "ves.io.schema.shape.bot_defense.bot_infrastructure.KubernetesCluster",
+            "properties": {
+                "cluster_tag": {
+                    "type": "string",
+                    "description": " The cluster tag of the Kubernetes cluster",
+                    "title": "Cluster tag",
+                    "x-displayname": "Cluster Tag"
+                },
+                "deployed_allowlist_policy_metadata": {
+                    "description": " Allowlist policy deployed in the cluster",
+                    "title": "Deployed Allowlist Policy",
+                    "$ref": "#/definitions/bot_infrastructurePolicyMetadata",
+                    "x-displayname": "Deployed Allowlist Policy"
+                },
+                "deployed_bot_threat_intelligence_package_name": {
+                    "type": "string",
+                    "description": " Bot Threat Intelligence Package deployed in the cluster",
+                    "title": "Deployed Bot Threat Intelligence Package",
+                    "x-displayname": "Deployed Bot Threat Intelligence Package"
+                },
+                "deployed_endpoint_policy_metadata": {
+                    "description": " Endpoint policy deployed in the cluster",
+                    "title": "Deployed Endpoint Policy",
+                    "$ref": "#/definitions/bot_infrastructurePolicyMetadata",
+                    "x-displayname": "Deployed Endpoint Policy"
+                },
+                "deployed_network_policy_metadata": {
+                    "description": " Network policy deployed in the cluster",
+                    "title": "Deployed Network Policy",
+                    "$ref": "#/definitions/bot_infrastructurePolicyMetadata",
+                    "x-displayname": "Deployed Network Policy"
+                },
+                "firmware_version": {
+                    "type": "string",
+                    "description": " The version of firmware for the Kubernetes cluster",
+                    "title": "Firmware Version",
+                    "x-displayname": "Firmware Version"
+                },
+                "sync_status": {
+                    "description": " The sync status of the Kubernetes cluster",
+                    "title": "Sync Status",
+                    "$ref": "#/definitions/bot_infrastructureSyncStatus",
+                    "x-displayname": "Sync Status"
                 }
             }
         },
@@ -2907,6 +3000,37 @@ var APISwaggerJSON string = `{
                         "$ref": "#/definitions/ioschemaObjectRefType"
                     },
                     "x-displayname": "Config Object"
+                }
+            }
+        },
+        "bot_infrastructureSyncStatus": {
+            "type": "string",
+            "description": "Sync Status\n\nThe Kubernetes cluster status is unknown\nThe Kubernetes cluster is out of sync with the latest policies\nThe Kubernetes cluster is in sync with the latest policies",
+            "title": "Sync Status",
+            "enum": [
+                "SYNC_STATUS_UNKNOWN",
+                "SYNC_STATUS_OUT_OF_SYNC",
+                "SYNC_STATUS_IN_SYNC"
+            ],
+            "default": "SYNC_STATUS_UNKNOWN",
+            "x-displayname": "Sync Status",
+            "x-ves-proto-enum": "ves.io.schema.shape.bot_defense.bot_infrastructure.SyncStatus"
+        },
+        "bot_infrastructureTIPackageInformation": {
+            "type": "object",
+            "description": "The metadata of threat intelligence policy.",
+            "title": "Threat Intelligence Package Metadata",
+            "x-displayname": "Threat Intelligence Package",
+            "x-ves-proto-message": "ves.io.schema.shape.bot_defense.bot_infrastructure.TIPackageInformation",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "\n\nValidation Rules:\n  ves.io.schema.rules.string.not_empty: true\n",
+                    "title": "Threat Intelligence Package Name",
+                    "x-displayname": "TI Package Name",
+                    "x-ves-validation-rules": {
+                        "ves.io.schema.rules.string.not_empty": "true"
+                    }
                 }
             }
         },

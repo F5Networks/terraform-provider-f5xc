@@ -26,8 +26,8 @@ __debug_bin
 *.log.*
 logs/
 log/
-/logs
-/log
+/logs/
+/log/
 
 # Temporary Files
 *.tmp

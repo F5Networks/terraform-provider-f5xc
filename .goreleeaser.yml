@@ -5,7 +5,7 @@ before:
 builds:
   - env:
       - CGO_ENABLED=0
-    main: ./cmd/terraform-provider-volterra/main.go
+    main: ./cmd/terraform-provider-f5xc/main.go
     mod_timestamp: '{{ .CommitTimestamp }}'
     flags:
       - -trimpath

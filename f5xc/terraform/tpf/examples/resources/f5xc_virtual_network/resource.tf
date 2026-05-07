@@ -2,6 +2,6 @@ resource "f5xc_virtual_network" "example" {
   name      = "example_virtual_network"
   namespace = "example_namespace"
   network_choice = {
-    global_network = true
+    site_local_network = true
   }
 }

@@ -30,17 +30,17 @@ type DataSourceF5XCNetworkPolicy struct {
 }
 
 type NetworkPolicyGlobalSpecTypeLocalEndpointChoice struct {
-	Prefix         types.Object `tfsdk:"prefix"`
 	PrefixSelector types.Object `tfsdk:"prefix_selector"`
-}
-
-type NetworkPolicyGlobalSpecTypePrefix struct {
-	Prefix     types.List `tfsdk:"prefix"`
-	Ipv6Prefix types.List `tfsdk:"ipv6_prefix"`
+	Prefix         types.Object `tfsdk:"prefix"`
 }
 
 type NetworkPolicyGlobalSpecTypePrefixSelector struct {
 	Expressions types.List `tfsdk:"expressions"`
+}
+
+type NetworkPolicyGlobalSpecTypePrefix struct {
+	Ipv6Prefix types.List `tfsdk:"ipv6_prefix"`
+	Prefix     types.List `tfsdk:"prefix"`
 }
 
 type NetworkPolicyNetworkPolicyEndpointChoiceType struct {
@@ -48,20 +48,20 @@ type NetworkPolicyNetworkPolicyEndpointChoiceType struct {
 }
 
 type NetworkPolicyEndpointChoiceTypeEndpointChoice struct {
-	PrefixList       types.Object `tfsdk:"prefix_list"`
 	Any              types.Bool   `tfsdk:"any"`
 	OutsideEndpoints types.Bool   `tfsdk:"outside_endpoints"`
 	InsideEndpoints  types.Bool   `tfsdk:"inside_endpoints"`
 	LabelSelector    types.Object `tfsdk:"label_selector"`
+	PrefixList       types.Object `tfsdk:"prefix_list"`
+}
+
+type NetworkPolicyEndpointChoiceTypeLabelSelector struct {
+	Expressions types.List `tfsdk:"expressions"`
 }
 
 type NetworkPolicyEndpointChoiceTypePrefixList struct {
 	Prefixes     types.List `tfsdk:"prefixes"`
 	Ipv6Prefixes types.List `tfsdk:"ipv6_prefixes"`
-}
-
-type NetworkPolicyEndpointChoiceTypeLabelSelector struct {
-	Expressions types.List `tfsdk:"expressions"`
 }
 
 type NetworkPolicyGlobalSpecTypeRuleChoice struct {
@@ -75,20 +75,12 @@ type NetworkPolicyGlobalSpecTypeRules struct {
 }
 
 type NetworkPolicyNetworkPolicyNetworkPolicyRuleType struct {
-	AdvAction           types.Object `tfsdk:"adv_action"`
-	LabelMatcher        types.Object `tfsdk:"label_matcher"`
 	Metadata            types.Object `tfsdk:"metadata"`
+	Action              types.List   `tfsdk:"action"`
+	AdvAction           types.Object `tfsdk:"adv_action"`
 	OtherEndpointChoice types.Object `tfsdk:"other_endpoint_choice"`
 	TrafficChoice       types.Object `tfsdk:"traffic_choice"`
-	Action              types.List   `tfsdk:"action"`
-}
-
-type NetworkPolicyNetworkPolicyRuleNetworkPolicyRuleAdvancedAction struct {
-	Action types.List `tfsdk:"action"`
-}
-
-type NetworkPolicyLabelMatcherType struct {
-	Keys types.List `tfsdk:"keys"`
+	LabelMatcher        types.Object `tfsdk:"label_matcher"`
 }
 
 type NetworkPolicyMessageMetaType struct {
@@ -96,18 +88,17 @@ type NetworkPolicyMessageMetaType struct {
 	Description types.String `tfsdk:"description"`
 }
 
+type NetworkPolicyNetworkPolicyRuleNetworkPolicyRuleAdvancedAction struct {
+	Action types.List `tfsdk:"action"`
+}
+
 type NetworkPolicyNetworkPolicyRuleTypeOtherEndpointChoice struct {
+	LabelSelector    types.Object `tfsdk:"label_selector"`
+	IpPrefixSet      types.Object `tfsdk:"ip_prefix_set"`
 	Any              types.Bool   `tfsdk:"any"`
 	PrefixList       types.Object `tfsdk:"prefix_list"`
 	OutsideEndpoints types.Bool   `tfsdk:"outside_endpoints"`
 	InsideEndpoints  types.Bool   `tfsdk:"inside_endpoints"`
-	LabelSelector    types.Object `tfsdk:"label_selector"`
-	IpPrefixSet      types.Object `tfsdk:"ip_prefix_set"`
-}
-
-type NetworkPolicyNetworkPolicyRuleTypePrefixList struct {
-	Prefixes     types.List `tfsdk:"prefixes"`
-	Ipv6Prefixes types.List `tfsdk:"ipv6_prefixes"`
 }
 
 type NetworkPolicyNetworkPolicyRuleTypeLabelSelector struct {
@@ -118,12 +109,17 @@ type NetworkPolicyNetworkPolicyRuleTypeIpPrefixSet struct {
 	Ref types.List `tfsdk:"ref"`
 }
 
+type NetworkPolicyNetworkPolicyRuleTypePrefixList struct {
+	Prefixes     types.List `tfsdk:"prefixes"`
+	Ipv6Prefixes types.List `tfsdk:"ipv6_prefixes"`
+}
+
 type NetworkPolicyNetworkPolicyRuleTypeTrafficChoice struct {
-	AllUdpTraffic     types.Bool   `tfsdk:"all_udp_traffic"`
 	Applications      types.Object `tfsdk:"applications"`
 	ProtocolPortRange types.Object `tfsdk:"protocol_port_range"`
 	AllTraffic        types.Bool   `tfsdk:"all_traffic"`
 	AllTcpTraffic     types.Bool   `tfsdk:"all_tcp_traffic"`
+	AllUdpTraffic     types.Bool   `tfsdk:"all_udp_traffic"`
 }
 
 type NetworkPolicyNetworkPolicyRuleTypeApplications struct {
@@ -133,6 +129,10 @@ type NetworkPolicyNetworkPolicyRuleTypeApplications struct {
 type NetworkPolicyNetworkPolicyRuleTypeProtocolPortRange struct {
 	Protocol   types.String `tfsdk:"protocol"`
 	PortRanges types.List   `tfsdk:"port_ranges"`
+}
+
+type NetworkPolicyLabelMatcherType struct {
+	Keys types.List `tfsdk:"keys"`
 }
 
 type NetworkPolicyGlobalSpecTypeLegacyRules struct {
@@ -160,22 +160,11 @@ type DataSourceF5XCNetworkPolicyModel struct {
 // Attribute map for OneOfField --> LocalEndpoint
 var NetworkPolicyLocalEndpointModelAttributeMap = map[string]attr.Type{
 
-	"prefix": types.ObjectType{
-		AttrTypes: NetworkPolicyLocalEndpointPrefixModelAttributeMap,
-	},
 	"prefix_selector": types.ObjectType{
 		AttrTypes: NetworkPolicyLocalEndpointPrefixSelectorModelAttributeMap,
 	},
-}
-
-// Attribute map for PointerOfOneOfField --> Prefix
-var NetworkPolicyLocalEndpointPrefixModelAttributeMap = map[string]attr.Type{
-
-	"prefix": types.ListType{
-		ElemType: types.StringType,
-	},
-	"ipv6_prefix": types.ListType{
-		ElemType: types.StringType,
+	"prefix": types.ObjectType{
+		AttrTypes: NetworkPolicyLocalEndpointPrefixModelAttributeMap,
 	},
 }
 
@@ -187,12 +176,23 @@ var NetworkPolicyLocalEndpointPrefixSelectorModelAttributeMap = map[string]attr.
 	},
 }
 
+// Attribute map for PointerOfOneOfField --> Prefix
+var NetworkPolicyLocalEndpointPrefixModelAttributeMap = map[string]attr.Type{
+
+	"ipv6_prefix": types.ListType{
+		ElemType: types.StringType,
+	},
+	"prefix": types.ListType{
+		ElemType: types.StringType,
+	},
+}
+
 // Attribute map for ArrayOfPointerField --> IngressRules
 var NetworkPolicyIngressRulesObjectRefModelAttributeMap = map[string]attr.Type{
 
-	"name":      types.StringType,
 	"tenant":    types.StringType,
 	"namespace": types.StringType,
+	"name":      types.StringType,
 }
 
 // Attribute map for ArrayOfPointerField --> EgressRules
@@ -214,14 +214,22 @@ var NetworkPolicyEndpointModelAttributeMap = map[string]attr.Type{
 // Attribute map for RequiredOneOfField --> EndpointChoice
 var NetworkPolicyEndpointEndpointChoiceModelAttributeMap = map[string]attr.Type{
 
-	"prefix_list": types.ObjectType{
-		AttrTypes: NetworkPolicyEndpointEndpointChoicePrefixListModelAttributeMap,
-	},
 	"any":               types.BoolType,
 	"outside_endpoints": types.BoolType,
 	"inside_endpoints":  types.BoolType,
 	"label_selector": types.ObjectType{
 		AttrTypes: NetworkPolicyEndpointEndpointChoiceLabelSelectorModelAttributeMap,
+	},
+	"prefix_list": types.ObjectType{
+		AttrTypes: NetworkPolicyEndpointEndpointChoicePrefixListModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> LabelSelector
+var NetworkPolicyEndpointEndpointChoiceLabelSelectorModelAttributeMap = map[string]attr.Type{
+
+	"expressions": types.ListType{
+		ElemType: types.StringType,
 	},
 }
 
@@ -232,14 +240,6 @@ var NetworkPolicyEndpointEndpointChoicePrefixListModelAttributeMap = map[string]
 		ElemType: types.StringType,
 	},
 	"ipv6_prefixes": types.ListType{
-		ElemType: types.StringType,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> LabelSelector
-var NetworkPolicyEndpointEndpointChoiceLabelSelectorModelAttributeMap = map[string]attr.Type{
-
-	"expressions": types.ListType{
 		ElemType: types.StringType,
 	},
 }
@@ -261,11 +261,39 @@ var NetworkPolicyRuleChoiceRulesModelAttributeMap = map[string]attr.Type{
 	"ingress_rules": types.ListType{
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
-				"adv_action": types.ObjectType{
+				"metadata": types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"name":        types.StringType,
+						"description": types.StringType},
+				},
+				"action": types.ListType{
+					ElemType: types.StringType,
+				}, "adv_action": types.ObjectType{
 					AttrTypes: map[string]attr.Type{
 						"action": types.ListType{
 							ElemType: types.StringType,
 						}},
+				},
+				"other_endpoint_choice": types.ObjectType{
+					AttrTypes: NetworkPolicyRuleChoiceRulesIngressRulesOtherEndpointModelAttributeMap,
+				},
+				"traffic_choice": types.ObjectType{
+					AttrTypes: NetworkPolicyRuleChoiceRulesIngressRulesTrafficChoiceModelAttributeMap,
+				}, "label_matcher": types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"keys": types.ListType{
+							ElemType: types.StringType,
+						}},
+				},
+			},
+		},
+	},
+	"egress_rules": types.ListType{
+		ElemType: types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+
+				"traffic_choice": types.ObjectType{
+					AttrTypes: NetworkPolicyRuleChoiceRulesEgressRulesTrafficChoiceModelAttributeMap,
 				}, "label_matcher": types.ObjectType{
 					AttrTypes: map[string]attr.Type{
 						"keys": types.ListType{
@@ -276,32 +304,6 @@ var NetworkPolicyRuleChoiceRulesModelAttributeMap = map[string]attr.Type{
 						"name":        types.StringType,
 						"description": types.StringType},
 				},
-				"other_endpoint_choice": types.ObjectType{
-					AttrTypes: NetworkPolicyRuleChoiceRulesIngressRulesOtherEndpointModelAttributeMap,
-				},
-				"traffic_choice": types.ObjectType{
-					AttrTypes: NetworkPolicyRuleChoiceRulesIngressRulesTrafficChoiceModelAttributeMap,
-				},
-				"action": types.ListType{
-					ElemType: types.StringType,
-				},
-			},
-		},
-	},
-	"egress_rules": types.ListType{
-		ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				"metadata": types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"name":        types.StringType,
-						"description": types.StringType},
-				},
-				"other_endpoint_choice": types.ObjectType{
-					AttrTypes: NetworkPolicyRuleChoiceRulesEgressRulesOtherEndpointModelAttributeMap,
-				},
-				"traffic_choice": types.ObjectType{
-					AttrTypes: NetworkPolicyRuleChoiceRulesEgressRulesTrafficChoiceModelAttributeMap,
-				},
 				"action": types.ListType{
 					ElemType: types.StringType,
 				}, "adv_action": types.ObjectType{
@@ -309,11 +311,9 @@ var NetworkPolicyRuleChoiceRulesModelAttributeMap = map[string]attr.Type{
 						"action": types.ListType{
 							ElemType: types.StringType,
 						}},
-				}, "label_matcher": types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"keys": types.ListType{
-							ElemType: types.StringType,
-						}},
+				},
+				"other_endpoint_choice": types.ObjectType{
+					AttrTypes: NetworkPolicyRuleChoiceRulesEgressRulesOtherEndpointModelAttributeMap,
 				},
 			},
 		},
@@ -322,45 +322,29 @@ var NetworkPolicyRuleChoiceRulesModelAttributeMap = map[string]attr.Type{
 
 // Attribute map for ArrayOfPointerField --> IngressRules
 var NetworkPolicyRuleChoiceRulesIngressRulesModelAttributeMap = map[string]attr.Type{
-	"adv_action": types.ObjectType{
+	"metadata": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"name":        types.StringType,
+			"description": types.StringType},
+	},
+	"action": types.ListType{
+		ElemType: types.StringType,
+	}, "adv_action": types.ObjectType{
 		AttrTypes: map[string]attr.Type{
 			"action": types.ListType{
 				ElemType: types.StringType,
 			}},
-	}, "label_matcher": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"keys": types.ListType{
-				ElemType: types.StringType,
-			}},
-	}, "metadata": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"name":        types.StringType,
-			"description": types.StringType},
 	},
 	"other_endpoint_choice": types.ObjectType{
 		AttrTypes: NetworkPolicyRuleChoiceRulesIngressRulesOtherEndpointModelAttributeMap,
 	},
 	"traffic_choice": types.ObjectType{
 		AttrTypes: NetworkPolicyRuleChoiceRulesIngressRulesTrafficChoiceModelAttributeMap,
-	},
-	"action": types.ListType{
-		ElemType: types.StringType,
-	},
-}
-
-// Attribute map for PointerField --> AdvAction
-var NetworkPolicyRuleChoiceRulesIngressRulesAdvActionModelAttributeMap = map[string]attr.Type{
-
-	"action": types.ListType{
-		ElemType: types.StringType,
-	},
-}
-
-// Attribute map for PointerField --> LabelMatcher
-var NetworkPolicyRuleChoiceRulesIngressRulesLabelMatcherModelAttributeMap = map[string]attr.Type{
-
-	"keys": types.ListType{
-		ElemType: types.StringType,
+	}, "label_matcher": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"keys": types.ListType{
+				ElemType: types.StringType,
+			}},
 	},
 }
 
@@ -371,32 +355,29 @@ var NetworkPolicyRuleChoiceRulesIngressRulesMetadataModelAttributeMap = map[stri
 	"description": types.StringType,
 }
 
+// Attribute map for PointerField --> AdvAction
+var NetworkPolicyRuleChoiceRulesIngressRulesAdvActionModelAttributeMap = map[string]attr.Type{
+
+	"action": types.ListType{
+		ElemType: types.StringType,
+	},
+}
+
 // Attribute map for OneOfField --> OtherEndpoint
 var NetworkPolicyRuleChoiceRulesIngressRulesOtherEndpointModelAttributeMap = map[string]attr.Type{
 
-	"any": types.BoolType,
-	"prefix_list": types.ObjectType{
-		AttrTypes: NetworkPolicyRuleChoiceRulesIngressRulesOtherEndpointPrefixListModelAttributeMap,
-	},
-	"outside_endpoints": types.BoolType,
-	"inside_endpoints":  types.BoolType,
 	"label_selector": types.ObjectType{
 		AttrTypes: NetworkPolicyRuleChoiceRulesIngressRulesOtherEndpointLabelSelectorModelAttributeMap,
 	},
 	"ip_prefix_set": types.ObjectType{
 		AttrTypes: NetworkPolicyRuleChoiceRulesIngressRulesOtherEndpointIpPrefixSetModelAttributeMap,
 	},
-}
-
-// Attribute map for PointerOfOneOfField --> PrefixList
-var NetworkPolicyRuleChoiceRulesIngressRulesOtherEndpointPrefixListModelAttributeMap = map[string]attr.Type{
-
-	"prefixes": types.ListType{
-		ElemType: types.StringType,
+	"any": types.BoolType,
+	"prefix_list": types.ObjectType{
+		AttrTypes: NetworkPolicyRuleChoiceRulesIngressRulesOtherEndpointPrefixListModelAttributeMap,
 	},
-	"ipv6_prefixes": types.ListType{
-		ElemType: types.StringType,
-	},
+	"outside_endpoints": types.BoolType,
+	"inside_endpoints":  types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> LabelSelector
@@ -414,9 +395,9 @@ var NetworkPolicyRuleChoiceRulesIngressRulesOtherEndpointIpPrefixSetModelAttribu
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
 
-				"namespace": types.StringType,
 				"name":      types.StringType,
 				"tenant":    types.StringType,
+				"namespace": types.StringType,
 			},
 		},
 	},
@@ -425,15 +406,25 @@ var NetworkPolicyRuleChoiceRulesIngressRulesOtherEndpointIpPrefixSetModelAttribu
 // Attribute map for ArrayOfPointerField --> Ref
 var NetworkPolicyRefObjectRefModelAttributeMap = map[string]attr.Type{
 
-	"namespace": types.StringType,
 	"name":      types.StringType,
 	"tenant":    types.StringType,
+	"namespace": types.StringType,
+}
+
+// Attribute map for PointerOfOneOfField --> PrefixList
+var NetworkPolicyRuleChoiceRulesIngressRulesOtherEndpointPrefixListModelAttributeMap = map[string]attr.Type{
+
+	"prefixes": types.ListType{
+		ElemType: types.StringType,
+	},
+	"ipv6_prefixes": types.ListType{
+		ElemType: types.StringType,
+	},
 }
 
 // Attribute map for OneOfField --> TrafficChoice
 var NetworkPolicyRuleChoiceRulesIngressRulesTrafficChoiceModelAttributeMap = map[string]attr.Type{
 
-	"all_udp_traffic": types.BoolType,
 	"applications": types.ObjectType{
 		AttrTypes: NetworkPolicyRuleChoiceRulesIngressRulesTrafficChoiceApplicationsModelAttributeMap,
 	},
@@ -442,6 +433,7 @@ var NetworkPolicyRuleChoiceRulesIngressRulesTrafficChoiceModelAttributeMap = map
 	},
 	"all_traffic":     types.BoolType,
 	"all_tcp_traffic": types.BoolType,
+	"all_udp_traffic": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> Applications
@@ -461,18 +453,28 @@ var NetworkPolicyRuleChoiceRulesIngressRulesTrafficChoiceProtocolPortRangeModelA
 	},
 }
 
+// Attribute map for PointerField --> LabelMatcher
+var NetworkPolicyRuleChoiceRulesIngressRulesLabelMatcherModelAttributeMap = map[string]attr.Type{
+
+	"keys": types.ListType{
+		ElemType: types.StringType,
+	},
+}
+
 // Attribute map for ArrayOfPointerField --> EgressRules
 var NetworkPolicyRuleChoiceRulesEgressRulesModelAttributeMap = map[string]attr.Type{
-	"metadata": types.ObjectType{
+
+	"traffic_choice": types.ObjectType{
+		AttrTypes: NetworkPolicyRuleChoiceRulesEgressRulesTrafficChoiceModelAttributeMap,
+	}, "label_matcher": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"keys": types.ListType{
+				ElemType: types.StringType,
+			}},
+	}, "metadata": types.ObjectType{
 		AttrTypes: map[string]attr.Type{
 			"name":        types.StringType,
 			"description": types.StringType},
-	},
-	"other_endpoint_choice": types.ObjectType{
-		AttrTypes: NetworkPolicyRuleChoiceRulesEgressRulesOtherEndpointModelAttributeMap,
-	},
-	"traffic_choice": types.ObjectType{
-		AttrTypes: NetworkPolicyRuleChoiceRulesEgressRulesTrafficChoiceModelAttributeMap,
 	},
 	"action": types.ListType{
 		ElemType: types.StringType,
@@ -481,11 +483,48 @@ var NetworkPolicyRuleChoiceRulesEgressRulesModelAttributeMap = map[string]attr.T
 			"action": types.ListType{
 				ElemType: types.StringType,
 			}},
-	}, "label_matcher": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"keys": types.ListType{
-				ElemType: types.StringType,
-			}},
+	},
+	"other_endpoint_choice": types.ObjectType{
+		AttrTypes: NetworkPolicyRuleChoiceRulesEgressRulesOtherEndpointModelAttributeMap,
+	},
+}
+
+// Attribute map for OneOfField --> TrafficChoice
+var NetworkPolicyRuleChoiceRulesEgressRulesTrafficChoiceModelAttributeMap = map[string]attr.Type{
+
+	"protocol_port_range": types.ObjectType{
+		AttrTypes: NetworkPolicyRuleChoiceRulesEgressRulesTrafficChoiceProtocolPortRangeModelAttributeMap,
+	},
+	"all_traffic":     types.BoolType,
+	"all_tcp_traffic": types.BoolType,
+	"all_udp_traffic": types.BoolType,
+	"applications": types.ObjectType{
+		AttrTypes: NetworkPolicyRuleChoiceRulesEgressRulesTrafficChoiceApplicationsModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> ProtocolPortRange
+var NetworkPolicyRuleChoiceRulesEgressRulesTrafficChoiceProtocolPortRangeModelAttributeMap = map[string]attr.Type{
+
+	"protocol": types.StringType,
+	"port_ranges": types.ListType{
+		ElemType: types.StringType,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> Applications
+var NetworkPolicyRuleChoiceRulesEgressRulesTrafficChoiceApplicationsModelAttributeMap = map[string]attr.Type{
+
+	"applications": types.ListType{
+		ElemType: types.StringType,
+	},
+}
+
+// Attribute map for PointerField --> LabelMatcher
+var NetworkPolicyRuleChoiceRulesEgressRulesLabelMatcherModelAttributeMap = map[string]attr.Type{
+
+	"keys": types.ListType{
+		ElemType: types.StringType,
 	},
 }
 
@@ -496,9 +535,18 @@ var NetworkPolicyRuleChoiceRulesEgressRulesMetadataModelAttributeMap = map[strin
 	"description": types.StringType,
 }
 
+// Attribute map for PointerField --> AdvAction
+var NetworkPolicyRuleChoiceRulesEgressRulesAdvActionModelAttributeMap = map[string]attr.Type{
+
+	"action": types.ListType{
+		ElemType: types.StringType,
+	},
+}
+
 // Attribute map for OneOfField --> OtherEndpoint
 var NetworkPolicyRuleChoiceRulesEgressRulesOtherEndpointModelAttributeMap = map[string]attr.Type{
 
+	"any": types.BoolType,
 	"prefix_list": types.ObjectType{
 		AttrTypes: NetworkPolicyRuleChoiceRulesEgressRulesOtherEndpointPrefixListModelAttributeMap,
 	},
@@ -510,7 +558,6 @@ var NetworkPolicyRuleChoiceRulesEgressRulesOtherEndpointModelAttributeMap = map[
 	"ip_prefix_set": types.ObjectType{
 		AttrTypes: NetworkPolicyRuleChoiceRulesEgressRulesOtherEndpointIpPrefixSetModelAttributeMap,
 	},
-	"any": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> PrefixList
@@ -547,53 +594,6 @@ var NetworkPolicyRuleChoiceRulesEgressRulesOtherEndpointIpPrefixSetModelAttribut
 	},
 }
 
-// Attribute map for OneOfField --> TrafficChoice
-var NetworkPolicyRuleChoiceRulesEgressRulesTrafficChoiceModelAttributeMap = map[string]attr.Type{
-
-	"all_traffic":     types.BoolType,
-	"all_tcp_traffic": types.BoolType,
-	"all_udp_traffic": types.BoolType,
-	"applications": types.ObjectType{
-		AttrTypes: NetworkPolicyRuleChoiceRulesEgressRulesTrafficChoiceApplicationsModelAttributeMap,
-	},
-	"protocol_port_range": types.ObjectType{
-		AttrTypes: NetworkPolicyRuleChoiceRulesEgressRulesTrafficChoiceProtocolPortRangeModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> Applications
-var NetworkPolicyRuleChoiceRulesEgressRulesTrafficChoiceApplicationsModelAttributeMap = map[string]attr.Type{
-
-	"applications": types.ListType{
-		ElemType: types.StringType,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> ProtocolPortRange
-var NetworkPolicyRuleChoiceRulesEgressRulesTrafficChoiceProtocolPortRangeModelAttributeMap = map[string]attr.Type{
-
-	"protocol": types.StringType,
-	"port_ranges": types.ListType{
-		ElemType: types.StringType,
-	},
-}
-
-// Attribute map for PointerField --> AdvAction
-var NetworkPolicyRuleChoiceRulesEgressRulesAdvActionModelAttributeMap = map[string]attr.Type{
-
-	"action": types.ListType{
-		ElemType: types.StringType,
-	},
-}
-
-// Attribute map for PointerField --> LabelMatcher
-var NetworkPolicyRuleChoiceRulesEgressRulesLabelMatcherModelAttributeMap = map[string]attr.Type{
-
-	"keys": types.ListType{
-		ElemType: types.StringType,
-	},
-}
-
 // Attribute map for PointerOfOneOfField --> LegacyRules
 var NetworkPolicyRuleChoiceLegacyRulesModelAttributeMap = map[string]attr.Type{
 
@@ -601,9 +601,9 @@ var NetworkPolicyRuleChoiceLegacyRulesModelAttributeMap = map[string]attr.Type{
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
 
-				"namespace": types.StringType,
 				"name":      types.StringType,
 				"tenant":    types.StringType,
+				"namespace": types.StringType,
 			},
 		},
 	},
@@ -681,28 +681,6 @@ func (r *DataSourceF5XCNetworkPolicy) Schema(ctx context.Context, request dataso
 				Optional:    false,
 				Computed:    true,
 				Attributes: map[string]schema.Attribute{
-					"prefix": schema.SingleNestedAttribute{
-						Description: "prefix list of ip prefixes that are member of set representing local endpoint prefix is the list of ip addresses to match For egress rules these ip prefixes are source For ingress rules these ip prefixes are destination",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-						Attributes: map[string]schema.Attribute{
-							"prefix": schema.ListAttribute{
-								Description: "Prefix",
-								ElementType: types.StringType,
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-							},
-							"ipv6_prefix": schema.ListAttribute{
-								Description: "ipv6 prefix",
-								ElementType: types.StringType,
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-							},
-						},
-					},
 					"prefix_selector": schema.SingleNestedAttribute{
 						Description: "prefix selector local end point is set of prefixes determined by label selector expression Labels can be specified in BNF grammar format",
 						Required:    false,
@@ -711,6 +689,28 @@ func (r *DataSourceF5XCNetworkPolicy) Schema(ctx context.Context, request dataso
 						Attributes: map[string]schema.Attribute{
 							"expressions": schema.ListAttribute{
 								Description: "expressions expressions contains the kubernetes style label expression for selections.",
+								ElementType: types.StringType,
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
+						},
+					},
+					"prefix": schema.SingleNestedAttribute{
+						Description: "prefix list of ip prefixes that are member of set representing local endpoint prefix is the list of ip addresses to match For egress rules these ip prefixes are source For ingress rules these ip prefixes are destination",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+						Attributes: map[string]schema.Attribute{
+							"ipv6_prefix": schema.ListAttribute{
+								Description: "ipv6 prefix",
+								ElementType: types.StringType,
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
+							"prefix": schema.ListAttribute{
+								Description: "Prefix",
 								ElementType: types.StringType,
 								Required:    false,
 								Optional:    false,
@@ -727,12 +727,6 @@ func (r *DataSourceF5XCNetworkPolicy) Schema(ctx context.Context, request dataso
 				Computed:    true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
-						"name": schema.StringAttribute{
-							Description: "",
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-						},
 						"tenant": schema.StringAttribute{
 							Description: "",
 							Required:    false,
@@ -740,6 +734,12 @@ func (r *DataSourceF5XCNetworkPolicy) Schema(ctx context.Context, request dataso
 							Computed:    true,
 						},
 						"namespace": schema.StringAttribute{
+							Description: "",
+							Required:    false,
+							Optional:    false,
+							Computed:    true,
+						},
+						"name": schema.StringAttribute{
 							Description: "",
 							Required:    false,
 							Optional:    false,
@@ -788,28 +788,6 @@ func (r *DataSourceF5XCNetworkPolicy) Schema(ctx context.Context, request dataso
 						Optional:    false,
 						Computed:    true,
 						Attributes: map[string]schema.Attribute{
-							"prefix_list": schema.SingleNestedAttribute{
-								Description: "ipv4/ipv6 prefix list List of ip prefixes that are representing endpoint For egress rules: from this endpoints to remote endpoints these ip prefixes are source ip. For Ingress rules: To this endpoints from remote endpoints these ip prefixes are destination ip.",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-								Attributes: map[string]schema.Attribute{
-									"prefixes": schema.ListAttribute{
-										Description: "ipv4 prefix list List of IPv4 prefixes that represent an endpoint",
-										ElementType: types.StringType,
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-									},
-									"ipv6_prefixes": schema.ListAttribute{
-										Description: "ipv6 prefixes List of IPv6 prefix strings.",
-										ElementType: types.StringType,
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-									},
-								},
-							},
 							"any": schema.BoolAttribute{
 								Description: "Any Endpoint Any Endpoint that matches 0/0 ip prefix",
 								Required:    false,
@@ -843,6 +821,28 @@ func (r *DataSourceF5XCNetworkPolicy) Schema(ctx context.Context, request dataso
 									},
 								},
 							},
+							"prefix_list": schema.SingleNestedAttribute{
+								Description: "ipv4/ipv6 prefix list List of ip prefixes that are representing endpoint For egress rules: from this endpoints to remote endpoints these ip prefixes are source ip. For Ingress rules: To this endpoints from remote endpoints these ip prefixes are destination ip.",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+								Attributes: map[string]schema.Attribute{
+									"prefixes": schema.ListAttribute{
+										Description: "ipv4 prefix list List of IPv4 prefixes that represent an endpoint",
+										ElementType: types.StringType,
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+									},
+									"ipv6_prefixes": schema.ListAttribute{
+										Description: "ipv6 prefixes List of IPv6 prefix strings.",
+										ElementType: types.StringType,
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+									},
+								},
+							},
 						},
 					},
 				},
@@ -866,36 +866,6 @@ func (r *DataSourceF5XCNetworkPolicy) Schema(ctx context.Context, request dataso
 								Computed:    true,
 								NestedObject: schema.NestedAttributeObject{
 									Attributes: map[string]schema.Attribute{
-										"adv_action": schema.SingleNestedAttribute{
-											Description: "adv_action Enable or disable logging.",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-											Attributes: map[string]schema.Attribute{
-												"action": schema.ListAttribute{
-													Description: "Action Enable or disable logging.",
-													ElementType: types.StringType,
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-											},
-										},
-										"label_matcher": schema.SingleNestedAttribute{
-											Description: "label matcher A list of label keys that identify the label values that need to be the same for the source and destination endpoints. Note that the actual label values are not specified here, just the label keys. This facilitates reuse of policies across multiple dimensions such as deployment, environment, and location.",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-											Attributes: map[string]schema.Attribute{
-												"keys": schema.ListAttribute{
-													Description: "keys The list of label key names that have to match",
-													ElementType: types.StringType,
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-											},
-										},
 										"metadata": schema.SingleNestedAttribute{
 											Description: "metadata Common attributes for the rule including name and description.",
 											Required:    false,
@@ -916,12 +886,85 @@ func (r *DataSourceF5XCNetworkPolicy) Schema(ctx context.Context, request dataso
 												},
 											},
 										},
+										"action": schema.ListAttribute{
+											Description: "action Action to be taken at rule match. Currently supported actions are Allow and Deny",
+											ElementType: types.StringType,
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+										},
+										"adv_action": schema.SingleNestedAttribute{
+											Description: "adv_action Enable or disable logging.",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+											Attributes: map[string]schema.Attribute{
+												"action": schema.ListAttribute{
+													Description: "Action Enable or disable logging.",
+													ElementType: types.StringType,
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+											},
+										},
 										"other_endpoint_choice": schema.SingleNestedAttribute{
 											Description: "Other Endpoint Other endpoint of ingress or egress session with endpoint of policy. If rule is an ingress rule then other endpoint indicates the source endpoint from which session is initiated. If rule is an egress rule then other endpoint indicates the destination endpoint to which session is initiated from policy endpoint.",
 											Required:    false,
 											Optional:    false,
 											Computed:    true,
 											Attributes: map[string]schema.Attribute{
+												"label_selector": schema.SingleNestedAttribute{
+													Description: "prefix Label selector local end point is set of prefixes determined by label selector expression",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+													Attributes: map[string]schema.Attribute{
+														"expressions": schema.ListAttribute{
+															Description: "expressions expressions contains the kubernetes style label expression for selections.",
+															ElementType: types.StringType,
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+													},
+												},
+												"ip_prefix_set": schema.SingleNestedAttribute{
+													Description: "ip prefix set Reference to object which represents list of IP prefixes that will be referred as remote endpoint",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+													Attributes: map[string]schema.Attribute{
+														"ref": schema.ListNestedAttribute{
+															Description: "ref A list of references to ip_prefix_set objects.",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+															NestedObject: schema.NestedAttributeObject{
+																Attributes: map[string]schema.Attribute{
+																	"name": schema.StringAttribute{
+																		Description: "",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
+																	},
+																	"tenant": schema.StringAttribute{
+																		Description: "",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
+																	},
+																	"namespace": schema.StringAttribute{
+																		Description: "",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
+																	},
+																},
+															},
+														},
+													},
+												},
 												"any": schema.BoolAttribute{
 													Description: "Any Endpoint Any Endpoint that matches 0/0 ip prefix",
 													Required:    false,
@@ -962,57 +1005,6 @@ func (r *DataSourceF5XCNetworkPolicy) Schema(ctx context.Context, request dataso
 													Optional:    false,
 													Computed:    true,
 												},
-												"label_selector": schema.SingleNestedAttribute{
-													Description: "prefix Label selector local end point is set of prefixes determined by label selector expression",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-													Attributes: map[string]schema.Attribute{
-														"expressions": schema.ListAttribute{
-															Description: "expressions expressions contains the kubernetes style label expression for selections.",
-															ElementType: types.StringType,
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-													},
-												},
-												"ip_prefix_set": schema.SingleNestedAttribute{
-													Description: "ip prefix set Reference to object which represents list of IP prefixes that will be referred as remote endpoint",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-													Attributes: map[string]schema.Attribute{
-														"ref": schema.ListNestedAttribute{
-															Description: "ref A list of references to ip_prefix_set objects.",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-															NestedObject: schema.NestedAttributeObject{
-																Attributes: map[string]schema.Attribute{
-																	"namespace": schema.StringAttribute{
-																		Description: "",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																	},
-																	"name": schema.StringAttribute{
-																		Description: "",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																	},
-																	"tenant": schema.StringAttribute{
-																		Description: "",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																	},
-																},
-															},
-														},
-													},
-												},
 											},
 										},
 										"traffic_choice": schema.SingleNestedAttribute{
@@ -1021,12 +1013,6 @@ func (r *DataSourceF5XCNetworkPolicy) Schema(ctx context.Context, request dataso
 											Optional:    false,
 											Computed:    true,
 											Attributes: map[string]schema.Attribute{
-												"all_udp_traffic": schema.BoolAttribute{
-													Description: "All UDP Traffic Select all UDP traffic to match",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
 												"applications": schema.SingleNestedAttribute{
 													Description: "Specific Applications Select Application traffic to match",
 													Required:    false,
@@ -1075,14 +1061,28 @@ func (r *DataSourceF5XCNetworkPolicy) Schema(ctx context.Context, request dataso
 													Optional:    false,
 													Computed:    true,
 												},
+												"all_udp_traffic": schema.BoolAttribute{
+													Description: "All UDP Traffic Select all UDP traffic to match",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
 											},
 										},
-										"action": schema.ListAttribute{
-											Description: "action Action to be taken at rule match. Currently supported actions are Allow and Deny",
-											ElementType: types.StringType,
+										"label_matcher": schema.SingleNestedAttribute{
+											Description: "label matcher A list of label keys that identify the label values that need to be the same for the source and destination endpoints. Note that the actual label values are not specified here, just the label keys. This facilitates reuse of policies across multiple dimensions such as deployment, environment, and location.",
 											Required:    false,
 											Optional:    false,
 											Computed:    true,
+											Attributes: map[string]schema.Attribute{
+												"keys": schema.ListAttribute{
+													Description: "keys The list of label key names that have to match",
+													ElementType: types.StringType,
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+											},
 										},
 									},
 								},
@@ -1094,6 +1094,83 @@ func (r *DataSourceF5XCNetworkPolicy) Schema(ctx context.Context, request dataso
 								Computed:    true,
 								NestedObject: schema.NestedAttributeObject{
 									Attributes: map[string]schema.Attribute{
+										"traffic_choice": schema.SingleNestedAttribute{
+											Description: "Traffic Type Select type of traffic to match",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+											Attributes: map[string]schema.Attribute{
+												"protocol_port_range": schema.SingleNestedAttribute{
+													Description: "Protocol and Port Ranges Select specific protocol and port ranges traffic to match",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+													Attributes: map[string]schema.Attribute{
+														"protocol": schema.StringAttribute{
+															Description: "protocol Protocol in IP packet to be used as match criteria Values are tcp, udp, and icmp",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+														"port_ranges": schema.ListAttribute{
+															Description: "ports List of port ranges. Each range is a single port or a pair of start and end ports e.g. 8080-8192",
+															ElementType: types.StringType,
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+													},
+												},
+												"all_traffic": schema.BoolAttribute{
+													Description: "All Traffic Select all traffic to match",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"all_tcp_traffic": schema.BoolAttribute{
+													Description: "All TCP Traffic Select all TCP traffic to match",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"all_udp_traffic": schema.BoolAttribute{
+													Description: "All UDP Traffic Select all UDP traffic to match",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"applications": schema.SingleNestedAttribute{
+													Description: "Specific Applications Select Application traffic to match",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+													Attributes: map[string]schema.Attribute{
+														"applications": schema.ListAttribute{
+															Description: "Applications Application protocols like HTTP, SNMP",
+															ElementType: types.StringType,
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+													},
+												},
+											},
+										},
+										"label_matcher": schema.SingleNestedAttribute{
+											Description: "label matcher A list of label keys that identify the label values that need to be the same for the source and destination endpoints. Note that the actual label values are not specified here, just the label keys. This facilitates reuse of policies across multiple dimensions such as deployment, environment, and location.",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+											Attributes: map[string]schema.Attribute{
+												"keys": schema.ListAttribute{
+													Description: "keys The list of label key names that have to match",
+													ElementType: types.StringType,
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+											},
+										},
 										"metadata": schema.SingleNestedAttribute{
 											Description: "metadata Common attributes for the rule including name and description.",
 											Required:    false,
@@ -1114,12 +1191,40 @@ func (r *DataSourceF5XCNetworkPolicy) Schema(ctx context.Context, request dataso
 												},
 											},
 										},
+										"action": schema.ListAttribute{
+											Description: "action Action to be taken at rule match. Currently supported actions are Allow and Deny",
+											ElementType: types.StringType,
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+										},
+										"adv_action": schema.SingleNestedAttribute{
+											Description: "adv_action Enable or disable logging.",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+											Attributes: map[string]schema.Attribute{
+												"action": schema.ListAttribute{
+													Description: "Action Enable or disable logging.",
+													ElementType: types.StringType,
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+											},
+										},
 										"other_endpoint_choice": schema.SingleNestedAttribute{
 											Description: "Other Endpoint Other endpoint of ingress or egress session with endpoint of policy. If rule is an ingress rule then other endpoint indicates the source endpoint from which session is initiated. If rule is an egress rule then other endpoint indicates the destination endpoint to which session is initiated from policy endpoint.",
 											Required:    false,
 											Optional:    false,
 											Computed:    true,
 											Attributes: map[string]schema.Attribute{
+												"any": schema.BoolAttribute{
+													Description: "Any Endpoint Any Endpoint that matches 0/0 ip prefix",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
 												"prefix_list": schema.SingleNestedAttribute{
 													Description: "ipv4/ipv6 prefix list list of ip prefixes that are representing endpoint For Egress rules: from these endpoints to remote endpoints these ip prefixes are source IPs. For Ingress rules: To these endpoints from remote endpoints these ip prefixes are destination IPs.",
 													Required:    false,
@@ -1204,111 +1309,6 @@ func (r *DataSourceF5XCNetworkPolicy) Schema(ctx context.Context, request dataso
 															},
 														},
 													},
-												},
-												"any": schema.BoolAttribute{
-													Description: "Any Endpoint Any Endpoint that matches 0/0 ip prefix",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-											},
-										},
-										"traffic_choice": schema.SingleNestedAttribute{
-											Description: "Traffic Type Select type of traffic to match",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-											Attributes: map[string]schema.Attribute{
-												"all_traffic": schema.BoolAttribute{
-													Description: "All Traffic Select all traffic to match",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"all_tcp_traffic": schema.BoolAttribute{
-													Description: "All TCP Traffic Select all TCP traffic to match",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"all_udp_traffic": schema.BoolAttribute{
-													Description: "All UDP Traffic Select all UDP traffic to match",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"applications": schema.SingleNestedAttribute{
-													Description: "Specific Applications Select Application traffic to match",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-													Attributes: map[string]schema.Attribute{
-														"applications": schema.ListAttribute{
-															Description: "Applications Application protocols like HTTP, SNMP",
-															ElementType: types.StringType,
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-													},
-												},
-												"protocol_port_range": schema.SingleNestedAttribute{
-													Description: "Protocol and Port Ranges Select specific protocol and port ranges traffic to match",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-													Attributes: map[string]schema.Attribute{
-														"protocol": schema.StringAttribute{
-															Description: "protocol Protocol in IP packet to be used as match criteria Values are tcp, udp, and icmp",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-														"port_ranges": schema.ListAttribute{
-															Description: "ports List of port ranges. Each range is a single port or a pair of start and end ports e.g. 8080-8192",
-															ElementType: types.StringType,
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-													},
-												},
-											},
-										},
-										"action": schema.ListAttribute{
-											Description: "action Action to be taken at rule match. Currently supported actions are Allow and Deny",
-											ElementType: types.StringType,
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
-										"adv_action": schema.SingleNestedAttribute{
-											Description: "adv_action Enable or disable logging.",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-											Attributes: map[string]schema.Attribute{
-												"action": schema.ListAttribute{
-													Description: "Action Enable or disable logging.",
-													ElementType: types.StringType,
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-											},
-										},
-										"label_matcher": schema.SingleNestedAttribute{
-											Description: "label matcher A list of label keys that identify the label values that need to be the same for the source and destination endpoints. Note that the actual label values are not specified here, just the label keys. This facilitates reuse of policies across multiple dimensions such as deployment, environment, and location.",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-											Attributes: map[string]schema.Attribute{
-												"keys": schema.ListAttribute{
-													Description: "keys The list of label key names that have to match",
-													ElementType: types.StringType,
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
 												},
 											},
 										},
@@ -1330,12 +1330,6 @@ func (r *DataSourceF5XCNetworkPolicy) Schema(ctx context.Context, request dataso
 								Computed:    true,
 								NestedObject: schema.NestedAttributeObject{
 									Attributes: map[string]schema.Attribute{
-										"namespace": schema.StringAttribute{
-											Description: "",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
 										"name": schema.StringAttribute{
 											Description: "",
 											Required:    false,
@@ -1343,6 +1337,12 @@ func (r *DataSourceF5XCNetworkPolicy) Schema(ctx context.Context, request dataso
 											Computed:    true,
 										},
 										"tenant": schema.StringAttribute{
+											Description: "",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+										},
+										"namespace": schema.StringAttribute{
 											Description: "",
 											Required:    false,
 											Optional:    false,
@@ -1516,50 +1516,6 @@ func (d *DataSourceF5XCNetworkPolicy) Read(ctx context.Context, request datasour
 
 		// Recursively call the nested template to process the oneof choices.
 
-		// data specToModelNested PointerOfOneOfField --> Prefix
-		// <no value>
-		// false
-		{
-			prefixOptions, isPrefix := localEndpointChoiceChoices.(*ves_io_schema_network_policy.GlobalSpecType_Prefix)
-			prefixAttributeMap := make(map[string]attr.Value)
-
-			if isPrefix && prefixOptions != nil {
-
-				// data specToModelNested ArrayOfStringField --> Prefix
-				if len(prefixOptions.Prefix.GetPrefix()) > 0 {
-					listValue, diags := types.ListValueFrom(ctx, types.StringType, prefixOptions.Prefix.GetPrefix())
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					prefixAttributeMap["prefix"] = listValue
-				} else {
-					prefixAttributeMap["prefix"] = types.ListNull(types.StringType)
-				}
-
-				// data specToModelNested ArrayOfStringField --> Ipv6Prefix
-				if len(prefixOptions.Prefix.GetIpv6Prefix()) > 0 {
-					listValue, diags := types.ListValueFrom(ctx, types.StringType, prefixOptions.Prefix.GetIpv6Prefix())
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					prefixAttributeMap["ipv6_prefix"] = listValue
-				} else {
-					prefixAttributeMap["ipv6_prefix"] = types.ListNull(types.StringType)
-				}
-
-				prefixObj, diags := types.ObjectValue(NetworkPolicyLocalEndpointPrefixModelAttributeMap, prefixAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				localEndpointChoiceChoicesModel.Prefix = prefixObj
-			} else {
-				localEndpointChoiceChoicesModel.Prefix = types.ObjectNull(NetworkPolicyLocalEndpointPrefixModelAttributeMap)
-			}
-		}
-
 		// data specToModelNested PointerOfOneOfField --> PrefixSelector
 		// <no value>
 		// false
@@ -1592,6 +1548,50 @@ func (d *DataSourceF5XCNetworkPolicy) Read(ctx context.Context, request datasour
 			}
 		}
 
+		// data specToModelNested PointerOfOneOfField --> Prefix
+		// <no value>
+		// false
+		{
+			prefixOptions, isPrefix := localEndpointChoiceChoices.(*ves_io_schema_network_policy.GlobalSpecType_Prefix)
+			prefixAttributeMap := make(map[string]attr.Value)
+
+			if isPrefix && prefixOptions != nil {
+
+				// data specToModelNested ArrayOfStringField --> Ipv6Prefix
+				if len(prefixOptions.Prefix.GetIpv6Prefix()) > 0 {
+					listValue, diags := types.ListValueFrom(ctx, types.StringType, prefixOptions.Prefix.GetIpv6Prefix())
+					response.Diagnostics.Append(diags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					prefixAttributeMap["ipv6_prefix"] = listValue
+				} else {
+					prefixAttributeMap["ipv6_prefix"] = types.ListNull(types.StringType)
+				}
+
+				// data specToModelNested ArrayOfStringField --> Prefix
+				if len(prefixOptions.Prefix.GetPrefix()) > 0 {
+					listValue, diags := types.ListValueFrom(ctx, types.StringType, prefixOptions.Prefix.GetPrefix())
+					response.Diagnostics.Append(diags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					prefixAttributeMap["prefix"] = listValue
+				} else {
+					prefixAttributeMap["prefix"] = types.ListNull(types.StringType)
+				}
+
+				prefixObj, diags := types.ObjectValue(NetworkPolicyLocalEndpointPrefixModelAttributeMap, prefixAttributeMap)
+				response.Diagnostics.Append(diags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				localEndpointChoiceChoicesModel.Prefix = prefixObj
+			} else {
+				localEndpointChoiceChoicesModel.Prefix = types.ObjectNull(NetworkPolicyLocalEndpointPrefixModelAttributeMap)
+			}
+		}
+
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
 		localEndpointChoiceObj, diags := utils.GoStructToObjectValue(
 			ctx,
@@ -1617,14 +1617,6 @@ func (d *DataSourceF5XCNetworkPolicy) Read(ctx context.Context, request datasour
 		for _, ingressRulesElement := range specData.IngressRules {
 			objectRefTypeModelModel := ObjectRefTypeModel{}
 
-			// data specToModelNested RequiredStringField --> Name
-			if ingressRulesElement.GetName() != "" {
-				objectRefTypeModelModel.Name = types.StringValue(ingressRulesElement.GetName())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Name = types.StringNull()
-			}
-
 			// data specToModelNested StringField --> Tenant
 			if ingressRulesElement.GetTenant() != "" {
 				objectRefTypeModelModel.Tenant = types.StringValue(ingressRulesElement.GetTenant())
@@ -1639,6 +1631,14 @@ func (d *DataSourceF5XCNetworkPolicy) Read(ctx context.Context, request datasour
 			} else {
 				// Empty string, set to null
 				objectRefTypeModelModel.Namespace = types.StringNull()
+			}
+
+			// data specToModelNested RequiredStringField --> Name
+			if ingressRulesElement.GetName() != "" {
+				objectRefTypeModelModel.Name = types.StringValue(ingressRulesElement.GetName())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Name = types.StringNull()
 			}
 
 			ingressRulesElements = append(ingressRulesElements, objectRefTypeModelModel)
@@ -1735,50 +1735,6 @@ func (d *DataSourceF5XCNetworkPolicy) Read(ctx context.Context, request datasour
 
 			// Process nested choices, populating the temporary attribute map
 
-			// data specToModelNested PointerOfOneOfField --> PrefixList
-			// <no value>
-			// false
-			{
-				prefixListOptions, isPrefixList := endpointendpointChoiceChoices.(*ves_io_schema_network_policy.EndpointChoiceType_PrefixList)
-				prefixListAttributeMap := make(map[string]attr.Value)
-
-				if isPrefixList && prefixListOptions != nil {
-
-					// data specToModelNested ArrayOfStringField --> Prefixes
-					if len(prefixListOptions.PrefixList.GetPrefixes()) > 0 {
-						listValue, diags := types.ListValueFrom(ctx, types.StringType, prefixListOptions.PrefixList.GetPrefixes())
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						prefixListAttributeMap["prefixes"] = listValue
-					} else {
-						prefixListAttributeMap["prefixes"] = types.ListNull(types.StringType)
-					}
-
-					// data specToModelNested ArrayOfStringField --> Ipv6Prefixes
-					if len(prefixListOptions.PrefixList.GetIpv6Prefixes()) > 0 {
-						listValue, diags := types.ListValueFrom(ctx, types.StringType, prefixListOptions.PrefixList.GetIpv6Prefixes())
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						prefixListAttributeMap["ipv6_prefixes"] = listValue
-					} else {
-						prefixListAttributeMap["ipv6_prefixes"] = types.ListNull(types.StringType)
-					}
-
-					prefixListObj, diags := types.ObjectValue(NetworkPolicyEndpointEndpointChoicePrefixListModelAttributeMap, prefixListAttributeMap)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					endpointendpointChoiceChoicesAttributeMap["prefix_list"] = prefixListObj
-				} else {
-					endpointendpointChoiceChoicesAttributeMap["prefix_list"] = types.ObjectNull(NetworkPolicyEndpointEndpointChoicePrefixListModelAttributeMap)
-				}
-			}
-
 			// data specToModelNested BoolOfOneOfPointerField --> Any
 			_, isAny := endpointendpointChoiceChoices.(*ves_io_schema_network_policy.EndpointChoiceType_Any)
 
@@ -1835,6 +1791,50 @@ func (d *DataSourceF5XCNetworkPolicy) Read(ctx context.Context, request datasour
 					endpointendpointChoiceChoicesAttributeMap["label_selector"] = labelSelectorObj
 				} else {
 					endpointendpointChoiceChoicesAttributeMap["label_selector"] = types.ObjectNull(NetworkPolicyEndpointEndpointChoiceLabelSelectorModelAttributeMap)
+				}
+			}
+
+			// data specToModelNested PointerOfOneOfField --> PrefixList
+			// <no value>
+			// false
+			{
+				prefixListOptions, isPrefixList := endpointendpointChoiceChoices.(*ves_io_schema_network_policy.EndpointChoiceType_PrefixList)
+				prefixListAttributeMap := make(map[string]attr.Value)
+
+				if isPrefixList && prefixListOptions != nil {
+
+					// data specToModelNested ArrayOfStringField --> Prefixes
+					if len(prefixListOptions.PrefixList.GetPrefixes()) > 0 {
+						listValue, diags := types.ListValueFrom(ctx, types.StringType, prefixListOptions.PrefixList.GetPrefixes())
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						prefixListAttributeMap["prefixes"] = listValue
+					} else {
+						prefixListAttributeMap["prefixes"] = types.ListNull(types.StringType)
+					}
+
+					// data specToModelNested ArrayOfStringField --> Ipv6Prefixes
+					if len(prefixListOptions.PrefixList.GetIpv6Prefixes()) > 0 {
+						listValue, diags := types.ListValueFrom(ctx, types.StringType, prefixListOptions.PrefixList.GetIpv6Prefixes())
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						prefixListAttributeMap["ipv6_prefixes"] = listValue
+					} else {
+						prefixListAttributeMap["ipv6_prefixes"] = types.ListNull(types.StringType)
+					}
+
+					prefixListObj, diags := types.ObjectValue(NetworkPolicyEndpointEndpointChoicePrefixListModelAttributeMap, prefixListAttributeMap)
+					response.Diagnostics.Append(diags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					endpointendpointChoiceChoicesAttributeMap["prefix_list"] = prefixListObj
+				} else {
+					endpointendpointChoiceChoicesAttributeMap["prefix_list"] = types.ObjectNull(NetworkPolicyEndpointEndpointChoicePrefixListModelAttributeMap)
 				}
 			}
 
@@ -1902,84 +1902,6 @@ func (d *DataSourceF5XCNetworkPolicy) Read(ctx context.Context, request datasour
 					for _, ingressRulesElement := range rulesOptions.Rules.GetIngressRules() {
 						networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel := NetworkPolicyNetworkPolicyNetworkPolicyRuleType{}
 
-						// data specToModelNested PointerField --> AdvAction
-						if ingressRulesElement.GetAdvAction() != nil {
-							// Create the nested Go struct
-							networkPolicyNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel := &NetworkPolicyNetworkPolicyRuleNetworkPolicyRuleAdvancedAction{}
-							advActionElement := ingressRulesElement.GetAdvAction()
-
-							// Recursively populate the nested struct
-
-							// data specToModelNested EnumField --> Action
-							if advActionElement.GetAction().String() != "" {
-								stringValue := types.StringValue(advActionElement.GetAction().String())
-								stringSlice := []types.String{stringValue}
-								listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								networkPolicyNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel.Action = listValue
-							} else {
-								networkPolicyNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel.Action = types.ListNull(types.StringType)
-							}
-
-							// This field needs to be converted to a types.ObjectValue before assignment.
-							networkPolicyNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModelObj, diags := types.ObjectValueFrom(ctx, NetworkPolicyRuleChoiceRulesIngressRulesAdvActionModelAttributeMap, networkPolicyNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.AdvAction = networkPolicyNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModelObj
-
-						} else {
-							// The source field is nil (e.g. redacted by the API).
-							// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-							// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-							// because the API may always return a non-nil struct (with REDACTED values) for this field,
-							// making this else-branch unreachable. The child OneOf handles the actual healing.
-							// The target is a types.Object, so we use types.ObjectNull.
-							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.AdvAction = types.ObjectNull(NetworkPolicyRuleChoiceRulesIngressRulesAdvActionModelAttributeMap)
-						}
-
-						// data specToModelNested PointerField --> LabelMatcher
-						if ingressRulesElement.GetLabelMatcher() != nil {
-							// Create the nested Go struct
-							networkPolicyLabelMatcherTypeModel := &NetworkPolicyLabelMatcherType{}
-							labelMatcherElement := ingressRulesElement.GetLabelMatcher()
-
-							// Recursively populate the nested struct
-
-							// data specToModelNested ArrayOfStringField --> Keys
-							if len(labelMatcherElement.GetKeys()) > 0 {
-								listValue, diags := types.ListValueFrom(ctx, types.StringType, labelMatcherElement.GetKeys())
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								networkPolicyLabelMatcherTypeModel.Keys = listValue
-							} else {
-								networkPolicyLabelMatcherTypeModel.Keys = types.ListNull(types.StringType)
-							}
-
-							// This field needs to be converted to a types.ObjectValue before assignment.
-							networkPolicyLabelMatcherTypeModelObj, diags := types.ObjectValueFrom(ctx, NetworkPolicyRuleChoiceRulesIngressRulesLabelMatcherModelAttributeMap, networkPolicyLabelMatcherTypeModel)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.LabelMatcher = networkPolicyLabelMatcherTypeModelObj
-
-						} else {
-							// The source field is nil (e.g. redacted by the API).
-							// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-							// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-							// because the API may always return a non-nil struct (with REDACTED values) for this field,
-							// making this else-branch unreachable. The child OneOf handles the actual healing.
-							// The target is a types.Object, so we use types.ObjectNull.
-							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.LabelMatcher = types.ObjectNull(NetworkPolicyRuleChoiceRulesIngressRulesLabelMatcherModelAttributeMap)
-						}
-
 						// data specToModelNested RequiredPointerField --> Metadata
 						if ingressRulesElement.GetMetadata() != nil {
 							// Create the nested Go struct
@@ -2022,6 +1944,60 @@ func (d *DataSourceF5XCNetworkPolicy) Read(ctx context.Context, request datasour
 							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.Metadata = types.ObjectNull(NetworkPolicyRuleChoiceRulesIngressRulesMetadataModelAttributeMap)
 						}
 
+						// data specToModelNested EnumField --> Action
+						if ingressRulesElement.GetAction().String() != "" {
+							stringValue := types.StringValue(ingressRulesElement.GetAction().String())
+							stringSlice := []types.String{stringValue}
+							listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+							response.Diagnostics.Append(diags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.Action = listValue
+						} else {
+							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.Action = types.ListNull(types.StringType)
+						}
+
+						// data specToModelNested PointerField --> AdvAction
+						if ingressRulesElement.GetAdvAction() != nil {
+							// Create the nested Go struct
+							networkPolicyNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel := &NetworkPolicyNetworkPolicyRuleNetworkPolicyRuleAdvancedAction{}
+							advActionElement := ingressRulesElement.GetAdvAction()
+
+							// Recursively populate the nested struct
+
+							// data specToModelNested EnumField --> Action
+							if advActionElement.GetAction().String() != "" {
+								stringValue := types.StringValue(advActionElement.GetAction().String())
+								stringSlice := []types.String{stringValue}
+								listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+								response.Diagnostics.Append(diags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								networkPolicyNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel.Action = listValue
+							} else {
+								networkPolicyNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel.Action = types.ListNull(types.StringType)
+							}
+
+							// This field needs to be converted to a types.ObjectValue before assignment.
+							networkPolicyNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModelObj, diags := types.ObjectValueFrom(ctx, NetworkPolicyRuleChoiceRulesIngressRulesAdvActionModelAttributeMap, networkPolicyNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel)
+							response.Diagnostics.Append(diags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.AdvAction = networkPolicyNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModelObj
+
+						} else {
+							// The source field is nil (e.g. redacted by the API).
+							// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
+							// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
+							// because the API may always return a non-nil struct (with REDACTED values) for this field,
+							// making this else-branch unreachable. The child OneOf handles the actual healing.
+							// The target is a types.Object, so we use types.ObjectNull.
+							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.AdvAction = types.ObjectNull(NetworkPolicyRuleChoiceRulesIngressRulesAdvActionModelAttributeMap)
+						}
+
 						// data specToModelNested OneOfField --> OtherEndpoint
 						if ingressRulesElement.GetOtherEndpoint() != nil {
 							// Create a temporary attribute map for the choices within this OneOf
@@ -2032,6 +2008,108 @@ func (d *DataSourceF5XCNetworkPolicy) Read(ctx context.Context, request datasour
 							ingressRulesotherEndpointChoiceChoices := ingressRulesElement.GetOtherEndpoint()
 
 							// Process nested choices, populating the temporary attribute map
+
+							// data specToModelNested PointerOfOneOfField --> LabelSelector
+							// <no value>
+							// false
+							{
+								labelSelectorOptions, isLabelSelector := ingressRulesotherEndpointChoiceChoices.(*ves_io_schema_network_policy.NetworkPolicyRuleType_LabelSelector)
+								labelSelectorAttributeMap := make(map[string]attr.Value)
+
+								if isLabelSelector && labelSelectorOptions != nil {
+
+									// data specToModelNested RequiredArrayOfStringField --> Expressions
+									if len(labelSelectorOptions.LabelSelector.GetExpressions()) > 0 {
+										listValue, diags := types.ListValueFrom(ctx, types.StringType, labelSelectorOptions.LabelSelector.GetExpressions())
+										response.Diagnostics.Append(diags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										labelSelectorAttributeMap["expressions"] = listValue
+									} else {
+										labelSelectorAttributeMap["expressions"] = types.ListNull(types.StringType)
+									}
+
+									labelSelectorObj, diags := types.ObjectValue(NetworkPolicyRuleChoiceRulesIngressRulesOtherEndpointLabelSelectorModelAttributeMap, labelSelectorAttributeMap)
+									response.Diagnostics.Append(diags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									ingressRulesotherEndpointChoiceChoicesAttributeMap["label_selector"] = labelSelectorObj
+								} else {
+									ingressRulesotherEndpointChoiceChoicesAttributeMap["label_selector"] = types.ObjectNull(NetworkPolicyRuleChoiceRulesIngressRulesOtherEndpointLabelSelectorModelAttributeMap)
+								}
+							}
+
+							// data specToModelNested PointerOfOneOfField --> IpPrefixSet
+							// <no value>
+							// false
+							{
+								ipPrefixSetOptions, isIpPrefixSet := ingressRulesotherEndpointChoiceChoices.(*ves_io_schema_network_policy.NetworkPolicyRuleType_IpPrefixSet)
+								ipPrefixSetAttributeMap := make(map[string]attr.Value)
+
+								if isIpPrefixSet && ipPrefixSetOptions != nil {
+
+									// data specToModelNested ArrayOfPointerField --> Ref
+									if len(ipPrefixSetOptions.IpPrefixSet.GetRef()) > 0 {
+										// Step 1: Always create a slice of model structs from the spec data.
+										// This slice serves as an intermediate representation.
+										refElements := make([]ObjectRefTypeModel, 0, len(ipPrefixSetOptions.IpPrefixSet.GetRef()))
+										for _, refElement := range ipPrefixSetOptions.IpPrefixSet.GetRef() {
+											objectRefTypeModelModel := ObjectRefTypeModel{}
+
+											// data specToModelNested RequiredStringField --> Name
+											if refElement.GetName() != "" {
+												objectRefTypeModelModel.Name = types.StringValue(refElement.GetName())
+											} else {
+												// Empty string, set to null
+												objectRefTypeModelModel.Name = types.StringNull()
+											}
+
+											// data specToModelNested StringField --> Tenant
+											if refElement.GetTenant() != "" {
+												objectRefTypeModelModel.Tenant = types.StringValue(refElement.GetTenant())
+											} else {
+												// Empty string, set to null
+												objectRefTypeModelModel.Tenant = types.StringNull()
+											}
+
+											// data specToModelNested RequiredStringField --> Namespace
+											if refElement.GetNamespace() != "" {
+												objectRefTypeModelModel.Namespace = types.StringValue(refElement.GetNamespace())
+											} else {
+												// Empty string, set to null
+												objectRefTypeModelModel.Namespace = types.StringNull()
+											}
+
+											refElements = append(refElements, objectRefTypeModelModel)
+										}
+										// CASE 1: The target field is a `types.List` or an attribute map.
+										// The intermediate slice of structs must be converted to a `types.ListValue`.
+										refListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: NetworkPolicyRefObjectRefModelAttributeMap}, refElements)
+										response.Diagnostics.Append(diags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										ipPrefixSetAttributeMap["ref"] = refListValue
+
+									} else {
+										// The source list is empty or nil.
+										// CASE 1: The target field is a `types.List` or an attribute map.
+										// Assign a null `types.ListValue`.
+										ipPrefixSetAttributeMap["ref"] = types.ListNull(types.ObjectType{AttrTypes: NetworkPolicyRefObjectRefModelAttributeMap})
+									}
+
+									ipPrefixSetObj, diags := types.ObjectValue(NetworkPolicyRuleChoiceRulesIngressRulesOtherEndpointIpPrefixSetModelAttributeMap, ipPrefixSetAttributeMap)
+									response.Diagnostics.Append(diags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									ingressRulesotherEndpointChoiceChoicesAttributeMap["ip_prefix_set"] = ipPrefixSetObj
+								} else {
+									ingressRulesotherEndpointChoiceChoicesAttributeMap["ip_prefix_set"] = types.ObjectNull(NetworkPolicyRuleChoiceRulesIngressRulesOtherEndpointIpPrefixSetModelAttributeMap)
+								}
+							}
 
 							// data specToModelNested BoolOfOneOfPointerField --> Any
 							_, isAny := ingressRulesotherEndpointChoiceChoices.(*ves_io_schema_network_policy.NetworkPolicyRuleType_Any)
@@ -2104,108 +2182,6 @@ func (d *DataSourceF5XCNetworkPolicy) Read(ctx context.Context, request datasour
 								ingressRulesotherEndpointChoiceChoicesAttributeMap["inside_endpoints"] = types.BoolNull()
 							}
 
-							// data specToModelNested PointerOfOneOfField --> LabelSelector
-							// <no value>
-							// false
-							{
-								labelSelectorOptions, isLabelSelector := ingressRulesotherEndpointChoiceChoices.(*ves_io_schema_network_policy.NetworkPolicyRuleType_LabelSelector)
-								labelSelectorAttributeMap := make(map[string]attr.Value)
-
-								if isLabelSelector && labelSelectorOptions != nil {
-
-									// data specToModelNested RequiredArrayOfStringField --> Expressions
-									if len(labelSelectorOptions.LabelSelector.GetExpressions()) > 0 {
-										listValue, diags := types.ListValueFrom(ctx, types.StringType, labelSelectorOptions.LabelSelector.GetExpressions())
-										response.Diagnostics.Append(diags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										labelSelectorAttributeMap["expressions"] = listValue
-									} else {
-										labelSelectorAttributeMap["expressions"] = types.ListNull(types.StringType)
-									}
-
-									labelSelectorObj, diags := types.ObjectValue(NetworkPolicyRuleChoiceRulesIngressRulesOtherEndpointLabelSelectorModelAttributeMap, labelSelectorAttributeMap)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									ingressRulesotherEndpointChoiceChoicesAttributeMap["label_selector"] = labelSelectorObj
-								} else {
-									ingressRulesotherEndpointChoiceChoicesAttributeMap["label_selector"] = types.ObjectNull(NetworkPolicyRuleChoiceRulesIngressRulesOtherEndpointLabelSelectorModelAttributeMap)
-								}
-							}
-
-							// data specToModelNested PointerOfOneOfField --> IpPrefixSet
-							// <no value>
-							// false
-							{
-								ipPrefixSetOptions, isIpPrefixSet := ingressRulesotherEndpointChoiceChoices.(*ves_io_schema_network_policy.NetworkPolicyRuleType_IpPrefixSet)
-								ipPrefixSetAttributeMap := make(map[string]attr.Value)
-
-								if isIpPrefixSet && ipPrefixSetOptions != nil {
-
-									// data specToModelNested ArrayOfPointerField --> Ref
-									if len(ipPrefixSetOptions.IpPrefixSet.GetRef()) > 0 {
-										// Step 1: Always create a slice of model structs from the spec data.
-										// This slice serves as an intermediate representation.
-										refElements := make([]ObjectRefTypeModel, 0, len(ipPrefixSetOptions.IpPrefixSet.GetRef()))
-										for _, refElement := range ipPrefixSetOptions.IpPrefixSet.GetRef() {
-											objectRefTypeModelModel := ObjectRefTypeModel{}
-
-											// data specToModelNested RequiredStringField --> Namespace
-											if refElement.GetNamespace() != "" {
-												objectRefTypeModelModel.Namespace = types.StringValue(refElement.GetNamespace())
-											} else {
-												// Empty string, set to null
-												objectRefTypeModelModel.Namespace = types.StringNull()
-											}
-
-											// data specToModelNested RequiredStringField --> Name
-											if refElement.GetName() != "" {
-												objectRefTypeModelModel.Name = types.StringValue(refElement.GetName())
-											} else {
-												// Empty string, set to null
-												objectRefTypeModelModel.Name = types.StringNull()
-											}
-
-											// data specToModelNested StringField --> Tenant
-											if refElement.GetTenant() != "" {
-												objectRefTypeModelModel.Tenant = types.StringValue(refElement.GetTenant())
-											} else {
-												// Empty string, set to null
-												objectRefTypeModelModel.Tenant = types.StringNull()
-											}
-
-											refElements = append(refElements, objectRefTypeModelModel)
-										}
-										// CASE 1: The target field is a `types.List` or an attribute map.
-										// The intermediate slice of structs must be converted to a `types.ListValue`.
-										refListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: NetworkPolicyRefObjectRefModelAttributeMap}, refElements)
-										response.Diagnostics.Append(diags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										ipPrefixSetAttributeMap["ref"] = refListValue
-
-									} else {
-										// The source list is empty or nil.
-										// CASE 1: The target field is a `types.List` or an attribute map.
-										// Assign a null `types.ListValue`.
-										ipPrefixSetAttributeMap["ref"] = types.ListNull(types.ObjectType{AttrTypes: NetworkPolicyRefObjectRefModelAttributeMap})
-									}
-
-									ipPrefixSetObj, diags := types.ObjectValue(NetworkPolicyRuleChoiceRulesIngressRulesOtherEndpointIpPrefixSetModelAttributeMap, ipPrefixSetAttributeMap)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									ingressRulesotherEndpointChoiceChoicesAttributeMap["ip_prefix_set"] = ipPrefixSetObj
-								} else {
-									ingressRulesotherEndpointChoiceChoicesAttributeMap["ip_prefix_set"] = types.ObjectNull(NetworkPolicyRuleChoiceRulesIngressRulesOtherEndpointIpPrefixSetModelAttributeMap)
-								}
-							}
-
 							// --- End of Choices ---
 
 							// Create the final ObjectValue for this OneOf field
@@ -2235,15 +2211,6 @@ func (d *DataSourceF5XCNetworkPolicy) Read(ctx context.Context, request datasour
 							ingressRulestrafficChoiceChoices := ingressRulesElement.GetTrafficChoice()
 
 							// Process nested choices, populating the temporary attribute map
-
-							// data specToModelNested BoolOfOneOfPointerField --> AllUdpTraffic
-							_, isAllUdpTraffic := ingressRulestrafficChoiceChoices.(*ves_io_schema_network_policy.NetworkPolicyRuleType_AllUdpTraffic)
-
-							if isAllUdpTraffic {
-								ingressRulestrafficChoiceChoicesAttributeMap["all_udp_traffic"] = types.BoolValue(true)
-							} else {
-								ingressRulestrafficChoiceChoicesAttributeMap["all_udp_traffic"] = types.BoolNull()
-							}
 
 							// data specToModelNested PointerOfOneOfField --> Applications
 							// <no value>
@@ -2341,6 +2308,15 @@ func (d *DataSourceF5XCNetworkPolicy) Read(ctx context.Context, request datasour
 								ingressRulestrafficChoiceChoicesAttributeMap["all_tcp_traffic"] = types.BoolNull()
 							}
 
+							// data specToModelNested BoolOfOneOfPointerField --> AllUdpTraffic
+							_, isAllUdpTraffic := ingressRulestrafficChoiceChoices.(*ves_io_schema_network_policy.NetworkPolicyRuleType_AllUdpTraffic)
+
+							if isAllUdpTraffic {
+								ingressRulestrafficChoiceChoicesAttributeMap["all_udp_traffic"] = types.BoolValue(true)
+							} else {
+								ingressRulestrafficChoiceChoicesAttributeMap["all_udp_traffic"] = types.BoolNull()
+							}
+
 							// --- End of Choices ---
 
 							// Create the final ObjectValue for this OneOf field
@@ -2360,18 +2336,42 @@ func (d *DataSourceF5XCNetworkPolicy) Read(ctx context.Context, request datasour
 							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.TrafficChoice = types.ObjectNull(NetworkPolicyRuleChoiceRulesIngressRulesTrafficChoiceModelAttributeMap)
 						}
 
-						// data specToModelNested EnumField --> Action
-						if ingressRulesElement.GetAction().String() != "" {
-							stringValue := types.StringValue(ingressRulesElement.GetAction().String())
-							stringSlice := []types.String{stringValue}
-							listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+						// data specToModelNested PointerField --> LabelMatcher
+						if ingressRulesElement.GetLabelMatcher() != nil {
+							// Create the nested Go struct
+							networkPolicyLabelMatcherTypeModel := &NetworkPolicyLabelMatcherType{}
+							labelMatcherElement := ingressRulesElement.GetLabelMatcher()
+
+							// Recursively populate the nested struct
+
+							// data specToModelNested ArrayOfStringField --> Keys
+							if len(labelMatcherElement.GetKeys()) > 0 {
+								listValue, diags := types.ListValueFrom(ctx, types.StringType, labelMatcherElement.GetKeys())
+								response.Diagnostics.Append(diags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								networkPolicyLabelMatcherTypeModel.Keys = listValue
+							} else {
+								networkPolicyLabelMatcherTypeModel.Keys = types.ListNull(types.StringType)
+							}
+
+							// This field needs to be converted to a types.ObjectValue before assignment.
+							networkPolicyLabelMatcherTypeModelObj, diags := types.ObjectValueFrom(ctx, NetworkPolicyRuleChoiceRulesIngressRulesLabelMatcherModelAttributeMap, networkPolicyLabelMatcherTypeModel)
 							response.Diagnostics.Append(diags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.Action = listValue
+							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.LabelMatcher = networkPolicyLabelMatcherTypeModelObj
+
 						} else {
-							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.Action = types.ListNull(types.StringType)
+							// The source field is nil (e.g. redacted by the API).
+							// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
+							// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
+							// because the API may always return a non-nil struct (with REDACTED values) for this field,
+							// making this else-branch unreachable. The child OneOf handles the actual healing.
+							// The target is a types.Object, so we use types.ObjectNull.
+							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.LabelMatcher = types.ObjectNull(NetworkPolicyRuleChoiceRulesIngressRulesLabelMatcherModelAttributeMap)
 						}
 
 						ingressRulesElements = append(ingressRulesElements, networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel)
@@ -2399,6 +2399,179 @@ func (d *DataSourceF5XCNetworkPolicy) Read(ctx context.Context, request datasour
 					egressRulesElements := make([]NetworkPolicyNetworkPolicyNetworkPolicyRuleType, 0, len(rulesOptions.Rules.GetEgressRules()))
 					for _, egressRulesElement := range rulesOptions.Rules.GetEgressRules() {
 						networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel := NetworkPolicyNetworkPolicyNetworkPolicyRuleType{}
+
+						// data specToModelNested OneOfField --> TrafficChoice
+						if egressRulesElement.GetTrafficChoice() != nil {
+							// Create a temporary attribute map for the choices within this OneOf
+							egressRulestrafficChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+							// Define a variable for the spec choices to be passed down to nested templates.
+							// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+							egressRulestrafficChoiceChoices := egressRulesElement.GetTrafficChoice()
+
+							// Process nested choices, populating the temporary attribute map
+
+							// data specToModelNested PointerOfOneOfField --> ProtocolPortRange
+							// <no value>
+							// false
+							{
+								protocolPortRangeOptions, isProtocolPortRange := egressRulestrafficChoiceChoices.(*ves_io_schema_network_policy.NetworkPolicyRuleType_ProtocolPortRange)
+								protocolPortRangeAttributeMap := make(map[string]attr.Value)
+
+								if isProtocolPortRange && protocolPortRangeOptions != nil {
+
+									// data specToModelNested StringField --> Protocol
+									if protocolPortRangeOptions.ProtocolPortRange.GetProtocol() != "" {
+										protocolPortRangeAttributeMap["protocol"] = types.StringValue(protocolPortRangeOptions.ProtocolPortRange.GetProtocol())
+									} else {
+										// Empty string, set to null
+										protocolPortRangeAttributeMap["protocol"] = types.StringNull()
+									}
+
+									// data specToModelNested ArrayOfStringField --> PortRanges
+									if len(protocolPortRangeOptions.ProtocolPortRange.GetPortRanges()) > 0 {
+										listValue, diags := types.ListValueFrom(ctx, types.StringType, protocolPortRangeOptions.ProtocolPortRange.GetPortRanges())
+										response.Diagnostics.Append(diags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										protocolPortRangeAttributeMap["port_ranges"] = listValue
+									} else {
+										protocolPortRangeAttributeMap["port_ranges"] = types.ListNull(types.StringType)
+									}
+
+									protocolPortRangeObj, diags := types.ObjectValue(NetworkPolicyRuleChoiceRulesEgressRulesTrafficChoiceProtocolPortRangeModelAttributeMap, protocolPortRangeAttributeMap)
+									response.Diagnostics.Append(diags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									egressRulestrafficChoiceChoicesAttributeMap["protocol_port_range"] = protocolPortRangeObj
+								} else {
+									egressRulestrafficChoiceChoicesAttributeMap["protocol_port_range"] = types.ObjectNull(NetworkPolicyRuleChoiceRulesEgressRulesTrafficChoiceProtocolPortRangeModelAttributeMap)
+								}
+							}
+
+							// data specToModelNested BoolOfOneOfPointerField --> AllTraffic
+							_, isAllTraffic := egressRulestrafficChoiceChoices.(*ves_io_schema_network_policy.NetworkPolicyRuleType_AllTraffic)
+
+							if isAllTraffic {
+								egressRulestrafficChoiceChoicesAttributeMap["all_traffic"] = types.BoolValue(true)
+							} else {
+								egressRulestrafficChoiceChoicesAttributeMap["all_traffic"] = types.BoolNull()
+							}
+
+							// data specToModelNested BoolOfOneOfPointerField --> AllTcpTraffic
+							_, isAllTcpTraffic := egressRulestrafficChoiceChoices.(*ves_io_schema_network_policy.NetworkPolicyRuleType_AllTcpTraffic)
+
+							if isAllTcpTraffic {
+								egressRulestrafficChoiceChoicesAttributeMap["all_tcp_traffic"] = types.BoolValue(true)
+							} else {
+								egressRulestrafficChoiceChoicesAttributeMap["all_tcp_traffic"] = types.BoolNull()
+							}
+
+							// data specToModelNested BoolOfOneOfPointerField --> AllUdpTraffic
+							_, isAllUdpTraffic := egressRulestrafficChoiceChoices.(*ves_io_schema_network_policy.NetworkPolicyRuleType_AllUdpTraffic)
+
+							if isAllUdpTraffic {
+								egressRulestrafficChoiceChoicesAttributeMap["all_udp_traffic"] = types.BoolValue(true)
+							} else {
+								egressRulestrafficChoiceChoicesAttributeMap["all_udp_traffic"] = types.BoolNull()
+							}
+
+							// data specToModelNested PointerOfOneOfField --> Applications
+							// <no value>
+							// false
+							{
+								applicationsOptions, isApplications := egressRulestrafficChoiceChoices.(*ves_io_schema_network_policy.NetworkPolicyRuleType_Applications)
+								applicationsAttributeMap := make(map[string]attr.Value)
+
+								if isApplications && applicationsOptions != nil {
+
+									// data SpecToModelNested ArrayOfEnumField --> Applications
+									if len(applicationsOptions.Applications.GetApplications()) > 0 {
+										applicationsStrings := make([]string, 0, len(applicationsOptions.Applications.GetApplications()))
+										for _, v := range applicationsOptions.Applications.GetApplications() {
+											if strVal, exists := ves_io_schema_network_policy.ApplicationEnumType_name[int32(v)]; exists {
+												applicationsStrings = append(applicationsStrings, strVal)
+											}
+										}
+										listValue, diags := types.ListValueFrom(ctx, types.StringType, applicationsStrings)
+										response.Diagnostics.Append(diags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										applicationsAttributeMap["applications"] = listValue
+									} else {
+										applicationsAttributeMap["applications"] = types.ListNull(types.StringType)
+									}
+
+									applicationsObj, diags := types.ObjectValue(NetworkPolicyRuleChoiceRulesEgressRulesTrafficChoiceApplicationsModelAttributeMap, applicationsAttributeMap)
+									response.Diagnostics.Append(diags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									egressRulestrafficChoiceChoicesAttributeMap["applications"] = applicationsObj
+								} else {
+									egressRulestrafficChoiceChoicesAttributeMap["applications"] = types.ObjectNull(NetworkPolicyRuleChoiceRulesEgressRulesTrafficChoiceApplicationsModelAttributeMap)
+								}
+							}
+
+							// --- End of Choices ---
+
+							// Create the final ObjectValue for this OneOf field
+							finalObj, egressRulestrafficChoiceChoicesObjDiags := types.ObjectValue(
+								NetworkPolicyRuleChoiceRulesEgressRulesTrafficChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+								egressRulestrafficChoiceChoicesAttributeMap,
+							)
+							response.Diagnostics.Append(egressRulestrafficChoiceChoicesObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+
+							// Assign the final object to the correct place (either the root model or a parent's attribute map)
+							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.TrafficChoice = finalObj
+						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
+							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.TrafficChoice = types.ObjectNull(NetworkPolicyRuleChoiceRulesEgressRulesTrafficChoiceModelAttributeMap)
+						}
+
+						// data specToModelNested PointerField --> LabelMatcher
+						if egressRulesElement.GetLabelMatcher() != nil {
+							// Create the nested Go struct
+							networkPolicyLabelMatcherTypeModel := &NetworkPolicyLabelMatcherType{}
+							labelMatcherElement := egressRulesElement.GetLabelMatcher()
+
+							// Recursively populate the nested struct
+
+							// data specToModelNested ArrayOfStringField --> Keys
+							if len(labelMatcherElement.GetKeys()) > 0 {
+								listValue, diags := types.ListValueFrom(ctx, types.StringType, labelMatcherElement.GetKeys())
+								response.Diagnostics.Append(diags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								networkPolicyLabelMatcherTypeModel.Keys = listValue
+							} else {
+								networkPolicyLabelMatcherTypeModel.Keys = types.ListNull(types.StringType)
+							}
+
+							// This field needs to be converted to a types.ObjectValue before assignment.
+							networkPolicyLabelMatcherTypeModelObj, diags := types.ObjectValueFrom(ctx, NetworkPolicyRuleChoiceRulesEgressRulesLabelMatcherModelAttributeMap, networkPolicyLabelMatcherTypeModel)
+							response.Diagnostics.Append(diags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.LabelMatcher = networkPolicyLabelMatcherTypeModelObj
+
+						} else {
+							// The source field is nil (e.g. redacted by the API).
+							// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
+							// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
+							// because the API may always return a non-nil struct (with REDACTED values) for this field,
+							// making this else-branch unreachable. The child OneOf handles the actual healing.
+							// The target is a types.Object, so we use types.ObjectNull.
+							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.LabelMatcher = types.ObjectNull(NetworkPolicyRuleChoiceRulesEgressRulesLabelMatcherModelAttributeMap)
+						}
 
 						// data specToModelNested RequiredPointerField --> Metadata
 						if egressRulesElement.GetMetadata() != nil {
@@ -2442,6 +2615,60 @@ func (d *DataSourceF5XCNetworkPolicy) Read(ctx context.Context, request datasour
 							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.Metadata = types.ObjectNull(NetworkPolicyRuleChoiceRulesEgressRulesMetadataModelAttributeMap)
 						}
 
+						// data specToModelNested EnumField --> Action
+						if egressRulesElement.GetAction().String() != "" {
+							stringValue := types.StringValue(egressRulesElement.GetAction().String())
+							stringSlice := []types.String{stringValue}
+							listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+							response.Diagnostics.Append(diags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.Action = listValue
+						} else {
+							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.Action = types.ListNull(types.StringType)
+						}
+
+						// data specToModelNested PointerField --> AdvAction
+						if egressRulesElement.GetAdvAction() != nil {
+							// Create the nested Go struct
+							networkPolicyNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel := &NetworkPolicyNetworkPolicyRuleNetworkPolicyRuleAdvancedAction{}
+							advActionElement := egressRulesElement.GetAdvAction()
+
+							// Recursively populate the nested struct
+
+							// data specToModelNested EnumField --> Action
+							if advActionElement.GetAction().String() != "" {
+								stringValue := types.StringValue(advActionElement.GetAction().String())
+								stringSlice := []types.String{stringValue}
+								listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+								response.Diagnostics.Append(diags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								networkPolicyNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel.Action = listValue
+							} else {
+								networkPolicyNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel.Action = types.ListNull(types.StringType)
+							}
+
+							// This field needs to be converted to a types.ObjectValue before assignment.
+							networkPolicyNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModelObj, diags := types.ObjectValueFrom(ctx, NetworkPolicyRuleChoiceRulesEgressRulesAdvActionModelAttributeMap, networkPolicyNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel)
+							response.Diagnostics.Append(diags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.AdvAction = networkPolicyNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModelObj
+
+						} else {
+							// The source field is nil (e.g. redacted by the API).
+							// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
+							// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
+							// because the API may always return a non-nil struct (with REDACTED values) for this field,
+							// making this else-branch unreachable. The child OneOf handles the actual healing.
+							// The target is a types.Object, so we use types.ObjectNull.
+							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.AdvAction = types.ObjectNull(NetworkPolicyRuleChoiceRulesEgressRulesAdvActionModelAttributeMap)
+						}
+
 						// data specToModelNested OneOfField --> OtherEndpoint
 						if egressRulesElement.GetOtherEndpoint() != nil {
 							// Create a temporary attribute map for the choices within this OneOf
@@ -2452,6 +2679,15 @@ func (d *DataSourceF5XCNetworkPolicy) Read(ctx context.Context, request datasour
 							egressRulesotherEndpointChoiceChoices := egressRulesElement.GetOtherEndpoint()
 
 							// Process nested choices, populating the temporary attribute map
+
+							// data specToModelNested BoolOfOneOfPointerField --> Any
+							_, isAny := egressRulesotherEndpointChoiceChoices.(*ves_io_schema_network_policy.NetworkPolicyRuleType_Any)
+
+							if isAny {
+								egressRulesotherEndpointChoiceChoicesAttributeMap["any"] = types.BoolValue(true)
+							} else {
+								egressRulesotherEndpointChoiceChoicesAttributeMap["any"] = types.BoolNull()
+							}
 
 							// data specToModelNested PointerOfOneOfField --> PrefixList
 							// <no value>
@@ -2617,15 +2853,6 @@ func (d *DataSourceF5XCNetworkPolicy) Read(ctx context.Context, request datasour
 								}
 							}
 
-							// data specToModelNested BoolOfOneOfPointerField --> Any
-							_, isAny := egressRulesotherEndpointChoiceChoices.(*ves_io_schema_network_policy.NetworkPolicyRuleType_Any)
-
-							if isAny {
-								egressRulesotherEndpointChoiceChoicesAttributeMap["any"] = types.BoolValue(true)
-							} else {
-								egressRulesotherEndpointChoiceChoicesAttributeMap["any"] = types.BoolNull()
-							}
-
 							// --- End of Choices ---
 
 							// Create the final ObjectValue for this OneOf field
@@ -2643,233 +2870,6 @@ func (d *DataSourceF5XCNetworkPolicy) Read(ctx context.Context, request datasour
 						} else {
 							// The OneOf field is nil in the source spec, so set the Terraform object to null.
 							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.OtherEndpointChoice = types.ObjectNull(NetworkPolicyRuleChoiceRulesEgressRulesOtherEndpointModelAttributeMap)
-						}
-
-						// data specToModelNested OneOfField --> TrafficChoice
-						if egressRulesElement.GetTrafficChoice() != nil {
-							// Create a temporary attribute map for the choices within this OneOf
-							egressRulestrafficChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-							// Define a variable for the spec choices to be passed down to nested templates.
-							// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-							egressRulestrafficChoiceChoices := egressRulesElement.GetTrafficChoice()
-
-							// Process nested choices, populating the temporary attribute map
-
-							// data specToModelNested BoolOfOneOfPointerField --> AllTraffic
-							_, isAllTraffic := egressRulestrafficChoiceChoices.(*ves_io_schema_network_policy.NetworkPolicyRuleType_AllTraffic)
-
-							if isAllTraffic {
-								egressRulestrafficChoiceChoicesAttributeMap["all_traffic"] = types.BoolValue(true)
-							} else {
-								egressRulestrafficChoiceChoicesAttributeMap["all_traffic"] = types.BoolNull()
-							}
-
-							// data specToModelNested BoolOfOneOfPointerField --> AllTcpTraffic
-							_, isAllTcpTraffic := egressRulestrafficChoiceChoices.(*ves_io_schema_network_policy.NetworkPolicyRuleType_AllTcpTraffic)
-
-							if isAllTcpTraffic {
-								egressRulestrafficChoiceChoicesAttributeMap["all_tcp_traffic"] = types.BoolValue(true)
-							} else {
-								egressRulestrafficChoiceChoicesAttributeMap["all_tcp_traffic"] = types.BoolNull()
-							}
-
-							// data specToModelNested BoolOfOneOfPointerField --> AllUdpTraffic
-							_, isAllUdpTraffic := egressRulestrafficChoiceChoices.(*ves_io_schema_network_policy.NetworkPolicyRuleType_AllUdpTraffic)
-
-							if isAllUdpTraffic {
-								egressRulestrafficChoiceChoicesAttributeMap["all_udp_traffic"] = types.BoolValue(true)
-							} else {
-								egressRulestrafficChoiceChoicesAttributeMap["all_udp_traffic"] = types.BoolNull()
-							}
-
-							// data specToModelNested PointerOfOneOfField --> Applications
-							// <no value>
-							// false
-							{
-								applicationsOptions, isApplications := egressRulestrafficChoiceChoices.(*ves_io_schema_network_policy.NetworkPolicyRuleType_Applications)
-								applicationsAttributeMap := make(map[string]attr.Value)
-
-								if isApplications && applicationsOptions != nil {
-
-									// data SpecToModelNested ArrayOfEnumField --> Applications
-									if len(applicationsOptions.Applications.GetApplications()) > 0 {
-										applicationsStrings := make([]string, 0, len(applicationsOptions.Applications.GetApplications()))
-										for _, v := range applicationsOptions.Applications.GetApplications() {
-											if strVal, exists := ves_io_schema_network_policy.ApplicationEnumType_name[int32(v)]; exists {
-												applicationsStrings = append(applicationsStrings, strVal)
-											}
-										}
-										listValue, diags := types.ListValueFrom(ctx, types.StringType, applicationsStrings)
-										response.Diagnostics.Append(diags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										applicationsAttributeMap["applications"] = listValue
-									} else {
-										applicationsAttributeMap["applications"] = types.ListNull(types.StringType)
-									}
-
-									applicationsObj, diags := types.ObjectValue(NetworkPolicyRuleChoiceRulesEgressRulesTrafficChoiceApplicationsModelAttributeMap, applicationsAttributeMap)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									egressRulestrafficChoiceChoicesAttributeMap["applications"] = applicationsObj
-								} else {
-									egressRulestrafficChoiceChoicesAttributeMap["applications"] = types.ObjectNull(NetworkPolicyRuleChoiceRulesEgressRulesTrafficChoiceApplicationsModelAttributeMap)
-								}
-							}
-
-							// data specToModelNested PointerOfOneOfField --> ProtocolPortRange
-							// <no value>
-							// false
-							{
-								protocolPortRangeOptions, isProtocolPortRange := egressRulestrafficChoiceChoices.(*ves_io_schema_network_policy.NetworkPolicyRuleType_ProtocolPortRange)
-								protocolPortRangeAttributeMap := make(map[string]attr.Value)
-
-								if isProtocolPortRange && protocolPortRangeOptions != nil {
-
-									// data specToModelNested StringField --> Protocol
-									if protocolPortRangeOptions.ProtocolPortRange.GetProtocol() != "" {
-										protocolPortRangeAttributeMap["protocol"] = types.StringValue(protocolPortRangeOptions.ProtocolPortRange.GetProtocol())
-									} else {
-										// Empty string, set to null
-										protocolPortRangeAttributeMap["protocol"] = types.StringNull()
-									}
-
-									// data specToModelNested ArrayOfStringField --> PortRanges
-									if len(protocolPortRangeOptions.ProtocolPortRange.GetPortRanges()) > 0 {
-										listValue, diags := types.ListValueFrom(ctx, types.StringType, protocolPortRangeOptions.ProtocolPortRange.GetPortRanges())
-										response.Diagnostics.Append(diags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										protocolPortRangeAttributeMap["port_ranges"] = listValue
-									} else {
-										protocolPortRangeAttributeMap["port_ranges"] = types.ListNull(types.StringType)
-									}
-
-									protocolPortRangeObj, diags := types.ObjectValue(NetworkPolicyRuleChoiceRulesEgressRulesTrafficChoiceProtocolPortRangeModelAttributeMap, protocolPortRangeAttributeMap)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									egressRulestrafficChoiceChoicesAttributeMap["protocol_port_range"] = protocolPortRangeObj
-								} else {
-									egressRulestrafficChoiceChoicesAttributeMap["protocol_port_range"] = types.ObjectNull(NetworkPolicyRuleChoiceRulesEgressRulesTrafficChoiceProtocolPortRangeModelAttributeMap)
-								}
-							}
-
-							// --- End of Choices ---
-
-							// Create the final ObjectValue for this OneOf field
-							finalObj, egressRulestrafficChoiceChoicesObjDiags := types.ObjectValue(
-								NetworkPolicyRuleChoiceRulesEgressRulesTrafficChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-								egressRulestrafficChoiceChoicesAttributeMap,
-							)
-							response.Diagnostics.Append(egressRulestrafficChoiceChoicesObjDiags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.TrafficChoice = finalObj
-						} else {
-							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.TrafficChoice = types.ObjectNull(NetworkPolicyRuleChoiceRulesEgressRulesTrafficChoiceModelAttributeMap)
-						}
-
-						// data specToModelNested EnumField --> Action
-						if egressRulesElement.GetAction().String() != "" {
-							stringValue := types.StringValue(egressRulesElement.GetAction().String())
-							stringSlice := []types.String{stringValue}
-							listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.Action = listValue
-						} else {
-							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.Action = types.ListNull(types.StringType)
-						}
-
-						// data specToModelNested PointerField --> AdvAction
-						if egressRulesElement.GetAdvAction() != nil {
-							// Create the nested Go struct
-							networkPolicyNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel := &NetworkPolicyNetworkPolicyRuleNetworkPolicyRuleAdvancedAction{}
-							advActionElement := egressRulesElement.GetAdvAction()
-
-							// Recursively populate the nested struct
-
-							// data specToModelNested EnumField --> Action
-							if advActionElement.GetAction().String() != "" {
-								stringValue := types.StringValue(advActionElement.GetAction().String())
-								stringSlice := []types.String{stringValue}
-								listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								networkPolicyNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel.Action = listValue
-							} else {
-								networkPolicyNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel.Action = types.ListNull(types.StringType)
-							}
-
-							// This field needs to be converted to a types.ObjectValue before assignment.
-							networkPolicyNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModelObj, diags := types.ObjectValueFrom(ctx, NetworkPolicyRuleChoiceRulesEgressRulesAdvActionModelAttributeMap, networkPolicyNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.AdvAction = networkPolicyNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModelObj
-
-						} else {
-							// The source field is nil (e.g. redacted by the API).
-							// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-							// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-							// because the API may always return a non-nil struct (with REDACTED values) for this field,
-							// making this else-branch unreachable. The child OneOf handles the actual healing.
-							// The target is a types.Object, so we use types.ObjectNull.
-							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.AdvAction = types.ObjectNull(NetworkPolicyRuleChoiceRulesEgressRulesAdvActionModelAttributeMap)
-						}
-
-						// data specToModelNested PointerField --> LabelMatcher
-						if egressRulesElement.GetLabelMatcher() != nil {
-							// Create the nested Go struct
-							networkPolicyLabelMatcherTypeModel := &NetworkPolicyLabelMatcherType{}
-							labelMatcherElement := egressRulesElement.GetLabelMatcher()
-
-							// Recursively populate the nested struct
-
-							// data specToModelNested ArrayOfStringField --> Keys
-							if len(labelMatcherElement.GetKeys()) > 0 {
-								listValue, diags := types.ListValueFrom(ctx, types.StringType, labelMatcherElement.GetKeys())
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								networkPolicyLabelMatcherTypeModel.Keys = listValue
-							} else {
-								networkPolicyLabelMatcherTypeModel.Keys = types.ListNull(types.StringType)
-							}
-
-							// This field needs to be converted to a types.ObjectValue before assignment.
-							networkPolicyLabelMatcherTypeModelObj, diags := types.ObjectValueFrom(ctx, NetworkPolicyRuleChoiceRulesEgressRulesLabelMatcherModelAttributeMap, networkPolicyLabelMatcherTypeModel)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.LabelMatcher = networkPolicyLabelMatcherTypeModelObj
-
-						} else {
-							// The source field is nil (e.g. redacted by the API).
-							// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-							// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-							// because the API may always return a non-nil struct (with REDACTED values) for this field,
-							// making this else-branch unreachable. The child OneOf handles the actual healing.
-							// The target is a types.Object, so we use types.ObjectNull.
-							networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel.LabelMatcher = types.ObjectNull(NetworkPolicyRuleChoiceRulesEgressRulesLabelMatcherModelAttributeMap)
 						}
 
 						egressRulesElements = append(egressRulesElements, networkPolicyNetworkPolicyNetworkPolicyRuleTypeModel)
@@ -2918,14 +2918,6 @@ func (d *DataSourceF5XCNetworkPolicy) Read(ctx context.Context, request datasour
 					for _, ingressRulesElement := range legacyRulesOptions.LegacyRules.GetIngressRules() {
 						objectRefTypeModelModel := ObjectRefTypeModel{}
 
-						// data specToModelNested RequiredStringField --> Namespace
-						if ingressRulesElement.GetNamespace() != "" {
-							objectRefTypeModelModel.Namespace = types.StringValue(ingressRulesElement.GetNamespace())
-						} else {
-							// Empty string, set to null
-							objectRefTypeModelModel.Namespace = types.StringNull()
-						}
-
 						// data specToModelNested RequiredStringField --> Name
 						if ingressRulesElement.GetName() != "" {
 							objectRefTypeModelModel.Name = types.StringValue(ingressRulesElement.GetName())
@@ -2940,6 +2932,14 @@ func (d *DataSourceF5XCNetworkPolicy) Read(ctx context.Context, request datasour
 						} else {
 							// Empty string, set to null
 							objectRefTypeModelModel.Tenant = types.StringNull()
+						}
+
+						// data specToModelNested RequiredStringField --> Namespace
+						if ingressRulesElement.GetNamespace() != "" {
+							objectRefTypeModelModel.Namespace = types.StringValue(ingressRulesElement.GetNamespace())
+						} else {
+							// Empty string, set to null
+							objectRefTypeModelModel.Namespace = types.StringNull()
 						}
 
 						ingressRulesElements = append(ingressRulesElements, objectRefTypeModelModel)

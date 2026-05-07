@@ -54,11 +54,11 @@ type SegmentGlobalSpecTypeInternetConnectionChoice struct {
 }
 
 type SegmentSegmentAttachmentType struct {
-	CloudConnectType types.String `tfsdk:"cloud_connect_type"`
 	Type             types.String `tfsdk:"type"`
 	Name             types.String `tfsdk:"name"`
 	Site             types.String `tfsdk:"site"`
 	CloudConnectName types.String `tfsdk:"cloud_connect_name"`
+	CloudConnectType types.String `tfsdk:"cloud_connect_type"`
 }
 
 // ResourceF5XCSegmentModel describes the resource data model.
@@ -93,11 +93,11 @@ var SegmentInternetConnectionChoiceModelAttributeMap = map[string]attr.Type{
 // Attribute map for ArrayOfPointerField --> Attachments
 var SegmentAttachmentsModelAttributeMap = map[string]attr.Type{
 
-	"cloud_connect_type": types.StringType,
 	"type":               types.StringType,
 	"name":               types.StringType,
 	"site":               types.StringType,
 	"cloud_connect_name": types.StringType,
+	"cloud_connect_type": types.StringType,
 }
 
 func NewResourceF5XCSegment() resource.Resource {
@@ -202,13 +202,6 @@ func (r *ResourceF5XCSegment) Schema(ctx context.Context, request resource.Schem
 				Computed:            false,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
-						"cloud_connect_type": schema.StringAttribute{
-							Description:         "Cloud Connect Type Cloud Connect Type",
-							MarkdownDescription: "",
-							Required:            false,
-							Optional:            true,
-							Computed:            false,
-						},
 						"type": schema.StringAttribute{
 							Description:         "Attachment Type Attachment Type",
 							MarkdownDescription: "",
@@ -232,6 +225,13 @@ func (r *ResourceF5XCSegment) Schema(ctx context.Context, request resource.Schem
 						},
 						"cloud_connect_name": schema.StringAttribute{
 							Description:         "Cloud Connect Name Cloud Connect Name",
+							MarkdownDescription: "",
+							Required:            false,
+							Optional:            true,
+							Computed:            false,
+						},
+						"cloud_connect_type": schema.StringAttribute{
+							Description:         "Cloud Connect Type Cloud Connect Type",
 							MarkdownDescription: "",
 							Required:            false,
 							Optional:            true,
@@ -558,14 +558,6 @@ func (r *ResourceF5XCSegment) Create(ctx context.Context, request resource.Creat
 		for _, attachmentsElement := range specData.Attachments {
 			segmentSegmentAttachmentTypeModel := SegmentSegmentAttachmentType{}
 
-			// resource specToModelNested StringField --> CloudConnectType
-			if attachmentsElement.GetCloudConnectType() != "" {
-				segmentSegmentAttachmentTypeModel.CloudConnectType = types.StringValue(attachmentsElement.GetCloudConnectType())
-			} else {
-				// Empty string, set to null
-				segmentSegmentAttachmentTypeModel.CloudConnectType = types.StringNull()
-			}
-
 			// resource specToModelNested StringField --> Type
 			if attachmentsElement.GetType() != "" {
 				segmentSegmentAttachmentTypeModel.Type = types.StringValue(attachmentsElement.GetType())
@@ -596,6 +588,14 @@ func (r *ResourceF5XCSegment) Create(ctx context.Context, request resource.Creat
 			} else {
 				// Empty string, set to null
 				segmentSegmentAttachmentTypeModel.CloudConnectName = types.StringNull()
+			}
+
+			// resource specToModelNested StringField --> CloudConnectType
+			if attachmentsElement.GetCloudConnectType() != "" {
+				segmentSegmentAttachmentTypeModel.CloudConnectType = types.StringValue(attachmentsElement.GetCloudConnectType())
+			} else {
+				// Empty string, set to null
+				segmentSegmentAttachmentTypeModel.CloudConnectType = types.StringNull()
 			}
 
 			attachmentsElements = append(attachmentsElements, segmentSegmentAttachmentTypeModel)
@@ -837,14 +837,6 @@ func (r *ResourceF5XCSegment) Read(ctx context.Context, request resource.ReadReq
 		for _, attachmentsElement := range specData.Attachments {
 			segmentSegmentAttachmentTypeModel := SegmentSegmentAttachmentType{}
 
-			// resource specToModelNested StringField --> CloudConnectType
-			if attachmentsElement.GetCloudConnectType() != "" {
-				segmentSegmentAttachmentTypeModel.CloudConnectType = types.StringValue(attachmentsElement.GetCloudConnectType())
-			} else {
-				// Empty string, set to null
-				segmentSegmentAttachmentTypeModel.CloudConnectType = types.StringNull()
-			}
-
 			// resource specToModelNested StringField --> Type
 			if attachmentsElement.GetType() != "" {
 				segmentSegmentAttachmentTypeModel.Type = types.StringValue(attachmentsElement.GetType())
@@ -875,6 +867,14 @@ func (r *ResourceF5XCSegment) Read(ctx context.Context, request resource.ReadReq
 			} else {
 				// Empty string, set to null
 				segmentSegmentAttachmentTypeModel.CloudConnectName = types.StringNull()
+			}
+
+			// resource specToModelNested StringField --> CloudConnectType
+			if attachmentsElement.GetCloudConnectType() != "" {
+				segmentSegmentAttachmentTypeModel.CloudConnectType = types.StringValue(attachmentsElement.GetCloudConnectType())
+			} else {
+				// Empty string, set to null
+				segmentSegmentAttachmentTypeModel.CloudConnectType = types.StringNull()
 			}
 
 			attachmentsElements = append(attachmentsElements, segmentSegmentAttachmentTypeModel)
@@ -1180,14 +1180,6 @@ func (r *ResourceF5XCSegment) Update(ctx context.Context, request resource.Updat
 		for _, attachmentsElement := range specData.Attachments {
 			segmentSegmentAttachmentTypeModel := SegmentSegmentAttachmentType{}
 
-			// resource specToModelNested StringField --> CloudConnectType
-			if attachmentsElement.GetCloudConnectType() != "" {
-				segmentSegmentAttachmentTypeModel.CloudConnectType = types.StringValue(attachmentsElement.GetCloudConnectType())
-			} else {
-				// Empty string, set to null
-				segmentSegmentAttachmentTypeModel.CloudConnectType = types.StringNull()
-			}
-
 			// resource specToModelNested StringField --> Type
 			if attachmentsElement.GetType() != "" {
 				segmentSegmentAttachmentTypeModel.Type = types.StringValue(attachmentsElement.GetType())
@@ -1218,6 +1210,14 @@ func (r *ResourceF5XCSegment) Update(ctx context.Context, request resource.Updat
 			} else {
 				// Empty string, set to null
 				segmentSegmentAttachmentTypeModel.CloudConnectName = types.StringNull()
+			}
+
+			// resource specToModelNested StringField --> CloudConnectType
+			if attachmentsElement.GetCloudConnectType() != "" {
+				segmentSegmentAttachmentTypeModel.CloudConnectType = types.StringValue(attachmentsElement.GetCloudConnectType())
+			} else {
+				// Empty string, set to null
+				segmentSegmentAttachmentTypeModel.CloudConnectType = types.StringNull()
 			}
 
 			attachmentsElements = append(attachmentsElements, segmentSegmentAttachmentTypeModel)

@@ -54,14 +54,9 @@ type ResourceF5XCHealthcheck struct {
 }
 
 type HealthcheckGlobalSpecTypeHealthCheckChoice struct {
+	HttpHealthCheck    types.Object `tfsdk:"http_health_check"`
 	TcpHealthCheck     types.Object `tfsdk:"tcp_health_check"`
 	UdpIcmpHealthCheck types.Bool   `tfsdk:"udp_icmp_health_check"`
-	HttpHealthCheck    types.Object `tfsdk:"http_health_check"`
-}
-
-type HealthcheckGlobalSpecTypeTcpHealthCheck struct {
-	SendPayload      types.String `tfsdk:"send_payload"`
-	ExpectedResponse types.String `tfsdk:"expected_response"`
 }
 
 type HealthcheckGlobalSpecTypeHttpHealthCheck struct {
@@ -79,20 +74,25 @@ type HealthcheckHttpHealthCheckHostHeaderChoice struct {
 	HostHeader          types.String `tfsdk:"host_header"`
 }
 
+type HealthcheckGlobalSpecTypeTcpHealthCheck struct {
+	SendPayload      types.String `tfsdk:"send_payload"`
+	ExpectedResponse types.String `tfsdk:"expected_response"`
+}
+
 // ResourceF5XCHealthcheckModel describes the resource data model.
 type ResourceF5XCHealthcheckModel struct {
-	Labels             types.Map      `tfsdk:"labels"`
-	Annotations        types.Map      `tfsdk:"annotations"`
 	Description        types.String   `tfsdk:"description"`
 	Name               types.String   `tfsdk:"name"`
 	Namespace          types.String   `tfsdk:"namespace"`
 	Uid                types.String   `tfsdk:"uid"`
-	HealthCheckChoice  types.Object   `tfsdk:"health_check_choice"`
+	Labels             types.Map      `tfsdk:"labels"`
+	Annotations        types.Map      `tfsdk:"annotations"`
 	Timeout            types.Int64    `tfsdk:"timeout"`
 	Interval           types.Int64    `tfsdk:"interval"`
 	UnhealthyThreshold types.Int64    `tfsdk:"unhealthy_threshold"`
 	HealthyThreshold   types.Int64    `tfsdk:"healthy_threshold"`
 	JitterPercent      types.Int64    `tfsdk:"jitter_percent"`
+	HealthCheckChoice  types.Object   `tfsdk:"health_check_choice"`
 	Timeouts           timeouts.Value `tfsdk:"timeouts"`
 }
 
@@ -109,20 +109,13 @@ var (
 // Attribute map for RequiredOneOfField --> HealthCheck
 var HealthcheckHealthCheckModelAttributeMap = map[string]attr.Type{
 
+	"http_health_check": types.ObjectType{
+		AttrTypes: HealthcheckHealthCheckHttpHealthCheckModelAttributeMap,
+	},
 	"tcp_health_check": types.ObjectType{
 		AttrTypes: HealthcheckHealthCheckTcpHealthCheckModelAttributeMap,
 	},
 	"udp_icmp_health_check": types.BoolType,
-	"http_health_check": types.ObjectType{
-		AttrTypes: HealthcheckHealthCheckHttpHealthCheckModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> TcpHealthCheck
-var HealthcheckHealthCheckTcpHealthCheckModelAttributeMap = map[string]attr.Type{
-
-	"send_payload":      types.StringType,
-	"expected_response": types.StringType,
 }
 
 // Attribute map for PointerOfOneOfField --> HttpHealthCheck
@@ -152,6 +145,13 @@ var HealthcheckHealthCheckHttpHealthCheckHostHeaderChoiceModelAttributeMap = map
 	"host_header":            types.StringType,
 }
 
+// Attribute map for PointerOfOneOfField --> TcpHealthCheck
+var HealthcheckHealthCheckTcpHealthCheckModelAttributeMap = map[string]attr.Type{
+
+	"send_payload":      types.StringType,
+	"expected_response": types.StringType,
+}
+
 func NewResourceF5XCHealthcheck() resource.Resource {
 	return &ResourceF5XCHealthcheck{}
 }
@@ -167,29 +167,6 @@ func (r *ResourceF5XCHealthcheck) Schema(ctx context.Context, request resource.S
 		Description:         "Healthcheck resource",
 
 		Attributes: map[string]schema.Attribute{
-			"labels": schema.MapAttribute{
-				Description:         "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            true,
-				ElementType:         types.StringType,
-				PlanModifiers: []planmodifier.Map{
-					mapmergemodifier.New(),
-				},
-			},
-			"annotations": schema.MapAttribute{
-				Description:         "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            false,
-				ElementType:         types.StringType,
-				Validators: []validator.Map{
-					mapvalidator.KeysAre(stringvalidator.LengthBetween(1, 64)),
-					mapvalidator.ValueStringsAre(stringvalidator.LengthBetween(1, 1024)),
-				},
-			},
 			"description": schema.StringAttribute{
 				Description:         "description Human readable description for the object",
 				MarkdownDescription: "",
@@ -222,6 +199,85 @@ func (r *ResourceF5XCHealthcheck) Schema(ctx context.Context, request resource.S
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
+			"labels": schema.MapAttribute{
+				Description:         "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				MarkdownDescription: "",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				ElementType:         types.StringType,
+				PlanModifiers: []planmodifier.Map{
+					mapmergemodifier.New(),
+				},
+			},
+			"annotations": schema.MapAttribute{
+				Description:         "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
+				MarkdownDescription: "",
+				Required:            false,
+				Optional:            true,
+				Computed:            false,
+				ElementType:         types.StringType,
+				Validators: []validator.Map{
+					mapvalidator.KeysAre(stringvalidator.LengthBetween(1, 64)),
+					mapvalidator.ValueStringsAre(stringvalidator.LengthBetween(1, 1024)),
+				},
+			},
+			"timeout": schema.Int64Attribute{
+				Description:         "timeout Timeout in seconds to wait for successful response. In other words, it is the time to wait for a health check response. If the timeout is reached the health check attempt will be considered a failure.",
+				MarkdownDescription: "<br>**Default:** `3`",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				Default:             int64default.StaticInt64(3),
+				Validators: []validator.Int64{
+					int64validator.Between(1, 600),
+				},
+			},
+			"interval": schema.Int64Attribute{
+				Description:         "interval Time interval in seconds between two healthcheck requests.",
+				MarkdownDescription: "<br>**Default:** `15`",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				Default:             int64default.StaticInt64(15),
+				Validators: []validator.Int64{
+					int64validator.Between(1, 600),
+				},
+			},
+			"unhealthy_threshold": schema.Int64Attribute{
+				Description:         "unhealthy threshold Number of failed responses before declaring unhealthy. In other words, this is the number of unhealthy health checks required before a host is marked unhealthy. Note that for http health checking if a host responds with 503 this threshold is ignored and the host is considered unhealthy immediately.",
+				MarkdownDescription: "<br>**Default:** `1`",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				Default:             int64default.StaticInt64(1),
+				Validators: []validator.Int64{
+					int64validator.Between(1, 16),
+				},
+			},
+			"healthy_threshold": schema.Int64Attribute{
+				Description:         "healthy threshold Number of successful responses before declaring healthy. In other words, this is the number of healthy health checks required before a host is marked healthy. Note that during startup, only a single successful health check is required to mark a host healthy.",
+				MarkdownDescription: "<br>**Default:** `3`",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				Default:             int64default.StaticInt64(3),
+				Validators: []validator.Int64{
+					int64validator.Between(1, 16),
+				},
+			},
+			"jitter_percent": schema.Int64Attribute{
+				Description:         "jitter percent Add a random amount of time as a percent value to the interval between successive healthcheck requests.",
+				MarkdownDescription: "<br>**Default:** `30`<br>**Validation:** `OneOf [0]`",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				Default:             int64default.StaticInt64(30),
+				Validators: []validator.Int64{
+					int64validator.Between(10, 50),
+					int64validator.OneOf(0),
+				},
+			},
 			"health_check_choice": schema.SingleNestedAttribute{
 				Description:         "health_check Specifies whether to perform HTTP Health Check or TCP Health check",
 				MarkdownDescription: "",
@@ -236,45 +292,6 @@ func (r *ResourceF5XCHealthcheck) Schema(ctx context.Context, request resource.S
 					),
 				},
 				Attributes: map[string]schema.Attribute{
-					"tcp_health_check": schema.SingleNestedAttribute{
-						Description:         "tcp_health_check Specifies send payload and expected response payload",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Attributes: map[string]schema.Attribute{
-							"send_payload": schema.StringAttribute{
-								Description:         "send payload raw bytes sent in the request. Empty payloads imply a connect-only health check. Describes the encoding of the payload bytes in the payload. Hex encoded payload.",
-								MarkdownDescription: "<br>**Validation:** `Length LengthAtMost(2048)`",
-								Required:            false,
-								Optional:            true,
-								Computed:            false,
-								Validators: []validator.String{
-									stringvalidator.LengthAtMost(2048),
-								},
-							},
-							"expected_response": schema.StringAttribute{
-								Description:         "expected response raw bytes expected in the request. Describes the encoding of the payload bytes in the payload. Hex encoded payload.",
-								MarkdownDescription: "<br>**Validation:** `Length LengthAtMost(2048)`",
-								Required:            false,
-								Optional:            true,
-								Computed:            false,
-								Validators: []validator.String{
-									stringvalidator.LengthAtMost(2048),
-								},
-							},
-						},
-					},
-					"udp_icmp_health_check": schema.BoolAttribute{
-						Description:         "udp_icmp_health_check Specifies ICMP HealthCheck for UDP Loadbalancer",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Validators: []validator.Bool{
-							boolvalidator.Equals(true),
-						},
-					},
 					"http_health_check": schema.SingleNestedAttribute{
 						Description:         "http_health_check Specifies the following details for HTTP health check requests 1. Host header 2. Path 3. Request headers to add 4. Request headers to remove",
 						MarkdownDescription: "",
@@ -384,62 +401,45 @@ func (r *ResourceF5XCHealthcheck) Schema(ctx context.Context, request resource.S
 							},
 						},
 					},
-				},
-			},
-			"timeout": schema.Int64Attribute{
-				Description:         "timeout Timeout in seconds to wait for successful response. In other words, it is the time to wait for a health check response. If the timeout is reached the health check attempt will be considered a failure.",
-				MarkdownDescription: "<br>**Default:** `3`",
-				Required:            false,
-				Optional:            true,
-				Computed:            true,
-				Default:             int64default.StaticInt64(3),
-				Validators: []validator.Int64{
-					int64validator.Between(1, 600),
-				},
-			},
-			"interval": schema.Int64Attribute{
-				Description:         "interval Time interval in seconds between two healthcheck requests.",
-				MarkdownDescription: "<br>**Default:** `15`",
-				Required:            false,
-				Optional:            true,
-				Computed:            true,
-				Default:             int64default.StaticInt64(15),
-				Validators: []validator.Int64{
-					int64validator.Between(1, 600),
-				},
-			},
-			"unhealthy_threshold": schema.Int64Attribute{
-				Description:         "unhealthy threshold Number of failed responses before declaring unhealthy. In other words, this is the number of unhealthy health checks required before a host is marked unhealthy. Note that for http health checking if a host responds with 503 this threshold is ignored and the host is considered unhealthy immediately.",
-				MarkdownDescription: "<br>**Default:** `1`",
-				Required:            false,
-				Optional:            true,
-				Computed:            true,
-				Default:             int64default.StaticInt64(1),
-				Validators: []validator.Int64{
-					int64validator.Between(1, 16),
-				},
-			},
-			"healthy_threshold": schema.Int64Attribute{
-				Description:         "healthy threshold Number of successful responses before declaring healthy. In other words, this is the number of healthy health checks required before a host is marked healthy. Note that during startup, only a single successful health check is required to mark a host healthy.",
-				MarkdownDescription: "<br>**Default:** `3`",
-				Required:            false,
-				Optional:            true,
-				Computed:            true,
-				Default:             int64default.StaticInt64(3),
-				Validators: []validator.Int64{
-					int64validator.Between(1, 16),
-				},
-			},
-			"jitter_percent": schema.Int64Attribute{
-				Description:         "jitter percent Add a random amount of time as a percent value to the interval between successive healthcheck requests.",
-				MarkdownDescription: "<br>**Default:** `30`<br>**Validation:** `OneOf [0]`",
-				Required:            false,
-				Optional:            true,
-				Computed:            true,
-				Default:             int64default.StaticInt64(30),
-				Validators: []validator.Int64{
-					int64validator.Between(10, 50),
-					int64validator.OneOf(0),
+					"tcp_health_check": schema.SingleNestedAttribute{
+						Description:         "tcp_health_check Specifies send payload and expected response payload",
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Attributes: map[string]schema.Attribute{
+							"send_payload": schema.StringAttribute{
+								Description:         "send payload raw bytes sent in the request. Empty payloads imply a connect-only health check. Describes the encoding of the payload bytes in the payload. Hex encoded payload.",
+								MarkdownDescription: "<br>**Validation:** `Length LengthAtMost(2048)`",
+								Required:            false,
+								Optional:            true,
+								Computed:            false,
+								Validators: []validator.String{
+									stringvalidator.LengthAtMost(2048),
+								},
+							},
+							"expected_response": schema.StringAttribute{
+								Description:         "expected response raw bytes expected in the request. Describes the encoding of the payload bytes in the payload. Hex encoded payload.",
+								MarkdownDescription: "<br>**Validation:** `Length LengthAtMost(2048)`",
+								Required:            false,
+								Optional:            true,
+								Computed:            false,
+								Validators: []validator.String{
+									stringvalidator.LengthAtMost(2048),
+								},
+							},
+						},
+					},
+					"udp_icmp_health_check": schema.BoolAttribute{
+						Description:         "udp_icmp_health_check Specifies ICMP HealthCheck for UDP Loadbalancer",
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Validators: []validator.Bool{
+							boolvalidator.Equals(true),
+						},
+					},
 				},
 			},
 			"timeouts": timeouts.Attributes(ctx, timeouts.Opts{
@@ -544,20 +544,6 @@ func (r *ResourceF5XCHealthcheck) Create(ctx context.Context, request resource.C
 
 	// Populate createReq from data model
 
-	// resource modelToMetaRoot MapOfStringField --> Annotations
-	if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
-		var labels map[string]string
-		diags = data.Annotations.ElementsAs(ctx, &labels, false)
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			tflog.Error(ctx, "Failed to convert annotations from map to model")
-			return
-		}
-		meta.Annotations = labels
-	} else {
-		meta.Annotations = nil
-	}
-
 	// resource modelToMetaRoot StringField --> Description
 	if !data.Description.IsNull() && !data.Description.IsUnknown() {
 		meta.Description = string(data.Description.ValueString())
@@ -573,42 +559,43 @@ func (r *ResourceF5XCHealthcheck) Create(ctx context.Context, request resource.C
 		meta.Namespace = string(data.Namespace.ValueString())
 	}
 
+	// resource modelToMetaRoot MapOfStringField --> Annotations
+	if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
+		var labels map[string]string
+		diags = data.Annotations.ElementsAs(ctx, &labels, false)
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			tflog.Error(ctx, "Failed to convert annotations from map to model")
+			return
+		}
+		meta.Annotations = labels
+	} else {
+		meta.Annotations = nil
+	}
+
+	// resource modelToSpecRoot RequiredUintField --> Timeout
+	spec.Timeout = uint32(data.Timeout.ValueInt64())
+
+	// resource modelToSpecRoot RequiredUintField --> Interval
+	spec.Interval = uint32(data.Interval.ValueInt64())
+
+	// resource modelToSpecRoot RequiredUintField --> UnhealthyThreshold
+	spec.UnhealthyThreshold = uint32(data.UnhealthyThreshold.ValueInt64())
+
+	// resource modelToSpecRoot RequiredUintField --> HealthyThreshold
+	spec.HealthyThreshold = uint32(data.HealthyThreshold.ValueInt64())
+
+	// resource modelToSpecRoot UintField --> JitterPercent
+	if !data.JitterPercent.IsNull() && !data.JitterPercent.IsUnknown() {
+		spec.JitterPercent = uint32(data.JitterPercent.ValueInt64())
+	}
+
 	// resource modelToSpecRoot RequiredOneOfField --> HealthCheck
 	if !data.HealthCheckChoice.IsNull() && !data.HealthCheckChoice.IsUnknown() {
 		healthCheckChoiceModel := HealthcheckGlobalSpecTypeHealthCheckChoice{}
 		response.Diagnostics.Append(data.HealthCheckChoice.As(ctx, &healthCheckChoiceModel, basetypes.ObjectAsOptions{})...)
 		if response.Diagnostics.HasError() {
 			return
-		}
-
-		// resource modelToSpecNested PointerOfOneOfField --> TcpHealthCheck
-		if !healthCheckChoiceModel.TcpHealthCheck.IsNull() && !healthCheckChoiceModel.TcpHealthCheck.IsUnknown() {
-			var healthcheckGlobalSpecTypeTcpHealthCheckModel HealthcheckGlobalSpecTypeTcpHealthCheck
-			response.Diagnostics.Append(healthCheckChoiceModel.TcpHealthCheck.As(ctx, &healthcheckGlobalSpecTypeTcpHealthCheckModel, basetypes.ObjectAsOptions{})...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			tcpHealthCheckOneOfSpec := &ves_io_schema_healthcheck.CreateSpecType_TcpHealthCheck{}
-			tcpHealthCheckOneOfSpec.TcpHealthCheck = &ves_io_schema_healthcheck.TcpHealthCheck{}
-			spec.HealthCheck = tcpHealthCheckOneOfSpec
-
-			// resource modelToSpecNested StringField --> SendPayload
-			if !healthcheckGlobalSpecTypeTcpHealthCheckModel.SendPayload.IsNull() && !healthcheckGlobalSpecTypeTcpHealthCheckModel.SendPayload.IsUnknown() {
-				tcpHealthCheckOneOfSpec.TcpHealthCheck.SendPayload = string(healthcheckGlobalSpecTypeTcpHealthCheckModel.SendPayload.ValueString())
-			}
-
-			// resource modelToSpecNested StringField --> ExpectedResponse
-			if !healthcheckGlobalSpecTypeTcpHealthCheckModel.ExpectedResponse.IsNull() && !healthcheckGlobalSpecTypeTcpHealthCheckModel.ExpectedResponse.IsUnknown() {
-				tcpHealthCheckOneOfSpec.TcpHealthCheck.ExpectedResponse = string(healthcheckGlobalSpecTypeTcpHealthCheckModel.ExpectedResponse.ValueString())
-			}
-
-		}
-
-		// resource modelToSpecNested BoolOfOneOfPointerField --> UdpIcmpHealthCheck
-		if !healthCheckChoiceModel.UdpIcmpHealthCheck.IsNull() && !healthCheckChoiceModel.UdpIcmpHealthCheck.IsUnknown() {
-			udpIcmpHealthCheckSpecBool := &ves_io_schema_healthcheck.CreateSpecType_UdpIcmpHealthCheck{}
-			udpIcmpHealthCheckSpecBool.UdpIcmpHealthCheck = &ves_io_schema.Empty{}
-			spec.HealthCheck = udpIcmpHealthCheckSpecBool
 		}
 
 		// resource modelToSpecNested PointerOfOneOfField --> HttpHealthCheck
@@ -699,23 +686,36 @@ func (r *ResourceF5XCHealthcheck) Create(ctx context.Context, request resource.C
 
 		}
 
-	}
+		// resource modelToSpecNested PointerOfOneOfField --> TcpHealthCheck
+		if !healthCheckChoiceModel.TcpHealthCheck.IsNull() && !healthCheckChoiceModel.TcpHealthCheck.IsUnknown() {
+			var healthcheckGlobalSpecTypeTcpHealthCheckModel HealthcheckGlobalSpecTypeTcpHealthCheck
+			response.Diagnostics.Append(healthCheckChoiceModel.TcpHealthCheck.As(ctx, &healthcheckGlobalSpecTypeTcpHealthCheckModel, basetypes.ObjectAsOptions{})...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			tcpHealthCheckOneOfSpec := &ves_io_schema_healthcheck.CreateSpecType_TcpHealthCheck{}
+			tcpHealthCheckOneOfSpec.TcpHealthCheck = &ves_io_schema_healthcheck.TcpHealthCheck{}
+			spec.HealthCheck = tcpHealthCheckOneOfSpec
 
-	// resource modelToSpecRoot RequiredUintField --> Timeout
-	spec.Timeout = uint32(data.Timeout.ValueInt64())
+			// resource modelToSpecNested StringField --> SendPayload
+			if !healthcheckGlobalSpecTypeTcpHealthCheckModel.SendPayload.IsNull() && !healthcheckGlobalSpecTypeTcpHealthCheckModel.SendPayload.IsUnknown() {
+				tcpHealthCheckOneOfSpec.TcpHealthCheck.SendPayload = string(healthcheckGlobalSpecTypeTcpHealthCheckModel.SendPayload.ValueString())
+			}
 
-	// resource modelToSpecRoot RequiredUintField --> Interval
-	spec.Interval = uint32(data.Interval.ValueInt64())
+			// resource modelToSpecNested StringField --> ExpectedResponse
+			if !healthcheckGlobalSpecTypeTcpHealthCheckModel.ExpectedResponse.IsNull() && !healthcheckGlobalSpecTypeTcpHealthCheckModel.ExpectedResponse.IsUnknown() {
+				tcpHealthCheckOneOfSpec.TcpHealthCheck.ExpectedResponse = string(healthcheckGlobalSpecTypeTcpHealthCheckModel.ExpectedResponse.ValueString())
+			}
 
-	// resource modelToSpecRoot RequiredUintField --> UnhealthyThreshold
-	spec.UnhealthyThreshold = uint32(data.UnhealthyThreshold.ValueInt64())
+		}
 
-	// resource modelToSpecRoot RequiredUintField --> HealthyThreshold
-	spec.HealthyThreshold = uint32(data.HealthyThreshold.ValueInt64())
+		// resource modelToSpecNested BoolOfOneOfPointerField --> UdpIcmpHealthCheck
+		if !healthCheckChoiceModel.UdpIcmpHealthCheck.IsNull() && !healthCheckChoiceModel.UdpIcmpHealthCheck.IsUnknown() {
+			udpIcmpHealthCheckSpecBool := &ves_io_schema_healthcheck.CreateSpecType_UdpIcmpHealthCheck{}
+			udpIcmpHealthCheckSpecBool.UdpIcmpHealthCheck = &ves_io_schema.Empty{}
+			spec.HealthCheck = udpIcmpHealthCheckSpecBool
+		}
 
-	// resource modelToSpecRoot UintField --> JitterPercent
-	if !data.JitterPercent.IsNull() && !data.JitterPercent.IsUnknown() {
-		spec.JitterPercent = uint32(data.JitterPercent.ValueInt64())
 	}
 
 	if response.Diagnostics.HasError() {
@@ -750,6 +750,18 @@ func (r *ResourceF5XCHealthcheck) Create(ctx context.Context, request resource.C
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
+
+	// resource SpecToModelRoot Meta StringField --> Description
+	data.Description = types.StringValue(metaData.GetDescription())
+
+	// resource SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
+
+	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
+	data.Namespace = types.StringValue(metaData.GetNamespace())
+
+	// resource SpecToModelRoot Meta StringField --> Uid
+	data.Uid = types.StringValue(systemMetaData.GetUid())
 
 	// resource SpecToModelRoot Meta MapOfStringField --> Labels
 	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
@@ -829,17 +841,37 @@ func (r *ResourceF5XCHealthcheck) Create(ctx context.Context, request resource.C
 		data.Annotations = types.MapNull(types.StringType)
 	}
 
-	// resource SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
+	// resource SpecToModelRoot RequiredUintField --> Timeout
+	timeoutValue := specData.GetTimeout()
+	if timeoutValue > 0 {
+		data.Timeout = types.Int64Value(int64(timeoutValue))
+	}
 
-	// resource SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
+	// resource SpecToModelRoot RequiredUintField --> Interval
+	intervalValue := specData.GetInterval()
+	if intervalValue > 0 {
+		data.Interval = types.Int64Value(int64(intervalValue))
+	}
 
-	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
-	data.Namespace = types.StringValue(metaData.GetNamespace())
+	// resource SpecToModelRoot RequiredUintField --> UnhealthyThreshold
+	unhealthyThresholdValue := specData.GetUnhealthyThreshold()
+	if unhealthyThresholdValue > 0 {
+		data.UnhealthyThreshold = types.Int64Value(int64(unhealthyThresholdValue))
+	}
 
-	// resource SpecToModelRoot Meta StringField --> Uid
-	data.Uid = types.StringValue(systemMetaData.GetUid())
+	// resource SpecToModelRoot RequiredUintField --> HealthyThreshold
+	healthyThresholdValue := specData.GetHealthyThreshold()
+	if healthyThresholdValue > 0 {
+		data.HealthyThreshold = types.Int64Value(int64(healthyThresholdValue))
+	}
+
+	// resource SpecToModelRoot UintField --> JitterPercent
+	jitterPercentValue := specData.GetJitterPercent()
+	if jitterPercentValue > 0 {
+		data.JitterPercent = types.Int64Value(int64(jitterPercentValue))
+	} else {
+		data.JitterPercent = types.Int64Null()
+	}
 
 	// resource SpecToModelRoot RequiredOneOfField --> HealthCheck
 	// false
@@ -853,51 +885,6 @@ func (r *ResourceF5XCHealthcheck) Create(ctx context.Context, request resource.C
 		var healthCheckChoiceChoicesModel = &HealthcheckGlobalSpecTypeHealthCheckChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
-
-		// resource specToModelNested PointerOfOneOfField --> TcpHealthCheck
-		// GlobalSpecType
-		// false
-		{
-			tcpHealthCheckOptions, isTcpHealthCheck := healthCheckChoiceChoices.(*ves_io_schema_healthcheck.GlobalSpecType_TcpHealthCheck)
-			tcpHealthCheckAttributeMap := make(map[string]attr.Value)
-
-			if isTcpHealthCheck && tcpHealthCheckOptions != nil {
-
-				// resource specToModelNested StringField --> SendPayload
-				if tcpHealthCheckOptions.TcpHealthCheck.GetSendPayload() != "" {
-					tcpHealthCheckAttributeMap["send_payload"] = types.StringValue(tcpHealthCheckOptions.TcpHealthCheck.GetSendPayload())
-				} else {
-					// Empty string, set to null
-					tcpHealthCheckAttributeMap["send_payload"] = types.StringNull()
-				}
-
-				// resource specToModelNested StringField --> ExpectedResponse
-				if tcpHealthCheckOptions.TcpHealthCheck.GetExpectedResponse() != "" {
-					tcpHealthCheckAttributeMap["expected_response"] = types.StringValue(tcpHealthCheckOptions.TcpHealthCheck.GetExpectedResponse())
-				} else {
-					// Empty string, set to null
-					tcpHealthCheckAttributeMap["expected_response"] = types.StringNull()
-				}
-
-				tcpHealthCheckObj, diags := types.ObjectValue(HealthcheckHealthCheckTcpHealthCheckModelAttributeMap, tcpHealthCheckAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				healthCheckChoiceChoicesModel.TcpHealthCheck = tcpHealthCheckObj
-			} else {
-				healthCheckChoiceChoicesModel.TcpHealthCheck = types.ObjectNull(HealthcheckHealthCheckTcpHealthCheckModelAttributeMap)
-			}
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> UdpIcmpHealthCheck
-		_, isUdpIcmpHealthCheck := healthCheckChoiceChoices.(*ves_io_schema_healthcheck.GlobalSpecType_UdpIcmpHealthCheck)
-
-		if isUdpIcmpHealthCheck {
-			healthCheckChoiceChoicesModel.UdpIcmpHealthCheck = types.BoolValue(true)
-		} else {
-			healthCheckChoiceChoicesModel.UdpIcmpHealthCheck = types.BoolNull()
-		}
 
 		// resource specToModelNested PointerOfOneOfField --> HttpHealthCheck
 		// GlobalSpecType
@@ -1026,6 +1013,51 @@ func (r *ResourceF5XCHealthcheck) Create(ctx context.Context, request resource.C
 			}
 		}
 
+		// resource specToModelNested PointerOfOneOfField --> TcpHealthCheck
+		// GlobalSpecType
+		// false
+		{
+			tcpHealthCheckOptions, isTcpHealthCheck := healthCheckChoiceChoices.(*ves_io_schema_healthcheck.GlobalSpecType_TcpHealthCheck)
+			tcpHealthCheckAttributeMap := make(map[string]attr.Value)
+
+			if isTcpHealthCheck && tcpHealthCheckOptions != nil {
+
+				// resource specToModelNested StringField --> SendPayload
+				if tcpHealthCheckOptions.TcpHealthCheck.GetSendPayload() != "" {
+					tcpHealthCheckAttributeMap["send_payload"] = types.StringValue(tcpHealthCheckOptions.TcpHealthCheck.GetSendPayload())
+				} else {
+					// Empty string, set to null
+					tcpHealthCheckAttributeMap["send_payload"] = types.StringNull()
+				}
+
+				// resource specToModelNested StringField --> ExpectedResponse
+				if tcpHealthCheckOptions.TcpHealthCheck.GetExpectedResponse() != "" {
+					tcpHealthCheckAttributeMap["expected_response"] = types.StringValue(tcpHealthCheckOptions.TcpHealthCheck.GetExpectedResponse())
+				} else {
+					// Empty string, set to null
+					tcpHealthCheckAttributeMap["expected_response"] = types.StringNull()
+				}
+
+				tcpHealthCheckObj, diags := types.ObjectValue(HealthcheckHealthCheckTcpHealthCheckModelAttributeMap, tcpHealthCheckAttributeMap)
+				response.Diagnostics.Append(diags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				healthCheckChoiceChoicesModel.TcpHealthCheck = tcpHealthCheckObj
+			} else {
+				healthCheckChoiceChoicesModel.TcpHealthCheck = types.ObjectNull(HealthcheckHealthCheckTcpHealthCheckModelAttributeMap)
+			}
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> UdpIcmpHealthCheck
+		_, isUdpIcmpHealthCheck := healthCheckChoiceChoices.(*ves_io_schema_healthcheck.GlobalSpecType_UdpIcmpHealthCheck)
+
+		if isUdpIcmpHealthCheck {
+			healthCheckChoiceChoicesModel.UdpIcmpHealthCheck = types.BoolValue(true)
+		} else {
+			healthCheckChoiceChoicesModel.UdpIcmpHealthCheck = types.BoolNull()
+		}
+
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
 		healthCheckChoiceObj, diags := utils.GoStructToObjectValue(
 			ctx,
@@ -1042,38 +1074,6 @@ func (r *ResourceF5XCHealthcheck) Create(ctx context.Context, request resource.C
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		data.HealthCheckChoice = types.ObjectNull(HealthcheckHealthCheckModelAttributeMap)
-	}
-
-	// resource SpecToModelRoot RequiredUintField --> Timeout
-	timeoutValue := specData.GetTimeout()
-	if timeoutValue > 0 {
-		data.Timeout = types.Int64Value(int64(timeoutValue))
-	}
-
-	// resource SpecToModelRoot RequiredUintField --> Interval
-	intervalValue := specData.GetInterval()
-	if intervalValue > 0 {
-		data.Interval = types.Int64Value(int64(intervalValue))
-	}
-
-	// resource SpecToModelRoot RequiredUintField --> UnhealthyThreshold
-	unhealthyThresholdValue := specData.GetUnhealthyThreshold()
-	if unhealthyThresholdValue > 0 {
-		data.UnhealthyThreshold = types.Int64Value(int64(unhealthyThresholdValue))
-	}
-
-	// resource SpecToModelRoot RequiredUintField --> HealthyThreshold
-	healthyThresholdValue := specData.GetHealthyThreshold()
-	if healthyThresholdValue > 0 {
-		data.HealthyThreshold = types.Int64Value(int64(healthyThresholdValue))
-	}
-
-	// resource SpecToModelRoot UintField --> JitterPercent
-	jitterPercentValue := specData.GetJitterPercent()
-	if jitterPercentValue > 0 {
-		data.JitterPercent = types.Int64Value(int64(jitterPercentValue))
-	} else {
-		data.JitterPercent = types.Int64Null()
 	}
 
 	if response.Diagnostics.HasError() {
@@ -1138,6 +1138,18 @@ func (r *ResourceF5XCHealthcheck) Read(ctx context.Context, request resource.Rea
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
+
+	// resource SpecToModelRoot Meta StringField --> Description
+	data.Description = types.StringValue(metaData.GetDescription())
+
+	// resource SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
+
+	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
+	data.Namespace = types.StringValue(metaData.GetNamespace())
+
+	// resource SpecToModelRoot Meta StringField --> Uid
+	data.Uid = types.StringValue(systemMetaData.GetUid())
 
 	// resource SpecToModelRoot Meta MapOfStringField --> Labels
 	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
@@ -1233,17 +1245,37 @@ func (r *ResourceF5XCHealthcheck) Read(ctx context.Context, request resource.Rea
 		data.Annotations = types.MapNull(types.StringType)
 	}
 
-	// resource SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
+	// resource SpecToModelRoot RequiredUintField --> Timeout
+	timeoutValue := specData.GetTimeout()
+	if timeoutValue > 0 {
+		data.Timeout = types.Int64Value(int64(timeoutValue))
+	}
 
-	// resource SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
+	// resource SpecToModelRoot RequiredUintField --> Interval
+	intervalValue := specData.GetInterval()
+	if intervalValue > 0 {
+		data.Interval = types.Int64Value(int64(intervalValue))
+	}
 
-	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
-	data.Namespace = types.StringValue(metaData.GetNamespace())
+	// resource SpecToModelRoot RequiredUintField --> UnhealthyThreshold
+	unhealthyThresholdValue := specData.GetUnhealthyThreshold()
+	if unhealthyThresholdValue > 0 {
+		data.UnhealthyThreshold = types.Int64Value(int64(unhealthyThresholdValue))
+	}
 
-	// resource SpecToModelRoot Meta StringField --> Uid
-	data.Uid = types.StringValue(systemMetaData.GetUid())
+	// resource SpecToModelRoot RequiredUintField --> HealthyThreshold
+	healthyThresholdValue := specData.GetHealthyThreshold()
+	if healthyThresholdValue > 0 {
+		data.HealthyThreshold = types.Int64Value(int64(healthyThresholdValue))
+	}
+
+	// resource SpecToModelRoot UintField --> JitterPercent
+	jitterPercentValue := specData.GetJitterPercent()
+	if jitterPercentValue > 0 {
+		data.JitterPercent = types.Int64Value(int64(jitterPercentValue))
+	} else {
+		data.JitterPercent = types.Int64Null()
+	}
 
 	// resource SpecToModelRoot RequiredOneOfField --> HealthCheck
 	// false
@@ -1257,51 +1289,6 @@ func (r *ResourceF5XCHealthcheck) Read(ctx context.Context, request resource.Rea
 		var healthCheckChoiceChoicesModel = &HealthcheckGlobalSpecTypeHealthCheckChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
-
-		// resource specToModelNested PointerOfOneOfField --> TcpHealthCheck
-		// <no value>
-		// false
-		{
-			tcpHealthCheckOptions, isTcpHealthCheck := healthCheckChoiceChoices.(*ves_io_schema_healthcheck.GlobalSpecType_TcpHealthCheck)
-			tcpHealthCheckAttributeMap := make(map[string]attr.Value)
-
-			if isTcpHealthCheck && tcpHealthCheckOptions != nil {
-
-				// resource specToModelNested StringField --> SendPayload
-				if tcpHealthCheckOptions.TcpHealthCheck.GetSendPayload() != "" {
-					tcpHealthCheckAttributeMap["send_payload"] = types.StringValue(tcpHealthCheckOptions.TcpHealthCheck.GetSendPayload())
-				} else {
-					// Empty string, set to null
-					tcpHealthCheckAttributeMap["send_payload"] = types.StringNull()
-				}
-
-				// resource specToModelNested StringField --> ExpectedResponse
-				if tcpHealthCheckOptions.TcpHealthCheck.GetExpectedResponse() != "" {
-					tcpHealthCheckAttributeMap["expected_response"] = types.StringValue(tcpHealthCheckOptions.TcpHealthCheck.GetExpectedResponse())
-				} else {
-					// Empty string, set to null
-					tcpHealthCheckAttributeMap["expected_response"] = types.StringNull()
-				}
-
-				tcpHealthCheckObj, diags := types.ObjectValue(HealthcheckHealthCheckTcpHealthCheckModelAttributeMap, tcpHealthCheckAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				healthCheckChoiceChoicesModel.TcpHealthCheck = tcpHealthCheckObj
-			} else {
-				healthCheckChoiceChoicesModel.TcpHealthCheck = types.ObjectNull(HealthcheckHealthCheckTcpHealthCheckModelAttributeMap)
-			}
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> UdpIcmpHealthCheck
-		_, isUdpIcmpHealthCheck := healthCheckChoiceChoices.(*ves_io_schema_healthcheck.GlobalSpecType_UdpIcmpHealthCheck)
-
-		if isUdpIcmpHealthCheck {
-			healthCheckChoiceChoicesModel.UdpIcmpHealthCheck = types.BoolValue(true)
-		} else {
-			healthCheckChoiceChoicesModel.UdpIcmpHealthCheck = types.BoolNull()
-		}
 
 		// resource specToModelNested PointerOfOneOfField --> HttpHealthCheck
 		// <no value>
@@ -1430,6 +1417,51 @@ func (r *ResourceF5XCHealthcheck) Read(ctx context.Context, request resource.Rea
 			}
 		}
 
+		// resource specToModelNested PointerOfOneOfField --> TcpHealthCheck
+		// <no value>
+		// false
+		{
+			tcpHealthCheckOptions, isTcpHealthCheck := healthCheckChoiceChoices.(*ves_io_schema_healthcheck.GlobalSpecType_TcpHealthCheck)
+			tcpHealthCheckAttributeMap := make(map[string]attr.Value)
+
+			if isTcpHealthCheck && tcpHealthCheckOptions != nil {
+
+				// resource specToModelNested StringField --> SendPayload
+				if tcpHealthCheckOptions.TcpHealthCheck.GetSendPayload() != "" {
+					tcpHealthCheckAttributeMap["send_payload"] = types.StringValue(tcpHealthCheckOptions.TcpHealthCheck.GetSendPayload())
+				} else {
+					// Empty string, set to null
+					tcpHealthCheckAttributeMap["send_payload"] = types.StringNull()
+				}
+
+				// resource specToModelNested StringField --> ExpectedResponse
+				if tcpHealthCheckOptions.TcpHealthCheck.GetExpectedResponse() != "" {
+					tcpHealthCheckAttributeMap["expected_response"] = types.StringValue(tcpHealthCheckOptions.TcpHealthCheck.GetExpectedResponse())
+				} else {
+					// Empty string, set to null
+					tcpHealthCheckAttributeMap["expected_response"] = types.StringNull()
+				}
+
+				tcpHealthCheckObj, diags := types.ObjectValue(HealthcheckHealthCheckTcpHealthCheckModelAttributeMap, tcpHealthCheckAttributeMap)
+				response.Diagnostics.Append(diags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				healthCheckChoiceChoicesModel.TcpHealthCheck = tcpHealthCheckObj
+			} else {
+				healthCheckChoiceChoicesModel.TcpHealthCheck = types.ObjectNull(HealthcheckHealthCheckTcpHealthCheckModelAttributeMap)
+			}
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> UdpIcmpHealthCheck
+		_, isUdpIcmpHealthCheck := healthCheckChoiceChoices.(*ves_io_schema_healthcheck.GlobalSpecType_UdpIcmpHealthCheck)
+
+		if isUdpIcmpHealthCheck {
+			healthCheckChoiceChoicesModel.UdpIcmpHealthCheck = types.BoolValue(true)
+		} else {
+			healthCheckChoiceChoicesModel.UdpIcmpHealthCheck = types.BoolNull()
+		}
+
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
 		healthCheckChoiceObj, diags := utils.GoStructToObjectValue(
 			ctx,
@@ -1446,38 +1478,6 @@ func (r *ResourceF5XCHealthcheck) Read(ctx context.Context, request resource.Rea
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		data.HealthCheckChoice = types.ObjectNull(HealthcheckHealthCheckModelAttributeMap)
-	}
-
-	// resource SpecToModelRoot RequiredUintField --> Timeout
-	timeoutValue := specData.GetTimeout()
-	if timeoutValue > 0 {
-		data.Timeout = types.Int64Value(int64(timeoutValue))
-	}
-
-	// resource SpecToModelRoot RequiredUintField --> Interval
-	intervalValue := specData.GetInterval()
-	if intervalValue > 0 {
-		data.Interval = types.Int64Value(int64(intervalValue))
-	}
-
-	// resource SpecToModelRoot RequiredUintField --> UnhealthyThreshold
-	unhealthyThresholdValue := specData.GetUnhealthyThreshold()
-	if unhealthyThresholdValue > 0 {
-		data.UnhealthyThreshold = types.Int64Value(int64(unhealthyThresholdValue))
-	}
-
-	// resource SpecToModelRoot RequiredUintField --> HealthyThreshold
-	healthyThresholdValue := specData.GetHealthyThreshold()
-	if healthyThresholdValue > 0 {
-		data.HealthyThreshold = types.Int64Value(int64(healthyThresholdValue))
-	}
-
-	// resource SpecToModelRoot UintField --> JitterPercent
-	jitterPercentValue := specData.GetJitterPercent()
-	if jitterPercentValue > 0 {
-		data.JitterPercent = types.Int64Value(int64(jitterPercentValue))
-	} else {
-		data.JitterPercent = types.Int64Null()
 	}
 
 	if response.Diagnostics.HasError() {
@@ -1527,20 +1527,6 @@ func (r *ResourceF5XCHealthcheck) Update(ctx context.Context, request resource.U
 
 	// Populate updateReq from data model
 
-	// resource modelToMetaRoot MapOfStringField --> Annotations
-	if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
-		var labels map[string]string
-		diags = data.Annotations.ElementsAs(ctx, &labels, false)
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			tflog.Error(ctx, "Failed to convert annotations from map to model")
-			return
-		}
-		meta.Annotations = labels
-	} else {
-		meta.Annotations = nil
-	}
-
 	// resource modelToMetaRoot StringField --> Description
 	if !data.Description.IsNull() && !data.Description.IsUnknown() {
 		meta.Description = string(data.Description.ValueString())
@@ -1556,42 +1542,43 @@ func (r *ResourceF5XCHealthcheck) Update(ctx context.Context, request resource.U
 		meta.Namespace = string(data.Namespace.ValueString())
 	}
 
+	// resource modelToMetaRoot MapOfStringField --> Annotations
+	if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
+		var labels map[string]string
+		diags = data.Annotations.ElementsAs(ctx, &labels, false)
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			tflog.Error(ctx, "Failed to convert annotations from map to model")
+			return
+		}
+		meta.Annotations = labels
+	} else {
+		meta.Annotations = nil
+	}
+
+	// resource modelToSpecRoot RequiredUintField --> Timeout
+	spec.Timeout = uint32(data.Timeout.ValueInt64())
+
+	// resource modelToSpecRoot RequiredUintField --> Interval
+	spec.Interval = uint32(data.Interval.ValueInt64())
+
+	// resource modelToSpecRoot RequiredUintField --> UnhealthyThreshold
+	spec.UnhealthyThreshold = uint32(data.UnhealthyThreshold.ValueInt64())
+
+	// resource modelToSpecRoot RequiredUintField --> HealthyThreshold
+	spec.HealthyThreshold = uint32(data.HealthyThreshold.ValueInt64())
+
+	// resource modelToSpecRoot UintField --> JitterPercent
+	if !data.JitterPercent.IsNull() && !data.JitterPercent.IsUnknown() {
+		spec.JitterPercent = uint32(data.JitterPercent.ValueInt64())
+	}
+
 	// resource modelToSpecRoot RequiredOneOfField --> HealthCheck
 	if !data.HealthCheckChoice.IsNull() && !data.HealthCheckChoice.IsUnknown() {
 		healthCheckChoiceModel := HealthcheckGlobalSpecTypeHealthCheckChoice{}
 		response.Diagnostics.Append(data.HealthCheckChoice.As(ctx, &healthCheckChoiceModel, basetypes.ObjectAsOptions{})...)
 		if response.Diagnostics.HasError() {
 			return
-		}
-
-		// resource modelToSpecNested PointerOfOneOfField --> TcpHealthCheck
-		if !healthCheckChoiceModel.TcpHealthCheck.IsNull() && !healthCheckChoiceModel.TcpHealthCheck.IsUnknown() {
-			var healthcheckGlobalSpecTypeTcpHealthCheckModel HealthcheckGlobalSpecTypeTcpHealthCheck
-			response.Diagnostics.Append(healthCheckChoiceModel.TcpHealthCheck.As(ctx, &healthcheckGlobalSpecTypeTcpHealthCheckModel, basetypes.ObjectAsOptions{})...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			tcpHealthCheckOneOfSpec := &ves_io_schema_healthcheck.ReplaceSpecType_TcpHealthCheck{}
-			tcpHealthCheckOneOfSpec.TcpHealthCheck = &ves_io_schema_healthcheck.TcpHealthCheck{}
-			spec.HealthCheck = tcpHealthCheckOneOfSpec
-
-			// resource modelToSpecNested StringField --> SendPayload
-			if !healthcheckGlobalSpecTypeTcpHealthCheckModel.SendPayload.IsNull() && !healthcheckGlobalSpecTypeTcpHealthCheckModel.SendPayload.IsUnknown() {
-				tcpHealthCheckOneOfSpec.TcpHealthCheck.SendPayload = string(healthcheckGlobalSpecTypeTcpHealthCheckModel.SendPayload.ValueString())
-			}
-
-			// resource modelToSpecNested StringField --> ExpectedResponse
-			if !healthcheckGlobalSpecTypeTcpHealthCheckModel.ExpectedResponse.IsNull() && !healthcheckGlobalSpecTypeTcpHealthCheckModel.ExpectedResponse.IsUnknown() {
-				tcpHealthCheckOneOfSpec.TcpHealthCheck.ExpectedResponse = string(healthcheckGlobalSpecTypeTcpHealthCheckModel.ExpectedResponse.ValueString())
-			}
-
-		}
-
-		// resource modelToSpecNested BoolOfOneOfPointerField --> UdpIcmpHealthCheck
-		if !healthCheckChoiceModel.UdpIcmpHealthCheck.IsNull() && !healthCheckChoiceModel.UdpIcmpHealthCheck.IsUnknown() {
-			udpIcmpHealthCheckSpecBool := &ves_io_schema_healthcheck.ReplaceSpecType_UdpIcmpHealthCheck{}
-			udpIcmpHealthCheckSpecBool.UdpIcmpHealthCheck = &ves_io_schema.Empty{}
-			spec.HealthCheck = udpIcmpHealthCheckSpecBool
 		}
 
 		// resource modelToSpecNested PointerOfOneOfField --> HttpHealthCheck
@@ -1682,23 +1669,36 @@ func (r *ResourceF5XCHealthcheck) Update(ctx context.Context, request resource.U
 
 		}
 
-	}
+		// resource modelToSpecNested PointerOfOneOfField --> TcpHealthCheck
+		if !healthCheckChoiceModel.TcpHealthCheck.IsNull() && !healthCheckChoiceModel.TcpHealthCheck.IsUnknown() {
+			var healthcheckGlobalSpecTypeTcpHealthCheckModel HealthcheckGlobalSpecTypeTcpHealthCheck
+			response.Diagnostics.Append(healthCheckChoiceModel.TcpHealthCheck.As(ctx, &healthcheckGlobalSpecTypeTcpHealthCheckModel, basetypes.ObjectAsOptions{})...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			tcpHealthCheckOneOfSpec := &ves_io_schema_healthcheck.ReplaceSpecType_TcpHealthCheck{}
+			tcpHealthCheckOneOfSpec.TcpHealthCheck = &ves_io_schema_healthcheck.TcpHealthCheck{}
+			spec.HealthCheck = tcpHealthCheckOneOfSpec
 
-	// resource modelToSpecRoot RequiredUintField --> Timeout
-	spec.Timeout = uint32(data.Timeout.ValueInt64())
+			// resource modelToSpecNested StringField --> SendPayload
+			if !healthcheckGlobalSpecTypeTcpHealthCheckModel.SendPayload.IsNull() && !healthcheckGlobalSpecTypeTcpHealthCheckModel.SendPayload.IsUnknown() {
+				tcpHealthCheckOneOfSpec.TcpHealthCheck.SendPayload = string(healthcheckGlobalSpecTypeTcpHealthCheckModel.SendPayload.ValueString())
+			}
 
-	// resource modelToSpecRoot RequiredUintField --> Interval
-	spec.Interval = uint32(data.Interval.ValueInt64())
+			// resource modelToSpecNested StringField --> ExpectedResponse
+			if !healthcheckGlobalSpecTypeTcpHealthCheckModel.ExpectedResponse.IsNull() && !healthcheckGlobalSpecTypeTcpHealthCheckModel.ExpectedResponse.IsUnknown() {
+				tcpHealthCheckOneOfSpec.TcpHealthCheck.ExpectedResponse = string(healthcheckGlobalSpecTypeTcpHealthCheckModel.ExpectedResponse.ValueString())
+			}
 
-	// resource modelToSpecRoot RequiredUintField --> UnhealthyThreshold
-	spec.UnhealthyThreshold = uint32(data.UnhealthyThreshold.ValueInt64())
+		}
 
-	// resource modelToSpecRoot RequiredUintField --> HealthyThreshold
-	spec.HealthyThreshold = uint32(data.HealthyThreshold.ValueInt64())
+		// resource modelToSpecNested BoolOfOneOfPointerField --> UdpIcmpHealthCheck
+		if !healthCheckChoiceModel.UdpIcmpHealthCheck.IsNull() && !healthCheckChoiceModel.UdpIcmpHealthCheck.IsUnknown() {
+			udpIcmpHealthCheckSpecBool := &ves_io_schema_healthcheck.ReplaceSpecType_UdpIcmpHealthCheck{}
+			udpIcmpHealthCheckSpecBool.UdpIcmpHealthCheck = &ves_io_schema.Empty{}
+			spec.HealthCheck = udpIcmpHealthCheckSpecBool
+		}
 
-	// resource modelToSpecRoot UintField --> JitterPercent
-	if !data.JitterPercent.IsNull() && !data.JitterPercent.IsUnknown() {
-		spec.JitterPercent = uint32(data.JitterPercent.ValueInt64())
 	}
 
 	if response.Diagnostics.HasError() {
@@ -1734,6 +1734,18 @@ func (r *ResourceF5XCHealthcheck) Update(ctx context.Context, request resource.U
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
+
+	// resource SpecToModelRoot Meta StringField --> Description
+	data.Description = types.StringValue(metaData.GetDescription())
+
+	// resource SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
+
+	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
+	data.Namespace = types.StringValue(metaData.GetNamespace())
+
+	// resource SpecToModelRoot Meta StringField --> Uid
+	data.Uid = types.StringValue(systemMetaData.GetUid())
 
 	// resource SpecToModelRoot Meta MapOfStringField --> Labels
 	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
@@ -1829,17 +1841,37 @@ func (r *ResourceF5XCHealthcheck) Update(ctx context.Context, request resource.U
 		data.Annotations = types.MapNull(types.StringType)
 	}
 
-	// resource SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
+	// resource SpecToModelRoot RequiredUintField --> Timeout
+	timeoutValue := specData.GetTimeout()
+	if timeoutValue > 0 {
+		data.Timeout = types.Int64Value(int64(timeoutValue))
+	}
 
-	// resource SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
+	// resource SpecToModelRoot RequiredUintField --> Interval
+	intervalValue := specData.GetInterval()
+	if intervalValue > 0 {
+		data.Interval = types.Int64Value(int64(intervalValue))
+	}
 
-	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
-	data.Namespace = types.StringValue(metaData.GetNamespace())
+	// resource SpecToModelRoot RequiredUintField --> UnhealthyThreshold
+	unhealthyThresholdValue := specData.GetUnhealthyThreshold()
+	if unhealthyThresholdValue > 0 {
+		data.UnhealthyThreshold = types.Int64Value(int64(unhealthyThresholdValue))
+	}
 
-	// resource SpecToModelRoot Meta StringField --> Uid
-	data.Uid = types.StringValue(systemMetaData.GetUid())
+	// resource SpecToModelRoot RequiredUintField --> HealthyThreshold
+	healthyThresholdValue := specData.GetHealthyThreshold()
+	if healthyThresholdValue > 0 {
+		data.HealthyThreshold = types.Int64Value(int64(healthyThresholdValue))
+	}
+
+	// resource SpecToModelRoot UintField --> JitterPercent
+	jitterPercentValue := specData.GetJitterPercent()
+	if jitterPercentValue > 0 {
+		data.JitterPercent = types.Int64Value(int64(jitterPercentValue))
+	} else {
+		data.JitterPercent = types.Int64Null()
+	}
 
 	// resource SpecToModelRoot RequiredOneOfField --> HealthCheck
 	// false
@@ -1853,51 +1885,6 @@ func (r *ResourceF5XCHealthcheck) Update(ctx context.Context, request resource.U
 		var healthCheckChoiceChoicesModel = &HealthcheckGlobalSpecTypeHealthCheckChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
-
-		// resource specToModelNested PointerOfOneOfField --> TcpHealthCheck
-		// GlobalSpecType
-		// false
-		{
-			tcpHealthCheckOptions, isTcpHealthCheck := healthCheckChoiceChoices.(*ves_io_schema_healthcheck.GlobalSpecType_TcpHealthCheck)
-			tcpHealthCheckAttributeMap := make(map[string]attr.Value)
-
-			if isTcpHealthCheck && tcpHealthCheckOptions != nil {
-
-				// resource specToModelNested StringField --> SendPayload
-				if tcpHealthCheckOptions.TcpHealthCheck.GetSendPayload() != "" {
-					tcpHealthCheckAttributeMap["send_payload"] = types.StringValue(tcpHealthCheckOptions.TcpHealthCheck.GetSendPayload())
-				} else {
-					// Empty string, set to null
-					tcpHealthCheckAttributeMap["send_payload"] = types.StringNull()
-				}
-
-				// resource specToModelNested StringField --> ExpectedResponse
-				if tcpHealthCheckOptions.TcpHealthCheck.GetExpectedResponse() != "" {
-					tcpHealthCheckAttributeMap["expected_response"] = types.StringValue(tcpHealthCheckOptions.TcpHealthCheck.GetExpectedResponse())
-				} else {
-					// Empty string, set to null
-					tcpHealthCheckAttributeMap["expected_response"] = types.StringNull()
-				}
-
-				tcpHealthCheckObj, diags := types.ObjectValue(HealthcheckHealthCheckTcpHealthCheckModelAttributeMap, tcpHealthCheckAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				healthCheckChoiceChoicesModel.TcpHealthCheck = tcpHealthCheckObj
-			} else {
-				healthCheckChoiceChoicesModel.TcpHealthCheck = types.ObjectNull(HealthcheckHealthCheckTcpHealthCheckModelAttributeMap)
-			}
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> UdpIcmpHealthCheck
-		_, isUdpIcmpHealthCheck := healthCheckChoiceChoices.(*ves_io_schema_healthcheck.GlobalSpecType_UdpIcmpHealthCheck)
-
-		if isUdpIcmpHealthCheck {
-			healthCheckChoiceChoicesModel.UdpIcmpHealthCheck = types.BoolValue(true)
-		} else {
-			healthCheckChoiceChoicesModel.UdpIcmpHealthCheck = types.BoolNull()
-		}
 
 		// resource specToModelNested PointerOfOneOfField --> HttpHealthCheck
 		// GlobalSpecType
@@ -2026,6 +2013,51 @@ func (r *ResourceF5XCHealthcheck) Update(ctx context.Context, request resource.U
 			}
 		}
 
+		// resource specToModelNested PointerOfOneOfField --> TcpHealthCheck
+		// GlobalSpecType
+		// false
+		{
+			tcpHealthCheckOptions, isTcpHealthCheck := healthCheckChoiceChoices.(*ves_io_schema_healthcheck.GlobalSpecType_TcpHealthCheck)
+			tcpHealthCheckAttributeMap := make(map[string]attr.Value)
+
+			if isTcpHealthCheck && tcpHealthCheckOptions != nil {
+
+				// resource specToModelNested StringField --> SendPayload
+				if tcpHealthCheckOptions.TcpHealthCheck.GetSendPayload() != "" {
+					tcpHealthCheckAttributeMap["send_payload"] = types.StringValue(tcpHealthCheckOptions.TcpHealthCheck.GetSendPayload())
+				} else {
+					// Empty string, set to null
+					tcpHealthCheckAttributeMap["send_payload"] = types.StringNull()
+				}
+
+				// resource specToModelNested StringField --> ExpectedResponse
+				if tcpHealthCheckOptions.TcpHealthCheck.GetExpectedResponse() != "" {
+					tcpHealthCheckAttributeMap["expected_response"] = types.StringValue(tcpHealthCheckOptions.TcpHealthCheck.GetExpectedResponse())
+				} else {
+					// Empty string, set to null
+					tcpHealthCheckAttributeMap["expected_response"] = types.StringNull()
+				}
+
+				tcpHealthCheckObj, diags := types.ObjectValue(HealthcheckHealthCheckTcpHealthCheckModelAttributeMap, tcpHealthCheckAttributeMap)
+				response.Diagnostics.Append(diags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				healthCheckChoiceChoicesModel.TcpHealthCheck = tcpHealthCheckObj
+			} else {
+				healthCheckChoiceChoicesModel.TcpHealthCheck = types.ObjectNull(HealthcheckHealthCheckTcpHealthCheckModelAttributeMap)
+			}
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> UdpIcmpHealthCheck
+		_, isUdpIcmpHealthCheck := healthCheckChoiceChoices.(*ves_io_schema_healthcheck.GlobalSpecType_UdpIcmpHealthCheck)
+
+		if isUdpIcmpHealthCheck {
+			healthCheckChoiceChoicesModel.UdpIcmpHealthCheck = types.BoolValue(true)
+		} else {
+			healthCheckChoiceChoicesModel.UdpIcmpHealthCheck = types.BoolNull()
+		}
+
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
 		healthCheckChoiceObj, diags := utils.GoStructToObjectValue(
 			ctx,
@@ -2042,38 +2074,6 @@ func (r *ResourceF5XCHealthcheck) Update(ctx context.Context, request resource.U
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		data.HealthCheckChoice = types.ObjectNull(HealthcheckHealthCheckModelAttributeMap)
-	}
-
-	// resource SpecToModelRoot RequiredUintField --> Timeout
-	timeoutValue := specData.GetTimeout()
-	if timeoutValue > 0 {
-		data.Timeout = types.Int64Value(int64(timeoutValue))
-	}
-
-	// resource SpecToModelRoot RequiredUintField --> Interval
-	intervalValue := specData.GetInterval()
-	if intervalValue > 0 {
-		data.Interval = types.Int64Value(int64(intervalValue))
-	}
-
-	// resource SpecToModelRoot RequiredUintField --> UnhealthyThreshold
-	unhealthyThresholdValue := specData.GetUnhealthyThreshold()
-	if unhealthyThresholdValue > 0 {
-		data.UnhealthyThreshold = types.Int64Value(int64(unhealthyThresholdValue))
-	}
-
-	// resource SpecToModelRoot RequiredUintField --> HealthyThreshold
-	healthyThresholdValue := specData.GetHealthyThreshold()
-	if healthyThresholdValue > 0 {
-		data.HealthyThreshold = types.Int64Value(int64(healthyThresholdValue))
-	}
-
-	// resource SpecToModelRoot UintField --> JitterPercent
-	jitterPercentValue := specData.GetJitterPercent()
-	if jitterPercentValue > 0 {
-		data.JitterPercent = types.Int64Value(int64(jitterPercentValue))
-	} else {
-		data.JitterPercent = types.Int64Null()
 	}
 
 	// Save updated data into Terraform state

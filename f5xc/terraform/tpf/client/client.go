@@ -658,9 +658,13 @@ func NewVesAPIClient(c *ProviderConfig) (*APIClient, error) {
 		authClient = NewAuthClient(c.Url, p12Auth)
 	}
 
-	// Initialize the global rate limiter
+	// Initialize the global rate limiter.
+	// If no limiter config is provided, use rate.Inf (no rate limiting) so that
+	// limiter.Wait() calls in CRUD methods never panic on a nil limiter.
 	if c.Limiter != nil {
 		limiter = rate.NewLimiter(rate.Limit(c.Limiter.Rate/60.0), int(c.Limiter.Burst))
+	} else {
+		limiter = rate.NewLimiter(rate.Inf, 1)
 	}
 
 	c1 := APIClient{

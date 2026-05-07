@@ -29,12 +29,12 @@ type DataSourceF5XCNetworkFirewall struct {
 
 // DataSourceF5XCNetworkFirewallModel describes the resource data model.
 type DataSourceF5XCNetworkFirewallModel struct {
+	Annotations types.Map      `tfsdk:"annotations"`
+	Description types.String   `tfsdk:"description"`
 	Name        types.String   `tfsdk:"name"`
 	Namespace   types.String   `tfsdk:"namespace"`
 	Uid         types.String   `tfsdk:"uid"`
 	Labels      types.Map      `tfsdk:"labels"`
-	Annotations types.Map      `tfsdk:"annotations"`
-	Description types.String   `tfsdk:"description"`
 	Timeouts    timeouts.Value `tfsdk:"timeouts"`
 }
 
@@ -58,6 +58,19 @@ func (r *DataSourceF5XCNetworkFirewall) Schema(ctx context.Context, request data
 		Description:         "NetworkFirewall data source",
 
 		Attributes: map[string]schema.Attribute{
+			"annotations": schema.MapAttribute{
+				Description: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				ElementType: types.StringType,
+			},
+			"description": schema.StringAttribute{
+				Description: "description Human readable description for the object",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+			},
 			"name": schema.StringAttribute{
 				Description: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
 				Required:    false,
@@ -82,19 +95,6 @@ func (r *DataSourceF5XCNetworkFirewall) Schema(ctx context.Context, request data
 				Optional:    false,
 				Computed:    true,
 				ElementType: types.StringType,
-			},
-			"annotations": schema.MapAttribute{
-				Description: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
-			"description": schema.StringAttribute{
-				Description: "description Human readable description for the object",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
 			},
 			"timeouts": timeouts.Attributes(ctx, timeouts.Opts{
 				Read: false, // activate timeouts.read
@@ -167,6 +167,27 @@ func (d *DataSourceF5XCNetworkFirewall) Read(ctx context.Context, request dataso
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
+	// data SpecToModelRoot Meta MapOfStringField --> Annotations
+	if metaData.GetAnnotations() != nil {
+		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
+		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+		response.Diagnostics.Append(annotationsDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		// Assign the typed map to the model
+		data.Annotations = annotationsMap
+	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
+		// API returned nil and the model has no value: set an explicit Null map to avoid
+		// DynamicPseudoType errors. If the model already contains a value (e.g. labels were set
+		// but the API did not echo them back in the response), preserve the existing value to prevent
+		// "Provider produced inconsistent result after apply" errors.
+		data.Annotations = types.MapNull(types.StringType)
+	}
+
+	// data SpecToModelRoot Meta StringField --> Description
+	data.Description = types.StringValue(metaData.GetDescription())
+
 	// data SpecToModelRoot Meta RequiredStringField --> Name
 	data.Name = types.StringValue(metaData.GetName())
 
@@ -193,27 +214,6 @@ func (d *DataSourceF5XCNetworkFirewall) Read(ctx context.Context, request dataso
 		// "Provider produced inconsistent result after apply" errors.
 		data.Labels = types.MapNull(types.StringType)
 	}
-
-	// data SpecToModelRoot Meta MapOfStringField --> Annotations
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// Assign the typed map to the model
-		data.Annotations = annotationsMap
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil and the model has no value: set an explicit Null map to avoid
-		// DynamicPseudoType errors. If the model already contains a value (e.g. labels were set
-		// but the API did not echo them back in the response), preserve the existing value to prevent
-		// "Provider produced inconsistent result after apply" errors.
-		data.Annotations = types.MapNull(types.StringType)
-	}
-
-	// data SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
 
 	// Set state to fully populated data
 	diags = response.State.Set(ctx, &data)

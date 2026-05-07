@@ -66,12 +66,20 @@ type DnsLoadBalancerDnsLoadBalancerLoadBalancingRule struct {
 }
 
 type DnsLoadBalancerLoadBalancingRuleClientChoice struct {
+	AsnList                  types.Object `tfsdk:"asn_list"`
+	AsnMatcher               types.Object `tfsdk:"asn_matcher"`
 	IpPrefixList             types.Object `tfsdk:"ip_prefix_list"`
 	IpPrefixSet              types.Object `tfsdk:"ip_prefix_set"`
 	GeoLocationLabelSelector types.Object `tfsdk:"geo_location_label_selector"`
 	GeoLocationSet           types.Object `tfsdk:"geo_location_set"`
-	AsnList                  types.Object `tfsdk:"asn_list"`
-	AsnMatcher               types.Object `tfsdk:"asn_matcher"`
+}
+
+type DnsLoadBalancerLoadBalancingRuleAsnList struct {
+	AsNumbers types.List `tfsdk:"as_numbers"`
+}
+
+type DnsLoadBalancerLoadBalancingRuleAsnMatcher struct {
+	AsnSets types.List `tfsdk:"asn_sets"`
 }
 
 type DnsLoadBalancerLoadBalancingRuleIpPrefixList struct {
@@ -87,14 +95,6 @@ type DnsLoadBalancerLoadBalancingRuleIpPrefixSet struct {
 
 type DnsLoadBalancerLoadBalancingRuleGeoLocationLabelSelector struct {
 	Expressions types.List `tfsdk:"expressions"`
-}
-
-type DnsLoadBalancerLoadBalancingRuleAsnList struct {
-	AsNumbers types.List `tfsdk:"as_numbers"`
-}
-
-type DnsLoadBalancerLoadBalancingRuleAsnMatcher struct {
-	AsnSets types.List `tfsdk:"asn_sets"`
 }
 
 type DnsLoadBalancerLoadBalancingRuleActionChoice struct {
@@ -184,6 +184,12 @@ var DnsLoadBalancerRuleListRulesModelAttributeMap = map[string]attr.Type{
 // Attribute map for RequiredOneOfField --> ClientChoice
 var DnsLoadBalancerRuleListRulesClientChoiceModelAttributeMap = map[string]attr.Type{
 
+	"asn_list": types.ObjectType{
+		AttrTypes: DnsLoadBalancerRuleListRulesClientChoiceAsnListModelAttributeMap,
+	},
+	"asn_matcher": types.ObjectType{
+		AttrTypes: DnsLoadBalancerRuleListRulesClientChoiceAsnMatcherModelAttributeMap,
+	},
 	"ip_prefix_list": types.ObjectType{
 		AttrTypes: DnsLoadBalancerRuleListRulesClientChoiceIpPrefixListModelAttributeMap,
 	},
@@ -196,12 +202,37 @@ var DnsLoadBalancerRuleListRulesClientChoiceModelAttributeMap = map[string]attr.
 	"geo_location_set": types.ObjectType{
 		AttrTypes: DnsLoadBalancerRuleListRulesClientChoiceGeoLocationSetModelAttributeMap,
 	},
-	"asn_list": types.ObjectType{
-		AttrTypes: DnsLoadBalancerRuleListRulesClientChoiceAsnListModelAttributeMap,
+}
+
+// Attribute map for PointerOfOneOfField --> AsnList
+var DnsLoadBalancerRuleListRulesClientChoiceAsnListModelAttributeMap = map[string]attr.Type{
+
+	"as_numbers": types.ListType{
+		ElemType: types.Int64Type,
 	},
-	"asn_matcher": types.ObjectType{
-		AttrTypes: DnsLoadBalancerRuleListRulesClientChoiceAsnMatcherModelAttributeMap,
+}
+
+// Attribute map for PointerOfOneOfField --> AsnMatcher
+var DnsLoadBalancerRuleListRulesClientChoiceAsnMatcherModelAttributeMap = map[string]attr.Type{
+
+	"asn_sets": types.ListType{
+		ElemType: types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+
+				"namespace": types.StringType,
+				"name":      types.StringType,
+				"tenant":    types.StringType,
+			},
+		},
 	},
+}
+
+// Attribute map for RequiredArrayOfPointerField --> AsnSets
+var DnsLoadBalancerAsnSetsObjectRefModelAttributeMap = map[string]attr.Type{
+
+	"namespace": types.StringType,
+	"name":      types.StringType,
+	"tenant":    types.StringType,
 }
 
 // Attribute map for PointerOfOneOfField --> IpPrefixList
@@ -256,37 +287,6 @@ var DnsLoadBalancerRuleListRulesClientChoiceGeoLocationSetModelAttributeMap = ma
 	"namespace": types.StringType,
 }
 
-// Attribute map for PointerOfOneOfField --> AsnList
-var DnsLoadBalancerRuleListRulesClientChoiceAsnListModelAttributeMap = map[string]attr.Type{
-
-	"as_numbers": types.ListType{
-		ElemType: types.Int64Type,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> AsnMatcher
-var DnsLoadBalancerRuleListRulesClientChoiceAsnMatcherModelAttributeMap = map[string]attr.Type{
-
-	"asn_sets": types.ListType{
-		ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-
-				"tenant":    types.StringType,
-				"namespace": types.StringType,
-				"name":      types.StringType,
-			},
-		},
-	},
-}
-
-// Attribute map for RequiredArrayOfPointerField --> AsnSets
-var DnsLoadBalancerAsnSetsObjectRefModelAttributeMap = map[string]attr.Type{
-
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
-	"name":      types.StringType,
-}
-
 // Attribute map for RequiredOneOfField --> ActionChoice
 var DnsLoadBalancerRuleListRulesActionChoiceModelAttributeMap = map[string]attr.Type{
 
@@ -298,9 +298,9 @@ var DnsLoadBalancerRuleListRulesActionChoiceModelAttributeMap = map[string]attr.
 // Attribute map for PointerOfOneOfField --> Pool
 var DnsLoadBalancerRuleListRulesActionChoicePoolModelAttributeMap = map[string]attr.Type{
 
-	"name":      types.StringType,
 	"tenant":    types.StringType,
 	"namespace": types.StringType,
+	"name":      types.StringType,
 }
 
 // Attribute map for PointerField --> ResponseCache
@@ -331,9 +331,9 @@ var DnsLoadBalancerResponseCacheResponseCacheParametersChoiceResponseCacheParame
 // Attribute map for ArrayOfPointerField --> DnsZones
 var DnsLoadBalancerDnsZonesObjectRefModelAttributeMap = map[string]attr.Type{
 
+	"name":      types.StringType,
 	"tenant":    types.StringType,
 	"namespace": types.StringType,
-	"name":      types.StringType,
 }
 
 func NewResourceF5XCDnsLoadBalancer() resource.Resource {
@@ -441,13 +441,13 @@ func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resour
 			},
 			"record_type": schema.ListAttribute{
 				Description:         "Resource Record Type",
-				MarkdownDescription: "<br>**Allowed Values (choose one):** `[\"SRV\", \"A\", \"AAAA\", \"MX\", \"CNAME\"]`",
+				MarkdownDescription: "<br>**Allowed Values (choose one):** `[\"MX\", \"CNAME\", \"SRV\", \"A\", \"AAAA\"]`",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
 				ElementType:         types.StringType,
 				Validators: []validator.List{
-					listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"SRV", "A", "AAAA", "MX", "CNAME"}...)),
+					listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"MX", "CNAME", "SRV", "A", "AAAA"}...)),
 					listvalidator.SizeAtMost(1),
 				},
 			},
@@ -474,15 +474,76 @@ func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resour
 									Computed:            false,
 									Validators: []validator.Object{
 										atmostoneofvalidator.AtMostOneOf(
+											"asn_list",
+											"asn_matcher",
 											"ip_prefix_list",
 											"ip_prefix_set",
 											"geo_location_label_selector",
 											"geo_location_set",
-											"asn_list",
-											"asn_matcher",
 										),
 									},
 									Attributes: map[string]schema.Attribute{
+										"asn_list": schema.SingleNestedAttribute{
+											Description:         "asn list List of 4-byte ASN values. The rule evaluates to true if the origin ASN is present in the ASN list.",
+											MarkdownDescription: "",
+											Required:            false,
+											Optional:            true,
+											Computed:            false,
+											Attributes: map[string]schema.Attribute{
+												"as_numbers": schema.ListAttribute{
+													Description:         "as numbers An unordered set of RFC 6793 defined 4-byte AS numbers that can be used to create allow or deny lists for use in network policy or service policy. It can be used to create the allow list only for DNS Load Balancer.",
+													MarkdownDescription: "",
+													ElementType:         types.Int64Type,
+													Required:            true,
+													Optional:            false,
+													Computed:            false,
+												},
+											},
+										},
+										"asn_matcher": schema.SingleNestedAttribute{
+											Description:         "asn matcher List of references to BGP ASN Set objects. The rule evaluates to true if the origin ASN is present in one of the BGP ASN Set objects.",
+											MarkdownDescription: "",
+											Required:            false,
+											Optional:            true,
+											Computed:            false,
+											Attributes: map[string]schema.Attribute{
+												"asn_sets": schema.ListNestedAttribute{
+													Description:         "asn_sets A list of references to bgp_asn_set objects.",
+													MarkdownDescription: "",
+													Required:            true,
+													Optional:            false,
+													Computed:            false,
+													NestedObject: schema.NestedAttributeObject{
+														Attributes: map[string]schema.Attribute{
+															"namespace": schema.StringAttribute{
+																Description:         "",
+																MarkdownDescription: "",
+																Required:            true,
+																Optional:            false,
+																Computed:            false,
+															},
+															"name": schema.StringAttribute{
+																Description:         "",
+																MarkdownDescription: "",
+																Required:            true,
+																Optional:            false,
+																Computed:            false,
+															},
+															"tenant": schema.StringAttribute{
+																Description:         "",
+																MarkdownDescription: "",
+																Required:            false,
+																Optional:            false,
+																Computed:            true,
+																PlanModifiers: []planmodifier.String{
+																	stringplanmodifier.UseStateForUnknown(),
+																},
+															},
+														},
+													},
+												},
+											},
+										},
 										"ip_prefix_list": schema.SingleNestedAttribute{
 											Description:         "IP prefix list List of IP Prefix values. The rule evaluates to true if the EDNS0 client subnet is covered by one or more of the IP prefixes in the IP Prefix list.",
 											MarkdownDescription: "",
@@ -624,67 +685,6 @@ func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resour
 												},
 											},
 										},
-										"asn_list": schema.SingleNestedAttribute{
-											Description:         "asn list List of 4-byte ASN values. The rule evaluates to true if the origin ASN is present in the ASN list.",
-											MarkdownDescription: "",
-											Required:            false,
-											Optional:            true,
-											Computed:            false,
-											Attributes: map[string]schema.Attribute{
-												"as_numbers": schema.ListAttribute{
-													Description:         "as numbers An unordered set of RFC 6793 defined 4-byte AS numbers that can be used to create allow or deny lists for use in network policy or service policy. It can be used to create the allow list only for DNS Load Balancer.",
-													MarkdownDescription: "",
-													ElementType:         types.Int64Type,
-													Required:            true,
-													Optional:            false,
-													Computed:            false,
-												},
-											},
-										},
-										"asn_matcher": schema.SingleNestedAttribute{
-											Description:         "asn matcher List of references to BGP ASN Set objects. The rule evaluates to true if the origin ASN is present in one of the BGP ASN Set objects.",
-											MarkdownDescription: "",
-											Required:            false,
-											Optional:            true,
-											Computed:            false,
-											Attributes: map[string]schema.Attribute{
-												"asn_sets": schema.ListNestedAttribute{
-													Description:         "asn_sets A list of references to bgp_asn_set objects.",
-													MarkdownDescription: "",
-													Required:            true,
-													Optional:            false,
-													Computed:            false,
-													NestedObject: schema.NestedAttributeObject{
-														Attributes: map[string]schema.Attribute{
-															"tenant": schema.StringAttribute{
-																Description:         "",
-																MarkdownDescription: "",
-																Required:            false,
-																Optional:            false,
-																Computed:            true,
-																PlanModifiers: []planmodifier.String{
-																	stringplanmodifier.UseStateForUnknown(),
-																},
-															},
-															"namespace": schema.StringAttribute{
-																Description:         "",
-																MarkdownDescription: "",
-																Required:            true,
-																Optional:            false,
-																Computed:            false,
-															},
-															"name": schema.StringAttribute{
-																Description:         "",
-																MarkdownDescription: "",
-																Required:            true,
-																Optional:            false,
-																Computed:            false,
-															},
-														},
-													},
-												},
-											},
-										},
 									},
 								},
 								"action_choice": schema.SingleNestedAttribute{
@@ -706,13 +706,6 @@ func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resour
 											Optional:            true,
 											Computed:            false,
 											Attributes: map[string]schema.Attribute{
-												"name": schema.StringAttribute{
-													Description:         "",
-													MarkdownDescription: "",
-													Required:            true,
-													Optional:            false,
-													Computed:            false,
-												},
 												"tenant": schema.StringAttribute{
 													Description:         "",
 													MarkdownDescription: "",
@@ -724,6 +717,13 @@ func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resour
 													},
 												},
 												"namespace": schema.StringAttribute{
+													Description:         "",
+													MarkdownDescription: "",
+													Required:            true,
+													Optional:            false,
+													Computed:            false,
+												},
+												"name": schema.StringAttribute{
 													Description:         "",
 													MarkdownDescription: "",
 													Required:            true,
@@ -834,6 +834,13 @@ func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resour
 				Computed:            false,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
+						"name": schema.StringAttribute{
+							Description:         "",
+							MarkdownDescription: "",
+							Required:            true,
+							Optional:            false,
+							Computed:            false,
+						},
 						"tenant": schema.StringAttribute{
 							Description:         "",
 							MarkdownDescription: "",
@@ -845,13 +852,6 @@ func (r *ResourceF5XCDnsLoadBalancer) Schema(ctx context.Context, request resour
 							},
 						},
 						"namespace": schema.StringAttribute{
-							Description:         "",
-							MarkdownDescription: "",
-							Required:            true,
-							Optional:            false,
-							Computed:            false,
-						},
-						"name": schema.StringAttribute{
 							Description:         "",
 							MarkdownDescription: "",
 							Required:            true,
@@ -1086,6 +1086,73 @@ func (r *ResourceF5XCDnsLoadBalancer) Create(ctx context.Context, request resour
 							return
 						}
 
+						// resource modelToSpecNested PointerOfOneOfField --> AsnList
+						if !rulesClientChoiceModel.AsnList.IsNull() && !rulesClientChoiceModel.AsnList.IsUnknown() {
+							var dnsLoadBalancerLoadBalancingRuleAsnListModel DnsLoadBalancerLoadBalancingRuleAsnList
+							response.Diagnostics.Append(rulesClientChoiceModel.AsnList.As(ctx, &dnsLoadBalancerLoadBalancingRuleAsnListModel, basetypes.ObjectAsOptions{})...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							asnListOneOfSpec := &ves_io_schema_dns_load_balancer.LoadBalancingRule_AsnList{}
+							asnListOneOfSpec.AsnList = &ves_io_schema_policy.AsnMatchList{}
+							rulesSpec[i].ClientChoice = asnListOneOfSpec
+
+							elements := make([]uint32, 0, len(dnsLoadBalancerLoadBalancingRuleAsnListModel.AsNumbers.Elements()))
+							diags := dnsLoadBalancerLoadBalancingRuleAsnListModel.AsNumbers.ElementsAs(ctx, &elements, false)
+							response.Diagnostics.Append(diags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							asnListOneOfSpec.AsnList.AsNumbers = elements
+
+						}
+
+						// resource modelToSpecNested PointerOfOneOfField --> AsnMatcher
+						if !rulesClientChoiceModel.AsnMatcher.IsNull() && !rulesClientChoiceModel.AsnMatcher.IsUnknown() {
+							var dnsLoadBalancerLoadBalancingRuleAsnMatcherModel DnsLoadBalancerLoadBalancingRuleAsnMatcher
+							response.Diagnostics.Append(rulesClientChoiceModel.AsnMatcher.As(ctx, &dnsLoadBalancerLoadBalancingRuleAsnMatcherModel, basetypes.ObjectAsOptions{})...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							asnMatcherOneOfSpec := &ves_io_schema_dns_load_balancer.LoadBalancingRule_AsnMatcher{}
+							asnMatcherOneOfSpec.AsnMatcher = &ves_io_schema_policy.AsnMatcherType{}
+							rulesSpec[i].ClientChoice = asnMatcherOneOfSpec
+
+							// resource modelToSpecNested RequiredArrayOfPointerField --> AsnSets
+							if !dnsLoadBalancerLoadBalancingRuleAsnMatcherModel.AsnSets.IsNull() && !dnsLoadBalancerLoadBalancingRuleAsnMatcherModel.AsnSets.IsUnknown() && len(dnsLoadBalancerLoadBalancingRuleAsnMatcherModel.AsnSets.Elements()) > 0 {
+								// 1. Convert the types.List into a slice of the model's Go struct
+								var asnSetsElements []ObjectRefTypeModel
+								response.Diagnostics.Append(dnsLoadBalancerLoadBalancingRuleAsnMatcherModel.AsnSets.ElementsAs(ctx, &asnSetsElements, false)...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+
+								// 2. Initialize the spec slice
+								asnSetsSpec := make([]*ves_io_schema.ObjectRefType, len(asnSetsElements))
+								asnMatcherOneOfSpec.AsnMatcher.AsnSets = asnSetsSpec
+
+								// 3. Iterate over the converted Go slice
+								for ii, asnSetsElement := range asnSetsElements {
+									// Initialize the spec struct for the current element
+									asnMatcherOneOfSpec.AsnMatcher.AsnSets[ii] = &ves_io_schema.ObjectRefType{}
+
+									// Recursively process nested elements
+
+									// resource modelToSpecNested RequiredStringField --> Namespace
+									if !asnSetsElement.Namespace.IsNull() && !asnSetsElement.Namespace.IsUnknown() {
+										asnSetsSpec[i].Namespace = string(asnSetsElement.Namespace.ValueString())
+									}
+
+									// resource modelToSpecNested RequiredStringField --> Name
+									if !asnSetsElement.Name.IsNull() && !asnSetsElement.Name.IsUnknown() {
+										asnSetsSpec[i].Name = string(asnSetsElement.Name.ValueString())
+									}
+
+								}
+							}
+
+						}
+
 						// resource modelToSpecNested PointerOfOneOfField --> IpPrefixList
 						if !rulesClientChoiceModel.IpPrefixList.IsNull() && !rulesClientChoiceModel.IpPrefixList.IsUnknown() {
 							var dnsLoadBalancerLoadBalancingRuleIpPrefixListModel DnsLoadBalancerLoadBalancingRuleIpPrefixList
@@ -1222,73 +1289,6 @@ func (r *ResourceF5XCDnsLoadBalancer) Create(ctx context.Context, request resour
 
 						}
 
-						// resource modelToSpecNested PointerOfOneOfField --> AsnList
-						if !rulesClientChoiceModel.AsnList.IsNull() && !rulesClientChoiceModel.AsnList.IsUnknown() {
-							var dnsLoadBalancerLoadBalancingRuleAsnListModel DnsLoadBalancerLoadBalancingRuleAsnList
-							response.Diagnostics.Append(rulesClientChoiceModel.AsnList.As(ctx, &dnsLoadBalancerLoadBalancingRuleAsnListModel, basetypes.ObjectAsOptions{})...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							asnListOneOfSpec := &ves_io_schema_dns_load_balancer.LoadBalancingRule_AsnList{}
-							asnListOneOfSpec.AsnList = &ves_io_schema_policy.AsnMatchList{}
-							rulesSpec[i].ClientChoice = asnListOneOfSpec
-
-							elements := make([]uint32, 0, len(dnsLoadBalancerLoadBalancingRuleAsnListModel.AsNumbers.Elements()))
-							diags := dnsLoadBalancerLoadBalancingRuleAsnListModel.AsNumbers.ElementsAs(ctx, &elements, false)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							asnListOneOfSpec.AsnList.AsNumbers = elements
-
-						}
-
-						// resource modelToSpecNested PointerOfOneOfField --> AsnMatcher
-						if !rulesClientChoiceModel.AsnMatcher.IsNull() && !rulesClientChoiceModel.AsnMatcher.IsUnknown() {
-							var dnsLoadBalancerLoadBalancingRuleAsnMatcherModel DnsLoadBalancerLoadBalancingRuleAsnMatcher
-							response.Diagnostics.Append(rulesClientChoiceModel.AsnMatcher.As(ctx, &dnsLoadBalancerLoadBalancingRuleAsnMatcherModel, basetypes.ObjectAsOptions{})...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							asnMatcherOneOfSpec := &ves_io_schema_dns_load_balancer.LoadBalancingRule_AsnMatcher{}
-							asnMatcherOneOfSpec.AsnMatcher = &ves_io_schema_policy.AsnMatcherType{}
-							rulesSpec[i].ClientChoice = asnMatcherOneOfSpec
-
-							// resource modelToSpecNested RequiredArrayOfPointerField --> AsnSets
-							if !dnsLoadBalancerLoadBalancingRuleAsnMatcherModel.AsnSets.IsNull() && !dnsLoadBalancerLoadBalancingRuleAsnMatcherModel.AsnSets.IsUnknown() && len(dnsLoadBalancerLoadBalancingRuleAsnMatcherModel.AsnSets.Elements()) > 0 {
-								// 1. Convert the types.List into a slice of the model's Go struct
-								var asnSetsElements []ObjectRefTypeModel
-								response.Diagnostics.Append(dnsLoadBalancerLoadBalancingRuleAsnMatcherModel.AsnSets.ElementsAs(ctx, &asnSetsElements, false)...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-
-								// 2. Initialize the spec slice
-								asnSetsSpec := make([]*ves_io_schema.ObjectRefType, len(asnSetsElements))
-								asnMatcherOneOfSpec.AsnMatcher.AsnSets = asnSetsSpec
-
-								// 3. Iterate over the converted Go slice
-								for ii, asnSetsElement := range asnSetsElements {
-									// Initialize the spec struct for the current element
-									asnMatcherOneOfSpec.AsnMatcher.AsnSets[ii] = &ves_io_schema.ObjectRefType{}
-
-									// Recursively process nested elements
-
-									// resource modelToSpecNested RequiredStringField --> Namespace
-									if !asnSetsElement.Namespace.IsNull() && !asnSetsElement.Namespace.IsUnknown() {
-										asnSetsSpec[i].Namespace = string(asnSetsElement.Namespace.ValueString())
-									}
-
-									// resource modelToSpecNested RequiredStringField --> Name
-									if !asnSetsElement.Name.IsNull() && !asnSetsElement.Name.IsUnknown() {
-										asnSetsSpec[i].Name = string(asnSetsElement.Name.ValueString())
-									}
-
-								}
-							}
-
-						}
-
 					}
 
 					// resource modelToSpecNested RequiredOneOfField --> ActionChoice
@@ -1310,14 +1310,14 @@ func (r *ResourceF5XCDnsLoadBalancer) Create(ctx context.Context, request resour
 							poolOneOfSpec.Pool = &ves_io_schema_views.ObjectRefType{}
 							rulesSpec[i].ActionChoice = poolOneOfSpec
 
-							// resource modelToSpecNested RequiredStringField --> Name
-							if !objectRefTypeModelModel.Name.IsNull() && !objectRefTypeModelModel.Name.IsUnknown() {
-								poolOneOfSpec.Pool.Name = string(objectRefTypeModelModel.Name.ValueString())
-							}
-
 							// resource modelToSpecNested RequiredStringField --> Namespace
 							if !objectRefTypeModelModel.Namespace.IsNull() && !objectRefTypeModelModel.Namespace.IsUnknown() {
 								poolOneOfSpec.Pool.Namespace = string(objectRefTypeModelModel.Namespace.ValueString())
+							}
+
+							// resource modelToSpecNested RequiredStringField --> Name
+							if !objectRefTypeModelModel.Name.IsNull() && !objectRefTypeModelModel.Name.IsUnknown() {
+								poolOneOfSpec.Pool.Name = string(objectRefTypeModelModel.Name.ValueString())
 							}
 
 						}
@@ -1602,6 +1602,109 @@ func (r *ResourceF5XCDnsLoadBalancer) Create(ctx context.Context, request resour
 
 					// Process nested choices, populating the temporary attribute map
 
+					// resource specToModelNested PointerOfOneOfField --> AsnList
+					// GlobalSpecType
+					// false
+					{
+						asnListOptions, isAsnList := rulesclientChoiceChoices.(*ves_io_schema_dns_load_balancer.LoadBalancingRule_AsnList)
+						asnListAttributeMap := make(map[string]attr.Value)
+
+						if isAsnList && asnListOptions != nil {
+
+							// resource specToModelNested RequiredArrayOfUintField --> AsNumbers
+							asNumbersValue := asnListOptions.AsnList.GetAsNumbers()
+							if len(asNumbersValue) > 0 {
+								listValue, diags := types.ListValueFrom(ctx, types.Int64Type, asnListOptions.AsnList.GetAsNumbers())
+								response.Diagnostics.Append(diags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								asnListAttributeMap["as_numbers"] = listValue
+							} else {
+								asnListAttributeMap["as_numbers"] = types.ListNull(types.Int64Type)
+							}
+
+							asnListObj, diags := types.ObjectValue(DnsLoadBalancerRuleListRulesClientChoiceAsnListModelAttributeMap, asnListAttributeMap)
+							response.Diagnostics.Append(diags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							rulesclientChoiceChoicesAttributeMap["asn_list"] = asnListObj
+						} else {
+							rulesclientChoiceChoicesAttributeMap["asn_list"] = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceAsnListModelAttributeMap)
+						}
+					}
+
+					// resource specToModelNested PointerOfOneOfField --> AsnMatcher
+					// GlobalSpecType
+					// false
+					{
+						asnMatcherOptions, isAsnMatcher := rulesclientChoiceChoices.(*ves_io_schema_dns_load_balancer.LoadBalancingRule_AsnMatcher)
+						asnMatcherAttributeMap := make(map[string]attr.Value)
+
+						if isAsnMatcher && asnMatcherOptions != nil {
+
+							// resource specToModelNested RequiredArrayOfPointerField --> AsnSets
+							if len(asnMatcherOptions.AsnMatcher.GetAsnSets()) > 0 {
+								// Step 1: Always create a slice of model structs from the spec data.
+								// This slice serves as an intermediate representation.
+								asnSetsElements := make([]ObjectRefTypeModel, 0, len(asnMatcherOptions.AsnMatcher.GetAsnSets()))
+								for _, asnSetsElement := range asnMatcherOptions.AsnMatcher.GetAsnSets() {
+									objectRefTypeModelModel := ObjectRefTypeModel{}
+
+									// resource specToModelNested RequiredStringField --> Namespace
+									if asnSetsElement.GetNamespace() != "" {
+										objectRefTypeModelModel.Namespace = types.StringValue(asnSetsElement.GetNamespace())
+									} else {
+										// Empty string, set to null
+										objectRefTypeModelModel.Namespace = types.StringNull()
+									}
+
+									// resource specToModelNested RequiredStringField --> Name
+									if asnSetsElement.GetName() != "" {
+										objectRefTypeModelModel.Name = types.StringValue(asnSetsElement.GetName())
+									} else {
+										// Empty string, set to null
+										objectRefTypeModelModel.Name = types.StringNull()
+									}
+
+									// resource specToModelNested StringField --> Tenant
+									if asnSetsElement.GetTenant() != "" {
+										objectRefTypeModelModel.Tenant = types.StringValue(asnSetsElement.GetTenant())
+									} else {
+										// Empty string, set to null
+										objectRefTypeModelModel.Tenant = types.StringNull()
+									}
+
+									asnSetsElements = append(asnSetsElements, objectRefTypeModelModel)
+								}
+								// CASE 1: The target field is a `types.List` or an attribute map.
+								// The intermediate slice of structs must be converted to a `types.ListValue`.
+								asnSetsListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DnsLoadBalancerAsnSetsObjectRefModelAttributeMap}, asnSetsElements)
+								response.Diagnostics.Append(diags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								asnMatcherAttributeMap["asn_sets"] = asnSetsListValue
+
+							} else {
+								// The source list is empty or nil.
+								// CASE 1: The target field is a `types.List` or an attribute map.
+								// Assign a null `types.ListValue`.
+								asnMatcherAttributeMap["asn_sets"] = types.ListNull(types.ObjectType{AttrTypes: DnsLoadBalancerAsnSetsObjectRefModelAttributeMap})
+							}
+
+							asnMatcherObj, diags := types.ObjectValue(DnsLoadBalancerRuleListRulesClientChoiceAsnMatcherModelAttributeMap, asnMatcherAttributeMap)
+							response.Diagnostics.Append(diags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							rulesclientChoiceChoicesAttributeMap["asn_matcher"] = asnMatcherObj
+						} else {
+							rulesclientChoiceChoicesAttributeMap["asn_matcher"] = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceAsnMatcherModelAttributeMap)
+						}
+					}
+
 					// resource specToModelNested PointerOfOneOfField --> IpPrefixList
 					// GlobalSpecType
 					// false
@@ -1798,109 +1901,6 @@ func (r *ResourceF5XCDnsLoadBalancer) Create(ctx context.Context, request resour
 						}
 					}
 
-					// resource specToModelNested PointerOfOneOfField --> AsnList
-					// GlobalSpecType
-					// false
-					{
-						asnListOptions, isAsnList := rulesclientChoiceChoices.(*ves_io_schema_dns_load_balancer.LoadBalancingRule_AsnList)
-						asnListAttributeMap := make(map[string]attr.Value)
-
-						if isAsnList && asnListOptions != nil {
-
-							// resource specToModelNested RequiredArrayOfUintField --> AsNumbers
-							asNumbersValue := asnListOptions.AsnList.GetAsNumbers()
-							if len(asNumbersValue) > 0 {
-								listValue, diags := types.ListValueFrom(ctx, types.Int64Type, asnListOptions.AsnList.GetAsNumbers())
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								asnListAttributeMap["as_numbers"] = listValue
-							} else {
-								asnListAttributeMap["as_numbers"] = types.ListNull(types.Int64Type)
-							}
-
-							asnListObj, diags := types.ObjectValue(DnsLoadBalancerRuleListRulesClientChoiceAsnListModelAttributeMap, asnListAttributeMap)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							rulesclientChoiceChoicesAttributeMap["asn_list"] = asnListObj
-						} else {
-							rulesclientChoiceChoicesAttributeMap["asn_list"] = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceAsnListModelAttributeMap)
-						}
-					}
-
-					// resource specToModelNested PointerOfOneOfField --> AsnMatcher
-					// GlobalSpecType
-					// false
-					{
-						asnMatcherOptions, isAsnMatcher := rulesclientChoiceChoices.(*ves_io_schema_dns_load_balancer.LoadBalancingRule_AsnMatcher)
-						asnMatcherAttributeMap := make(map[string]attr.Value)
-
-						if isAsnMatcher && asnMatcherOptions != nil {
-
-							// resource specToModelNested RequiredArrayOfPointerField --> AsnSets
-							if len(asnMatcherOptions.AsnMatcher.GetAsnSets()) > 0 {
-								// Step 1: Always create a slice of model structs from the spec data.
-								// This slice serves as an intermediate representation.
-								asnSetsElements := make([]ObjectRefTypeModel, 0, len(asnMatcherOptions.AsnMatcher.GetAsnSets()))
-								for _, asnSetsElement := range asnMatcherOptions.AsnMatcher.GetAsnSets() {
-									objectRefTypeModelModel := ObjectRefTypeModel{}
-
-									// resource specToModelNested StringField --> Tenant
-									if asnSetsElement.GetTenant() != "" {
-										objectRefTypeModelModel.Tenant = types.StringValue(asnSetsElement.GetTenant())
-									} else {
-										// Empty string, set to null
-										objectRefTypeModelModel.Tenant = types.StringNull()
-									}
-
-									// resource specToModelNested RequiredStringField --> Namespace
-									if asnSetsElement.GetNamespace() != "" {
-										objectRefTypeModelModel.Namespace = types.StringValue(asnSetsElement.GetNamespace())
-									} else {
-										// Empty string, set to null
-										objectRefTypeModelModel.Namespace = types.StringNull()
-									}
-
-									// resource specToModelNested RequiredStringField --> Name
-									if asnSetsElement.GetName() != "" {
-										objectRefTypeModelModel.Name = types.StringValue(asnSetsElement.GetName())
-									} else {
-										// Empty string, set to null
-										objectRefTypeModelModel.Name = types.StringNull()
-									}
-
-									asnSetsElements = append(asnSetsElements, objectRefTypeModelModel)
-								}
-								// CASE 1: The target field is a `types.List` or an attribute map.
-								// The intermediate slice of structs must be converted to a `types.ListValue`.
-								asnSetsListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DnsLoadBalancerAsnSetsObjectRefModelAttributeMap}, asnSetsElements)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								asnMatcherAttributeMap["asn_sets"] = asnSetsListValue
-
-							} else {
-								// The source list is empty or nil.
-								// CASE 1: The target field is a `types.List` or an attribute map.
-								// Assign a null `types.ListValue`.
-								asnMatcherAttributeMap["asn_sets"] = types.ListNull(types.ObjectType{AttrTypes: DnsLoadBalancerAsnSetsObjectRefModelAttributeMap})
-							}
-
-							asnMatcherObj, diags := types.ObjectValue(DnsLoadBalancerRuleListRulesClientChoiceAsnMatcherModelAttributeMap, asnMatcherAttributeMap)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							rulesclientChoiceChoicesAttributeMap["asn_matcher"] = asnMatcherObj
-						} else {
-							rulesclientChoiceChoicesAttributeMap["asn_matcher"] = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceAsnMatcherModelAttributeMap)
-						}
-					}
-
 					// --- End of Choices ---
 
 					// Create the final ObjectValue for this OneOf field
@@ -1940,14 +1940,6 @@ func (r *ResourceF5XCDnsLoadBalancer) Create(ctx context.Context, request resour
 
 						if isPool && poolOptions != nil {
 
-							// resource specToModelNested RequiredStringField --> Name
-							if poolOptions.Pool.GetName() != "" {
-								poolAttributeMap["name"] = types.StringValue(poolOptions.Pool.GetName())
-							} else {
-								// Empty string, set to null
-								poolAttributeMap["name"] = types.StringNull()
-							}
-
 							// resource specToModelNested StringField --> Tenant
 							if poolOptions.Pool.GetTenant() != "" {
 								poolAttributeMap["tenant"] = types.StringValue(poolOptions.Pool.GetTenant())
@@ -1962,6 +1954,14 @@ func (r *ResourceF5XCDnsLoadBalancer) Create(ctx context.Context, request resour
 							} else {
 								// Empty string, set to null
 								poolAttributeMap["namespace"] = types.StringNull()
+							}
+
+							// resource specToModelNested RequiredStringField --> Name
+							if poolOptions.Pool.GetName() != "" {
+								poolAttributeMap["name"] = types.StringValue(poolOptions.Pool.GetName())
+							} else {
+								// Empty string, set to null
+								poolAttributeMap["name"] = types.StringNull()
 							}
 
 							poolObj, diags := types.ObjectValue(DnsLoadBalancerRuleListRulesActionChoicePoolModelAttributeMap, poolAttributeMap)
@@ -2123,6 +2123,14 @@ func (r *ResourceF5XCDnsLoadBalancer) Create(ctx context.Context, request resour
 		for _, dnsZonesElement := range specData.DnsZones {
 			objectRefTypeModelModel := ObjectRefTypeModel{}
 
+			// resource specToModelNested RequiredStringField --> Name
+			if dnsZonesElement.GetName() != "" {
+				objectRefTypeModelModel.Name = types.StringValue(dnsZonesElement.GetName())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Name = types.StringNull()
+			}
+
 			// resource specToModelNested StringField --> Tenant
 			if dnsZonesElement.GetTenant() != "" {
 				objectRefTypeModelModel.Tenant = types.StringValue(dnsZonesElement.GetTenant())
@@ -2137,14 +2145,6 @@ func (r *ResourceF5XCDnsLoadBalancer) Create(ctx context.Context, request resour
 			} else {
 				// Empty string, set to null
 				objectRefTypeModelModel.Namespace = types.StringNull()
-			}
-
-			// resource specToModelNested RequiredStringField --> Name
-			if dnsZonesElement.GetName() != "" {
-				objectRefTypeModelModel.Name = types.StringValue(dnsZonesElement.GetName())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Name = types.StringNull()
 			}
 
 			dnsZonesElements = append(dnsZonesElements, objectRefTypeModelModel)
@@ -2421,6 +2421,109 @@ func (r *ResourceF5XCDnsLoadBalancer) Read(ctx context.Context, request resource
 
 					// Process nested choices, populating the temporary attribute map
 
+					// resource specToModelNested PointerOfOneOfField --> AsnList
+					// <no value>
+					// false
+					{
+						asnListOptions, isAsnList := rulesclientChoiceChoices.(*ves_io_schema_dns_load_balancer.LoadBalancingRule_AsnList)
+						asnListAttributeMap := make(map[string]attr.Value)
+
+						if isAsnList && asnListOptions != nil {
+
+							// resource specToModelNested RequiredArrayOfUintField --> AsNumbers
+							asNumbersValue := asnListOptions.AsnList.GetAsNumbers()
+							if len(asNumbersValue) > 0 {
+								listValue, diags := types.ListValueFrom(ctx, types.Int64Type, asnListOptions.AsnList.GetAsNumbers())
+								response.Diagnostics.Append(diags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								asnListAttributeMap["as_numbers"] = listValue
+							} else {
+								asnListAttributeMap["as_numbers"] = types.ListNull(types.Int64Type)
+							}
+
+							asnListObj, diags := types.ObjectValue(DnsLoadBalancerRuleListRulesClientChoiceAsnListModelAttributeMap, asnListAttributeMap)
+							response.Diagnostics.Append(diags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							rulesclientChoiceChoicesAttributeMap["asn_list"] = asnListObj
+						} else {
+							rulesclientChoiceChoicesAttributeMap["asn_list"] = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceAsnListModelAttributeMap)
+						}
+					}
+
+					// resource specToModelNested PointerOfOneOfField --> AsnMatcher
+					// <no value>
+					// false
+					{
+						asnMatcherOptions, isAsnMatcher := rulesclientChoiceChoices.(*ves_io_schema_dns_load_balancer.LoadBalancingRule_AsnMatcher)
+						asnMatcherAttributeMap := make(map[string]attr.Value)
+
+						if isAsnMatcher && asnMatcherOptions != nil {
+
+							// resource specToModelNested RequiredArrayOfPointerField --> AsnSets
+							if len(asnMatcherOptions.AsnMatcher.GetAsnSets()) > 0 {
+								// Step 1: Always create a slice of model structs from the spec data.
+								// This slice serves as an intermediate representation.
+								asnSetsElements := make([]ObjectRefTypeModel, 0, len(asnMatcherOptions.AsnMatcher.GetAsnSets()))
+								for _, asnSetsElement := range asnMatcherOptions.AsnMatcher.GetAsnSets() {
+									objectRefTypeModelModel := ObjectRefTypeModel{}
+
+									// resource specToModelNested RequiredStringField --> Namespace
+									if asnSetsElement.GetNamespace() != "" {
+										objectRefTypeModelModel.Namespace = types.StringValue(asnSetsElement.GetNamespace())
+									} else {
+										// Empty string, set to null
+										objectRefTypeModelModel.Namespace = types.StringNull()
+									}
+
+									// resource specToModelNested RequiredStringField --> Name
+									if asnSetsElement.GetName() != "" {
+										objectRefTypeModelModel.Name = types.StringValue(asnSetsElement.GetName())
+									} else {
+										// Empty string, set to null
+										objectRefTypeModelModel.Name = types.StringNull()
+									}
+
+									// resource specToModelNested StringField --> Tenant
+									if asnSetsElement.GetTenant() != "" {
+										objectRefTypeModelModel.Tenant = types.StringValue(asnSetsElement.GetTenant())
+									} else {
+										// Empty string, set to null
+										objectRefTypeModelModel.Tenant = types.StringNull()
+									}
+
+									asnSetsElements = append(asnSetsElements, objectRefTypeModelModel)
+								}
+								// CASE 1: The target field is a `types.List` or an attribute map.
+								// The intermediate slice of structs must be converted to a `types.ListValue`.
+								asnSetsListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DnsLoadBalancerAsnSetsObjectRefModelAttributeMap}, asnSetsElements)
+								response.Diagnostics.Append(diags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								asnMatcherAttributeMap["asn_sets"] = asnSetsListValue
+
+							} else {
+								// The source list is empty or nil.
+								// CASE 1: The target field is a `types.List` or an attribute map.
+								// Assign a null `types.ListValue`.
+								asnMatcherAttributeMap["asn_sets"] = types.ListNull(types.ObjectType{AttrTypes: DnsLoadBalancerAsnSetsObjectRefModelAttributeMap})
+							}
+
+							asnMatcherObj, diags := types.ObjectValue(DnsLoadBalancerRuleListRulesClientChoiceAsnMatcherModelAttributeMap, asnMatcherAttributeMap)
+							response.Diagnostics.Append(diags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							rulesclientChoiceChoicesAttributeMap["asn_matcher"] = asnMatcherObj
+						} else {
+							rulesclientChoiceChoicesAttributeMap["asn_matcher"] = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceAsnMatcherModelAttributeMap)
+						}
+					}
+
 					// resource specToModelNested PointerOfOneOfField --> IpPrefixList
 					// <no value>
 					// false
@@ -2617,109 +2720,6 @@ func (r *ResourceF5XCDnsLoadBalancer) Read(ctx context.Context, request resource
 						}
 					}
 
-					// resource specToModelNested PointerOfOneOfField --> AsnList
-					// <no value>
-					// false
-					{
-						asnListOptions, isAsnList := rulesclientChoiceChoices.(*ves_io_schema_dns_load_balancer.LoadBalancingRule_AsnList)
-						asnListAttributeMap := make(map[string]attr.Value)
-
-						if isAsnList && asnListOptions != nil {
-
-							// resource specToModelNested RequiredArrayOfUintField --> AsNumbers
-							asNumbersValue := asnListOptions.AsnList.GetAsNumbers()
-							if len(asNumbersValue) > 0 {
-								listValue, diags := types.ListValueFrom(ctx, types.Int64Type, asnListOptions.AsnList.GetAsNumbers())
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								asnListAttributeMap["as_numbers"] = listValue
-							} else {
-								asnListAttributeMap["as_numbers"] = types.ListNull(types.Int64Type)
-							}
-
-							asnListObj, diags := types.ObjectValue(DnsLoadBalancerRuleListRulesClientChoiceAsnListModelAttributeMap, asnListAttributeMap)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							rulesclientChoiceChoicesAttributeMap["asn_list"] = asnListObj
-						} else {
-							rulesclientChoiceChoicesAttributeMap["asn_list"] = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceAsnListModelAttributeMap)
-						}
-					}
-
-					// resource specToModelNested PointerOfOneOfField --> AsnMatcher
-					// <no value>
-					// false
-					{
-						asnMatcherOptions, isAsnMatcher := rulesclientChoiceChoices.(*ves_io_schema_dns_load_balancer.LoadBalancingRule_AsnMatcher)
-						asnMatcherAttributeMap := make(map[string]attr.Value)
-
-						if isAsnMatcher && asnMatcherOptions != nil {
-
-							// resource specToModelNested RequiredArrayOfPointerField --> AsnSets
-							if len(asnMatcherOptions.AsnMatcher.GetAsnSets()) > 0 {
-								// Step 1: Always create a slice of model structs from the spec data.
-								// This slice serves as an intermediate representation.
-								asnSetsElements := make([]ObjectRefTypeModel, 0, len(asnMatcherOptions.AsnMatcher.GetAsnSets()))
-								for _, asnSetsElement := range asnMatcherOptions.AsnMatcher.GetAsnSets() {
-									objectRefTypeModelModel := ObjectRefTypeModel{}
-
-									// resource specToModelNested StringField --> Tenant
-									if asnSetsElement.GetTenant() != "" {
-										objectRefTypeModelModel.Tenant = types.StringValue(asnSetsElement.GetTenant())
-									} else {
-										// Empty string, set to null
-										objectRefTypeModelModel.Tenant = types.StringNull()
-									}
-
-									// resource specToModelNested RequiredStringField --> Namespace
-									if asnSetsElement.GetNamespace() != "" {
-										objectRefTypeModelModel.Namespace = types.StringValue(asnSetsElement.GetNamespace())
-									} else {
-										// Empty string, set to null
-										objectRefTypeModelModel.Namespace = types.StringNull()
-									}
-
-									// resource specToModelNested RequiredStringField --> Name
-									if asnSetsElement.GetName() != "" {
-										objectRefTypeModelModel.Name = types.StringValue(asnSetsElement.GetName())
-									} else {
-										// Empty string, set to null
-										objectRefTypeModelModel.Name = types.StringNull()
-									}
-
-									asnSetsElements = append(asnSetsElements, objectRefTypeModelModel)
-								}
-								// CASE 1: The target field is a `types.List` or an attribute map.
-								// The intermediate slice of structs must be converted to a `types.ListValue`.
-								asnSetsListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DnsLoadBalancerAsnSetsObjectRefModelAttributeMap}, asnSetsElements)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								asnMatcherAttributeMap["asn_sets"] = asnSetsListValue
-
-							} else {
-								// The source list is empty or nil.
-								// CASE 1: The target field is a `types.List` or an attribute map.
-								// Assign a null `types.ListValue`.
-								asnMatcherAttributeMap["asn_sets"] = types.ListNull(types.ObjectType{AttrTypes: DnsLoadBalancerAsnSetsObjectRefModelAttributeMap})
-							}
-
-							asnMatcherObj, diags := types.ObjectValue(DnsLoadBalancerRuleListRulesClientChoiceAsnMatcherModelAttributeMap, asnMatcherAttributeMap)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							rulesclientChoiceChoicesAttributeMap["asn_matcher"] = asnMatcherObj
-						} else {
-							rulesclientChoiceChoicesAttributeMap["asn_matcher"] = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceAsnMatcherModelAttributeMap)
-						}
-					}
-
 					// --- End of Choices ---
 
 					// Create the final ObjectValue for this OneOf field
@@ -2759,14 +2759,6 @@ func (r *ResourceF5XCDnsLoadBalancer) Read(ctx context.Context, request resource
 
 						if isPool && poolOptions != nil {
 
-							// resource specToModelNested RequiredStringField --> Name
-							if poolOptions.Pool.GetName() != "" {
-								poolAttributeMap["name"] = types.StringValue(poolOptions.Pool.GetName())
-							} else {
-								// Empty string, set to null
-								poolAttributeMap["name"] = types.StringNull()
-							}
-
 							// resource specToModelNested StringField --> Tenant
 							if poolOptions.Pool.GetTenant() != "" {
 								poolAttributeMap["tenant"] = types.StringValue(poolOptions.Pool.GetTenant())
@@ -2781,6 +2773,14 @@ func (r *ResourceF5XCDnsLoadBalancer) Read(ctx context.Context, request resource
 							} else {
 								// Empty string, set to null
 								poolAttributeMap["namespace"] = types.StringNull()
+							}
+
+							// resource specToModelNested RequiredStringField --> Name
+							if poolOptions.Pool.GetName() != "" {
+								poolAttributeMap["name"] = types.StringValue(poolOptions.Pool.GetName())
+							} else {
+								// Empty string, set to null
+								poolAttributeMap["name"] = types.StringNull()
 							}
 
 							poolObj, diags := types.ObjectValue(DnsLoadBalancerRuleListRulesActionChoicePoolModelAttributeMap, poolAttributeMap)
@@ -2942,6 +2942,14 @@ func (r *ResourceF5XCDnsLoadBalancer) Read(ctx context.Context, request resource
 		for _, dnsZonesElement := range specData.DnsZones {
 			objectRefTypeModelModel := ObjectRefTypeModel{}
 
+			// resource specToModelNested RequiredStringField --> Name
+			if dnsZonesElement.GetName() != "" {
+				objectRefTypeModelModel.Name = types.StringValue(dnsZonesElement.GetName())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Name = types.StringNull()
+			}
+
 			// resource specToModelNested StringField --> Tenant
 			if dnsZonesElement.GetTenant() != "" {
 				objectRefTypeModelModel.Tenant = types.StringValue(dnsZonesElement.GetTenant())
@@ -2956,14 +2964,6 @@ func (r *ResourceF5XCDnsLoadBalancer) Read(ctx context.Context, request resource
 			} else {
 				// Empty string, set to null
 				objectRefTypeModelModel.Namespace = types.StringNull()
-			}
-
-			// resource specToModelNested RequiredStringField --> Name
-			if dnsZonesElement.GetName() != "" {
-				objectRefTypeModelModel.Name = types.StringValue(dnsZonesElement.GetName())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Name = types.StringNull()
 			}
 
 			dnsZonesElements = append(dnsZonesElements, objectRefTypeModelModel)
@@ -3159,6 +3159,73 @@ func (r *ResourceF5XCDnsLoadBalancer) Update(ctx context.Context, request resour
 							return
 						}
 
+						// resource modelToSpecNested PointerOfOneOfField --> AsnList
+						if !rulesClientChoiceModel.AsnList.IsNull() && !rulesClientChoiceModel.AsnList.IsUnknown() {
+							var dnsLoadBalancerLoadBalancingRuleAsnListModel DnsLoadBalancerLoadBalancingRuleAsnList
+							response.Diagnostics.Append(rulesClientChoiceModel.AsnList.As(ctx, &dnsLoadBalancerLoadBalancingRuleAsnListModel, basetypes.ObjectAsOptions{})...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							asnListOneOfSpec := &ves_io_schema_dns_load_balancer.LoadBalancingRule_AsnList{}
+							asnListOneOfSpec.AsnList = &ves_io_schema_policy.AsnMatchList{}
+							rulesSpec[i].ClientChoice = asnListOneOfSpec
+
+							elements := make([]uint32, 0, len(dnsLoadBalancerLoadBalancingRuleAsnListModel.AsNumbers.Elements()))
+							diags := dnsLoadBalancerLoadBalancingRuleAsnListModel.AsNumbers.ElementsAs(ctx, &elements, false)
+							response.Diagnostics.Append(diags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							asnListOneOfSpec.AsnList.AsNumbers = elements
+
+						}
+
+						// resource modelToSpecNested PointerOfOneOfField --> AsnMatcher
+						if !rulesClientChoiceModel.AsnMatcher.IsNull() && !rulesClientChoiceModel.AsnMatcher.IsUnknown() {
+							var dnsLoadBalancerLoadBalancingRuleAsnMatcherModel DnsLoadBalancerLoadBalancingRuleAsnMatcher
+							response.Diagnostics.Append(rulesClientChoiceModel.AsnMatcher.As(ctx, &dnsLoadBalancerLoadBalancingRuleAsnMatcherModel, basetypes.ObjectAsOptions{})...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							asnMatcherOneOfSpec := &ves_io_schema_dns_load_balancer.LoadBalancingRule_AsnMatcher{}
+							asnMatcherOneOfSpec.AsnMatcher = &ves_io_schema_policy.AsnMatcherType{}
+							rulesSpec[i].ClientChoice = asnMatcherOneOfSpec
+
+							// resource modelToSpecNested RequiredArrayOfPointerField --> AsnSets
+							if !dnsLoadBalancerLoadBalancingRuleAsnMatcherModel.AsnSets.IsNull() && !dnsLoadBalancerLoadBalancingRuleAsnMatcherModel.AsnSets.IsUnknown() && len(dnsLoadBalancerLoadBalancingRuleAsnMatcherModel.AsnSets.Elements()) > 0 {
+								// 1. Convert the types.List into a slice of the model's Go struct
+								var asnSetsElements []ObjectRefTypeModel
+								response.Diagnostics.Append(dnsLoadBalancerLoadBalancingRuleAsnMatcherModel.AsnSets.ElementsAs(ctx, &asnSetsElements, false)...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+
+								// 2. Initialize the spec slice
+								asnSetsSpec := make([]*ves_io_schema.ObjectRefType, len(asnSetsElements))
+								asnMatcherOneOfSpec.AsnMatcher.AsnSets = asnSetsSpec
+
+								// 3. Iterate over the converted Go slice
+								for ii, asnSetsElement := range asnSetsElements {
+									// Initialize the spec struct for the current element
+									asnMatcherOneOfSpec.AsnMatcher.AsnSets[ii] = &ves_io_schema.ObjectRefType{}
+
+									// Recursively process nested elements
+
+									// resource modelToSpecNested RequiredStringField --> Namespace
+									if !asnSetsElement.Namespace.IsNull() && !asnSetsElement.Namespace.IsUnknown() {
+										asnSetsSpec[i].Namespace = string(asnSetsElement.Namespace.ValueString())
+									}
+
+									// resource modelToSpecNested RequiredStringField --> Name
+									if !asnSetsElement.Name.IsNull() && !asnSetsElement.Name.IsUnknown() {
+										asnSetsSpec[i].Name = string(asnSetsElement.Name.ValueString())
+									}
+
+								}
+							}
+
+						}
+
 						// resource modelToSpecNested PointerOfOneOfField --> IpPrefixList
 						if !rulesClientChoiceModel.IpPrefixList.IsNull() && !rulesClientChoiceModel.IpPrefixList.IsUnknown() {
 							var dnsLoadBalancerLoadBalancingRuleIpPrefixListModel DnsLoadBalancerLoadBalancingRuleIpPrefixList
@@ -3295,73 +3362,6 @@ func (r *ResourceF5XCDnsLoadBalancer) Update(ctx context.Context, request resour
 
 						}
 
-						// resource modelToSpecNested PointerOfOneOfField --> AsnList
-						if !rulesClientChoiceModel.AsnList.IsNull() && !rulesClientChoiceModel.AsnList.IsUnknown() {
-							var dnsLoadBalancerLoadBalancingRuleAsnListModel DnsLoadBalancerLoadBalancingRuleAsnList
-							response.Diagnostics.Append(rulesClientChoiceModel.AsnList.As(ctx, &dnsLoadBalancerLoadBalancingRuleAsnListModel, basetypes.ObjectAsOptions{})...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							asnListOneOfSpec := &ves_io_schema_dns_load_balancer.LoadBalancingRule_AsnList{}
-							asnListOneOfSpec.AsnList = &ves_io_schema_policy.AsnMatchList{}
-							rulesSpec[i].ClientChoice = asnListOneOfSpec
-
-							elements := make([]uint32, 0, len(dnsLoadBalancerLoadBalancingRuleAsnListModel.AsNumbers.Elements()))
-							diags := dnsLoadBalancerLoadBalancingRuleAsnListModel.AsNumbers.ElementsAs(ctx, &elements, false)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							asnListOneOfSpec.AsnList.AsNumbers = elements
-
-						}
-
-						// resource modelToSpecNested PointerOfOneOfField --> AsnMatcher
-						if !rulesClientChoiceModel.AsnMatcher.IsNull() && !rulesClientChoiceModel.AsnMatcher.IsUnknown() {
-							var dnsLoadBalancerLoadBalancingRuleAsnMatcherModel DnsLoadBalancerLoadBalancingRuleAsnMatcher
-							response.Diagnostics.Append(rulesClientChoiceModel.AsnMatcher.As(ctx, &dnsLoadBalancerLoadBalancingRuleAsnMatcherModel, basetypes.ObjectAsOptions{})...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							asnMatcherOneOfSpec := &ves_io_schema_dns_load_balancer.LoadBalancingRule_AsnMatcher{}
-							asnMatcherOneOfSpec.AsnMatcher = &ves_io_schema_policy.AsnMatcherType{}
-							rulesSpec[i].ClientChoice = asnMatcherOneOfSpec
-
-							// resource modelToSpecNested RequiredArrayOfPointerField --> AsnSets
-							if !dnsLoadBalancerLoadBalancingRuleAsnMatcherModel.AsnSets.IsNull() && !dnsLoadBalancerLoadBalancingRuleAsnMatcherModel.AsnSets.IsUnknown() && len(dnsLoadBalancerLoadBalancingRuleAsnMatcherModel.AsnSets.Elements()) > 0 {
-								// 1. Convert the types.List into a slice of the model's Go struct
-								var asnSetsElements []ObjectRefTypeModel
-								response.Diagnostics.Append(dnsLoadBalancerLoadBalancingRuleAsnMatcherModel.AsnSets.ElementsAs(ctx, &asnSetsElements, false)...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-
-								// 2. Initialize the spec slice
-								asnSetsSpec := make([]*ves_io_schema.ObjectRefType, len(asnSetsElements))
-								asnMatcherOneOfSpec.AsnMatcher.AsnSets = asnSetsSpec
-
-								// 3. Iterate over the converted Go slice
-								for ii, asnSetsElement := range asnSetsElements {
-									// Initialize the spec struct for the current element
-									asnMatcherOneOfSpec.AsnMatcher.AsnSets[ii] = &ves_io_schema.ObjectRefType{}
-
-									// Recursively process nested elements
-
-									// resource modelToSpecNested RequiredStringField --> Namespace
-									if !asnSetsElement.Namespace.IsNull() && !asnSetsElement.Namespace.IsUnknown() {
-										asnSetsSpec[i].Namespace = string(asnSetsElement.Namespace.ValueString())
-									}
-
-									// resource modelToSpecNested RequiredStringField --> Name
-									if !asnSetsElement.Name.IsNull() && !asnSetsElement.Name.IsUnknown() {
-										asnSetsSpec[i].Name = string(asnSetsElement.Name.ValueString())
-									}
-
-								}
-							}
-
-						}
-
 					}
 
 					// resource modelToSpecNested RequiredOneOfField --> ActionChoice
@@ -3383,14 +3383,14 @@ func (r *ResourceF5XCDnsLoadBalancer) Update(ctx context.Context, request resour
 							poolOneOfSpec.Pool = &ves_io_schema_views.ObjectRefType{}
 							rulesSpec[i].ActionChoice = poolOneOfSpec
 
-							// resource modelToSpecNested RequiredStringField --> Name
-							if !objectRefTypeModelModel.Name.IsNull() && !objectRefTypeModelModel.Name.IsUnknown() {
-								poolOneOfSpec.Pool.Name = string(objectRefTypeModelModel.Name.ValueString())
-							}
-
 							// resource modelToSpecNested RequiredStringField --> Namespace
 							if !objectRefTypeModelModel.Namespace.IsNull() && !objectRefTypeModelModel.Namespace.IsUnknown() {
 								poolOneOfSpec.Pool.Namespace = string(objectRefTypeModelModel.Namespace.ValueString())
+							}
+
+							// resource modelToSpecNested RequiredStringField --> Name
+							if !objectRefTypeModelModel.Name.IsNull() && !objectRefTypeModelModel.Name.IsUnknown() {
+								poolOneOfSpec.Pool.Name = string(objectRefTypeModelModel.Name.ValueString())
 							}
 
 						}
@@ -3692,6 +3692,109 @@ func (r *ResourceF5XCDnsLoadBalancer) Update(ctx context.Context, request resour
 
 					// Process nested choices, populating the temporary attribute map
 
+					// resource specToModelNested PointerOfOneOfField --> AsnList
+					// GlobalSpecType
+					// false
+					{
+						asnListOptions, isAsnList := rulesclientChoiceChoices.(*ves_io_schema_dns_load_balancer.LoadBalancingRule_AsnList)
+						asnListAttributeMap := make(map[string]attr.Value)
+
+						if isAsnList && asnListOptions != nil {
+
+							// resource specToModelNested RequiredArrayOfUintField --> AsNumbers
+							asNumbersValue := asnListOptions.AsnList.GetAsNumbers()
+							if len(asNumbersValue) > 0 {
+								listValue, diags := types.ListValueFrom(ctx, types.Int64Type, asnListOptions.AsnList.GetAsNumbers())
+								response.Diagnostics.Append(diags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								asnListAttributeMap["as_numbers"] = listValue
+							} else {
+								asnListAttributeMap["as_numbers"] = types.ListNull(types.Int64Type)
+							}
+
+							asnListObj, diags := types.ObjectValue(DnsLoadBalancerRuleListRulesClientChoiceAsnListModelAttributeMap, asnListAttributeMap)
+							response.Diagnostics.Append(diags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							rulesclientChoiceChoicesAttributeMap["asn_list"] = asnListObj
+						} else {
+							rulesclientChoiceChoicesAttributeMap["asn_list"] = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceAsnListModelAttributeMap)
+						}
+					}
+
+					// resource specToModelNested PointerOfOneOfField --> AsnMatcher
+					// GlobalSpecType
+					// false
+					{
+						asnMatcherOptions, isAsnMatcher := rulesclientChoiceChoices.(*ves_io_schema_dns_load_balancer.LoadBalancingRule_AsnMatcher)
+						asnMatcherAttributeMap := make(map[string]attr.Value)
+
+						if isAsnMatcher && asnMatcherOptions != nil {
+
+							// resource specToModelNested RequiredArrayOfPointerField --> AsnSets
+							if len(asnMatcherOptions.AsnMatcher.GetAsnSets()) > 0 {
+								// Step 1: Always create a slice of model structs from the spec data.
+								// This slice serves as an intermediate representation.
+								asnSetsElements := make([]ObjectRefTypeModel, 0, len(asnMatcherOptions.AsnMatcher.GetAsnSets()))
+								for _, asnSetsElement := range asnMatcherOptions.AsnMatcher.GetAsnSets() {
+									objectRefTypeModelModel := ObjectRefTypeModel{}
+
+									// resource specToModelNested RequiredStringField --> Namespace
+									if asnSetsElement.GetNamespace() != "" {
+										objectRefTypeModelModel.Namespace = types.StringValue(asnSetsElement.GetNamespace())
+									} else {
+										// Empty string, set to null
+										objectRefTypeModelModel.Namespace = types.StringNull()
+									}
+
+									// resource specToModelNested RequiredStringField --> Name
+									if asnSetsElement.GetName() != "" {
+										objectRefTypeModelModel.Name = types.StringValue(asnSetsElement.GetName())
+									} else {
+										// Empty string, set to null
+										objectRefTypeModelModel.Name = types.StringNull()
+									}
+
+									// resource specToModelNested StringField --> Tenant
+									if asnSetsElement.GetTenant() != "" {
+										objectRefTypeModelModel.Tenant = types.StringValue(asnSetsElement.GetTenant())
+									} else {
+										// Empty string, set to null
+										objectRefTypeModelModel.Tenant = types.StringNull()
+									}
+
+									asnSetsElements = append(asnSetsElements, objectRefTypeModelModel)
+								}
+								// CASE 1: The target field is a `types.List` or an attribute map.
+								// The intermediate slice of structs must be converted to a `types.ListValue`.
+								asnSetsListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DnsLoadBalancerAsnSetsObjectRefModelAttributeMap}, asnSetsElements)
+								response.Diagnostics.Append(diags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								asnMatcherAttributeMap["asn_sets"] = asnSetsListValue
+
+							} else {
+								// The source list is empty or nil.
+								// CASE 1: The target field is a `types.List` or an attribute map.
+								// Assign a null `types.ListValue`.
+								asnMatcherAttributeMap["asn_sets"] = types.ListNull(types.ObjectType{AttrTypes: DnsLoadBalancerAsnSetsObjectRefModelAttributeMap})
+							}
+
+							asnMatcherObj, diags := types.ObjectValue(DnsLoadBalancerRuleListRulesClientChoiceAsnMatcherModelAttributeMap, asnMatcherAttributeMap)
+							response.Diagnostics.Append(diags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							rulesclientChoiceChoicesAttributeMap["asn_matcher"] = asnMatcherObj
+						} else {
+							rulesclientChoiceChoicesAttributeMap["asn_matcher"] = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceAsnMatcherModelAttributeMap)
+						}
+					}
+
 					// resource specToModelNested PointerOfOneOfField --> IpPrefixList
 					// GlobalSpecType
 					// false
@@ -3888,109 +3991,6 @@ func (r *ResourceF5XCDnsLoadBalancer) Update(ctx context.Context, request resour
 						}
 					}
 
-					// resource specToModelNested PointerOfOneOfField --> AsnList
-					// GlobalSpecType
-					// false
-					{
-						asnListOptions, isAsnList := rulesclientChoiceChoices.(*ves_io_schema_dns_load_balancer.LoadBalancingRule_AsnList)
-						asnListAttributeMap := make(map[string]attr.Value)
-
-						if isAsnList && asnListOptions != nil {
-
-							// resource specToModelNested RequiredArrayOfUintField --> AsNumbers
-							asNumbersValue := asnListOptions.AsnList.GetAsNumbers()
-							if len(asNumbersValue) > 0 {
-								listValue, diags := types.ListValueFrom(ctx, types.Int64Type, asnListOptions.AsnList.GetAsNumbers())
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								asnListAttributeMap["as_numbers"] = listValue
-							} else {
-								asnListAttributeMap["as_numbers"] = types.ListNull(types.Int64Type)
-							}
-
-							asnListObj, diags := types.ObjectValue(DnsLoadBalancerRuleListRulesClientChoiceAsnListModelAttributeMap, asnListAttributeMap)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							rulesclientChoiceChoicesAttributeMap["asn_list"] = asnListObj
-						} else {
-							rulesclientChoiceChoicesAttributeMap["asn_list"] = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceAsnListModelAttributeMap)
-						}
-					}
-
-					// resource specToModelNested PointerOfOneOfField --> AsnMatcher
-					// GlobalSpecType
-					// false
-					{
-						asnMatcherOptions, isAsnMatcher := rulesclientChoiceChoices.(*ves_io_schema_dns_load_balancer.LoadBalancingRule_AsnMatcher)
-						asnMatcherAttributeMap := make(map[string]attr.Value)
-
-						if isAsnMatcher && asnMatcherOptions != nil {
-
-							// resource specToModelNested RequiredArrayOfPointerField --> AsnSets
-							if len(asnMatcherOptions.AsnMatcher.GetAsnSets()) > 0 {
-								// Step 1: Always create a slice of model structs from the spec data.
-								// This slice serves as an intermediate representation.
-								asnSetsElements := make([]ObjectRefTypeModel, 0, len(asnMatcherOptions.AsnMatcher.GetAsnSets()))
-								for _, asnSetsElement := range asnMatcherOptions.AsnMatcher.GetAsnSets() {
-									objectRefTypeModelModel := ObjectRefTypeModel{}
-
-									// resource specToModelNested StringField --> Tenant
-									if asnSetsElement.GetTenant() != "" {
-										objectRefTypeModelModel.Tenant = types.StringValue(asnSetsElement.GetTenant())
-									} else {
-										// Empty string, set to null
-										objectRefTypeModelModel.Tenant = types.StringNull()
-									}
-
-									// resource specToModelNested RequiredStringField --> Namespace
-									if asnSetsElement.GetNamespace() != "" {
-										objectRefTypeModelModel.Namespace = types.StringValue(asnSetsElement.GetNamespace())
-									} else {
-										// Empty string, set to null
-										objectRefTypeModelModel.Namespace = types.StringNull()
-									}
-
-									// resource specToModelNested RequiredStringField --> Name
-									if asnSetsElement.GetName() != "" {
-										objectRefTypeModelModel.Name = types.StringValue(asnSetsElement.GetName())
-									} else {
-										// Empty string, set to null
-										objectRefTypeModelModel.Name = types.StringNull()
-									}
-
-									asnSetsElements = append(asnSetsElements, objectRefTypeModelModel)
-								}
-								// CASE 1: The target field is a `types.List` or an attribute map.
-								// The intermediate slice of structs must be converted to a `types.ListValue`.
-								asnSetsListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DnsLoadBalancerAsnSetsObjectRefModelAttributeMap}, asnSetsElements)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								asnMatcherAttributeMap["asn_sets"] = asnSetsListValue
-
-							} else {
-								// The source list is empty or nil.
-								// CASE 1: The target field is a `types.List` or an attribute map.
-								// Assign a null `types.ListValue`.
-								asnMatcherAttributeMap["asn_sets"] = types.ListNull(types.ObjectType{AttrTypes: DnsLoadBalancerAsnSetsObjectRefModelAttributeMap})
-							}
-
-							asnMatcherObj, diags := types.ObjectValue(DnsLoadBalancerRuleListRulesClientChoiceAsnMatcherModelAttributeMap, asnMatcherAttributeMap)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							rulesclientChoiceChoicesAttributeMap["asn_matcher"] = asnMatcherObj
-						} else {
-							rulesclientChoiceChoicesAttributeMap["asn_matcher"] = types.ObjectNull(DnsLoadBalancerRuleListRulesClientChoiceAsnMatcherModelAttributeMap)
-						}
-					}
-
 					// --- End of Choices ---
 
 					// Create the final ObjectValue for this OneOf field
@@ -4030,14 +4030,6 @@ func (r *ResourceF5XCDnsLoadBalancer) Update(ctx context.Context, request resour
 
 						if isPool && poolOptions != nil {
 
-							// resource specToModelNested RequiredStringField --> Name
-							if poolOptions.Pool.GetName() != "" {
-								poolAttributeMap["name"] = types.StringValue(poolOptions.Pool.GetName())
-							} else {
-								// Empty string, set to null
-								poolAttributeMap["name"] = types.StringNull()
-							}
-
 							// resource specToModelNested StringField --> Tenant
 							if poolOptions.Pool.GetTenant() != "" {
 								poolAttributeMap["tenant"] = types.StringValue(poolOptions.Pool.GetTenant())
@@ -4052,6 +4044,14 @@ func (r *ResourceF5XCDnsLoadBalancer) Update(ctx context.Context, request resour
 							} else {
 								// Empty string, set to null
 								poolAttributeMap["namespace"] = types.StringNull()
+							}
+
+							// resource specToModelNested RequiredStringField --> Name
+							if poolOptions.Pool.GetName() != "" {
+								poolAttributeMap["name"] = types.StringValue(poolOptions.Pool.GetName())
+							} else {
+								// Empty string, set to null
+								poolAttributeMap["name"] = types.StringNull()
 							}
 
 							poolObj, diags := types.ObjectValue(DnsLoadBalancerRuleListRulesActionChoicePoolModelAttributeMap, poolAttributeMap)
@@ -4213,6 +4213,14 @@ func (r *ResourceF5XCDnsLoadBalancer) Update(ctx context.Context, request resour
 		for _, dnsZonesElement := range specData.DnsZones {
 			objectRefTypeModelModel := ObjectRefTypeModel{}
 
+			// resource specToModelNested RequiredStringField --> Name
+			if dnsZonesElement.GetName() != "" {
+				objectRefTypeModelModel.Name = types.StringValue(dnsZonesElement.GetName())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Name = types.StringNull()
+			}
+
 			// resource specToModelNested StringField --> Tenant
 			if dnsZonesElement.GetTenant() != "" {
 				objectRefTypeModelModel.Tenant = types.StringValue(dnsZonesElement.GetTenant())
@@ -4227,14 +4235,6 @@ func (r *ResourceF5XCDnsLoadBalancer) Update(ctx context.Context, request resour
 			} else {
 				// Empty string, set to null
 				objectRefTypeModelModel.Namespace = types.StringNull()
-			}
-
-			// resource specToModelNested RequiredStringField --> Name
-			if dnsZonesElement.GetName() != "" {
-				objectRefTypeModelModel.Name = types.StringValue(dnsZonesElement.GetName())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Name = types.StringNull()
 			}
 
 			dnsZonesElements = append(dnsZonesElements, objectRefTypeModelModel)

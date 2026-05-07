@@ -52,26 +52,15 @@ type ResourceF5XCCloudCredentials struct {
 }
 
 type CloudCredentialsGlobalSpecTypeCloudChoice struct {
+	GcpCredFile         types.Object `tfsdk:"gcp_cred_file"`
+	AwsSecretKey        types.Object `tfsdk:"aws_secret_key"`
 	AwsAssumeRole       types.Object `tfsdk:"aws_assume_role"`
 	AzurePfxCertificate types.Object `tfsdk:"azure_pfx_certificate"`
 	AzureClientSecret   types.Object `tfsdk:"azure_client_secret"`
-	GcpCredFile         types.Object `tfsdk:"gcp_cred_file"`
-	AwsSecretKey        types.Object `tfsdk:"aws_secret_key"`
 }
 
-type CloudCredentialsGlobalSpecTypeAwsAssumeRole struct {
-	RoleArn         types.String `tfsdk:"role_arn"`
-	DurationSeconds types.Int64  `tfsdk:"duration_seconds"`
-	SessionName     types.String `tfsdk:"session_name"`
-	SessionTags     types.Map    `tfsdk:"session_tags"`
-}
-
-type CloudCredentialsGlobalSpecTypeAzurePfxCertificate struct {
-	ClientId       types.String `tfsdk:"client_id"`
-	SubscriptionId types.String `tfsdk:"subscription_id"`
-	TenantId       types.String `tfsdk:"tenant_id"`
-	CertificateUrl types.String `tfsdk:"certificate_url"`
-	Password       types.Object `tfsdk:"password"`
+type CloudCredentialsGlobalSpecTypeGcpCredFile struct {
+	CredentialFile types.Object `tfsdk:"credential_file"`
 }
 
 type CloudCredentialsSecretType struct {
@@ -94,20 +83,31 @@ type CloudCredentialsSecretTypeClearSecretInfo struct {
 	Url      types.String `tfsdk:"url"`
 }
 
-type CloudCredentialsGlobalSpecTypeAzureClientSecret struct {
-	ClientSecret   types.Object `tfsdk:"client_secret"`
-	ClientId       types.String `tfsdk:"client_id"`
-	SubscriptionId types.String `tfsdk:"subscription_id"`
-	TenantId       types.String `tfsdk:"tenant_id"`
-}
-
-type CloudCredentialsGlobalSpecTypeGcpCredFile struct {
-	CredentialFile types.Object `tfsdk:"credential_file"`
-}
-
 type CloudCredentialsGlobalSpecTypeAwsSecretKey struct {
 	AccessKey types.String `tfsdk:"access_key"`
 	SecretKey types.Object `tfsdk:"secret_key"`
+}
+
+type CloudCredentialsGlobalSpecTypeAwsAssumeRole struct {
+	RoleArn         types.String `tfsdk:"role_arn"`
+	DurationSeconds types.Int64  `tfsdk:"duration_seconds"`
+	SessionName     types.String `tfsdk:"session_name"`
+	SessionTags     types.Map    `tfsdk:"session_tags"`
+}
+
+type CloudCredentialsGlobalSpecTypeAzurePfxCertificate struct {
+	ClientId       types.String `tfsdk:"client_id"`
+	SubscriptionId types.String `tfsdk:"subscription_id"`
+	TenantId       types.String `tfsdk:"tenant_id"`
+	CertificateUrl types.String `tfsdk:"certificate_url"`
+	Password       types.Object `tfsdk:"password"`
+}
+
+type CloudCredentialsGlobalSpecTypeAzureClientSecret struct {
+	ClientId       types.String `tfsdk:"client_id"`
+	SubscriptionId types.String `tfsdk:"subscription_id"`
+	TenantId       types.String `tfsdk:"tenant_id"`
+	ClientSecret   types.Object `tfsdk:"client_secret"`
 }
 
 // ResourceF5XCCloudCredentialsModel describes the resource data model.
@@ -135,6 +135,12 @@ var (
 // Attribute map for RequiredOneOfField --> Cloud
 var CloudCredentialsCloudModelAttributeMap = map[string]attr.Type{
 
+	"gcp_cred_file": types.ObjectType{
+		AttrTypes: CloudCredentialsCloudGcpCredFileModelAttributeMap,
+	},
+	"aws_secret_key": types.ObjectType{
+		AttrTypes: CloudCredentialsCloudAwsSecretKeyModelAttributeMap,
+	},
 	"aws_assume_role": types.ObjectType{
 		AttrTypes: CloudCredentialsCloudAwsAssumeRoleModelAttributeMap,
 	},
@@ -144,12 +150,95 @@ var CloudCredentialsCloudModelAttributeMap = map[string]attr.Type{
 	"azure_client_secret": types.ObjectType{
 		AttrTypes: CloudCredentialsCloudAzureClientSecretModelAttributeMap,
 	},
-	"gcp_cred_file": types.ObjectType{
-		AttrTypes: CloudCredentialsCloudGcpCredFileModelAttributeMap,
+}
+
+// Attribute map for PointerOfOneOfField --> GcpCredFile
+var CloudCredentialsCloudGcpCredFileModelAttributeMap = map[string]attr.Type{
+	"credential_file": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"secret_info_choice": types.ObjectType{
+				AttrTypes: CloudCredentialsCloudGcpCredFileCredentialFileSecretInfoOneofModelAttributeMap,
+			}},
 	},
-	"aws_secret_key": types.ObjectType{
-		AttrTypes: CloudCredentialsCloudAwsSecretKeyModelAttributeMap,
+}
+
+// Attribute map for RequiredPointerField --> CredentialFile
+var CloudCredentialsCloudGcpCredFileCredentialFileModelAttributeMap = map[string]attr.Type{
+
+	"secret_info_choice": types.ObjectType{
+		AttrTypes: CloudCredentialsCloudGcpCredFileCredentialFileSecretInfoOneofModelAttributeMap,
 	},
+}
+
+// Attribute map for RequiredOneOfField --> SecretInfoOneof
+var CloudCredentialsCloudGcpCredFileCredentialFileSecretInfoOneofModelAttributeMap = map[string]attr.Type{
+
+	"blindfold_secret_info": types.ObjectType{
+		AttrTypes: CloudCredentialsCloudGcpCredFileCredentialFileSecretInfoOneofBlindfoldSecretInfoModelAttributeMap,
+	},
+	"clear_secret_info": types.ObjectType{
+		AttrTypes: CloudCredentialsCloudGcpCredFileCredentialFileSecretInfoOneofClearSecretInfoModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
+var CloudCredentialsCloudGcpCredFileCredentialFileSecretInfoOneofBlindfoldSecretInfoModelAttributeMap = map[string]attr.Type{
+
+	"decryption_provider": types.StringType,
+	"store_provider":      types.StringType,
+	"location":            types.StringType,
+}
+
+// Attribute map for PointerOfOneOfField --> ClearSecretInfo
+var CloudCredentialsCloudGcpCredFileCredentialFileSecretInfoOneofClearSecretInfoModelAttributeMap = map[string]attr.Type{
+
+	"provider": types.StringType,
+	"url":      types.StringType,
+}
+
+// Attribute map for PointerOfOneOfField --> AwsSecretKey
+var CloudCredentialsCloudAwsSecretKeyModelAttributeMap = map[string]attr.Type{
+
+	"access_key": types.StringType, "secret_key": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"secret_info_choice": types.ObjectType{
+				AttrTypes: CloudCredentialsCloudAwsSecretKeySecretKeySecretInfoOneofModelAttributeMap,
+			}},
+	},
+}
+
+// Attribute map for RequiredPointerField --> SecretKey
+var CloudCredentialsCloudAwsSecretKeySecretKeyModelAttributeMap = map[string]attr.Type{
+
+	"secret_info_choice": types.ObjectType{
+		AttrTypes: CloudCredentialsCloudAwsSecretKeySecretKeySecretInfoOneofModelAttributeMap,
+	},
+}
+
+// Attribute map for RequiredOneOfField --> SecretInfoOneof
+var CloudCredentialsCloudAwsSecretKeySecretKeySecretInfoOneofModelAttributeMap = map[string]attr.Type{
+
+	"blindfold_secret_info": types.ObjectType{
+		AttrTypes: CloudCredentialsCloudAwsSecretKeySecretKeySecretInfoOneofBlindfoldSecretInfoModelAttributeMap,
+	},
+	"clear_secret_info": types.ObjectType{
+		AttrTypes: CloudCredentialsCloudAwsSecretKeySecretKeySecretInfoOneofClearSecretInfoModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
+var CloudCredentialsCloudAwsSecretKeySecretKeySecretInfoOneofBlindfoldSecretInfoModelAttributeMap = map[string]attr.Type{
+
+	"decryption_provider": types.StringType,
+	"store_provider":      types.StringType,
+	"location":            types.StringType,
+}
+
+// Attribute map for PointerOfOneOfField --> ClearSecretInfo
+var CloudCredentialsCloudAwsSecretKeySecretKeySecretInfoOneofClearSecretInfoModelAttributeMap = map[string]attr.Type{
+
+	"provider": types.StringType,
+	"url":      types.StringType,
 }
 
 // Attribute map for PointerOfOneOfField --> AwsAssumeRole
@@ -188,12 +277,19 @@ var CloudCredentialsCloudAzurePfxCertificatePasswordModelAttributeMap = map[stri
 // Attribute map for RequiredOneOfField --> SecretInfoOneof
 var CloudCredentialsCloudAzurePfxCertificatePasswordSecretInfoOneofModelAttributeMap = map[string]attr.Type{
 
-	"blindfold_secret_info": types.ObjectType{
-		AttrTypes: CloudCredentialsCloudAzurePfxCertificatePasswordSecretInfoOneofBlindfoldSecretInfoModelAttributeMap,
-	},
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: CloudCredentialsCloudAzurePfxCertificatePasswordSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
+	"blindfold_secret_info": types.ObjectType{
+		AttrTypes: CloudCredentialsCloudAzurePfxCertificatePasswordSecretInfoOneofBlindfoldSecretInfoModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> ClearSecretInfo
+var CloudCredentialsCloudAzurePfxCertificatePasswordSecretInfoOneofClearSecretInfoModelAttributeMap = map[string]attr.Type{
+
+	"provider": types.StringType,
+	"url":      types.StringType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -204,24 +300,17 @@ var CloudCredentialsCloudAzurePfxCertificatePasswordSecretInfoOneofBlindfoldSecr
 	"location":            types.StringType,
 }
 
-// Attribute map for PointerOfOneOfField --> ClearSecretInfo
-var CloudCredentialsCloudAzurePfxCertificatePasswordSecretInfoOneofClearSecretInfoModelAttributeMap = map[string]attr.Type{
-
-	"provider": types.StringType,
-	"url":      types.StringType,
-}
-
 // Attribute map for PointerOfOneOfField --> AzureClientSecret
 var CloudCredentialsCloudAzureClientSecretModelAttributeMap = map[string]attr.Type{
-	"client_secret": types.ObjectType{
+
+	"client_id":       types.StringType,
+	"subscription_id": types.StringType,
+	"tenant_id":       types.StringType, "client_secret": types.ObjectType{
 		AttrTypes: map[string]attr.Type{
 			"secret_info_choice": types.ObjectType{
 				AttrTypes: CloudCredentialsCloudAzureClientSecretClientSecretSecretInfoOneofModelAttributeMap,
 			}},
 	},
-	"client_id":       types.StringType,
-	"subscription_id": types.StringType,
-	"tenant_id":       types.StringType,
 }
 
 // Attribute map for RequiredPointerField --> ClientSecret
@@ -235,20 +324,12 @@ var CloudCredentialsCloudAzureClientSecretClientSecretModelAttributeMap = map[st
 // Attribute map for RequiredOneOfField --> SecretInfoOneof
 var CloudCredentialsCloudAzureClientSecretClientSecretSecretInfoOneofModelAttributeMap = map[string]attr.Type{
 
-	"blindfold_secret_info": types.ObjectType{
-		AttrTypes: CloudCredentialsCloudAzureClientSecretClientSecretSecretInfoOneofBlindfoldSecretInfoModelAttributeMap,
-	},
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: CloudCredentialsCloudAzureClientSecretClientSecretSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
-}
-
-// Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
-var CloudCredentialsCloudAzureClientSecretClientSecretSecretInfoOneofBlindfoldSecretInfoModelAttributeMap = map[string]attr.Type{
-
-	"decryption_provider": types.StringType,
-	"store_provider":      types.StringType,
-	"location":            types.StringType,
+	"blindfold_secret_info": types.ObjectType{
+		AttrTypes: CloudCredentialsCloudAzureClientSecretClientSecretSecretInfoOneofBlindfoldSecretInfoModelAttributeMap,
+	},
 }
 
 // Attribute map for PointerOfOneOfField --> ClearSecretInfo
@@ -258,93 +339,12 @@ var CloudCredentialsCloudAzureClientSecretClientSecretSecretInfoOneofClearSecret
 	"url":      types.StringType,
 }
 
-// Attribute map for PointerOfOneOfField --> GcpCredFile
-var CloudCredentialsCloudGcpCredFileModelAttributeMap = map[string]attr.Type{
-	"credential_file": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"secret_info_choice": types.ObjectType{
-				AttrTypes: CloudCredentialsCloudGcpCredFileCredentialFileSecretInfoOneofModelAttributeMap,
-			}},
-	},
-}
-
-// Attribute map for RequiredPointerField --> CredentialFile
-var CloudCredentialsCloudGcpCredFileCredentialFileModelAttributeMap = map[string]attr.Type{
-
-	"secret_info_choice": types.ObjectType{
-		AttrTypes: CloudCredentialsCloudGcpCredFileCredentialFileSecretInfoOneofModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> SecretInfoOneof
-var CloudCredentialsCloudGcpCredFileCredentialFileSecretInfoOneofModelAttributeMap = map[string]attr.Type{
-
-	"blindfold_secret_info": types.ObjectType{
-		AttrTypes: CloudCredentialsCloudGcpCredFileCredentialFileSecretInfoOneofBlindfoldSecretInfoModelAttributeMap,
-	},
-	"clear_secret_info": types.ObjectType{
-		AttrTypes: CloudCredentialsCloudGcpCredFileCredentialFileSecretInfoOneofClearSecretInfoModelAttributeMap,
-	},
-}
-
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
-var CloudCredentialsCloudGcpCredFileCredentialFileSecretInfoOneofBlindfoldSecretInfoModelAttributeMap = map[string]attr.Type{
+var CloudCredentialsCloudAzureClientSecretClientSecretSecretInfoOneofBlindfoldSecretInfoModelAttributeMap = map[string]attr.Type{
 
-	"location":            types.StringType,
 	"decryption_provider": types.StringType,
 	"store_provider":      types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> ClearSecretInfo
-var CloudCredentialsCloudGcpCredFileCredentialFileSecretInfoOneofClearSecretInfoModelAttributeMap = map[string]attr.Type{
-
-	"provider": types.StringType,
-	"url":      types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> AwsSecretKey
-var CloudCredentialsCloudAwsSecretKeyModelAttributeMap = map[string]attr.Type{
-
-	"access_key": types.StringType, "secret_key": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"secret_info_choice": types.ObjectType{
-				AttrTypes: CloudCredentialsCloudAwsSecretKeySecretKeySecretInfoOneofModelAttributeMap,
-			}},
-	},
-}
-
-// Attribute map for RequiredPointerField --> SecretKey
-var CloudCredentialsCloudAwsSecretKeySecretKeyModelAttributeMap = map[string]attr.Type{
-
-	"secret_info_choice": types.ObjectType{
-		AttrTypes: CloudCredentialsCloudAwsSecretKeySecretKeySecretInfoOneofModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> SecretInfoOneof
-var CloudCredentialsCloudAwsSecretKeySecretKeySecretInfoOneofModelAttributeMap = map[string]attr.Type{
-
-	"clear_secret_info": types.ObjectType{
-		AttrTypes: CloudCredentialsCloudAwsSecretKeySecretKeySecretInfoOneofClearSecretInfoModelAttributeMap,
-	},
-	"blindfold_secret_info": types.ObjectType{
-		AttrTypes: CloudCredentialsCloudAwsSecretKeySecretKeySecretInfoOneofBlindfoldSecretInfoModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> ClearSecretInfo
-var CloudCredentialsCloudAwsSecretKeySecretKeySecretInfoOneofClearSecretInfoModelAttributeMap = map[string]attr.Type{
-
-	"provider": types.StringType,
-	"url":      types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
-var CloudCredentialsCloudAwsSecretKeySecretKeySecretInfoOneofBlindfoldSecretInfoModelAttributeMap = map[string]attr.Type{
-
 	"location":            types.StringType,
-	"decryption_provider": types.StringType,
-	"store_provider":      types.StringType,
 }
 
 func NewResourceF5XCCloudCredentials() resource.Resource {
@@ -425,14 +425,198 @@ func (r *ResourceF5XCCloudCredentials) Schema(ctx context.Context, request resou
 				Computed:            false,
 				Validators: []validator.Object{
 					atmostoneofvalidator.AtMostOneOf(
-						"aws_secret_key",
 						"aws_assume_role",
 						"azure_pfx_certificate",
 						"azure_client_secret",
 						"gcp_cred_file",
+						"aws_secret_key",
 					),
 				},
 				Attributes: map[string]schema.Attribute{
+					"gcp_cred_file": schema.SingleNestedAttribute{
+						Description:         "GCP Credentials Google authentication using content of Google Credentials File",
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Attributes: map[string]schema.Attribute{
+							"credential_file": schema.SingleNestedAttribute{
+								Description:         "GCP credential file Content of Credential File for your GCP account",
+								MarkdownDescription: "",
+								Required:            true,
+								Optional:            false,
+								Computed:            false,
+								Attributes: map[string]schema.Attribute{
+									"secret_info_choice": schema.SingleNestedAttribute{
+										Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+										MarkdownDescription: "",
+										Required:            true,
+										Optional:            false,
+										Computed:            false,
+										Validators: []validator.Object{
+											atmostoneofvalidator.AtMostOneOf(
+												"blindfold_secret_info",
+												"clear_secret_info",
+											),
+										},
+										Attributes: map[string]schema.Attribute{
+											"blindfold_secret_info": schema.SingleNestedAttribute{
+												Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+												MarkdownDescription: "",
+												Required:            false,
+												Optional:            true,
+												Computed:            false,
+												Attributes: map[string]schema.Attribute{
+													"decryption_provider": schema.StringAttribute{
+														Description:         "Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.",
+														MarkdownDescription: "",
+														Required:            false,
+														Optional:            true,
+														Computed:            false,
+													},
+													"store_provider": schema.StringAttribute{
+														Description:         "Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
+														MarkdownDescription: "",
+														Required:            false,
+														Optional:            true,
+														Computed:            false,
+													},
+													"location": schema.StringAttribute{
+														Description:         "Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location",
+														MarkdownDescription: "",
+														Required:            true,
+														Optional:            false,
+														Computed:            false,
+													},
+												},
+											},
+											"clear_secret_info": schema.SingleNestedAttribute{
+												Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+												MarkdownDescription: "",
+												Required:            false,
+												Optional:            true,
+												Computed:            false,
+												Attributes: map[string]schema.Attribute{
+													"provider": schema.StringAttribute{
+														Description:         "Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
+														MarkdownDescription: "",
+														Required:            false,
+														Optional:            true,
+														Computed:            false,
+													},
+													"url": schema.StringAttribute{
+														Description:         "URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.",
+														MarkdownDescription: "",
+														Required:            true,
+														Optional:            false,
+														Computed:            false,
+														Sensitive:           true,
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+					"aws_secret_key": schema.SingleNestedAttribute{
+						Description:         "AWS Programmatic Access Credentials AWS authentication using access keys",
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Attributes: map[string]schema.Attribute{
+							"access_key": schema.StringAttribute{
+								Description:         "AWS Access Key ID Access key ID for your AWS account",
+								MarkdownDescription: "<br>**Validation:** `Length LengthAtMost(128)`",
+								Required:            true,
+								Optional:            false,
+								Computed:            false,
+								Validators: []validator.String{
+									stringvalidator.LengthAtMost(128),
+								},
+							},
+							"secret_key": schema.SingleNestedAttribute{
+								Description:         "AWS Secret Access Key Secret Access Key for your AWS account",
+								MarkdownDescription: "",
+								Required:            true,
+								Optional:            false,
+								Computed:            false,
+								Attributes: map[string]schema.Attribute{
+									"secret_info_choice": schema.SingleNestedAttribute{
+										Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+										MarkdownDescription: "",
+										Required:            true,
+										Optional:            false,
+										Computed:            false,
+										Validators: []validator.Object{
+											atmostoneofvalidator.AtMostOneOf(
+												"blindfold_secret_info",
+												"clear_secret_info",
+											),
+										},
+										Attributes: map[string]schema.Attribute{
+											"blindfold_secret_info": schema.SingleNestedAttribute{
+												Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+												MarkdownDescription: "",
+												Required:            false,
+												Optional:            true,
+												Computed:            false,
+												Attributes: map[string]schema.Attribute{
+													"decryption_provider": schema.StringAttribute{
+														Description:         "Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.",
+														MarkdownDescription: "",
+														Required:            false,
+														Optional:            true,
+														Computed:            false,
+													},
+													"store_provider": schema.StringAttribute{
+														Description:         "Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
+														MarkdownDescription: "",
+														Required:            false,
+														Optional:            true,
+														Computed:            false,
+													},
+													"location": schema.StringAttribute{
+														Description:         "Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location",
+														MarkdownDescription: "",
+														Required:            true,
+														Optional:            false,
+														Computed:            false,
+													},
+												},
+											},
+											"clear_secret_info": schema.SingleNestedAttribute{
+												Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+												MarkdownDescription: "",
+												Required:            false,
+												Optional:            true,
+												Computed:            false,
+												Attributes: map[string]schema.Attribute{
+													"provider": schema.StringAttribute{
+														Description:         "Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
+														MarkdownDescription: "",
+														Required:            false,
+														Optional:            true,
+														Computed:            false,
+													},
+													"url": schema.StringAttribute{
+														Description:         "URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.",
+														MarkdownDescription: "",
+														Required:            true,
+														Optional:            false,
+														Computed:            false,
+														Sensitive:           true,
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
 					"aws_assume_role": schema.SingleNestedAttribute{
 						Description:         "AWS Assume Role F5XC will assume role designated by customer",
 						MarkdownDescription: "",
@@ -555,11 +739,35 @@ func (r *ResourceF5XCCloudCredentials) Schema(ctx context.Context, request resou
 										Computed:            false,
 										Validators: []validator.Object{
 											atmostoneofvalidator.AtMostOneOf(
-												"blindfold_secret_info",
 												"clear_secret_info",
+												"blindfold_secret_info",
 											),
 										},
 										Attributes: map[string]schema.Attribute{
+											"clear_secret_info": schema.SingleNestedAttribute{
+												Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+												MarkdownDescription: "",
+												Required:            false,
+												Optional:            true,
+												Computed:            false,
+												Attributes: map[string]schema.Attribute{
+													"provider": schema.StringAttribute{
+														Description:         "Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
+														MarkdownDescription: "",
+														Required:            false,
+														Optional:            true,
+														Computed:            false,
+													},
+													"url": schema.StringAttribute{
+														Description:         "URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.",
+														MarkdownDescription: "",
+														Required:            true,
+														Optional:            false,
+														Computed:            false,
+														Sensitive:           true,
+													},
+												},
+											},
 											"blindfold_secret_info": schema.SingleNestedAttribute{
 												Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
 												MarkdownDescription: "",
@@ -587,30 +795,6 @@ func (r *ResourceF5XCCloudCredentials) Schema(ctx context.Context, request resou
 														Required:            true,
 														Optional:            false,
 														Computed:            false,
-													},
-												},
-											},
-											"clear_secret_info": schema.SingleNestedAttribute{
-												Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-												MarkdownDescription: "",
-												Required:            false,
-												Optional:            true,
-												Computed:            false,
-												Attributes: map[string]schema.Attribute{
-													"provider": schema.StringAttribute{
-														Description:         "Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
-														MarkdownDescription: "",
-														Required:            false,
-														Optional:            true,
-														Computed:            false,
-													},
-													"url": schema.StringAttribute{
-														Description:         "URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.",
-														MarkdownDescription: "",
-														Required:            true,
-														Optional:            false,
-														Computed:            false,
-														Sensitive:           true,
 													},
 												},
 											},
@@ -627,84 +811,6 @@ func (r *ResourceF5XCCloudCredentials) Schema(ctx context.Context, request resou
 						Optional:            true,
 						Computed:            false,
 						Attributes: map[string]schema.Attribute{
-							"client_secret": schema.SingleNestedAttribute{
-								Description:         "Azure client secret Client Secret (alias password) for your Azure service principal",
-								MarkdownDescription: "",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
-								Attributes: map[string]schema.Attribute{
-									"secret_info_choice": schema.SingleNestedAttribute{
-										Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-										MarkdownDescription: "",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
-										Validators: []validator.Object{
-											atmostoneofvalidator.AtMostOneOf(
-												"blindfold_secret_info",
-												"clear_secret_info",
-											),
-										},
-										Attributes: map[string]schema.Attribute{
-											"blindfold_secret_info": schema.SingleNestedAttribute{
-												Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-												MarkdownDescription: "",
-												Required:            false,
-												Optional:            true,
-												Computed:            false,
-												Attributes: map[string]schema.Attribute{
-													"decryption_provider": schema.StringAttribute{
-														Description:         "Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.",
-														MarkdownDescription: "",
-														Required:            false,
-														Optional:            true,
-														Computed:            false,
-													},
-													"store_provider": schema.StringAttribute{
-														Description:         "Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
-														MarkdownDescription: "",
-														Required:            false,
-														Optional:            true,
-														Computed:            false,
-													},
-													"location": schema.StringAttribute{
-														Description:         "Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location",
-														MarkdownDescription: "",
-														Required:            true,
-														Optional:            false,
-														Computed:            false,
-													},
-												},
-											},
-											"clear_secret_info": schema.SingleNestedAttribute{
-												Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-												MarkdownDescription: "",
-												Required:            false,
-												Optional:            true,
-												Computed:            false,
-												Attributes: map[string]schema.Attribute{
-													"provider": schema.StringAttribute{
-														Description:         "Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
-														MarkdownDescription: "",
-														Required:            false,
-														Optional:            true,
-														Computed:            false,
-													},
-													"url": schema.StringAttribute{
-														Description:         "URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.",
-														MarkdownDescription: "",
-														Required:            true,
-														Optional:            false,
-														Computed:            false,
-														Sensitive:           true,
-													},
-												},
-											},
-										},
-									},
-								},
-							},
 							"client_id": schema.StringAttribute{
 								Description:         "Azure Client ID Client ID for your Azure service principal",
 								MarkdownDescription: "<br>**Validation:** `Length LengthAtMost(64)`",
@@ -735,114 +841,8 @@ func (r *ResourceF5XCCloudCredentials) Schema(ctx context.Context, request resou
 									stringvalidator.LengthAtMost(64),
 								},
 							},
-						},
-					},
-					"gcp_cred_file": schema.SingleNestedAttribute{
-						Description:         "GCP Credentials Google authentication using content of Google Credentials File",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Attributes: map[string]schema.Attribute{
-							"credential_file": schema.SingleNestedAttribute{
-								Description:         "GCP credential file Content of Credential File for your GCP account",
-								MarkdownDescription: "",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
-								Attributes: map[string]schema.Attribute{
-									"secret_info_choice": schema.SingleNestedAttribute{
-										Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-										MarkdownDescription: "",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
-										Validators: []validator.Object{
-											atmostoneofvalidator.AtMostOneOf(
-												"blindfold_secret_info",
-												"clear_secret_info",
-											),
-										},
-										Attributes: map[string]schema.Attribute{
-											"blindfold_secret_info": schema.SingleNestedAttribute{
-												Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-												MarkdownDescription: "",
-												Required:            false,
-												Optional:            true,
-												Computed:            false,
-												Attributes: map[string]schema.Attribute{
-													"location": schema.StringAttribute{
-														Description:         "Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location",
-														MarkdownDescription: "",
-														Required:            true,
-														Optional:            false,
-														Computed:            false,
-													},
-													"decryption_provider": schema.StringAttribute{
-														Description:         "Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.",
-														MarkdownDescription: "",
-														Required:            false,
-														Optional:            true,
-														Computed:            false,
-													},
-													"store_provider": schema.StringAttribute{
-														Description:         "Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
-														MarkdownDescription: "",
-														Required:            false,
-														Optional:            true,
-														Computed:            false,
-													},
-												},
-											},
-											"clear_secret_info": schema.SingleNestedAttribute{
-												Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-												MarkdownDescription: "",
-												Required:            false,
-												Optional:            true,
-												Computed:            false,
-												Attributes: map[string]schema.Attribute{
-													"provider": schema.StringAttribute{
-														Description:         "Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
-														MarkdownDescription: "",
-														Required:            false,
-														Optional:            true,
-														Computed:            false,
-													},
-													"url": schema.StringAttribute{
-														Description:         "URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.",
-														MarkdownDescription: "",
-														Required:            true,
-														Optional:            false,
-														Computed:            false,
-														Sensitive:           true,
-													},
-												},
-											},
-										},
-									},
-								},
-							},
-						},
-					},
-					"aws_secret_key": schema.SingleNestedAttribute{
-						Description:         "AWS Programmatic Access Credentials AWS authentication using access keys",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Attributes: map[string]schema.Attribute{
-							"access_key": schema.StringAttribute{
-								Description:         "AWS Access Key ID Access key ID for your AWS account",
-								MarkdownDescription: "<br>**Validation:** `Length LengthAtMost(128)`",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
-								Validators: []validator.String{
-									stringvalidator.LengthAtMost(128),
-								},
-							},
-							"secret_key": schema.SingleNestedAttribute{
-								Description:         "AWS Secret Access Key Secret Access Key for your AWS account",
+							"client_secret": schema.SingleNestedAttribute{
+								Description:         "Azure client secret Client Secret (alias password) for your Azure service principal",
 								MarkdownDescription: "",
 								Required:            true,
 								Optional:            false,
@@ -892,13 +892,6 @@ func (r *ResourceF5XCCloudCredentials) Schema(ctx context.Context, request resou
 												Optional:            true,
 												Computed:            false,
 												Attributes: map[string]schema.Attribute{
-													"location": schema.StringAttribute{
-														Description:         "Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location",
-														MarkdownDescription: "",
-														Required:            true,
-														Optional:            false,
-														Computed:            false,
-													},
 													"decryption_provider": schema.StringAttribute{
 														Description:         "Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.",
 														MarkdownDescription: "",
@@ -911,6 +904,13 @@ func (r *ResourceF5XCCloudCredentials) Schema(ctx context.Context, request resou
 														MarkdownDescription: "",
 														Required:            false,
 														Optional:            true,
+														Computed:            false,
+													},
+													"location": schema.StringAttribute{
+														Description:         "Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location",
+														MarkdownDescription: "",
+														Required:            true,
+														Optional:            false,
 														Computed:            false,
 													},
 												},
@@ -1062,6 +1062,185 @@ func (r *ResourceF5XCCloudCredentials) Create(ctx context.Context, request resou
 			return
 		}
 
+		// resource modelToSpecNested PointerOfOneOfField --> GcpCredFile
+		if !cloudChoiceModel.GcpCredFile.IsNull() && !cloudChoiceModel.GcpCredFile.IsUnknown() {
+			var cloudCredentialsGlobalSpecTypeGcpCredFileModel CloudCredentialsGlobalSpecTypeGcpCredFile
+			response.Diagnostics.Append(cloudChoiceModel.GcpCredFile.As(ctx, &cloudCredentialsGlobalSpecTypeGcpCredFileModel, basetypes.ObjectAsOptions{})...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			gcpCredFileOneOfSpec := &ves_io_schema_cloud_credentials.CreateSpecType_GcpCredFile{}
+			gcpCredFileOneOfSpec.GcpCredFile = &ves_io_schema_cloud_credentials.GCPCredFileType{}
+			spec.Cloud = gcpCredFileOneOfSpec
+
+			// resource modelToSpecNested RequiredPointerField --> CredentialFile
+			if !cloudCredentialsGlobalSpecTypeGcpCredFileModel.CredentialFile.IsNull() && !cloudCredentialsGlobalSpecTypeGcpCredFileModel.CredentialFile.IsUnknown() {
+				var credentialFileModel CloudCredentialsSecretType
+				response.Diagnostics.Append(cloudCredentialsGlobalSpecTypeGcpCredFileModel.CredentialFile.As(ctx, &credentialFileModel, basetypes.ObjectAsOptions{})...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				credentialFileSpec := &ves_io_schema.SecretType{}
+				gcpCredFileOneOfSpec.GcpCredFile.CredentialFile = credentialFileSpec
+
+				// resource modelToSpecNested RequiredOneOfField --> SecretInfoOneof
+				if !credentialFileModel.SecretInfoChoice.IsNull() && !credentialFileModel.SecretInfoChoice.IsUnknown() {
+					credentialFileSecretInfoChoiceModel := CloudCredentialsSecretTypeSecretInfoChoice{}
+					response.Diagnostics.Append(credentialFileModel.SecretInfoChoice.As(ctx, &credentialFileSecretInfoChoiceModel, basetypes.ObjectAsOptions{})...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					// resource modelToSpecNested PointerOfOneOfField --> BlindfoldSecretInfo
+					if !credentialFileSecretInfoChoiceModel.BlindfoldSecretInfo.IsNull() && !credentialFileSecretInfoChoiceModel.BlindfoldSecretInfo.IsUnknown() {
+						var cloudCredentialsSecretTypeBlindfoldSecretInfoModel CloudCredentialsSecretTypeBlindfoldSecretInfo
+						response.Diagnostics.Append(credentialFileSecretInfoChoiceModel.BlindfoldSecretInfo.As(ctx, &cloudCredentialsSecretTypeBlindfoldSecretInfoModel, basetypes.ObjectAsOptions{})...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						blindfoldSecretInfoOneOfSpec := &ves_io_schema.SecretType_BlindfoldSecretInfo{}
+						blindfoldSecretInfoOneOfSpec.BlindfoldSecretInfo = &ves_io_schema.BlindfoldSecretInfoType{}
+						credentialFileSpec.SecretInfoOneof = blindfoldSecretInfoOneOfSpec
+
+						// resource modelToSpecNested StringField --> DecryptionProvider
+						if !cloudCredentialsSecretTypeBlindfoldSecretInfoModel.DecryptionProvider.IsNull() && !cloudCredentialsSecretTypeBlindfoldSecretInfoModel.DecryptionProvider.IsUnknown() {
+							blindfoldSecretInfoOneOfSpec.BlindfoldSecretInfo.DecryptionProvider = string(cloudCredentialsSecretTypeBlindfoldSecretInfoModel.DecryptionProvider.ValueString())
+						}
+
+						// resource modelToSpecNested StringField --> StoreProvider
+						if !cloudCredentialsSecretTypeBlindfoldSecretInfoModel.StoreProvider.IsNull() && !cloudCredentialsSecretTypeBlindfoldSecretInfoModel.StoreProvider.IsUnknown() {
+							blindfoldSecretInfoOneOfSpec.BlindfoldSecretInfo.StoreProvider = string(cloudCredentialsSecretTypeBlindfoldSecretInfoModel.StoreProvider.ValueString())
+						}
+
+						// resource modelToSpecNested RequiredStringField --> Location
+						if !cloudCredentialsSecretTypeBlindfoldSecretInfoModel.Location.IsNull() && !cloudCredentialsSecretTypeBlindfoldSecretInfoModel.Location.IsUnknown() {
+							blindfoldSecretInfoOneOfSpec.BlindfoldSecretInfo.Location = string(cloudCredentialsSecretTypeBlindfoldSecretInfoModel.Location.ValueString())
+						}
+
+					}
+
+					// resource modelToSpecNested PointerOfOneOfField --> ClearSecretInfo
+					if !credentialFileSecretInfoChoiceModel.ClearSecretInfo.IsNull() && !credentialFileSecretInfoChoiceModel.ClearSecretInfo.IsUnknown() {
+						var cloudCredentialsSecretTypeClearSecretInfoModel CloudCredentialsSecretTypeClearSecretInfo
+						response.Diagnostics.Append(credentialFileSecretInfoChoiceModel.ClearSecretInfo.As(ctx, &cloudCredentialsSecretTypeClearSecretInfoModel, basetypes.ObjectAsOptions{})...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						clearSecretInfoOneOfSpec := &ves_io_schema.SecretType_ClearSecretInfo{}
+						clearSecretInfoOneOfSpec.ClearSecretInfo = &ves_io_schema.ClearSecretInfoType{}
+						credentialFileSpec.SecretInfoOneof = clearSecretInfoOneOfSpec
+
+						// resource modelToSpecNested StringField --> Provider
+						if !cloudCredentialsSecretTypeClearSecretInfoModel.Provider.IsNull() && !cloudCredentialsSecretTypeClearSecretInfoModel.Provider.IsUnknown() {
+							clearSecretInfoOneOfSpec.ClearSecretInfo.Provider = string(cloudCredentialsSecretTypeClearSecretInfoModel.Provider.ValueString())
+						}
+
+						// resource modelToSpecNested RequiredStringField --> Url
+						if !cloudCredentialsSecretTypeClearSecretInfoModel.Url.IsNull() && !cloudCredentialsSecretTypeClearSecretInfoModel.Url.IsUnknown() {
+							clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(cloudCredentialsSecretTypeClearSecretInfoModel.Url.ValueString())
+						}
+
+					}
+
+				}
+
+			}
+
+		}
+
+		// resource modelToSpecNested PointerOfOneOfField --> AwsSecretKey
+		if !cloudChoiceModel.AwsSecretKey.IsNull() && !cloudChoiceModel.AwsSecretKey.IsUnknown() {
+			var cloudCredentialsGlobalSpecTypeAwsSecretKeyModel CloudCredentialsGlobalSpecTypeAwsSecretKey
+			response.Diagnostics.Append(cloudChoiceModel.AwsSecretKey.As(ctx, &cloudCredentialsGlobalSpecTypeAwsSecretKeyModel, basetypes.ObjectAsOptions{})...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			awsSecretKeyOneOfSpec := &ves_io_schema_cloud_credentials.CreateSpecType_AwsSecretKey{}
+			awsSecretKeyOneOfSpec.AwsSecretKey = &ves_io_schema_cloud_credentials.AWSSecretType{}
+			spec.Cloud = awsSecretKeyOneOfSpec
+
+			// resource modelToSpecNested RequiredStringField --> AccessKey
+			if !cloudCredentialsGlobalSpecTypeAwsSecretKeyModel.AccessKey.IsNull() && !cloudCredentialsGlobalSpecTypeAwsSecretKeyModel.AccessKey.IsUnknown() {
+				awsSecretKeyOneOfSpec.AwsSecretKey.AccessKey = string(cloudCredentialsGlobalSpecTypeAwsSecretKeyModel.AccessKey.ValueString())
+			}
+
+			// resource modelToSpecNested RequiredPointerField --> SecretKey
+			if !cloudCredentialsGlobalSpecTypeAwsSecretKeyModel.SecretKey.IsNull() && !cloudCredentialsGlobalSpecTypeAwsSecretKeyModel.SecretKey.IsUnknown() {
+				var secretKeyModel CloudCredentialsSecretType
+				response.Diagnostics.Append(cloudCredentialsGlobalSpecTypeAwsSecretKeyModel.SecretKey.As(ctx, &secretKeyModel, basetypes.ObjectAsOptions{})...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				secretKeySpec := &ves_io_schema.SecretType{}
+				awsSecretKeyOneOfSpec.AwsSecretKey.SecretKey = secretKeySpec
+
+				// resource modelToSpecNested RequiredOneOfField --> SecretInfoOneof
+				if !secretKeyModel.SecretInfoChoice.IsNull() && !secretKeyModel.SecretInfoChoice.IsUnknown() {
+					secretKeySecretInfoChoiceModel := CloudCredentialsSecretTypeSecretInfoChoice{}
+					response.Diagnostics.Append(secretKeyModel.SecretInfoChoice.As(ctx, &secretKeySecretInfoChoiceModel, basetypes.ObjectAsOptions{})...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					// resource modelToSpecNested PointerOfOneOfField --> BlindfoldSecretInfo
+					if !secretKeySecretInfoChoiceModel.BlindfoldSecretInfo.IsNull() && !secretKeySecretInfoChoiceModel.BlindfoldSecretInfo.IsUnknown() {
+						var cloudCredentialsSecretTypeBlindfoldSecretInfoModel CloudCredentialsSecretTypeBlindfoldSecretInfo
+						response.Diagnostics.Append(secretKeySecretInfoChoiceModel.BlindfoldSecretInfo.As(ctx, &cloudCredentialsSecretTypeBlindfoldSecretInfoModel, basetypes.ObjectAsOptions{})...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						blindfoldSecretInfoOneOfSpec := &ves_io_schema.SecretType_BlindfoldSecretInfo{}
+						blindfoldSecretInfoOneOfSpec.BlindfoldSecretInfo = &ves_io_schema.BlindfoldSecretInfoType{}
+						secretKeySpec.SecretInfoOneof = blindfoldSecretInfoOneOfSpec
+
+						// resource modelToSpecNested StringField --> DecryptionProvider
+						if !cloudCredentialsSecretTypeBlindfoldSecretInfoModel.DecryptionProvider.IsNull() && !cloudCredentialsSecretTypeBlindfoldSecretInfoModel.DecryptionProvider.IsUnknown() {
+							blindfoldSecretInfoOneOfSpec.BlindfoldSecretInfo.DecryptionProvider = string(cloudCredentialsSecretTypeBlindfoldSecretInfoModel.DecryptionProvider.ValueString())
+						}
+
+						// resource modelToSpecNested StringField --> StoreProvider
+						if !cloudCredentialsSecretTypeBlindfoldSecretInfoModel.StoreProvider.IsNull() && !cloudCredentialsSecretTypeBlindfoldSecretInfoModel.StoreProvider.IsUnknown() {
+							blindfoldSecretInfoOneOfSpec.BlindfoldSecretInfo.StoreProvider = string(cloudCredentialsSecretTypeBlindfoldSecretInfoModel.StoreProvider.ValueString())
+						}
+
+						// resource modelToSpecNested RequiredStringField --> Location
+						if !cloudCredentialsSecretTypeBlindfoldSecretInfoModel.Location.IsNull() && !cloudCredentialsSecretTypeBlindfoldSecretInfoModel.Location.IsUnknown() {
+							blindfoldSecretInfoOneOfSpec.BlindfoldSecretInfo.Location = string(cloudCredentialsSecretTypeBlindfoldSecretInfoModel.Location.ValueString())
+						}
+
+					}
+
+					// resource modelToSpecNested PointerOfOneOfField --> ClearSecretInfo
+					if !secretKeySecretInfoChoiceModel.ClearSecretInfo.IsNull() && !secretKeySecretInfoChoiceModel.ClearSecretInfo.IsUnknown() {
+						var cloudCredentialsSecretTypeClearSecretInfoModel CloudCredentialsSecretTypeClearSecretInfo
+						response.Diagnostics.Append(secretKeySecretInfoChoiceModel.ClearSecretInfo.As(ctx, &cloudCredentialsSecretTypeClearSecretInfoModel, basetypes.ObjectAsOptions{})...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						clearSecretInfoOneOfSpec := &ves_io_schema.SecretType_ClearSecretInfo{}
+						clearSecretInfoOneOfSpec.ClearSecretInfo = &ves_io_schema.ClearSecretInfoType{}
+						secretKeySpec.SecretInfoOneof = clearSecretInfoOneOfSpec
+
+						// resource modelToSpecNested StringField --> Provider
+						if !cloudCredentialsSecretTypeClearSecretInfoModel.Provider.IsNull() && !cloudCredentialsSecretTypeClearSecretInfoModel.Provider.IsUnknown() {
+							clearSecretInfoOneOfSpec.ClearSecretInfo.Provider = string(cloudCredentialsSecretTypeClearSecretInfoModel.Provider.ValueString())
+						}
+
+						// resource modelToSpecNested RequiredStringField --> Url
+						if !cloudCredentialsSecretTypeClearSecretInfoModel.Url.IsNull() && !cloudCredentialsSecretTypeClearSecretInfoModel.Url.IsUnknown() {
+							clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(cloudCredentialsSecretTypeClearSecretInfoModel.Url.ValueString())
+						}
+
+					}
+
+				}
+
+			}
+
+		}
+
 		// resource modelToSpecNested PointerOfOneOfField --> AwsAssumeRole
 		if !cloudChoiceModel.AwsAssumeRole.IsNull() && !cloudChoiceModel.AwsAssumeRole.IsUnknown() {
 			var cloudCredentialsGlobalSpecTypeAwsAssumeRoleModel CloudCredentialsGlobalSpecTypeAwsAssumeRole
@@ -1154,6 +1333,29 @@ func (r *ResourceF5XCCloudCredentials) Create(ctx context.Context, request resou
 						return
 					}
 
+					// resource modelToSpecNested PointerOfOneOfField --> ClearSecretInfo
+					if !passwordSecretInfoChoiceModel.ClearSecretInfo.IsNull() && !passwordSecretInfoChoiceModel.ClearSecretInfo.IsUnknown() {
+						var cloudCredentialsSecretTypeClearSecretInfoModel CloudCredentialsSecretTypeClearSecretInfo
+						response.Diagnostics.Append(passwordSecretInfoChoiceModel.ClearSecretInfo.As(ctx, &cloudCredentialsSecretTypeClearSecretInfoModel, basetypes.ObjectAsOptions{})...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						clearSecretInfoOneOfSpec := &ves_io_schema.SecretType_ClearSecretInfo{}
+						clearSecretInfoOneOfSpec.ClearSecretInfo = &ves_io_schema.ClearSecretInfoType{}
+						passwordSpec.SecretInfoOneof = clearSecretInfoOneOfSpec
+
+						// resource modelToSpecNested StringField --> Provider
+						if !cloudCredentialsSecretTypeClearSecretInfoModel.Provider.IsNull() && !cloudCredentialsSecretTypeClearSecretInfoModel.Provider.IsUnknown() {
+							clearSecretInfoOneOfSpec.ClearSecretInfo.Provider = string(cloudCredentialsSecretTypeClearSecretInfoModel.Provider.ValueString())
+						}
+
+						// resource modelToSpecNested RequiredStringField --> Url
+						if !cloudCredentialsSecretTypeClearSecretInfoModel.Url.IsNull() && !cloudCredentialsSecretTypeClearSecretInfoModel.Url.IsUnknown() {
+							clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(cloudCredentialsSecretTypeClearSecretInfoModel.Url.ValueString())
+						}
+
+					}
+
 					// resource modelToSpecNested PointerOfOneOfField --> BlindfoldSecretInfo
 					if !passwordSecretInfoChoiceModel.BlindfoldSecretInfo.IsNull() && !passwordSecretInfoChoiceModel.BlindfoldSecretInfo.IsUnknown() {
 						var cloudCredentialsSecretTypeBlindfoldSecretInfoModel CloudCredentialsSecretTypeBlindfoldSecretInfo
@@ -1182,29 +1384,6 @@ func (r *ResourceF5XCCloudCredentials) Create(ctx context.Context, request resou
 
 					}
 
-					// resource modelToSpecNested PointerOfOneOfField --> ClearSecretInfo
-					if !passwordSecretInfoChoiceModel.ClearSecretInfo.IsNull() && !passwordSecretInfoChoiceModel.ClearSecretInfo.IsUnknown() {
-						var cloudCredentialsSecretTypeClearSecretInfoModel CloudCredentialsSecretTypeClearSecretInfo
-						response.Diagnostics.Append(passwordSecretInfoChoiceModel.ClearSecretInfo.As(ctx, &cloudCredentialsSecretTypeClearSecretInfoModel, basetypes.ObjectAsOptions{})...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						clearSecretInfoOneOfSpec := &ves_io_schema.SecretType_ClearSecretInfo{}
-						clearSecretInfoOneOfSpec.ClearSecretInfo = &ves_io_schema.ClearSecretInfoType{}
-						passwordSpec.SecretInfoOneof = clearSecretInfoOneOfSpec
-
-						// resource modelToSpecNested StringField --> Provider
-						if !cloudCredentialsSecretTypeClearSecretInfoModel.Provider.IsNull() && !cloudCredentialsSecretTypeClearSecretInfoModel.Provider.IsUnknown() {
-							clearSecretInfoOneOfSpec.ClearSecretInfo.Provider = string(cloudCredentialsSecretTypeClearSecretInfoModel.Provider.ValueString())
-						}
-
-						// resource modelToSpecNested RequiredStringField --> Url
-						if !cloudCredentialsSecretTypeClearSecretInfoModel.Url.IsNull() && !cloudCredentialsSecretTypeClearSecretInfoModel.Url.IsUnknown() {
-							clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(cloudCredentialsSecretTypeClearSecretInfoModel.Url.ValueString())
-						}
-
-					}
-
 				}
 
 			}
@@ -1221,6 +1400,21 @@ func (r *ResourceF5XCCloudCredentials) Create(ctx context.Context, request resou
 			azureClientSecretOneOfSpec := &ves_io_schema_cloud_credentials.CreateSpecType_AzureClientSecret{}
 			azureClientSecretOneOfSpec.AzureClientSecret = &ves_io_schema_cloud_credentials.AzureSecretType{}
 			spec.Cloud = azureClientSecretOneOfSpec
+
+			// resource modelToSpecNested RequiredStringField --> ClientId
+			if !cloudCredentialsGlobalSpecTypeAzureClientSecretModel.ClientId.IsNull() && !cloudCredentialsGlobalSpecTypeAzureClientSecretModel.ClientId.IsUnknown() {
+				azureClientSecretOneOfSpec.AzureClientSecret.ClientId = string(cloudCredentialsGlobalSpecTypeAzureClientSecretModel.ClientId.ValueString())
+			}
+
+			// resource modelToSpecNested RequiredStringField --> SubscriptionId
+			if !cloudCredentialsGlobalSpecTypeAzureClientSecretModel.SubscriptionId.IsNull() && !cloudCredentialsGlobalSpecTypeAzureClientSecretModel.SubscriptionId.IsUnknown() {
+				azureClientSecretOneOfSpec.AzureClientSecret.SubscriptionId = string(cloudCredentialsGlobalSpecTypeAzureClientSecretModel.SubscriptionId.ValueString())
+			}
+
+			// resource modelToSpecNested RequiredStringField --> TenantId
+			if !cloudCredentialsGlobalSpecTypeAzureClientSecretModel.TenantId.IsNull() && !cloudCredentialsGlobalSpecTypeAzureClientSecretModel.TenantId.IsUnknown() {
+				azureClientSecretOneOfSpec.AzureClientSecret.TenantId = string(cloudCredentialsGlobalSpecTypeAzureClientSecretModel.TenantId.ValueString())
+			}
 
 			// resource modelToSpecNested RequiredPointerField --> ClientSecret
 			if !cloudCredentialsGlobalSpecTypeAzureClientSecretModel.ClientSecret.IsNull() && !cloudCredentialsGlobalSpecTypeAzureClientSecretModel.ClientSecret.IsUnknown() {
@@ -1239,6 +1433,29 @@ func (r *ResourceF5XCCloudCredentials) Create(ctx context.Context, request resou
 					response.Diagnostics.Append(clientSecretModel.SecretInfoChoice.As(ctx, &clientSecretSecretInfoChoiceModel, basetypes.ObjectAsOptions{})...)
 					if response.Diagnostics.HasError() {
 						return
+					}
+
+					// resource modelToSpecNested PointerOfOneOfField --> ClearSecretInfo
+					if !clientSecretSecretInfoChoiceModel.ClearSecretInfo.IsNull() && !clientSecretSecretInfoChoiceModel.ClearSecretInfo.IsUnknown() {
+						var cloudCredentialsSecretTypeClearSecretInfoModel CloudCredentialsSecretTypeClearSecretInfo
+						response.Diagnostics.Append(clientSecretSecretInfoChoiceModel.ClearSecretInfo.As(ctx, &cloudCredentialsSecretTypeClearSecretInfoModel, basetypes.ObjectAsOptions{})...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						clearSecretInfoOneOfSpec := &ves_io_schema.SecretType_ClearSecretInfo{}
+						clearSecretInfoOneOfSpec.ClearSecretInfo = &ves_io_schema.ClearSecretInfoType{}
+						clientSecretSpec.SecretInfoOneof = clearSecretInfoOneOfSpec
+
+						// resource modelToSpecNested StringField --> Provider
+						if !cloudCredentialsSecretTypeClearSecretInfoModel.Provider.IsNull() && !cloudCredentialsSecretTypeClearSecretInfoModel.Provider.IsUnknown() {
+							clearSecretInfoOneOfSpec.ClearSecretInfo.Provider = string(cloudCredentialsSecretTypeClearSecretInfoModel.Provider.ValueString())
+						}
+
+						// resource modelToSpecNested RequiredStringField --> Url
+						if !cloudCredentialsSecretTypeClearSecretInfoModel.Url.IsNull() && !cloudCredentialsSecretTypeClearSecretInfoModel.Url.IsUnknown() {
+							clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(cloudCredentialsSecretTypeClearSecretInfoModel.Url.ValueString())
+						}
+
 					}
 
 					// resource modelToSpecNested PointerOfOneOfField --> BlindfoldSecretInfo
@@ -1265,223 +1482,6 @@ func (r *ResourceF5XCCloudCredentials) Create(ctx context.Context, request resou
 						// resource modelToSpecNested RequiredStringField --> Location
 						if !cloudCredentialsSecretTypeBlindfoldSecretInfoModel.Location.IsNull() && !cloudCredentialsSecretTypeBlindfoldSecretInfoModel.Location.IsUnknown() {
 							blindfoldSecretInfoOneOfSpec.BlindfoldSecretInfo.Location = string(cloudCredentialsSecretTypeBlindfoldSecretInfoModel.Location.ValueString())
-						}
-
-					}
-
-					// resource modelToSpecNested PointerOfOneOfField --> ClearSecretInfo
-					if !clientSecretSecretInfoChoiceModel.ClearSecretInfo.IsNull() && !clientSecretSecretInfoChoiceModel.ClearSecretInfo.IsUnknown() {
-						var cloudCredentialsSecretTypeClearSecretInfoModel CloudCredentialsSecretTypeClearSecretInfo
-						response.Diagnostics.Append(clientSecretSecretInfoChoiceModel.ClearSecretInfo.As(ctx, &cloudCredentialsSecretTypeClearSecretInfoModel, basetypes.ObjectAsOptions{})...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						clearSecretInfoOneOfSpec := &ves_io_schema.SecretType_ClearSecretInfo{}
-						clearSecretInfoOneOfSpec.ClearSecretInfo = &ves_io_schema.ClearSecretInfoType{}
-						clientSecretSpec.SecretInfoOneof = clearSecretInfoOneOfSpec
-
-						// resource modelToSpecNested StringField --> Provider
-						if !cloudCredentialsSecretTypeClearSecretInfoModel.Provider.IsNull() && !cloudCredentialsSecretTypeClearSecretInfoModel.Provider.IsUnknown() {
-							clearSecretInfoOneOfSpec.ClearSecretInfo.Provider = string(cloudCredentialsSecretTypeClearSecretInfoModel.Provider.ValueString())
-						}
-
-						// resource modelToSpecNested RequiredStringField --> Url
-						if !cloudCredentialsSecretTypeClearSecretInfoModel.Url.IsNull() && !cloudCredentialsSecretTypeClearSecretInfoModel.Url.IsUnknown() {
-							clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(cloudCredentialsSecretTypeClearSecretInfoModel.Url.ValueString())
-						}
-
-					}
-
-				}
-
-			}
-
-			// resource modelToSpecNested RequiredStringField --> ClientId
-			if !cloudCredentialsGlobalSpecTypeAzureClientSecretModel.ClientId.IsNull() && !cloudCredentialsGlobalSpecTypeAzureClientSecretModel.ClientId.IsUnknown() {
-				azureClientSecretOneOfSpec.AzureClientSecret.ClientId = string(cloudCredentialsGlobalSpecTypeAzureClientSecretModel.ClientId.ValueString())
-			}
-
-			// resource modelToSpecNested RequiredStringField --> SubscriptionId
-			if !cloudCredentialsGlobalSpecTypeAzureClientSecretModel.SubscriptionId.IsNull() && !cloudCredentialsGlobalSpecTypeAzureClientSecretModel.SubscriptionId.IsUnknown() {
-				azureClientSecretOneOfSpec.AzureClientSecret.SubscriptionId = string(cloudCredentialsGlobalSpecTypeAzureClientSecretModel.SubscriptionId.ValueString())
-			}
-
-			// resource modelToSpecNested RequiredStringField --> TenantId
-			if !cloudCredentialsGlobalSpecTypeAzureClientSecretModel.TenantId.IsNull() && !cloudCredentialsGlobalSpecTypeAzureClientSecretModel.TenantId.IsUnknown() {
-				azureClientSecretOneOfSpec.AzureClientSecret.TenantId = string(cloudCredentialsGlobalSpecTypeAzureClientSecretModel.TenantId.ValueString())
-			}
-
-		}
-
-		// resource modelToSpecNested PointerOfOneOfField --> GcpCredFile
-		if !cloudChoiceModel.GcpCredFile.IsNull() && !cloudChoiceModel.GcpCredFile.IsUnknown() {
-			var cloudCredentialsGlobalSpecTypeGcpCredFileModel CloudCredentialsGlobalSpecTypeGcpCredFile
-			response.Diagnostics.Append(cloudChoiceModel.GcpCredFile.As(ctx, &cloudCredentialsGlobalSpecTypeGcpCredFileModel, basetypes.ObjectAsOptions{})...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			gcpCredFileOneOfSpec := &ves_io_schema_cloud_credentials.CreateSpecType_GcpCredFile{}
-			gcpCredFileOneOfSpec.GcpCredFile = &ves_io_schema_cloud_credentials.GCPCredFileType{}
-			spec.Cloud = gcpCredFileOneOfSpec
-
-			// resource modelToSpecNested RequiredPointerField --> CredentialFile
-			if !cloudCredentialsGlobalSpecTypeGcpCredFileModel.CredentialFile.IsNull() && !cloudCredentialsGlobalSpecTypeGcpCredFileModel.CredentialFile.IsUnknown() {
-				var credentialFileModel CloudCredentialsSecretType
-				response.Diagnostics.Append(cloudCredentialsGlobalSpecTypeGcpCredFileModel.CredentialFile.As(ctx, &credentialFileModel, basetypes.ObjectAsOptions{})...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				credentialFileSpec := &ves_io_schema.SecretType{}
-				gcpCredFileOneOfSpec.GcpCredFile.CredentialFile = credentialFileSpec
-
-				// resource modelToSpecNested RequiredOneOfField --> SecretInfoOneof
-				if !credentialFileModel.SecretInfoChoice.IsNull() && !credentialFileModel.SecretInfoChoice.IsUnknown() {
-					credentialFileSecretInfoChoiceModel := CloudCredentialsSecretTypeSecretInfoChoice{}
-					response.Diagnostics.Append(credentialFileModel.SecretInfoChoice.As(ctx, &credentialFileSecretInfoChoiceModel, basetypes.ObjectAsOptions{})...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-
-					// resource modelToSpecNested PointerOfOneOfField --> BlindfoldSecretInfo
-					if !credentialFileSecretInfoChoiceModel.BlindfoldSecretInfo.IsNull() && !credentialFileSecretInfoChoiceModel.BlindfoldSecretInfo.IsUnknown() {
-						var cloudCredentialsSecretTypeBlindfoldSecretInfoModel CloudCredentialsSecretTypeBlindfoldSecretInfo
-						response.Diagnostics.Append(credentialFileSecretInfoChoiceModel.BlindfoldSecretInfo.As(ctx, &cloudCredentialsSecretTypeBlindfoldSecretInfoModel, basetypes.ObjectAsOptions{})...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						blindfoldSecretInfoOneOfSpec := &ves_io_schema.SecretType_BlindfoldSecretInfo{}
-						blindfoldSecretInfoOneOfSpec.BlindfoldSecretInfo = &ves_io_schema.BlindfoldSecretInfoType{}
-						credentialFileSpec.SecretInfoOneof = blindfoldSecretInfoOneOfSpec
-
-						// resource modelToSpecNested RequiredStringField --> Location
-						if !cloudCredentialsSecretTypeBlindfoldSecretInfoModel.Location.IsNull() && !cloudCredentialsSecretTypeBlindfoldSecretInfoModel.Location.IsUnknown() {
-							blindfoldSecretInfoOneOfSpec.BlindfoldSecretInfo.Location = string(cloudCredentialsSecretTypeBlindfoldSecretInfoModel.Location.ValueString())
-						}
-
-						// resource modelToSpecNested StringField --> DecryptionProvider
-						if !cloudCredentialsSecretTypeBlindfoldSecretInfoModel.DecryptionProvider.IsNull() && !cloudCredentialsSecretTypeBlindfoldSecretInfoModel.DecryptionProvider.IsUnknown() {
-							blindfoldSecretInfoOneOfSpec.BlindfoldSecretInfo.DecryptionProvider = string(cloudCredentialsSecretTypeBlindfoldSecretInfoModel.DecryptionProvider.ValueString())
-						}
-
-						// resource modelToSpecNested StringField --> StoreProvider
-						if !cloudCredentialsSecretTypeBlindfoldSecretInfoModel.StoreProvider.IsNull() && !cloudCredentialsSecretTypeBlindfoldSecretInfoModel.StoreProvider.IsUnknown() {
-							blindfoldSecretInfoOneOfSpec.BlindfoldSecretInfo.StoreProvider = string(cloudCredentialsSecretTypeBlindfoldSecretInfoModel.StoreProvider.ValueString())
-						}
-
-					}
-
-					// resource modelToSpecNested PointerOfOneOfField --> ClearSecretInfo
-					if !credentialFileSecretInfoChoiceModel.ClearSecretInfo.IsNull() && !credentialFileSecretInfoChoiceModel.ClearSecretInfo.IsUnknown() {
-						var cloudCredentialsSecretTypeClearSecretInfoModel CloudCredentialsSecretTypeClearSecretInfo
-						response.Diagnostics.Append(credentialFileSecretInfoChoiceModel.ClearSecretInfo.As(ctx, &cloudCredentialsSecretTypeClearSecretInfoModel, basetypes.ObjectAsOptions{})...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						clearSecretInfoOneOfSpec := &ves_io_schema.SecretType_ClearSecretInfo{}
-						clearSecretInfoOneOfSpec.ClearSecretInfo = &ves_io_schema.ClearSecretInfoType{}
-						credentialFileSpec.SecretInfoOneof = clearSecretInfoOneOfSpec
-
-						// resource modelToSpecNested StringField --> Provider
-						if !cloudCredentialsSecretTypeClearSecretInfoModel.Provider.IsNull() && !cloudCredentialsSecretTypeClearSecretInfoModel.Provider.IsUnknown() {
-							clearSecretInfoOneOfSpec.ClearSecretInfo.Provider = string(cloudCredentialsSecretTypeClearSecretInfoModel.Provider.ValueString())
-						}
-
-						// resource modelToSpecNested RequiredStringField --> Url
-						if !cloudCredentialsSecretTypeClearSecretInfoModel.Url.IsNull() && !cloudCredentialsSecretTypeClearSecretInfoModel.Url.IsUnknown() {
-							clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(cloudCredentialsSecretTypeClearSecretInfoModel.Url.ValueString())
-						}
-
-					}
-
-				}
-
-			}
-
-		}
-
-		// resource modelToSpecNested PointerOfOneOfField --> AwsSecretKey
-		if !cloudChoiceModel.AwsSecretKey.IsNull() && !cloudChoiceModel.AwsSecretKey.IsUnknown() {
-			var cloudCredentialsGlobalSpecTypeAwsSecretKeyModel CloudCredentialsGlobalSpecTypeAwsSecretKey
-			response.Diagnostics.Append(cloudChoiceModel.AwsSecretKey.As(ctx, &cloudCredentialsGlobalSpecTypeAwsSecretKeyModel, basetypes.ObjectAsOptions{})...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			awsSecretKeyOneOfSpec := &ves_io_schema_cloud_credentials.CreateSpecType_AwsSecretKey{}
-			awsSecretKeyOneOfSpec.AwsSecretKey = &ves_io_schema_cloud_credentials.AWSSecretType{}
-			spec.Cloud = awsSecretKeyOneOfSpec
-
-			// resource modelToSpecNested RequiredStringField --> AccessKey
-			if !cloudCredentialsGlobalSpecTypeAwsSecretKeyModel.AccessKey.IsNull() && !cloudCredentialsGlobalSpecTypeAwsSecretKeyModel.AccessKey.IsUnknown() {
-				awsSecretKeyOneOfSpec.AwsSecretKey.AccessKey = string(cloudCredentialsGlobalSpecTypeAwsSecretKeyModel.AccessKey.ValueString())
-			}
-
-			// resource modelToSpecNested RequiredPointerField --> SecretKey
-			if !cloudCredentialsGlobalSpecTypeAwsSecretKeyModel.SecretKey.IsNull() && !cloudCredentialsGlobalSpecTypeAwsSecretKeyModel.SecretKey.IsUnknown() {
-				var secretKeyModel CloudCredentialsSecretType
-				response.Diagnostics.Append(cloudCredentialsGlobalSpecTypeAwsSecretKeyModel.SecretKey.As(ctx, &secretKeyModel, basetypes.ObjectAsOptions{})...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				secretKeySpec := &ves_io_schema.SecretType{}
-				awsSecretKeyOneOfSpec.AwsSecretKey.SecretKey = secretKeySpec
-
-				// resource modelToSpecNested RequiredOneOfField --> SecretInfoOneof
-				if !secretKeyModel.SecretInfoChoice.IsNull() && !secretKeyModel.SecretInfoChoice.IsUnknown() {
-					secretKeySecretInfoChoiceModel := CloudCredentialsSecretTypeSecretInfoChoice{}
-					response.Diagnostics.Append(secretKeyModel.SecretInfoChoice.As(ctx, &secretKeySecretInfoChoiceModel, basetypes.ObjectAsOptions{})...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-
-					// resource modelToSpecNested PointerOfOneOfField --> ClearSecretInfo
-					if !secretKeySecretInfoChoiceModel.ClearSecretInfo.IsNull() && !secretKeySecretInfoChoiceModel.ClearSecretInfo.IsUnknown() {
-						var cloudCredentialsSecretTypeClearSecretInfoModel CloudCredentialsSecretTypeClearSecretInfo
-						response.Diagnostics.Append(secretKeySecretInfoChoiceModel.ClearSecretInfo.As(ctx, &cloudCredentialsSecretTypeClearSecretInfoModel, basetypes.ObjectAsOptions{})...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						clearSecretInfoOneOfSpec := &ves_io_schema.SecretType_ClearSecretInfo{}
-						clearSecretInfoOneOfSpec.ClearSecretInfo = &ves_io_schema.ClearSecretInfoType{}
-						secretKeySpec.SecretInfoOneof = clearSecretInfoOneOfSpec
-
-						// resource modelToSpecNested StringField --> Provider
-						if !cloudCredentialsSecretTypeClearSecretInfoModel.Provider.IsNull() && !cloudCredentialsSecretTypeClearSecretInfoModel.Provider.IsUnknown() {
-							clearSecretInfoOneOfSpec.ClearSecretInfo.Provider = string(cloudCredentialsSecretTypeClearSecretInfoModel.Provider.ValueString())
-						}
-
-						// resource modelToSpecNested RequiredStringField --> Url
-						if !cloudCredentialsSecretTypeClearSecretInfoModel.Url.IsNull() && !cloudCredentialsSecretTypeClearSecretInfoModel.Url.IsUnknown() {
-							clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(cloudCredentialsSecretTypeClearSecretInfoModel.Url.ValueString())
-						}
-
-					}
-
-					// resource modelToSpecNested PointerOfOneOfField --> BlindfoldSecretInfo
-					if !secretKeySecretInfoChoiceModel.BlindfoldSecretInfo.IsNull() && !secretKeySecretInfoChoiceModel.BlindfoldSecretInfo.IsUnknown() {
-						var cloudCredentialsSecretTypeBlindfoldSecretInfoModel CloudCredentialsSecretTypeBlindfoldSecretInfo
-						response.Diagnostics.Append(secretKeySecretInfoChoiceModel.BlindfoldSecretInfo.As(ctx, &cloudCredentialsSecretTypeBlindfoldSecretInfoModel, basetypes.ObjectAsOptions{})...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						blindfoldSecretInfoOneOfSpec := &ves_io_schema.SecretType_BlindfoldSecretInfo{}
-						blindfoldSecretInfoOneOfSpec.BlindfoldSecretInfo = &ves_io_schema.BlindfoldSecretInfoType{}
-						secretKeySpec.SecretInfoOneof = blindfoldSecretInfoOneOfSpec
-
-						// resource modelToSpecNested RequiredStringField --> Location
-						if !cloudCredentialsSecretTypeBlindfoldSecretInfoModel.Location.IsNull() && !cloudCredentialsSecretTypeBlindfoldSecretInfoModel.Location.IsUnknown() {
-							blindfoldSecretInfoOneOfSpec.BlindfoldSecretInfo.Location = string(cloudCredentialsSecretTypeBlindfoldSecretInfoModel.Location.ValueString())
-						}
-
-						// resource modelToSpecNested StringField --> DecryptionProvider
-						if !cloudCredentialsSecretTypeBlindfoldSecretInfoModel.DecryptionProvider.IsNull() && !cloudCredentialsSecretTypeBlindfoldSecretInfoModel.DecryptionProvider.IsUnknown() {
-							blindfoldSecretInfoOneOfSpec.BlindfoldSecretInfo.DecryptionProvider = string(cloudCredentialsSecretTypeBlindfoldSecretInfoModel.DecryptionProvider.ValueString())
-						}
-
-						// resource modelToSpecNested StringField --> StoreProvider
-						if !cloudCredentialsSecretTypeBlindfoldSecretInfoModel.StoreProvider.IsNull() && !cloudCredentialsSecretTypeBlindfoldSecretInfoModel.StoreProvider.IsUnknown() {
-							blindfoldSecretInfoOneOfSpec.BlindfoldSecretInfo.StoreProvider = string(cloudCredentialsSecretTypeBlindfoldSecretInfoModel.StoreProvider.ValueString())
 						}
 
 					}
@@ -1630,428 +1630,6 @@ func (r *ResourceF5XCCloudCredentials) Create(ctx context.Context, request resou
 
 		// Recursively call the nested template to process the oneof choices.
 
-		// resource specToModelNested PointerOfOneOfField --> AwsAssumeRole
-		// GlobalSpecType
-		// false
-		{
-			awsAssumeRoleOptions, isAwsAssumeRole := cloudChoiceChoices.(*ves_io_schema_cloud_credentials.GlobalSpecType_AwsAssumeRole)
-			awsAssumeRoleAttributeMap := make(map[string]attr.Value)
-
-			if isAwsAssumeRole && awsAssumeRoleOptions != nil {
-
-				// resource specToModelNested RequiredStringField --> RoleArn
-				if awsAssumeRoleOptions.AwsAssumeRole.GetRoleArn() != "" {
-					awsAssumeRoleAttributeMap["role_arn"] = types.StringValue(awsAssumeRoleOptions.AwsAssumeRole.GetRoleArn())
-				} else {
-					// Empty string, set to null
-					awsAssumeRoleAttributeMap["role_arn"] = types.StringNull()
-				}
-
-				// resource specToModelNested UintField --> DurationSeconds
-				awsAssumeRoleAttributeMap["duration_seconds"] = types.Int64Value(int64(awsAssumeRoleOptions.AwsAssumeRole.GetDurationSeconds()))
-
-				// resource specToModelNested RequiredStringField --> SessionName
-				if awsAssumeRoleOptions.AwsAssumeRole.GetSessionName() != "" {
-					awsAssumeRoleAttributeMap["session_name"] = types.StringValue(awsAssumeRoleOptions.AwsAssumeRole.GetSessionName())
-				} else {
-					// Empty string, set to null
-					awsAssumeRoleAttributeMap["session_name"] = types.StringNull()
-				}
-
-				// resource specToModelNested MapOfStringField --> SessionTags
-				if awsAssumeRoleOptions.AwsAssumeRole.GetSessionTags() != nil {
-					// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-					sessionTagsMap, sessionTagsDiags := utils.StringMapToTerraformMap(awsAssumeRoleOptions.AwsAssumeRole.GetSessionTags())
-					response.Diagnostics.Append(sessionTagsDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					// Assign the typed map to the model
-					awsAssumeRoleAttributeMap["session_tags"] = sessionTagsMap
-				} else {
-					// Ensure the state reflects a Null map with the correct element type to avoid DynamicPseudoType errors
-					awsAssumeRoleAttributeMap["session_tags"] = types.MapNull(types.StringType)
-				}
-
-				awsAssumeRoleObj, diags := types.ObjectValue(CloudCredentialsCloudAwsAssumeRoleModelAttributeMap, awsAssumeRoleAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				cloudChoiceChoicesModel.AwsAssumeRole = awsAssumeRoleObj
-			} else {
-				cloudChoiceChoicesModel.AwsAssumeRole = types.ObjectNull(CloudCredentialsCloudAwsAssumeRoleModelAttributeMap)
-			}
-		}
-
-		// resource specToModelNested PointerOfOneOfField --> AzurePfxCertificate
-		// GlobalSpecType
-		// false
-		{
-			azurePfxCertificateOptions, isAzurePfxCertificate := cloudChoiceChoices.(*ves_io_schema_cloud_credentials.GlobalSpecType_AzurePfxCertificate)
-			azurePfxCertificateAttributeMap := make(map[string]attr.Value)
-
-			if isAzurePfxCertificate && azurePfxCertificateOptions != nil {
-
-				// resource specToModelNested RequiredStringField --> ClientId
-				if azurePfxCertificateOptions.AzurePfxCertificate.GetClientId() != "" {
-					azurePfxCertificateAttributeMap["client_id"] = types.StringValue(azurePfxCertificateOptions.AzurePfxCertificate.GetClientId())
-				} else {
-					// Empty string, set to null
-					azurePfxCertificateAttributeMap["client_id"] = types.StringNull()
-				}
-
-				// resource specToModelNested RequiredStringField --> SubscriptionId
-				if azurePfxCertificateOptions.AzurePfxCertificate.GetSubscriptionId() != "" {
-					azurePfxCertificateAttributeMap["subscription_id"] = types.StringValue(azurePfxCertificateOptions.AzurePfxCertificate.GetSubscriptionId())
-				} else {
-					// Empty string, set to null
-					azurePfxCertificateAttributeMap["subscription_id"] = types.StringNull()
-				}
-
-				// resource specToModelNested RequiredStringField --> TenantId
-				if azurePfxCertificateOptions.AzurePfxCertificate.GetTenantId() != "" {
-					azurePfxCertificateAttributeMap["tenant_id"] = types.StringValue(azurePfxCertificateOptions.AzurePfxCertificate.GetTenantId())
-				} else {
-					// Empty string, set to null
-					azurePfxCertificateAttributeMap["tenant_id"] = types.StringNull()
-				}
-
-				// resource specToModelNested RequiredStringField --> CertificateUrl
-				if azurePfxCertificateOptions.AzurePfxCertificate.GetCertificateUrl() != "" {
-					azurePfxCertificateAttributeMap["certificate_url"] = types.StringValue(azurePfxCertificateOptions.AzurePfxCertificate.GetCertificateUrl())
-				} else {
-					// Empty string, set to null
-					azurePfxCertificateAttributeMap["certificate_url"] = types.StringNull()
-				}
-
-				// resource specToModelNested RequiredPointerField --> Password
-				if azurePfxCertificateOptions.AzurePfxCertificate.GetPassword() != nil {
-					// Create the nested Go struct
-					cloudCredentialsSecretTypeModel := &CloudCredentialsSecretType{}
-					passwordElement := azurePfxCertificateOptions.AzurePfxCertificate.GetPassword()
-
-					// Recursively populate the nested struct
-
-					// resource specToModelNested RequiredOneOfField --> SecretInfoOneof
-					// GlobalSpecType
-					if passwordElement.GetSecretInfoOneof() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						passwordsecretInfoChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates
-						passwordsecretInfoChoiceChoices := passwordElement.GetSecretInfoOneof()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// resource specToModelNested PointerOfOneOfField --> BlindfoldSecretInfo
-						// GlobalSpecType
-						// false
-						{
-							blindfoldSecretInfoOptions, isBlindfoldSecretInfo := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_BlindfoldSecretInfo)
-							blindfoldSecretInfoAttributeMap := make(map[string]attr.Value)
-
-							if isBlindfoldSecretInfo && blindfoldSecretInfoOptions != nil {
-
-								// resource specToModelNested StringField --> DecryptionProvider
-								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider() != "" {
-									blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider())
-								} else {
-									// Empty string, set to null
-									blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringNull()
-								}
-
-								// resource specToModelNested StringField --> StoreProvider
-								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider() != "" {
-									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider())
-								} else {
-									// Empty string, set to null
-									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringNull()
-								}
-
-								// resource specToModelNested RequiredStringField --> Location
-								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation() != "" {
-									blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation())
-								} else {
-									// Empty string, set to null
-									blindfoldSecretInfoAttributeMap["location"] = types.StringNull()
-								}
-
-								blindfoldSecretInfoObj, diags := types.ObjectValue(CloudCredentialsCloudAzurePfxCertificatePasswordSecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								passwordsecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = blindfoldSecretInfoObj
-							} else {
-								passwordsecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = types.ObjectNull(CloudCredentialsCloudAzurePfxCertificatePasswordSecretInfoOneofBlindfoldSecretInfoModelAttributeMap)
-							}
-						}
-
-						// resource specToModelNested PointerOfOneOfField --> ClearSecretInfo
-						// GlobalSpecType
-						// false
-						{
-							clearSecretInfoOptions, isClearSecretInfo := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_ClearSecretInfo)
-							clearSecretInfoAttributeMap := make(map[string]attr.Value)
-
-							if isClearSecretInfo && clearSecretInfoOptions != nil {
-
-								// resource specToModelNested StringField --> Provider
-								if clearSecretInfoOptions.ClearSecretInfo.GetProvider() != "" {
-									clearSecretInfoAttributeMap["provider"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetProvider())
-								} else {
-									// Empty string, set to null
-									clearSecretInfoAttributeMap["provider"] = types.StringNull()
-								}
-
-								// resource specToModelNested RequiredStringField --> Url
-								if clearSecretInfoOptions.ClearSecretInfo.GetUrl() != "" {
-									clearSecretInfoAttributeMap["url"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetUrl())
-								} else {
-									// Empty string, set to null
-									clearSecretInfoAttributeMap["url"] = types.StringNull()
-								}
-
-								clearSecretInfoObj, diags := types.ObjectValue(CloudCredentialsCloudAzurePfxCertificatePasswordSecretInfoOneofClearSecretInfoModelAttributeMap, clearSecretInfoAttributeMap)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								passwordsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = clearSecretInfoObj
-							} else {
-								passwordsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(CloudCredentialsCloudAzurePfxCertificatePasswordSecretInfoOneofClearSecretInfoModelAttributeMap)
-							}
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, passwordsecretInfoChoiceChoicesObjDiags := types.ObjectValue(
-							CloudCredentialsCloudAzurePfxCertificatePasswordSecretInfoOneofModelAttributeMap, // The attribute schema for the OneOf choices
-							passwordsecretInfoChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(passwordsecretInfoChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						cloudCredentialsSecretTypeModel.SecretInfoChoice = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						cloudCredentialsSecretTypeModel.SecretInfoChoice = types.ObjectNull(CloudCredentialsCloudAzurePfxCertificatePasswordSecretInfoOneofModelAttributeMap)
-					}
-
-					// This field needs to be converted to a types.ObjectValue before assignment.
-					cloudCredentialsSecretTypeModelObj, diags := types.ObjectValueFrom(ctx, CloudCredentialsCloudAzurePfxCertificatePasswordModelAttributeMap, cloudCredentialsSecretTypeModel)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					azurePfxCertificateAttributeMap["password"] = cloudCredentialsSecretTypeModelObj
-
-				} else {
-					// The source field is nil (e.g. redacted by the API).
-					// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
-					// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
-					// here because the API may always return a non-nil struct (with REDACTED values) for this
-					// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-					// The target is a types.Object, so we use types.ObjectNull.
-					azurePfxCertificateAttributeMap["password"] = types.ObjectNull(CloudCredentialsCloudAzurePfxCertificatePasswordModelAttributeMap)
-				}
-
-				azurePfxCertificateObj, diags := types.ObjectValue(CloudCredentialsCloudAzurePfxCertificateModelAttributeMap, azurePfxCertificateAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				cloudChoiceChoicesModel.AzurePfxCertificate = azurePfxCertificateObj
-			} else {
-				cloudChoiceChoicesModel.AzurePfxCertificate = types.ObjectNull(CloudCredentialsCloudAzurePfxCertificateModelAttributeMap)
-			}
-		}
-
-		// resource specToModelNested PointerOfOneOfField --> AzureClientSecret
-		// GlobalSpecType
-		// false
-		{
-			azureClientSecretOptions, isAzureClientSecret := cloudChoiceChoices.(*ves_io_schema_cloud_credentials.GlobalSpecType_AzureClientSecret)
-			azureClientSecretAttributeMap := make(map[string]attr.Value)
-
-			if isAzureClientSecret && azureClientSecretOptions != nil {
-
-				// resource specToModelNested RequiredPointerField --> ClientSecret
-				if azureClientSecretOptions.AzureClientSecret.GetClientSecret() != nil {
-					// Create the nested Go struct
-					cloudCredentialsSecretTypeModel := &CloudCredentialsSecretType{}
-					clientSecretElement := azureClientSecretOptions.AzureClientSecret.GetClientSecret()
-
-					// Recursively populate the nested struct
-
-					// resource specToModelNested RequiredOneOfField --> SecretInfoOneof
-					// GlobalSpecType
-					if clientSecretElement.GetSecretInfoOneof() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						clientSecretsecretInfoChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates
-						clientSecretsecretInfoChoiceChoices := clientSecretElement.GetSecretInfoOneof()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// resource specToModelNested PointerOfOneOfField --> BlindfoldSecretInfo
-						// GlobalSpecType
-						// false
-						{
-							blindfoldSecretInfoOptions, isBlindfoldSecretInfo := clientSecretsecretInfoChoiceChoices.(*ves_io_schema.SecretType_BlindfoldSecretInfo)
-							blindfoldSecretInfoAttributeMap := make(map[string]attr.Value)
-
-							if isBlindfoldSecretInfo && blindfoldSecretInfoOptions != nil {
-
-								// resource specToModelNested StringField --> DecryptionProvider
-								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider() != "" {
-									blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider())
-								} else {
-									// Empty string, set to null
-									blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringNull()
-								}
-
-								// resource specToModelNested StringField --> StoreProvider
-								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider() != "" {
-									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider())
-								} else {
-									// Empty string, set to null
-									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringNull()
-								}
-
-								// resource specToModelNested RequiredStringField --> Location
-								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation() != "" {
-									blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation())
-								} else {
-									// Empty string, set to null
-									blindfoldSecretInfoAttributeMap["location"] = types.StringNull()
-								}
-
-								blindfoldSecretInfoObj, diags := types.ObjectValue(CloudCredentialsCloudAzureClientSecretClientSecretSecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								clientSecretsecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = blindfoldSecretInfoObj
-							} else {
-								clientSecretsecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = types.ObjectNull(CloudCredentialsCloudAzureClientSecretClientSecretSecretInfoOneofBlindfoldSecretInfoModelAttributeMap)
-							}
-						}
-
-						// resource specToModelNested PointerOfOneOfField --> ClearSecretInfo
-						// GlobalSpecType
-						// false
-						{
-							clearSecretInfoOptions, isClearSecretInfo := clientSecretsecretInfoChoiceChoices.(*ves_io_schema.SecretType_ClearSecretInfo)
-							clearSecretInfoAttributeMap := make(map[string]attr.Value)
-
-							if isClearSecretInfo && clearSecretInfoOptions != nil {
-
-								// resource specToModelNested StringField --> Provider
-								if clearSecretInfoOptions.ClearSecretInfo.GetProvider() != "" {
-									clearSecretInfoAttributeMap["provider"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetProvider())
-								} else {
-									// Empty string, set to null
-									clearSecretInfoAttributeMap["provider"] = types.StringNull()
-								}
-
-								// resource specToModelNested RequiredStringField --> Url
-								if clearSecretInfoOptions.ClearSecretInfo.GetUrl() != "" {
-									clearSecretInfoAttributeMap["url"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetUrl())
-								} else {
-									// Empty string, set to null
-									clearSecretInfoAttributeMap["url"] = types.StringNull()
-								}
-
-								clearSecretInfoObj, diags := types.ObjectValue(CloudCredentialsCloudAzureClientSecretClientSecretSecretInfoOneofClearSecretInfoModelAttributeMap, clearSecretInfoAttributeMap)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								clientSecretsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = clearSecretInfoObj
-							} else {
-								clientSecretsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(CloudCredentialsCloudAzureClientSecretClientSecretSecretInfoOneofClearSecretInfoModelAttributeMap)
-							}
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, clientSecretsecretInfoChoiceChoicesObjDiags := types.ObjectValue(
-							CloudCredentialsCloudAzureClientSecretClientSecretSecretInfoOneofModelAttributeMap, // The attribute schema for the OneOf choices
-							clientSecretsecretInfoChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(clientSecretsecretInfoChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						cloudCredentialsSecretTypeModel.SecretInfoChoice = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						cloudCredentialsSecretTypeModel.SecretInfoChoice = types.ObjectNull(CloudCredentialsCloudAzureClientSecretClientSecretSecretInfoOneofModelAttributeMap)
-					}
-
-					// This field needs to be converted to a types.ObjectValue before assignment.
-					cloudCredentialsSecretTypeModelObj, diags := types.ObjectValueFrom(ctx, CloudCredentialsCloudAzureClientSecretClientSecretModelAttributeMap, cloudCredentialsSecretTypeModel)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					azureClientSecretAttributeMap["client_secret"] = cloudCredentialsSecretTypeModelObj
-
-				} else {
-					// The source field is nil (e.g. redacted by the API).
-					// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
-					// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
-					// here because the API may always return a non-nil struct (with REDACTED values) for this
-					// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-					// The target is a types.Object, so we use types.ObjectNull.
-					azureClientSecretAttributeMap["client_secret"] = types.ObjectNull(CloudCredentialsCloudAzureClientSecretClientSecretModelAttributeMap)
-				}
-
-				// resource specToModelNested RequiredStringField --> ClientId
-				if azureClientSecretOptions.AzureClientSecret.GetClientId() != "" {
-					azureClientSecretAttributeMap["client_id"] = types.StringValue(azureClientSecretOptions.AzureClientSecret.GetClientId())
-				} else {
-					// Empty string, set to null
-					azureClientSecretAttributeMap["client_id"] = types.StringNull()
-				}
-
-				// resource specToModelNested RequiredStringField --> SubscriptionId
-				if azureClientSecretOptions.AzureClientSecret.GetSubscriptionId() != "" {
-					azureClientSecretAttributeMap["subscription_id"] = types.StringValue(azureClientSecretOptions.AzureClientSecret.GetSubscriptionId())
-				} else {
-					// Empty string, set to null
-					azureClientSecretAttributeMap["subscription_id"] = types.StringNull()
-				}
-
-				// resource specToModelNested RequiredStringField --> TenantId
-				if azureClientSecretOptions.AzureClientSecret.GetTenantId() != "" {
-					azureClientSecretAttributeMap["tenant_id"] = types.StringValue(azureClientSecretOptions.AzureClientSecret.GetTenantId())
-				} else {
-					// Empty string, set to null
-					azureClientSecretAttributeMap["tenant_id"] = types.StringNull()
-				}
-
-				azureClientSecretObj, diags := types.ObjectValue(CloudCredentialsCloudAzureClientSecretModelAttributeMap, azureClientSecretAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				cloudChoiceChoicesModel.AzureClientSecret = azureClientSecretObj
-			} else {
-				cloudChoiceChoicesModel.AzureClientSecret = types.ObjectNull(CloudCredentialsCloudAzureClientSecretModelAttributeMap)
-			}
-		}
-
 		// resource specToModelNested PointerOfOneOfField --> GcpCredFile
 		// GlobalSpecType
 		// false
@@ -2089,14 +1667,6 @@ func (r *ResourceF5XCCloudCredentials) Create(ctx context.Context, request resou
 
 							if isBlindfoldSecretInfo && blindfoldSecretInfoOptions != nil {
 
-								// resource specToModelNested RequiredStringField --> Location
-								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation() != "" {
-									blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation())
-								} else {
-									// Empty string, set to null
-									blindfoldSecretInfoAttributeMap["location"] = types.StringNull()
-								}
-
 								// resource specToModelNested StringField --> DecryptionProvider
 								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider() != "" {
 									blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider())
@@ -2111,6 +1681,14 @@ func (r *ResourceF5XCCloudCredentials) Create(ctx context.Context, request resou
 								} else {
 									// Empty string, set to null
 									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringNull()
+								}
+
+								// resource specToModelNested RequiredStringField --> Location
+								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation() != "" {
+									blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation())
+								} else {
+									// Empty string, set to null
+									blindfoldSecretInfoAttributeMap["location"] = types.StringNull()
 								}
 
 								blindfoldSecretInfoObj, diags := types.ObjectValue(CloudCredentialsCloudGcpCredFileCredentialFileSecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
@@ -2244,6 +1822,50 @@ func (r *ResourceF5XCCloudCredentials) Create(ctx context.Context, request resou
 
 						// Process nested choices, populating the temporary attribute map
 
+						// resource specToModelNested PointerOfOneOfField --> BlindfoldSecretInfo
+						// GlobalSpecType
+						// false
+						{
+							blindfoldSecretInfoOptions, isBlindfoldSecretInfo := secretKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_BlindfoldSecretInfo)
+							blindfoldSecretInfoAttributeMap := make(map[string]attr.Value)
+
+							if isBlindfoldSecretInfo && blindfoldSecretInfoOptions != nil {
+
+								// resource specToModelNested StringField --> DecryptionProvider
+								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider() != "" {
+									blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider())
+								} else {
+									// Empty string, set to null
+									blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringNull()
+								}
+
+								// resource specToModelNested StringField --> StoreProvider
+								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider() != "" {
+									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider())
+								} else {
+									// Empty string, set to null
+									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringNull()
+								}
+
+								// resource specToModelNested RequiredStringField --> Location
+								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation() != "" {
+									blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation())
+								} else {
+									// Empty string, set to null
+									blindfoldSecretInfoAttributeMap["location"] = types.StringNull()
+								}
+
+								blindfoldSecretInfoObj, diags := types.ObjectValue(CloudCredentialsCloudAwsSecretKeySecretKeySecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
+								response.Diagnostics.Append(diags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								secretKeysecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = blindfoldSecretInfoObj
+							} else {
+								secretKeysecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = types.ObjectNull(CloudCredentialsCloudAwsSecretKeySecretKeySecretInfoOneofBlindfoldSecretInfoModelAttributeMap)
+							}
+						}
+
 						// resource specToModelNested PointerOfOneOfField --> ClearSecretInfo
 						// GlobalSpecType
 						// false
@@ -2277,50 +1899,6 @@ func (r *ResourceF5XCCloudCredentials) Create(ctx context.Context, request resou
 								secretKeysecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = clearSecretInfoObj
 							} else {
 								secretKeysecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(CloudCredentialsCloudAwsSecretKeySecretKeySecretInfoOneofClearSecretInfoModelAttributeMap)
-							}
-						}
-
-						// resource specToModelNested PointerOfOneOfField --> BlindfoldSecretInfo
-						// GlobalSpecType
-						// false
-						{
-							blindfoldSecretInfoOptions, isBlindfoldSecretInfo := secretKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_BlindfoldSecretInfo)
-							blindfoldSecretInfoAttributeMap := make(map[string]attr.Value)
-
-							if isBlindfoldSecretInfo && blindfoldSecretInfoOptions != nil {
-
-								// resource specToModelNested RequiredStringField --> Location
-								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation() != "" {
-									blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation())
-								} else {
-									// Empty string, set to null
-									blindfoldSecretInfoAttributeMap["location"] = types.StringNull()
-								}
-
-								// resource specToModelNested StringField --> DecryptionProvider
-								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider() != "" {
-									blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider())
-								} else {
-									// Empty string, set to null
-									blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringNull()
-								}
-
-								// resource specToModelNested StringField --> StoreProvider
-								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider() != "" {
-									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider())
-								} else {
-									// Empty string, set to null
-									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringNull()
-								}
-
-								blindfoldSecretInfoObj, diags := types.ObjectValue(CloudCredentialsCloudAwsSecretKeySecretKeySecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								secretKeysecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = blindfoldSecretInfoObj
-							} else {
-								secretKeysecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = types.ObjectNull(CloudCredentialsCloudAwsSecretKeySecretKeySecretInfoOneofBlindfoldSecretInfoModelAttributeMap)
 							}
 						}
 
@@ -2369,6 +1947,428 @@ func (r *ResourceF5XCCloudCredentials) Create(ctx context.Context, request resou
 				cloudChoiceChoicesModel.AwsSecretKey = awsSecretKeyObj
 			} else {
 				cloudChoiceChoicesModel.AwsSecretKey = types.ObjectNull(CloudCredentialsCloudAwsSecretKeyModelAttributeMap)
+			}
+		}
+
+		// resource specToModelNested PointerOfOneOfField --> AwsAssumeRole
+		// GlobalSpecType
+		// false
+		{
+			awsAssumeRoleOptions, isAwsAssumeRole := cloudChoiceChoices.(*ves_io_schema_cloud_credentials.GlobalSpecType_AwsAssumeRole)
+			awsAssumeRoleAttributeMap := make(map[string]attr.Value)
+
+			if isAwsAssumeRole && awsAssumeRoleOptions != nil {
+
+				// resource specToModelNested RequiredStringField --> RoleArn
+				if awsAssumeRoleOptions.AwsAssumeRole.GetRoleArn() != "" {
+					awsAssumeRoleAttributeMap["role_arn"] = types.StringValue(awsAssumeRoleOptions.AwsAssumeRole.GetRoleArn())
+				} else {
+					// Empty string, set to null
+					awsAssumeRoleAttributeMap["role_arn"] = types.StringNull()
+				}
+
+				// resource specToModelNested UintField --> DurationSeconds
+				awsAssumeRoleAttributeMap["duration_seconds"] = types.Int64Value(int64(awsAssumeRoleOptions.AwsAssumeRole.GetDurationSeconds()))
+
+				// resource specToModelNested RequiredStringField --> SessionName
+				if awsAssumeRoleOptions.AwsAssumeRole.GetSessionName() != "" {
+					awsAssumeRoleAttributeMap["session_name"] = types.StringValue(awsAssumeRoleOptions.AwsAssumeRole.GetSessionName())
+				} else {
+					// Empty string, set to null
+					awsAssumeRoleAttributeMap["session_name"] = types.StringNull()
+				}
+
+				// resource specToModelNested MapOfStringField --> SessionTags
+				if awsAssumeRoleOptions.AwsAssumeRole.GetSessionTags() != nil {
+					// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
+					sessionTagsMap, sessionTagsDiags := utils.StringMapToTerraformMap(awsAssumeRoleOptions.AwsAssumeRole.GetSessionTags())
+					response.Diagnostics.Append(sessionTagsDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					// Assign the typed map to the model
+					awsAssumeRoleAttributeMap["session_tags"] = sessionTagsMap
+				} else {
+					// Ensure the state reflects a Null map with the correct element type to avoid DynamicPseudoType errors
+					awsAssumeRoleAttributeMap["session_tags"] = types.MapNull(types.StringType)
+				}
+
+				awsAssumeRoleObj, diags := types.ObjectValue(CloudCredentialsCloudAwsAssumeRoleModelAttributeMap, awsAssumeRoleAttributeMap)
+				response.Diagnostics.Append(diags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				cloudChoiceChoicesModel.AwsAssumeRole = awsAssumeRoleObj
+			} else {
+				cloudChoiceChoicesModel.AwsAssumeRole = types.ObjectNull(CloudCredentialsCloudAwsAssumeRoleModelAttributeMap)
+			}
+		}
+
+		// resource specToModelNested PointerOfOneOfField --> AzurePfxCertificate
+		// GlobalSpecType
+		// false
+		{
+			azurePfxCertificateOptions, isAzurePfxCertificate := cloudChoiceChoices.(*ves_io_schema_cloud_credentials.GlobalSpecType_AzurePfxCertificate)
+			azurePfxCertificateAttributeMap := make(map[string]attr.Value)
+
+			if isAzurePfxCertificate && azurePfxCertificateOptions != nil {
+
+				// resource specToModelNested RequiredStringField --> ClientId
+				if azurePfxCertificateOptions.AzurePfxCertificate.GetClientId() != "" {
+					azurePfxCertificateAttributeMap["client_id"] = types.StringValue(azurePfxCertificateOptions.AzurePfxCertificate.GetClientId())
+				} else {
+					// Empty string, set to null
+					azurePfxCertificateAttributeMap["client_id"] = types.StringNull()
+				}
+
+				// resource specToModelNested RequiredStringField --> SubscriptionId
+				if azurePfxCertificateOptions.AzurePfxCertificate.GetSubscriptionId() != "" {
+					azurePfxCertificateAttributeMap["subscription_id"] = types.StringValue(azurePfxCertificateOptions.AzurePfxCertificate.GetSubscriptionId())
+				} else {
+					// Empty string, set to null
+					azurePfxCertificateAttributeMap["subscription_id"] = types.StringNull()
+				}
+
+				// resource specToModelNested RequiredStringField --> TenantId
+				if azurePfxCertificateOptions.AzurePfxCertificate.GetTenantId() != "" {
+					azurePfxCertificateAttributeMap["tenant_id"] = types.StringValue(azurePfxCertificateOptions.AzurePfxCertificate.GetTenantId())
+				} else {
+					// Empty string, set to null
+					azurePfxCertificateAttributeMap["tenant_id"] = types.StringNull()
+				}
+
+				// resource specToModelNested RequiredStringField --> CertificateUrl
+				if azurePfxCertificateOptions.AzurePfxCertificate.GetCertificateUrl() != "" {
+					azurePfxCertificateAttributeMap["certificate_url"] = types.StringValue(azurePfxCertificateOptions.AzurePfxCertificate.GetCertificateUrl())
+				} else {
+					// Empty string, set to null
+					azurePfxCertificateAttributeMap["certificate_url"] = types.StringNull()
+				}
+
+				// resource specToModelNested RequiredPointerField --> Password
+				if azurePfxCertificateOptions.AzurePfxCertificate.GetPassword() != nil {
+					// Create the nested Go struct
+					cloudCredentialsSecretTypeModel := &CloudCredentialsSecretType{}
+					passwordElement := azurePfxCertificateOptions.AzurePfxCertificate.GetPassword()
+
+					// Recursively populate the nested struct
+
+					// resource specToModelNested RequiredOneOfField --> SecretInfoOneof
+					// GlobalSpecType
+					if passwordElement.GetSecretInfoOneof() != nil {
+						// Create a temporary attribute map for the choices within this OneOf
+						passwordsecretInfoChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+						// Define a variable for the spec choices to be passed down to nested templates
+						passwordsecretInfoChoiceChoices := passwordElement.GetSecretInfoOneof()
+
+						// Process nested choices, populating the temporary attribute map
+
+						// resource specToModelNested PointerOfOneOfField --> ClearSecretInfo
+						// GlobalSpecType
+						// false
+						{
+							clearSecretInfoOptions, isClearSecretInfo := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_ClearSecretInfo)
+							clearSecretInfoAttributeMap := make(map[string]attr.Value)
+
+							if isClearSecretInfo && clearSecretInfoOptions != nil {
+
+								// resource specToModelNested StringField --> Provider
+								if clearSecretInfoOptions.ClearSecretInfo.GetProvider() != "" {
+									clearSecretInfoAttributeMap["provider"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetProvider())
+								} else {
+									// Empty string, set to null
+									clearSecretInfoAttributeMap["provider"] = types.StringNull()
+								}
+
+								// resource specToModelNested RequiredStringField --> Url
+								if clearSecretInfoOptions.ClearSecretInfo.GetUrl() != "" {
+									clearSecretInfoAttributeMap["url"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetUrl())
+								} else {
+									// Empty string, set to null
+									clearSecretInfoAttributeMap["url"] = types.StringNull()
+								}
+
+								clearSecretInfoObj, diags := types.ObjectValue(CloudCredentialsCloudAzurePfxCertificatePasswordSecretInfoOneofClearSecretInfoModelAttributeMap, clearSecretInfoAttributeMap)
+								response.Diagnostics.Append(diags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								passwordsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = clearSecretInfoObj
+							} else {
+								passwordsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(CloudCredentialsCloudAzurePfxCertificatePasswordSecretInfoOneofClearSecretInfoModelAttributeMap)
+							}
+						}
+
+						// resource specToModelNested PointerOfOneOfField --> BlindfoldSecretInfo
+						// GlobalSpecType
+						// false
+						{
+							blindfoldSecretInfoOptions, isBlindfoldSecretInfo := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_BlindfoldSecretInfo)
+							blindfoldSecretInfoAttributeMap := make(map[string]attr.Value)
+
+							if isBlindfoldSecretInfo && blindfoldSecretInfoOptions != nil {
+
+								// resource specToModelNested StringField --> DecryptionProvider
+								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider() != "" {
+									blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider())
+								} else {
+									// Empty string, set to null
+									blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringNull()
+								}
+
+								// resource specToModelNested StringField --> StoreProvider
+								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider() != "" {
+									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider())
+								} else {
+									// Empty string, set to null
+									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringNull()
+								}
+
+								// resource specToModelNested RequiredStringField --> Location
+								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation() != "" {
+									blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation())
+								} else {
+									// Empty string, set to null
+									blindfoldSecretInfoAttributeMap["location"] = types.StringNull()
+								}
+
+								blindfoldSecretInfoObj, diags := types.ObjectValue(CloudCredentialsCloudAzurePfxCertificatePasswordSecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
+								response.Diagnostics.Append(diags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								passwordsecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = blindfoldSecretInfoObj
+							} else {
+								passwordsecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = types.ObjectNull(CloudCredentialsCloudAzurePfxCertificatePasswordSecretInfoOneofBlindfoldSecretInfoModelAttributeMap)
+							}
+						}
+
+						// --- End of Choices ---
+
+						// Create the final ObjectValue for this OneOf field
+						finalObj, passwordsecretInfoChoiceChoicesObjDiags := types.ObjectValue(
+							CloudCredentialsCloudAzurePfxCertificatePasswordSecretInfoOneofModelAttributeMap, // The attribute schema for the OneOf choices
+							passwordsecretInfoChoiceChoicesAttributeMap,
+						)
+						response.Diagnostics.Append(passwordsecretInfoChoiceChoicesObjDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						// Assign the final object to the correct place (either the root model or a parent's attribute map)
+						cloudCredentialsSecretTypeModel.SecretInfoChoice = finalObj
+					} else {
+						// The OneOf field is nil in the source spec, so set the Terraform object to null.
+						cloudCredentialsSecretTypeModel.SecretInfoChoice = types.ObjectNull(CloudCredentialsCloudAzurePfxCertificatePasswordSecretInfoOneofModelAttributeMap)
+					}
+
+					// This field needs to be converted to a types.ObjectValue before assignment.
+					cloudCredentialsSecretTypeModelObj, diags := types.ObjectValueFrom(ctx, CloudCredentialsCloudAzurePfxCertificatePasswordModelAttributeMap, cloudCredentialsSecretTypeModel)
+					response.Diagnostics.Append(diags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					azurePfxCertificateAttributeMap["password"] = cloudCredentialsSecretTypeModelObj
+
+				} else {
+					// The source field is nil (e.g. redacted by the API).
+					// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
+					// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
+					// here because the API may always return a non-nil struct (with REDACTED values) for this
+					// field, making this else-branch unreachable. The child OneOf handles the actual healing.
+					// The target is a types.Object, so we use types.ObjectNull.
+					azurePfxCertificateAttributeMap["password"] = types.ObjectNull(CloudCredentialsCloudAzurePfxCertificatePasswordModelAttributeMap)
+				}
+
+				azurePfxCertificateObj, diags := types.ObjectValue(CloudCredentialsCloudAzurePfxCertificateModelAttributeMap, azurePfxCertificateAttributeMap)
+				response.Diagnostics.Append(diags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				cloudChoiceChoicesModel.AzurePfxCertificate = azurePfxCertificateObj
+			} else {
+				cloudChoiceChoicesModel.AzurePfxCertificate = types.ObjectNull(CloudCredentialsCloudAzurePfxCertificateModelAttributeMap)
+			}
+		}
+
+		// resource specToModelNested PointerOfOneOfField --> AzureClientSecret
+		// GlobalSpecType
+		// false
+		{
+			azureClientSecretOptions, isAzureClientSecret := cloudChoiceChoices.(*ves_io_schema_cloud_credentials.GlobalSpecType_AzureClientSecret)
+			azureClientSecretAttributeMap := make(map[string]attr.Value)
+
+			if isAzureClientSecret && azureClientSecretOptions != nil {
+
+				// resource specToModelNested RequiredStringField --> ClientId
+				if azureClientSecretOptions.AzureClientSecret.GetClientId() != "" {
+					azureClientSecretAttributeMap["client_id"] = types.StringValue(azureClientSecretOptions.AzureClientSecret.GetClientId())
+				} else {
+					// Empty string, set to null
+					azureClientSecretAttributeMap["client_id"] = types.StringNull()
+				}
+
+				// resource specToModelNested RequiredStringField --> SubscriptionId
+				if azureClientSecretOptions.AzureClientSecret.GetSubscriptionId() != "" {
+					azureClientSecretAttributeMap["subscription_id"] = types.StringValue(azureClientSecretOptions.AzureClientSecret.GetSubscriptionId())
+				} else {
+					// Empty string, set to null
+					azureClientSecretAttributeMap["subscription_id"] = types.StringNull()
+				}
+
+				// resource specToModelNested RequiredStringField --> TenantId
+				if azureClientSecretOptions.AzureClientSecret.GetTenantId() != "" {
+					azureClientSecretAttributeMap["tenant_id"] = types.StringValue(azureClientSecretOptions.AzureClientSecret.GetTenantId())
+				} else {
+					// Empty string, set to null
+					azureClientSecretAttributeMap["tenant_id"] = types.StringNull()
+				}
+
+				// resource specToModelNested RequiredPointerField --> ClientSecret
+				if azureClientSecretOptions.AzureClientSecret.GetClientSecret() != nil {
+					// Create the nested Go struct
+					cloudCredentialsSecretTypeModel := &CloudCredentialsSecretType{}
+					clientSecretElement := azureClientSecretOptions.AzureClientSecret.GetClientSecret()
+
+					// Recursively populate the nested struct
+
+					// resource specToModelNested RequiredOneOfField --> SecretInfoOneof
+					// GlobalSpecType
+					if clientSecretElement.GetSecretInfoOneof() != nil {
+						// Create a temporary attribute map for the choices within this OneOf
+						clientSecretsecretInfoChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+						// Define a variable for the spec choices to be passed down to nested templates
+						clientSecretsecretInfoChoiceChoices := clientSecretElement.GetSecretInfoOneof()
+
+						// Process nested choices, populating the temporary attribute map
+
+						// resource specToModelNested PointerOfOneOfField --> ClearSecretInfo
+						// GlobalSpecType
+						// false
+						{
+							clearSecretInfoOptions, isClearSecretInfo := clientSecretsecretInfoChoiceChoices.(*ves_io_schema.SecretType_ClearSecretInfo)
+							clearSecretInfoAttributeMap := make(map[string]attr.Value)
+
+							if isClearSecretInfo && clearSecretInfoOptions != nil {
+
+								// resource specToModelNested StringField --> Provider
+								if clearSecretInfoOptions.ClearSecretInfo.GetProvider() != "" {
+									clearSecretInfoAttributeMap["provider"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetProvider())
+								} else {
+									// Empty string, set to null
+									clearSecretInfoAttributeMap["provider"] = types.StringNull()
+								}
+
+								// resource specToModelNested RequiredStringField --> Url
+								if clearSecretInfoOptions.ClearSecretInfo.GetUrl() != "" {
+									clearSecretInfoAttributeMap["url"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetUrl())
+								} else {
+									// Empty string, set to null
+									clearSecretInfoAttributeMap["url"] = types.StringNull()
+								}
+
+								clearSecretInfoObj, diags := types.ObjectValue(CloudCredentialsCloudAzureClientSecretClientSecretSecretInfoOneofClearSecretInfoModelAttributeMap, clearSecretInfoAttributeMap)
+								response.Diagnostics.Append(diags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								clientSecretsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = clearSecretInfoObj
+							} else {
+								clientSecretsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(CloudCredentialsCloudAzureClientSecretClientSecretSecretInfoOneofClearSecretInfoModelAttributeMap)
+							}
+						}
+
+						// resource specToModelNested PointerOfOneOfField --> BlindfoldSecretInfo
+						// GlobalSpecType
+						// false
+						{
+							blindfoldSecretInfoOptions, isBlindfoldSecretInfo := clientSecretsecretInfoChoiceChoices.(*ves_io_schema.SecretType_BlindfoldSecretInfo)
+							blindfoldSecretInfoAttributeMap := make(map[string]attr.Value)
+
+							if isBlindfoldSecretInfo && blindfoldSecretInfoOptions != nil {
+
+								// resource specToModelNested StringField --> DecryptionProvider
+								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider() != "" {
+									blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider())
+								} else {
+									// Empty string, set to null
+									blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringNull()
+								}
+
+								// resource specToModelNested StringField --> StoreProvider
+								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider() != "" {
+									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider())
+								} else {
+									// Empty string, set to null
+									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringNull()
+								}
+
+								// resource specToModelNested RequiredStringField --> Location
+								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation() != "" {
+									blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation())
+								} else {
+									// Empty string, set to null
+									blindfoldSecretInfoAttributeMap["location"] = types.StringNull()
+								}
+
+								blindfoldSecretInfoObj, diags := types.ObjectValue(CloudCredentialsCloudAzureClientSecretClientSecretSecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
+								response.Diagnostics.Append(diags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								clientSecretsecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = blindfoldSecretInfoObj
+							} else {
+								clientSecretsecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = types.ObjectNull(CloudCredentialsCloudAzureClientSecretClientSecretSecretInfoOneofBlindfoldSecretInfoModelAttributeMap)
+							}
+						}
+
+						// --- End of Choices ---
+
+						// Create the final ObjectValue for this OneOf field
+						finalObj, clientSecretsecretInfoChoiceChoicesObjDiags := types.ObjectValue(
+							CloudCredentialsCloudAzureClientSecretClientSecretSecretInfoOneofModelAttributeMap, // The attribute schema for the OneOf choices
+							clientSecretsecretInfoChoiceChoicesAttributeMap,
+						)
+						response.Diagnostics.Append(clientSecretsecretInfoChoiceChoicesObjDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						// Assign the final object to the correct place (either the root model or a parent's attribute map)
+						cloudCredentialsSecretTypeModel.SecretInfoChoice = finalObj
+					} else {
+						// The OneOf field is nil in the source spec, so set the Terraform object to null.
+						cloudCredentialsSecretTypeModel.SecretInfoChoice = types.ObjectNull(CloudCredentialsCloudAzureClientSecretClientSecretSecretInfoOneofModelAttributeMap)
+					}
+
+					// This field needs to be converted to a types.ObjectValue before assignment.
+					cloudCredentialsSecretTypeModelObj, diags := types.ObjectValueFrom(ctx, CloudCredentialsCloudAzureClientSecretClientSecretModelAttributeMap, cloudCredentialsSecretTypeModel)
+					response.Diagnostics.Append(diags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					azureClientSecretAttributeMap["client_secret"] = cloudCredentialsSecretTypeModelObj
+
+				} else {
+					// The source field is nil (e.g. redacted by the API).
+					// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
+					// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
+					// here because the API may always return a non-nil struct (with REDACTED values) for this
+					// field, making this else-branch unreachable. The child OneOf handles the actual healing.
+					// The target is a types.Object, so we use types.ObjectNull.
+					azureClientSecretAttributeMap["client_secret"] = types.ObjectNull(CloudCredentialsCloudAzureClientSecretClientSecretModelAttributeMap)
+				}
+
+				azureClientSecretObj, diags := types.ObjectValue(CloudCredentialsCloudAzureClientSecretModelAttributeMap, azureClientSecretAttributeMap)
+				response.Diagnostics.Append(diags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				cloudChoiceChoicesModel.AzureClientSecret = azureClientSecretObj
+			} else {
+				cloudChoiceChoicesModel.AzureClientSecret = types.ObjectNull(CloudCredentialsCloudAzureClientSecretModelAttributeMap)
 			}
 		}
 
@@ -2572,452 +2572,6 @@ func (r *ResourceF5XCCloudCredentials) Read(ctx context.Context, request resourc
 
 		// Recursively call the nested template to process the oneof choices.
 
-		// resource specToModelNested PointerOfOneOfField --> AwsAssumeRole
-		// <no value>
-		// false
-		{
-			awsAssumeRoleOptions, isAwsAssumeRole := cloudChoiceChoices.(*ves_io_schema_cloud_credentials.GlobalSpecType_AwsAssumeRole)
-			awsAssumeRoleAttributeMap := make(map[string]attr.Value)
-
-			if isAwsAssumeRole && awsAssumeRoleOptions != nil {
-
-				// resource specToModelNested RequiredStringField --> RoleArn
-				if awsAssumeRoleOptions.AwsAssumeRole.GetRoleArn() != "" {
-					awsAssumeRoleAttributeMap["role_arn"] = types.StringValue(awsAssumeRoleOptions.AwsAssumeRole.GetRoleArn())
-				} else {
-					// Empty string, set to null
-					awsAssumeRoleAttributeMap["role_arn"] = types.StringNull()
-				}
-
-				// resource specToModelNested UintField --> DurationSeconds
-				awsAssumeRoleAttributeMap["duration_seconds"] = types.Int64Value(int64(awsAssumeRoleOptions.AwsAssumeRole.GetDurationSeconds()))
-
-				// resource specToModelNested RequiredStringField --> SessionName
-				if awsAssumeRoleOptions.AwsAssumeRole.GetSessionName() != "" {
-					awsAssumeRoleAttributeMap["session_name"] = types.StringValue(awsAssumeRoleOptions.AwsAssumeRole.GetSessionName())
-				} else {
-					// Empty string, set to null
-					awsAssumeRoleAttributeMap["session_name"] = types.StringNull()
-				}
-
-				// resource specToModelNested MapOfStringField --> SessionTags
-				if awsAssumeRoleOptions.AwsAssumeRole.GetSessionTags() != nil {
-					// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-					sessionTagsMap, sessionTagsDiags := utils.StringMapToTerraformMap(awsAssumeRoleOptions.AwsAssumeRole.GetSessionTags())
-					response.Diagnostics.Append(sessionTagsDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					// Assign the typed map to the model
-					awsAssumeRoleAttributeMap["session_tags"] = sessionTagsMap
-				} else {
-					// Ensure the state reflects a Null map with the correct element type to avoid DynamicPseudoType errors
-					awsAssumeRoleAttributeMap["session_tags"] = types.MapNull(types.StringType)
-				}
-
-				awsAssumeRoleObj, diags := types.ObjectValue(CloudCredentialsCloudAwsAssumeRoleModelAttributeMap, awsAssumeRoleAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				cloudChoiceChoicesModel.AwsAssumeRole = awsAssumeRoleObj
-			} else {
-				cloudChoiceChoicesModel.AwsAssumeRole = types.ObjectNull(CloudCredentialsCloudAwsAssumeRoleModelAttributeMap)
-			}
-		}
-
-		// resource specToModelNested PointerOfOneOfField --> AzurePfxCertificate
-		// <no value>
-		// false
-		{
-			azurePfxCertificateOptions, isAzurePfxCertificate := cloudChoiceChoices.(*ves_io_schema_cloud_credentials.GlobalSpecType_AzurePfxCertificate)
-			azurePfxCertificateAttributeMap := make(map[string]attr.Value)
-
-			if isAzurePfxCertificate && azurePfxCertificateOptions != nil {
-
-				// resource specToModelNested RequiredStringField --> ClientId
-				if azurePfxCertificateOptions.AzurePfxCertificate.GetClientId() != "" {
-					azurePfxCertificateAttributeMap["client_id"] = types.StringValue(azurePfxCertificateOptions.AzurePfxCertificate.GetClientId())
-				} else {
-					// Empty string, set to null
-					azurePfxCertificateAttributeMap["client_id"] = types.StringNull()
-				}
-
-				// resource specToModelNested RequiredStringField --> SubscriptionId
-				if azurePfxCertificateOptions.AzurePfxCertificate.GetSubscriptionId() != "" {
-					azurePfxCertificateAttributeMap["subscription_id"] = types.StringValue(azurePfxCertificateOptions.AzurePfxCertificate.GetSubscriptionId())
-				} else {
-					// Empty string, set to null
-					azurePfxCertificateAttributeMap["subscription_id"] = types.StringNull()
-				}
-
-				// resource specToModelNested RequiredStringField --> TenantId
-				if azurePfxCertificateOptions.AzurePfxCertificate.GetTenantId() != "" {
-					azurePfxCertificateAttributeMap["tenant_id"] = types.StringValue(azurePfxCertificateOptions.AzurePfxCertificate.GetTenantId())
-				} else {
-					// Empty string, set to null
-					azurePfxCertificateAttributeMap["tenant_id"] = types.StringNull()
-				}
-
-				// resource specToModelNested RequiredStringField --> CertificateUrl
-				if azurePfxCertificateOptions.AzurePfxCertificate.GetCertificateUrl() != "" {
-					azurePfxCertificateAttributeMap["certificate_url"] = types.StringValue(azurePfxCertificateOptions.AzurePfxCertificate.GetCertificateUrl())
-				} else {
-					// Empty string, set to null
-					azurePfxCertificateAttributeMap["certificate_url"] = types.StringNull()
-				}
-
-				// resource specToModelNested RequiredPointerField --> Password
-				if azurePfxCertificateOptions.AzurePfxCertificate.GetPassword() != nil {
-					// Create the nested Go struct
-					cloudCredentialsSecretTypeModel := &CloudCredentialsSecretType{}
-					passwordElement := azurePfxCertificateOptions.AzurePfxCertificate.GetPassword()
-
-					// Recursively populate the nested struct
-
-					// resource specToModelNested RequiredOneOfField --> SecretInfoOneof
-					// <no value>
-					if passwordElement.GetSecretInfoOneof() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						passwordsecretInfoChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates
-						passwordsecretInfoChoiceChoices := passwordElement.GetSecretInfoOneof()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// resource specToModelNested PointerOfOneOfField --> BlindfoldSecretInfo
-						// <no value>
-						// false
-						{
-							blindfoldSecretInfoOptions, isBlindfoldSecretInfo := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_BlindfoldSecretInfo)
-							blindfoldSecretInfoAttributeMap := make(map[string]attr.Value)
-
-							if isBlindfoldSecretInfo && blindfoldSecretInfoOptions != nil {
-
-								// resource specToModelNested StringField --> DecryptionProvider
-								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider() != "" {
-									blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider())
-								} else {
-									// Empty string, set to null
-									blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringNull()
-								}
-
-								// resource specToModelNested StringField --> StoreProvider
-								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider() != "" {
-									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider())
-								} else {
-									// Empty string, set to null
-									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringNull()
-								}
-
-								// resource specToModelNested RequiredStringField --> Location
-								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation() != "" {
-									blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation())
-								} else {
-									// Empty string, set to null
-									blindfoldSecretInfoAttributeMap["location"] = types.StringNull()
-								}
-
-								blindfoldSecretInfoObj, diags := types.ObjectValue(CloudCredentialsCloudAzurePfxCertificatePasswordSecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								passwordsecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = blindfoldSecretInfoObj
-							} else {
-								passwordsecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = types.ObjectNull(CloudCredentialsCloudAzurePfxCertificatePasswordSecretInfoOneofBlindfoldSecretInfoModelAttributeMap)
-							}
-						}
-
-						// resource specToModelNested PointerOfOneOfField --> ClearSecretInfo
-						// <no value>
-						// false
-						{
-							clearSecretInfoOptions, isClearSecretInfo := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_ClearSecretInfo)
-							clearSecretInfoAttributeMap := make(map[string]attr.Value)
-
-							if isClearSecretInfo && clearSecretInfoOptions != nil {
-
-								// resource specToModelNested StringField --> Provider
-								if clearSecretInfoOptions.ClearSecretInfo.GetProvider() != "" {
-									clearSecretInfoAttributeMap["provider"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetProvider())
-								} else {
-									// Empty string, set to null
-									clearSecretInfoAttributeMap["provider"] = types.StringNull()
-								}
-
-								// resource specToModelNested RequiredStringField --> Url
-								if clearSecretInfoOptions.ClearSecretInfo.GetUrl() != "" {
-									clearSecretInfoAttributeMap["url"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetUrl())
-								} else {
-									// Empty string, set to null
-									clearSecretInfoAttributeMap["url"] = types.StringNull()
-								}
-
-								clearSecretInfoObj, diags := types.ObjectValue(CloudCredentialsCloudAzurePfxCertificatePasswordSecretInfoOneofClearSecretInfoModelAttributeMap, clearSecretInfoAttributeMap)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								passwordsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = clearSecretInfoObj
-							} else {
-								passwordsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(CloudCredentialsCloudAzurePfxCertificatePasswordSecretInfoOneofClearSecretInfoModelAttributeMap)
-							}
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, passwordsecretInfoChoiceChoicesObjDiags := types.ObjectValue(
-							CloudCredentialsCloudAzurePfxCertificatePasswordSecretInfoOneofModelAttributeMap, // The attribute schema for the OneOf choices
-							passwordsecretInfoChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(passwordsecretInfoChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						cloudCredentialsSecretTypeModel.SecretInfoChoice = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						// State Healing: The API redacted the OneOf secret field (returned nil). Restore the entire
-						// secret_info_choice object from prior Terraform state so that the model reflects what the
-						// user originally configured and Terraform does not detect a false drift.
-						{
-							savedSecretInfoChoicePath := path.Root("cloud_choice").AtName("azure_pfx_certificate").AtName("password").AtName("secret_info_choice")
-							var savedSecretInfoChoice types.Object
-							stateHealDiags := request.State.GetAttribute(ctx, savedSecretInfoChoicePath, &savedSecretInfoChoice)
-							if !stateHealDiags.HasError() && !savedSecretInfoChoice.IsNull() && !savedSecretInfoChoice.IsUnknown() {
-								cloudCredentialsSecretTypeModel.SecretInfoChoice = savedSecretInfoChoice
-							} else {
-								cloudCredentialsSecretTypeModel.SecretInfoChoice = types.ObjectNull(CloudCredentialsCloudAzurePfxCertificatePasswordSecretInfoOneofModelAttributeMap)
-							}
-						}
-					}
-
-					// This field needs to be converted to a types.ObjectValue before assignment.
-					cloudCredentialsSecretTypeModelObj, diags := types.ObjectValueFrom(ctx, CloudCredentialsCloudAzurePfxCertificatePasswordModelAttributeMap, cloudCredentialsSecretTypeModel)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					azurePfxCertificateAttributeMap["password"] = cloudCredentialsSecretTypeModelObj
-
-				} else {
-					// The source field is nil (e.g. redacted by the API).
-					// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
-					// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
-					// here because the API may always return a non-nil struct (with REDACTED values) for this
-					// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-					// The target is a types.Object, so we use types.ObjectNull.
-					azurePfxCertificateAttributeMap["password"] = types.ObjectNull(CloudCredentialsCloudAzurePfxCertificatePasswordModelAttributeMap)
-				}
-
-				azurePfxCertificateObj, diags := types.ObjectValue(CloudCredentialsCloudAzurePfxCertificateModelAttributeMap, azurePfxCertificateAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				cloudChoiceChoicesModel.AzurePfxCertificate = azurePfxCertificateObj
-			} else {
-				cloudChoiceChoicesModel.AzurePfxCertificate = types.ObjectNull(CloudCredentialsCloudAzurePfxCertificateModelAttributeMap)
-			}
-		}
-
-		// resource specToModelNested PointerOfOneOfField --> AzureClientSecret
-		// <no value>
-		// false
-		{
-			azureClientSecretOptions, isAzureClientSecret := cloudChoiceChoices.(*ves_io_schema_cloud_credentials.GlobalSpecType_AzureClientSecret)
-			azureClientSecretAttributeMap := make(map[string]attr.Value)
-
-			if isAzureClientSecret && azureClientSecretOptions != nil {
-
-				// resource specToModelNested RequiredPointerField --> ClientSecret
-				if azureClientSecretOptions.AzureClientSecret.GetClientSecret() != nil {
-					// Create the nested Go struct
-					cloudCredentialsSecretTypeModel := &CloudCredentialsSecretType{}
-					clientSecretElement := azureClientSecretOptions.AzureClientSecret.GetClientSecret()
-
-					// Recursively populate the nested struct
-
-					// resource specToModelNested RequiredOneOfField --> SecretInfoOneof
-					// <no value>
-					if clientSecretElement.GetSecretInfoOneof() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						clientSecretsecretInfoChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates
-						clientSecretsecretInfoChoiceChoices := clientSecretElement.GetSecretInfoOneof()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// resource specToModelNested PointerOfOneOfField --> BlindfoldSecretInfo
-						// <no value>
-						// false
-						{
-							blindfoldSecretInfoOptions, isBlindfoldSecretInfo := clientSecretsecretInfoChoiceChoices.(*ves_io_schema.SecretType_BlindfoldSecretInfo)
-							blindfoldSecretInfoAttributeMap := make(map[string]attr.Value)
-
-							if isBlindfoldSecretInfo && blindfoldSecretInfoOptions != nil {
-
-								// resource specToModelNested StringField --> DecryptionProvider
-								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider() != "" {
-									blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider())
-								} else {
-									// Empty string, set to null
-									blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringNull()
-								}
-
-								// resource specToModelNested StringField --> StoreProvider
-								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider() != "" {
-									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider())
-								} else {
-									// Empty string, set to null
-									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringNull()
-								}
-
-								// resource specToModelNested RequiredStringField --> Location
-								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation() != "" {
-									blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation())
-								} else {
-									// Empty string, set to null
-									blindfoldSecretInfoAttributeMap["location"] = types.StringNull()
-								}
-
-								blindfoldSecretInfoObj, diags := types.ObjectValue(CloudCredentialsCloudAzureClientSecretClientSecretSecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								clientSecretsecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = blindfoldSecretInfoObj
-							} else {
-								clientSecretsecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = types.ObjectNull(CloudCredentialsCloudAzureClientSecretClientSecretSecretInfoOneofBlindfoldSecretInfoModelAttributeMap)
-							}
-						}
-
-						// resource specToModelNested PointerOfOneOfField --> ClearSecretInfo
-						// <no value>
-						// false
-						{
-							clearSecretInfoOptions, isClearSecretInfo := clientSecretsecretInfoChoiceChoices.(*ves_io_schema.SecretType_ClearSecretInfo)
-							clearSecretInfoAttributeMap := make(map[string]attr.Value)
-
-							if isClearSecretInfo && clearSecretInfoOptions != nil {
-
-								// resource specToModelNested StringField --> Provider
-								if clearSecretInfoOptions.ClearSecretInfo.GetProvider() != "" {
-									clearSecretInfoAttributeMap["provider"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetProvider())
-								} else {
-									// Empty string, set to null
-									clearSecretInfoAttributeMap["provider"] = types.StringNull()
-								}
-
-								// resource specToModelNested RequiredStringField --> Url
-								if clearSecretInfoOptions.ClearSecretInfo.GetUrl() != "" {
-									clearSecretInfoAttributeMap["url"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetUrl())
-								} else {
-									// Empty string, set to null
-									clearSecretInfoAttributeMap["url"] = types.StringNull()
-								}
-
-								clearSecretInfoObj, diags := types.ObjectValue(CloudCredentialsCloudAzureClientSecretClientSecretSecretInfoOneofClearSecretInfoModelAttributeMap, clearSecretInfoAttributeMap)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								clientSecretsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = clearSecretInfoObj
-							} else {
-								clientSecretsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(CloudCredentialsCloudAzureClientSecretClientSecretSecretInfoOneofClearSecretInfoModelAttributeMap)
-							}
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, clientSecretsecretInfoChoiceChoicesObjDiags := types.ObjectValue(
-							CloudCredentialsCloudAzureClientSecretClientSecretSecretInfoOneofModelAttributeMap, // The attribute schema for the OneOf choices
-							clientSecretsecretInfoChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(clientSecretsecretInfoChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						cloudCredentialsSecretTypeModel.SecretInfoChoice = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						// State Healing: The API redacted the OneOf secret field (returned nil). Restore the entire
-						// secret_info_choice object from prior Terraform state so that the model reflects what the
-						// user originally configured and Terraform does not detect a false drift.
-						{
-							savedSecretInfoChoicePath := path.Root("cloud_choice").AtName("azure_client_secret").AtName("client_secret").AtName("secret_info_choice")
-							var savedSecretInfoChoice types.Object
-							stateHealDiags := request.State.GetAttribute(ctx, savedSecretInfoChoicePath, &savedSecretInfoChoice)
-							if !stateHealDiags.HasError() && !savedSecretInfoChoice.IsNull() && !savedSecretInfoChoice.IsUnknown() {
-								cloudCredentialsSecretTypeModel.SecretInfoChoice = savedSecretInfoChoice
-							} else {
-								cloudCredentialsSecretTypeModel.SecretInfoChoice = types.ObjectNull(CloudCredentialsCloudAzureClientSecretClientSecretSecretInfoOneofModelAttributeMap)
-							}
-						}
-					}
-
-					// This field needs to be converted to a types.ObjectValue before assignment.
-					cloudCredentialsSecretTypeModelObj, diags := types.ObjectValueFrom(ctx, CloudCredentialsCloudAzureClientSecretClientSecretModelAttributeMap, cloudCredentialsSecretTypeModel)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					azureClientSecretAttributeMap["client_secret"] = cloudCredentialsSecretTypeModelObj
-
-				} else {
-					// The source field is nil (e.g. redacted by the API).
-					// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
-					// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
-					// here because the API may always return a non-nil struct (with REDACTED values) for this
-					// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-					// The target is a types.Object, so we use types.ObjectNull.
-					azureClientSecretAttributeMap["client_secret"] = types.ObjectNull(CloudCredentialsCloudAzureClientSecretClientSecretModelAttributeMap)
-				}
-
-				// resource specToModelNested RequiredStringField --> ClientId
-				if azureClientSecretOptions.AzureClientSecret.GetClientId() != "" {
-					azureClientSecretAttributeMap["client_id"] = types.StringValue(azureClientSecretOptions.AzureClientSecret.GetClientId())
-				} else {
-					// Empty string, set to null
-					azureClientSecretAttributeMap["client_id"] = types.StringNull()
-				}
-
-				// resource specToModelNested RequiredStringField --> SubscriptionId
-				if azureClientSecretOptions.AzureClientSecret.GetSubscriptionId() != "" {
-					azureClientSecretAttributeMap["subscription_id"] = types.StringValue(azureClientSecretOptions.AzureClientSecret.GetSubscriptionId())
-				} else {
-					// Empty string, set to null
-					azureClientSecretAttributeMap["subscription_id"] = types.StringNull()
-				}
-
-				// resource specToModelNested RequiredStringField --> TenantId
-				if azureClientSecretOptions.AzureClientSecret.GetTenantId() != "" {
-					azureClientSecretAttributeMap["tenant_id"] = types.StringValue(azureClientSecretOptions.AzureClientSecret.GetTenantId())
-				} else {
-					// Empty string, set to null
-					azureClientSecretAttributeMap["tenant_id"] = types.StringNull()
-				}
-
-				azureClientSecretObj, diags := types.ObjectValue(CloudCredentialsCloudAzureClientSecretModelAttributeMap, azureClientSecretAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				cloudChoiceChoicesModel.AzureClientSecret = azureClientSecretObj
-			} else {
-				cloudChoiceChoicesModel.AzureClientSecret = types.ObjectNull(CloudCredentialsCloudAzureClientSecretModelAttributeMap)
-			}
-		}
-
 		// resource specToModelNested PointerOfOneOfField --> GcpCredFile
 		// <no value>
 		// false
@@ -3055,14 +2609,6 @@ func (r *ResourceF5XCCloudCredentials) Read(ctx context.Context, request resourc
 
 							if isBlindfoldSecretInfo && blindfoldSecretInfoOptions != nil {
 
-								// resource specToModelNested RequiredStringField --> Location
-								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation() != "" {
-									blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation())
-								} else {
-									// Empty string, set to null
-									blindfoldSecretInfoAttributeMap["location"] = types.StringNull()
-								}
-
 								// resource specToModelNested StringField --> DecryptionProvider
 								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider() != "" {
 									blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider())
@@ -3077,6 +2623,14 @@ func (r *ResourceF5XCCloudCredentials) Read(ctx context.Context, request resourc
 								} else {
 									// Empty string, set to null
 									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringNull()
+								}
+
+								// resource specToModelNested RequiredStringField --> Location
+								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation() != "" {
+									blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation())
+								} else {
+									// Empty string, set to null
+									blindfoldSecretInfoAttributeMap["location"] = types.StringNull()
 								}
 
 								blindfoldSecretInfoObj, diags := types.ObjectValue(CloudCredentialsCloudGcpCredFileCredentialFileSecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
@@ -3222,6 +2776,50 @@ func (r *ResourceF5XCCloudCredentials) Read(ctx context.Context, request resourc
 
 						// Process nested choices, populating the temporary attribute map
 
+						// resource specToModelNested PointerOfOneOfField --> BlindfoldSecretInfo
+						// <no value>
+						// false
+						{
+							blindfoldSecretInfoOptions, isBlindfoldSecretInfo := secretKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_BlindfoldSecretInfo)
+							blindfoldSecretInfoAttributeMap := make(map[string]attr.Value)
+
+							if isBlindfoldSecretInfo && blindfoldSecretInfoOptions != nil {
+
+								// resource specToModelNested StringField --> DecryptionProvider
+								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider() != "" {
+									blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider())
+								} else {
+									// Empty string, set to null
+									blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringNull()
+								}
+
+								// resource specToModelNested StringField --> StoreProvider
+								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider() != "" {
+									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider())
+								} else {
+									// Empty string, set to null
+									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringNull()
+								}
+
+								// resource specToModelNested RequiredStringField --> Location
+								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation() != "" {
+									blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation())
+								} else {
+									// Empty string, set to null
+									blindfoldSecretInfoAttributeMap["location"] = types.StringNull()
+								}
+
+								blindfoldSecretInfoObj, diags := types.ObjectValue(CloudCredentialsCloudAwsSecretKeySecretKeySecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
+								response.Diagnostics.Append(diags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								secretKeysecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = blindfoldSecretInfoObj
+							} else {
+								secretKeysecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = types.ObjectNull(CloudCredentialsCloudAwsSecretKeySecretKeySecretInfoOneofBlindfoldSecretInfoModelAttributeMap)
+							}
+						}
+
 						// resource specToModelNested PointerOfOneOfField --> ClearSecretInfo
 						// <no value>
 						// false
@@ -3255,50 +2853,6 @@ func (r *ResourceF5XCCloudCredentials) Read(ctx context.Context, request resourc
 								secretKeysecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = clearSecretInfoObj
 							} else {
 								secretKeysecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(CloudCredentialsCloudAwsSecretKeySecretKeySecretInfoOneofClearSecretInfoModelAttributeMap)
-							}
-						}
-
-						// resource specToModelNested PointerOfOneOfField --> BlindfoldSecretInfo
-						// <no value>
-						// false
-						{
-							blindfoldSecretInfoOptions, isBlindfoldSecretInfo := secretKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_BlindfoldSecretInfo)
-							blindfoldSecretInfoAttributeMap := make(map[string]attr.Value)
-
-							if isBlindfoldSecretInfo && blindfoldSecretInfoOptions != nil {
-
-								// resource specToModelNested RequiredStringField --> Location
-								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation() != "" {
-									blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation())
-								} else {
-									// Empty string, set to null
-									blindfoldSecretInfoAttributeMap["location"] = types.StringNull()
-								}
-
-								// resource specToModelNested StringField --> DecryptionProvider
-								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider() != "" {
-									blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider())
-								} else {
-									// Empty string, set to null
-									blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringNull()
-								}
-
-								// resource specToModelNested StringField --> StoreProvider
-								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider() != "" {
-									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider())
-								} else {
-									// Empty string, set to null
-									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringNull()
-								}
-
-								blindfoldSecretInfoObj, diags := types.ObjectValue(CloudCredentialsCloudAwsSecretKeySecretKeySecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								secretKeysecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = blindfoldSecretInfoObj
-							} else {
-								secretKeysecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = types.ObjectNull(CloudCredentialsCloudAwsSecretKeySecretKeySecretInfoOneofBlindfoldSecretInfoModelAttributeMap)
 							}
 						}
 
@@ -3359,6 +2913,452 @@ func (r *ResourceF5XCCloudCredentials) Read(ctx context.Context, request resourc
 				cloudChoiceChoicesModel.AwsSecretKey = awsSecretKeyObj
 			} else {
 				cloudChoiceChoicesModel.AwsSecretKey = types.ObjectNull(CloudCredentialsCloudAwsSecretKeyModelAttributeMap)
+			}
+		}
+
+		// resource specToModelNested PointerOfOneOfField --> AwsAssumeRole
+		// <no value>
+		// false
+		{
+			awsAssumeRoleOptions, isAwsAssumeRole := cloudChoiceChoices.(*ves_io_schema_cloud_credentials.GlobalSpecType_AwsAssumeRole)
+			awsAssumeRoleAttributeMap := make(map[string]attr.Value)
+
+			if isAwsAssumeRole && awsAssumeRoleOptions != nil {
+
+				// resource specToModelNested RequiredStringField --> RoleArn
+				if awsAssumeRoleOptions.AwsAssumeRole.GetRoleArn() != "" {
+					awsAssumeRoleAttributeMap["role_arn"] = types.StringValue(awsAssumeRoleOptions.AwsAssumeRole.GetRoleArn())
+				} else {
+					// Empty string, set to null
+					awsAssumeRoleAttributeMap["role_arn"] = types.StringNull()
+				}
+
+				// resource specToModelNested UintField --> DurationSeconds
+				awsAssumeRoleAttributeMap["duration_seconds"] = types.Int64Value(int64(awsAssumeRoleOptions.AwsAssumeRole.GetDurationSeconds()))
+
+				// resource specToModelNested RequiredStringField --> SessionName
+				if awsAssumeRoleOptions.AwsAssumeRole.GetSessionName() != "" {
+					awsAssumeRoleAttributeMap["session_name"] = types.StringValue(awsAssumeRoleOptions.AwsAssumeRole.GetSessionName())
+				} else {
+					// Empty string, set to null
+					awsAssumeRoleAttributeMap["session_name"] = types.StringNull()
+				}
+
+				// resource specToModelNested MapOfStringField --> SessionTags
+				if awsAssumeRoleOptions.AwsAssumeRole.GetSessionTags() != nil {
+					// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
+					sessionTagsMap, sessionTagsDiags := utils.StringMapToTerraformMap(awsAssumeRoleOptions.AwsAssumeRole.GetSessionTags())
+					response.Diagnostics.Append(sessionTagsDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					// Assign the typed map to the model
+					awsAssumeRoleAttributeMap["session_tags"] = sessionTagsMap
+				} else {
+					// Ensure the state reflects a Null map with the correct element type to avoid DynamicPseudoType errors
+					awsAssumeRoleAttributeMap["session_tags"] = types.MapNull(types.StringType)
+				}
+
+				awsAssumeRoleObj, diags := types.ObjectValue(CloudCredentialsCloudAwsAssumeRoleModelAttributeMap, awsAssumeRoleAttributeMap)
+				response.Diagnostics.Append(diags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				cloudChoiceChoicesModel.AwsAssumeRole = awsAssumeRoleObj
+			} else {
+				cloudChoiceChoicesModel.AwsAssumeRole = types.ObjectNull(CloudCredentialsCloudAwsAssumeRoleModelAttributeMap)
+			}
+		}
+
+		// resource specToModelNested PointerOfOneOfField --> AzurePfxCertificate
+		// <no value>
+		// false
+		{
+			azurePfxCertificateOptions, isAzurePfxCertificate := cloudChoiceChoices.(*ves_io_schema_cloud_credentials.GlobalSpecType_AzurePfxCertificate)
+			azurePfxCertificateAttributeMap := make(map[string]attr.Value)
+
+			if isAzurePfxCertificate && azurePfxCertificateOptions != nil {
+
+				// resource specToModelNested RequiredStringField --> ClientId
+				if azurePfxCertificateOptions.AzurePfxCertificate.GetClientId() != "" {
+					azurePfxCertificateAttributeMap["client_id"] = types.StringValue(azurePfxCertificateOptions.AzurePfxCertificate.GetClientId())
+				} else {
+					// Empty string, set to null
+					azurePfxCertificateAttributeMap["client_id"] = types.StringNull()
+				}
+
+				// resource specToModelNested RequiredStringField --> SubscriptionId
+				if azurePfxCertificateOptions.AzurePfxCertificate.GetSubscriptionId() != "" {
+					azurePfxCertificateAttributeMap["subscription_id"] = types.StringValue(azurePfxCertificateOptions.AzurePfxCertificate.GetSubscriptionId())
+				} else {
+					// Empty string, set to null
+					azurePfxCertificateAttributeMap["subscription_id"] = types.StringNull()
+				}
+
+				// resource specToModelNested RequiredStringField --> TenantId
+				if azurePfxCertificateOptions.AzurePfxCertificate.GetTenantId() != "" {
+					azurePfxCertificateAttributeMap["tenant_id"] = types.StringValue(azurePfxCertificateOptions.AzurePfxCertificate.GetTenantId())
+				} else {
+					// Empty string, set to null
+					azurePfxCertificateAttributeMap["tenant_id"] = types.StringNull()
+				}
+
+				// resource specToModelNested RequiredStringField --> CertificateUrl
+				if azurePfxCertificateOptions.AzurePfxCertificate.GetCertificateUrl() != "" {
+					azurePfxCertificateAttributeMap["certificate_url"] = types.StringValue(azurePfxCertificateOptions.AzurePfxCertificate.GetCertificateUrl())
+				} else {
+					// Empty string, set to null
+					azurePfxCertificateAttributeMap["certificate_url"] = types.StringNull()
+				}
+
+				// resource specToModelNested RequiredPointerField --> Password
+				if azurePfxCertificateOptions.AzurePfxCertificate.GetPassword() != nil {
+					// Create the nested Go struct
+					cloudCredentialsSecretTypeModel := &CloudCredentialsSecretType{}
+					passwordElement := azurePfxCertificateOptions.AzurePfxCertificate.GetPassword()
+
+					// Recursively populate the nested struct
+
+					// resource specToModelNested RequiredOneOfField --> SecretInfoOneof
+					// <no value>
+					if passwordElement.GetSecretInfoOneof() != nil {
+						// Create a temporary attribute map for the choices within this OneOf
+						passwordsecretInfoChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+						// Define a variable for the spec choices to be passed down to nested templates
+						passwordsecretInfoChoiceChoices := passwordElement.GetSecretInfoOneof()
+
+						// Process nested choices, populating the temporary attribute map
+
+						// resource specToModelNested PointerOfOneOfField --> ClearSecretInfo
+						// <no value>
+						// false
+						{
+							clearSecretInfoOptions, isClearSecretInfo := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_ClearSecretInfo)
+							clearSecretInfoAttributeMap := make(map[string]attr.Value)
+
+							if isClearSecretInfo && clearSecretInfoOptions != nil {
+
+								// resource specToModelNested StringField --> Provider
+								if clearSecretInfoOptions.ClearSecretInfo.GetProvider() != "" {
+									clearSecretInfoAttributeMap["provider"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetProvider())
+								} else {
+									// Empty string, set to null
+									clearSecretInfoAttributeMap["provider"] = types.StringNull()
+								}
+
+								// resource specToModelNested RequiredStringField --> Url
+								if clearSecretInfoOptions.ClearSecretInfo.GetUrl() != "" {
+									clearSecretInfoAttributeMap["url"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetUrl())
+								} else {
+									// Empty string, set to null
+									clearSecretInfoAttributeMap["url"] = types.StringNull()
+								}
+
+								clearSecretInfoObj, diags := types.ObjectValue(CloudCredentialsCloudAzurePfxCertificatePasswordSecretInfoOneofClearSecretInfoModelAttributeMap, clearSecretInfoAttributeMap)
+								response.Diagnostics.Append(diags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								passwordsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = clearSecretInfoObj
+							} else {
+								passwordsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(CloudCredentialsCloudAzurePfxCertificatePasswordSecretInfoOneofClearSecretInfoModelAttributeMap)
+							}
+						}
+
+						// resource specToModelNested PointerOfOneOfField --> BlindfoldSecretInfo
+						// <no value>
+						// false
+						{
+							blindfoldSecretInfoOptions, isBlindfoldSecretInfo := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_BlindfoldSecretInfo)
+							blindfoldSecretInfoAttributeMap := make(map[string]attr.Value)
+
+							if isBlindfoldSecretInfo && blindfoldSecretInfoOptions != nil {
+
+								// resource specToModelNested StringField --> DecryptionProvider
+								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider() != "" {
+									blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider())
+								} else {
+									// Empty string, set to null
+									blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringNull()
+								}
+
+								// resource specToModelNested StringField --> StoreProvider
+								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider() != "" {
+									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider())
+								} else {
+									// Empty string, set to null
+									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringNull()
+								}
+
+								// resource specToModelNested RequiredStringField --> Location
+								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation() != "" {
+									blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation())
+								} else {
+									// Empty string, set to null
+									blindfoldSecretInfoAttributeMap["location"] = types.StringNull()
+								}
+
+								blindfoldSecretInfoObj, diags := types.ObjectValue(CloudCredentialsCloudAzurePfxCertificatePasswordSecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
+								response.Diagnostics.Append(diags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								passwordsecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = blindfoldSecretInfoObj
+							} else {
+								passwordsecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = types.ObjectNull(CloudCredentialsCloudAzurePfxCertificatePasswordSecretInfoOneofBlindfoldSecretInfoModelAttributeMap)
+							}
+						}
+
+						// --- End of Choices ---
+
+						// Create the final ObjectValue for this OneOf field
+						finalObj, passwordsecretInfoChoiceChoicesObjDiags := types.ObjectValue(
+							CloudCredentialsCloudAzurePfxCertificatePasswordSecretInfoOneofModelAttributeMap, // The attribute schema for the OneOf choices
+							passwordsecretInfoChoiceChoicesAttributeMap,
+						)
+						response.Diagnostics.Append(passwordsecretInfoChoiceChoicesObjDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						// Assign the final object to the correct place (either the root model or a parent's attribute map)
+						cloudCredentialsSecretTypeModel.SecretInfoChoice = finalObj
+					} else {
+						// The OneOf field is nil in the source spec, so set the Terraform object to null.
+						// State Healing: The API redacted the OneOf secret field (returned nil). Restore the entire
+						// secret_info_choice object from prior Terraform state so that the model reflects what the
+						// user originally configured and Terraform does not detect a false drift.
+						{
+							savedSecretInfoChoicePath := path.Root("cloud_choice").AtName("azure_pfx_certificate").AtName("password").AtName("secret_info_choice")
+							var savedSecretInfoChoice types.Object
+							stateHealDiags := request.State.GetAttribute(ctx, savedSecretInfoChoicePath, &savedSecretInfoChoice)
+							if !stateHealDiags.HasError() && !savedSecretInfoChoice.IsNull() && !savedSecretInfoChoice.IsUnknown() {
+								cloudCredentialsSecretTypeModel.SecretInfoChoice = savedSecretInfoChoice
+							} else {
+								cloudCredentialsSecretTypeModel.SecretInfoChoice = types.ObjectNull(CloudCredentialsCloudAzurePfxCertificatePasswordSecretInfoOneofModelAttributeMap)
+							}
+						}
+					}
+
+					// This field needs to be converted to a types.ObjectValue before assignment.
+					cloudCredentialsSecretTypeModelObj, diags := types.ObjectValueFrom(ctx, CloudCredentialsCloudAzurePfxCertificatePasswordModelAttributeMap, cloudCredentialsSecretTypeModel)
+					response.Diagnostics.Append(diags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					azurePfxCertificateAttributeMap["password"] = cloudCredentialsSecretTypeModelObj
+
+				} else {
+					// The source field is nil (e.g. redacted by the API).
+					// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
+					// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
+					// here because the API may always return a non-nil struct (with REDACTED values) for this
+					// field, making this else-branch unreachable. The child OneOf handles the actual healing.
+					// The target is a types.Object, so we use types.ObjectNull.
+					azurePfxCertificateAttributeMap["password"] = types.ObjectNull(CloudCredentialsCloudAzurePfxCertificatePasswordModelAttributeMap)
+				}
+
+				azurePfxCertificateObj, diags := types.ObjectValue(CloudCredentialsCloudAzurePfxCertificateModelAttributeMap, azurePfxCertificateAttributeMap)
+				response.Diagnostics.Append(diags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				cloudChoiceChoicesModel.AzurePfxCertificate = azurePfxCertificateObj
+			} else {
+				cloudChoiceChoicesModel.AzurePfxCertificate = types.ObjectNull(CloudCredentialsCloudAzurePfxCertificateModelAttributeMap)
+			}
+		}
+
+		// resource specToModelNested PointerOfOneOfField --> AzureClientSecret
+		// <no value>
+		// false
+		{
+			azureClientSecretOptions, isAzureClientSecret := cloudChoiceChoices.(*ves_io_schema_cloud_credentials.GlobalSpecType_AzureClientSecret)
+			azureClientSecretAttributeMap := make(map[string]attr.Value)
+
+			if isAzureClientSecret && azureClientSecretOptions != nil {
+
+				// resource specToModelNested RequiredStringField --> ClientId
+				if azureClientSecretOptions.AzureClientSecret.GetClientId() != "" {
+					azureClientSecretAttributeMap["client_id"] = types.StringValue(azureClientSecretOptions.AzureClientSecret.GetClientId())
+				} else {
+					// Empty string, set to null
+					azureClientSecretAttributeMap["client_id"] = types.StringNull()
+				}
+
+				// resource specToModelNested RequiredStringField --> SubscriptionId
+				if azureClientSecretOptions.AzureClientSecret.GetSubscriptionId() != "" {
+					azureClientSecretAttributeMap["subscription_id"] = types.StringValue(azureClientSecretOptions.AzureClientSecret.GetSubscriptionId())
+				} else {
+					// Empty string, set to null
+					azureClientSecretAttributeMap["subscription_id"] = types.StringNull()
+				}
+
+				// resource specToModelNested RequiredStringField --> TenantId
+				if azureClientSecretOptions.AzureClientSecret.GetTenantId() != "" {
+					azureClientSecretAttributeMap["tenant_id"] = types.StringValue(azureClientSecretOptions.AzureClientSecret.GetTenantId())
+				} else {
+					// Empty string, set to null
+					azureClientSecretAttributeMap["tenant_id"] = types.StringNull()
+				}
+
+				// resource specToModelNested RequiredPointerField --> ClientSecret
+				if azureClientSecretOptions.AzureClientSecret.GetClientSecret() != nil {
+					// Create the nested Go struct
+					cloudCredentialsSecretTypeModel := &CloudCredentialsSecretType{}
+					clientSecretElement := azureClientSecretOptions.AzureClientSecret.GetClientSecret()
+
+					// Recursively populate the nested struct
+
+					// resource specToModelNested RequiredOneOfField --> SecretInfoOneof
+					// <no value>
+					if clientSecretElement.GetSecretInfoOneof() != nil {
+						// Create a temporary attribute map for the choices within this OneOf
+						clientSecretsecretInfoChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+						// Define a variable for the spec choices to be passed down to nested templates
+						clientSecretsecretInfoChoiceChoices := clientSecretElement.GetSecretInfoOneof()
+
+						// Process nested choices, populating the temporary attribute map
+
+						// resource specToModelNested PointerOfOneOfField --> ClearSecretInfo
+						// <no value>
+						// false
+						{
+							clearSecretInfoOptions, isClearSecretInfo := clientSecretsecretInfoChoiceChoices.(*ves_io_schema.SecretType_ClearSecretInfo)
+							clearSecretInfoAttributeMap := make(map[string]attr.Value)
+
+							if isClearSecretInfo && clearSecretInfoOptions != nil {
+
+								// resource specToModelNested StringField --> Provider
+								if clearSecretInfoOptions.ClearSecretInfo.GetProvider() != "" {
+									clearSecretInfoAttributeMap["provider"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetProvider())
+								} else {
+									// Empty string, set to null
+									clearSecretInfoAttributeMap["provider"] = types.StringNull()
+								}
+
+								// resource specToModelNested RequiredStringField --> Url
+								if clearSecretInfoOptions.ClearSecretInfo.GetUrl() != "" {
+									clearSecretInfoAttributeMap["url"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetUrl())
+								} else {
+									// Empty string, set to null
+									clearSecretInfoAttributeMap["url"] = types.StringNull()
+								}
+
+								clearSecretInfoObj, diags := types.ObjectValue(CloudCredentialsCloudAzureClientSecretClientSecretSecretInfoOneofClearSecretInfoModelAttributeMap, clearSecretInfoAttributeMap)
+								response.Diagnostics.Append(diags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								clientSecretsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = clearSecretInfoObj
+							} else {
+								clientSecretsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(CloudCredentialsCloudAzureClientSecretClientSecretSecretInfoOneofClearSecretInfoModelAttributeMap)
+							}
+						}
+
+						// resource specToModelNested PointerOfOneOfField --> BlindfoldSecretInfo
+						// <no value>
+						// false
+						{
+							blindfoldSecretInfoOptions, isBlindfoldSecretInfo := clientSecretsecretInfoChoiceChoices.(*ves_io_schema.SecretType_BlindfoldSecretInfo)
+							blindfoldSecretInfoAttributeMap := make(map[string]attr.Value)
+
+							if isBlindfoldSecretInfo && blindfoldSecretInfoOptions != nil {
+
+								// resource specToModelNested StringField --> DecryptionProvider
+								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider() != "" {
+									blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider())
+								} else {
+									// Empty string, set to null
+									blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringNull()
+								}
+
+								// resource specToModelNested StringField --> StoreProvider
+								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider() != "" {
+									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider())
+								} else {
+									// Empty string, set to null
+									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringNull()
+								}
+
+								// resource specToModelNested RequiredStringField --> Location
+								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation() != "" {
+									blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation())
+								} else {
+									// Empty string, set to null
+									blindfoldSecretInfoAttributeMap["location"] = types.StringNull()
+								}
+
+								blindfoldSecretInfoObj, diags := types.ObjectValue(CloudCredentialsCloudAzureClientSecretClientSecretSecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
+								response.Diagnostics.Append(diags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								clientSecretsecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = blindfoldSecretInfoObj
+							} else {
+								clientSecretsecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = types.ObjectNull(CloudCredentialsCloudAzureClientSecretClientSecretSecretInfoOneofBlindfoldSecretInfoModelAttributeMap)
+							}
+						}
+
+						// --- End of Choices ---
+
+						// Create the final ObjectValue for this OneOf field
+						finalObj, clientSecretsecretInfoChoiceChoicesObjDiags := types.ObjectValue(
+							CloudCredentialsCloudAzureClientSecretClientSecretSecretInfoOneofModelAttributeMap, // The attribute schema for the OneOf choices
+							clientSecretsecretInfoChoiceChoicesAttributeMap,
+						)
+						response.Diagnostics.Append(clientSecretsecretInfoChoiceChoicesObjDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						// Assign the final object to the correct place (either the root model or a parent's attribute map)
+						cloudCredentialsSecretTypeModel.SecretInfoChoice = finalObj
+					} else {
+						// The OneOf field is nil in the source spec, so set the Terraform object to null.
+						// State Healing: The API redacted the OneOf secret field (returned nil). Restore the entire
+						// secret_info_choice object from prior Terraform state so that the model reflects what the
+						// user originally configured and Terraform does not detect a false drift.
+						{
+							savedSecretInfoChoicePath := path.Root("cloud_choice").AtName("azure_client_secret").AtName("client_secret").AtName("secret_info_choice")
+							var savedSecretInfoChoice types.Object
+							stateHealDiags := request.State.GetAttribute(ctx, savedSecretInfoChoicePath, &savedSecretInfoChoice)
+							if !stateHealDiags.HasError() && !savedSecretInfoChoice.IsNull() && !savedSecretInfoChoice.IsUnknown() {
+								cloudCredentialsSecretTypeModel.SecretInfoChoice = savedSecretInfoChoice
+							} else {
+								cloudCredentialsSecretTypeModel.SecretInfoChoice = types.ObjectNull(CloudCredentialsCloudAzureClientSecretClientSecretSecretInfoOneofModelAttributeMap)
+							}
+						}
+					}
+
+					// This field needs to be converted to a types.ObjectValue before assignment.
+					cloudCredentialsSecretTypeModelObj, diags := types.ObjectValueFrom(ctx, CloudCredentialsCloudAzureClientSecretClientSecretModelAttributeMap, cloudCredentialsSecretTypeModel)
+					response.Diagnostics.Append(diags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					azureClientSecretAttributeMap["client_secret"] = cloudCredentialsSecretTypeModelObj
+
+				} else {
+					// The source field is nil (e.g. redacted by the API).
+					// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
+					// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
+					// here because the API may always return a non-nil struct (with REDACTED values) for this
+					// field, making this else-branch unreachable. The child OneOf handles the actual healing.
+					// The target is a types.Object, so we use types.ObjectNull.
+					azureClientSecretAttributeMap["client_secret"] = types.ObjectNull(CloudCredentialsCloudAzureClientSecretClientSecretModelAttributeMap)
+				}
+
+				azureClientSecretObj, diags := types.ObjectValue(CloudCredentialsCloudAzureClientSecretModelAttributeMap, azureClientSecretAttributeMap)
+				response.Diagnostics.Append(diags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				cloudChoiceChoicesModel.AzureClientSecret = azureClientSecretObj
+			} else {
+				cloudChoiceChoicesModel.AzureClientSecret = types.ObjectNull(CloudCredentialsCloudAzureClientSecretModelAttributeMap)
 			}
 		}
 
@@ -3464,6 +3464,185 @@ func (r *ResourceF5XCCloudCredentials) Update(ctx context.Context, request resou
 			return
 		}
 
+		// resource modelToSpecNested PointerOfOneOfField --> GcpCredFile
+		if !cloudChoiceModel.GcpCredFile.IsNull() && !cloudChoiceModel.GcpCredFile.IsUnknown() {
+			var cloudCredentialsGlobalSpecTypeGcpCredFileModel CloudCredentialsGlobalSpecTypeGcpCredFile
+			response.Diagnostics.Append(cloudChoiceModel.GcpCredFile.As(ctx, &cloudCredentialsGlobalSpecTypeGcpCredFileModel, basetypes.ObjectAsOptions{})...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			gcpCredFileOneOfSpec := &ves_io_schema_cloud_credentials.ReplaceSpecType_GcpCredFile{}
+			gcpCredFileOneOfSpec.GcpCredFile = &ves_io_schema_cloud_credentials.GCPCredFileType{}
+			spec.Cloud = gcpCredFileOneOfSpec
+
+			// resource modelToSpecNested RequiredPointerField --> CredentialFile
+			if !cloudCredentialsGlobalSpecTypeGcpCredFileModel.CredentialFile.IsNull() && !cloudCredentialsGlobalSpecTypeGcpCredFileModel.CredentialFile.IsUnknown() {
+				var credentialFileModel CloudCredentialsSecretType
+				response.Diagnostics.Append(cloudCredentialsGlobalSpecTypeGcpCredFileModel.CredentialFile.As(ctx, &credentialFileModel, basetypes.ObjectAsOptions{})...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				credentialFileSpec := &ves_io_schema.SecretType{}
+				gcpCredFileOneOfSpec.GcpCredFile.CredentialFile = credentialFileSpec
+
+				// resource modelToSpecNested RequiredOneOfField --> SecretInfoOneof
+				if !credentialFileModel.SecretInfoChoice.IsNull() && !credentialFileModel.SecretInfoChoice.IsUnknown() {
+					credentialFileSecretInfoChoiceModel := CloudCredentialsSecretTypeSecretInfoChoice{}
+					response.Diagnostics.Append(credentialFileModel.SecretInfoChoice.As(ctx, &credentialFileSecretInfoChoiceModel, basetypes.ObjectAsOptions{})...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					// resource modelToSpecNested PointerOfOneOfField --> BlindfoldSecretInfo
+					if !credentialFileSecretInfoChoiceModel.BlindfoldSecretInfo.IsNull() && !credentialFileSecretInfoChoiceModel.BlindfoldSecretInfo.IsUnknown() {
+						var cloudCredentialsSecretTypeBlindfoldSecretInfoModel CloudCredentialsSecretTypeBlindfoldSecretInfo
+						response.Diagnostics.Append(credentialFileSecretInfoChoiceModel.BlindfoldSecretInfo.As(ctx, &cloudCredentialsSecretTypeBlindfoldSecretInfoModel, basetypes.ObjectAsOptions{})...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						blindfoldSecretInfoOneOfSpec := &ves_io_schema.SecretType_BlindfoldSecretInfo{}
+						blindfoldSecretInfoOneOfSpec.BlindfoldSecretInfo = &ves_io_schema.BlindfoldSecretInfoType{}
+						credentialFileSpec.SecretInfoOneof = blindfoldSecretInfoOneOfSpec
+
+						// resource modelToSpecNested StringField --> DecryptionProvider
+						if !cloudCredentialsSecretTypeBlindfoldSecretInfoModel.DecryptionProvider.IsNull() && !cloudCredentialsSecretTypeBlindfoldSecretInfoModel.DecryptionProvider.IsUnknown() {
+							blindfoldSecretInfoOneOfSpec.BlindfoldSecretInfo.DecryptionProvider = string(cloudCredentialsSecretTypeBlindfoldSecretInfoModel.DecryptionProvider.ValueString())
+						}
+
+						// resource modelToSpecNested StringField --> StoreProvider
+						if !cloudCredentialsSecretTypeBlindfoldSecretInfoModel.StoreProvider.IsNull() && !cloudCredentialsSecretTypeBlindfoldSecretInfoModel.StoreProvider.IsUnknown() {
+							blindfoldSecretInfoOneOfSpec.BlindfoldSecretInfo.StoreProvider = string(cloudCredentialsSecretTypeBlindfoldSecretInfoModel.StoreProvider.ValueString())
+						}
+
+						// resource modelToSpecNested RequiredStringField --> Location
+						if !cloudCredentialsSecretTypeBlindfoldSecretInfoModel.Location.IsNull() && !cloudCredentialsSecretTypeBlindfoldSecretInfoModel.Location.IsUnknown() {
+							blindfoldSecretInfoOneOfSpec.BlindfoldSecretInfo.Location = string(cloudCredentialsSecretTypeBlindfoldSecretInfoModel.Location.ValueString())
+						}
+
+					}
+
+					// resource modelToSpecNested PointerOfOneOfField --> ClearSecretInfo
+					if !credentialFileSecretInfoChoiceModel.ClearSecretInfo.IsNull() && !credentialFileSecretInfoChoiceModel.ClearSecretInfo.IsUnknown() {
+						var cloudCredentialsSecretTypeClearSecretInfoModel CloudCredentialsSecretTypeClearSecretInfo
+						response.Diagnostics.Append(credentialFileSecretInfoChoiceModel.ClearSecretInfo.As(ctx, &cloudCredentialsSecretTypeClearSecretInfoModel, basetypes.ObjectAsOptions{})...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						clearSecretInfoOneOfSpec := &ves_io_schema.SecretType_ClearSecretInfo{}
+						clearSecretInfoOneOfSpec.ClearSecretInfo = &ves_io_schema.ClearSecretInfoType{}
+						credentialFileSpec.SecretInfoOneof = clearSecretInfoOneOfSpec
+
+						// resource modelToSpecNested StringField --> Provider
+						if !cloudCredentialsSecretTypeClearSecretInfoModel.Provider.IsNull() && !cloudCredentialsSecretTypeClearSecretInfoModel.Provider.IsUnknown() {
+							clearSecretInfoOneOfSpec.ClearSecretInfo.Provider = string(cloudCredentialsSecretTypeClearSecretInfoModel.Provider.ValueString())
+						}
+
+						// resource modelToSpecNested RequiredStringField --> Url
+						if !cloudCredentialsSecretTypeClearSecretInfoModel.Url.IsNull() && !cloudCredentialsSecretTypeClearSecretInfoModel.Url.IsUnknown() {
+							clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(cloudCredentialsSecretTypeClearSecretInfoModel.Url.ValueString())
+						}
+
+					}
+
+				}
+
+			}
+
+		}
+
+		// resource modelToSpecNested PointerOfOneOfField --> AwsSecretKey
+		if !cloudChoiceModel.AwsSecretKey.IsNull() && !cloudChoiceModel.AwsSecretKey.IsUnknown() {
+			var cloudCredentialsGlobalSpecTypeAwsSecretKeyModel CloudCredentialsGlobalSpecTypeAwsSecretKey
+			response.Diagnostics.Append(cloudChoiceModel.AwsSecretKey.As(ctx, &cloudCredentialsGlobalSpecTypeAwsSecretKeyModel, basetypes.ObjectAsOptions{})...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			awsSecretKeyOneOfSpec := &ves_io_schema_cloud_credentials.ReplaceSpecType_AwsSecretKey{}
+			awsSecretKeyOneOfSpec.AwsSecretKey = &ves_io_schema_cloud_credentials.AWSSecretType{}
+			spec.Cloud = awsSecretKeyOneOfSpec
+
+			// resource modelToSpecNested RequiredStringField --> AccessKey
+			if !cloudCredentialsGlobalSpecTypeAwsSecretKeyModel.AccessKey.IsNull() && !cloudCredentialsGlobalSpecTypeAwsSecretKeyModel.AccessKey.IsUnknown() {
+				awsSecretKeyOneOfSpec.AwsSecretKey.AccessKey = string(cloudCredentialsGlobalSpecTypeAwsSecretKeyModel.AccessKey.ValueString())
+			}
+
+			// resource modelToSpecNested RequiredPointerField --> SecretKey
+			if !cloudCredentialsGlobalSpecTypeAwsSecretKeyModel.SecretKey.IsNull() && !cloudCredentialsGlobalSpecTypeAwsSecretKeyModel.SecretKey.IsUnknown() {
+				var secretKeyModel CloudCredentialsSecretType
+				response.Diagnostics.Append(cloudCredentialsGlobalSpecTypeAwsSecretKeyModel.SecretKey.As(ctx, &secretKeyModel, basetypes.ObjectAsOptions{})...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				secretKeySpec := &ves_io_schema.SecretType{}
+				awsSecretKeyOneOfSpec.AwsSecretKey.SecretKey = secretKeySpec
+
+				// resource modelToSpecNested RequiredOneOfField --> SecretInfoOneof
+				if !secretKeyModel.SecretInfoChoice.IsNull() && !secretKeyModel.SecretInfoChoice.IsUnknown() {
+					secretKeySecretInfoChoiceModel := CloudCredentialsSecretTypeSecretInfoChoice{}
+					response.Diagnostics.Append(secretKeyModel.SecretInfoChoice.As(ctx, &secretKeySecretInfoChoiceModel, basetypes.ObjectAsOptions{})...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					// resource modelToSpecNested PointerOfOneOfField --> BlindfoldSecretInfo
+					if !secretKeySecretInfoChoiceModel.BlindfoldSecretInfo.IsNull() && !secretKeySecretInfoChoiceModel.BlindfoldSecretInfo.IsUnknown() {
+						var cloudCredentialsSecretTypeBlindfoldSecretInfoModel CloudCredentialsSecretTypeBlindfoldSecretInfo
+						response.Diagnostics.Append(secretKeySecretInfoChoiceModel.BlindfoldSecretInfo.As(ctx, &cloudCredentialsSecretTypeBlindfoldSecretInfoModel, basetypes.ObjectAsOptions{})...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						blindfoldSecretInfoOneOfSpec := &ves_io_schema.SecretType_BlindfoldSecretInfo{}
+						blindfoldSecretInfoOneOfSpec.BlindfoldSecretInfo = &ves_io_schema.BlindfoldSecretInfoType{}
+						secretKeySpec.SecretInfoOneof = blindfoldSecretInfoOneOfSpec
+
+						// resource modelToSpecNested StringField --> DecryptionProvider
+						if !cloudCredentialsSecretTypeBlindfoldSecretInfoModel.DecryptionProvider.IsNull() && !cloudCredentialsSecretTypeBlindfoldSecretInfoModel.DecryptionProvider.IsUnknown() {
+							blindfoldSecretInfoOneOfSpec.BlindfoldSecretInfo.DecryptionProvider = string(cloudCredentialsSecretTypeBlindfoldSecretInfoModel.DecryptionProvider.ValueString())
+						}
+
+						// resource modelToSpecNested StringField --> StoreProvider
+						if !cloudCredentialsSecretTypeBlindfoldSecretInfoModel.StoreProvider.IsNull() && !cloudCredentialsSecretTypeBlindfoldSecretInfoModel.StoreProvider.IsUnknown() {
+							blindfoldSecretInfoOneOfSpec.BlindfoldSecretInfo.StoreProvider = string(cloudCredentialsSecretTypeBlindfoldSecretInfoModel.StoreProvider.ValueString())
+						}
+
+						// resource modelToSpecNested RequiredStringField --> Location
+						if !cloudCredentialsSecretTypeBlindfoldSecretInfoModel.Location.IsNull() && !cloudCredentialsSecretTypeBlindfoldSecretInfoModel.Location.IsUnknown() {
+							blindfoldSecretInfoOneOfSpec.BlindfoldSecretInfo.Location = string(cloudCredentialsSecretTypeBlindfoldSecretInfoModel.Location.ValueString())
+						}
+
+					}
+
+					// resource modelToSpecNested PointerOfOneOfField --> ClearSecretInfo
+					if !secretKeySecretInfoChoiceModel.ClearSecretInfo.IsNull() && !secretKeySecretInfoChoiceModel.ClearSecretInfo.IsUnknown() {
+						var cloudCredentialsSecretTypeClearSecretInfoModel CloudCredentialsSecretTypeClearSecretInfo
+						response.Diagnostics.Append(secretKeySecretInfoChoiceModel.ClearSecretInfo.As(ctx, &cloudCredentialsSecretTypeClearSecretInfoModel, basetypes.ObjectAsOptions{})...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						clearSecretInfoOneOfSpec := &ves_io_schema.SecretType_ClearSecretInfo{}
+						clearSecretInfoOneOfSpec.ClearSecretInfo = &ves_io_schema.ClearSecretInfoType{}
+						secretKeySpec.SecretInfoOneof = clearSecretInfoOneOfSpec
+
+						// resource modelToSpecNested StringField --> Provider
+						if !cloudCredentialsSecretTypeClearSecretInfoModel.Provider.IsNull() && !cloudCredentialsSecretTypeClearSecretInfoModel.Provider.IsUnknown() {
+							clearSecretInfoOneOfSpec.ClearSecretInfo.Provider = string(cloudCredentialsSecretTypeClearSecretInfoModel.Provider.ValueString())
+						}
+
+						// resource modelToSpecNested RequiredStringField --> Url
+						if !cloudCredentialsSecretTypeClearSecretInfoModel.Url.IsNull() && !cloudCredentialsSecretTypeClearSecretInfoModel.Url.IsUnknown() {
+							clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(cloudCredentialsSecretTypeClearSecretInfoModel.Url.ValueString())
+						}
+
+					}
+
+				}
+
+			}
+
+		}
+
 		// resource modelToSpecNested PointerOfOneOfField --> AwsAssumeRole
 		if !cloudChoiceModel.AwsAssumeRole.IsNull() && !cloudChoiceModel.AwsAssumeRole.IsUnknown() {
 			var cloudCredentialsGlobalSpecTypeAwsAssumeRoleModel CloudCredentialsGlobalSpecTypeAwsAssumeRole
@@ -3556,6 +3735,29 @@ func (r *ResourceF5XCCloudCredentials) Update(ctx context.Context, request resou
 						return
 					}
 
+					// resource modelToSpecNested PointerOfOneOfField --> ClearSecretInfo
+					if !passwordSecretInfoChoiceModel.ClearSecretInfo.IsNull() && !passwordSecretInfoChoiceModel.ClearSecretInfo.IsUnknown() {
+						var cloudCredentialsSecretTypeClearSecretInfoModel CloudCredentialsSecretTypeClearSecretInfo
+						response.Diagnostics.Append(passwordSecretInfoChoiceModel.ClearSecretInfo.As(ctx, &cloudCredentialsSecretTypeClearSecretInfoModel, basetypes.ObjectAsOptions{})...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						clearSecretInfoOneOfSpec := &ves_io_schema.SecretType_ClearSecretInfo{}
+						clearSecretInfoOneOfSpec.ClearSecretInfo = &ves_io_schema.ClearSecretInfoType{}
+						passwordSpec.SecretInfoOneof = clearSecretInfoOneOfSpec
+
+						// resource modelToSpecNested StringField --> Provider
+						if !cloudCredentialsSecretTypeClearSecretInfoModel.Provider.IsNull() && !cloudCredentialsSecretTypeClearSecretInfoModel.Provider.IsUnknown() {
+							clearSecretInfoOneOfSpec.ClearSecretInfo.Provider = string(cloudCredentialsSecretTypeClearSecretInfoModel.Provider.ValueString())
+						}
+
+						// resource modelToSpecNested RequiredStringField --> Url
+						if !cloudCredentialsSecretTypeClearSecretInfoModel.Url.IsNull() && !cloudCredentialsSecretTypeClearSecretInfoModel.Url.IsUnknown() {
+							clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(cloudCredentialsSecretTypeClearSecretInfoModel.Url.ValueString())
+						}
+
+					}
+
 					// resource modelToSpecNested PointerOfOneOfField --> BlindfoldSecretInfo
 					if !passwordSecretInfoChoiceModel.BlindfoldSecretInfo.IsNull() && !passwordSecretInfoChoiceModel.BlindfoldSecretInfo.IsUnknown() {
 						var cloudCredentialsSecretTypeBlindfoldSecretInfoModel CloudCredentialsSecretTypeBlindfoldSecretInfo
@@ -3584,29 +3786,6 @@ func (r *ResourceF5XCCloudCredentials) Update(ctx context.Context, request resou
 
 					}
 
-					// resource modelToSpecNested PointerOfOneOfField --> ClearSecretInfo
-					if !passwordSecretInfoChoiceModel.ClearSecretInfo.IsNull() && !passwordSecretInfoChoiceModel.ClearSecretInfo.IsUnknown() {
-						var cloudCredentialsSecretTypeClearSecretInfoModel CloudCredentialsSecretTypeClearSecretInfo
-						response.Diagnostics.Append(passwordSecretInfoChoiceModel.ClearSecretInfo.As(ctx, &cloudCredentialsSecretTypeClearSecretInfoModel, basetypes.ObjectAsOptions{})...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						clearSecretInfoOneOfSpec := &ves_io_schema.SecretType_ClearSecretInfo{}
-						clearSecretInfoOneOfSpec.ClearSecretInfo = &ves_io_schema.ClearSecretInfoType{}
-						passwordSpec.SecretInfoOneof = clearSecretInfoOneOfSpec
-
-						// resource modelToSpecNested StringField --> Provider
-						if !cloudCredentialsSecretTypeClearSecretInfoModel.Provider.IsNull() && !cloudCredentialsSecretTypeClearSecretInfoModel.Provider.IsUnknown() {
-							clearSecretInfoOneOfSpec.ClearSecretInfo.Provider = string(cloudCredentialsSecretTypeClearSecretInfoModel.Provider.ValueString())
-						}
-
-						// resource modelToSpecNested RequiredStringField --> Url
-						if !cloudCredentialsSecretTypeClearSecretInfoModel.Url.IsNull() && !cloudCredentialsSecretTypeClearSecretInfoModel.Url.IsUnknown() {
-							clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(cloudCredentialsSecretTypeClearSecretInfoModel.Url.ValueString())
-						}
-
-					}
-
 				}
 
 			}
@@ -3623,6 +3802,21 @@ func (r *ResourceF5XCCloudCredentials) Update(ctx context.Context, request resou
 			azureClientSecretOneOfSpec := &ves_io_schema_cloud_credentials.ReplaceSpecType_AzureClientSecret{}
 			azureClientSecretOneOfSpec.AzureClientSecret = &ves_io_schema_cloud_credentials.AzureSecretType{}
 			spec.Cloud = azureClientSecretOneOfSpec
+
+			// resource modelToSpecNested RequiredStringField --> ClientId
+			if !cloudCredentialsGlobalSpecTypeAzureClientSecretModel.ClientId.IsNull() && !cloudCredentialsGlobalSpecTypeAzureClientSecretModel.ClientId.IsUnknown() {
+				azureClientSecretOneOfSpec.AzureClientSecret.ClientId = string(cloudCredentialsGlobalSpecTypeAzureClientSecretModel.ClientId.ValueString())
+			}
+
+			// resource modelToSpecNested RequiredStringField --> SubscriptionId
+			if !cloudCredentialsGlobalSpecTypeAzureClientSecretModel.SubscriptionId.IsNull() && !cloudCredentialsGlobalSpecTypeAzureClientSecretModel.SubscriptionId.IsUnknown() {
+				azureClientSecretOneOfSpec.AzureClientSecret.SubscriptionId = string(cloudCredentialsGlobalSpecTypeAzureClientSecretModel.SubscriptionId.ValueString())
+			}
+
+			// resource modelToSpecNested RequiredStringField --> TenantId
+			if !cloudCredentialsGlobalSpecTypeAzureClientSecretModel.TenantId.IsNull() && !cloudCredentialsGlobalSpecTypeAzureClientSecretModel.TenantId.IsUnknown() {
+				azureClientSecretOneOfSpec.AzureClientSecret.TenantId = string(cloudCredentialsGlobalSpecTypeAzureClientSecretModel.TenantId.ValueString())
+			}
 
 			// resource modelToSpecNested RequiredPointerField --> ClientSecret
 			if !cloudCredentialsGlobalSpecTypeAzureClientSecretModel.ClientSecret.IsNull() && !cloudCredentialsGlobalSpecTypeAzureClientSecretModel.ClientSecret.IsUnknown() {
@@ -3641,6 +3835,29 @@ func (r *ResourceF5XCCloudCredentials) Update(ctx context.Context, request resou
 					response.Diagnostics.Append(clientSecretModel.SecretInfoChoice.As(ctx, &clientSecretSecretInfoChoiceModel, basetypes.ObjectAsOptions{})...)
 					if response.Diagnostics.HasError() {
 						return
+					}
+
+					// resource modelToSpecNested PointerOfOneOfField --> ClearSecretInfo
+					if !clientSecretSecretInfoChoiceModel.ClearSecretInfo.IsNull() && !clientSecretSecretInfoChoiceModel.ClearSecretInfo.IsUnknown() {
+						var cloudCredentialsSecretTypeClearSecretInfoModel CloudCredentialsSecretTypeClearSecretInfo
+						response.Diagnostics.Append(clientSecretSecretInfoChoiceModel.ClearSecretInfo.As(ctx, &cloudCredentialsSecretTypeClearSecretInfoModel, basetypes.ObjectAsOptions{})...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						clearSecretInfoOneOfSpec := &ves_io_schema.SecretType_ClearSecretInfo{}
+						clearSecretInfoOneOfSpec.ClearSecretInfo = &ves_io_schema.ClearSecretInfoType{}
+						clientSecretSpec.SecretInfoOneof = clearSecretInfoOneOfSpec
+
+						// resource modelToSpecNested StringField --> Provider
+						if !cloudCredentialsSecretTypeClearSecretInfoModel.Provider.IsNull() && !cloudCredentialsSecretTypeClearSecretInfoModel.Provider.IsUnknown() {
+							clearSecretInfoOneOfSpec.ClearSecretInfo.Provider = string(cloudCredentialsSecretTypeClearSecretInfoModel.Provider.ValueString())
+						}
+
+						// resource modelToSpecNested RequiredStringField --> Url
+						if !cloudCredentialsSecretTypeClearSecretInfoModel.Url.IsNull() && !cloudCredentialsSecretTypeClearSecretInfoModel.Url.IsUnknown() {
+							clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(cloudCredentialsSecretTypeClearSecretInfoModel.Url.ValueString())
+						}
+
 					}
 
 					// resource modelToSpecNested PointerOfOneOfField --> BlindfoldSecretInfo
@@ -3667,223 +3884,6 @@ func (r *ResourceF5XCCloudCredentials) Update(ctx context.Context, request resou
 						// resource modelToSpecNested RequiredStringField --> Location
 						if !cloudCredentialsSecretTypeBlindfoldSecretInfoModel.Location.IsNull() && !cloudCredentialsSecretTypeBlindfoldSecretInfoModel.Location.IsUnknown() {
 							blindfoldSecretInfoOneOfSpec.BlindfoldSecretInfo.Location = string(cloudCredentialsSecretTypeBlindfoldSecretInfoModel.Location.ValueString())
-						}
-
-					}
-
-					// resource modelToSpecNested PointerOfOneOfField --> ClearSecretInfo
-					if !clientSecretSecretInfoChoiceModel.ClearSecretInfo.IsNull() && !clientSecretSecretInfoChoiceModel.ClearSecretInfo.IsUnknown() {
-						var cloudCredentialsSecretTypeClearSecretInfoModel CloudCredentialsSecretTypeClearSecretInfo
-						response.Diagnostics.Append(clientSecretSecretInfoChoiceModel.ClearSecretInfo.As(ctx, &cloudCredentialsSecretTypeClearSecretInfoModel, basetypes.ObjectAsOptions{})...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						clearSecretInfoOneOfSpec := &ves_io_schema.SecretType_ClearSecretInfo{}
-						clearSecretInfoOneOfSpec.ClearSecretInfo = &ves_io_schema.ClearSecretInfoType{}
-						clientSecretSpec.SecretInfoOneof = clearSecretInfoOneOfSpec
-
-						// resource modelToSpecNested StringField --> Provider
-						if !cloudCredentialsSecretTypeClearSecretInfoModel.Provider.IsNull() && !cloudCredentialsSecretTypeClearSecretInfoModel.Provider.IsUnknown() {
-							clearSecretInfoOneOfSpec.ClearSecretInfo.Provider = string(cloudCredentialsSecretTypeClearSecretInfoModel.Provider.ValueString())
-						}
-
-						// resource modelToSpecNested RequiredStringField --> Url
-						if !cloudCredentialsSecretTypeClearSecretInfoModel.Url.IsNull() && !cloudCredentialsSecretTypeClearSecretInfoModel.Url.IsUnknown() {
-							clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(cloudCredentialsSecretTypeClearSecretInfoModel.Url.ValueString())
-						}
-
-					}
-
-				}
-
-			}
-
-			// resource modelToSpecNested RequiredStringField --> ClientId
-			if !cloudCredentialsGlobalSpecTypeAzureClientSecretModel.ClientId.IsNull() && !cloudCredentialsGlobalSpecTypeAzureClientSecretModel.ClientId.IsUnknown() {
-				azureClientSecretOneOfSpec.AzureClientSecret.ClientId = string(cloudCredentialsGlobalSpecTypeAzureClientSecretModel.ClientId.ValueString())
-			}
-
-			// resource modelToSpecNested RequiredStringField --> SubscriptionId
-			if !cloudCredentialsGlobalSpecTypeAzureClientSecretModel.SubscriptionId.IsNull() && !cloudCredentialsGlobalSpecTypeAzureClientSecretModel.SubscriptionId.IsUnknown() {
-				azureClientSecretOneOfSpec.AzureClientSecret.SubscriptionId = string(cloudCredentialsGlobalSpecTypeAzureClientSecretModel.SubscriptionId.ValueString())
-			}
-
-			// resource modelToSpecNested RequiredStringField --> TenantId
-			if !cloudCredentialsGlobalSpecTypeAzureClientSecretModel.TenantId.IsNull() && !cloudCredentialsGlobalSpecTypeAzureClientSecretModel.TenantId.IsUnknown() {
-				azureClientSecretOneOfSpec.AzureClientSecret.TenantId = string(cloudCredentialsGlobalSpecTypeAzureClientSecretModel.TenantId.ValueString())
-			}
-
-		}
-
-		// resource modelToSpecNested PointerOfOneOfField --> GcpCredFile
-		if !cloudChoiceModel.GcpCredFile.IsNull() && !cloudChoiceModel.GcpCredFile.IsUnknown() {
-			var cloudCredentialsGlobalSpecTypeGcpCredFileModel CloudCredentialsGlobalSpecTypeGcpCredFile
-			response.Diagnostics.Append(cloudChoiceModel.GcpCredFile.As(ctx, &cloudCredentialsGlobalSpecTypeGcpCredFileModel, basetypes.ObjectAsOptions{})...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			gcpCredFileOneOfSpec := &ves_io_schema_cloud_credentials.ReplaceSpecType_GcpCredFile{}
-			gcpCredFileOneOfSpec.GcpCredFile = &ves_io_schema_cloud_credentials.GCPCredFileType{}
-			spec.Cloud = gcpCredFileOneOfSpec
-
-			// resource modelToSpecNested RequiredPointerField --> CredentialFile
-			if !cloudCredentialsGlobalSpecTypeGcpCredFileModel.CredentialFile.IsNull() && !cloudCredentialsGlobalSpecTypeGcpCredFileModel.CredentialFile.IsUnknown() {
-				var credentialFileModel CloudCredentialsSecretType
-				response.Diagnostics.Append(cloudCredentialsGlobalSpecTypeGcpCredFileModel.CredentialFile.As(ctx, &credentialFileModel, basetypes.ObjectAsOptions{})...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				credentialFileSpec := &ves_io_schema.SecretType{}
-				gcpCredFileOneOfSpec.GcpCredFile.CredentialFile = credentialFileSpec
-
-				// resource modelToSpecNested RequiredOneOfField --> SecretInfoOneof
-				if !credentialFileModel.SecretInfoChoice.IsNull() && !credentialFileModel.SecretInfoChoice.IsUnknown() {
-					credentialFileSecretInfoChoiceModel := CloudCredentialsSecretTypeSecretInfoChoice{}
-					response.Diagnostics.Append(credentialFileModel.SecretInfoChoice.As(ctx, &credentialFileSecretInfoChoiceModel, basetypes.ObjectAsOptions{})...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-
-					// resource modelToSpecNested PointerOfOneOfField --> BlindfoldSecretInfo
-					if !credentialFileSecretInfoChoiceModel.BlindfoldSecretInfo.IsNull() && !credentialFileSecretInfoChoiceModel.BlindfoldSecretInfo.IsUnknown() {
-						var cloudCredentialsSecretTypeBlindfoldSecretInfoModel CloudCredentialsSecretTypeBlindfoldSecretInfo
-						response.Diagnostics.Append(credentialFileSecretInfoChoiceModel.BlindfoldSecretInfo.As(ctx, &cloudCredentialsSecretTypeBlindfoldSecretInfoModel, basetypes.ObjectAsOptions{})...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						blindfoldSecretInfoOneOfSpec := &ves_io_schema.SecretType_BlindfoldSecretInfo{}
-						blindfoldSecretInfoOneOfSpec.BlindfoldSecretInfo = &ves_io_schema.BlindfoldSecretInfoType{}
-						credentialFileSpec.SecretInfoOneof = blindfoldSecretInfoOneOfSpec
-
-						// resource modelToSpecNested RequiredStringField --> Location
-						if !cloudCredentialsSecretTypeBlindfoldSecretInfoModel.Location.IsNull() && !cloudCredentialsSecretTypeBlindfoldSecretInfoModel.Location.IsUnknown() {
-							blindfoldSecretInfoOneOfSpec.BlindfoldSecretInfo.Location = string(cloudCredentialsSecretTypeBlindfoldSecretInfoModel.Location.ValueString())
-						}
-
-						// resource modelToSpecNested StringField --> DecryptionProvider
-						if !cloudCredentialsSecretTypeBlindfoldSecretInfoModel.DecryptionProvider.IsNull() && !cloudCredentialsSecretTypeBlindfoldSecretInfoModel.DecryptionProvider.IsUnknown() {
-							blindfoldSecretInfoOneOfSpec.BlindfoldSecretInfo.DecryptionProvider = string(cloudCredentialsSecretTypeBlindfoldSecretInfoModel.DecryptionProvider.ValueString())
-						}
-
-						// resource modelToSpecNested StringField --> StoreProvider
-						if !cloudCredentialsSecretTypeBlindfoldSecretInfoModel.StoreProvider.IsNull() && !cloudCredentialsSecretTypeBlindfoldSecretInfoModel.StoreProvider.IsUnknown() {
-							blindfoldSecretInfoOneOfSpec.BlindfoldSecretInfo.StoreProvider = string(cloudCredentialsSecretTypeBlindfoldSecretInfoModel.StoreProvider.ValueString())
-						}
-
-					}
-
-					// resource modelToSpecNested PointerOfOneOfField --> ClearSecretInfo
-					if !credentialFileSecretInfoChoiceModel.ClearSecretInfo.IsNull() && !credentialFileSecretInfoChoiceModel.ClearSecretInfo.IsUnknown() {
-						var cloudCredentialsSecretTypeClearSecretInfoModel CloudCredentialsSecretTypeClearSecretInfo
-						response.Diagnostics.Append(credentialFileSecretInfoChoiceModel.ClearSecretInfo.As(ctx, &cloudCredentialsSecretTypeClearSecretInfoModel, basetypes.ObjectAsOptions{})...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						clearSecretInfoOneOfSpec := &ves_io_schema.SecretType_ClearSecretInfo{}
-						clearSecretInfoOneOfSpec.ClearSecretInfo = &ves_io_schema.ClearSecretInfoType{}
-						credentialFileSpec.SecretInfoOneof = clearSecretInfoOneOfSpec
-
-						// resource modelToSpecNested StringField --> Provider
-						if !cloudCredentialsSecretTypeClearSecretInfoModel.Provider.IsNull() && !cloudCredentialsSecretTypeClearSecretInfoModel.Provider.IsUnknown() {
-							clearSecretInfoOneOfSpec.ClearSecretInfo.Provider = string(cloudCredentialsSecretTypeClearSecretInfoModel.Provider.ValueString())
-						}
-
-						// resource modelToSpecNested RequiredStringField --> Url
-						if !cloudCredentialsSecretTypeClearSecretInfoModel.Url.IsNull() && !cloudCredentialsSecretTypeClearSecretInfoModel.Url.IsUnknown() {
-							clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(cloudCredentialsSecretTypeClearSecretInfoModel.Url.ValueString())
-						}
-
-					}
-
-				}
-
-			}
-
-		}
-
-		// resource modelToSpecNested PointerOfOneOfField --> AwsSecretKey
-		if !cloudChoiceModel.AwsSecretKey.IsNull() && !cloudChoiceModel.AwsSecretKey.IsUnknown() {
-			var cloudCredentialsGlobalSpecTypeAwsSecretKeyModel CloudCredentialsGlobalSpecTypeAwsSecretKey
-			response.Diagnostics.Append(cloudChoiceModel.AwsSecretKey.As(ctx, &cloudCredentialsGlobalSpecTypeAwsSecretKeyModel, basetypes.ObjectAsOptions{})...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			awsSecretKeyOneOfSpec := &ves_io_schema_cloud_credentials.ReplaceSpecType_AwsSecretKey{}
-			awsSecretKeyOneOfSpec.AwsSecretKey = &ves_io_schema_cloud_credentials.AWSSecretType{}
-			spec.Cloud = awsSecretKeyOneOfSpec
-
-			// resource modelToSpecNested RequiredStringField --> AccessKey
-			if !cloudCredentialsGlobalSpecTypeAwsSecretKeyModel.AccessKey.IsNull() && !cloudCredentialsGlobalSpecTypeAwsSecretKeyModel.AccessKey.IsUnknown() {
-				awsSecretKeyOneOfSpec.AwsSecretKey.AccessKey = string(cloudCredentialsGlobalSpecTypeAwsSecretKeyModel.AccessKey.ValueString())
-			}
-
-			// resource modelToSpecNested RequiredPointerField --> SecretKey
-			if !cloudCredentialsGlobalSpecTypeAwsSecretKeyModel.SecretKey.IsNull() && !cloudCredentialsGlobalSpecTypeAwsSecretKeyModel.SecretKey.IsUnknown() {
-				var secretKeyModel CloudCredentialsSecretType
-				response.Diagnostics.Append(cloudCredentialsGlobalSpecTypeAwsSecretKeyModel.SecretKey.As(ctx, &secretKeyModel, basetypes.ObjectAsOptions{})...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				secretKeySpec := &ves_io_schema.SecretType{}
-				awsSecretKeyOneOfSpec.AwsSecretKey.SecretKey = secretKeySpec
-
-				// resource modelToSpecNested RequiredOneOfField --> SecretInfoOneof
-				if !secretKeyModel.SecretInfoChoice.IsNull() && !secretKeyModel.SecretInfoChoice.IsUnknown() {
-					secretKeySecretInfoChoiceModel := CloudCredentialsSecretTypeSecretInfoChoice{}
-					response.Diagnostics.Append(secretKeyModel.SecretInfoChoice.As(ctx, &secretKeySecretInfoChoiceModel, basetypes.ObjectAsOptions{})...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-
-					// resource modelToSpecNested PointerOfOneOfField --> ClearSecretInfo
-					if !secretKeySecretInfoChoiceModel.ClearSecretInfo.IsNull() && !secretKeySecretInfoChoiceModel.ClearSecretInfo.IsUnknown() {
-						var cloudCredentialsSecretTypeClearSecretInfoModel CloudCredentialsSecretTypeClearSecretInfo
-						response.Diagnostics.Append(secretKeySecretInfoChoiceModel.ClearSecretInfo.As(ctx, &cloudCredentialsSecretTypeClearSecretInfoModel, basetypes.ObjectAsOptions{})...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						clearSecretInfoOneOfSpec := &ves_io_schema.SecretType_ClearSecretInfo{}
-						clearSecretInfoOneOfSpec.ClearSecretInfo = &ves_io_schema.ClearSecretInfoType{}
-						secretKeySpec.SecretInfoOneof = clearSecretInfoOneOfSpec
-
-						// resource modelToSpecNested StringField --> Provider
-						if !cloudCredentialsSecretTypeClearSecretInfoModel.Provider.IsNull() && !cloudCredentialsSecretTypeClearSecretInfoModel.Provider.IsUnknown() {
-							clearSecretInfoOneOfSpec.ClearSecretInfo.Provider = string(cloudCredentialsSecretTypeClearSecretInfoModel.Provider.ValueString())
-						}
-
-						// resource modelToSpecNested RequiredStringField --> Url
-						if !cloudCredentialsSecretTypeClearSecretInfoModel.Url.IsNull() && !cloudCredentialsSecretTypeClearSecretInfoModel.Url.IsUnknown() {
-							clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(cloudCredentialsSecretTypeClearSecretInfoModel.Url.ValueString())
-						}
-
-					}
-
-					// resource modelToSpecNested PointerOfOneOfField --> BlindfoldSecretInfo
-					if !secretKeySecretInfoChoiceModel.BlindfoldSecretInfo.IsNull() && !secretKeySecretInfoChoiceModel.BlindfoldSecretInfo.IsUnknown() {
-						var cloudCredentialsSecretTypeBlindfoldSecretInfoModel CloudCredentialsSecretTypeBlindfoldSecretInfo
-						response.Diagnostics.Append(secretKeySecretInfoChoiceModel.BlindfoldSecretInfo.As(ctx, &cloudCredentialsSecretTypeBlindfoldSecretInfoModel, basetypes.ObjectAsOptions{})...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						blindfoldSecretInfoOneOfSpec := &ves_io_schema.SecretType_BlindfoldSecretInfo{}
-						blindfoldSecretInfoOneOfSpec.BlindfoldSecretInfo = &ves_io_schema.BlindfoldSecretInfoType{}
-						secretKeySpec.SecretInfoOneof = blindfoldSecretInfoOneOfSpec
-
-						// resource modelToSpecNested RequiredStringField --> Location
-						if !cloudCredentialsSecretTypeBlindfoldSecretInfoModel.Location.IsNull() && !cloudCredentialsSecretTypeBlindfoldSecretInfoModel.Location.IsUnknown() {
-							blindfoldSecretInfoOneOfSpec.BlindfoldSecretInfo.Location = string(cloudCredentialsSecretTypeBlindfoldSecretInfoModel.Location.ValueString())
-						}
-
-						// resource modelToSpecNested StringField --> DecryptionProvider
-						if !cloudCredentialsSecretTypeBlindfoldSecretInfoModel.DecryptionProvider.IsNull() && !cloudCredentialsSecretTypeBlindfoldSecretInfoModel.DecryptionProvider.IsUnknown() {
-							blindfoldSecretInfoOneOfSpec.BlindfoldSecretInfo.DecryptionProvider = string(cloudCredentialsSecretTypeBlindfoldSecretInfoModel.DecryptionProvider.ValueString())
-						}
-
-						// resource modelToSpecNested StringField --> StoreProvider
-						if !cloudCredentialsSecretTypeBlindfoldSecretInfoModel.StoreProvider.IsNull() && !cloudCredentialsSecretTypeBlindfoldSecretInfoModel.StoreProvider.IsUnknown() {
-							blindfoldSecretInfoOneOfSpec.BlindfoldSecretInfo.StoreProvider = string(cloudCredentialsSecretTypeBlindfoldSecretInfoModel.StoreProvider.ValueString())
 						}
 
 					}
@@ -4049,452 +4049,6 @@ func (r *ResourceF5XCCloudCredentials) Update(ctx context.Context, request resou
 
 		// Recursively call the nested template to process the oneof choices.
 
-		// resource specToModelNested PointerOfOneOfField --> AwsAssumeRole
-		// GlobalSpecType
-		// false
-		{
-			awsAssumeRoleOptions, isAwsAssumeRole := cloudChoiceChoices.(*ves_io_schema_cloud_credentials.GlobalSpecType_AwsAssumeRole)
-			awsAssumeRoleAttributeMap := make(map[string]attr.Value)
-
-			if isAwsAssumeRole && awsAssumeRoleOptions != nil {
-
-				// resource specToModelNested RequiredStringField --> RoleArn
-				if awsAssumeRoleOptions.AwsAssumeRole.GetRoleArn() != "" {
-					awsAssumeRoleAttributeMap["role_arn"] = types.StringValue(awsAssumeRoleOptions.AwsAssumeRole.GetRoleArn())
-				} else {
-					// Empty string, set to null
-					awsAssumeRoleAttributeMap["role_arn"] = types.StringNull()
-				}
-
-				// resource specToModelNested UintField --> DurationSeconds
-				awsAssumeRoleAttributeMap["duration_seconds"] = types.Int64Value(int64(awsAssumeRoleOptions.AwsAssumeRole.GetDurationSeconds()))
-
-				// resource specToModelNested RequiredStringField --> SessionName
-				if awsAssumeRoleOptions.AwsAssumeRole.GetSessionName() != "" {
-					awsAssumeRoleAttributeMap["session_name"] = types.StringValue(awsAssumeRoleOptions.AwsAssumeRole.GetSessionName())
-				} else {
-					// Empty string, set to null
-					awsAssumeRoleAttributeMap["session_name"] = types.StringNull()
-				}
-
-				// resource specToModelNested MapOfStringField --> SessionTags
-				if awsAssumeRoleOptions.AwsAssumeRole.GetSessionTags() != nil {
-					// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-					sessionTagsMap, sessionTagsDiags := utils.StringMapToTerraformMap(awsAssumeRoleOptions.AwsAssumeRole.GetSessionTags())
-					response.Diagnostics.Append(sessionTagsDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					// Assign the typed map to the model
-					awsAssumeRoleAttributeMap["session_tags"] = sessionTagsMap
-				} else {
-					// Ensure the state reflects a Null map with the correct element type to avoid DynamicPseudoType errors
-					awsAssumeRoleAttributeMap["session_tags"] = types.MapNull(types.StringType)
-				}
-
-				awsAssumeRoleObj, diags := types.ObjectValue(CloudCredentialsCloudAwsAssumeRoleModelAttributeMap, awsAssumeRoleAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				cloudChoiceChoicesModel.AwsAssumeRole = awsAssumeRoleObj
-			} else {
-				cloudChoiceChoicesModel.AwsAssumeRole = types.ObjectNull(CloudCredentialsCloudAwsAssumeRoleModelAttributeMap)
-			}
-		}
-
-		// resource specToModelNested PointerOfOneOfField --> AzurePfxCertificate
-		// GlobalSpecType
-		// false
-		{
-			azurePfxCertificateOptions, isAzurePfxCertificate := cloudChoiceChoices.(*ves_io_schema_cloud_credentials.GlobalSpecType_AzurePfxCertificate)
-			azurePfxCertificateAttributeMap := make(map[string]attr.Value)
-
-			if isAzurePfxCertificate && azurePfxCertificateOptions != nil {
-
-				// resource specToModelNested RequiredStringField --> ClientId
-				if azurePfxCertificateOptions.AzurePfxCertificate.GetClientId() != "" {
-					azurePfxCertificateAttributeMap["client_id"] = types.StringValue(azurePfxCertificateOptions.AzurePfxCertificate.GetClientId())
-				} else {
-					// Empty string, set to null
-					azurePfxCertificateAttributeMap["client_id"] = types.StringNull()
-				}
-
-				// resource specToModelNested RequiredStringField --> SubscriptionId
-				if azurePfxCertificateOptions.AzurePfxCertificate.GetSubscriptionId() != "" {
-					azurePfxCertificateAttributeMap["subscription_id"] = types.StringValue(azurePfxCertificateOptions.AzurePfxCertificate.GetSubscriptionId())
-				} else {
-					// Empty string, set to null
-					azurePfxCertificateAttributeMap["subscription_id"] = types.StringNull()
-				}
-
-				// resource specToModelNested RequiredStringField --> TenantId
-				if azurePfxCertificateOptions.AzurePfxCertificate.GetTenantId() != "" {
-					azurePfxCertificateAttributeMap["tenant_id"] = types.StringValue(azurePfxCertificateOptions.AzurePfxCertificate.GetTenantId())
-				} else {
-					// Empty string, set to null
-					azurePfxCertificateAttributeMap["tenant_id"] = types.StringNull()
-				}
-
-				// resource specToModelNested RequiredStringField --> CertificateUrl
-				if azurePfxCertificateOptions.AzurePfxCertificate.GetCertificateUrl() != "" {
-					azurePfxCertificateAttributeMap["certificate_url"] = types.StringValue(azurePfxCertificateOptions.AzurePfxCertificate.GetCertificateUrl())
-				} else {
-					// Empty string, set to null
-					azurePfxCertificateAttributeMap["certificate_url"] = types.StringNull()
-				}
-
-				// resource specToModelNested RequiredPointerField --> Password
-				if azurePfxCertificateOptions.AzurePfxCertificate.GetPassword() != nil {
-					// Create the nested Go struct
-					cloudCredentialsSecretTypeModel := &CloudCredentialsSecretType{}
-					passwordElement := azurePfxCertificateOptions.AzurePfxCertificate.GetPassword()
-
-					// Recursively populate the nested struct
-
-					// resource specToModelNested RequiredOneOfField --> SecretInfoOneof
-					// GlobalSpecType
-					if passwordElement.GetSecretInfoOneof() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						passwordsecretInfoChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates
-						passwordsecretInfoChoiceChoices := passwordElement.GetSecretInfoOneof()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// resource specToModelNested PointerOfOneOfField --> BlindfoldSecretInfo
-						// GlobalSpecType
-						// false
-						{
-							blindfoldSecretInfoOptions, isBlindfoldSecretInfo := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_BlindfoldSecretInfo)
-							blindfoldSecretInfoAttributeMap := make(map[string]attr.Value)
-
-							if isBlindfoldSecretInfo && blindfoldSecretInfoOptions != nil {
-
-								// resource specToModelNested StringField --> DecryptionProvider
-								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider() != "" {
-									blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider())
-								} else {
-									// Empty string, set to null
-									blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringNull()
-								}
-
-								// resource specToModelNested StringField --> StoreProvider
-								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider() != "" {
-									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider())
-								} else {
-									// Empty string, set to null
-									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringNull()
-								}
-
-								// resource specToModelNested RequiredStringField --> Location
-								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation() != "" {
-									blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation())
-								} else {
-									// Empty string, set to null
-									blindfoldSecretInfoAttributeMap["location"] = types.StringNull()
-								}
-
-								blindfoldSecretInfoObj, diags := types.ObjectValue(CloudCredentialsCloudAzurePfxCertificatePasswordSecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								passwordsecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = blindfoldSecretInfoObj
-							} else {
-								passwordsecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = types.ObjectNull(CloudCredentialsCloudAzurePfxCertificatePasswordSecretInfoOneofBlindfoldSecretInfoModelAttributeMap)
-							}
-						}
-
-						// resource specToModelNested PointerOfOneOfField --> ClearSecretInfo
-						// GlobalSpecType
-						// false
-						{
-							clearSecretInfoOptions, isClearSecretInfo := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_ClearSecretInfo)
-							clearSecretInfoAttributeMap := make(map[string]attr.Value)
-
-							if isClearSecretInfo && clearSecretInfoOptions != nil {
-
-								// resource specToModelNested StringField --> Provider
-								if clearSecretInfoOptions.ClearSecretInfo.GetProvider() != "" {
-									clearSecretInfoAttributeMap["provider"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetProvider())
-								} else {
-									// Empty string, set to null
-									clearSecretInfoAttributeMap["provider"] = types.StringNull()
-								}
-
-								// resource specToModelNested RequiredStringField --> Url
-								if clearSecretInfoOptions.ClearSecretInfo.GetUrl() != "" {
-									clearSecretInfoAttributeMap["url"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetUrl())
-								} else {
-									// Empty string, set to null
-									clearSecretInfoAttributeMap["url"] = types.StringNull()
-								}
-
-								clearSecretInfoObj, diags := types.ObjectValue(CloudCredentialsCloudAzurePfxCertificatePasswordSecretInfoOneofClearSecretInfoModelAttributeMap, clearSecretInfoAttributeMap)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								passwordsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = clearSecretInfoObj
-							} else {
-								passwordsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(CloudCredentialsCloudAzurePfxCertificatePasswordSecretInfoOneofClearSecretInfoModelAttributeMap)
-							}
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, passwordsecretInfoChoiceChoicesObjDiags := types.ObjectValue(
-							CloudCredentialsCloudAzurePfxCertificatePasswordSecretInfoOneofModelAttributeMap, // The attribute schema for the OneOf choices
-							passwordsecretInfoChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(passwordsecretInfoChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						cloudCredentialsSecretTypeModel.SecretInfoChoice = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						// State Healing: The API redacted the OneOf secret field (returned nil). Restore the entire
-						// secret_info_choice object from prior Terraform state so that the model reflects what the
-						// user originally configured and Terraform does not detect a false drift.
-						{
-							savedSecretInfoChoicePath := path.Root("cloud_choice").AtName("azure_pfx_certificate").AtName("password").AtName("secret_info_choice")
-							var savedSecretInfoChoice types.Object
-							stateHealDiags := request.State.GetAttribute(ctx, savedSecretInfoChoicePath, &savedSecretInfoChoice)
-							if !stateHealDiags.HasError() && !savedSecretInfoChoice.IsNull() && !savedSecretInfoChoice.IsUnknown() {
-								cloudCredentialsSecretTypeModel.SecretInfoChoice = savedSecretInfoChoice
-							} else {
-								cloudCredentialsSecretTypeModel.SecretInfoChoice = types.ObjectNull(CloudCredentialsCloudAzurePfxCertificatePasswordSecretInfoOneofModelAttributeMap)
-							}
-						}
-					}
-
-					// This field needs to be converted to a types.ObjectValue before assignment.
-					cloudCredentialsSecretTypeModelObj, diags := types.ObjectValueFrom(ctx, CloudCredentialsCloudAzurePfxCertificatePasswordModelAttributeMap, cloudCredentialsSecretTypeModel)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					azurePfxCertificateAttributeMap["password"] = cloudCredentialsSecretTypeModelObj
-
-				} else {
-					// The source field is nil (e.g. redacted by the API).
-					// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
-					// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
-					// here because the API may always return a non-nil struct (with REDACTED values) for this
-					// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-					// The target is a types.Object, so we use types.ObjectNull.
-					azurePfxCertificateAttributeMap["password"] = types.ObjectNull(CloudCredentialsCloudAzurePfxCertificatePasswordModelAttributeMap)
-				}
-
-				azurePfxCertificateObj, diags := types.ObjectValue(CloudCredentialsCloudAzurePfxCertificateModelAttributeMap, azurePfxCertificateAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				cloudChoiceChoicesModel.AzurePfxCertificate = azurePfxCertificateObj
-			} else {
-				cloudChoiceChoicesModel.AzurePfxCertificate = types.ObjectNull(CloudCredentialsCloudAzurePfxCertificateModelAttributeMap)
-			}
-		}
-
-		// resource specToModelNested PointerOfOneOfField --> AzureClientSecret
-		// GlobalSpecType
-		// false
-		{
-			azureClientSecretOptions, isAzureClientSecret := cloudChoiceChoices.(*ves_io_schema_cloud_credentials.GlobalSpecType_AzureClientSecret)
-			azureClientSecretAttributeMap := make(map[string]attr.Value)
-
-			if isAzureClientSecret && azureClientSecretOptions != nil {
-
-				// resource specToModelNested RequiredPointerField --> ClientSecret
-				if azureClientSecretOptions.AzureClientSecret.GetClientSecret() != nil {
-					// Create the nested Go struct
-					cloudCredentialsSecretTypeModel := &CloudCredentialsSecretType{}
-					clientSecretElement := azureClientSecretOptions.AzureClientSecret.GetClientSecret()
-
-					// Recursively populate the nested struct
-
-					// resource specToModelNested RequiredOneOfField --> SecretInfoOneof
-					// GlobalSpecType
-					if clientSecretElement.GetSecretInfoOneof() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						clientSecretsecretInfoChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates
-						clientSecretsecretInfoChoiceChoices := clientSecretElement.GetSecretInfoOneof()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// resource specToModelNested PointerOfOneOfField --> BlindfoldSecretInfo
-						// GlobalSpecType
-						// false
-						{
-							blindfoldSecretInfoOptions, isBlindfoldSecretInfo := clientSecretsecretInfoChoiceChoices.(*ves_io_schema.SecretType_BlindfoldSecretInfo)
-							blindfoldSecretInfoAttributeMap := make(map[string]attr.Value)
-
-							if isBlindfoldSecretInfo && blindfoldSecretInfoOptions != nil {
-
-								// resource specToModelNested StringField --> DecryptionProvider
-								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider() != "" {
-									blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider())
-								} else {
-									// Empty string, set to null
-									blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringNull()
-								}
-
-								// resource specToModelNested StringField --> StoreProvider
-								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider() != "" {
-									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider())
-								} else {
-									// Empty string, set to null
-									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringNull()
-								}
-
-								// resource specToModelNested RequiredStringField --> Location
-								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation() != "" {
-									blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation())
-								} else {
-									// Empty string, set to null
-									blindfoldSecretInfoAttributeMap["location"] = types.StringNull()
-								}
-
-								blindfoldSecretInfoObj, diags := types.ObjectValue(CloudCredentialsCloudAzureClientSecretClientSecretSecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								clientSecretsecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = blindfoldSecretInfoObj
-							} else {
-								clientSecretsecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = types.ObjectNull(CloudCredentialsCloudAzureClientSecretClientSecretSecretInfoOneofBlindfoldSecretInfoModelAttributeMap)
-							}
-						}
-
-						// resource specToModelNested PointerOfOneOfField --> ClearSecretInfo
-						// GlobalSpecType
-						// false
-						{
-							clearSecretInfoOptions, isClearSecretInfo := clientSecretsecretInfoChoiceChoices.(*ves_io_schema.SecretType_ClearSecretInfo)
-							clearSecretInfoAttributeMap := make(map[string]attr.Value)
-
-							if isClearSecretInfo && clearSecretInfoOptions != nil {
-
-								// resource specToModelNested StringField --> Provider
-								if clearSecretInfoOptions.ClearSecretInfo.GetProvider() != "" {
-									clearSecretInfoAttributeMap["provider"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetProvider())
-								} else {
-									// Empty string, set to null
-									clearSecretInfoAttributeMap["provider"] = types.StringNull()
-								}
-
-								// resource specToModelNested RequiredStringField --> Url
-								if clearSecretInfoOptions.ClearSecretInfo.GetUrl() != "" {
-									clearSecretInfoAttributeMap["url"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetUrl())
-								} else {
-									// Empty string, set to null
-									clearSecretInfoAttributeMap["url"] = types.StringNull()
-								}
-
-								clearSecretInfoObj, diags := types.ObjectValue(CloudCredentialsCloudAzureClientSecretClientSecretSecretInfoOneofClearSecretInfoModelAttributeMap, clearSecretInfoAttributeMap)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								clientSecretsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = clearSecretInfoObj
-							} else {
-								clientSecretsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(CloudCredentialsCloudAzureClientSecretClientSecretSecretInfoOneofClearSecretInfoModelAttributeMap)
-							}
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, clientSecretsecretInfoChoiceChoicesObjDiags := types.ObjectValue(
-							CloudCredentialsCloudAzureClientSecretClientSecretSecretInfoOneofModelAttributeMap, // The attribute schema for the OneOf choices
-							clientSecretsecretInfoChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(clientSecretsecretInfoChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						cloudCredentialsSecretTypeModel.SecretInfoChoice = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						// State Healing: The API redacted the OneOf secret field (returned nil). Restore the entire
-						// secret_info_choice object from prior Terraform state so that the model reflects what the
-						// user originally configured and Terraform does not detect a false drift.
-						{
-							savedSecretInfoChoicePath := path.Root("cloud_choice").AtName("azure_client_secret").AtName("client_secret").AtName("secret_info_choice")
-							var savedSecretInfoChoice types.Object
-							stateHealDiags := request.State.GetAttribute(ctx, savedSecretInfoChoicePath, &savedSecretInfoChoice)
-							if !stateHealDiags.HasError() && !savedSecretInfoChoice.IsNull() && !savedSecretInfoChoice.IsUnknown() {
-								cloudCredentialsSecretTypeModel.SecretInfoChoice = savedSecretInfoChoice
-							} else {
-								cloudCredentialsSecretTypeModel.SecretInfoChoice = types.ObjectNull(CloudCredentialsCloudAzureClientSecretClientSecretSecretInfoOneofModelAttributeMap)
-							}
-						}
-					}
-
-					// This field needs to be converted to a types.ObjectValue before assignment.
-					cloudCredentialsSecretTypeModelObj, diags := types.ObjectValueFrom(ctx, CloudCredentialsCloudAzureClientSecretClientSecretModelAttributeMap, cloudCredentialsSecretTypeModel)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					azureClientSecretAttributeMap["client_secret"] = cloudCredentialsSecretTypeModelObj
-
-				} else {
-					// The source field is nil (e.g. redacted by the API).
-					// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
-					// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
-					// here because the API may always return a non-nil struct (with REDACTED values) for this
-					// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-					// The target is a types.Object, so we use types.ObjectNull.
-					azureClientSecretAttributeMap["client_secret"] = types.ObjectNull(CloudCredentialsCloudAzureClientSecretClientSecretModelAttributeMap)
-				}
-
-				// resource specToModelNested RequiredStringField --> ClientId
-				if azureClientSecretOptions.AzureClientSecret.GetClientId() != "" {
-					azureClientSecretAttributeMap["client_id"] = types.StringValue(azureClientSecretOptions.AzureClientSecret.GetClientId())
-				} else {
-					// Empty string, set to null
-					azureClientSecretAttributeMap["client_id"] = types.StringNull()
-				}
-
-				// resource specToModelNested RequiredStringField --> SubscriptionId
-				if azureClientSecretOptions.AzureClientSecret.GetSubscriptionId() != "" {
-					azureClientSecretAttributeMap["subscription_id"] = types.StringValue(azureClientSecretOptions.AzureClientSecret.GetSubscriptionId())
-				} else {
-					// Empty string, set to null
-					azureClientSecretAttributeMap["subscription_id"] = types.StringNull()
-				}
-
-				// resource specToModelNested RequiredStringField --> TenantId
-				if azureClientSecretOptions.AzureClientSecret.GetTenantId() != "" {
-					azureClientSecretAttributeMap["tenant_id"] = types.StringValue(azureClientSecretOptions.AzureClientSecret.GetTenantId())
-				} else {
-					// Empty string, set to null
-					azureClientSecretAttributeMap["tenant_id"] = types.StringNull()
-				}
-
-				azureClientSecretObj, diags := types.ObjectValue(CloudCredentialsCloudAzureClientSecretModelAttributeMap, azureClientSecretAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				cloudChoiceChoicesModel.AzureClientSecret = azureClientSecretObj
-			} else {
-				cloudChoiceChoicesModel.AzureClientSecret = types.ObjectNull(CloudCredentialsCloudAzureClientSecretModelAttributeMap)
-			}
-		}
-
 		// resource specToModelNested PointerOfOneOfField --> GcpCredFile
 		// GlobalSpecType
 		// false
@@ -4532,14 +4086,6 @@ func (r *ResourceF5XCCloudCredentials) Update(ctx context.Context, request resou
 
 							if isBlindfoldSecretInfo && blindfoldSecretInfoOptions != nil {
 
-								// resource specToModelNested RequiredStringField --> Location
-								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation() != "" {
-									blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation())
-								} else {
-									// Empty string, set to null
-									blindfoldSecretInfoAttributeMap["location"] = types.StringNull()
-								}
-
 								// resource specToModelNested StringField --> DecryptionProvider
 								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider() != "" {
 									blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider())
@@ -4554,6 +4100,14 @@ func (r *ResourceF5XCCloudCredentials) Update(ctx context.Context, request resou
 								} else {
 									// Empty string, set to null
 									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringNull()
+								}
+
+								// resource specToModelNested RequiredStringField --> Location
+								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation() != "" {
+									blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation())
+								} else {
+									// Empty string, set to null
+									blindfoldSecretInfoAttributeMap["location"] = types.StringNull()
 								}
 
 								blindfoldSecretInfoObj, diags := types.ObjectValue(CloudCredentialsCloudGcpCredFileCredentialFileSecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
@@ -4699,6 +4253,50 @@ func (r *ResourceF5XCCloudCredentials) Update(ctx context.Context, request resou
 
 						// Process nested choices, populating the temporary attribute map
 
+						// resource specToModelNested PointerOfOneOfField --> BlindfoldSecretInfo
+						// GlobalSpecType
+						// false
+						{
+							blindfoldSecretInfoOptions, isBlindfoldSecretInfo := secretKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_BlindfoldSecretInfo)
+							blindfoldSecretInfoAttributeMap := make(map[string]attr.Value)
+
+							if isBlindfoldSecretInfo && blindfoldSecretInfoOptions != nil {
+
+								// resource specToModelNested StringField --> DecryptionProvider
+								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider() != "" {
+									blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider())
+								} else {
+									// Empty string, set to null
+									blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringNull()
+								}
+
+								// resource specToModelNested StringField --> StoreProvider
+								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider() != "" {
+									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider())
+								} else {
+									// Empty string, set to null
+									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringNull()
+								}
+
+								// resource specToModelNested RequiredStringField --> Location
+								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation() != "" {
+									blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation())
+								} else {
+									// Empty string, set to null
+									blindfoldSecretInfoAttributeMap["location"] = types.StringNull()
+								}
+
+								blindfoldSecretInfoObj, diags := types.ObjectValue(CloudCredentialsCloudAwsSecretKeySecretKeySecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
+								response.Diagnostics.Append(diags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								secretKeysecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = blindfoldSecretInfoObj
+							} else {
+								secretKeysecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = types.ObjectNull(CloudCredentialsCloudAwsSecretKeySecretKeySecretInfoOneofBlindfoldSecretInfoModelAttributeMap)
+							}
+						}
+
 						// resource specToModelNested PointerOfOneOfField --> ClearSecretInfo
 						// GlobalSpecType
 						// false
@@ -4732,50 +4330,6 @@ func (r *ResourceF5XCCloudCredentials) Update(ctx context.Context, request resou
 								secretKeysecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = clearSecretInfoObj
 							} else {
 								secretKeysecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(CloudCredentialsCloudAwsSecretKeySecretKeySecretInfoOneofClearSecretInfoModelAttributeMap)
-							}
-						}
-
-						// resource specToModelNested PointerOfOneOfField --> BlindfoldSecretInfo
-						// GlobalSpecType
-						// false
-						{
-							blindfoldSecretInfoOptions, isBlindfoldSecretInfo := secretKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_BlindfoldSecretInfo)
-							blindfoldSecretInfoAttributeMap := make(map[string]attr.Value)
-
-							if isBlindfoldSecretInfo && blindfoldSecretInfoOptions != nil {
-
-								// resource specToModelNested RequiredStringField --> Location
-								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation() != "" {
-									blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation())
-								} else {
-									// Empty string, set to null
-									blindfoldSecretInfoAttributeMap["location"] = types.StringNull()
-								}
-
-								// resource specToModelNested StringField --> DecryptionProvider
-								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider() != "" {
-									blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider())
-								} else {
-									// Empty string, set to null
-									blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringNull()
-								}
-
-								// resource specToModelNested StringField --> StoreProvider
-								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider() != "" {
-									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider())
-								} else {
-									// Empty string, set to null
-									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringNull()
-								}
-
-								blindfoldSecretInfoObj, diags := types.ObjectValue(CloudCredentialsCloudAwsSecretKeySecretKeySecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								secretKeysecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = blindfoldSecretInfoObj
-							} else {
-								secretKeysecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = types.ObjectNull(CloudCredentialsCloudAwsSecretKeySecretKeySecretInfoOneofBlindfoldSecretInfoModelAttributeMap)
 							}
 						}
 
@@ -4836,6 +4390,452 @@ func (r *ResourceF5XCCloudCredentials) Update(ctx context.Context, request resou
 				cloudChoiceChoicesModel.AwsSecretKey = awsSecretKeyObj
 			} else {
 				cloudChoiceChoicesModel.AwsSecretKey = types.ObjectNull(CloudCredentialsCloudAwsSecretKeyModelAttributeMap)
+			}
+		}
+
+		// resource specToModelNested PointerOfOneOfField --> AwsAssumeRole
+		// GlobalSpecType
+		// false
+		{
+			awsAssumeRoleOptions, isAwsAssumeRole := cloudChoiceChoices.(*ves_io_schema_cloud_credentials.GlobalSpecType_AwsAssumeRole)
+			awsAssumeRoleAttributeMap := make(map[string]attr.Value)
+
+			if isAwsAssumeRole && awsAssumeRoleOptions != nil {
+
+				// resource specToModelNested RequiredStringField --> RoleArn
+				if awsAssumeRoleOptions.AwsAssumeRole.GetRoleArn() != "" {
+					awsAssumeRoleAttributeMap["role_arn"] = types.StringValue(awsAssumeRoleOptions.AwsAssumeRole.GetRoleArn())
+				} else {
+					// Empty string, set to null
+					awsAssumeRoleAttributeMap["role_arn"] = types.StringNull()
+				}
+
+				// resource specToModelNested UintField --> DurationSeconds
+				awsAssumeRoleAttributeMap["duration_seconds"] = types.Int64Value(int64(awsAssumeRoleOptions.AwsAssumeRole.GetDurationSeconds()))
+
+				// resource specToModelNested RequiredStringField --> SessionName
+				if awsAssumeRoleOptions.AwsAssumeRole.GetSessionName() != "" {
+					awsAssumeRoleAttributeMap["session_name"] = types.StringValue(awsAssumeRoleOptions.AwsAssumeRole.GetSessionName())
+				} else {
+					// Empty string, set to null
+					awsAssumeRoleAttributeMap["session_name"] = types.StringNull()
+				}
+
+				// resource specToModelNested MapOfStringField --> SessionTags
+				if awsAssumeRoleOptions.AwsAssumeRole.GetSessionTags() != nil {
+					// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
+					sessionTagsMap, sessionTagsDiags := utils.StringMapToTerraformMap(awsAssumeRoleOptions.AwsAssumeRole.GetSessionTags())
+					response.Diagnostics.Append(sessionTagsDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					// Assign the typed map to the model
+					awsAssumeRoleAttributeMap["session_tags"] = sessionTagsMap
+				} else {
+					// Ensure the state reflects a Null map with the correct element type to avoid DynamicPseudoType errors
+					awsAssumeRoleAttributeMap["session_tags"] = types.MapNull(types.StringType)
+				}
+
+				awsAssumeRoleObj, diags := types.ObjectValue(CloudCredentialsCloudAwsAssumeRoleModelAttributeMap, awsAssumeRoleAttributeMap)
+				response.Diagnostics.Append(diags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				cloudChoiceChoicesModel.AwsAssumeRole = awsAssumeRoleObj
+			} else {
+				cloudChoiceChoicesModel.AwsAssumeRole = types.ObjectNull(CloudCredentialsCloudAwsAssumeRoleModelAttributeMap)
+			}
+		}
+
+		// resource specToModelNested PointerOfOneOfField --> AzurePfxCertificate
+		// GlobalSpecType
+		// false
+		{
+			azurePfxCertificateOptions, isAzurePfxCertificate := cloudChoiceChoices.(*ves_io_schema_cloud_credentials.GlobalSpecType_AzurePfxCertificate)
+			azurePfxCertificateAttributeMap := make(map[string]attr.Value)
+
+			if isAzurePfxCertificate && azurePfxCertificateOptions != nil {
+
+				// resource specToModelNested RequiredStringField --> ClientId
+				if azurePfxCertificateOptions.AzurePfxCertificate.GetClientId() != "" {
+					azurePfxCertificateAttributeMap["client_id"] = types.StringValue(azurePfxCertificateOptions.AzurePfxCertificate.GetClientId())
+				} else {
+					// Empty string, set to null
+					azurePfxCertificateAttributeMap["client_id"] = types.StringNull()
+				}
+
+				// resource specToModelNested RequiredStringField --> SubscriptionId
+				if azurePfxCertificateOptions.AzurePfxCertificate.GetSubscriptionId() != "" {
+					azurePfxCertificateAttributeMap["subscription_id"] = types.StringValue(azurePfxCertificateOptions.AzurePfxCertificate.GetSubscriptionId())
+				} else {
+					// Empty string, set to null
+					azurePfxCertificateAttributeMap["subscription_id"] = types.StringNull()
+				}
+
+				// resource specToModelNested RequiredStringField --> TenantId
+				if azurePfxCertificateOptions.AzurePfxCertificate.GetTenantId() != "" {
+					azurePfxCertificateAttributeMap["tenant_id"] = types.StringValue(azurePfxCertificateOptions.AzurePfxCertificate.GetTenantId())
+				} else {
+					// Empty string, set to null
+					azurePfxCertificateAttributeMap["tenant_id"] = types.StringNull()
+				}
+
+				// resource specToModelNested RequiredStringField --> CertificateUrl
+				if azurePfxCertificateOptions.AzurePfxCertificate.GetCertificateUrl() != "" {
+					azurePfxCertificateAttributeMap["certificate_url"] = types.StringValue(azurePfxCertificateOptions.AzurePfxCertificate.GetCertificateUrl())
+				} else {
+					// Empty string, set to null
+					azurePfxCertificateAttributeMap["certificate_url"] = types.StringNull()
+				}
+
+				// resource specToModelNested RequiredPointerField --> Password
+				if azurePfxCertificateOptions.AzurePfxCertificate.GetPassword() != nil {
+					// Create the nested Go struct
+					cloudCredentialsSecretTypeModel := &CloudCredentialsSecretType{}
+					passwordElement := azurePfxCertificateOptions.AzurePfxCertificate.GetPassword()
+
+					// Recursively populate the nested struct
+
+					// resource specToModelNested RequiredOneOfField --> SecretInfoOneof
+					// GlobalSpecType
+					if passwordElement.GetSecretInfoOneof() != nil {
+						// Create a temporary attribute map for the choices within this OneOf
+						passwordsecretInfoChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+						// Define a variable for the spec choices to be passed down to nested templates
+						passwordsecretInfoChoiceChoices := passwordElement.GetSecretInfoOneof()
+
+						// Process nested choices, populating the temporary attribute map
+
+						// resource specToModelNested PointerOfOneOfField --> ClearSecretInfo
+						// GlobalSpecType
+						// false
+						{
+							clearSecretInfoOptions, isClearSecretInfo := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_ClearSecretInfo)
+							clearSecretInfoAttributeMap := make(map[string]attr.Value)
+
+							if isClearSecretInfo && clearSecretInfoOptions != nil {
+
+								// resource specToModelNested StringField --> Provider
+								if clearSecretInfoOptions.ClearSecretInfo.GetProvider() != "" {
+									clearSecretInfoAttributeMap["provider"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetProvider())
+								} else {
+									// Empty string, set to null
+									clearSecretInfoAttributeMap["provider"] = types.StringNull()
+								}
+
+								// resource specToModelNested RequiredStringField --> Url
+								if clearSecretInfoOptions.ClearSecretInfo.GetUrl() != "" {
+									clearSecretInfoAttributeMap["url"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetUrl())
+								} else {
+									// Empty string, set to null
+									clearSecretInfoAttributeMap["url"] = types.StringNull()
+								}
+
+								clearSecretInfoObj, diags := types.ObjectValue(CloudCredentialsCloudAzurePfxCertificatePasswordSecretInfoOneofClearSecretInfoModelAttributeMap, clearSecretInfoAttributeMap)
+								response.Diagnostics.Append(diags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								passwordsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = clearSecretInfoObj
+							} else {
+								passwordsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(CloudCredentialsCloudAzurePfxCertificatePasswordSecretInfoOneofClearSecretInfoModelAttributeMap)
+							}
+						}
+
+						// resource specToModelNested PointerOfOneOfField --> BlindfoldSecretInfo
+						// GlobalSpecType
+						// false
+						{
+							blindfoldSecretInfoOptions, isBlindfoldSecretInfo := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_BlindfoldSecretInfo)
+							blindfoldSecretInfoAttributeMap := make(map[string]attr.Value)
+
+							if isBlindfoldSecretInfo && blindfoldSecretInfoOptions != nil {
+
+								// resource specToModelNested StringField --> DecryptionProvider
+								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider() != "" {
+									blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider())
+								} else {
+									// Empty string, set to null
+									blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringNull()
+								}
+
+								// resource specToModelNested StringField --> StoreProvider
+								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider() != "" {
+									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider())
+								} else {
+									// Empty string, set to null
+									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringNull()
+								}
+
+								// resource specToModelNested RequiredStringField --> Location
+								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation() != "" {
+									blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation())
+								} else {
+									// Empty string, set to null
+									blindfoldSecretInfoAttributeMap["location"] = types.StringNull()
+								}
+
+								blindfoldSecretInfoObj, diags := types.ObjectValue(CloudCredentialsCloudAzurePfxCertificatePasswordSecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
+								response.Diagnostics.Append(diags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								passwordsecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = blindfoldSecretInfoObj
+							} else {
+								passwordsecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = types.ObjectNull(CloudCredentialsCloudAzurePfxCertificatePasswordSecretInfoOneofBlindfoldSecretInfoModelAttributeMap)
+							}
+						}
+
+						// --- End of Choices ---
+
+						// Create the final ObjectValue for this OneOf field
+						finalObj, passwordsecretInfoChoiceChoicesObjDiags := types.ObjectValue(
+							CloudCredentialsCloudAzurePfxCertificatePasswordSecretInfoOneofModelAttributeMap, // The attribute schema for the OneOf choices
+							passwordsecretInfoChoiceChoicesAttributeMap,
+						)
+						response.Diagnostics.Append(passwordsecretInfoChoiceChoicesObjDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						// Assign the final object to the correct place (either the root model or a parent's attribute map)
+						cloudCredentialsSecretTypeModel.SecretInfoChoice = finalObj
+					} else {
+						// The OneOf field is nil in the source spec, so set the Terraform object to null.
+						// State Healing: The API redacted the OneOf secret field (returned nil). Restore the entire
+						// secret_info_choice object from prior Terraform state so that the model reflects what the
+						// user originally configured and Terraform does not detect a false drift.
+						{
+							savedSecretInfoChoicePath := path.Root("cloud_choice").AtName("azure_pfx_certificate").AtName("password").AtName("secret_info_choice")
+							var savedSecretInfoChoice types.Object
+							stateHealDiags := request.State.GetAttribute(ctx, savedSecretInfoChoicePath, &savedSecretInfoChoice)
+							if !stateHealDiags.HasError() && !savedSecretInfoChoice.IsNull() && !savedSecretInfoChoice.IsUnknown() {
+								cloudCredentialsSecretTypeModel.SecretInfoChoice = savedSecretInfoChoice
+							} else {
+								cloudCredentialsSecretTypeModel.SecretInfoChoice = types.ObjectNull(CloudCredentialsCloudAzurePfxCertificatePasswordSecretInfoOneofModelAttributeMap)
+							}
+						}
+					}
+
+					// This field needs to be converted to a types.ObjectValue before assignment.
+					cloudCredentialsSecretTypeModelObj, diags := types.ObjectValueFrom(ctx, CloudCredentialsCloudAzurePfxCertificatePasswordModelAttributeMap, cloudCredentialsSecretTypeModel)
+					response.Diagnostics.Append(diags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					azurePfxCertificateAttributeMap["password"] = cloudCredentialsSecretTypeModelObj
+
+				} else {
+					// The source field is nil (e.g. redacted by the API).
+					// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
+					// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
+					// here because the API may always return a non-nil struct (with REDACTED values) for this
+					// field, making this else-branch unreachable. The child OneOf handles the actual healing.
+					// The target is a types.Object, so we use types.ObjectNull.
+					azurePfxCertificateAttributeMap["password"] = types.ObjectNull(CloudCredentialsCloudAzurePfxCertificatePasswordModelAttributeMap)
+				}
+
+				azurePfxCertificateObj, diags := types.ObjectValue(CloudCredentialsCloudAzurePfxCertificateModelAttributeMap, azurePfxCertificateAttributeMap)
+				response.Diagnostics.Append(diags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				cloudChoiceChoicesModel.AzurePfxCertificate = azurePfxCertificateObj
+			} else {
+				cloudChoiceChoicesModel.AzurePfxCertificate = types.ObjectNull(CloudCredentialsCloudAzurePfxCertificateModelAttributeMap)
+			}
+		}
+
+		// resource specToModelNested PointerOfOneOfField --> AzureClientSecret
+		// GlobalSpecType
+		// false
+		{
+			azureClientSecretOptions, isAzureClientSecret := cloudChoiceChoices.(*ves_io_schema_cloud_credentials.GlobalSpecType_AzureClientSecret)
+			azureClientSecretAttributeMap := make(map[string]attr.Value)
+
+			if isAzureClientSecret && azureClientSecretOptions != nil {
+
+				// resource specToModelNested RequiredStringField --> ClientId
+				if azureClientSecretOptions.AzureClientSecret.GetClientId() != "" {
+					azureClientSecretAttributeMap["client_id"] = types.StringValue(azureClientSecretOptions.AzureClientSecret.GetClientId())
+				} else {
+					// Empty string, set to null
+					azureClientSecretAttributeMap["client_id"] = types.StringNull()
+				}
+
+				// resource specToModelNested RequiredStringField --> SubscriptionId
+				if azureClientSecretOptions.AzureClientSecret.GetSubscriptionId() != "" {
+					azureClientSecretAttributeMap["subscription_id"] = types.StringValue(azureClientSecretOptions.AzureClientSecret.GetSubscriptionId())
+				} else {
+					// Empty string, set to null
+					azureClientSecretAttributeMap["subscription_id"] = types.StringNull()
+				}
+
+				// resource specToModelNested RequiredStringField --> TenantId
+				if azureClientSecretOptions.AzureClientSecret.GetTenantId() != "" {
+					azureClientSecretAttributeMap["tenant_id"] = types.StringValue(azureClientSecretOptions.AzureClientSecret.GetTenantId())
+				} else {
+					// Empty string, set to null
+					azureClientSecretAttributeMap["tenant_id"] = types.StringNull()
+				}
+
+				// resource specToModelNested RequiredPointerField --> ClientSecret
+				if azureClientSecretOptions.AzureClientSecret.GetClientSecret() != nil {
+					// Create the nested Go struct
+					cloudCredentialsSecretTypeModel := &CloudCredentialsSecretType{}
+					clientSecretElement := azureClientSecretOptions.AzureClientSecret.GetClientSecret()
+
+					// Recursively populate the nested struct
+
+					// resource specToModelNested RequiredOneOfField --> SecretInfoOneof
+					// GlobalSpecType
+					if clientSecretElement.GetSecretInfoOneof() != nil {
+						// Create a temporary attribute map for the choices within this OneOf
+						clientSecretsecretInfoChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+						// Define a variable for the spec choices to be passed down to nested templates
+						clientSecretsecretInfoChoiceChoices := clientSecretElement.GetSecretInfoOneof()
+
+						// Process nested choices, populating the temporary attribute map
+
+						// resource specToModelNested PointerOfOneOfField --> ClearSecretInfo
+						// GlobalSpecType
+						// false
+						{
+							clearSecretInfoOptions, isClearSecretInfo := clientSecretsecretInfoChoiceChoices.(*ves_io_schema.SecretType_ClearSecretInfo)
+							clearSecretInfoAttributeMap := make(map[string]attr.Value)
+
+							if isClearSecretInfo && clearSecretInfoOptions != nil {
+
+								// resource specToModelNested StringField --> Provider
+								if clearSecretInfoOptions.ClearSecretInfo.GetProvider() != "" {
+									clearSecretInfoAttributeMap["provider"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetProvider())
+								} else {
+									// Empty string, set to null
+									clearSecretInfoAttributeMap["provider"] = types.StringNull()
+								}
+
+								// resource specToModelNested RequiredStringField --> Url
+								if clearSecretInfoOptions.ClearSecretInfo.GetUrl() != "" {
+									clearSecretInfoAttributeMap["url"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetUrl())
+								} else {
+									// Empty string, set to null
+									clearSecretInfoAttributeMap["url"] = types.StringNull()
+								}
+
+								clearSecretInfoObj, diags := types.ObjectValue(CloudCredentialsCloudAzureClientSecretClientSecretSecretInfoOneofClearSecretInfoModelAttributeMap, clearSecretInfoAttributeMap)
+								response.Diagnostics.Append(diags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								clientSecretsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = clearSecretInfoObj
+							} else {
+								clientSecretsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(CloudCredentialsCloudAzureClientSecretClientSecretSecretInfoOneofClearSecretInfoModelAttributeMap)
+							}
+						}
+
+						// resource specToModelNested PointerOfOneOfField --> BlindfoldSecretInfo
+						// GlobalSpecType
+						// false
+						{
+							blindfoldSecretInfoOptions, isBlindfoldSecretInfo := clientSecretsecretInfoChoiceChoices.(*ves_io_schema.SecretType_BlindfoldSecretInfo)
+							blindfoldSecretInfoAttributeMap := make(map[string]attr.Value)
+
+							if isBlindfoldSecretInfo && blindfoldSecretInfoOptions != nil {
+
+								// resource specToModelNested StringField --> DecryptionProvider
+								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider() != "" {
+									blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider())
+								} else {
+									// Empty string, set to null
+									blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringNull()
+								}
+
+								// resource specToModelNested StringField --> StoreProvider
+								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider() != "" {
+									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider())
+								} else {
+									// Empty string, set to null
+									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringNull()
+								}
+
+								// resource specToModelNested RequiredStringField --> Location
+								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation() != "" {
+									blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation())
+								} else {
+									// Empty string, set to null
+									blindfoldSecretInfoAttributeMap["location"] = types.StringNull()
+								}
+
+								blindfoldSecretInfoObj, diags := types.ObjectValue(CloudCredentialsCloudAzureClientSecretClientSecretSecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
+								response.Diagnostics.Append(diags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								clientSecretsecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = blindfoldSecretInfoObj
+							} else {
+								clientSecretsecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = types.ObjectNull(CloudCredentialsCloudAzureClientSecretClientSecretSecretInfoOneofBlindfoldSecretInfoModelAttributeMap)
+							}
+						}
+
+						// --- End of Choices ---
+
+						// Create the final ObjectValue for this OneOf field
+						finalObj, clientSecretsecretInfoChoiceChoicesObjDiags := types.ObjectValue(
+							CloudCredentialsCloudAzureClientSecretClientSecretSecretInfoOneofModelAttributeMap, // The attribute schema for the OneOf choices
+							clientSecretsecretInfoChoiceChoicesAttributeMap,
+						)
+						response.Diagnostics.Append(clientSecretsecretInfoChoiceChoicesObjDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						// Assign the final object to the correct place (either the root model or a parent's attribute map)
+						cloudCredentialsSecretTypeModel.SecretInfoChoice = finalObj
+					} else {
+						// The OneOf field is nil in the source spec, so set the Terraform object to null.
+						// State Healing: The API redacted the OneOf secret field (returned nil). Restore the entire
+						// secret_info_choice object from prior Terraform state so that the model reflects what the
+						// user originally configured and Terraform does not detect a false drift.
+						{
+							savedSecretInfoChoicePath := path.Root("cloud_choice").AtName("azure_client_secret").AtName("client_secret").AtName("secret_info_choice")
+							var savedSecretInfoChoice types.Object
+							stateHealDiags := request.State.GetAttribute(ctx, savedSecretInfoChoicePath, &savedSecretInfoChoice)
+							if !stateHealDiags.HasError() && !savedSecretInfoChoice.IsNull() && !savedSecretInfoChoice.IsUnknown() {
+								cloudCredentialsSecretTypeModel.SecretInfoChoice = savedSecretInfoChoice
+							} else {
+								cloudCredentialsSecretTypeModel.SecretInfoChoice = types.ObjectNull(CloudCredentialsCloudAzureClientSecretClientSecretSecretInfoOneofModelAttributeMap)
+							}
+						}
+					}
+
+					// This field needs to be converted to a types.ObjectValue before assignment.
+					cloudCredentialsSecretTypeModelObj, diags := types.ObjectValueFrom(ctx, CloudCredentialsCloudAzureClientSecretClientSecretModelAttributeMap, cloudCredentialsSecretTypeModel)
+					response.Diagnostics.Append(diags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					azureClientSecretAttributeMap["client_secret"] = cloudCredentialsSecretTypeModelObj
+
+				} else {
+					// The source field is nil (e.g. redacted by the API).
+					// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
+					// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
+					// here because the API may always return a non-nil struct (with REDACTED values) for this
+					// field, making this else-branch unreachable. The child OneOf handles the actual healing.
+					// The target is a types.Object, so we use types.ObjectNull.
+					azureClientSecretAttributeMap["client_secret"] = types.ObjectNull(CloudCredentialsCloudAzureClientSecretClientSecretModelAttributeMap)
+				}
+
+				azureClientSecretObj, diags := types.ObjectValue(CloudCredentialsCloudAzureClientSecretModelAttributeMap, azureClientSecretAttributeMap)
+				response.Diagnostics.Append(diags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				cloudChoiceChoicesModel.AzureClientSecret = azureClientSecretObj
+			} else {
+				cloudChoiceChoicesModel.AzureClientSecret = types.ObjectNull(CloudCredentialsCloudAzureClientSecretModelAttributeMap)
 			}
 		}
 

@@ -49,8 +49,8 @@ type SubnetDHCPNetworkTypeNetworkPrefixChoice struct {
 }
 
 type SubnetSiteSubnetParametersTypeAddressChoice struct {
-	Dhcp     types.Bool `tfsdk:"dhcp"`
 	StaticIp types.Bool `tfsdk:"static_ip"`
+	Dhcp     types.Bool `tfsdk:"dhcp"`
 }
 
 type SubnetGlobalSpecTypeConnectionChoice struct {
@@ -69,9 +69,37 @@ type SubnetSubnetSubnetDHCPServerParametersType struct {
 }
 
 type SubnetNetworkInterfaceDHCPServerParametersType struct {
-	InterfacesAddressingChoice types.Object `tfsdk:"interfaces_addressing_choice"`
 	FixedIpMap                 types.Map    `tfsdk:"fixed_ip_map"`
 	DhcpNetworks               types.List   `tfsdk:"dhcp_networks"`
+	InterfacesAddressingChoice types.Object `tfsdk:"interfaces_addressing_choice"`
+}
+
+type SubnetNetworkInterfaceDHCPNetworkType struct {
+	GatewayChoice       types.Object `tfsdk:"gateway_choice"`
+	DnsChoice           types.Object `tfsdk:"dns_choice"`
+	PoolSettings        types.List   `tfsdk:"pool_settings"`
+	NetworkPrefixChoice types.Object `tfsdk:"network_prefix_choice"`
+	Pools               types.List   `tfsdk:"pools"`
+}
+
+type SubnetDHCPNetworkTypeGatewayChoice struct {
+	FirstAddress types.Bool   `tfsdk:"first_address"`
+	LastAddress  types.Bool   `tfsdk:"last_address"`
+	DgwAddress   types.String `tfsdk:"dgw_address"`
+}
+
+type SubnetDHCPNetworkTypeDnsChoice struct {
+	SameAsDgw  types.Bool   `tfsdk:"same_as_dgw"`
+	DnsAddress types.String `tfsdk:"dns_address"`
+}
+
+type SubnetNetworkInterfaceDHCPNetworkTypeNetworkPrefixChoice struct {
+	NetworkPrefix types.String `tfsdk:"network_prefix"`
+}
+
+type SubnetNetworkInterfaceDHCPPoolType struct {
+	StartIp types.String `tfsdk:"start_ip"`
+	EndIp   types.String `tfsdk:"end_ip"`
 }
 
 type SubnetDHCPServerParametersTypeInterfacesAddressingChoice struct {
@@ -84,42 +112,14 @@ type SubnetDHCPServerParametersTypeInterfaceIpMap struct {
 	InterfaceIpMap types.Map `tfsdk:"interface_ip_map"`
 }
 
-type SubnetNetworkInterfaceDHCPNetworkType struct {
-	GatewayChoice       types.Object `tfsdk:"gateway_choice"`
-	DnsChoice           types.Object `tfsdk:"dns_choice"`
-	PoolSettings        types.List   `tfsdk:"pool_settings"`
-	NetworkPrefixChoice types.Object `tfsdk:"network_prefix_choice"`
-	Pools               types.List   `tfsdk:"pools"`
-}
-
-type SubnetDHCPNetworkTypeGatewayChoice struct {
-	DgwAddress   types.String `tfsdk:"dgw_address"`
-	FirstAddress types.Bool   `tfsdk:"first_address"`
-	LastAddress  types.Bool   `tfsdk:"last_address"`
-}
-
-type SubnetDHCPNetworkTypeDnsChoice struct {
-	DnsAddress types.String `tfsdk:"dns_address"`
-	SameAsDgw  types.Bool   `tfsdk:"same_as_dgw"`
-}
-
-type SubnetNetworkInterfaceDHCPNetworkTypeNetworkPrefixChoice struct {
-	NetworkPrefix types.String `tfsdk:"network_prefix"`
-}
-
-type SubnetNetworkInterfaceDHCPPoolType struct {
-	EndIp   types.String `tfsdk:"end_ip"`
-	StartIp types.String `tfsdk:"start_ip"`
-}
-
 // DataSourceF5XCSubnetModel describes the resource data model.
 type DataSourceF5XCSubnetModel struct {
+	Annotations                  types.Map      `tfsdk:"annotations"`
+	Description                  types.String   `tfsdk:"description"`
 	Name                         types.String   `tfsdk:"name"`
 	Namespace                    types.String   `tfsdk:"namespace"`
 	Uid                          types.String   `tfsdk:"uid"`
 	Labels                       types.Map      `tfsdk:"labels"`
-	Annotations                  types.Map      `tfsdk:"annotations"`
-	Description                  types.String   `tfsdk:"description"`
 	SiteSubnetParams             types.List     `tfsdk:"site_subnet_params"`
 	ConnectionChoice             types.Object   `tfsdk:"connection_choice"`
 	SiteDhcpServerParamsInternal types.List     `tfsdk:"site_dhcp_server_params_internal"`
@@ -193,8 +193,8 @@ var SubnetSiteSubnetParamsSubnetDhcpServerParamsDhcpNetworksNetworkPrefixChoiceM
 // Attribute map for OneOfField --> AddressChoice
 var SubnetSiteSubnetParamsAddressChoiceModelAttributeMap = map[string]attr.Type{
 
-	"dhcp":      types.BoolType,
 	"static_ip": types.BoolType,
+	"dhcp":      types.BoolType,
 }
 
 // Attribute map for OneOfField --> ConnectionChoice
@@ -211,18 +211,18 @@ var SubnetConnectionChoiceModelAttributeMap = map[string]attr.Type{
 var SubnetConnectionChoiceConnectToLayer2ModelAttributeMap = map[string]attr.Type{
 	"layer2_intf_ref": types.ObjectType{
 		AttrTypes: map[string]attr.Type{
-			"name":      types.StringType,
 			"tenant":    types.StringType,
-			"namespace": types.StringType},
+			"namespace": types.StringType,
+			"name":      types.StringType},
 	},
 }
 
 // Attribute map for RequiredPointerField --> Layer2IntfRef
 var SubnetConnectionChoiceConnectToLayer2Layer2IntfRefModelAttributeMap = map[string]attr.Type{
 
-	"name":      types.StringType,
 	"tenant":    types.StringType,
 	"namespace": types.StringType,
+	"name":      types.StringType,
 }
 
 // Attribute map for RequiredArrayOfPointerField --> SiteDhcpServerParamsInternal
@@ -239,9 +239,6 @@ var SubnetSiteDhcpServerParamsInternalModelAttributeMap = map[string]attr.Type{
 		},
 	}, "subnet_dhcp_server_params": types.ObjectType{
 		AttrTypes: map[string]attr.Type{
-			"interfaces_addressing_choice": types.ObjectType{
-				AttrTypes: SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsInterfacesAddressingChoiceModelAttributeMap,
-			},
 			"fixed_ip_map": types.MapType{
 				ElemType: types.StringType,
 			},
@@ -265,13 +262,16 @@ var SubnetSiteDhcpServerParamsInternalModelAttributeMap = map[string]attr.Type{
 							ElemType: types.ObjectType{
 								AttrTypes: map[string]attr.Type{
 
-									"end_ip":   types.StringType,
 									"start_ip": types.StringType,
+									"end_ip":   types.StringType,
 								},
 							},
 						},
 					},
 				},
+			},
+			"interfaces_addressing_choice": types.ObjectType{
+				AttrTypes: SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsInterfacesAddressingChoiceModelAttributeMap,
 			}},
 	},
 }
@@ -287,9 +287,6 @@ var SubnetSiteObjectRefModelAttributeMap = map[string]attr.Type{
 // Attribute map for PointerField --> SubnetDhcpServerParams
 var SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsModelAttributeMap = map[string]attr.Type{
 
-	"interfaces_addressing_choice": types.ObjectType{
-		AttrTypes: SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsInterfacesAddressingChoiceModelAttributeMap,
-	},
 	"fixed_ip_map": types.MapType{
 		ElemType: types.StringType,
 	},
@@ -313,31 +310,16 @@ var SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsModelAttributeMap = 
 					ElemType: types.ObjectType{
 						AttrTypes: map[string]attr.Type{
 
-							"end_ip":   types.StringType,
 							"start_ip": types.StringType,
+							"end_ip":   types.StringType,
 						},
 					},
 				},
 			},
 		},
 	},
-}
-
-// Attribute map for RequiredOneOfField --> InterfacesAddressingChoice
-var SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsInterfacesAddressingChoiceModelAttributeMap = map[string]attr.Type{
-
-	"automatic_from_start": types.BoolType,
-	"automatic_from_end":   types.BoolType,
-	"interface_ip_map": types.ObjectType{
-		AttrTypes: SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsInterfacesAddressingChoiceInterfaceIpMapModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> InterfaceIpMap
-var SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsInterfacesAddressingChoiceInterfaceIpMapModelAttributeMap = map[string]attr.Type{
-
-	"interface_ip_map": types.MapType{
-		ElemType: types.StringType,
+	"interfaces_addressing_choice": types.ObjectType{
+		AttrTypes: SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsInterfacesAddressingChoiceModelAttributeMap,
 	},
 }
 
@@ -360,8 +342,8 @@ var SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsDhcpNetworksModelAtt
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
 
-				"end_ip":   types.StringType,
 				"start_ip": types.StringType,
+				"end_ip":   types.StringType,
 			},
 		},
 	},
@@ -370,16 +352,16 @@ var SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsDhcpNetworksModelAtt
 // Attribute map for RequiredOneOfField --> GatewayChoice
 var SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsDhcpNetworksGatewayChoiceModelAttributeMap = map[string]attr.Type{
 
-	"dgw_address":   types.StringType,
 	"first_address": types.BoolType,
 	"last_address":  types.BoolType,
+	"dgw_address":   types.StringType,
 }
 
 // Attribute map for RequiredOneOfField --> DnsChoice
 var SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsDhcpNetworksDnsChoiceModelAttributeMap = map[string]attr.Type{
 
-	"dns_address": types.StringType,
 	"same_as_dgw": types.BoolType,
+	"dns_address": types.StringType,
 }
 
 // Attribute map for RequiredOneOfField --> NetworkPrefixChoice
@@ -391,8 +373,26 @@ var SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsDhcpNetworksNetworkP
 // Attribute map for ArrayOfPointerField --> Pools
 var SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsDhcpNetworksPoolsModelAttributeMap = map[string]attr.Type{
 
-	"end_ip":   types.StringType,
 	"start_ip": types.StringType,
+	"end_ip":   types.StringType,
+}
+
+// Attribute map for RequiredOneOfField --> InterfacesAddressingChoice
+var SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsInterfacesAddressingChoiceModelAttributeMap = map[string]attr.Type{
+
+	"automatic_from_start": types.BoolType,
+	"automatic_from_end":   types.BoolType,
+	"interface_ip_map": types.ObjectType{
+		AttrTypes: SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsInterfacesAddressingChoiceInterfaceIpMapModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> InterfaceIpMap
+var SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsInterfacesAddressingChoiceInterfaceIpMapModelAttributeMap = map[string]attr.Type{
+
+	"interface_ip_map": types.MapType{
+		ElemType: types.StringType,
+	},
 }
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -413,6 +413,19 @@ func (r *DataSourceF5XCSubnet) Schema(ctx context.Context, request datasource.Sc
 		Description:         "Subnet data source",
 
 		Attributes: map[string]schema.Attribute{
+			"annotations": schema.MapAttribute{
+				Description: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				ElementType: types.StringType,
+			},
+			"description": schema.StringAttribute{
+				Description: "description Human readable description for the object",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+			},
 			"name": schema.StringAttribute{
 				Description: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
 				Required:    false,
@@ -437,19 +450,6 @@ func (r *DataSourceF5XCSubnet) Schema(ctx context.Context, request datasource.Sc
 				Optional:    false,
 				Computed:    true,
 				ElementType: types.StringType,
-			},
-			"annotations": schema.MapAttribute{
-				Description: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
-			"description": schema.StringAttribute{
-				Description: "description Human readable description for the object",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
 			},
 			"site_subnet_params": schema.ListNestedAttribute{
 				Description: "Site subnet parameters that are used by the Create Spec Configure subnet parameters per site",
@@ -528,14 +528,14 @@ func (r *DataSourceF5XCSubnet) Schema(ctx context.Context, request datasource.Sc
 							Optional:    false,
 							Computed:    true,
 							Attributes: map[string]schema.Attribute{
-								"dhcp": schema.BoolAttribute{
-									Description: "DHCP Subnet uses DHCP for address allocation",
+								"static_ip": schema.BoolAttribute{
+									Description: "Static IP Subnet uses static IP addresses",
 									Required:    false,
 									Optional:    false,
 									Computed:    true,
 								},
-								"static_ip": schema.BoolAttribute{
-									Description: "Static IP Subnet uses static IP addresses",
+								"dhcp": schema.BoolAttribute{
+									Description: "DHCP Subnet uses DHCP for address allocation",
 									Required:    false,
 									Optional:    false,
 									Computed:    true,
@@ -563,12 +563,6 @@ func (r *DataSourceF5XCSubnet) Schema(ctx context.Context, request datasource.Sc
 								Optional:    false,
 								Computed:    true,
 								Attributes: map[string]schema.Attribute{
-									"name": schema.StringAttribute{
-										Description: "",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-									},
 									"tenant": schema.StringAttribute{
 										Description: "",
 										Required:    false,
@@ -576,6 +570,12 @@ func (r *DataSourceF5XCSubnet) Schema(ctx context.Context, request datasource.Sc
 										Computed:    true,
 									},
 									"namespace": schema.StringAttribute{
+										Description: "",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+									},
+									"name": schema.StringAttribute{
 										Description: "",
 										Required:    false,
 										Optional:    false,
@@ -640,41 +640,6 @@ func (r *DataSourceF5XCSubnet) Schema(ctx context.Context, request datasource.Sc
 							Optional:    false,
 							Computed:    true,
 							Attributes: map[string]schema.Attribute{
-								"interfaces_addressing_choice": schema.SingleNestedAttribute{
-									Description: "Interface IP(s) Specify how interfaces on each node are assigned local address",
-									Required:    false,
-									Optional:    false,
-									Computed:    true,
-									Attributes: map[string]schema.Attribute{
-										"automatic_from_start": schema.BoolAttribute{
-											Description: "Automatic Start Assign automatically from start of the first network in the DHCP Network list",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
-										"automatic_from_end": schema.BoolAttribute{
-											Description: "Automatic End Assign automatically from end of the first network in the DHCP Network list",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
-										"interface_ip_map": schema.SingleNestedAttribute{
-											Description: "Static IPv4 Configuration Statically configure a IPv4 address for every node",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-											Attributes: map[string]schema.Attribute{
-												"interface_ip_map": schema.MapAttribute{
-													Description: "Site:Node to IP mapping Specify static IPv4 addresses per site:node.",
-													ElementType: types.StringType,
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-											},
-										},
-									},
-								},
 								"fixed_ip_map": schema.MapAttribute{
 									Description: "Fixed IP Assignments Assign fixed IPv4 addresses based on the MAC Address of the DHCP Client.",
 									ElementType: types.StringType,
@@ -695,12 +660,6 @@ func (r *DataSourceF5XCSubnet) Schema(ctx context.Context, request datasource.Sc
 												Optional:    false,
 												Computed:    true,
 												Attributes: map[string]schema.Attribute{
-													"dgw_address": schema.StringAttribute{
-														Description: "Configured Address Enter a IPv4 address from the network prefix to be used as the default gateway.",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
 													"first_address": schema.BoolAttribute{
 														Description: "First Address First usable address from the network prefix is chosen as default gateway",
 														Required:    false,
@@ -713,6 +672,12 @@ func (r *DataSourceF5XCSubnet) Schema(ctx context.Context, request datasource.Sc
 														Optional:    false,
 														Computed:    true,
 													},
+													"dgw_address": schema.StringAttribute{
+														Description: "Configured Address Enter a IPv4 address from the network prefix to be used as the default gateway.",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+													},
 												},
 											},
 											"dns_choice": schema.SingleNestedAttribute{
@@ -721,14 +686,14 @@ func (r *DataSourceF5XCSubnet) Schema(ctx context.Context, request datasource.Sc
 												Optional:    false,
 												Computed:    true,
 												Attributes: map[string]schema.Attribute{
-													"dns_address": schema.StringAttribute{
-														Description: "Configured Address Enter a IPv4 address from the network prefix to be used as the DNS server.",
+													"same_as_dgw": schema.BoolAttribute{
+														Description: "Default Gateway Address DNS server address is same as default gateway address",
 														Required:    false,
 														Optional:    false,
 														Computed:    true,
 													},
-													"same_as_dgw": schema.BoolAttribute{
-														Description: "Default Gateway Address DNS server address is same as default gateway address",
+													"dns_address": schema.StringAttribute{
+														Description: "Configured Address Enter a IPv4 address from the network prefix to be used as the DNS server.",
 														Required:    false,
 														Optional:    false,
 														Computed:    true,
@@ -763,19 +728,54 @@ func (r *DataSourceF5XCSubnet) Schema(ctx context.Context, request datasource.Sc
 												Computed:    true,
 												NestedObject: schema.NestedAttributeObject{
 													Attributes: map[string]schema.Attribute{
-														"end_ip": schema.StringAttribute{
-															Description: "End IP Ending IP of the pool range. In case of address allocator, offset is derived based on network prefix. 10.1.1.200 with prefix length of 24, end offset is 0.0.0.200",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
 														"start_ip": schema.StringAttribute{
 															Description: "Start IP Starting IP of the pool range. In case of address allocator, offset is derived based on network prefix. 10.1.1.5 with prefix length of 24, start offset is 0.0.0.5",
 															Required:    false,
 															Optional:    false,
 															Computed:    true,
 														},
+														"end_ip": schema.StringAttribute{
+															Description: "End IP Ending IP of the pool range. In case of address allocator, offset is derived based on network prefix. 10.1.1.200 with prefix length of 24, end offset is 0.0.0.200",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
 													},
+												},
+											},
+										},
+									},
+								},
+								"interfaces_addressing_choice": schema.SingleNestedAttribute{
+									Description: "Interface IP(s) Specify how interfaces on each node are assigned local address",
+									Required:    false,
+									Optional:    false,
+									Computed:    true,
+									Attributes: map[string]schema.Attribute{
+										"automatic_from_start": schema.BoolAttribute{
+											Description: "Automatic Start Assign automatically from start of the first network in the DHCP Network list",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+										},
+										"automatic_from_end": schema.BoolAttribute{
+											Description: "Automatic End Assign automatically from end of the first network in the DHCP Network list",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+										},
+										"interface_ip_map": schema.SingleNestedAttribute{
+											Description: "Static IPv4 Configuration Statically configure a IPv4 address for every node",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+											Attributes: map[string]schema.Attribute{
+												"interface_ip_map": schema.MapAttribute{
+													Description: "Site:Node to IP mapping Specify static IPv4 addresses per site:node.",
+													ElementType: types.StringType,
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
 												},
 											},
 										},
@@ -857,6 +857,27 @@ func (d *DataSourceF5XCSubnet) Read(ctx context.Context, request datasource.Read
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
+	// data SpecToModelRoot Meta MapOfStringField --> Annotations
+	if metaData.GetAnnotations() != nil {
+		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
+		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+		response.Diagnostics.Append(annotationsDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		// Assign the typed map to the model
+		data.Annotations = annotationsMap
+	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
+		// API returned nil and the model has no value: set an explicit Null map to avoid
+		// DynamicPseudoType errors. If the model already contains a value (e.g. labels were set
+		// but the API did not echo them back in the response), preserve the existing value to prevent
+		// "Provider produced inconsistent result after apply" errors.
+		data.Annotations = types.MapNull(types.StringType)
+	}
+
+	// data SpecToModelRoot Meta StringField --> Description
+	data.Description = types.StringValue(metaData.GetDescription())
+
 	// data SpecToModelRoot Meta RequiredStringField --> Name
 	data.Name = types.StringValue(metaData.GetName())
 
@@ -883,27 +904,6 @@ func (d *DataSourceF5XCSubnet) Read(ctx context.Context, request datasource.Read
 		// "Provider produced inconsistent result after apply" errors.
 		data.Labels = types.MapNull(types.StringType)
 	}
-
-	// data SpecToModelRoot Meta MapOfStringField --> Annotations
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// Assign the typed map to the model
-		data.Annotations = annotationsMap
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil and the model has no value: set an explicit Null map to avoid
-		// DynamicPseudoType errors. If the model already contains a value (e.g. labels were set
-		// but the API did not echo them back in the response), preserve the existing value to prevent
-		// "Provider produced inconsistent result after apply" errors.
-		data.Annotations = types.MapNull(types.StringType)
-	}
-
-	// data SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
 
 	// data SpecToModelRoot RequiredArrayOfPointerField --> SiteSubnetParams
 	siteSubnetParamsElementsSpectToModel := make([]SubnetSubnetSiteSubnetParametersType, 0, len(specData.SiteSubnetParams))
@@ -1074,15 +1074,6 @@ func (d *DataSourceF5XCSubnet) Read(ctx context.Context, request datasource.Read
 
 			// Process nested choices, populating the temporary attribute map
 
-			// data specToModelNested BoolOfOneOfPointerField --> Dhcp
-			_, isDhcp := siteSubnetParamsaddressChoiceChoices.(*ves_io_schema_subnet.SiteSubnetParametersType_Dhcp)
-
-			if isDhcp {
-				siteSubnetParamsaddressChoiceChoicesAttributeMap["dhcp"] = types.BoolValue(true)
-			} else {
-				siteSubnetParamsaddressChoiceChoicesAttributeMap["dhcp"] = types.BoolNull()
-			}
-
 			// data specToModelNested BoolOfOneOfPointerField --> StaticIp
 			_, isStaticIp := siteSubnetParamsaddressChoiceChoices.(*ves_io_schema_subnet.SiteSubnetParametersType_StaticIp)
 
@@ -1090,6 +1081,15 @@ func (d *DataSourceF5XCSubnet) Read(ctx context.Context, request datasource.Read
 				siteSubnetParamsaddressChoiceChoicesAttributeMap["static_ip"] = types.BoolValue(true)
 			} else {
 				siteSubnetParamsaddressChoiceChoicesAttributeMap["static_ip"] = types.BoolNull()
+			}
+
+			// data specToModelNested BoolOfOneOfPointerField --> Dhcp
+			_, isDhcp := siteSubnetParamsaddressChoiceChoices.(*ves_io_schema_subnet.SiteSubnetParametersType_Dhcp)
+
+			if isDhcp {
+				siteSubnetParamsaddressChoiceChoicesAttributeMap["dhcp"] = types.BoolValue(true)
+			} else {
+				siteSubnetParamsaddressChoiceChoicesAttributeMap["dhcp"] = types.BoolNull()
 			}
 
 			// --- End of Choices ---
@@ -1158,14 +1158,6 @@ func (d *DataSourceF5XCSubnet) Read(ctx context.Context, request datasource.Read
 
 					// Recursively populate the nested struct
 
-					// data specToModelNested RequiredStringField --> Name
-					if layer2IntfRefElement.GetName() != "" {
-						objectRefTypeModelModel.Name = types.StringValue(layer2IntfRefElement.GetName())
-					} else {
-						// Empty string, set to null
-						objectRefTypeModelModel.Name = types.StringNull()
-					}
-
 					// data specToModelNested StringField --> Tenant
 					if layer2IntfRefElement.GetTenant() != "" {
 						objectRefTypeModelModel.Tenant = types.StringValue(layer2IntfRefElement.GetTenant())
@@ -1180,6 +1172,14 @@ func (d *DataSourceF5XCSubnet) Read(ctx context.Context, request datasource.Read
 					} else {
 						// Empty string, set to null
 						objectRefTypeModelModel.Namespace = types.StringNull()
+					}
+
+					// data specToModelNested RequiredStringField --> Name
+					if layer2IntfRefElement.GetName() != "" {
+						objectRefTypeModelModel.Name = types.StringValue(layer2IntfRefElement.GetName())
+					} else {
+						// Empty string, set to null
+						objectRefTypeModelModel.Name = types.StringNull()
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
@@ -1311,90 +1311,6 @@ func (d *DataSourceF5XCSubnet) Read(ctx context.Context, request datasource.Read
 
 			// Recursively populate the nested struct
 
-			// data specToModelNested RequiredOneOfField --> InterfacesAddressingChoice
-			// <no value>
-			if subnetDhcpServerParamsElement.GetInterfacesAddressingChoice() != nil {
-				// Create a temporary attribute map for the choices within this OneOf
-				subnetDhcpServerParamsinterfacesAddressingChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-				// Define a variable for the spec choices to be passed down to nested templates.
-				// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-				subnetDhcpServerParamsinterfacesAddressingChoiceChoices := subnetDhcpServerParamsElement.GetInterfacesAddressingChoice()
-
-				// Process nested choices, populating the temporary attribute map
-
-				// data specToModelNested BoolOfOneOfPointerField --> AutomaticFromStart
-				_, isAutomaticFromStart := subnetDhcpServerParamsinterfacesAddressingChoiceChoices.(*ves_io_schema_network_interface.DHCPServerParametersType_AutomaticFromStart)
-
-				if isAutomaticFromStart {
-					subnetDhcpServerParamsinterfacesAddressingChoiceChoicesAttributeMap["automatic_from_start"] = types.BoolValue(true)
-				} else {
-					subnetDhcpServerParamsinterfacesAddressingChoiceChoicesAttributeMap["automatic_from_start"] = types.BoolNull()
-				}
-
-				// data specToModelNested BoolOfOneOfPointerField --> AutomaticFromEnd
-				_, isAutomaticFromEnd := subnetDhcpServerParamsinterfacesAddressingChoiceChoices.(*ves_io_schema_network_interface.DHCPServerParametersType_AutomaticFromEnd)
-
-				if isAutomaticFromEnd {
-					subnetDhcpServerParamsinterfacesAddressingChoiceChoicesAttributeMap["automatic_from_end"] = types.BoolValue(true)
-				} else {
-					subnetDhcpServerParamsinterfacesAddressingChoiceChoicesAttributeMap["automatic_from_end"] = types.BoolNull()
-				}
-
-				// data specToModelNested PointerOfOneOfField --> InterfaceIpMap
-				// <no value>
-				// false
-				{
-					interfaceIpMapOptions, isInterfaceIpMap := subnetDhcpServerParamsinterfacesAddressingChoiceChoices.(*ves_io_schema_network_interface.DHCPServerParametersType_InterfaceIpMap)
-					interfaceIpMapAttributeMap := make(map[string]attr.Value)
-
-					if isInterfaceIpMap && interfaceIpMapOptions != nil {
-
-						// data specToModelNested MapOfStringField --> InterfaceIpMap
-						if interfaceIpMapOptions.InterfaceIpMap.GetInterfaceIpMap() != nil {
-							// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-							interfaceIpMapMap, interfaceIpMapDiags := utils.StringMapToTerraformMap(interfaceIpMapOptions.InterfaceIpMap.GetInterfaceIpMap())
-							response.Diagnostics.Append(interfaceIpMapDiags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							// Assign the typed map to the model
-							interfaceIpMapAttributeMap["interface_ip_map"] = interfaceIpMapMap
-						} else {
-							// Ensure the state reflects a Null map with the correct element type to avoid DynamicPseudoType errors
-							interfaceIpMapAttributeMap["interface_ip_map"] = types.MapNull(types.StringType)
-						}
-
-						interfaceIpMapObj, diags := types.ObjectValue(SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsInterfacesAddressingChoiceInterfaceIpMapModelAttributeMap, interfaceIpMapAttributeMap)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						subnetDhcpServerParamsinterfacesAddressingChoiceChoicesAttributeMap["interface_ip_map"] = interfaceIpMapObj
-					} else {
-						subnetDhcpServerParamsinterfacesAddressingChoiceChoicesAttributeMap["interface_ip_map"] = types.ObjectNull(SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsInterfacesAddressingChoiceInterfaceIpMapModelAttributeMap)
-					}
-				}
-
-				// --- End of Choices ---
-
-				// Create the final ObjectValue for this OneOf field
-				finalObj, subnetDhcpServerParamsinterfacesAddressingChoiceChoicesObjDiags := types.ObjectValue(
-					SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsInterfacesAddressingChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-					subnetDhcpServerParamsinterfacesAddressingChoiceChoicesAttributeMap,
-				)
-				response.Diagnostics.Append(subnetDhcpServerParamsinterfacesAddressingChoiceChoicesObjDiags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// Assign the final object to the correct place (either the root model or a parent's attribute map)
-				subnetNetworkInterfaceDHCPServerParametersTypeModel.InterfacesAddressingChoice = finalObj
-			} else {
-				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-				subnetNetworkInterfaceDHCPServerParametersTypeModel.InterfacesAddressingChoice = types.ObjectNull(SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsInterfacesAddressingChoiceModelAttributeMap)
-			}
-
 			// data specToModelNested MapOfStringField --> FixedIpMap
 			if subnetDhcpServerParamsElement.GetFixedIpMap() != nil {
 				// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
@@ -1430,16 +1346,6 @@ func (d *DataSourceF5XCSubnet) Read(ctx context.Context, request datasource.Read
 
 						// Process nested choices, populating the temporary attribute map
 
-						// data specToModelNested StringOfOneOfField --> DgwAddress
-						dgwAddressItem, isDgwAddress := dhcpNetworksgatewayChoiceChoices.(*ves_io_schema_network_interface.DHCPNetworkType_DgwAddress)
-
-						if isDgwAddress {
-							dhcpNetworksgatewayChoiceChoicesAttributeMap["dgw_address"] = types.StringValue(string(dgwAddressItem.DgwAddress))
-						} else {
-							// Empty string, set to null
-							dhcpNetworksgatewayChoiceChoicesAttributeMap["dgw_address"] = types.StringNull()
-						}
-
 						// data specToModelNested BoolOfOneOfPointerField --> FirstAddress
 						_, isFirstAddress := dhcpNetworksgatewayChoiceChoices.(*ves_io_schema_network_interface.DHCPNetworkType_FirstAddress)
 
@@ -1456,6 +1362,16 @@ func (d *DataSourceF5XCSubnet) Read(ctx context.Context, request datasource.Read
 							dhcpNetworksgatewayChoiceChoicesAttributeMap["last_address"] = types.BoolValue(true)
 						} else {
 							dhcpNetworksgatewayChoiceChoicesAttributeMap["last_address"] = types.BoolNull()
+						}
+
+						// data specToModelNested StringOfOneOfField --> DgwAddress
+						dgwAddressItem, isDgwAddress := dhcpNetworksgatewayChoiceChoices.(*ves_io_schema_network_interface.DHCPNetworkType_DgwAddress)
+
+						if isDgwAddress {
+							dhcpNetworksgatewayChoiceChoicesAttributeMap["dgw_address"] = types.StringValue(string(dgwAddressItem.DgwAddress))
+						} else {
+							// Empty string, set to null
+							dhcpNetworksgatewayChoiceChoicesAttributeMap["dgw_address"] = types.StringNull()
 						}
 
 						// --- End of Choices ---
@@ -1489,6 +1405,15 @@ func (d *DataSourceF5XCSubnet) Read(ctx context.Context, request datasource.Read
 
 						// Process nested choices, populating the temporary attribute map
 
+						// data specToModelNested BoolOfOneOfPointerField --> SameAsDgw
+						_, isSameAsDgw := dhcpNetworksdnsChoiceChoices.(*ves_io_schema_network_interface.DHCPNetworkType_SameAsDgw)
+
+						if isSameAsDgw {
+							dhcpNetworksdnsChoiceChoicesAttributeMap["same_as_dgw"] = types.BoolValue(true)
+						} else {
+							dhcpNetworksdnsChoiceChoicesAttributeMap["same_as_dgw"] = types.BoolNull()
+						}
+
 						// data specToModelNested StringOfOneOfField --> DnsAddress
 						dnsAddressItem, isDnsAddress := dhcpNetworksdnsChoiceChoices.(*ves_io_schema_network_interface.DHCPNetworkType_DnsAddress)
 
@@ -1497,15 +1422,6 @@ func (d *DataSourceF5XCSubnet) Read(ctx context.Context, request datasource.Read
 						} else {
 							// Empty string, set to null
 							dhcpNetworksdnsChoiceChoicesAttributeMap["dns_address"] = types.StringNull()
-						}
-
-						// data specToModelNested BoolOfOneOfPointerField --> SameAsDgw
-						_, isSameAsDgw := dhcpNetworksdnsChoiceChoices.(*ves_io_schema_network_interface.DHCPNetworkType_SameAsDgw)
-
-						if isSameAsDgw {
-							dhcpNetworksdnsChoiceChoicesAttributeMap["same_as_dgw"] = types.BoolValue(true)
-						} else {
-							dhcpNetworksdnsChoiceChoicesAttributeMap["same_as_dgw"] = types.BoolNull()
 						}
 
 						// --- End of Choices ---
@@ -1590,20 +1506,20 @@ func (d *DataSourceF5XCSubnet) Read(ctx context.Context, request datasource.Read
 						for _, poolsElement := range dhcpNetworksElement.GetPools() {
 							subnetNetworkInterfaceDHCPPoolTypeModel := SubnetNetworkInterfaceDHCPPoolType{}
 
-							// data specToModelNested StringField --> EndIp
-							if poolsElement.GetEndIp() != "" {
-								subnetNetworkInterfaceDHCPPoolTypeModel.EndIp = types.StringValue(poolsElement.GetEndIp())
-							} else {
-								// Empty string, set to null
-								subnetNetworkInterfaceDHCPPoolTypeModel.EndIp = types.StringNull()
-							}
-
 							// data specToModelNested StringField --> StartIp
 							if poolsElement.GetStartIp() != "" {
 								subnetNetworkInterfaceDHCPPoolTypeModel.StartIp = types.StringValue(poolsElement.GetStartIp())
 							} else {
 								// Empty string, set to null
 								subnetNetworkInterfaceDHCPPoolTypeModel.StartIp = types.StringNull()
+							}
+
+							// data specToModelNested StringField --> EndIp
+							if poolsElement.GetEndIp() != "" {
+								subnetNetworkInterfaceDHCPPoolTypeModel.EndIp = types.StringValue(poolsElement.GetEndIp())
+							} else {
+								// Empty string, set to null
+								subnetNetworkInterfaceDHCPPoolTypeModel.EndIp = types.StringNull()
 							}
 
 							poolsElements = append(poolsElements, subnetNetworkInterfaceDHCPPoolTypeModel)
@@ -1640,6 +1556,90 @@ func (d *DataSourceF5XCSubnet) Read(ctx context.Context, request datasource.Read
 				// CASE 1: The target field is a `types.List` or an attribute map.
 				// Assign a null `types.ListValue`.
 				subnetNetworkInterfaceDHCPServerParametersTypeModel.DhcpNetworks = types.ListNull(types.ObjectType{AttrTypes: SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsDhcpNetworksModelAttributeMap})
+			}
+
+			// data specToModelNested RequiredOneOfField --> InterfacesAddressingChoice
+			// <no value>
+			if subnetDhcpServerParamsElement.GetInterfacesAddressingChoice() != nil {
+				// Create a temporary attribute map for the choices within this OneOf
+				subnetDhcpServerParamsinterfacesAddressingChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+				// Define a variable for the spec choices to be passed down to nested templates.
+				// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+				subnetDhcpServerParamsinterfacesAddressingChoiceChoices := subnetDhcpServerParamsElement.GetInterfacesAddressingChoice()
+
+				// Process nested choices, populating the temporary attribute map
+
+				// data specToModelNested BoolOfOneOfPointerField --> AutomaticFromStart
+				_, isAutomaticFromStart := subnetDhcpServerParamsinterfacesAddressingChoiceChoices.(*ves_io_schema_network_interface.DHCPServerParametersType_AutomaticFromStart)
+
+				if isAutomaticFromStart {
+					subnetDhcpServerParamsinterfacesAddressingChoiceChoicesAttributeMap["automatic_from_start"] = types.BoolValue(true)
+				} else {
+					subnetDhcpServerParamsinterfacesAddressingChoiceChoicesAttributeMap["automatic_from_start"] = types.BoolNull()
+				}
+
+				// data specToModelNested BoolOfOneOfPointerField --> AutomaticFromEnd
+				_, isAutomaticFromEnd := subnetDhcpServerParamsinterfacesAddressingChoiceChoices.(*ves_io_schema_network_interface.DHCPServerParametersType_AutomaticFromEnd)
+
+				if isAutomaticFromEnd {
+					subnetDhcpServerParamsinterfacesAddressingChoiceChoicesAttributeMap["automatic_from_end"] = types.BoolValue(true)
+				} else {
+					subnetDhcpServerParamsinterfacesAddressingChoiceChoicesAttributeMap["automatic_from_end"] = types.BoolNull()
+				}
+
+				// data specToModelNested PointerOfOneOfField --> InterfaceIpMap
+				// <no value>
+				// false
+				{
+					interfaceIpMapOptions, isInterfaceIpMap := subnetDhcpServerParamsinterfacesAddressingChoiceChoices.(*ves_io_schema_network_interface.DHCPServerParametersType_InterfaceIpMap)
+					interfaceIpMapAttributeMap := make(map[string]attr.Value)
+
+					if isInterfaceIpMap && interfaceIpMapOptions != nil {
+
+						// data specToModelNested MapOfStringField --> InterfaceIpMap
+						if interfaceIpMapOptions.InterfaceIpMap.GetInterfaceIpMap() != nil {
+							// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
+							interfaceIpMapMap, interfaceIpMapDiags := utils.StringMapToTerraformMap(interfaceIpMapOptions.InterfaceIpMap.GetInterfaceIpMap())
+							response.Diagnostics.Append(interfaceIpMapDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							// Assign the typed map to the model
+							interfaceIpMapAttributeMap["interface_ip_map"] = interfaceIpMapMap
+						} else {
+							// Ensure the state reflects a Null map with the correct element type to avoid DynamicPseudoType errors
+							interfaceIpMapAttributeMap["interface_ip_map"] = types.MapNull(types.StringType)
+						}
+
+						interfaceIpMapObj, diags := types.ObjectValue(SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsInterfacesAddressingChoiceInterfaceIpMapModelAttributeMap, interfaceIpMapAttributeMap)
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						subnetDhcpServerParamsinterfacesAddressingChoiceChoicesAttributeMap["interface_ip_map"] = interfaceIpMapObj
+					} else {
+						subnetDhcpServerParamsinterfacesAddressingChoiceChoicesAttributeMap["interface_ip_map"] = types.ObjectNull(SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsInterfacesAddressingChoiceInterfaceIpMapModelAttributeMap)
+					}
+				}
+
+				// --- End of Choices ---
+
+				// Create the final ObjectValue for this OneOf field
+				finalObj, subnetDhcpServerParamsinterfacesAddressingChoiceChoicesObjDiags := types.ObjectValue(
+					SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsInterfacesAddressingChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+					subnetDhcpServerParamsinterfacesAddressingChoiceChoicesAttributeMap,
+				)
+				response.Diagnostics.Append(subnetDhcpServerParamsinterfacesAddressingChoiceChoicesObjDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				// Assign the final object to the correct place (either the root model or a parent's attribute map)
+				subnetNetworkInterfaceDHCPServerParametersTypeModel.InterfacesAddressingChoice = finalObj
+			} else {
+				// The OneOf field is nil in the source spec, so set the Terraform object to null.
+				subnetNetworkInterfaceDHCPServerParametersTypeModel.InterfacesAddressingChoice = types.ObjectNull(SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsInterfacesAddressingChoiceModelAttributeMap)
 			}
 
 			// This field needs to be converted to a types.ObjectValue before assignment.

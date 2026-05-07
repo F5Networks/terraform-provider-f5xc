@@ -31,23 +31,18 @@ type DataSourceF5XCEnhancedFirewallPolicy struct {
 }
 
 type EnhancedFirewallPolicyGlobalSpecTypeRuleChoice struct {
-	DenyAll             types.Bool   `tfsdk:"deny_all"`
-	DeniedSources       types.Object `tfsdk:"denied_sources"`
 	DeniedDestinations  types.Object `tfsdk:"denied_destinations"`
 	RuleList            types.Object `tfsdk:"rule_list"`
 	AllowAll            types.Bool   `tfsdk:"allow_all"`
 	AllowedSources      types.Object `tfsdk:"allowed_sources"`
 	AllowedDestinations types.Object `tfsdk:"allowed_destinations"`
-}
-
-type EnhancedFirewallPolicyGlobalSpecTypeDeniedSources struct {
-	Prefix     types.List `tfsdk:"prefix"`
-	Ipv6Prefix types.List `tfsdk:"ipv6_prefix"`
+	DenyAll             types.Bool   `tfsdk:"deny_all"`
+	DeniedSources       types.Object `tfsdk:"denied_sources"`
 }
 
 type EnhancedFirewallPolicyGlobalSpecTypeDeniedDestinations struct {
-	Prefix     types.List `tfsdk:"prefix"`
 	Ipv6Prefix types.List `tfsdk:"ipv6_prefix"`
+	Prefix     types.List `tfsdk:"prefix"`
 }
 
 type EnhancedFirewallPolicyGlobalSpecTypeRuleList struct {
@@ -55,60 +50,29 @@ type EnhancedFirewallPolicyGlobalSpecTypeRuleList struct {
 }
 
 type EnhancedFirewallPolicyEnhancedFirewallPolicyEnhancedFirewallPolicyRuleType struct {
-	SourceChoice      types.Object `tfsdk:"source_choice"`
 	DestinationChoice types.Object `tfsdk:"destination_choice"`
 	TrafficChoice     types.Object `tfsdk:"traffic_choice"`
 	LabelMatcher      types.Object `tfsdk:"label_matcher"`
 	Metadata          types.Object `tfsdk:"metadata"`
 	ActionChoice      types.Object `tfsdk:"action_choice"`
 	AdvancedAction    types.Object `tfsdk:"advanced_action"`
-}
-
-type EnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeSourceChoice struct {
-	SourcePrefixList    types.Object `tfsdk:"source_prefix_list"`
-	SourceIpPrefixSet   types.Object `tfsdk:"source_ip_prefix_set"`
-	OutsideSources      types.Bool   `tfsdk:"outside_sources"`
-	SourceLabelSelector types.Object `tfsdk:"source_label_selector"`
-	SourceAwsVpcIds     types.Object `tfsdk:"source_aws_vpc_ids"`
-	InsideSources       types.Bool   `tfsdk:"inside_sources"`
-	AllSources          types.Bool   `tfsdk:"all_sources"`
-}
-
-type EnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeSourcePrefixList struct {
-	Prefixes     types.List `tfsdk:"prefixes"`
-	Ipv6Prefixes types.List `tfsdk:"ipv6_prefixes"`
-}
-
-type EnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeSourceIpPrefixSet struct {
-	Ref types.List `tfsdk:"ref"`
-}
-
-type EnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeSourceLabelSelector struct {
-	Expressions types.List `tfsdk:"expressions"`
-}
-
-type EnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeSourceAwsVpcIds struct {
-	VpcId types.List `tfsdk:"vpc_id"`
+	SourceChoice      types.Object `tfsdk:"source_choice"`
 }
 
 type EnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeDestinationChoice struct {
 	DestinationLabelSelector types.Object `tfsdk:"destination_label_selector"`
-	OutsideDestinations      types.Bool   `tfsdk:"outside_destinations"`
-	AllSloVips               types.Bool   `tfsdk:"all_slo_vips"`
-	DestinationAwsVpcIds     types.Object `tfsdk:"destination_aws_vpc_ids"`
-	AllDestinations          types.Bool   `tfsdk:"all_destinations"`
 	DestinationPrefixList    types.Object `tfsdk:"destination_prefix_list"`
 	DestinationIpPrefixSet   types.Object `tfsdk:"destination_ip_prefix_set"`
-	AllSliVips               types.Bool   `tfsdk:"all_sli_vips"`
 	InsideDestinations       types.Bool   `tfsdk:"inside_destinations"`
+	AllSloVips               types.Bool   `tfsdk:"all_slo_vips"`
+	OutsideDestinations      types.Bool   `tfsdk:"outside_destinations"`
+	AllSliVips               types.Bool   `tfsdk:"all_sli_vips"`
+	DestinationAwsVpcIds     types.Object `tfsdk:"destination_aws_vpc_ids"`
+	AllDestinations          types.Bool   `tfsdk:"all_destinations"`
 }
 
 type EnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeDestinationLabelSelector struct {
 	Expressions types.List `tfsdk:"expressions"`
-}
-
-type EnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeDestinationAwsVpcIds struct {
-	VpcId types.List `tfsdk:"vpc_id"`
 }
 
 type EnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeDestinationPrefixList struct {
@@ -120,21 +84,25 @@ type EnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeDestinationIpPrefixSet 
 	Ref types.List `tfsdk:"ref"`
 }
 
+type EnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeDestinationAwsVpcIds struct {
+	VpcId types.List `tfsdk:"vpc_id"`
+}
+
 type EnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeTrafficChoice struct {
-	ProtocolPortRange types.Object `tfsdk:"protocol_port_range"`
 	AllTraffic        types.Bool   `tfsdk:"all_traffic"`
 	AllTcpTraffic     types.Bool   `tfsdk:"all_tcp_traffic"`
 	AllUdpTraffic     types.Bool   `tfsdk:"all_udp_traffic"`
 	Applications      types.Object `tfsdk:"applications"`
-}
-
-type EnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeProtocolPortRange struct {
-	Protocol   types.String `tfsdk:"protocol"`
-	PortRanges types.List   `tfsdk:"port_ranges"`
+	ProtocolPortRange types.Object `tfsdk:"protocol_port_range"`
 }
 
 type EnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeApplications struct {
 	Applications types.List `tfsdk:"applications"`
+}
+
+type EnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeProtocolPortRange struct {
+	PortRanges types.List   `tfsdk:"port_ranges"`
+	Protocol   types.String `tfsdk:"protocol"`
 }
 
 type EnhancedFirewallPolicyLabelMatcherType struct {
@@ -160,6 +128,33 @@ type EnhancedFirewallPolicyNetworkPolicyRuleNetworkPolicyRuleAdvancedAction stru
 	Action types.List `tfsdk:"action"`
 }
 
+type EnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeSourceChoice struct {
+	OutsideSources      types.Bool   `tfsdk:"outside_sources"`
+	SourceLabelSelector types.Object `tfsdk:"source_label_selector"`
+	AllSources          types.Bool   `tfsdk:"all_sources"`
+	SourcePrefixList    types.Object `tfsdk:"source_prefix_list"`
+	SourceIpPrefixSet   types.Object `tfsdk:"source_ip_prefix_set"`
+	InsideSources       types.Bool   `tfsdk:"inside_sources"`
+	SourceAwsVpcIds     types.Object `tfsdk:"source_aws_vpc_ids"`
+}
+
+type EnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeSourceLabelSelector struct {
+	Expressions types.List `tfsdk:"expressions"`
+}
+
+type EnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeSourcePrefixList struct {
+	Prefixes     types.List `tfsdk:"prefixes"`
+	Ipv6Prefixes types.List `tfsdk:"ipv6_prefixes"`
+}
+
+type EnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeSourceIpPrefixSet struct {
+	Ref types.List `tfsdk:"ref"`
+}
+
+type EnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeSourceAwsVpcIds struct {
+	VpcId types.List `tfsdk:"vpc_id"`
+}
+
 type EnhancedFirewallPolicyGlobalSpecTypeAllowedSources struct {
 	Prefix     types.List `tfsdk:"prefix"`
 	Ipv6Prefix types.List `tfsdk:"ipv6_prefix"`
@@ -170,19 +165,14 @@ type EnhancedFirewallPolicyGlobalSpecTypeAllowedDestinations struct {
 	Ipv6Prefix types.List `tfsdk:"ipv6_prefix"`
 }
 
+type EnhancedFirewallPolicyGlobalSpecTypeDeniedSources struct {
+	Prefix     types.List `tfsdk:"prefix"`
+	Ipv6Prefix types.List `tfsdk:"ipv6_prefix"`
+}
+
 type EnhancedFirewallPolicyPolicySegmentPolicyType struct {
-	DstSegmentChoice types.Object `tfsdk:"dst_segment_choice"`
 	SrcSegmentChoice types.Object `tfsdk:"src_segment_choice"`
-}
-
-type EnhancedFirewallPolicySegmentPolicyTypeDstSegmentChoice struct {
-	DstAny       types.Bool   `tfsdk:"dst_any"`
-	IntraSegment types.Bool   `tfsdk:"intra_segment"`
-	DstSegments  types.Object `tfsdk:"dst_segments"`
-}
-
-type EnhancedFirewallPolicySegmentPolicyTypeDstSegments struct {
-	Segments types.List `tfsdk:"segments"`
+	DstSegmentChoice types.Object `tfsdk:"dst_segment_choice"`
 }
 
 type EnhancedFirewallPolicySegmentPolicyTypeSrcSegmentChoice struct {
@@ -194,14 +184,24 @@ type EnhancedFirewallPolicySegmentPolicyTypeSrcSegments struct {
 	Segments types.List `tfsdk:"segments"`
 }
 
+type EnhancedFirewallPolicySegmentPolicyTypeDstSegmentChoice struct {
+	DstSegments  types.Object `tfsdk:"dst_segments"`
+	DstAny       types.Bool   `tfsdk:"dst_any"`
+	IntraSegment types.Bool   `tfsdk:"intra_segment"`
+}
+
+type EnhancedFirewallPolicySegmentPolicyTypeDstSegments struct {
+	Segments types.List `tfsdk:"segments"`
+}
+
 // DataSourceF5XCEnhancedFirewallPolicyModel describes the resource data model.
 type DataSourceF5XCEnhancedFirewallPolicyModel struct {
+	Labels        types.Map      `tfsdk:"labels"`
+	Annotations   types.Map      `tfsdk:"annotations"`
 	Description   types.String   `tfsdk:"description"`
 	Name          types.String   `tfsdk:"name"`
 	Namespace     types.String   `tfsdk:"namespace"`
 	Uid           types.String   `tfsdk:"uid"`
-	Labels        types.Map      `tfsdk:"labels"`
-	Annotations   types.Map      `tfsdk:"annotations"`
 	RuleChoice    types.Object   `tfsdk:"rule_choice"`
 	SegmentPolicy types.Object   `tfsdk:"segment_policy"`
 	Timeouts      timeouts.Value `tfsdk:"timeouts"`
@@ -211,10 +211,6 @@ type DataSourceF5XCEnhancedFirewallPolicyModel struct {
 // Attribute map for RequiredOneOfField --> RuleChoice
 var EnhancedFirewallPolicyRuleChoiceModelAttributeMap = map[string]attr.Type{
 
-	"deny_all": types.BoolType,
-	"denied_sources": types.ObjectType{
-		AttrTypes: EnhancedFirewallPolicyRuleChoiceDeniedSourcesModelAttributeMap,
-	},
 	"denied_destinations": types.ObjectType{
 		AttrTypes: EnhancedFirewallPolicyRuleChoiceDeniedDestinationsModelAttributeMap,
 	},
@@ -228,26 +224,19 @@ var EnhancedFirewallPolicyRuleChoiceModelAttributeMap = map[string]attr.Type{
 	"allowed_destinations": types.ObjectType{
 		AttrTypes: EnhancedFirewallPolicyRuleChoiceAllowedDestinationsModelAttributeMap,
 	},
-}
-
-// Attribute map for PointerOfOneOfField --> DeniedSources
-var EnhancedFirewallPolicyRuleChoiceDeniedSourcesModelAttributeMap = map[string]attr.Type{
-
-	"prefix": types.ListType{
-		ElemType: types.StringType,
-	},
-	"ipv6_prefix": types.ListType{
-		ElemType: types.StringType,
+	"deny_all": types.BoolType,
+	"denied_sources": types.ObjectType{
+		AttrTypes: EnhancedFirewallPolicyRuleChoiceDeniedSourcesModelAttributeMap,
 	},
 }
 
 // Attribute map for PointerOfOneOfField --> DeniedDestinations
 var EnhancedFirewallPolicyRuleChoiceDeniedDestinationsModelAttributeMap = map[string]attr.Type{
 
-	"prefix": types.ListType{
+	"ipv6_prefix": types.ListType{
 		ElemType: types.StringType,
 	},
-	"ipv6_prefix": types.ListType{
+	"prefix": types.ListType{
 		ElemType: types.StringType,
 	},
 }
@@ -259,9 +248,6 @@ var EnhancedFirewallPolicyRuleChoiceRuleListModelAttributeMap = map[string]attr.
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
 
-				"source_choice": types.ObjectType{
-					AttrTypes: EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceModelAttributeMap,
-				},
 				"destination_choice": types.ObjectType{
 					AttrTypes: EnhancedFirewallPolicyRuleChoiceRuleListRulesDestinationChoiceModelAttributeMap,
 				},
@@ -285,6 +271,9 @@ var EnhancedFirewallPolicyRuleChoiceRuleListModelAttributeMap = map[string]attr.
 							ElemType: types.StringType,
 						}},
 				},
+				"source_choice": types.ObjectType{
+					AttrTypes: EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceModelAttributeMap,
+				},
 			},
 		},
 	},
@@ -293,9 +282,6 @@ var EnhancedFirewallPolicyRuleChoiceRuleListModelAttributeMap = map[string]attr.
 // Attribute map for RequiredArrayOfPointerField --> Rules
 var EnhancedFirewallPolicyRuleChoiceRuleListRulesModelAttributeMap = map[string]attr.Type{
 
-	"source_choice": types.ObjectType{
-		AttrTypes: EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceModelAttributeMap,
-	},
 	"destination_choice": types.ObjectType{
 		AttrTypes: EnhancedFirewallPolicyRuleChoiceRuleListRulesDestinationChoiceModelAttributeMap,
 	},
@@ -319,75 +305,8 @@ var EnhancedFirewallPolicyRuleChoiceRuleListRulesModelAttributeMap = map[string]
 				ElemType: types.StringType,
 			}},
 	},
-}
-
-// Attribute map for RequiredOneOfField --> SourceChoice
-var EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceModelAttributeMap = map[string]attr.Type{
-
-	"source_prefix_list": types.ObjectType{
-		AttrTypes: EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceSourcePrefixListModelAttributeMap,
-	},
-	"source_ip_prefix_set": types.ObjectType{
-		AttrTypes: EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceSourceIpPrefixSetModelAttributeMap,
-	},
-	"outside_sources": types.BoolType,
-	"source_label_selector": types.ObjectType{
-		AttrTypes: EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceSourceLabelSelectorModelAttributeMap,
-	},
-	"source_aws_vpc_ids": types.ObjectType{
-		AttrTypes: EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceSourceAwsVpcIdsModelAttributeMap,
-	},
-	"inside_sources": types.BoolType,
-	"all_sources":    types.BoolType,
-}
-
-// Attribute map for PointerOfOneOfField --> SourcePrefixList
-var EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceSourcePrefixListModelAttributeMap = map[string]attr.Type{
-
-	"prefixes": types.ListType{
-		ElemType: types.StringType,
-	},
-	"ipv6_prefixes": types.ListType{
-		ElemType: types.StringType,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> SourceIpPrefixSet
-var EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceSourceIpPrefixSetModelAttributeMap = map[string]attr.Type{
-
-	"ref": types.ListType{
-		ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-
-				"tenant":    types.StringType,
-				"namespace": types.StringType,
-				"name":      types.StringType,
-			},
-		},
-	},
-}
-
-// Attribute map for ArrayOfPointerField --> Ref
-var EnhancedFirewallPolicyRefObjectRefModelAttributeMap = map[string]attr.Type{
-
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
-	"name":      types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> SourceLabelSelector
-var EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceSourceLabelSelectorModelAttributeMap = map[string]attr.Type{
-
-	"expressions": types.ListType{
-		ElemType: types.StringType,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> SourceAwsVpcIds
-var EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceSourceAwsVpcIdsModelAttributeMap = map[string]attr.Type{
-
-	"vpc_id": types.ListType{
-		ElemType: types.StringType,
+	"source_choice": types.ObjectType{
+		AttrTypes: EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceModelAttributeMap,
 	},
 }
 
@@ -397,34 +316,26 @@ var EnhancedFirewallPolicyRuleChoiceRuleListRulesDestinationChoiceModelAttribute
 	"destination_label_selector": types.ObjectType{
 		AttrTypes: EnhancedFirewallPolicyRuleChoiceRuleListRulesDestinationChoiceDestinationLabelSelectorModelAttributeMap,
 	},
-	"outside_destinations": types.BoolType,
-	"all_slo_vips":         types.BoolType,
-	"destination_aws_vpc_ids": types.ObjectType{
-		AttrTypes: EnhancedFirewallPolicyRuleChoiceRuleListRulesDestinationChoiceDestinationAwsVpcIdsModelAttributeMap,
-	},
-	"all_destinations": types.BoolType,
 	"destination_prefix_list": types.ObjectType{
 		AttrTypes: EnhancedFirewallPolicyRuleChoiceRuleListRulesDestinationChoiceDestinationPrefixListModelAttributeMap,
 	},
 	"destination_ip_prefix_set": types.ObjectType{
 		AttrTypes: EnhancedFirewallPolicyRuleChoiceRuleListRulesDestinationChoiceDestinationIpPrefixSetModelAttributeMap,
 	},
-	"all_sli_vips":        types.BoolType,
-	"inside_destinations": types.BoolType,
+	"inside_destinations":  types.BoolType,
+	"all_slo_vips":         types.BoolType,
+	"outside_destinations": types.BoolType,
+	"all_sli_vips":         types.BoolType,
+	"destination_aws_vpc_ids": types.ObjectType{
+		AttrTypes: EnhancedFirewallPolicyRuleChoiceRuleListRulesDestinationChoiceDestinationAwsVpcIdsModelAttributeMap,
+	},
+	"all_destinations": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> DestinationLabelSelector
 var EnhancedFirewallPolicyRuleChoiceRuleListRulesDestinationChoiceDestinationLabelSelectorModelAttributeMap = map[string]attr.Type{
 
 	"expressions": types.ListType{
-		ElemType: types.StringType,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> DestinationAwsVpcIds
-var EnhancedFirewallPolicyRuleChoiceRuleListRulesDestinationChoiceDestinationAwsVpcIdsModelAttributeMap = map[string]attr.Type{
-
-	"vpc_id": types.ListType{
 		ElemType: types.StringType,
 	},
 }
@@ -447,34 +358,41 @@ var EnhancedFirewallPolicyRuleChoiceRuleListRulesDestinationChoiceDestinationIpP
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
 
+				"namespace": types.StringType,
 				"name":      types.StringType,
 				"tenant":    types.StringType,
-				"namespace": types.StringType,
 			},
 		},
+	},
+}
+
+// Attribute map for ArrayOfPointerField --> Ref
+var EnhancedFirewallPolicyRefObjectRefModelAttributeMap = map[string]attr.Type{
+
+	"namespace": types.StringType,
+	"name":      types.StringType,
+	"tenant":    types.StringType,
+}
+
+// Attribute map for PointerOfOneOfField --> DestinationAwsVpcIds
+var EnhancedFirewallPolicyRuleChoiceRuleListRulesDestinationChoiceDestinationAwsVpcIdsModelAttributeMap = map[string]attr.Type{
+
+	"vpc_id": types.ListType{
+		ElemType: types.StringType,
 	},
 }
 
 // Attribute map for RequiredOneOfField --> TrafficChoice
 var EnhancedFirewallPolicyRuleChoiceRuleListRulesTrafficChoiceModelAttributeMap = map[string]attr.Type{
 
-	"protocol_port_range": types.ObjectType{
-		AttrTypes: EnhancedFirewallPolicyRuleChoiceRuleListRulesTrafficChoiceProtocolPortRangeModelAttributeMap,
-	},
 	"all_traffic":     types.BoolType,
 	"all_tcp_traffic": types.BoolType,
 	"all_udp_traffic": types.BoolType,
 	"applications": types.ObjectType{
 		AttrTypes: EnhancedFirewallPolicyRuleChoiceRuleListRulesTrafficChoiceApplicationsModelAttributeMap,
 	},
-}
-
-// Attribute map for PointerOfOneOfField --> ProtocolPortRange
-var EnhancedFirewallPolicyRuleChoiceRuleListRulesTrafficChoiceProtocolPortRangeModelAttributeMap = map[string]attr.Type{
-
-	"protocol": types.StringType,
-	"port_ranges": types.ListType{
-		ElemType: types.StringType,
+	"protocol_port_range": types.ObjectType{
+		AttrTypes: EnhancedFirewallPolicyRuleChoiceRuleListRulesTrafficChoiceProtocolPortRangeModelAttributeMap,
 	},
 }
 
@@ -484,6 +402,15 @@ var EnhancedFirewallPolicyRuleChoiceRuleListRulesTrafficChoiceApplicationsModelA
 	"applications": types.ListType{
 		ElemType: types.StringType,
 	},
+}
+
+// Attribute map for PointerOfOneOfField --> ProtocolPortRange
+var EnhancedFirewallPolicyRuleChoiceRuleListRulesTrafficChoiceProtocolPortRangeModelAttributeMap = map[string]attr.Type{
+
+	"port_ranges": types.ListType{
+		ElemType: types.StringType,
+	},
+	"protocol": types.StringType,
 }
 
 // Attribute map for PointerField --> LabelMatcher
@@ -515,24 +442,86 @@ var EnhancedFirewallPolicyRuleChoiceRuleListRulesActionChoiceModelAttributeMap =
 var EnhancedFirewallPolicyRuleChoiceRuleListRulesActionChoiceInsertServiceModelAttributeMap = map[string]attr.Type{
 	"nfv_service": types.ObjectType{
 		AttrTypes: map[string]attr.Type{
-			"name":      types.StringType,
 			"tenant":    types.StringType,
-			"namespace": types.StringType},
+			"namespace": types.StringType,
+			"name":      types.StringType},
 	},
 }
 
 // Attribute map for RequiredPointerField --> NfvService
 var EnhancedFirewallPolicyRuleChoiceRuleListRulesActionChoiceInsertServiceNfvServiceModelAttributeMap = map[string]attr.Type{
 
-	"name":      types.StringType,
 	"tenant":    types.StringType,
 	"namespace": types.StringType,
+	"name":      types.StringType,
 }
 
 // Attribute map for PointerField --> AdvancedAction
 var EnhancedFirewallPolicyRuleChoiceRuleListRulesAdvancedActionModelAttributeMap = map[string]attr.Type{
 
 	"action": types.ListType{
+		ElemType: types.StringType,
+	},
+}
+
+// Attribute map for RequiredOneOfField --> SourceChoice
+var EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceModelAttributeMap = map[string]attr.Type{
+
+	"outside_sources": types.BoolType,
+	"source_label_selector": types.ObjectType{
+		AttrTypes: EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceSourceLabelSelectorModelAttributeMap,
+	},
+	"all_sources": types.BoolType,
+	"source_prefix_list": types.ObjectType{
+		AttrTypes: EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceSourcePrefixListModelAttributeMap,
+	},
+	"source_ip_prefix_set": types.ObjectType{
+		AttrTypes: EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceSourceIpPrefixSetModelAttributeMap,
+	},
+	"inside_sources": types.BoolType,
+	"source_aws_vpc_ids": types.ObjectType{
+		AttrTypes: EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceSourceAwsVpcIdsModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> SourceLabelSelector
+var EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceSourceLabelSelectorModelAttributeMap = map[string]attr.Type{
+
+	"expressions": types.ListType{
+		ElemType: types.StringType,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> SourcePrefixList
+var EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceSourcePrefixListModelAttributeMap = map[string]attr.Type{
+
+	"prefixes": types.ListType{
+		ElemType: types.StringType,
+	},
+	"ipv6_prefixes": types.ListType{
+		ElemType: types.StringType,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> SourceIpPrefixSet
+var EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceSourceIpPrefixSetModelAttributeMap = map[string]attr.Type{
+
+	"ref": types.ListType{
+		ElemType: types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+
+				"name":      types.StringType,
+				"tenant":    types.StringType,
+				"namespace": types.StringType,
+			},
+		},
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> SourceAwsVpcIds
+var EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceSourceAwsVpcIdsModelAttributeMap = map[string]attr.Type{
+
+	"vpc_id": types.ListType{
 		ElemType: types.StringType,
 	},
 }
@@ -559,48 +548,26 @@ var EnhancedFirewallPolicyRuleChoiceAllowedDestinationsModelAttributeMap = map[s
 	},
 }
 
+// Attribute map for PointerOfOneOfField --> DeniedSources
+var EnhancedFirewallPolicyRuleChoiceDeniedSourcesModelAttributeMap = map[string]attr.Type{
+
+	"prefix": types.ListType{
+		ElemType: types.StringType,
+	},
+	"ipv6_prefix": types.ListType{
+		ElemType: types.StringType,
+	},
+}
+
 // Attribute map for PointerField --> SegmentPolicy
 var EnhancedFirewallPolicySegmentPolicyModelAttributeMap = map[string]attr.Type{
 
-	"dst_segment_choice": types.ObjectType{
-		AttrTypes: EnhancedFirewallPolicySegmentPolicyDstSegmentChoiceModelAttributeMap,
-	},
 	"src_segment_choice": types.ObjectType{
 		AttrTypes: EnhancedFirewallPolicySegmentPolicySrcSegmentChoiceModelAttributeMap,
 	},
-}
-
-// Attribute map for OneOfField --> DstSegmentChoice
-var EnhancedFirewallPolicySegmentPolicyDstSegmentChoiceModelAttributeMap = map[string]attr.Type{
-
-	"dst_any":       types.BoolType,
-	"intra_segment": types.BoolType,
-	"dst_segments": types.ObjectType{
-		AttrTypes: EnhancedFirewallPolicySegmentPolicyDstSegmentChoiceDstSegmentsModelAttributeMap,
+	"dst_segment_choice": types.ObjectType{
+		AttrTypes: EnhancedFirewallPolicySegmentPolicyDstSegmentChoiceModelAttributeMap,
 	},
-}
-
-// Attribute map for PointerOfOneOfField --> DstSegments
-var EnhancedFirewallPolicySegmentPolicyDstSegmentChoiceDstSegmentsModelAttributeMap = map[string]attr.Type{
-
-	"segments": types.ListType{
-		ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-
-				"name":      types.StringType,
-				"tenant":    types.StringType,
-				"namespace": types.StringType,
-			},
-		},
-	},
-}
-
-// Attribute map for RequiredArrayOfPointerField --> Segments
-var EnhancedFirewallPolicySegmentsObjectRefModelAttributeMap = map[string]attr.Type{
-
-	"name":      types.StringType,
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
 }
 
 // Attribute map for OneOfField --> SrcSegmentChoice
@@ -627,6 +594,39 @@ var EnhancedFirewallPolicySegmentPolicySrcSegmentChoiceSrcSegmentsModelAttribute
 	},
 }
 
+// Attribute map for RequiredArrayOfPointerField --> Segments
+var EnhancedFirewallPolicySegmentsObjectRefModelAttributeMap = map[string]attr.Type{
+
+	"tenant":    types.StringType,
+	"namespace": types.StringType,
+	"name":      types.StringType,
+}
+
+// Attribute map for OneOfField --> DstSegmentChoice
+var EnhancedFirewallPolicySegmentPolicyDstSegmentChoiceModelAttributeMap = map[string]attr.Type{
+
+	"dst_segments": types.ObjectType{
+		AttrTypes: EnhancedFirewallPolicySegmentPolicyDstSegmentChoiceDstSegmentsModelAttributeMap,
+	},
+	"dst_any":       types.BoolType,
+	"intra_segment": types.BoolType,
+}
+
+// Attribute map for PointerOfOneOfField --> DstSegments
+var EnhancedFirewallPolicySegmentPolicyDstSegmentChoiceDstSegmentsModelAttributeMap = map[string]attr.Type{
+
+	"segments": types.ListType{
+		ElemType: types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+
+				"name":      types.StringType,
+				"tenant":    types.StringType,
+				"namespace": types.StringType,
+			},
+		},
+	},
+}
+
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ datasource.DataSource = &DataSourceF5XCEnhancedFirewallPolicy{}
 
@@ -645,6 +645,20 @@ func (r *DataSourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, reque
 		Description:         "EnhancedFirewallPolicy data source",
 
 		Attributes: map[string]schema.Attribute{
+			"labels": schema.MapAttribute{
+				Description: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				ElementType: types.StringType,
+			},
+			"annotations": schema.MapAttribute{
+				Description: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				ElementType: types.StringType,
+			},
 			"description": schema.StringAttribute{
 				Description: "description Human readable description for the object",
 				Required:    false,
@@ -669,69 +683,27 @@ func (r *DataSourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, reque
 				Optional:    false,
 				Computed:    true,
 			},
-			"labels": schema.MapAttribute{
-				Description: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
-			"annotations": schema.MapAttribute{
-				Description: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
 			"rule_choice": schema.SingleNestedAttribute{
 				Description: "Select Enhanced Firewall Policy Rule Type Select specific/custom rules for Enhanced Firewall Policy",
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
 				Attributes: map[string]schema.Attribute{
-					"deny_all": schema.BoolAttribute{
-						Description: "Deny all connections Deny all connections from any source to any destination",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-					},
-					"denied_sources": schema.SingleNestedAttribute{
-						Description: "List of denied source prefixes Deny all connections from list of sources to any destination",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-						Attributes: map[string]schema.Attribute{
-							"prefix": schema.ListAttribute{
-								Description: "Prefix",
-								ElementType: types.StringType,
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-							},
-							"ipv6_prefix": schema.ListAttribute{
-								Description: "ipv6 prefix",
-								ElementType: types.StringType,
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-							},
-						},
-					},
 					"denied_destinations": schema.SingleNestedAttribute{
 						Description: "List of denied destination prefixes Deny all connections to list of destinations from any source",
 						Required:    false,
 						Optional:    false,
 						Computed:    true,
 						Attributes: map[string]schema.Attribute{
-							"prefix": schema.ListAttribute{
-								Description: "Prefix",
+							"ipv6_prefix": schema.ListAttribute{
+								Description: "ipv6 prefix",
 								ElementType: types.StringType,
 								Required:    false,
 								Optional:    false,
 								Computed:    true,
 							},
-							"ipv6_prefix": schema.ListAttribute{
-								Description: "ipv6 prefix",
+							"prefix": schema.ListAttribute{
+								Description: "Prefix",
 								ElementType: types.StringType,
 								Required:    false,
 								Optional:    false,
@@ -752,120 +724,6 @@ func (r *DataSourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, reque
 								Computed:    true,
 								NestedObject: schema.NestedAttributeObject{
 									Attributes: map[string]schema.Attribute{
-										"source_choice": schema.SingleNestedAttribute{
-											Description: "Source Traffic Filter Source Traffic Filter for the policy",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-											Attributes: map[string]schema.Attribute{
-												"source_prefix_list": schema.SingleNestedAttribute{
-													Description: "ip prefix list Addresses that match one of the prefix in the list list contains sublist of both v4 and v6 prfix list",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-													Attributes: map[string]schema.Attribute{
-														"prefixes": schema.ListAttribute{
-															Description: "ipv4 prefix list List of IPv4 prefixes that represent an endpoint",
-															ElementType: types.StringType,
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-														"ipv6_prefixes": schema.ListAttribute{
-															Description: "ipv6 prefixes List of IPv6 prefix strings.",
-															ElementType: types.StringType,
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-													},
-												},
-												"source_ip_prefix_set": schema.SingleNestedAttribute{
-													Description: "IP Prefix Set",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-													Attributes: map[string]schema.Attribute{
-														"ref": schema.ListNestedAttribute{
-															Description: "ref A list of references to ip_prefix_set objects.",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-															NestedObject: schema.NestedAttributeObject{
-																Attributes: map[string]schema.Attribute{
-																	"tenant": schema.StringAttribute{
-																		Description: "",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																	},
-																	"namespace": schema.StringAttribute{
-																		Description: "",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																	},
-																	"name": schema.StringAttribute{
-																		Description: "",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																	},
-																},
-															},
-														},
-													},
-												},
-												"outside_sources": schema.BoolAttribute{
-													Description: "All Source Reachable via all outside interfaces All addresses reachable in site-local outside interfaces",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"source_label_selector": schema.SingleNestedAttribute{
-													Description: "Source Label selector Source is a set of addresses determined by label selector expression. These labels can be cloud tags defined on the vpc resource, labels on the global network or others.",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-													Attributes: map[string]schema.Attribute{
-														"expressions": schema.ListAttribute{
-															Description: "expressions expressions contains the kubernetes style label expression for selections.",
-															ElementType: types.StringType,
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-													},
-												},
-												"source_aws_vpc_ids": schema.SingleNestedAttribute{
-													Description: "AWS VPC Identifier Source is any address in list of AWS VPCs",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-													Attributes: map[string]schema.Attribute{
-														"vpc_id": schema.ListAttribute{
-															Description: "AWS VPC List List of VPC Identifiers in AWS",
-															ElementType: types.StringType,
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-													},
-												},
-												"inside_sources": schema.BoolAttribute{
-													Description: "All Source Reachable via all inside interfaces All addresses reachable in site-local inside interfaces",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"all_sources": schema.BoolAttribute{
-													Description: "All Sources Any address that matches 0/0 ip prefix",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-											},
-										},
 										"destination_choice": schema.SingleNestedAttribute{
 											Description: "Destination Traffic Filter Destination Traffic Filter for the policy",
 											Required:    false,
@@ -886,39 +744,6 @@ func (r *DataSourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, reque
 															Computed:    true,
 														},
 													},
-												},
-												"outside_destinations": schema.BoolAttribute{
-													Description: "All Destination Reachable via all outside interfaces All addresses reachable in site-local outside interfaces",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"all_slo_vips": schema.BoolAttribute{
-													Description: "All VIP address on Site Local Outside Network Destination is virtual-ip of all loadbalancer on site-local-outside network",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"destination_aws_vpc_ids": schema.SingleNestedAttribute{
-													Description: "AWS VPC Identifier Destination is any address in list of AWS VPCs",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-													Attributes: map[string]schema.Attribute{
-														"vpc_id": schema.ListAttribute{
-															Description: "AWS VPC List List of VPC Identifiers in AWS",
-															ElementType: types.StringType,
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-													},
-												},
-												"all_destinations": schema.BoolAttribute{
-													Description: "All Destinations Any address that matches 0/0 ip prefix",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
 												},
 												"destination_prefix_list": schema.SingleNestedAttribute{
 													Description: "IP Prefix List Addresses that match one of the prefix in the list",
@@ -955,6 +780,12 @@ func (r *DataSourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, reque
 															Computed:    true,
 															NestedObject: schema.NestedAttributeObject{
 																Attributes: map[string]schema.Attribute{
+																	"namespace": schema.StringAttribute{
+																		Description: "",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
+																	},
 																	"name": schema.StringAttribute{
 																		Description: "",
 																		Required:    false,
@@ -967,16 +798,28 @@ func (r *DataSourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, reque
 																		Optional:    false,
 																		Computed:    true,
 																	},
-																	"namespace": schema.StringAttribute{
-																		Description: "",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																	},
 																},
 															},
 														},
 													},
+												},
+												"inside_destinations": schema.BoolAttribute{
+													Description: "All Destination Reachable via all inside interfaces All addresses reachable in site-local inside interfaces",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"all_slo_vips": schema.BoolAttribute{
+													Description: "All VIP address on Site Local Outside Network Destination is virtual-ip of all loadbalancer on site-local-outside network",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"outside_destinations": schema.BoolAttribute{
+													Description: "All Destination Reachable via all outside interfaces All addresses reachable in site-local outside interfaces",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
 												},
 												"all_sli_vips": schema.BoolAttribute{
 													Description: "All VIP address on Site Local Inside Network Destination is virtual-ip of all loadbalancer on site-local-inside network",
@@ -984,8 +827,23 @@ func (r *DataSourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, reque
 													Optional:    false,
 													Computed:    true,
 												},
-												"inside_destinations": schema.BoolAttribute{
-													Description: "All Destination Reachable via all inside interfaces All addresses reachable in site-local inside interfaces",
+												"destination_aws_vpc_ids": schema.SingleNestedAttribute{
+													Description: "AWS VPC Identifier Destination is any address in list of AWS VPCs",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+													Attributes: map[string]schema.Attribute{
+														"vpc_id": schema.ListAttribute{
+															Description: "AWS VPC List List of VPC Identifiers in AWS",
+															ElementType: types.StringType,
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+													},
+												},
+												"all_destinations": schema.BoolAttribute{
+													Description: "All Destinations Any address that matches 0/0 ip prefix",
 													Required:    false,
 													Optional:    false,
 													Computed:    true,
@@ -998,27 +856,6 @@ func (r *DataSourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, reque
 											Optional:    false,
 											Computed:    true,
 											Attributes: map[string]schema.Attribute{
-												"protocol_port_range": schema.SingleNestedAttribute{
-													Description: "Protocol and Port Ranges Select specific protocol and port ranges traffic to match",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-													Attributes: map[string]schema.Attribute{
-														"protocol": schema.StringAttribute{
-															Description: "protocol Protocol in IP packet to be used as match criteria Values are tcp, udp, and icmp",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-														"port_ranges": schema.ListAttribute{
-															Description: "ports List of port ranges. Each range is a single port or a pair of start and end ports e.g. 8080-8192",
-															ElementType: types.StringType,
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-													},
-												},
 												"all_traffic": schema.BoolAttribute{
 													Description: "All Traffic Select all traffic to match",
 													Required:    false,
@@ -1046,6 +883,27 @@ func (r *DataSourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, reque
 														"applications": schema.ListAttribute{
 															Description: "Applications Application protocols like HTTP, SNMP",
 															ElementType: types.StringType,
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+													},
+												},
+												"protocol_port_range": schema.SingleNestedAttribute{
+													Description: "Protocol and Port Ranges Select specific protocol and port ranges traffic to match",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+													Attributes: map[string]schema.Attribute{
+														"port_ranges": schema.ListAttribute{
+															Description: "ports List of port ranges. Each range is a single port or a pair of start and end ports e.g. 8080-8192",
+															ElementType: types.StringType,
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+														"protocol": schema.StringAttribute{
+															Description: "protocol Protocol in IP packet to be used as match criteria Values are tcp, udp, and icmp",
 															Required:    false,
 															Optional:    false,
 															Computed:    true,
@@ -1107,12 +965,6 @@ func (r *DataSourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, reque
 															Optional:    false,
 															Computed:    true,
 															Attributes: map[string]schema.Attribute{
-																"name": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
 																"tenant": schema.StringAttribute{
 																	Description: "",
 																	Required:    false,
@@ -1120,6 +972,12 @@ func (r *DataSourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, reque
 																	Computed:    true,
 																},
 																"namespace": schema.StringAttribute{
+																	Description: "",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
+																"name": schema.StringAttribute{
 																	Description: "",
 																	Required:    false,
 																	Optional:    false,
@@ -1155,6 +1013,120 @@ func (r *DataSourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, reque
 													Required:    false,
 													Optional:    false,
 													Computed:    true,
+												},
+											},
+										},
+										"source_choice": schema.SingleNestedAttribute{
+											Description: "Source Traffic Filter Source Traffic Filter for the policy",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+											Attributes: map[string]schema.Attribute{
+												"outside_sources": schema.BoolAttribute{
+													Description: "All Source Reachable via all outside interfaces All addresses reachable in site-local outside interfaces",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"source_label_selector": schema.SingleNestedAttribute{
+													Description: "Source Label selector Source is a set of addresses determined by label selector expression. These labels can be cloud tags defined on the vpc resource, labels on the global network or others.",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+													Attributes: map[string]schema.Attribute{
+														"expressions": schema.ListAttribute{
+															Description: "expressions expressions contains the kubernetes style label expression for selections.",
+															ElementType: types.StringType,
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+													},
+												},
+												"all_sources": schema.BoolAttribute{
+													Description: "All Sources Any address that matches 0/0 ip prefix",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"source_prefix_list": schema.SingleNestedAttribute{
+													Description: "ip prefix list Addresses that match one of the prefix in the list list contains sublist of both v4 and v6 prfix list",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+													Attributes: map[string]schema.Attribute{
+														"prefixes": schema.ListAttribute{
+															Description: "ipv4 prefix list List of IPv4 prefixes that represent an endpoint",
+															ElementType: types.StringType,
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+														"ipv6_prefixes": schema.ListAttribute{
+															Description: "ipv6 prefixes List of IPv6 prefix strings.",
+															ElementType: types.StringType,
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+													},
+												},
+												"source_ip_prefix_set": schema.SingleNestedAttribute{
+													Description: "IP Prefix Set",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+													Attributes: map[string]schema.Attribute{
+														"ref": schema.ListNestedAttribute{
+															Description: "ref A list of references to ip_prefix_set objects.",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+															NestedObject: schema.NestedAttributeObject{
+																Attributes: map[string]schema.Attribute{
+																	"name": schema.StringAttribute{
+																		Description: "",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
+																	},
+																	"tenant": schema.StringAttribute{
+																		Description: "",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
+																	},
+																	"namespace": schema.StringAttribute{
+																		Description: "",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
+																	},
+																},
+															},
+														},
+													},
+												},
+												"inside_sources": schema.BoolAttribute{
+													Description: "All Source Reachable via all inside interfaces All addresses reachable in site-local inside interfaces",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"source_aws_vpc_ids": schema.SingleNestedAttribute{
+													Description: "AWS VPC Identifier Source is any address in list of AWS VPCs",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+													Attributes: map[string]schema.Attribute{
+														"vpc_id": schema.ListAttribute{
+															Description: "AWS VPC List List of VPC Identifiers in AWS",
+															ElementType: types.StringType,
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+													},
 												},
 											},
 										},
@@ -1213,6 +1185,34 @@ func (r *DataSourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, reque
 							},
 						},
 					},
+					"deny_all": schema.BoolAttribute{
+						Description: "Deny all connections Deny all connections from any source to any destination",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
+					"denied_sources": schema.SingleNestedAttribute{
+						Description: "List of denied source prefixes Deny all connections from list of sources to any destination",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+						Attributes: map[string]schema.Attribute{
+							"prefix": schema.ListAttribute{
+								Description: "Prefix",
+								ElementType: types.StringType,
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
+							"ipv6_prefix": schema.ListAttribute{
+								Description: "ipv6 prefix",
+								ElementType: types.StringType,
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
+						},
+					},
 				},
 			},
 			"segment_policy": schema.SingleNestedAttribute{
@@ -1221,62 +1221,6 @@ func (r *DataSourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, reque
 				Optional:    false,
 				Computed:    true,
 				Attributes: map[string]schema.Attribute{
-					"dst_segment_choice": schema.SingleNestedAttribute{
-						Description: "Destination Segments Select destination segment where rule is applied Configure option as Any to ignore segment match",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-						Attributes: map[string]schema.Attribute{
-							"dst_any": schema.BoolAttribute{
-								Description: "Any segment Traffic is not matched against any segment",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-							},
-							"intra_segment": schema.BoolAttribute{
-								Description: "Intra Segment Policy Traffic is matched for source and destination on the same segment",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-							},
-							"dst_segments": schema.SingleNestedAttribute{
-								Description: "List of segments Traffic is matched against destination segment in selected segments",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-								Attributes: map[string]schema.Attribute{
-									"segments": schema.ListNestedAttribute{
-										Description: "Segments Select list of segments",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-										NestedObject: schema.NestedAttributeObject{
-											Attributes: map[string]schema.Attribute{
-												"name": schema.StringAttribute{
-													Description: "",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"tenant": schema.StringAttribute{
-													Description: "",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"namespace": schema.StringAttribute{
-													Description: "",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-											},
-										},
-									},
-								},
-							},
-						},
-					},
 					"src_segment_choice": schema.SingleNestedAttribute{
 						Description: "Source Segments Select source segment where rule is applied Configure option as Any to ignore segment match",
 						Required:    false,
@@ -1324,6 +1268,62 @@ func (r *DataSourceF5XCEnhancedFirewallPolicy) Schema(ctx context.Context, reque
 										},
 									},
 								},
+							},
+						},
+					},
+					"dst_segment_choice": schema.SingleNestedAttribute{
+						Description: "Destination Segments Select destination segment where rule is applied Configure option as Any to ignore segment match",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+						Attributes: map[string]schema.Attribute{
+							"dst_segments": schema.SingleNestedAttribute{
+								Description: "List of segments Traffic is matched against destination segment in selected segments",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+								Attributes: map[string]schema.Attribute{
+									"segments": schema.ListNestedAttribute{
+										Description: "Segments Select list of segments",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+										NestedObject: schema.NestedAttributeObject{
+											Attributes: map[string]schema.Attribute{
+												"name": schema.StringAttribute{
+													Description: "",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"tenant": schema.StringAttribute{
+													Description: "",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"namespace": schema.StringAttribute{
+													Description: "",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+											},
+										},
+									},
+								},
+							},
+							"dst_any": schema.BoolAttribute{
+								Description: "Any segment Traffic is not matched against any segment",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
+							"intra_segment": schema.BoolAttribute{
+								Description: "Intra Segment Policy Traffic is matched for source and destination on the same segment",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
 							},
 						},
 					},
@@ -1400,18 +1400,6 @@ func (d *DataSourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
-	// data SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
-
-	// data SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
-
-	// data SpecToModelRoot Meta RequiredStringField --> Namespace
-	data.Namespace = types.StringValue(metaData.GetNamespace())
-
-	// data SpecToModelRoot Meta StringField --> Uid
-	data.Uid = types.StringValue(systemMetaData.GetUid())
-
 	// data SpecToModelRoot Meta MapOfStringField --> Labels
 	if metaData.GetLabels() != nil {
 		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
@@ -1448,6 +1436,18 @@ func (d *DataSourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request
 		data.Annotations = types.MapNull(types.StringType)
 	}
 
+	// data SpecToModelRoot Meta StringField --> Description
+	data.Description = types.StringValue(metaData.GetDescription())
+
+	// data SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
+
+	// data SpecToModelRoot Meta RequiredStringField --> Namespace
+	data.Namespace = types.StringValue(metaData.GetNamespace())
+
+	// data SpecToModelRoot Meta StringField --> Uid
+	data.Uid = types.StringValue(systemMetaData.GetUid())
+
 	// data SpecToModelRoot RequiredOneOfField --> RuleChoice
 	// false
 	// true
@@ -1462,59 +1462,6 @@ func (d *DataSourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request
 
 		// Recursively call the nested template to process the oneof choices.
 
-		// data specToModelNested BoolOfOneOfPointerField --> DenyAll
-		_, isDenyAll := ruleChoiceChoices.(*ves_io_schema_enhanced_firewall_policy.GlobalSpecType_DenyAll)
-
-		if isDenyAll {
-			ruleChoiceChoicesModel.DenyAll = types.BoolValue(true)
-		} else {
-			ruleChoiceChoicesModel.DenyAll = types.BoolNull()
-		}
-
-		// data specToModelNested PointerOfOneOfField --> DeniedSources
-		// <no value>
-		// false
-		{
-			deniedSourcesOptions, isDeniedSources := ruleChoiceChoices.(*ves_io_schema_enhanced_firewall_policy.GlobalSpecType_DeniedSources)
-			deniedSourcesAttributeMap := make(map[string]attr.Value)
-
-			if isDeniedSources && deniedSourcesOptions != nil {
-
-				// data specToModelNested ArrayOfStringField --> Prefix
-				if len(deniedSourcesOptions.DeniedSources.GetPrefix()) > 0 {
-					listValue, diags := types.ListValueFrom(ctx, types.StringType, deniedSourcesOptions.DeniedSources.GetPrefix())
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					deniedSourcesAttributeMap["prefix"] = listValue
-				} else {
-					deniedSourcesAttributeMap["prefix"] = types.ListNull(types.StringType)
-				}
-
-				// data specToModelNested ArrayOfStringField --> Ipv6Prefix
-				if len(deniedSourcesOptions.DeniedSources.GetIpv6Prefix()) > 0 {
-					listValue, diags := types.ListValueFrom(ctx, types.StringType, deniedSourcesOptions.DeniedSources.GetIpv6Prefix())
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					deniedSourcesAttributeMap["ipv6_prefix"] = listValue
-				} else {
-					deniedSourcesAttributeMap["ipv6_prefix"] = types.ListNull(types.StringType)
-				}
-
-				deniedSourcesObj, diags := types.ObjectValue(EnhancedFirewallPolicyRuleChoiceDeniedSourcesModelAttributeMap, deniedSourcesAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				ruleChoiceChoicesModel.DeniedSources = deniedSourcesObj
-			} else {
-				ruleChoiceChoicesModel.DeniedSources = types.ObjectNull(EnhancedFirewallPolicyRuleChoiceDeniedSourcesModelAttributeMap)
-			}
-		}
-
 		// data specToModelNested PointerOfOneOfField --> DeniedDestinations
 		// <no value>
 		// false
@@ -1523,18 +1470,6 @@ func (d *DataSourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request
 			deniedDestinationsAttributeMap := make(map[string]attr.Value)
 
 			if isDeniedDestinations && deniedDestinationsOptions != nil {
-
-				// data specToModelNested ArrayOfStringField --> Prefix
-				if len(deniedDestinationsOptions.DeniedDestinations.GetPrefix()) > 0 {
-					listValue, diags := types.ListValueFrom(ctx, types.StringType, deniedDestinationsOptions.DeniedDestinations.GetPrefix())
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					deniedDestinationsAttributeMap["prefix"] = listValue
-				} else {
-					deniedDestinationsAttributeMap["prefix"] = types.ListNull(types.StringType)
-				}
 
 				// data specToModelNested ArrayOfStringField --> Ipv6Prefix
 				if len(deniedDestinationsOptions.DeniedDestinations.GetIpv6Prefix()) > 0 {
@@ -1546,6 +1481,18 @@ func (d *DataSourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request
 					deniedDestinationsAttributeMap["ipv6_prefix"] = listValue
 				} else {
 					deniedDestinationsAttributeMap["ipv6_prefix"] = types.ListNull(types.StringType)
+				}
+
+				// data specToModelNested ArrayOfStringField --> Prefix
+				if len(deniedDestinationsOptions.DeniedDestinations.GetPrefix()) > 0 {
+					listValue, diags := types.ListValueFrom(ctx, types.StringType, deniedDestinationsOptions.DeniedDestinations.GetPrefix())
+					response.Diagnostics.Append(diags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					deniedDestinationsAttributeMap["prefix"] = listValue
+				} else {
+					deniedDestinationsAttributeMap["prefix"] = types.ListNull(types.StringType)
 				}
 
 				deniedDestinationsObj, diags := types.ObjectValue(EnhancedFirewallPolicyRuleChoiceDeniedDestinationsModelAttributeMap, deniedDestinationsAttributeMap)
@@ -1575,242 +1522,6 @@ func (d *DataSourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request
 					rulesElements := make([]EnhancedFirewallPolicyEnhancedFirewallPolicyEnhancedFirewallPolicyRuleType, 0, len(ruleListOptions.RuleList.GetRules()))
 					for _, rulesElement := range ruleListOptions.RuleList.GetRules() {
 						enhancedFirewallPolicyEnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel := EnhancedFirewallPolicyEnhancedFirewallPolicyEnhancedFirewallPolicyRuleType{}
-
-						// data specToModelNested RequiredOneOfField --> SourceChoice
-						// <no value>
-						if rulesElement.GetSourceChoice() != nil {
-							// Create a temporary attribute map for the choices within this OneOf
-							rulessourceChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-							// Define a variable for the spec choices to be passed down to nested templates.
-							// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-							rulessourceChoiceChoices := rulesElement.GetSourceChoice()
-
-							// Process nested choices, populating the temporary attribute map
-
-							// data specToModelNested PointerOfOneOfField --> SourcePrefixList
-							// <no value>
-							// false
-							{
-								sourcePrefixListOptions, isSourcePrefixList := rulessourceChoiceChoices.(*ves_io_schema_enhanced_firewall_policy.EnhancedFirewallPolicyRuleType_SourcePrefixList)
-								sourcePrefixListAttributeMap := make(map[string]attr.Value)
-
-								if isSourcePrefixList && sourcePrefixListOptions != nil {
-
-									// data specToModelNested ArrayOfStringField --> Prefixes
-									if len(sourcePrefixListOptions.SourcePrefixList.GetPrefixes()) > 0 {
-										listValue, diags := types.ListValueFrom(ctx, types.StringType, sourcePrefixListOptions.SourcePrefixList.GetPrefixes())
-										response.Diagnostics.Append(diags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										sourcePrefixListAttributeMap["prefixes"] = listValue
-									} else {
-										sourcePrefixListAttributeMap["prefixes"] = types.ListNull(types.StringType)
-									}
-
-									// data specToModelNested ArrayOfStringField --> Ipv6Prefixes
-									if len(sourcePrefixListOptions.SourcePrefixList.GetIpv6Prefixes()) > 0 {
-										listValue, diags := types.ListValueFrom(ctx, types.StringType, sourcePrefixListOptions.SourcePrefixList.GetIpv6Prefixes())
-										response.Diagnostics.Append(diags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										sourcePrefixListAttributeMap["ipv6_prefixes"] = listValue
-									} else {
-										sourcePrefixListAttributeMap["ipv6_prefixes"] = types.ListNull(types.StringType)
-									}
-
-									sourcePrefixListObj, diags := types.ObjectValue(EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceSourcePrefixListModelAttributeMap, sourcePrefixListAttributeMap)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									rulessourceChoiceChoicesAttributeMap["source_prefix_list"] = sourcePrefixListObj
-								} else {
-									rulessourceChoiceChoicesAttributeMap["source_prefix_list"] = types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceSourcePrefixListModelAttributeMap)
-								}
-							}
-
-							// data specToModelNested PointerOfOneOfField --> SourceIpPrefixSet
-							// <no value>
-							// false
-							{
-								sourceIpPrefixSetOptions, isSourceIpPrefixSet := rulessourceChoiceChoices.(*ves_io_schema_enhanced_firewall_policy.EnhancedFirewallPolicyRuleType_SourceIpPrefixSet)
-								sourceIpPrefixSetAttributeMap := make(map[string]attr.Value)
-
-								if isSourceIpPrefixSet && sourceIpPrefixSetOptions != nil {
-
-									// data specToModelNested ArrayOfPointerField --> Ref
-									if len(sourceIpPrefixSetOptions.SourceIpPrefixSet.GetRef()) > 0 {
-										// Step 1: Always create a slice of model structs from the spec data.
-										// This slice serves as an intermediate representation.
-										refElements := make([]ObjectRefTypeModel, 0, len(sourceIpPrefixSetOptions.SourceIpPrefixSet.GetRef()))
-										for _, refElement := range sourceIpPrefixSetOptions.SourceIpPrefixSet.GetRef() {
-											objectRefTypeModelModel := ObjectRefTypeModel{}
-
-											// data specToModelNested StringField --> Tenant
-											if refElement.GetTenant() != "" {
-												objectRefTypeModelModel.Tenant = types.StringValue(refElement.GetTenant())
-											} else {
-												// Empty string, set to null
-												objectRefTypeModelModel.Tenant = types.StringNull()
-											}
-
-											// data specToModelNested RequiredStringField --> Namespace
-											if refElement.GetNamespace() != "" {
-												objectRefTypeModelModel.Namespace = types.StringValue(refElement.GetNamespace())
-											} else {
-												// Empty string, set to null
-												objectRefTypeModelModel.Namespace = types.StringNull()
-											}
-
-											// data specToModelNested RequiredStringField --> Name
-											if refElement.GetName() != "" {
-												objectRefTypeModelModel.Name = types.StringValue(refElement.GetName())
-											} else {
-												// Empty string, set to null
-												objectRefTypeModelModel.Name = types.StringNull()
-											}
-
-											refElements = append(refElements, objectRefTypeModelModel)
-										}
-										// CASE 1: The target field is a `types.List` or an attribute map.
-										// The intermediate slice of structs must be converted to a `types.ListValue`.
-										refListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: EnhancedFirewallPolicyRefObjectRefModelAttributeMap}, refElements)
-										response.Diagnostics.Append(diags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										sourceIpPrefixSetAttributeMap["ref"] = refListValue
-
-									} else {
-										// The source list is empty or nil.
-										// CASE 1: The target field is a `types.List` or an attribute map.
-										// Assign a null `types.ListValue`.
-										sourceIpPrefixSetAttributeMap["ref"] = types.ListNull(types.ObjectType{AttrTypes: EnhancedFirewallPolicyRefObjectRefModelAttributeMap})
-									}
-
-									sourceIpPrefixSetObj, diags := types.ObjectValue(EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceSourceIpPrefixSetModelAttributeMap, sourceIpPrefixSetAttributeMap)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									rulessourceChoiceChoicesAttributeMap["source_ip_prefix_set"] = sourceIpPrefixSetObj
-								} else {
-									rulessourceChoiceChoicesAttributeMap["source_ip_prefix_set"] = types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceSourceIpPrefixSetModelAttributeMap)
-								}
-							}
-
-							// data specToModelNested BoolOfOneOfPointerField --> OutsideSources
-							_, isOutsideSources := rulessourceChoiceChoices.(*ves_io_schema_enhanced_firewall_policy.EnhancedFirewallPolicyRuleType_OutsideSources)
-
-							if isOutsideSources {
-								rulessourceChoiceChoicesAttributeMap["outside_sources"] = types.BoolValue(true)
-							} else {
-								rulessourceChoiceChoicesAttributeMap["outside_sources"] = types.BoolNull()
-							}
-
-							// data specToModelNested PointerOfOneOfField --> SourceLabelSelector
-							// <no value>
-							// false
-							{
-								sourceLabelSelectorOptions, isSourceLabelSelector := rulessourceChoiceChoices.(*ves_io_schema_enhanced_firewall_policy.EnhancedFirewallPolicyRuleType_SourceLabelSelector)
-								sourceLabelSelectorAttributeMap := make(map[string]attr.Value)
-
-								if isSourceLabelSelector && sourceLabelSelectorOptions != nil {
-
-									// data specToModelNested RequiredArrayOfStringField --> Expressions
-									if len(sourceLabelSelectorOptions.SourceLabelSelector.GetExpressions()) > 0 {
-										listValue, diags := types.ListValueFrom(ctx, types.StringType, sourceLabelSelectorOptions.SourceLabelSelector.GetExpressions())
-										response.Diagnostics.Append(diags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										sourceLabelSelectorAttributeMap["expressions"] = listValue
-									} else {
-										sourceLabelSelectorAttributeMap["expressions"] = types.ListNull(types.StringType)
-									}
-
-									sourceLabelSelectorObj, diags := types.ObjectValue(EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceSourceLabelSelectorModelAttributeMap, sourceLabelSelectorAttributeMap)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									rulessourceChoiceChoicesAttributeMap["source_label_selector"] = sourceLabelSelectorObj
-								} else {
-									rulessourceChoiceChoicesAttributeMap["source_label_selector"] = types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceSourceLabelSelectorModelAttributeMap)
-								}
-							}
-
-							// data specToModelNested PointerOfOneOfField --> SourceAwsVpcIds
-							// <no value>
-							// false
-							{
-								sourceAwsVpcIdsOptions, isSourceAwsVpcIds := rulessourceChoiceChoices.(*ves_io_schema_enhanced_firewall_policy.EnhancedFirewallPolicyRuleType_SourceAwsVpcIds)
-								sourceAwsVpcIdsAttributeMap := make(map[string]attr.Value)
-
-								if isSourceAwsVpcIds && sourceAwsVpcIdsOptions != nil {
-
-									// data specToModelNested RequiredArrayOfStringField --> VpcId
-									if len(sourceAwsVpcIdsOptions.SourceAwsVpcIds.GetVpcId()) > 0 {
-										listValue, diags := types.ListValueFrom(ctx, types.StringType, sourceAwsVpcIdsOptions.SourceAwsVpcIds.GetVpcId())
-										response.Diagnostics.Append(diags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										sourceAwsVpcIdsAttributeMap["vpc_id"] = listValue
-									} else {
-										sourceAwsVpcIdsAttributeMap["vpc_id"] = types.ListNull(types.StringType)
-									}
-
-									sourceAwsVpcIdsObj, diags := types.ObjectValue(EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceSourceAwsVpcIdsModelAttributeMap, sourceAwsVpcIdsAttributeMap)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									rulessourceChoiceChoicesAttributeMap["source_aws_vpc_ids"] = sourceAwsVpcIdsObj
-								} else {
-									rulessourceChoiceChoicesAttributeMap["source_aws_vpc_ids"] = types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceSourceAwsVpcIdsModelAttributeMap)
-								}
-							}
-
-							// data specToModelNested BoolOfOneOfPointerField --> InsideSources
-							_, isInsideSources := rulessourceChoiceChoices.(*ves_io_schema_enhanced_firewall_policy.EnhancedFirewallPolicyRuleType_InsideSources)
-
-							if isInsideSources {
-								rulessourceChoiceChoicesAttributeMap["inside_sources"] = types.BoolValue(true)
-							} else {
-								rulessourceChoiceChoicesAttributeMap["inside_sources"] = types.BoolNull()
-							}
-
-							// data specToModelNested BoolOfOneOfPointerField --> AllSources
-							_, isAllSources := rulessourceChoiceChoices.(*ves_io_schema_enhanced_firewall_policy.EnhancedFirewallPolicyRuleType_AllSources)
-
-							if isAllSources {
-								rulessourceChoiceChoicesAttributeMap["all_sources"] = types.BoolValue(true)
-							} else {
-								rulessourceChoiceChoicesAttributeMap["all_sources"] = types.BoolNull()
-							}
-
-							// --- End of Choices ---
-
-							// Create the final ObjectValue for this OneOf field
-							finalObj, rulessourceChoiceChoicesObjDiags := types.ObjectValue(
-								EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-								rulessourceChoiceChoicesAttributeMap,
-							)
-							response.Diagnostics.Append(rulessourceChoiceChoicesObjDiags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							enhancedFirewallPolicyEnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.SourceChoice = finalObj
-						} else {
-							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							enhancedFirewallPolicyEnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.SourceChoice = types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceModelAttributeMap)
-						}
 
 						// data specToModelNested RequiredOneOfField --> DestinationChoice
 						// <no value>
@@ -1854,65 +1565,6 @@ func (d *DataSourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request
 								} else {
 									rulesdestinationChoiceChoicesAttributeMap["destination_label_selector"] = types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesDestinationChoiceDestinationLabelSelectorModelAttributeMap)
 								}
-							}
-
-							// data specToModelNested BoolOfOneOfPointerField --> OutsideDestinations
-							_, isOutsideDestinations := rulesdestinationChoiceChoices.(*ves_io_schema_enhanced_firewall_policy.EnhancedFirewallPolicyRuleType_OutsideDestinations)
-
-							if isOutsideDestinations {
-								rulesdestinationChoiceChoicesAttributeMap["outside_destinations"] = types.BoolValue(true)
-							} else {
-								rulesdestinationChoiceChoicesAttributeMap["outside_destinations"] = types.BoolNull()
-							}
-
-							// data specToModelNested BoolOfOneOfPointerField --> AllSloVips
-							_, isAllSloVips := rulesdestinationChoiceChoices.(*ves_io_schema_enhanced_firewall_policy.EnhancedFirewallPolicyRuleType_AllSloVips)
-
-							if isAllSloVips {
-								rulesdestinationChoiceChoicesAttributeMap["all_slo_vips"] = types.BoolValue(true)
-							} else {
-								rulesdestinationChoiceChoicesAttributeMap["all_slo_vips"] = types.BoolNull()
-							}
-
-							// data specToModelNested PointerOfOneOfField --> DestinationAwsVpcIds
-							// <no value>
-							// false
-							{
-								destinationAwsVpcIdsOptions, isDestinationAwsVpcIds := rulesdestinationChoiceChoices.(*ves_io_schema_enhanced_firewall_policy.EnhancedFirewallPolicyRuleType_DestinationAwsVpcIds)
-								destinationAwsVpcIdsAttributeMap := make(map[string]attr.Value)
-
-								if isDestinationAwsVpcIds && destinationAwsVpcIdsOptions != nil {
-
-									// data specToModelNested RequiredArrayOfStringField --> VpcId
-									if len(destinationAwsVpcIdsOptions.DestinationAwsVpcIds.GetVpcId()) > 0 {
-										listValue, diags := types.ListValueFrom(ctx, types.StringType, destinationAwsVpcIdsOptions.DestinationAwsVpcIds.GetVpcId())
-										response.Diagnostics.Append(diags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										destinationAwsVpcIdsAttributeMap["vpc_id"] = listValue
-									} else {
-										destinationAwsVpcIdsAttributeMap["vpc_id"] = types.ListNull(types.StringType)
-									}
-
-									destinationAwsVpcIdsObj, diags := types.ObjectValue(EnhancedFirewallPolicyRuleChoiceRuleListRulesDestinationChoiceDestinationAwsVpcIdsModelAttributeMap, destinationAwsVpcIdsAttributeMap)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									rulesdestinationChoiceChoicesAttributeMap["destination_aws_vpc_ids"] = destinationAwsVpcIdsObj
-								} else {
-									rulesdestinationChoiceChoicesAttributeMap["destination_aws_vpc_ids"] = types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesDestinationChoiceDestinationAwsVpcIdsModelAttributeMap)
-								}
-							}
-
-							// data specToModelNested BoolOfOneOfPointerField --> AllDestinations
-							_, isAllDestinations := rulesdestinationChoiceChoices.(*ves_io_schema_enhanced_firewall_policy.EnhancedFirewallPolicyRuleType_AllDestinations)
-
-							if isAllDestinations {
-								rulesdestinationChoiceChoicesAttributeMap["all_destinations"] = types.BoolValue(true)
-							} else {
-								rulesdestinationChoiceChoicesAttributeMap["all_destinations"] = types.BoolNull()
 							}
 
 							// data specToModelNested PointerOfOneOfField --> DestinationPrefixList
@@ -1976,6 +1628,14 @@ func (d *DataSourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request
 										for _, refElement := range destinationIpPrefixSetOptions.DestinationIpPrefixSet.GetRef() {
 											objectRefTypeModelModel := ObjectRefTypeModel{}
 
+											// data specToModelNested RequiredStringField --> Namespace
+											if refElement.GetNamespace() != "" {
+												objectRefTypeModelModel.Namespace = types.StringValue(refElement.GetNamespace())
+											} else {
+												// Empty string, set to null
+												objectRefTypeModelModel.Namespace = types.StringNull()
+											}
+
 											// data specToModelNested RequiredStringField --> Name
 											if refElement.GetName() != "" {
 												objectRefTypeModelModel.Name = types.StringValue(refElement.GetName())
@@ -1990,14 +1650,6 @@ func (d *DataSourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request
 											} else {
 												// Empty string, set to null
 												objectRefTypeModelModel.Tenant = types.StringNull()
-											}
-
-											// data specToModelNested RequiredStringField --> Namespace
-											if refElement.GetNamespace() != "" {
-												objectRefTypeModelModel.Namespace = types.StringValue(refElement.GetNamespace())
-											} else {
-												// Empty string, set to null
-												objectRefTypeModelModel.Namespace = types.StringNull()
 											}
 
 											refElements = append(refElements, objectRefTypeModelModel)
@@ -2029,6 +1681,33 @@ func (d *DataSourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request
 								}
 							}
 
+							// data specToModelNested BoolOfOneOfPointerField --> InsideDestinations
+							_, isInsideDestinations := rulesdestinationChoiceChoices.(*ves_io_schema_enhanced_firewall_policy.EnhancedFirewallPolicyRuleType_InsideDestinations)
+
+							if isInsideDestinations {
+								rulesdestinationChoiceChoicesAttributeMap["inside_destinations"] = types.BoolValue(true)
+							} else {
+								rulesdestinationChoiceChoicesAttributeMap["inside_destinations"] = types.BoolNull()
+							}
+
+							// data specToModelNested BoolOfOneOfPointerField --> AllSloVips
+							_, isAllSloVips := rulesdestinationChoiceChoices.(*ves_io_schema_enhanced_firewall_policy.EnhancedFirewallPolicyRuleType_AllSloVips)
+
+							if isAllSloVips {
+								rulesdestinationChoiceChoicesAttributeMap["all_slo_vips"] = types.BoolValue(true)
+							} else {
+								rulesdestinationChoiceChoicesAttributeMap["all_slo_vips"] = types.BoolNull()
+							}
+
+							// data specToModelNested BoolOfOneOfPointerField --> OutsideDestinations
+							_, isOutsideDestinations := rulesdestinationChoiceChoices.(*ves_io_schema_enhanced_firewall_policy.EnhancedFirewallPolicyRuleType_OutsideDestinations)
+
+							if isOutsideDestinations {
+								rulesdestinationChoiceChoicesAttributeMap["outside_destinations"] = types.BoolValue(true)
+							} else {
+								rulesdestinationChoiceChoicesAttributeMap["outside_destinations"] = types.BoolNull()
+							}
+
 							// data specToModelNested BoolOfOneOfPointerField --> AllSliVips
 							_, isAllSliVips := rulesdestinationChoiceChoices.(*ves_io_schema_enhanced_firewall_policy.EnhancedFirewallPolicyRuleType_AllSliVips)
 
@@ -2038,13 +1717,45 @@ func (d *DataSourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request
 								rulesdestinationChoiceChoicesAttributeMap["all_sli_vips"] = types.BoolNull()
 							}
 
-							// data specToModelNested BoolOfOneOfPointerField --> InsideDestinations
-							_, isInsideDestinations := rulesdestinationChoiceChoices.(*ves_io_schema_enhanced_firewall_policy.EnhancedFirewallPolicyRuleType_InsideDestinations)
+							// data specToModelNested PointerOfOneOfField --> DestinationAwsVpcIds
+							// <no value>
+							// false
+							{
+								destinationAwsVpcIdsOptions, isDestinationAwsVpcIds := rulesdestinationChoiceChoices.(*ves_io_schema_enhanced_firewall_policy.EnhancedFirewallPolicyRuleType_DestinationAwsVpcIds)
+								destinationAwsVpcIdsAttributeMap := make(map[string]attr.Value)
 
-							if isInsideDestinations {
-								rulesdestinationChoiceChoicesAttributeMap["inside_destinations"] = types.BoolValue(true)
+								if isDestinationAwsVpcIds && destinationAwsVpcIdsOptions != nil {
+
+									// data specToModelNested RequiredArrayOfStringField --> VpcId
+									if len(destinationAwsVpcIdsOptions.DestinationAwsVpcIds.GetVpcId()) > 0 {
+										listValue, diags := types.ListValueFrom(ctx, types.StringType, destinationAwsVpcIdsOptions.DestinationAwsVpcIds.GetVpcId())
+										response.Diagnostics.Append(diags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										destinationAwsVpcIdsAttributeMap["vpc_id"] = listValue
+									} else {
+										destinationAwsVpcIdsAttributeMap["vpc_id"] = types.ListNull(types.StringType)
+									}
+
+									destinationAwsVpcIdsObj, diags := types.ObjectValue(EnhancedFirewallPolicyRuleChoiceRuleListRulesDestinationChoiceDestinationAwsVpcIdsModelAttributeMap, destinationAwsVpcIdsAttributeMap)
+									response.Diagnostics.Append(diags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									rulesdestinationChoiceChoicesAttributeMap["destination_aws_vpc_ids"] = destinationAwsVpcIdsObj
+								} else {
+									rulesdestinationChoiceChoicesAttributeMap["destination_aws_vpc_ids"] = types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesDestinationChoiceDestinationAwsVpcIdsModelAttributeMap)
+								}
+							}
+
+							// data specToModelNested BoolOfOneOfPointerField --> AllDestinations
+							_, isAllDestinations := rulesdestinationChoiceChoices.(*ves_io_schema_enhanced_firewall_policy.EnhancedFirewallPolicyRuleType_AllDestinations)
+
+							if isAllDestinations {
+								rulesdestinationChoiceChoicesAttributeMap["all_destinations"] = types.BoolValue(true)
 							} else {
-								rulesdestinationChoiceChoicesAttributeMap["inside_destinations"] = types.BoolNull()
+								rulesdestinationChoiceChoicesAttributeMap["all_destinations"] = types.BoolNull()
 							}
 
 							// --- End of Choices ---
@@ -2077,46 +1788,6 @@ func (d *DataSourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request
 							rulestrafficChoiceChoices := rulesElement.GetTrafficChoice()
 
 							// Process nested choices, populating the temporary attribute map
-
-							// data specToModelNested PointerOfOneOfField --> ProtocolPortRange
-							// <no value>
-							// false
-							{
-								protocolPortRangeOptions, isProtocolPortRange := rulestrafficChoiceChoices.(*ves_io_schema_enhanced_firewall_policy.EnhancedFirewallPolicyRuleType_ProtocolPortRange)
-								protocolPortRangeAttributeMap := make(map[string]attr.Value)
-
-								if isProtocolPortRange && protocolPortRangeOptions != nil {
-
-									// data specToModelNested StringField --> Protocol
-									if protocolPortRangeOptions.ProtocolPortRange.GetProtocol() != "" {
-										protocolPortRangeAttributeMap["protocol"] = types.StringValue(protocolPortRangeOptions.ProtocolPortRange.GetProtocol())
-									} else {
-										// Empty string, set to null
-										protocolPortRangeAttributeMap["protocol"] = types.StringNull()
-									}
-
-									// data specToModelNested ArrayOfStringField --> PortRanges
-									if len(protocolPortRangeOptions.ProtocolPortRange.GetPortRanges()) > 0 {
-										listValue, diags := types.ListValueFrom(ctx, types.StringType, protocolPortRangeOptions.ProtocolPortRange.GetPortRanges())
-										response.Diagnostics.Append(diags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										protocolPortRangeAttributeMap["port_ranges"] = listValue
-									} else {
-										protocolPortRangeAttributeMap["port_ranges"] = types.ListNull(types.StringType)
-									}
-
-									protocolPortRangeObj, diags := types.ObjectValue(EnhancedFirewallPolicyRuleChoiceRuleListRulesTrafficChoiceProtocolPortRangeModelAttributeMap, protocolPortRangeAttributeMap)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									rulestrafficChoiceChoicesAttributeMap["protocol_port_range"] = protocolPortRangeObj
-								} else {
-									rulestrafficChoiceChoicesAttributeMap["protocol_port_range"] = types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesTrafficChoiceProtocolPortRangeModelAttributeMap)
-								}
-							}
 
 							// data specToModelNested BoolOfOneOfPointerField --> AllTraffic
 							_, isAllTraffic := rulestrafficChoiceChoices.(*ves_io_schema_enhanced_firewall_policy.EnhancedFirewallPolicyRuleType_AllTraffic)
@@ -2180,6 +1851,46 @@ func (d *DataSourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request
 									rulestrafficChoiceChoicesAttributeMap["applications"] = applicationsObj
 								} else {
 									rulestrafficChoiceChoicesAttributeMap["applications"] = types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesTrafficChoiceApplicationsModelAttributeMap)
+								}
+							}
+
+							// data specToModelNested PointerOfOneOfField --> ProtocolPortRange
+							// <no value>
+							// false
+							{
+								protocolPortRangeOptions, isProtocolPortRange := rulestrafficChoiceChoices.(*ves_io_schema_enhanced_firewall_policy.EnhancedFirewallPolicyRuleType_ProtocolPortRange)
+								protocolPortRangeAttributeMap := make(map[string]attr.Value)
+
+								if isProtocolPortRange && protocolPortRangeOptions != nil {
+
+									// data specToModelNested ArrayOfStringField --> PortRanges
+									if len(protocolPortRangeOptions.ProtocolPortRange.GetPortRanges()) > 0 {
+										listValue, diags := types.ListValueFrom(ctx, types.StringType, protocolPortRangeOptions.ProtocolPortRange.GetPortRanges())
+										response.Diagnostics.Append(diags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										protocolPortRangeAttributeMap["port_ranges"] = listValue
+									} else {
+										protocolPortRangeAttributeMap["port_ranges"] = types.ListNull(types.StringType)
+									}
+
+									// data specToModelNested StringField --> Protocol
+									if protocolPortRangeOptions.ProtocolPortRange.GetProtocol() != "" {
+										protocolPortRangeAttributeMap["protocol"] = types.StringValue(protocolPortRangeOptions.ProtocolPortRange.GetProtocol())
+									} else {
+										// Empty string, set to null
+										protocolPortRangeAttributeMap["protocol"] = types.StringNull()
+									}
+
+									protocolPortRangeObj, diags := types.ObjectValue(EnhancedFirewallPolicyRuleChoiceRuleListRulesTrafficChoiceProtocolPortRangeModelAttributeMap, protocolPortRangeAttributeMap)
+									response.Diagnostics.Append(diags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									rulestrafficChoiceChoicesAttributeMap["protocol_port_range"] = protocolPortRangeObj
+								} else {
+									rulestrafficChoiceChoicesAttributeMap["protocol_port_range"] = types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesTrafficChoiceProtocolPortRangeModelAttributeMap)
 								}
 							}
 
@@ -2311,14 +2022,6 @@ func (d *DataSourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request
 
 										// Recursively populate the nested struct
 
-										// data specToModelNested RequiredStringField --> Name
-										if nfvServiceElement.GetName() != "" {
-											objectRefTypeModelModel.Name = types.StringValue(nfvServiceElement.GetName())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Name = types.StringNull()
-										}
-
 										// data specToModelNested StringField --> Tenant
 										if nfvServiceElement.GetTenant() != "" {
 											objectRefTypeModelModel.Tenant = types.StringValue(nfvServiceElement.GetTenant())
@@ -2333,6 +2036,14 @@ func (d *DataSourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request
 										} else {
 											// Empty string, set to null
 											objectRefTypeModelModel.Namespace = types.StringNull()
+										}
+
+										// data specToModelNested RequiredStringField --> Name
+										if nfvServiceElement.GetName() != "" {
+											objectRefTypeModelModel.Name = types.StringValue(nfvServiceElement.GetName())
+										} else {
+											// Empty string, set to null
+											objectRefTypeModelModel.Name = types.StringNull()
 										}
 
 										// This field needs to be converted to a types.ObjectValue before assignment.
@@ -2439,6 +2150,242 @@ func (d *DataSourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request
 							// making this else-branch unreachable. The child OneOf handles the actual healing.
 							// The target is a types.Object, so we use types.ObjectNull.
 							enhancedFirewallPolicyEnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.AdvancedAction = types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesAdvancedActionModelAttributeMap)
+						}
+
+						// data specToModelNested RequiredOneOfField --> SourceChoice
+						// <no value>
+						if rulesElement.GetSourceChoice() != nil {
+							// Create a temporary attribute map for the choices within this OneOf
+							rulessourceChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+							// Define a variable for the spec choices to be passed down to nested templates.
+							// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+							rulessourceChoiceChoices := rulesElement.GetSourceChoice()
+
+							// Process nested choices, populating the temporary attribute map
+
+							// data specToModelNested BoolOfOneOfPointerField --> OutsideSources
+							_, isOutsideSources := rulessourceChoiceChoices.(*ves_io_schema_enhanced_firewall_policy.EnhancedFirewallPolicyRuleType_OutsideSources)
+
+							if isOutsideSources {
+								rulessourceChoiceChoicesAttributeMap["outside_sources"] = types.BoolValue(true)
+							} else {
+								rulessourceChoiceChoicesAttributeMap["outside_sources"] = types.BoolNull()
+							}
+
+							// data specToModelNested PointerOfOneOfField --> SourceLabelSelector
+							// <no value>
+							// false
+							{
+								sourceLabelSelectorOptions, isSourceLabelSelector := rulessourceChoiceChoices.(*ves_io_schema_enhanced_firewall_policy.EnhancedFirewallPolicyRuleType_SourceLabelSelector)
+								sourceLabelSelectorAttributeMap := make(map[string]attr.Value)
+
+								if isSourceLabelSelector && sourceLabelSelectorOptions != nil {
+
+									// data specToModelNested RequiredArrayOfStringField --> Expressions
+									if len(sourceLabelSelectorOptions.SourceLabelSelector.GetExpressions()) > 0 {
+										listValue, diags := types.ListValueFrom(ctx, types.StringType, sourceLabelSelectorOptions.SourceLabelSelector.GetExpressions())
+										response.Diagnostics.Append(diags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										sourceLabelSelectorAttributeMap["expressions"] = listValue
+									} else {
+										sourceLabelSelectorAttributeMap["expressions"] = types.ListNull(types.StringType)
+									}
+
+									sourceLabelSelectorObj, diags := types.ObjectValue(EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceSourceLabelSelectorModelAttributeMap, sourceLabelSelectorAttributeMap)
+									response.Diagnostics.Append(diags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									rulessourceChoiceChoicesAttributeMap["source_label_selector"] = sourceLabelSelectorObj
+								} else {
+									rulessourceChoiceChoicesAttributeMap["source_label_selector"] = types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceSourceLabelSelectorModelAttributeMap)
+								}
+							}
+
+							// data specToModelNested BoolOfOneOfPointerField --> AllSources
+							_, isAllSources := rulessourceChoiceChoices.(*ves_io_schema_enhanced_firewall_policy.EnhancedFirewallPolicyRuleType_AllSources)
+
+							if isAllSources {
+								rulessourceChoiceChoicesAttributeMap["all_sources"] = types.BoolValue(true)
+							} else {
+								rulessourceChoiceChoicesAttributeMap["all_sources"] = types.BoolNull()
+							}
+
+							// data specToModelNested PointerOfOneOfField --> SourcePrefixList
+							// <no value>
+							// false
+							{
+								sourcePrefixListOptions, isSourcePrefixList := rulessourceChoiceChoices.(*ves_io_schema_enhanced_firewall_policy.EnhancedFirewallPolicyRuleType_SourcePrefixList)
+								sourcePrefixListAttributeMap := make(map[string]attr.Value)
+
+								if isSourcePrefixList && sourcePrefixListOptions != nil {
+
+									// data specToModelNested ArrayOfStringField --> Prefixes
+									if len(sourcePrefixListOptions.SourcePrefixList.GetPrefixes()) > 0 {
+										listValue, diags := types.ListValueFrom(ctx, types.StringType, sourcePrefixListOptions.SourcePrefixList.GetPrefixes())
+										response.Diagnostics.Append(diags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										sourcePrefixListAttributeMap["prefixes"] = listValue
+									} else {
+										sourcePrefixListAttributeMap["prefixes"] = types.ListNull(types.StringType)
+									}
+
+									// data specToModelNested ArrayOfStringField --> Ipv6Prefixes
+									if len(sourcePrefixListOptions.SourcePrefixList.GetIpv6Prefixes()) > 0 {
+										listValue, diags := types.ListValueFrom(ctx, types.StringType, sourcePrefixListOptions.SourcePrefixList.GetIpv6Prefixes())
+										response.Diagnostics.Append(diags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										sourcePrefixListAttributeMap["ipv6_prefixes"] = listValue
+									} else {
+										sourcePrefixListAttributeMap["ipv6_prefixes"] = types.ListNull(types.StringType)
+									}
+
+									sourcePrefixListObj, diags := types.ObjectValue(EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceSourcePrefixListModelAttributeMap, sourcePrefixListAttributeMap)
+									response.Diagnostics.Append(diags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									rulessourceChoiceChoicesAttributeMap["source_prefix_list"] = sourcePrefixListObj
+								} else {
+									rulessourceChoiceChoicesAttributeMap["source_prefix_list"] = types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceSourcePrefixListModelAttributeMap)
+								}
+							}
+
+							// data specToModelNested PointerOfOneOfField --> SourceIpPrefixSet
+							// <no value>
+							// false
+							{
+								sourceIpPrefixSetOptions, isSourceIpPrefixSet := rulessourceChoiceChoices.(*ves_io_schema_enhanced_firewall_policy.EnhancedFirewallPolicyRuleType_SourceIpPrefixSet)
+								sourceIpPrefixSetAttributeMap := make(map[string]attr.Value)
+
+								if isSourceIpPrefixSet && sourceIpPrefixSetOptions != nil {
+
+									// data specToModelNested ArrayOfPointerField --> Ref
+									if len(sourceIpPrefixSetOptions.SourceIpPrefixSet.GetRef()) > 0 {
+										// Step 1: Always create a slice of model structs from the spec data.
+										// This slice serves as an intermediate representation.
+										refElements := make([]ObjectRefTypeModel, 0, len(sourceIpPrefixSetOptions.SourceIpPrefixSet.GetRef()))
+										for _, refElement := range sourceIpPrefixSetOptions.SourceIpPrefixSet.GetRef() {
+											objectRefTypeModelModel := ObjectRefTypeModel{}
+
+											// data specToModelNested RequiredStringField --> Name
+											if refElement.GetName() != "" {
+												objectRefTypeModelModel.Name = types.StringValue(refElement.GetName())
+											} else {
+												// Empty string, set to null
+												objectRefTypeModelModel.Name = types.StringNull()
+											}
+
+											// data specToModelNested StringField --> Tenant
+											if refElement.GetTenant() != "" {
+												objectRefTypeModelModel.Tenant = types.StringValue(refElement.GetTenant())
+											} else {
+												// Empty string, set to null
+												objectRefTypeModelModel.Tenant = types.StringNull()
+											}
+
+											// data specToModelNested RequiredStringField --> Namespace
+											if refElement.GetNamespace() != "" {
+												objectRefTypeModelModel.Namespace = types.StringValue(refElement.GetNamespace())
+											} else {
+												// Empty string, set to null
+												objectRefTypeModelModel.Namespace = types.StringNull()
+											}
+
+											refElements = append(refElements, objectRefTypeModelModel)
+										}
+										// CASE 1: The target field is a `types.List` or an attribute map.
+										// The intermediate slice of structs must be converted to a `types.ListValue`.
+										refListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: EnhancedFirewallPolicyRefObjectRefModelAttributeMap}, refElements)
+										response.Diagnostics.Append(diags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										sourceIpPrefixSetAttributeMap["ref"] = refListValue
+
+									} else {
+										// The source list is empty or nil.
+										// CASE 1: The target field is a `types.List` or an attribute map.
+										// Assign a null `types.ListValue`.
+										sourceIpPrefixSetAttributeMap["ref"] = types.ListNull(types.ObjectType{AttrTypes: EnhancedFirewallPolicyRefObjectRefModelAttributeMap})
+									}
+
+									sourceIpPrefixSetObj, diags := types.ObjectValue(EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceSourceIpPrefixSetModelAttributeMap, sourceIpPrefixSetAttributeMap)
+									response.Diagnostics.Append(diags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									rulessourceChoiceChoicesAttributeMap["source_ip_prefix_set"] = sourceIpPrefixSetObj
+								} else {
+									rulessourceChoiceChoicesAttributeMap["source_ip_prefix_set"] = types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceSourceIpPrefixSetModelAttributeMap)
+								}
+							}
+
+							// data specToModelNested BoolOfOneOfPointerField --> InsideSources
+							_, isInsideSources := rulessourceChoiceChoices.(*ves_io_schema_enhanced_firewall_policy.EnhancedFirewallPolicyRuleType_InsideSources)
+
+							if isInsideSources {
+								rulessourceChoiceChoicesAttributeMap["inside_sources"] = types.BoolValue(true)
+							} else {
+								rulessourceChoiceChoicesAttributeMap["inside_sources"] = types.BoolNull()
+							}
+
+							// data specToModelNested PointerOfOneOfField --> SourceAwsVpcIds
+							// <no value>
+							// false
+							{
+								sourceAwsVpcIdsOptions, isSourceAwsVpcIds := rulessourceChoiceChoices.(*ves_io_schema_enhanced_firewall_policy.EnhancedFirewallPolicyRuleType_SourceAwsVpcIds)
+								sourceAwsVpcIdsAttributeMap := make(map[string]attr.Value)
+
+								if isSourceAwsVpcIds && sourceAwsVpcIdsOptions != nil {
+
+									// data specToModelNested RequiredArrayOfStringField --> VpcId
+									if len(sourceAwsVpcIdsOptions.SourceAwsVpcIds.GetVpcId()) > 0 {
+										listValue, diags := types.ListValueFrom(ctx, types.StringType, sourceAwsVpcIdsOptions.SourceAwsVpcIds.GetVpcId())
+										response.Diagnostics.Append(diags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										sourceAwsVpcIdsAttributeMap["vpc_id"] = listValue
+									} else {
+										sourceAwsVpcIdsAttributeMap["vpc_id"] = types.ListNull(types.StringType)
+									}
+
+									sourceAwsVpcIdsObj, diags := types.ObjectValue(EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceSourceAwsVpcIdsModelAttributeMap, sourceAwsVpcIdsAttributeMap)
+									response.Diagnostics.Append(diags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									rulessourceChoiceChoicesAttributeMap["source_aws_vpc_ids"] = sourceAwsVpcIdsObj
+								} else {
+									rulessourceChoiceChoicesAttributeMap["source_aws_vpc_ids"] = types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceSourceAwsVpcIdsModelAttributeMap)
+								}
+							}
+
+							// --- End of Choices ---
+
+							// Create the final ObjectValue for this OneOf field
+							finalObj, rulessourceChoiceChoicesObjDiags := types.ObjectValue(
+								EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+								rulessourceChoiceChoicesAttributeMap,
+							)
+							response.Diagnostics.Append(rulessourceChoiceChoicesObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+
+							// Assign the final object to the correct place (either the root model or a parent's attribute map)
+							enhancedFirewallPolicyEnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.SourceChoice = finalObj
+						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
+							enhancedFirewallPolicyEnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel.SourceChoice = types.ObjectNull(EnhancedFirewallPolicyRuleChoiceRuleListRulesSourceChoiceModelAttributeMap)
 						}
 
 						rulesElements = append(rulesElements, enhancedFirewallPolicyEnhancedFirewallPolicyEnhancedFirewallPolicyRuleTypeModel)
@@ -2567,6 +2514,59 @@ func (d *DataSourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request
 			}
 		}
 
+		// data specToModelNested BoolOfOneOfPointerField --> DenyAll
+		_, isDenyAll := ruleChoiceChoices.(*ves_io_schema_enhanced_firewall_policy.GlobalSpecType_DenyAll)
+
+		if isDenyAll {
+			ruleChoiceChoicesModel.DenyAll = types.BoolValue(true)
+		} else {
+			ruleChoiceChoicesModel.DenyAll = types.BoolNull()
+		}
+
+		// data specToModelNested PointerOfOneOfField --> DeniedSources
+		// <no value>
+		// false
+		{
+			deniedSourcesOptions, isDeniedSources := ruleChoiceChoices.(*ves_io_schema_enhanced_firewall_policy.GlobalSpecType_DeniedSources)
+			deniedSourcesAttributeMap := make(map[string]attr.Value)
+
+			if isDeniedSources && deniedSourcesOptions != nil {
+
+				// data specToModelNested ArrayOfStringField --> Prefix
+				if len(deniedSourcesOptions.DeniedSources.GetPrefix()) > 0 {
+					listValue, diags := types.ListValueFrom(ctx, types.StringType, deniedSourcesOptions.DeniedSources.GetPrefix())
+					response.Diagnostics.Append(diags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					deniedSourcesAttributeMap["prefix"] = listValue
+				} else {
+					deniedSourcesAttributeMap["prefix"] = types.ListNull(types.StringType)
+				}
+
+				// data specToModelNested ArrayOfStringField --> Ipv6Prefix
+				if len(deniedSourcesOptions.DeniedSources.GetIpv6Prefix()) > 0 {
+					listValue, diags := types.ListValueFrom(ctx, types.StringType, deniedSourcesOptions.DeniedSources.GetIpv6Prefix())
+					response.Diagnostics.Append(diags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					deniedSourcesAttributeMap["ipv6_prefix"] = listValue
+				} else {
+					deniedSourcesAttributeMap["ipv6_prefix"] = types.ListNull(types.StringType)
+				}
+
+				deniedSourcesObj, diags := types.ObjectValue(EnhancedFirewallPolicyRuleChoiceDeniedSourcesModelAttributeMap, deniedSourcesAttributeMap)
+				response.Diagnostics.Append(diags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				ruleChoiceChoicesModel.DeniedSources = deniedSourcesObj
+			} else {
+				ruleChoiceChoicesModel.DeniedSources = types.ObjectNull(EnhancedFirewallPolicyRuleChoiceDeniedSourcesModelAttributeMap)
+			}
+		}
+
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
 		ruleChoiceObj, diags := utils.GoStructToObjectValue(
 			ctx,
@@ -2589,124 +2589,6 @@ func (d *DataSourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request
 	if specData.GetSegmentPolicy() != nil {
 		var enhancedFirewallPolicyPolicySegmentPolicyTypeModel = &EnhancedFirewallPolicyPolicySegmentPolicyType{}
 		segmentPolicyElement := specData.GetSegmentPolicy()
-
-		// data specToModelNested OneOfField --> DstSegmentChoice
-		if segmentPolicyElement.GetDstSegmentChoice() != nil {
-			// Create a temporary attribute map for the choices within this OneOf
-			segmentPolicydstSegmentChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-			// Define a variable for the spec choices to be passed down to nested templates.
-			// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-			segmentPolicydstSegmentChoiceChoices := segmentPolicyElement.GetDstSegmentChoice()
-
-			// Process nested choices, populating the temporary attribute map
-
-			// data specToModelNested BoolOfOneOfPointerField --> DstAny
-			_, isDstAny := segmentPolicydstSegmentChoiceChoices.(*ves_io_schema_policy.SegmentPolicyType_DstAny)
-
-			if isDstAny {
-				segmentPolicydstSegmentChoiceChoicesAttributeMap["dst_any"] = types.BoolValue(true)
-			} else {
-				segmentPolicydstSegmentChoiceChoicesAttributeMap["dst_any"] = types.BoolNull()
-			}
-
-			// data specToModelNested BoolOfOneOfPointerField --> IntraSegment
-			_, isIntraSegment := segmentPolicydstSegmentChoiceChoices.(*ves_io_schema_policy.SegmentPolicyType_IntraSegment)
-
-			if isIntraSegment {
-				segmentPolicydstSegmentChoiceChoicesAttributeMap["intra_segment"] = types.BoolValue(true)
-			} else {
-				segmentPolicydstSegmentChoiceChoicesAttributeMap["intra_segment"] = types.BoolNull()
-			}
-
-			// data specToModelNested PointerOfOneOfField --> DstSegments
-			// <no value>
-			// false
-			{
-				dstSegmentsOptions, isDstSegments := segmentPolicydstSegmentChoiceChoices.(*ves_io_schema_policy.SegmentPolicyType_DstSegments)
-				dstSegmentsAttributeMap := make(map[string]attr.Value)
-
-				if isDstSegments && dstSegmentsOptions != nil {
-
-					// data specToModelNested RequiredArrayOfPointerField --> Segments
-					if len(dstSegmentsOptions.DstSegments.GetSegments()) > 0 {
-						// Step 1: Always create a slice of model structs from the spec data.
-						// This slice serves as an intermediate representation.
-						segmentsElements := make([]ObjectRefTypeModel, 0, len(dstSegmentsOptions.DstSegments.GetSegments()))
-						for _, segmentsElement := range dstSegmentsOptions.DstSegments.GetSegments() {
-							objectRefTypeModelModel := ObjectRefTypeModel{}
-
-							// data specToModelNested RequiredStringField --> Name
-							if segmentsElement.GetName() != "" {
-								objectRefTypeModelModel.Name = types.StringValue(segmentsElement.GetName())
-							} else {
-								// Empty string, set to null
-								objectRefTypeModelModel.Name = types.StringNull()
-							}
-
-							// data specToModelNested StringField --> Tenant
-							if segmentsElement.GetTenant() != "" {
-								objectRefTypeModelModel.Tenant = types.StringValue(segmentsElement.GetTenant())
-							} else {
-								// Empty string, set to null
-								objectRefTypeModelModel.Tenant = types.StringNull()
-							}
-
-							// data specToModelNested RequiredStringField --> Namespace
-							if segmentsElement.GetNamespace() != "" {
-								objectRefTypeModelModel.Namespace = types.StringValue(segmentsElement.GetNamespace())
-							} else {
-								// Empty string, set to null
-								objectRefTypeModelModel.Namespace = types.StringNull()
-							}
-
-							segmentsElements = append(segmentsElements, objectRefTypeModelModel)
-						}
-						// CASE 1: The target field is a `types.List` or an attribute map.
-						// The intermediate slice of structs must be converted to a `types.ListValue`.
-						segmentsListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: EnhancedFirewallPolicySegmentsObjectRefModelAttributeMap}, segmentsElements)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						dstSegmentsAttributeMap["segments"] = segmentsListValue
-
-					} else {
-						// The source list is empty or nil.
-						// CASE 1: The target field is a `types.List` or an attribute map.
-						// Assign a null `types.ListValue`.
-						dstSegmentsAttributeMap["segments"] = types.ListNull(types.ObjectType{AttrTypes: EnhancedFirewallPolicySegmentsObjectRefModelAttributeMap})
-					}
-
-					dstSegmentsObj, diags := types.ObjectValue(EnhancedFirewallPolicySegmentPolicyDstSegmentChoiceDstSegmentsModelAttributeMap, dstSegmentsAttributeMap)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					segmentPolicydstSegmentChoiceChoicesAttributeMap["dst_segments"] = dstSegmentsObj
-				} else {
-					segmentPolicydstSegmentChoiceChoicesAttributeMap["dst_segments"] = types.ObjectNull(EnhancedFirewallPolicySegmentPolicyDstSegmentChoiceDstSegmentsModelAttributeMap)
-				}
-			}
-
-			// --- End of Choices ---
-
-			// Create the final ObjectValue for this OneOf field
-			finalObj, segmentPolicydstSegmentChoiceChoicesObjDiags := types.ObjectValue(
-				EnhancedFirewallPolicySegmentPolicyDstSegmentChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-				segmentPolicydstSegmentChoiceChoicesAttributeMap,
-			)
-			response.Diagnostics.Append(segmentPolicydstSegmentChoiceChoicesObjDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			enhancedFirewallPolicyPolicySegmentPolicyTypeModel.DstSegmentChoice = finalObj
-		} else {
-			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			enhancedFirewallPolicyPolicySegmentPolicyTypeModel.DstSegmentChoice = types.ObjectNull(EnhancedFirewallPolicySegmentPolicyDstSegmentChoiceModelAttributeMap)
-		}
 
 		// data specToModelNested OneOfField --> SrcSegmentChoice
 		if segmentPolicyElement.GetSrcSegmentChoice() != nil {
@@ -2815,6 +2697,124 @@ func (d *DataSourceF5XCEnhancedFirewallPolicy) Read(ctx context.Context, request
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			enhancedFirewallPolicyPolicySegmentPolicyTypeModel.SrcSegmentChoice = types.ObjectNull(EnhancedFirewallPolicySegmentPolicySrcSegmentChoiceModelAttributeMap)
+		}
+
+		// data specToModelNested OneOfField --> DstSegmentChoice
+		if segmentPolicyElement.GetDstSegmentChoice() != nil {
+			// Create a temporary attribute map for the choices within this OneOf
+			segmentPolicydstSegmentChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+			// Define a variable for the spec choices to be passed down to nested templates.
+			// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+			segmentPolicydstSegmentChoiceChoices := segmentPolicyElement.GetDstSegmentChoice()
+
+			// Process nested choices, populating the temporary attribute map
+
+			// data specToModelNested PointerOfOneOfField --> DstSegments
+			// <no value>
+			// false
+			{
+				dstSegmentsOptions, isDstSegments := segmentPolicydstSegmentChoiceChoices.(*ves_io_schema_policy.SegmentPolicyType_DstSegments)
+				dstSegmentsAttributeMap := make(map[string]attr.Value)
+
+				if isDstSegments && dstSegmentsOptions != nil {
+
+					// data specToModelNested RequiredArrayOfPointerField --> Segments
+					if len(dstSegmentsOptions.DstSegments.GetSegments()) > 0 {
+						// Step 1: Always create a slice of model structs from the spec data.
+						// This slice serves as an intermediate representation.
+						segmentsElements := make([]ObjectRefTypeModel, 0, len(dstSegmentsOptions.DstSegments.GetSegments()))
+						for _, segmentsElement := range dstSegmentsOptions.DstSegments.GetSegments() {
+							objectRefTypeModelModel := ObjectRefTypeModel{}
+
+							// data specToModelNested RequiredStringField --> Name
+							if segmentsElement.GetName() != "" {
+								objectRefTypeModelModel.Name = types.StringValue(segmentsElement.GetName())
+							} else {
+								// Empty string, set to null
+								objectRefTypeModelModel.Name = types.StringNull()
+							}
+
+							// data specToModelNested StringField --> Tenant
+							if segmentsElement.GetTenant() != "" {
+								objectRefTypeModelModel.Tenant = types.StringValue(segmentsElement.GetTenant())
+							} else {
+								// Empty string, set to null
+								objectRefTypeModelModel.Tenant = types.StringNull()
+							}
+
+							// data specToModelNested RequiredStringField --> Namespace
+							if segmentsElement.GetNamespace() != "" {
+								objectRefTypeModelModel.Namespace = types.StringValue(segmentsElement.GetNamespace())
+							} else {
+								// Empty string, set to null
+								objectRefTypeModelModel.Namespace = types.StringNull()
+							}
+
+							segmentsElements = append(segmentsElements, objectRefTypeModelModel)
+						}
+						// CASE 1: The target field is a `types.List` or an attribute map.
+						// The intermediate slice of structs must be converted to a `types.ListValue`.
+						segmentsListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: EnhancedFirewallPolicySegmentsObjectRefModelAttributeMap}, segmentsElements)
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						dstSegmentsAttributeMap["segments"] = segmentsListValue
+
+					} else {
+						// The source list is empty or nil.
+						// CASE 1: The target field is a `types.List` or an attribute map.
+						// Assign a null `types.ListValue`.
+						dstSegmentsAttributeMap["segments"] = types.ListNull(types.ObjectType{AttrTypes: EnhancedFirewallPolicySegmentsObjectRefModelAttributeMap})
+					}
+
+					dstSegmentsObj, diags := types.ObjectValue(EnhancedFirewallPolicySegmentPolicyDstSegmentChoiceDstSegmentsModelAttributeMap, dstSegmentsAttributeMap)
+					response.Diagnostics.Append(diags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					segmentPolicydstSegmentChoiceChoicesAttributeMap["dst_segments"] = dstSegmentsObj
+				} else {
+					segmentPolicydstSegmentChoiceChoicesAttributeMap["dst_segments"] = types.ObjectNull(EnhancedFirewallPolicySegmentPolicyDstSegmentChoiceDstSegmentsModelAttributeMap)
+				}
+			}
+
+			// data specToModelNested BoolOfOneOfPointerField --> DstAny
+			_, isDstAny := segmentPolicydstSegmentChoiceChoices.(*ves_io_schema_policy.SegmentPolicyType_DstAny)
+
+			if isDstAny {
+				segmentPolicydstSegmentChoiceChoicesAttributeMap["dst_any"] = types.BoolValue(true)
+			} else {
+				segmentPolicydstSegmentChoiceChoicesAttributeMap["dst_any"] = types.BoolNull()
+			}
+
+			// data specToModelNested BoolOfOneOfPointerField --> IntraSegment
+			_, isIntraSegment := segmentPolicydstSegmentChoiceChoices.(*ves_io_schema_policy.SegmentPolicyType_IntraSegment)
+
+			if isIntraSegment {
+				segmentPolicydstSegmentChoiceChoicesAttributeMap["intra_segment"] = types.BoolValue(true)
+			} else {
+				segmentPolicydstSegmentChoiceChoicesAttributeMap["intra_segment"] = types.BoolNull()
+			}
+
+			// --- End of Choices ---
+
+			// Create the final ObjectValue for this OneOf field
+			finalObj, segmentPolicydstSegmentChoiceChoicesObjDiags := types.ObjectValue(
+				EnhancedFirewallPolicySegmentPolicyDstSegmentChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+				segmentPolicydstSegmentChoiceChoicesAttributeMap,
+			)
+			response.Diagnostics.Append(segmentPolicydstSegmentChoiceChoicesObjDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			// Assign the final object to the correct place (either the root model or a parent's attribute map)
+			enhancedFirewallPolicyPolicySegmentPolicyTypeModel.DstSegmentChoice = finalObj
+		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			enhancedFirewallPolicyPolicySegmentPolicyTypeModel.DstSegmentChoice = types.ObjectNull(EnhancedFirewallPolicySegmentPolicyDstSegmentChoiceModelAttributeMap)
 		}
 
 		segmentPolicyObj, segmentPolicyDiags := utils.GoStructToObjectValue(

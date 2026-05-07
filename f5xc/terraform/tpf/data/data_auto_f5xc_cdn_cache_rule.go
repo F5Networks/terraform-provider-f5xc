@@ -29,9 +29,9 @@ type DataSourceF5XCCdnCacheRule struct {
 }
 
 type CdnCacheRuleCdnCacheRuleCDNCacheRule struct {
-	RuleName           types.String `tfsdk:"rule_name"`
 	RuleExpressionList types.List   `tfsdk:"rule_expression_list"`
 	CacheActionsChoice types.Object `tfsdk:"cache_actions_choice"`
+	RuleName           types.String `tfsdk:"rule_name"`
 }
 
 type CdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionList struct {
@@ -40,31 +40,10 @@ type CdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionList struct {
 }
 
 type CdnCacheRuleCdnCacheRuleCDNCacheRuleExpression struct {
-	CookieMatcher   types.List   `tfsdk:"cookie_matcher"`
 	PathMatch       types.Object `tfsdk:"path_match"`
 	QueryParameters types.List   `tfsdk:"query_parameters"`
 	CacheHeaders    types.List   `tfsdk:"cache_headers"`
-}
-
-type CdnCacheRuleCdnCacheRuleCacheCookieMatcherType struct {
-	Name     types.String `tfsdk:"name"`
-	Operator types.Object `tfsdk:"operator"`
-}
-
-type CdnCacheRuleCdnCacheRuleCookieMatcherCacheOperator struct {
-	CacheOperatorChoice types.Object `tfsdk:"cache_operator_choice"`
-}
-
-type CdnCacheRuleCookieMatcherCacheOperatorCacheOperatorChoice struct {
-	Contains         types.String `tfsdk:"contains"`
-	DoesNotContain   types.String `tfsdk:"does_not_contain"`
-	Startswith       types.String `tfsdk:"startswith"`
-	DoesNotStartWith types.String `tfsdk:"does_not_start_with"`
-	Equals           types.String `tfsdk:"equals"`
-	DoesNotEqual     types.String `tfsdk:"does_not_equal"`
-	Endswith         types.String `tfsdk:"endswith"`
-	DoesNotEndWith   types.String `tfsdk:"does_not_end_with"`
-	MatchRegex       types.String `tfsdk:"match_regex"`
+	CookieMatcher   types.List   `tfsdk:"cookie_matcher"`
 }
 
 type CdnCacheRuleCdnCacheRuleCDNPathMatcherType struct {
@@ -76,15 +55,15 @@ type CdnCacheRuleCdnCacheRuleCacheOperator struct {
 }
 
 type CdnCacheRuleCacheOperatorCacheOperatorChoice struct {
-	DoesNotContain   types.String `tfsdk:"does_not_contain"`
-	DoesNotStartWith types.String `tfsdk:"does_not_start_with"`
 	DoesNotEndWith   types.String `tfsdk:"does_not_end_with"`
 	MatchRegex       types.String `tfsdk:"match_regex"`
-	Contains         types.String `tfsdk:"contains"`
-	Equals           types.String `tfsdk:"equals"`
 	DoesNotEqual     types.String `tfsdk:"does_not_equal"`
-	Startswith       types.String `tfsdk:"startswith"`
+	DoesNotContain   types.String `tfsdk:"does_not_contain"`
+	Equals           types.String `tfsdk:"equals"`
 	Endswith         types.String `tfsdk:"endswith"`
+	Startswith       types.String `tfsdk:"startswith"`
+	Contains         types.String `tfsdk:"contains"`
+	DoesNotStartWith types.String `tfsdk:"does_not_start_with"`
 }
 
 type CdnCacheRuleCdnCacheRuleCacheQueryParameterMatcherType struct {
@@ -97,15 +76,15 @@ type CdnCacheRuleCdnCacheRuleQueryParamCacheOperator struct {
 }
 
 type CdnCacheRuleQueryParamCacheOperatorCacheOperatorChoice struct {
-	Startswith       types.String `tfsdk:"startswith"`
-	DoesNotStartWith types.String `tfsdk:"does_not_start_with"`
-	DoesNotEndWith   types.String `tfsdk:"does_not_end_with"`
 	DoesNotEqual     types.String `tfsdk:"does_not_equal"`
 	Contains         types.String `tfsdk:"contains"`
-	DoesNotContain   types.String `tfsdk:"does_not_contain"`
-	Endswith         types.String `tfsdk:"endswith"`
 	MatchRegex       types.String `tfsdk:"match_regex"`
+	DoesNotContain   types.String `tfsdk:"does_not_contain"`
+	Startswith       types.String `tfsdk:"startswith"`
+	DoesNotStartWith types.String `tfsdk:"does_not_start_with"`
 	Equals           types.String `tfsdk:"equals"`
+	Endswith         types.String `tfsdk:"endswith"`
+	DoesNotEndWith   types.String `tfsdk:"does_not_end_with"`
 }
 
 type CdnCacheRuleCdnCacheRuleCacheHeaderMatcherType struct {
@@ -118,15 +97,36 @@ type CdnCacheRuleCdnCacheRuleHeaderCacheOperator struct {
 }
 
 type CdnCacheRuleHeaderCacheOperatorCacheOperatorChoice struct {
-	DoesNotStartWith types.String `tfsdk:"does_not_start_with"`
-	DoesNotEndWith   types.String `tfsdk:"does_not_end_with"`
 	DoesNotEqual     types.String `tfsdk:"does_not_equal"`
-	MatchRegex       types.String `tfsdk:"match_regex"`
 	Equals           types.String `tfsdk:"equals"`
 	Contains         types.String `tfsdk:"contains"`
 	Startswith       types.String `tfsdk:"startswith"`
 	Endswith         types.String `tfsdk:"endswith"`
 	DoesNotContain   types.String `tfsdk:"does_not_contain"`
+	DoesNotStartWith types.String `tfsdk:"does_not_start_with"`
+	DoesNotEndWith   types.String `tfsdk:"does_not_end_with"`
+	MatchRegex       types.String `tfsdk:"match_regex"`
+}
+
+type CdnCacheRuleCdnCacheRuleCacheCookieMatcherType struct {
+	Name     types.String `tfsdk:"name"`
+	Operator types.Object `tfsdk:"operator"`
+}
+
+type CdnCacheRuleCdnCacheRuleCookieMatcherCacheOperator struct {
+	CacheOperatorChoice types.Object `tfsdk:"cache_operator_choice"`
+}
+
+type CdnCacheRuleCookieMatcherCacheOperatorCacheOperatorChoice struct {
+	DoesNotEqual     types.String `tfsdk:"does_not_equal"`
+	DoesNotContain   types.String `tfsdk:"does_not_contain"`
+	DoesNotStartWith types.String `tfsdk:"does_not_start_with"`
+	Endswith         types.String `tfsdk:"endswith"`
+	MatchRegex       types.String `tfsdk:"match_regex"`
+	Contains         types.String `tfsdk:"contains"`
+	Startswith       types.String `tfsdk:"startswith"`
+	DoesNotEndWith   types.String `tfsdk:"does_not_end_with"`
+	Equals           types.String `tfsdk:"equals"`
 }
 
 type CdnCacheRuleCDNCacheRuleCacheActionsChoice struct {
@@ -139,30 +139,30 @@ type CdnCacheRuleCDNCacheRuleEligibleForCache struct {
 }
 
 type CdnCacheRuleCacheEligibleOptionsEligibleForCacheChoice struct {
-	SchemeProxyHostRequestUri types.Object `tfsdk:"scheme_proxy_host_request_uri"`
 	SchemeProxyHostUri        types.Object `tfsdk:"scheme_proxy_host_uri"`
-}
-
-type CdnCacheRuleCacheEligibleOptionsSchemeProxyHostRequestUri struct {
-	CacheTtl             types.String `tfsdk:"cache_ttl"`
-	IgnoreResponseCookie types.Bool   `tfsdk:"ignore_response_cookie"`
-	CacheOverride        types.Bool   `tfsdk:"cache_override"`
+	SchemeProxyHostRequestUri types.Object `tfsdk:"scheme_proxy_host_request_uri"`
 }
 
 type CdnCacheRuleCacheEligibleOptionsSchemeProxyHostUri struct {
+	CacheOverride        types.Bool   `tfsdk:"cache_override"`
 	CacheTtl             types.String `tfsdk:"cache_ttl"`
 	IgnoreResponseCookie types.Bool   `tfsdk:"ignore_response_cookie"`
+}
+
+type CdnCacheRuleCacheEligibleOptionsSchemeProxyHostRequestUri struct {
+	IgnoreResponseCookie types.Bool   `tfsdk:"ignore_response_cookie"`
 	CacheOverride        types.Bool   `tfsdk:"cache_override"`
+	CacheTtl             types.String `tfsdk:"cache_ttl"`
 }
 
 // DataSourceF5XCCdnCacheRuleModel describes the resource data model.
 type DataSourceF5XCCdnCacheRuleModel struct {
+	Name        types.String   `tfsdk:"name"`
 	Namespace   types.String   `tfsdk:"namespace"`
 	Uid         types.String   `tfsdk:"uid"`
 	Labels      types.Map      `tfsdk:"labels"`
 	Annotations types.Map      `tfsdk:"annotations"`
 	Description types.String   `tfsdk:"description"`
-	Name        types.String   `tfsdk:"name"`
 	CacheRules  types.Object   `tfsdk:"cache_rules"`
 	Timeouts    timeouts.Value `tfsdk:"timeouts"`
 }
@@ -171,7 +171,6 @@ type DataSourceF5XCCdnCacheRuleModel struct {
 // Attribute map for PointerField --> CacheRules
 var CdnCacheRuleCacheRulesModelAttributeMap = map[string]attr.Type{
 
-	"rule_name": types.StringType,
 	"rule_expression_list": types.ListType{
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
@@ -180,20 +179,7 @@ var CdnCacheRuleCacheRulesModelAttributeMap = map[string]attr.Type{
 				"cache_rule_expression": types.ListType{
 					ElemType: types.ObjectType{
 						AttrTypes: map[string]attr.Type{
-
-							"cookie_matcher": types.ListType{
-								ElemType: types.ObjectType{
-									AttrTypes: map[string]attr.Type{
-
-										"name": types.StringType, "operator": types.ObjectType{
-											AttrTypes: map[string]attr.Type{
-												"cache_operator_choice": types.ObjectType{
-													AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorCacheOperatorModelAttributeMap,
-												}},
-										},
-									},
-								},
-							}, "path_match": types.ObjectType{
+							"path_match": types.ObjectType{
 								AttrTypes: map[string]attr.Type{"operator": types.ObjectType{
 									AttrTypes: map[string]attr.Type{
 										"cache_operator_choice": types.ObjectType{
@@ -229,6 +215,19 @@ var CdnCacheRuleCacheRulesModelAttributeMap = map[string]attr.Type{
 									},
 								},
 							},
+							"cookie_matcher": types.ListType{
+								ElemType: types.ObjectType{
+									AttrTypes: map[string]attr.Type{
+
+										"name": types.StringType, "operator": types.ObjectType{
+											AttrTypes: map[string]attr.Type{
+												"cache_operator_choice": types.ObjectType{
+													AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorCacheOperatorModelAttributeMap,
+												}},
+										},
+									},
+								},
+							},
 						},
 					},
 				},
@@ -238,6 +237,7 @@ var CdnCacheRuleCacheRulesModelAttributeMap = map[string]attr.Type{
 	"cache_actions_choice": types.ObjectType{
 		AttrTypes: CdnCacheRuleCacheRulesCacheActionsModelAttributeMap,
 	},
+	"rule_name": types.StringType,
 }
 
 // Attribute map for RequiredArrayOfPointerField --> RuleExpressionList
@@ -247,20 +247,7 @@ var CdnCacheRuleCacheRulesRuleExpressionListModelAttributeMap = map[string]attr.
 	"cache_rule_expression": types.ListType{
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
-
-				"cookie_matcher": types.ListType{
-					ElemType: types.ObjectType{
-						AttrTypes: map[string]attr.Type{
-
-							"name": types.StringType, "operator": types.ObjectType{
-								AttrTypes: map[string]attr.Type{
-									"cache_operator_choice": types.ObjectType{
-										AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorCacheOperatorModelAttributeMap,
-									}},
-							},
-						},
-					},
-				}, "path_match": types.ObjectType{
+				"path_match": types.ObjectType{
 					AttrTypes: map[string]attr.Type{"operator": types.ObjectType{
 						AttrTypes: map[string]attr.Type{
 							"cache_operator_choice": types.ObjectType{
@@ -296,6 +283,19 @@ var CdnCacheRuleCacheRulesRuleExpressionListModelAttributeMap = map[string]attr.
 						},
 					},
 				},
+				"cookie_matcher": types.ListType{
+					ElemType: types.ObjectType{
+						AttrTypes: map[string]attr.Type{
+
+							"name": types.StringType, "operator": types.ObjectType{
+								AttrTypes: map[string]attr.Type{
+									"cache_operator_choice": types.ObjectType{
+										AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorCacheOperatorModelAttributeMap,
+									}},
+							},
+						},
+					},
+				},
 			},
 		},
 	},
@@ -303,20 +303,7 @@ var CdnCacheRuleCacheRulesRuleExpressionListModelAttributeMap = map[string]attr.
 
 // Attribute map for RequiredArrayOfPointerField --> CacheRuleExpression
 var CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionModelAttributeMap = map[string]attr.Type{
-
-	"cookie_matcher": types.ListType{
-		ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-
-				"name": types.StringType, "operator": types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"cache_operator_choice": types.ObjectType{
-							AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorCacheOperatorModelAttributeMap,
-						}},
-				},
-			},
-		},
-	}, "path_match": types.ObjectType{
+	"path_match": types.ObjectType{
 		AttrTypes: map[string]attr.Type{"operator": types.ObjectType{
 			AttrTypes: map[string]attr.Type{
 				"cache_operator_choice": types.ObjectType{
@@ -352,39 +339,19 @@ var CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionModelAttributeMap
 			},
 		},
 	},
-}
+	"cookie_matcher": types.ListType{
+		ElemType: types.ObjectType{
+			AttrTypes: map[string]attr.Type{
 
-// Attribute map for ArrayOfPointerField --> CookieMatcher
-var CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherModelAttributeMap = map[string]attr.Type{
-
-	"name": types.StringType, "operator": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"cache_operator_choice": types.ObjectType{
-				AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorCacheOperatorModelAttributeMap,
-			}},
+				"name": types.StringType, "operator": types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"cache_operator_choice": types.ObjectType{
+							AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorCacheOperatorModelAttributeMap,
+						}},
+				},
+			},
+		},
 	},
-}
-
-// Attribute map for PointerField --> Operator
-var CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorModelAttributeMap = map[string]attr.Type{
-
-	"cache_operator_choice": types.ObjectType{
-		AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorCacheOperatorModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> CacheOperator
-var CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorCacheOperatorModelAttributeMap = map[string]attr.Type{
-
-	"contains":            types.StringType,
-	"does_not_contain":    types.StringType,
-	"startswith":          types.StringType,
-	"does_not_start_with": types.StringType,
-	"equals":              types.StringType,
-	"does_not_equal":      types.StringType,
-	"endswith":            types.StringType,
-	"does_not_end_with":   types.StringType,
-	"match_regex":         types.StringType,
 }
 
 // Attribute map for PointerField --> PathMatch
@@ -408,15 +375,15 @@ var CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchOperator
 // Attribute map for RequiredOneOfField --> CacheOperator
 var CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchOperatorCacheOperatorModelAttributeMap = map[string]attr.Type{
 
-	"does_not_contain":    types.StringType,
-	"does_not_start_with": types.StringType,
 	"does_not_end_with":   types.StringType,
 	"match_regex":         types.StringType,
-	"contains":            types.StringType,
-	"equals":              types.StringType,
 	"does_not_equal":      types.StringType,
-	"startswith":          types.StringType,
+	"does_not_contain":    types.StringType,
+	"equals":              types.StringType,
 	"endswith":            types.StringType,
+	"startswith":          types.StringType,
+	"contains":            types.StringType,
+	"does_not_start_with": types.StringType,
 }
 
 // Attribute map for ArrayOfPointerField --> QueryParameters
@@ -441,15 +408,15 @@ var CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersOp
 // Attribute map for RequiredOneOfField --> CacheOperator
 var CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersOperatorCacheOperatorModelAttributeMap = map[string]attr.Type{
 
-	"startswith":          types.StringType,
-	"does_not_start_with": types.StringType,
-	"does_not_end_with":   types.StringType,
 	"does_not_equal":      types.StringType,
 	"contains":            types.StringType,
-	"does_not_contain":    types.StringType,
-	"endswith":            types.StringType,
 	"match_regex":         types.StringType,
+	"does_not_contain":    types.StringType,
+	"startswith":          types.StringType,
+	"does_not_start_with": types.StringType,
 	"equals":              types.StringType,
+	"endswith":            types.StringType,
+	"does_not_end_with":   types.StringType,
 }
 
 // Attribute map for ArrayOfPointerField --> CacheHeaders
@@ -476,15 +443,48 @@ var CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCacheHeadersOpera
 // Attribute map for RequiredOneOfField --> CacheOperator
 var CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCacheHeadersOperatorCacheOperatorModelAttributeMap = map[string]attr.Type{
 
-	"does_not_start_with": types.StringType,
-	"does_not_end_with":   types.StringType,
 	"does_not_equal":      types.StringType,
-	"match_regex":         types.StringType,
 	"equals":              types.StringType,
 	"contains":            types.StringType,
 	"startswith":          types.StringType,
 	"endswith":            types.StringType,
 	"does_not_contain":    types.StringType,
+	"does_not_start_with": types.StringType,
+	"does_not_end_with":   types.StringType,
+	"match_regex":         types.StringType,
+}
+
+// Attribute map for ArrayOfPointerField --> CookieMatcher
+var CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherModelAttributeMap = map[string]attr.Type{
+
+	"name": types.StringType, "operator": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"cache_operator_choice": types.ObjectType{
+				AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorCacheOperatorModelAttributeMap,
+			}},
+	},
+}
+
+// Attribute map for PointerField --> Operator
+var CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorModelAttributeMap = map[string]attr.Type{
+
+	"cache_operator_choice": types.ObjectType{
+		AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorCacheOperatorModelAttributeMap,
+	},
+}
+
+// Attribute map for RequiredOneOfField --> CacheOperator
+var CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorCacheOperatorModelAttributeMap = map[string]attr.Type{
+
+	"does_not_equal":      types.StringType,
+	"does_not_contain":    types.StringType,
+	"does_not_start_with": types.StringType,
+	"endswith":            types.StringType,
+	"match_regex":         types.StringType,
+	"contains":            types.StringType,
+	"startswith":          types.StringType,
+	"does_not_end_with":   types.StringType,
+	"equals":              types.StringType,
 }
 
 // Attribute map for RequiredOneOfField --> CacheActions
@@ -507,28 +507,28 @@ var CdnCacheRuleCacheRulesCacheActionsEligibleForCacheModelAttributeMap = map[st
 // Attribute map for RequiredOneOfField --> EligibleForCache
 var CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheModelAttributeMap = map[string]attr.Type{
 
-	"scheme_proxy_host_request_uri": types.ObjectType{
-		AttrTypes: CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheSchemeProxyHostRequestUriModelAttributeMap,
-	},
 	"scheme_proxy_host_uri": types.ObjectType{
 		AttrTypes: CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheSchemeProxyHostUriModelAttributeMap,
 	},
-}
-
-// Attribute map for PointerOfOneOfField --> SchemeProxyHostRequestUri
-var CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheSchemeProxyHostRequestUriModelAttributeMap = map[string]attr.Type{
-
-	"cache_ttl":              types.StringType,
-	"ignore_response_cookie": types.BoolType,
-	"cache_override":         types.BoolType,
+	"scheme_proxy_host_request_uri": types.ObjectType{
+		AttrTypes: CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheSchemeProxyHostRequestUriModelAttributeMap,
+	},
 }
 
 // Attribute map for PointerOfOneOfField --> SchemeProxyHostUri
 var CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheSchemeProxyHostUriModelAttributeMap = map[string]attr.Type{
 
+	"cache_override":         types.BoolType,
 	"cache_ttl":              types.StringType,
 	"ignore_response_cookie": types.BoolType,
+}
+
+// Attribute map for PointerOfOneOfField --> SchemeProxyHostRequestUri
+var CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheSchemeProxyHostRequestUriModelAttributeMap = map[string]attr.Type{
+
+	"ignore_response_cookie": types.BoolType,
 	"cache_override":         types.BoolType,
+	"cache_ttl":              types.StringType,
 }
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -549,6 +549,12 @@ func (r *DataSourceF5XCCdnCacheRule) Schema(ctx context.Context, request datasou
 		Description:         "CdnCacheRule data source",
 
 		Attributes: map[string]schema.Attribute{
+			"name": schema.StringAttribute{
+				Description: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
+				Required:    false,
+				Optional:    true,
+				Computed:    true,
+			},
 			"namespace": schema.StringAttribute{
 				Description: "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
 				Required:    false,
@@ -581,24 +587,12 @@ func (r *DataSourceF5XCCdnCacheRule) Schema(ctx context.Context, request datasou
 				Optional:    false,
 				Computed:    true,
 			},
-			"name": schema.StringAttribute{
-				Description: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
-				Required:    false,
-				Optional:    true,
-				Computed:    true,
-			},
 			"cache_rules": schema.SingleNestedAttribute{
 				Description: "List of Cache rules(These rules are ORed) Rules are evaluated in the order in which they are specified. The evaluation stops when the first rule match occurs.",
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
 				Attributes: map[string]schema.Attribute{
-					"rule_name": schema.StringAttribute{
-						Description: "Rule Name Name of the Cache Rule",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-					},
 					"rule_expression_list": schema.ListNestedAttribute{
 						Description: "Expression List Expressions are evaluated in the order in which they are specified. The evaluation stops when the first rule match occurs..",
 						Required:    false,
@@ -619,92 +613,6 @@ func (r *DataSourceF5XCCdnCacheRule) Schema(ctx context.Context, request datasou
 									Computed:    true,
 									NestedObject: schema.NestedAttributeObject{
 										Attributes: map[string]schema.Attribute{
-											"cookie_matcher": schema.ListNestedAttribute{
-												Description: "cookie matchers A list of predicates for all cookies that need to be matched. The criteria for matching each cookie is described in individual instances of CookieMatcherType. The actual cookie values are extracted from the request API as a list of strings for each cookie name. Note that all specified cookie matcher predicates must evaluate to true.",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-												NestedObject: schema.NestedAttributeObject{
-													Attributes: map[string]schema.Attribute{
-														"name": schema.StringAttribute{
-															Description: "name Enter the name of the cookie to match",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-														"operator": schema.SingleNestedAttribute{
-															Description: "cache_operator",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-															Attributes: map[string]schema.Attribute{
-																"cache_operator_choice": schema.SingleNestedAttribute{
-																	Description: "Cache Operator Match Operator",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																	Attributes: map[string]schema.Attribute{
-																		"contains": schema.StringAttribute{
-																			Description: "Contains The cookie value must include the specified value as a substring.",
-																			Required:    false,
-																			Optional:    false,
-																			Computed:    true,
-																		},
-																		"does_not_contain": schema.StringAttribute{
-																			Description: "Does Not Contain The cookie value must not include the specified value as a substring.",
-																			Required:    false,
-																			Optional:    false,
-																			Computed:    true,
-																		},
-																		"startswith": schema.StringAttribute{
-																			Description: "Starts With The cookie value must begin with the specified value.",
-																			Required:    false,
-																			Optional:    false,
-																			Computed:    true,
-																		},
-																		"does_not_start_with": schema.StringAttribute{
-																			Description: "Does Not Start With The cookie value must not begin with the specified value.",
-																			Required:    false,
-																			Optional:    false,
-																			Computed:    true,
-																		},
-																		"equals": schema.StringAttribute{
-																			Description: "Equals The cookie value must exactly match the specified value.",
-																			Required:    false,
-																			Optional:    false,
-																			Computed:    true,
-																		},
-																		"does_not_equal": schema.StringAttribute{
-																			Description: "Does Not Equal The cookie value must not match the specified value.",
-																			Required:    false,
-																			Optional:    false,
-																			Computed:    true,
-																		},
-																		"endswith": schema.StringAttribute{
-																			Description: "Ends With The cookie value must end with the specified value.",
-																			Required:    false,
-																			Optional:    false,
-																			Computed:    true,
-																		},
-																		"does_not_end_with": schema.StringAttribute{
-																			Description: "Does Not End With The cookie value must not end with the specified value.",
-																			Required:    false,
-																			Optional:    false,
-																			Computed:    true,
-																		},
-																		"match_regex": schema.StringAttribute{
-																			Description: "Matches Regex The cookie value must match the specified regular expression pattern in PCRE format.",
-																			Required:    false,
-																			Optional:    false,
-																			Computed:    true,
-																		},
-																	},
-																},
-															},
-														},
-													},
-												},
-											},
 											"path_match": schema.SingleNestedAttribute{
 												Description: "path_match URI path of route",
 												Required:    false,
@@ -723,18 +631,6 @@ func (r *DataSourceF5XCCdnCacheRule) Schema(ctx context.Context, request datasou
 																Optional:    false,
 																Computed:    true,
 																Attributes: map[string]schema.Attribute{
-																	"does_not_contain": schema.StringAttribute{
-																		Description: "Does Not Contain The path must not include the specified value as a substring, up to the filename.",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																	},
-																	"does_not_start_with": schema.StringAttribute{
-																		Description: "Does Not Start With The path must not begin with the specified value, up to the filename.",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																	},
 																	"does_not_end_with": schema.StringAttribute{
 																		Description: "Does Not End With The path must not end with the specified value, up to the filename.",
 																		Required:    false,
@@ -747,8 +643,14 @@ func (r *DataSourceF5XCCdnCacheRule) Schema(ctx context.Context, request datasou
 																		Optional:    false,
 																		Computed:    true,
 																	},
-																	"contains": schema.StringAttribute{
-																		Description: "Contains The path must include the specified value as a substring, up to the filename.",
+																	"does_not_equal": schema.StringAttribute{
+																		Description: "Does Not Equal The path must not match the specified value, up to the filename.",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
+																	},
+																	"does_not_contain": schema.StringAttribute{
+																		Description: "Does Not Contain The path must not include the specified value as a substring, up to the filename.",
 																		Required:    false,
 																		Optional:    false,
 																		Computed:    true,
@@ -759,8 +661,8 @@ func (r *DataSourceF5XCCdnCacheRule) Schema(ctx context.Context, request datasou
 																		Optional:    false,
 																		Computed:    true,
 																	},
-																	"does_not_equal": schema.StringAttribute{
-																		Description: "Does Not Equal The path must not match the specified value, up to the filename.",
+																	"endswith": schema.StringAttribute{
+																		Description: "Ends With The path must end with the specified value, up to the filename.",
 																		Required:    false,
 																		Optional:    false,
 																		Computed:    true,
@@ -771,8 +673,14 @@ func (r *DataSourceF5XCCdnCacheRule) Schema(ctx context.Context, request datasou
 																		Optional:    false,
 																		Computed:    true,
 																	},
-																	"endswith": schema.StringAttribute{
-																		Description: "Ends With The path must end with the specified value, up to the filename.",
+																	"contains": schema.StringAttribute{
+																		Description: "Contains The path must include the specified value as a substring, up to the filename.",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
+																	},
+																	"does_not_start_with": schema.StringAttribute{
+																		Description: "Does Not Start With The path must not begin with the specified value, up to the filename.",
 																		Required:    false,
 																		Optional:    false,
 																		Computed:    true,
@@ -808,24 +716,6 @@ func (r *DataSourceF5XCCdnCacheRule) Schema(ctx context.Context, request datasou
 																	Optional:    false,
 																	Computed:    true,
 																	Attributes: map[string]schema.Attribute{
-																		"startswith": schema.StringAttribute{
-																			Description: "Starts With The query parameter value must begin with the specified value.",
-																			Required:    false,
-																			Optional:    false,
-																			Computed:    true,
-																		},
-																		"does_not_start_with": schema.StringAttribute{
-																			Description: "Does Not Start With The query parameter value must not begin with the specified value.",
-																			Required:    false,
-																			Optional:    false,
-																			Computed:    true,
-																		},
-																		"does_not_end_with": schema.StringAttribute{
-																			Description: "Does Not End With The query parameter value must not end with the specified value.",
-																			Required:    false,
-																			Optional:    false,
-																			Computed:    true,
-																		},
 																		"does_not_equal": schema.StringAttribute{
 																			Description: "Does Not Equal The query parameter value must not match the specified value.",
 																			Required:    false,
@@ -838,8 +728,32 @@ func (r *DataSourceF5XCCdnCacheRule) Schema(ctx context.Context, request datasou
 																			Optional:    false,
 																			Computed:    true,
 																		},
+																		"match_regex": schema.StringAttribute{
+																			Description: "Matches Regex The query parameter value must match the specified regular expression pattern in PCRE format.",
+																			Required:    false,
+																			Optional:    false,
+																			Computed:    true,
+																		},
 																		"does_not_contain": schema.StringAttribute{
 																			Description: "Does Not Contain The query parameter value must not include the specified value as a substring.",
+																			Required:    false,
+																			Optional:    false,
+																			Computed:    true,
+																		},
+																		"startswith": schema.StringAttribute{
+																			Description: "Starts With The query parameter value must begin with the specified value.",
+																			Required:    false,
+																			Optional:    false,
+																			Computed:    true,
+																		},
+																		"does_not_start_with": schema.StringAttribute{
+																			Description: "Does Not Start With The query parameter value must not begin with the specified value.",
+																			Required:    false,
+																			Optional:    false,
+																			Computed:    true,
+																		},
+																		"equals": schema.StringAttribute{
+																			Description: "Equals The query parameter value must exactly match the specified value.",
 																			Required:    false,
 																			Optional:    false,
 																			Computed:    true,
@@ -850,14 +764,8 @@ func (r *DataSourceF5XCCdnCacheRule) Schema(ctx context.Context, request datasou
 																			Optional:    false,
 																			Computed:    true,
 																		},
-																		"match_regex": schema.StringAttribute{
-																			Description: "Matches Regex The query parameter value must match the specified regular expression pattern in PCRE format.",
-																			Required:    false,
-																			Optional:    false,
-																			Computed:    true,
-																		},
-																		"equals": schema.StringAttribute{
-																			Description: "Equals The query parameter value must exactly match the specified value.",
+																		"does_not_end_with": schema.StringAttribute{
+																			Description: "Does Not End With The query parameter value must not end with the specified value.",
 																			Required:    false,
 																			Optional:    false,
 																			Computed:    true,
@@ -895,26 +803,8 @@ func (r *DataSourceF5XCCdnCacheRule) Schema(ctx context.Context, request datasou
 																	Optional:    false,
 																	Computed:    true,
 																	Attributes: map[string]schema.Attribute{
-																		"does_not_start_with": schema.StringAttribute{
-																			Description: "Does Not Start With The header value must not begin with the specified value.",
-																			Required:    false,
-																			Optional:    false,
-																			Computed:    true,
-																		},
-																		"does_not_end_with": schema.StringAttribute{
-																			Description: "Does Not End With The header value must not end with the specified value.",
-																			Required:    false,
-																			Optional:    false,
-																			Computed:    true,
-																		},
 																		"does_not_equal": schema.StringAttribute{
 																			Description: "Does Not Equal The header value must not match the specified value.",
-																			Required:    false,
-																			Optional:    false,
-																			Computed:    true,
-																		},
-																		"match_regex": schema.StringAttribute{
-																			Description: "Matches Regex The header value must match the specified regular expression pattern.",
 																			Required:    false,
 																			Optional:    false,
 																			Computed:    true,
@@ -945,6 +835,110 @@ func (r *DataSourceF5XCCdnCacheRule) Schema(ctx context.Context, request datasou
 																		},
 																		"does_not_contain": schema.StringAttribute{
 																			Description: "Does Not Contain The header value must not include the specified value as a substring.",
+																			Required:    false,
+																			Optional:    false,
+																			Computed:    true,
+																		},
+																		"does_not_start_with": schema.StringAttribute{
+																			Description: "Does Not Start With The header value must not begin with the specified value.",
+																			Required:    false,
+																			Optional:    false,
+																			Computed:    true,
+																		},
+																		"does_not_end_with": schema.StringAttribute{
+																			Description: "Does Not End With The header value must not end with the specified value.",
+																			Required:    false,
+																			Optional:    false,
+																			Computed:    true,
+																		},
+																		"match_regex": schema.StringAttribute{
+																			Description: "Matches Regex The header value must match the specified regular expression pattern.",
+																			Required:    false,
+																			Optional:    false,
+																			Computed:    true,
+																		},
+																	},
+																},
+															},
+														},
+													},
+												},
+											},
+											"cookie_matcher": schema.ListNestedAttribute{
+												Description: "cookie matchers A list of predicates for all cookies that need to be matched. The criteria for matching each cookie is described in individual instances of CookieMatcherType. The actual cookie values are extracted from the request API as a list of strings for each cookie name. Note that all specified cookie matcher predicates must evaluate to true.",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+												NestedObject: schema.NestedAttributeObject{
+													Attributes: map[string]schema.Attribute{
+														"name": schema.StringAttribute{
+															Description: "name Enter the name of the cookie to match",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+														"operator": schema.SingleNestedAttribute{
+															Description: "cache_operator",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+															Attributes: map[string]schema.Attribute{
+																"cache_operator_choice": schema.SingleNestedAttribute{
+																	Description: "Cache Operator Match Operator",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																	Attributes: map[string]schema.Attribute{
+																		"does_not_equal": schema.StringAttribute{
+																			Description: "Does Not Equal The cookie value must not match the specified value.",
+																			Required:    false,
+																			Optional:    false,
+																			Computed:    true,
+																		},
+																		"does_not_contain": schema.StringAttribute{
+																			Description: "Does Not Contain The cookie value must not include the specified value as a substring.",
+																			Required:    false,
+																			Optional:    false,
+																			Computed:    true,
+																		},
+																		"does_not_start_with": schema.StringAttribute{
+																			Description: "Does Not Start With The cookie value must not begin with the specified value.",
+																			Required:    false,
+																			Optional:    false,
+																			Computed:    true,
+																		},
+																		"endswith": schema.StringAttribute{
+																			Description: "Ends With The cookie value must end with the specified value.",
+																			Required:    false,
+																			Optional:    false,
+																			Computed:    true,
+																		},
+																		"match_regex": schema.StringAttribute{
+																			Description: "Matches Regex The cookie value must match the specified regular expression pattern in PCRE format.",
+																			Required:    false,
+																			Optional:    false,
+																			Computed:    true,
+																		},
+																		"contains": schema.StringAttribute{
+																			Description: "Contains The cookie value must include the specified value as a substring.",
+																			Required:    false,
+																			Optional:    false,
+																			Computed:    true,
+																		},
+																		"startswith": schema.StringAttribute{
+																			Description: "Starts With The cookie value must begin with the specified value.",
+																			Required:    false,
+																			Optional:    false,
+																			Computed:    true,
+																		},
+																		"does_not_end_with": schema.StringAttribute{
+																			Description: "Does Not End With The cookie value must not end with the specified value.",
+																			Required:    false,
+																			Optional:    false,
+																			Computed:    true,
+																		},
+																		"equals": schema.StringAttribute{
+																			Description: "Equals The cookie value must exactly match the specified value.",
 																			Required:    false,
 																			Optional:    false,
 																			Computed:    true,
@@ -986,38 +980,18 @@ func (r *DataSourceF5XCCdnCacheRule) Schema(ctx context.Context, request datasou
 										Optional:    false,
 										Computed:    true,
 										Attributes: map[string]schema.Attribute{
-											"scheme_proxy_host_request_uri": schema.SingleNestedAttribute{
-												Description: "Scheme + Proxy Host + Request URI",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-												Attributes: map[string]schema.Attribute{
-													"cache_ttl": schema.StringAttribute{
-														Description: "Cache TTL Key Cache TTL value is used to cache the resource/content for the specified amount of time Format: [0-9][smhd], where s - seconds, m - minutes, h - hours, d - days",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
-													"ignore_response_cookie": schema.BoolAttribute{
-														Description: "Set Cookie By default, response will not be cached if set-cookie header is present. This option will override the behavior and cache response even with set-cookie header present.",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
-													"cache_override": schema.BoolAttribute{
-														Description: "Cache Override Honour Cache Override",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
-												},
-											},
 											"scheme_proxy_host_uri": schema.SingleNestedAttribute{
 												Description: "Scheme + Proxy Host + URI",
 												Required:    false,
 												Optional:    false,
 												Computed:    true,
 												Attributes: map[string]schema.Attribute{
+													"cache_override": schema.BoolAttribute{
+														Description: "Cache Override Honour Cache Override",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+													},
 													"cache_ttl": schema.StringAttribute{
 														Description: "Cache TTL Key Cache TTL value is used to cache the resource/content for the specified amount of time Format: [0-9][smhd], where s - seconds, m - minutes, h - hours, d - days",
 														Required:    false,
@@ -1030,8 +1004,28 @@ func (r *DataSourceF5XCCdnCacheRule) Schema(ctx context.Context, request datasou
 														Optional:    false,
 														Computed:    true,
 													},
+												},
+											},
+											"scheme_proxy_host_request_uri": schema.SingleNestedAttribute{
+												Description: "Scheme + Proxy Host + Request URI",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+												Attributes: map[string]schema.Attribute{
+													"ignore_response_cookie": schema.BoolAttribute{
+														Description: "Set Cookie By default, response will not be cached if set-cookie header is present. This option will override the behavior and cache response even with set-cookie header present.",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+													},
 													"cache_override": schema.BoolAttribute{
 														Description: "Cache Override Honour Cache Override",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+													},
+													"cache_ttl": schema.StringAttribute{
+														Description: "Cache TTL Key Cache TTL value is used to cache the resource/content for the specified amount of time Format: [0-9][smhd], where s - seconds, m - minutes, h - hours, d - days",
 														Required:    false,
 														Optional:    false,
 														Computed:    true,
@@ -1043,6 +1037,12 @@ func (r *DataSourceF5XCCdnCacheRule) Schema(ctx context.Context, request datasou
 								},
 							},
 						},
+					},
+					"rule_name": schema.StringAttribute{
+						Description: "Rule Name Name of the Cache Rule",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
 					},
 				},
 			},
@@ -1117,6 +1117,9 @@ func (d *DataSourceF5XCCdnCacheRule) Read(ctx context.Context, request datasourc
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
+	// data SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
+
 	// data SpecToModelRoot Meta RequiredStringField --> Namespace
 	data.Namespace = types.StringValue(metaData.GetNamespace())
 
@@ -1162,21 +1165,10 @@ func (d *DataSourceF5XCCdnCacheRule) Read(ctx context.Context, request datasourc
 	// data SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
 
-	// data SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
-
 	// data SpecToModelRoot PointerField --> CacheRules
 	if specData.GetCacheRules() != nil {
 		var cdnCacheRuleCdnCacheRuleCDNCacheRuleModel = &CdnCacheRuleCdnCacheRuleCDNCacheRule{}
 		cacheRulesElement := specData.GetCacheRules()
-
-		// data specToModelNested RequiredStringField --> RuleName
-		if cacheRulesElement.GetRuleName() != "" {
-			cdnCacheRuleCdnCacheRuleCDNCacheRuleModel.RuleName = types.StringValue(cacheRulesElement.GetRuleName())
-		} else {
-			// Empty string, set to null
-			cdnCacheRuleCdnCacheRuleCDNCacheRuleModel.RuleName = types.StringNull()
-		}
 
 		// data specToModelNested RequiredArrayOfPointerField --> RuleExpressionList
 		if len(cacheRulesElement.GetRuleExpressionList()) > 0 {
@@ -1201,187 +1193,6 @@ func (d *DataSourceF5XCCdnCacheRule) Read(ctx context.Context, request datasourc
 					cacheRuleExpressionElements := make([]CdnCacheRuleCdnCacheRuleCDNCacheRuleExpression, 0, len(ruleExpressionListElement.GetCacheRuleExpression()))
 					for _, cacheRuleExpressionElement := range ruleExpressionListElement.GetCacheRuleExpression() {
 						cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionModel := CdnCacheRuleCdnCacheRuleCDNCacheRuleExpression{}
-
-						// data specToModelNested ArrayOfPointerField --> CookieMatcher
-						if len(cacheRuleExpressionElement.GetCookieMatcher()) > 0 {
-							// Step 1: Always create a slice of model structs from the spec data.
-							// This slice serves as an intermediate representation.
-							cookieMatcherElements := make([]CdnCacheRuleCdnCacheRuleCacheCookieMatcherType, 0, len(cacheRuleExpressionElement.GetCookieMatcher()))
-							for _, cookieMatcherElement := range cacheRuleExpressionElement.GetCookieMatcher() {
-								cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel := CdnCacheRuleCdnCacheRuleCacheCookieMatcherType{}
-
-								// data specToModelNested RequiredStringField --> Name
-								if cookieMatcherElement.GetName() != "" {
-									cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel.Name = types.StringValue(cookieMatcherElement.GetName())
-								} else {
-									// Empty string, set to null
-									cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel.Name = types.StringNull()
-								}
-
-								// data specToModelNested PointerField --> Operator
-								if cookieMatcherElement.GetOperator() != nil {
-									// Create the nested Go struct
-									cdnCacheRuleCdnCacheRuleCookieMatcherCacheOperatorModel := &CdnCacheRuleCdnCacheRuleCookieMatcherCacheOperator{}
-									operatorElement := cookieMatcherElement.GetOperator()
-
-									// Recursively populate the nested struct
-
-									// data specToModelNested RequiredOneOfField --> CacheOperator
-									// <no value>
-									if operatorElement.GetCacheOperator() != nil {
-										// Create a temporary attribute map for the choices within this OneOf
-										operatorcacheOperatorChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-										// Define a variable for the spec choices to be passed down to nested templates.
-										// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-										operatorcacheOperatorChoiceChoices := operatorElement.GetCacheOperator()
-
-										// Process nested choices, populating the temporary attribute map
-
-										// data specToModelNested StringOfOneOfField --> Contains
-										containsItem, isContains := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_Contains)
-
-										if isContains {
-											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringValue(string(containsItem.Contains))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringNull()
-										}
-
-										// data specToModelNested StringOfOneOfField --> DoesNotContain
-										doesNotContainItem, isDoesNotContain := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_DoesNotContain)
-
-										if isDoesNotContain {
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringValue(string(doesNotContainItem.DoesNotContain))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringNull()
-										}
-
-										// data specToModelNested StringOfOneOfField --> Startswith
-										startswithItem, isStartswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_Startswith)
-
-										if isStartswith {
-											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringValue(string(startswithItem.Startswith))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringNull()
-										}
-
-										// data specToModelNested StringOfOneOfField --> DoesNotStartWith
-										doesNotStartWithItem, isDoesNotStartWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_DoesNotStartWith)
-
-										if isDoesNotStartWith {
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringValue(string(doesNotStartWithItem.DoesNotStartWith))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringNull()
-										}
-
-										// data specToModelNested StringOfOneOfField --> Equals
-										equalsItem, isEquals := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_Equals)
-
-										if isEquals {
-											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringValue(string(equalsItem.Equals))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringNull()
-										}
-
-										// data specToModelNested StringOfOneOfField --> DoesNotEqual
-										doesNotEqualItem, isDoesNotEqual := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_DoesNotEqual)
-
-										if isDoesNotEqual {
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringValue(string(doesNotEqualItem.DoesNotEqual))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringNull()
-										}
-
-										// data specToModelNested StringOfOneOfField --> Endswith
-										endswithItem, isEndswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_Endswith)
-
-										if isEndswith {
-											operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringValue(string(endswithItem.Endswith))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringNull()
-										}
-
-										// data specToModelNested StringOfOneOfField --> DoesNotEndWith
-										doesNotEndWithItem, isDoesNotEndWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_DoesNotEndWith)
-
-										if isDoesNotEndWith {
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringValue(string(doesNotEndWithItem.DoesNotEndWith))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringNull()
-										}
-
-										// data specToModelNested StringOfOneOfField --> MatchRegex
-										matchRegexItem, isMatchRegex := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_MatchRegex)
-
-										if isMatchRegex {
-											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringValue(string(matchRegexItem.MatchRegex))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringNull()
-										}
-
-										// --- End of Choices ---
-
-										// Create the final ObjectValue for this OneOf field
-										finalObj, operatorcacheOperatorChoiceChoicesObjDiags := types.ObjectValue(
-											CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorCacheOperatorModelAttributeMap, // The attribute schema for the OneOf choices
-											operatorcacheOperatorChoiceChoicesAttributeMap,
-										)
-										response.Diagnostics.Append(operatorcacheOperatorChoiceChoicesObjDiags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-
-										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										cdnCacheRuleCdnCacheRuleCookieMatcherCacheOperatorModel.CacheOperatorChoice = finalObj
-									} else {
-										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										cdnCacheRuleCdnCacheRuleCookieMatcherCacheOperatorModel.CacheOperatorChoice = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorCacheOperatorModelAttributeMap)
-									}
-
-									// This field needs to be converted to a types.ObjectValue before assignment.
-									cdnCacheRuleCdnCacheRuleCookieMatcherCacheOperatorModelObj, diags := types.ObjectValueFrom(ctx, CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorModelAttributeMap, cdnCacheRuleCdnCacheRuleCookieMatcherCacheOperatorModel)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel.Operator = cdnCacheRuleCdnCacheRuleCookieMatcherCacheOperatorModelObj
-
-								} else {
-									// The source field is nil (e.g. redacted by the API).
-									// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-									// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-									// because the API may always return a non-nil struct (with REDACTED values) for this field,
-									// making this else-branch unreachable. The child OneOf handles the actual healing.
-									// The target is a types.Object, so we use types.ObjectNull.
-									cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel.Operator = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorModelAttributeMap)
-								}
-
-								cookieMatcherElements = append(cookieMatcherElements, cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel)
-							}
-							// CASE 1: The target field is a `types.List` or an attribute map.
-							// The intermediate slice of structs must be converted to a `types.ListValue`.
-							cookieMatcherListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherModelAttributeMap}, cookieMatcherElements)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionModel.CookieMatcher = cookieMatcherListValue
-
-						} else {
-							// The source list is empty or nil.
-							// CASE 1: The target field is a `types.List` or an attribute map.
-							// Assign a null `types.ListValue`.
-							cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionModel.CookieMatcher = types.ListNull(types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherModelAttributeMap})
-						}
 
 						// data specToModelNested PointerField --> PathMatch
 						if cacheRuleExpressionElement.GetPathMatch() != nil {
@@ -1411,26 +1222,6 @@ func (d *DataSourceF5XCCdnCacheRule) Read(ctx context.Context, request datasourc
 
 									// Process nested choices, populating the temporary attribute map
 
-									// data specToModelNested StringOfOneOfField --> DoesNotContain
-									doesNotContainItem, isDoesNotContain := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotContain)
-
-									if isDoesNotContain {
-										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringValue(string(doesNotContainItem.DoesNotContain))
-									} else {
-										// Empty string, set to null
-										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringNull()
-									}
-
-									// data specToModelNested StringOfOneOfField --> DoesNotStartWith
-									doesNotStartWithItem, isDoesNotStartWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotStartWith)
-
-									if isDoesNotStartWith {
-										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringValue(string(doesNotStartWithItem.DoesNotStartWith))
-									} else {
-										// Empty string, set to null
-										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringNull()
-									}
-
 									// data specToModelNested StringOfOneOfField --> DoesNotEndWith
 									doesNotEndWithItem, isDoesNotEndWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotEndWith)
 
@@ -1451,14 +1242,24 @@ func (d *DataSourceF5XCCdnCacheRule) Read(ctx context.Context, request datasourc
 										operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringNull()
 									}
 
-									// data specToModelNested StringOfOneOfField --> Contains
-									containsItem, isContains := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_Contains)
+									// data specToModelNested StringOfOneOfField --> DoesNotEqual
+									doesNotEqualItem, isDoesNotEqual := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotEqual)
 
-									if isContains {
-										operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringValue(string(containsItem.Contains))
+									if isDoesNotEqual {
+										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringValue(string(doesNotEqualItem.DoesNotEqual))
 									} else {
 										// Empty string, set to null
-										operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringNull()
+										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringNull()
+									}
+
+									// data specToModelNested StringOfOneOfField --> DoesNotContain
+									doesNotContainItem, isDoesNotContain := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotContain)
+
+									if isDoesNotContain {
+										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringValue(string(doesNotContainItem.DoesNotContain))
+									} else {
+										// Empty string, set to null
+										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringNull()
 									}
 
 									// data specToModelNested StringOfOneOfField --> Equals
@@ -1471,14 +1272,14 @@ func (d *DataSourceF5XCCdnCacheRule) Read(ctx context.Context, request datasourc
 										operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringNull()
 									}
 
-									// data specToModelNested StringOfOneOfField --> DoesNotEqual
-									doesNotEqualItem, isDoesNotEqual := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotEqual)
+									// data specToModelNested StringOfOneOfField --> Endswith
+									endswithItem, isEndswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_Endswith)
 
-									if isDoesNotEqual {
-										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringValue(string(doesNotEqualItem.DoesNotEqual))
+									if isEndswith {
+										operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringValue(string(endswithItem.Endswith))
 									} else {
 										// Empty string, set to null
-										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringNull()
+										operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringNull()
 									}
 
 									// data specToModelNested StringOfOneOfField --> Startswith
@@ -1491,14 +1292,24 @@ func (d *DataSourceF5XCCdnCacheRule) Read(ctx context.Context, request datasourc
 										operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringNull()
 									}
 
-									// data specToModelNested StringOfOneOfField --> Endswith
-									endswithItem, isEndswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_Endswith)
+									// data specToModelNested StringOfOneOfField --> Contains
+									containsItem, isContains := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_Contains)
 
-									if isEndswith {
-										operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringValue(string(endswithItem.Endswith))
+									if isContains {
+										operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringValue(string(containsItem.Contains))
 									} else {
 										// Empty string, set to null
-										operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringNull()
+										operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringNull()
+									}
+
+									// data specToModelNested StringOfOneOfField --> DoesNotStartWith
+									doesNotStartWithItem, isDoesNotStartWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotStartWith)
+
+									if isDoesNotStartWith {
+										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringValue(string(doesNotStartWithItem.DoesNotStartWith))
+									} else {
+										// Empty string, set to null
+										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringNull()
 									}
 
 									// --- End of Choices ---
@@ -1592,36 +1403,6 @@ func (d *DataSourceF5XCCdnCacheRule) Read(ctx context.Context, request datasourc
 
 										// Process nested choices, populating the temporary attribute map
 
-										// data specToModelNested StringOfOneOfField --> Startswith
-										startswithItem, isStartswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Startswith)
-
-										if isStartswith {
-											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringValue(string(startswithItem.Startswith))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringNull()
-										}
-
-										// data specToModelNested StringOfOneOfField --> DoesNotStartWith
-										doesNotStartWithItem, isDoesNotStartWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotStartWith)
-
-										if isDoesNotStartWith {
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringValue(string(doesNotStartWithItem.DoesNotStartWith))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringNull()
-										}
-
-										// data specToModelNested StringOfOneOfField --> DoesNotEndWith
-										doesNotEndWithItem, isDoesNotEndWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotEndWith)
-
-										if isDoesNotEndWith {
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringValue(string(doesNotEndWithItem.DoesNotEndWith))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringNull()
-										}
-
 										// data specToModelNested StringOfOneOfField --> DoesNotEqual
 										doesNotEqualItem, isDoesNotEqual := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotEqual)
 
@@ -1642,6 +1423,16 @@ func (d *DataSourceF5XCCdnCacheRule) Read(ctx context.Context, request datasourc
 											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringNull()
 										}
 
+										// data specToModelNested StringOfOneOfField --> MatchRegex
+										matchRegexItem, isMatchRegex := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_MatchRegex)
+
+										if isMatchRegex {
+											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringValue(string(matchRegexItem.MatchRegex))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringNull()
+										}
+
 										// data specToModelNested StringOfOneOfField --> DoesNotContain
 										doesNotContainItem, isDoesNotContain := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotContain)
 
@@ -1650,6 +1441,36 @@ func (d *DataSourceF5XCCdnCacheRule) Read(ctx context.Context, request datasourc
 										} else {
 											// Empty string, set to null
 											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringNull()
+										}
+
+										// data specToModelNested StringOfOneOfField --> Startswith
+										startswithItem, isStartswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Startswith)
+
+										if isStartswith {
+											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringValue(string(startswithItem.Startswith))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringNull()
+										}
+
+										// data specToModelNested StringOfOneOfField --> DoesNotStartWith
+										doesNotStartWithItem, isDoesNotStartWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotStartWith)
+
+										if isDoesNotStartWith {
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringValue(string(doesNotStartWithItem.DoesNotStartWith))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringNull()
+										}
+
+										// data specToModelNested StringOfOneOfField --> Equals
+										equalsItem, isEquals := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Equals)
+
+										if isEquals {
+											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringValue(string(equalsItem.Equals))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringNull()
 										}
 
 										// data specToModelNested StringOfOneOfField --> Endswith
@@ -1662,24 +1483,14 @@ func (d *DataSourceF5XCCdnCacheRule) Read(ctx context.Context, request datasourc
 											operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringNull()
 										}
 
-										// data specToModelNested StringOfOneOfField --> MatchRegex
-										matchRegexItem, isMatchRegex := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_MatchRegex)
+										// data specToModelNested StringOfOneOfField --> DoesNotEndWith
+										doesNotEndWithItem, isDoesNotEndWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotEndWith)
 
-										if isMatchRegex {
-											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringValue(string(matchRegexItem.MatchRegex))
+										if isDoesNotEndWith {
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringValue(string(doesNotEndWithItem.DoesNotEndWith))
 										} else {
 											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringNull()
-										}
-
-										// data specToModelNested StringOfOneOfField --> Equals
-										equalsItem, isEquals := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Equals)
-
-										if isEquals {
-											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringValue(string(equalsItem.Equals))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringNull()
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringNull()
 										}
 
 										// --- End of Choices ---
@@ -1779,26 +1590,6 @@ func (d *DataSourceF5XCCdnCacheRule) Read(ctx context.Context, request datasourc
 
 										// Process nested choices, populating the temporary attribute map
 
-										// data specToModelNested StringOfOneOfField --> DoesNotStartWith
-										doesNotStartWithItem, isDoesNotStartWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_DoesNotStartWith)
-
-										if isDoesNotStartWith {
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringValue(string(doesNotStartWithItem.DoesNotStartWith))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringNull()
-										}
-
-										// data specToModelNested StringOfOneOfField --> DoesNotEndWith
-										doesNotEndWithItem, isDoesNotEndWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_DoesNotEndWith)
-
-										if isDoesNotEndWith {
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringValue(string(doesNotEndWithItem.DoesNotEndWith))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringNull()
-										}
-
 										// data specToModelNested StringOfOneOfField --> DoesNotEqual
 										doesNotEqualItem, isDoesNotEqual := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_DoesNotEqual)
 
@@ -1807,16 +1598,6 @@ func (d *DataSourceF5XCCdnCacheRule) Read(ctx context.Context, request datasourc
 										} else {
 											// Empty string, set to null
 											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringNull()
-										}
-
-										// data specToModelNested StringOfOneOfField --> MatchRegex
-										matchRegexItem, isMatchRegex := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_MatchRegex)
-
-										if isMatchRegex {
-											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringValue(string(matchRegexItem.MatchRegex))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringNull()
 										}
 
 										// data specToModelNested StringOfOneOfField --> Equals
@@ -1867,6 +1648,36 @@ func (d *DataSourceF5XCCdnCacheRule) Read(ctx context.Context, request datasourc
 										} else {
 											// Empty string, set to null
 											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringNull()
+										}
+
+										// data specToModelNested StringOfOneOfField --> DoesNotStartWith
+										doesNotStartWithItem, isDoesNotStartWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_DoesNotStartWith)
+
+										if isDoesNotStartWith {
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringValue(string(doesNotStartWithItem.DoesNotStartWith))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringNull()
+										}
+
+										// data specToModelNested StringOfOneOfField --> DoesNotEndWith
+										doesNotEndWithItem, isDoesNotEndWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_DoesNotEndWith)
+
+										if isDoesNotEndWith {
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringValue(string(doesNotEndWithItem.DoesNotEndWith))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringNull()
+										}
+
+										// data specToModelNested StringOfOneOfField --> MatchRegex
+										matchRegexItem, isMatchRegex := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_MatchRegex)
+
+										if isMatchRegex {
+											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringValue(string(matchRegexItem.MatchRegex))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringNull()
 										}
 
 										// --- End of Choices ---
@@ -1922,6 +1733,187 @@ func (d *DataSourceF5XCCdnCacheRule) Read(ctx context.Context, request datasourc
 							// CASE 1: The target field is a `types.List` or an attribute map.
 							// Assign a null `types.ListValue`.
 							cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionModel.CacheHeaders = types.ListNull(types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCacheHeadersModelAttributeMap})
+						}
+
+						// data specToModelNested ArrayOfPointerField --> CookieMatcher
+						if len(cacheRuleExpressionElement.GetCookieMatcher()) > 0 {
+							// Step 1: Always create a slice of model structs from the spec data.
+							// This slice serves as an intermediate representation.
+							cookieMatcherElements := make([]CdnCacheRuleCdnCacheRuleCacheCookieMatcherType, 0, len(cacheRuleExpressionElement.GetCookieMatcher()))
+							for _, cookieMatcherElement := range cacheRuleExpressionElement.GetCookieMatcher() {
+								cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel := CdnCacheRuleCdnCacheRuleCacheCookieMatcherType{}
+
+								// data specToModelNested RequiredStringField --> Name
+								if cookieMatcherElement.GetName() != "" {
+									cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel.Name = types.StringValue(cookieMatcherElement.GetName())
+								} else {
+									// Empty string, set to null
+									cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel.Name = types.StringNull()
+								}
+
+								// data specToModelNested PointerField --> Operator
+								if cookieMatcherElement.GetOperator() != nil {
+									// Create the nested Go struct
+									cdnCacheRuleCdnCacheRuleCookieMatcherCacheOperatorModel := &CdnCacheRuleCdnCacheRuleCookieMatcherCacheOperator{}
+									operatorElement := cookieMatcherElement.GetOperator()
+
+									// Recursively populate the nested struct
+
+									// data specToModelNested RequiredOneOfField --> CacheOperator
+									// <no value>
+									if operatorElement.GetCacheOperator() != nil {
+										// Create a temporary attribute map for the choices within this OneOf
+										operatorcacheOperatorChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+										// Define a variable for the spec choices to be passed down to nested templates.
+										// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+										operatorcacheOperatorChoiceChoices := operatorElement.GetCacheOperator()
+
+										// Process nested choices, populating the temporary attribute map
+
+										// data specToModelNested StringOfOneOfField --> DoesNotEqual
+										doesNotEqualItem, isDoesNotEqual := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_DoesNotEqual)
+
+										if isDoesNotEqual {
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringValue(string(doesNotEqualItem.DoesNotEqual))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringNull()
+										}
+
+										// data specToModelNested StringOfOneOfField --> DoesNotContain
+										doesNotContainItem, isDoesNotContain := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_DoesNotContain)
+
+										if isDoesNotContain {
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringValue(string(doesNotContainItem.DoesNotContain))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringNull()
+										}
+
+										// data specToModelNested StringOfOneOfField --> DoesNotStartWith
+										doesNotStartWithItem, isDoesNotStartWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_DoesNotStartWith)
+
+										if isDoesNotStartWith {
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringValue(string(doesNotStartWithItem.DoesNotStartWith))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringNull()
+										}
+
+										// data specToModelNested StringOfOneOfField --> Endswith
+										endswithItem, isEndswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_Endswith)
+
+										if isEndswith {
+											operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringValue(string(endswithItem.Endswith))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringNull()
+										}
+
+										// data specToModelNested StringOfOneOfField --> MatchRegex
+										matchRegexItem, isMatchRegex := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_MatchRegex)
+
+										if isMatchRegex {
+											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringValue(string(matchRegexItem.MatchRegex))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringNull()
+										}
+
+										// data specToModelNested StringOfOneOfField --> Contains
+										containsItem, isContains := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_Contains)
+
+										if isContains {
+											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringValue(string(containsItem.Contains))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringNull()
+										}
+
+										// data specToModelNested StringOfOneOfField --> Startswith
+										startswithItem, isStartswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_Startswith)
+
+										if isStartswith {
+											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringValue(string(startswithItem.Startswith))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringNull()
+										}
+
+										// data specToModelNested StringOfOneOfField --> DoesNotEndWith
+										doesNotEndWithItem, isDoesNotEndWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_DoesNotEndWith)
+
+										if isDoesNotEndWith {
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringValue(string(doesNotEndWithItem.DoesNotEndWith))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringNull()
+										}
+
+										// data specToModelNested StringOfOneOfField --> Equals
+										equalsItem, isEquals := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_Equals)
+
+										if isEquals {
+											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringValue(string(equalsItem.Equals))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringNull()
+										}
+
+										// --- End of Choices ---
+
+										// Create the final ObjectValue for this OneOf field
+										finalObj, operatorcacheOperatorChoiceChoicesObjDiags := types.ObjectValue(
+											CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorCacheOperatorModelAttributeMap, // The attribute schema for the OneOf choices
+											operatorcacheOperatorChoiceChoicesAttributeMap,
+										)
+										response.Diagnostics.Append(operatorcacheOperatorChoiceChoicesObjDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+
+										// Assign the final object to the correct place (either the root model or a parent's attribute map)
+										cdnCacheRuleCdnCacheRuleCookieMatcherCacheOperatorModel.CacheOperatorChoice = finalObj
+									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
+										cdnCacheRuleCdnCacheRuleCookieMatcherCacheOperatorModel.CacheOperatorChoice = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorCacheOperatorModelAttributeMap)
+									}
+
+									// This field needs to be converted to a types.ObjectValue before assignment.
+									cdnCacheRuleCdnCacheRuleCookieMatcherCacheOperatorModelObj, diags := types.ObjectValueFrom(ctx, CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorModelAttributeMap, cdnCacheRuleCdnCacheRuleCookieMatcherCacheOperatorModel)
+									response.Diagnostics.Append(diags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel.Operator = cdnCacheRuleCdnCacheRuleCookieMatcherCacheOperatorModelObj
+
+								} else {
+									// The source field is nil (e.g. redacted by the API).
+									// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
+									// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
+									// because the API may always return a non-nil struct (with REDACTED values) for this field,
+									// making this else-branch unreachable. The child OneOf handles the actual healing.
+									// The target is a types.Object, so we use types.ObjectNull.
+									cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel.Operator = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorModelAttributeMap)
+								}
+
+								cookieMatcherElements = append(cookieMatcherElements, cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel)
+							}
+							// CASE 1: The target field is a `types.List` or an attribute map.
+							// The intermediate slice of structs must be converted to a `types.ListValue`.
+							cookieMatcherListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherModelAttributeMap}, cookieMatcherElements)
+							response.Diagnostics.Append(diags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionModel.CookieMatcher = cookieMatcherListValue
+
+						} else {
+							// The source list is empty or nil.
+							// CASE 1: The target field is a `types.List` or an attribute map.
+							// Assign a null `types.ListValue`.
+							cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionModel.CookieMatcher = types.ListNull(types.ObjectType{AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherModelAttributeMap})
 						}
 
 						cacheRuleExpressionElements = append(cacheRuleExpressionElements, cdnCacheRuleCdnCacheRuleCDNCacheRuleExpressionModel)
@@ -2002,40 +1994,6 @@ func (d *DataSourceF5XCCdnCacheRule) Read(ctx context.Context, request datasourc
 
 						// Process nested choices, populating the temporary attribute map
 
-						// data specToModelNested PointerOfOneOfField --> SchemeProxyHostRequestUri
-						// <no value>
-						// false
-						{
-							schemeProxyHostRequestUriOptions, isSchemeProxyHostRequestUri := eligibleForCacheeligibleForCacheChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheEligibleOptions_SchemeProxyHostRequestUri)
-							schemeProxyHostRequestUriAttributeMap := make(map[string]attr.Value)
-
-							if isSchemeProxyHostRequestUri && schemeProxyHostRequestUriOptions != nil {
-
-								// data specToModelNested RequiredStringField --> CacheTtl
-								if schemeProxyHostRequestUriOptions.SchemeProxyHostRequestUri.GetCacheTtl() != "" {
-									schemeProxyHostRequestUriAttributeMap["cache_ttl"] = types.StringValue(schemeProxyHostRequestUriOptions.SchemeProxyHostRequestUri.GetCacheTtl())
-								} else {
-									// Empty string, set to null
-									schemeProxyHostRequestUriAttributeMap["cache_ttl"] = types.StringNull()
-								}
-
-								// data specToModelNested BoolField --> IgnoreResponseCookie
-								schemeProxyHostRequestUriAttributeMap["ignore_response_cookie"] = types.BoolValue(bool(schemeProxyHostRequestUriOptions.SchemeProxyHostRequestUri.GetIgnoreResponseCookie()))
-
-								// data specToModelNested BoolField --> CacheOverride
-								schemeProxyHostRequestUriAttributeMap["cache_override"] = types.BoolValue(bool(schemeProxyHostRequestUriOptions.SchemeProxyHostRequestUri.GetCacheOverride()))
-
-								schemeProxyHostRequestUriObj, diags := types.ObjectValue(CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheSchemeProxyHostRequestUriModelAttributeMap, schemeProxyHostRequestUriAttributeMap)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								eligibleForCacheeligibleForCacheChoiceChoicesAttributeMap["scheme_proxy_host_request_uri"] = schemeProxyHostRequestUriObj
-							} else {
-								eligibleForCacheeligibleForCacheChoiceChoicesAttributeMap["scheme_proxy_host_request_uri"] = types.ObjectNull(CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheSchemeProxyHostRequestUriModelAttributeMap)
-							}
-						}
-
 						// data specToModelNested PointerOfOneOfField --> SchemeProxyHostUri
 						// <no value>
 						// false
@@ -2044,6 +2002,9 @@ func (d *DataSourceF5XCCdnCacheRule) Read(ctx context.Context, request datasourc
 							schemeProxyHostUriAttributeMap := make(map[string]attr.Value)
 
 							if isSchemeProxyHostUri && schemeProxyHostUriOptions != nil {
+
+								// data specToModelNested BoolField --> CacheOverride
+								schemeProxyHostUriAttributeMap["cache_override"] = types.BoolValue(bool(schemeProxyHostUriOptions.SchemeProxyHostUri.GetCacheOverride()))
 
 								// data specToModelNested RequiredStringField --> CacheTtl
 								if schemeProxyHostUriOptions.SchemeProxyHostUri.GetCacheTtl() != "" {
@@ -2056,9 +2017,6 @@ func (d *DataSourceF5XCCdnCacheRule) Read(ctx context.Context, request datasourc
 								// data specToModelNested BoolField --> IgnoreResponseCookie
 								schemeProxyHostUriAttributeMap["ignore_response_cookie"] = types.BoolValue(bool(schemeProxyHostUriOptions.SchemeProxyHostUri.GetIgnoreResponseCookie()))
 
-								// data specToModelNested BoolField --> CacheOverride
-								schemeProxyHostUriAttributeMap["cache_override"] = types.BoolValue(bool(schemeProxyHostUriOptions.SchemeProxyHostUri.GetCacheOverride()))
-
 								schemeProxyHostUriObj, diags := types.ObjectValue(CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheSchemeProxyHostUriModelAttributeMap, schemeProxyHostUriAttributeMap)
 								response.Diagnostics.Append(diags...)
 								if response.Diagnostics.HasError() {
@@ -2067,6 +2025,40 @@ func (d *DataSourceF5XCCdnCacheRule) Read(ctx context.Context, request datasourc
 								eligibleForCacheeligibleForCacheChoiceChoicesAttributeMap["scheme_proxy_host_uri"] = schemeProxyHostUriObj
 							} else {
 								eligibleForCacheeligibleForCacheChoiceChoicesAttributeMap["scheme_proxy_host_uri"] = types.ObjectNull(CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheSchemeProxyHostUriModelAttributeMap)
+							}
+						}
+
+						// data specToModelNested PointerOfOneOfField --> SchemeProxyHostRequestUri
+						// <no value>
+						// false
+						{
+							schemeProxyHostRequestUriOptions, isSchemeProxyHostRequestUri := eligibleForCacheeligibleForCacheChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheEligibleOptions_SchemeProxyHostRequestUri)
+							schemeProxyHostRequestUriAttributeMap := make(map[string]attr.Value)
+
+							if isSchemeProxyHostRequestUri && schemeProxyHostRequestUriOptions != nil {
+
+								// data specToModelNested BoolField --> IgnoreResponseCookie
+								schemeProxyHostRequestUriAttributeMap["ignore_response_cookie"] = types.BoolValue(bool(schemeProxyHostRequestUriOptions.SchemeProxyHostRequestUri.GetIgnoreResponseCookie()))
+
+								// data specToModelNested BoolField --> CacheOverride
+								schemeProxyHostRequestUriAttributeMap["cache_override"] = types.BoolValue(bool(schemeProxyHostRequestUriOptions.SchemeProxyHostRequestUri.GetCacheOverride()))
+
+								// data specToModelNested RequiredStringField --> CacheTtl
+								if schemeProxyHostRequestUriOptions.SchemeProxyHostRequestUri.GetCacheTtl() != "" {
+									schemeProxyHostRequestUriAttributeMap["cache_ttl"] = types.StringValue(schemeProxyHostRequestUriOptions.SchemeProxyHostRequestUri.GetCacheTtl())
+								} else {
+									// Empty string, set to null
+									schemeProxyHostRequestUriAttributeMap["cache_ttl"] = types.StringNull()
+								}
+
+								schemeProxyHostRequestUriObj, diags := types.ObjectValue(CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheSchemeProxyHostRequestUriModelAttributeMap, schemeProxyHostRequestUriAttributeMap)
+								response.Diagnostics.Append(diags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								eligibleForCacheeligibleForCacheChoiceChoicesAttributeMap["scheme_proxy_host_request_uri"] = schemeProxyHostRequestUriObj
+							} else {
+								eligibleForCacheeligibleForCacheChoiceChoicesAttributeMap["scheme_proxy_host_request_uri"] = types.ObjectNull(CdnCacheRuleCacheRulesCacheActionsEligibleForCacheEligibleForCacheSchemeProxyHostRequestUriModelAttributeMap)
 							}
 						}
 
@@ -2117,6 +2109,14 @@ func (d *DataSourceF5XCCdnCacheRule) Read(ctx context.Context, request datasourc
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			cdnCacheRuleCdnCacheRuleCDNCacheRuleModel.CacheActionsChoice = types.ObjectNull(CdnCacheRuleCacheRulesCacheActionsModelAttributeMap)
+		}
+
+		// data specToModelNested RequiredStringField --> RuleName
+		if cacheRulesElement.GetRuleName() != "" {
+			cdnCacheRuleCdnCacheRuleCDNCacheRuleModel.RuleName = types.StringValue(cacheRulesElement.GetRuleName())
+		} else {
+			// Empty string, set to null
+			cdnCacheRuleCdnCacheRuleCDNCacheRuleModel.RuleName = types.StringNull()
 		}
 
 		cacheRulesObj, cacheRulesDiags := utils.GoStructToObjectValue(

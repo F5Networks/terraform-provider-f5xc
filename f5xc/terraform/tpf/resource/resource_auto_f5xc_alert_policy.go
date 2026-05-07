@@ -51,22 +51,10 @@ type ResourceF5XCAlertPolicy struct {
 	client *client.APIClient
 }
 
-type AlertPolicyAlertPolicyNotificationParameters struct {
-	GroupByChoice  types.Object `tfsdk:"group_by_choice"`
-	GroupWait      types.String `tfsdk:"group_wait"`
-	GroupInterval  types.String `tfsdk:"group_interval"`
-	RepeatInterval types.String `tfsdk:"repeat_interval"`
-}
-
-type AlertPolicyNotificationParametersGroupByChoice struct {
-	Default    types.Bool   `tfsdk:"default"`
-	Individual types.Bool   `tfsdk:"individual"`
-	VesIoGroup types.Bool   `tfsdk:"ves_io_group"`
-	Custom     types.Object `tfsdk:"custom"`
-}
-
-type AlertPolicyNotificationParametersCustom struct {
-	Labels types.List `tfsdk:"labels"`
+type ObjectRefTypeModel struct {
+	Namespace types.String `tfsdk:"namespace"`
+	Name      types.String `tfsdk:"name"`
+	Tenant    types.String `tfsdk:"tenant"`
 }
 
 type AlertPolicyAlertPolicyRoute struct {
@@ -76,12 +64,12 @@ type AlertPolicyAlertPolicyRoute struct {
 }
 
 type AlertPolicyRouteMatcherChoice struct {
+	AlertnameRegex types.String `tfsdk:"alertname_regex"`
 	Custom         types.Object `tfsdk:"custom"`
 	Any            types.Bool   `tfsdk:"any"`
 	Severity       types.Object `tfsdk:"severity"`
 	Group          types.Object `tfsdk:"group"`
 	Alertname      types.List   `tfsdk:"alertname"`
-	AlertnameRegex types.String `tfsdk:"alertname_regex"`
 }
 
 type AlertPolicyRouteCustom struct {
@@ -96,8 +84,8 @@ type AlertPolicyAlertPolicyLabelMatcher struct {
 }
 
 type AlertPolicyLabelMatcherMatcherTypeChoice struct {
-	RegexMatch types.String `tfsdk:"regex_match"`
 	ExactMatch types.String `tfsdk:"exact_match"`
+	RegexMatch types.String `tfsdk:"regex_match"`
 }
 
 type AlertPolicyRouteSeverity struct {
@@ -109,21 +97,39 @@ type AlertPolicyRouteGroup struct {
 }
 
 type AlertPolicyRouteActionChoice struct {
-	Send     types.Bool `tfsdk:"send"`
 	DontSend types.Bool `tfsdk:"dont_send"`
+	Send     types.Bool `tfsdk:"send"`
+}
+
+type AlertPolicyAlertPolicyNotificationParameters struct {
+	GroupWait      types.String `tfsdk:"group_wait"`
+	GroupInterval  types.String `tfsdk:"group_interval"`
+	RepeatInterval types.String `tfsdk:"repeat_interval"`
+	GroupByChoice  types.Object `tfsdk:"group_by_choice"`
+}
+
+type AlertPolicyNotificationParametersGroupByChoice struct {
+	Default    types.Bool   `tfsdk:"default"`
+	Individual types.Bool   `tfsdk:"individual"`
+	VesIoGroup types.Bool   `tfsdk:"ves_io_group"`
+	Custom     types.Object `tfsdk:"custom"`
+}
+
+type AlertPolicyNotificationParametersCustom struct {
+	Labels types.List `tfsdk:"labels"`
 }
 
 // ResourceF5XCAlertPolicyModel describes the resource data model.
 type ResourceF5XCAlertPolicyModel struct {
+	Labels                 types.Map      `tfsdk:"labels"`
 	Annotations            types.Map      `tfsdk:"annotations"`
 	Description            types.String   `tfsdk:"description"`
 	Name                   types.String   `tfsdk:"name"`
 	Namespace              types.String   `tfsdk:"namespace"`
 	Uid                    types.String   `tfsdk:"uid"`
-	Labels                 types.Map      `tfsdk:"labels"`
-	NotificationParameters types.Object   `tfsdk:"notification_parameters"`
 	Receivers              types.List     `tfsdk:"receivers"`
 	Routes                 types.List     `tfsdk:"routes"`
+	NotificationParameters types.Object   `tfsdk:"notification_parameters"`
 	Timeouts               timeouts.Value `tfsdk:"timeouts"`
 }
 
@@ -137,42 +143,12 @@ var (
 )
 
 // --- Attribute Maps for Nested Structs ---
-// Attribute map for PointerField --> NotificationParameters
-var AlertPolicyNotificationParametersModelAttributeMap = map[string]attr.Type{
-
-	"group_by_choice": types.ObjectType{
-		AttrTypes: AlertPolicyNotificationParametersGroupByModelAttributeMap,
-	},
-	"group_wait":      types.StringType,
-	"group_interval":  types.StringType,
-	"repeat_interval": types.StringType,
-}
-
-// Attribute map for RequiredOneOfField --> GroupBy
-var AlertPolicyNotificationParametersGroupByModelAttributeMap = map[string]attr.Type{
-
-	"default":      types.BoolType,
-	"individual":   types.BoolType,
-	"ves_io_group": types.BoolType,
-	"custom": types.ObjectType{
-		AttrTypes: AlertPolicyNotificationParametersGroupByCustomModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> Custom
-var AlertPolicyNotificationParametersGroupByCustomModelAttributeMap = map[string]attr.Type{
-
-	"labels": types.ListType{
-		ElemType: types.StringType,
-	},
-}
-
 // Attribute map for RequiredArrayOfPointerField --> Receivers
 var AlertPolicyReceiversObjectRefModelAttributeMap = map[string]attr.Type{
 
-	"tenant":    types.StringType,
 	"namespace": types.StringType,
 	"name":      types.StringType,
+	"tenant":    types.StringType,
 }
 
 // Attribute map for RequiredArrayOfPointerField --> Routes
@@ -185,18 +161,19 @@ var AlertPolicyRoutesModelAttributeMap = map[string]attr.Type{
 		AttrTypes: AlertPolicyRoutesActionModelAttributeMap,
 	}, "notification_parameters": types.ObjectType{
 		AttrTypes: map[string]attr.Type{
+			"group_wait":      types.StringType,
 			"group_interval":  types.StringType,
 			"repeat_interval": types.StringType,
 			"group_by_choice": types.ObjectType{
 				AttrTypes: AlertPolicyRoutesNotificationParametersGroupByModelAttributeMap,
-			},
-			"group_wait": types.StringType},
+			}},
 	},
 }
 
 // Attribute map for OneOfField --> Matcher
 var AlertPolicyRoutesMatcherModelAttributeMap = map[string]attr.Type{
 
+	"alertname_regex": types.StringType,
 	"custom": types.ObjectType{
 		AttrTypes: AlertPolicyRoutesMatcherCustomModelAttributeMap,
 	},
@@ -210,7 +187,6 @@ var AlertPolicyRoutesMatcherModelAttributeMap = map[string]attr.Type{
 	"alertname": types.ListType{
 		ElemType: types.StringType,
 	},
-	"alertname_regex": types.StringType,
 }
 
 // Attribute map for PointerOfOneOfField --> Custom
@@ -249,8 +225,8 @@ var AlertPolicyRoutesMatcherCustomSeverityModelAttributeMap = map[string]attr.Ty
 // Attribute map for RequiredOneOfField --> MatcherType
 var AlertPolicyRoutesMatcherCustomSeverityMatcherTypeModelAttributeMap = map[string]attr.Type{
 
-	"regex_match": types.StringType,
 	"exact_match": types.StringType,
+	"regex_match": types.StringType,
 }
 
 // Attribute map for PointerField --> Group
@@ -317,26 +293,56 @@ var AlertPolicyRoutesMatcherGroupModelAttributeMap = map[string]attr.Type{
 // Attribute map for RequiredOneOfField --> Action
 var AlertPolicyRoutesActionModelAttributeMap = map[string]attr.Type{
 
-	"send":      types.BoolType,
 	"dont_send": types.BoolType,
+	"send":      types.BoolType,
 }
 
 // Attribute map for PointerField --> NotificationParameters
 var AlertPolicyRoutesNotificationParametersModelAttributeMap = map[string]attr.Type{
 
+	"group_wait":      types.StringType,
 	"group_interval":  types.StringType,
 	"repeat_interval": types.StringType,
 	"group_by_choice": types.ObjectType{
 		AttrTypes: AlertPolicyRoutesNotificationParametersGroupByModelAttributeMap,
 	},
-	"group_wait": types.StringType,
 }
 
 // Attribute map for RequiredOneOfField --> GroupBy
 var AlertPolicyRoutesNotificationParametersGroupByModelAttributeMap = map[string]attr.Type{
 
+	"default":      types.BoolType,
+	"individual":   types.BoolType,
+	"ves_io_group": types.BoolType,
 	"custom": types.ObjectType{
 		AttrTypes: AlertPolicyRoutesNotificationParametersGroupByCustomModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> Custom
+var AlertPolicyRoutesNotificationParametersGroupByCustomModelAttributeMap = map[string]attr.Type{
+
+	"labels": types.ListType{
+		ElemType: types.StringType,
+	},
+}
+
+// Attribute map for PointerField --> NotificationParameters
+var AlertPolicyNotificationParametersModelAttributeMap = map[string]attr.Type{
+
+	"group_by_choice": types.ObjectType{
+		AttrTypes: AlertPolicyNotificationParametersGroupByModelAttributeMap,
+	},
+	"group_wait":      types.StringType,
+	"group_interval":  types.StringType,
+	"repeat_interval": types.StringType,
+}
+
+// Attribute map for RequiredOneOfField --> GroupBy
+var AlertPolicyNotificationParametersGroupByModelAttributeMap = map[string]attr.Type{
+
+	"custom": types.ObjectType{
+		AttrTypes: AlertPolicyNotificationParametersGroupByCustomModelAttributeMap,
 	},
 	"default":      types.BoolType,
 	"individual":   types.BoolType,
@@ -344,7 +350,7 @@ var AlertPolicyRoutesNotificationParametersGroupByModelAttributeMap = map[string
 }
 
 // Attribute map for PointerOfOneOfField --> Custom
-var AlertPolicyRoutesNotificationParametersGroupByCustomModelAttributeMap = map[string]attr.Type{
+var AlertPolicyNotificationParametersGroupByCustomModelAttributeMap = map[string]attr.Type{
 
 	"labels": types.ListType{
 		ElemType: types.StringType,
@@ -366,6 +372,17 @@ func (r *ResourceF5XCAlertPolicy) Schema(ctx context.Context, request resource.S
 		Description:         "AlertPolicy resource",
 
 		Attributes: map[string]schema.Attribute{
+			"labels": schema.MapAttribute{
+				Description:         "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				MarkdownDescription: "",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				ElementType:         types.StringType,
+				PlanModifiers: []planmodifier.Map{
+					mapmergemodifier.New(),
+				},
+			},
 			"annotations": schema.MapAttribute{
 				Description:         "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
 				MarkdownDescription: "",
@@ -410,121 +427,6 @@ func (r *ResourceF5XCAlertPolicy) Schema(ctx context.Context, request resource.S
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"labels": schema.MapAttribute{
-				Description:         "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            true,
-				ElementType:         types.StringType,
-				PlanModifiers: []planmodifier.Map{
-					mapmergemodifier.New(),
-				},
-			},
-			"notification_parameters": schema.SingleNestedAttribute{
-				Description:         "Notification Parameters Notification parameters to decide how and when the alerts should be sent to the receivers.",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            false,
-				Attributes: map[string]schema.Attribute{
-					"group_by_choice": schema.SingleNestedAttribute{
-						Description:         "Group By Set of labels to group the alerts",
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Validators: []validator.Object{
-							atmostoneofvalidator.AtMostOneOf(
-								"custom",
-								"default",
-								"individual",
-								"ves_io_group",
-							),
-						},
-						Attributes: map[string]schema.Attribute{
-							"default": schema.BoolAttribute{
-								Description:         "Default Group the alerts by severity, group name and alert name",
-								MarkdownDescription: "",
-								Required:            false,
-								Optional:            true,
-								Computed:            false,
-								Validators: []validator.Bool{
-									boolvalidator.Equals(true),
-								},
-							},
-							"individual": schema.BoolAttribute{
-								Description:         "Individual This option disables grouping of alerts",
-								MarkdownDescription: "",
-								Required:            false,
-								Optional:            true,
-								Computed:            false,
-								Validators: []validator.Bool{
-									boolvalidator.Equals(true),
-								},
-							},
-							"ves_io_group": schema.BoolAttribute{
-								Description:         "F5XC Defined Group Group the alerts by severity, group name and alert name",
-								MarkdownDescription: "",
-								Required:            false,
-								Optional:            true,
-								Computed:            false,
-								Validators: []validator.Bool{
-									boolvalidator.Equals(true),
-								},
-							},
-							"custom": schema.SingleNestedAttribute{
-								Description:         "Custom Specify set of labels for grouping the alerts",
-								MarkdownDescription: "",
-								Required:            false,
-								Optional:            true,
-								Computed:            false,
-								Attributes: map[string]schema.Attribute{
-									"labels": schema.ListAttribute{
-										Description:         "labels Name of labels to group/aggregate the alerts",
-										MarkdownDescription: "",
-										ElementType:         types.StringType,
-										Required:            false,
-										Optional:            true,
-										Computed:            false,
-										Validators: []validator.List{
-											listvalidator.SizeAtMost(5),
-											listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-												regexp.MustCompile(`^[a-zA-Z_][a-zA-Z0-9_]*$`),
-												"must be valid pattern",
-											)),
-										},
-									},
-								},
-							},
-						},
-					},
-					"group_wait": schema.StringAttribute{
-						Description:         "Group Wait Time value used to specify how long to initially wait for an inhibiting alert to arrive or collect more alerts for the same group. Format: [0-9][smhd], where s - seconds, m - minutes, h - hours, d - days If not specified, group_wait defaults to '30s'",
-						MarkdownDescription: "<br>**Default:** `30s`",
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Default:             stringdefault.StaticString("30s"),
-					},
-					"group_interval": schema.StringAttribute{
-						Description:         "Group Interval Group Interval is used to specify how long to wait before sending a notification about new alerts that are added to the group for which an initial notification has already been sent. Format: [0-9][smhd], where s - seconds, m - minutes, h - hours, d - days If not specified, group_interval defaults to '1m'",
-						MarkdownDescription: "<br>**Default:** `1m`",
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Default:             stringdefault.StaticString("1m"),
-					},
-					"repeat_interval": schema.StringAttribute{
-						Description:         "Repeat Interval Repeat Interval is used to specify how long to wait before sending a notification again if it has already been sent successfully. Format: [0-9][smhd], where s - seconds, m - minutes, h - hours, d - days If not specified, group_interval defaults to '4h'",
-						MarkdownDescription: "<br>**Default:** `4h`",
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Default:             stringdefault.StaticString("4h"),
-					},
-				},
-			},
 			"receivers": schema.ListNestedAttribute{
 				Description:         "Receivers list of Alert Receivers where the alerts will be sent",
 				MarkdownDescription: "",
@@ -533,16 +435,6 @@ func (r *ResourceF5XCAlertPolicy) Schema(ctx context.Context, request resource.S
 				Computed:            false,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
-						"tenant": schema.StringAttribute{
-							Description:         "",
-							MarkdownDescription: "",
-							Required:            false,
-							Optional:            false,
-							Computed:            true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
-							},
-						},
 						"namespace": schema.StringAttribute{
 							Description:         "",
 							MarkdownDescription: "",
@@ -556,6 +448,16 @@ func (r *ResourceF5XCAlertPolicy) Schema(ctx context.Context, request resource.S
 							Required:            true,
 							Optional:            false,
 							Computed:            false,
+						},
+						"tenant": schema.StringAttribute{
+							Description:         "",
+							MarkdownDescription: "",
+							Required:            false,
+							Optional:            false,
+							Computed:            true,
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
 						},
 					},
 				},
@@ -576,15 +478,22 @@ func (r *ResourceF5XCAlertPolicy) Schema(ctx context.Context, request resource.S
 							Computed:            false,
 							Validators: []validator.Object{
 								atmostoneofvalidator.AtMostOneOf(
+									"alertname",
+									"alertname_regex",
 									"custom",
 									"any",
 									"severity",
 									"group",
-									"alertname",
-									"alertname_regex",
 								),
 							},
 							Attributes: map[string]schema.Attribute{
+								"alertname_regex": schema.StringAttribute{
+									Description:         "Alertname Regex Match Regular Expression match for the alertname",
+									MarkdownDescription: "",
+									Required:            false,
+									Optional:            true,
+									Computed:            false,
+								},
 								"custom": schema.SingleNestedAttribute{
 									Description:         "Custom Match A set of custom equality/regex matchers an alert has to fulfill to match the route.",
 									MarkdownDescription: "",
@@ -612,15 +521,15 @@ func (r *ResourceF5XCAlertPolicy) Schema(ctx context.Context, request resource.S
 														),
 													},
 													Attributes: map[string]schema.Attribute{
-														"regex_match": schema.StringAttribute{
-															Description:         "Regex Match Regular expression match value for the label",
+														"exact_match": schema.StringAttribute{
+															Description:         "Exact Match Equality match value for the label",
 															MarkdownDescription: "",
 															Required:            false,
 															Optional:            true,
 															Computed:            false,
 														},
-														"exact_match": schema.StringAttribute{
-															Description:         "Exact Match Equality match value for the label",
+														"regex_match": schema.StringAttribute{
+															Description:         "Regex Match Regular expression match value for the label",
 															MarkdownDescription: "",
 															Required:            false,
 															Optional:            true,
@@ -787,35 +696,28 @@ func (r *ResourceF5XCAlertPolicy) Schema(ctx context.Context, request resource.S
 									Attributes: map[string]schema.Attribute{
 										"groups": schema.ListAttribute{
 											Description:         "groups Name of groups to match the alert",
-											MarkdownDescription: "<br>**Valid Options:** `[\"INFRASTRUCTURE\", \"SHAPE_SECURITY\", \"SECURITY_CSD\", \"ROUTED_DDOS\", \"VOLT_SHARE\", \"UAM\", \"TIMESERIES_ANOMALY\", \"DNS\", \"IAAS_CAAS\", \"CDN\", \"TLS\", \"SECURITY_BOT_DEFENSE\", \"VIRTUAL_HOST\", \"SECURITY\", \"SYNTHETIC_MONITORS\", \"CLOUD_LINK\"]` (Multiple selection allowed)",
+											MarkdownDescription: "<br>**Valid Options:** `[\"CLOUD_LINK\", \"IAAS_CAAS\", \"TLS\", \"VIRTUAL_HOST\", \"UAM\", \"SECURITY_CSD\", \"CDN\", \"VOLT_SHARE\", \"SECURITY\", \"TIMESERIES_ANOMALY\", \"SHAPE_SECURITY\", \"SYNTHETIC_MONITORS\", \"DNS\", \"ROUTED_DDOS\", \"INFRASTRUCTURE\", \"SECURITY_BOT_DEFENSE\"]` (Multiple selection allowed)",
 											ElementType:         types.StringType,
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
 											Validators: []validator.List{
-												listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"INFRASTRUCTURE", "SHAPE_SECURITY", "SECURITY_CSD", "ROUTED_DDOS", "VOLT_SHARE", "UAM", "TIMESERIES_ANOMALY", "DNS", "IAAS_CAAS", "CDN", "TLS", "SECURITY_BOT_DEFENSE", "VIRTUAL_HOST", "SECURITY", "SYNTHETIC_MONITORS", "CLOUD_LINK"}...)),
+												listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"CLOUD_LINK", "IAAS_CAAS", "TLS", "VIRTUAL_HOST", "UAM", "SECURITY_CSD", "CDN", "VOLT_SHARE", "SECURITY", "TIMESERIES_ANOMALY", "SHAPE_SECURITY", "SYNTHETIC_MONITORS", "DNS", "ROUTED_DDOS", "INFRASTRUCTURE", "SECURITY_BOT_DEFENSE"}...)),
 											},
 										},
 									},
 								},
 								"alertname": schema.ListAttribute{
 									Description:         "Alertname Matches the alertname of the alert",
-									MarkdownDescription: "<br>**Allowed Values (choose one):** `[\"ServicePolicyTooManyAttacks\", \"VesClientSideDefenseSensitiveFieldRead\", \"APISecurityShadowAPIDetected\", \"ServiceUnavailable\", \"APISecurityTooManyAttacks\", \"ThreatCampaign\", \"APISecuritySensitiveDataInResponseDetected\", \"WAFTooManyAttacks\", \"TLSCustomCertificateExpiring\", \"SitePhysicalInterfaceDown\", \"TunnelsToCustomerSiteDown\", \"SyntheticMonitorHealthCritical\", \"MaliciousUserDetected\", \"BotDefenseTooManySecurityEvents\", \"TLSAutomaticCertificateRenewalStillFailing\", \"TLSCustomCertificateExpiringSoon\", \"L7DDoS\", \"SiteCustomerTunnelInterfaceDown\", \"ServiceClientError\", \"VesClientSideDefenseSuspiciousDomain\", \"TLSCustomCertificateExpired\", \"APISecurityUnUsedAPIDetected\", \"APISecurityRiskScoreHighDetected\", \"RoutedDDoSAlertNotification\", \"RoutedDDoSTunnelStatusUpdateNotification\", \"ServiceClientErrorPerSourceSite\", \"ServiceEndpointHealthcheckFailure\", \"WAFTooManyMaliciousBots\", \"TLSAutomaticCertificateRenewalFailure\", \"TLSAutomaticCertificateExpired\", \"DNSZoneIgnoredDuplicateRecord\", \"RoutedDDoSMitigationNotification\", \"ServiceServerError\", \"ServiceServerErrorPerSourceSite\", \"ServiceHealthLow\"]`",
+									MarkdownDescription: "<br>**Allowed Values (choose one):** `[\"WAFTooManyMaliciousBots\", \"APISecuritySensitiveDataInResponseDetected\", \"ServiceHealthLow\", \"VesClientSideDefenseSensitiveFieldRead\", \"APISecurityShadowAPIDetected\", \"SiteCustomerTunnelInterfaceDown\", \"TLSCustomCertificateExpiring\", \"L7DDoS\", \"DNSZoneIgnoredDuplicateRecord\", \"ServiceServerError\", \"ServiceServerErrorPerSourceSite\", \"ThreatCampaign\", \"TLSAutomaticCertificateRenewalStillFailing\", \"ServiceClientErrorPerSourceSite\", \"APISecurityTooManyAttacks\", \"BotDefenseTooManySecurityEvents\", \"VesClientSideDefenseSuspiciousDomain\", \"TLSCustomCertificateExpiringSoon\", \"RoutedDDoSAlertNotification\", \"MaliciousUserDetected\", \"TunnelsToCustomerSiteDown\", \"ServiceUnavailable\", \"SyntheticMonitorHealthCritical\", \"TLSAutomaticCertificateRenewalFailure\", \"TLSCustomCertificateExpired\", \"APISecurityRiskScoreHighDetected\", \"ServiceEndpointHealthcheckFailure\", \"ServicePolicyTooManyAttacks\", \"APISecurityUnUsedAPIDetected\", \"RoutedDDoSMitigationNotification\", \"WAFTooManyAttacks\", \"SitePhysicalInterfaceDown\", \"ServiceClientError\", \"TLSAutomaticCertificateExpired\", \"RoutedDDoSTunnelStatusUpdateNotification\"]`",
 									ElementType:         types.StringType,
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
 									Validators: []validator.List{
-										listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"ServicePolicyTooManyAttacks", "VesClientSideDefenseSensitiveFieldRead", "APISecurityShadowAPIDetected", "ServiceUnavailable", "APISecurityTooManyAttacks", "ThreatCampaign", "APISecuritySensitiveDataInResponseDetected", "WAFTooManyAttacks", "TLSCustomCertificateExpiring", "SitePhysicalInterfaceDown", "TunnelsToCustomerSiteDown", "SyntheticMonitorHealthCritical", "MaliciousUserDetected", "BotDefenseTooManySecurityEvents", "TLSAutomaticCertificateRenewalStillFailing", "TLSCustomCertificateExpiringSoon", "L7DDoS", "SiteCustomerTunnelInterfaceDown", "ServiceClientError", "VesClientSideDefenseSuspiciousDomain", "TLSCustomCertificateExpired", "APISecurityUnUsedAPIDetected", "APISecurityRiskScoreHighDetected", "RoutedDDoSAlertNotification", "RoutedDDoSTunnelStatusUpdateNotification", "ServiceClientErrorPerSourceSite", "ServiceEndpointHealthcheckFailure", "WAFTooManyMaliciousBots", "TLSAutomaticCertificateRenewalFailure", "TLSAutomaticCertificateExpired", "DNSZoneIgnoredDuplicateRecord", "RoutedDDoSMitigationNotification", "ServiceServerError", "ServiceServerErrorPerSourceSite", "ServiceHealthLow"}...)),
+										listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"WAFTooManyMaliciousBots", "APISecuritySensitiveDataInResponseDetected", "ServiceHealthLow", "VesClientSideDefenseSensitiveFieldRead", "APISecurityShadowAPIDetected", "SiteCustomerTunnelInterfaceDown", "TLSCustomCertificateExpiring", "L7DDoS", "DNSZoneIgnoredDuplicateRecord", "ServiceServerError", "ServiceServerErrorPerSourceSite", "ThreatCampaign", "TLSAutomaticCertificateRenewalStillFailing", "ServiceClientErrorPerSourceSite", "APISecurityTooManyAttacks", "BotDefenseTooManySecurityEvents", "VesClientSideDefenseSuspiciousDomain", "TLSCustomCertificateExpiringSoon", "RoutedDDoSAlertNotification", "MaliciousUserDetected", "TunnelsToCustomerSiteDown", "ServiceUnavailable", "SyntheticMonitorHealthCritical", "TLSAutomaticCertificateRenewalFailure", "TLSCustomCertificateExpired", "APISecurityRiskScoreHighDetected", "ServiceEndpointHealthcheckFailure", "ServicePolicyTooManyAttacks", "APISecurityUnUsedAPIDetected", "RoutedDDoSMitigationNotification", "WAFTooManyAttacks", "SitePhysicalInterfaceDown", "ServiceClientError", "TLSAutomaticCertificateExpired", "RoutedDDoSTunnelStatusUpdateNotification"}...)),
 										listvalidator.SizeBetween(1, 1),
 									},
-								},
-								"alertname_regex": schema.StringAttribute{
-									Description:         "Alertname Regex Match Regular Expression match for the alertname",
-									MarkdownDescription: "",
-									Required:            false,
-									Optional:            true,
-									Computed:            false,
 								},
 							},
 						},
@@ -832,8 +734,8 @@ func (r *ResourceF5XCAlertPolicy) Schema(ctx context.Context, request resource.S
 								),
 							},
 							Attributes: map[string]schema.Attribute{
-								"send": schema.BoolAttribute{
-									Description:         "Send Send the alert",
+								"dont_send": schema.BoolAttribute{
+									Description:         "Do Not Send Do not send the alert",
 									MarkdownDescription: "",
 									Required:            false,
 									Optional:            true,
@@ -842,8 +744,8 @@ func (r *ResourceF5XCAlertPolicy) Schema(ctx context.Context, request resource.S
 										boolvalidator.Equals(true),
 									},
 								},
-								"dont_send": schema.BoolAttribute{
-									Description:         "Do Not Send Do not send the alert",
+								"send": schema.BoolAttribute{
+									Description:         "Send Send the alert",
 									MarkdownDescription: "",
 									Required:            false,
 									Optional:            true,
@@ -861,6 +763,14 @@ func (r *ResourceF5XCAlertPolicy) Schema(ctx context.Context, request resource.S
 							Optional:            true,
 							Computed:            false,
 							Attributes: map[string]schema.Attribute{
+								"group_wait": schema.StringAttribute{
+									Description:         "Group Wait Time value used to specify how long to initially wait for an inhibiting alert to arrive or collect more alerts for the same group. Format: [0-9][smhd], where s - seconds, m - minutes, h - hours, d - days If not specified, group_wait defaults to '30s'",
+									MarkdownDescription: "<br>**Default:** `30s`",
+									Required:            false,
+									Optional:            true,
+									Computed:            true,
+									Default:             stringdefault.StaticString("30s"),
+								},
 								"group_interval": schema.StringAttribute{
 									Description:         "Group Interval Group Interval is used to specify how long to wait before sending a notification about new alerts that are added to the group for which an initial notification has already been sent. Format: [0-9][smhd], where s - seconds, m - minutes, h - hours, d - days If not specified, group_interval defaults to '1m'",
 									MarkdownDescription: "<br>**Default:** `1m`",
@@ -892,30 +802,6 @@ func (r *ResourceF5XCAlertPolicy) Schema(ctx context.Context, request resource.S
 										),
 									},
 									Attributes: map[string]schema.Attribute{
-										"custom": schema.SingleNestedAttribute{
-											Description:         "Custom Specify set of labels for grouping the alerts",
-											MarkdownDescription: "",
-											Required:            false,
-											Optional:            true,
-											Computed:            false,
-											Attributes: map[string]schema.Attribute{
-												"labels": schema.ListAttribute{
-													Description:         "labels Name of labels to group/aggregate the alerts",
-													MarkdownDescription: "",
-													ElementType:         types.StringType,
-													Required:            false,
-													Optional:            true,
-													Computed:            false,
-													Validators: []validator.List{
-														listvalidator.SizeAtMost(5),
-														listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
-															regexp.MustCompile(`^[a-zA-Z_][a-zA-Z0-9_]*$`),
-															"must be valid pattern",
-														)),
-													},
-												},
-											},
-										},
 										"default": schema.BoolAttribute{
 											Description:         "Default Group the alerts by severity, group name and alert name",
 											MarkdownDescription: "",
@@ -946,18 +832,138 @@ func (r *ResourceF5XCAlertPolicy) Schema(ctx context.Context, request resource.S
 												boolvalidator.Equals(true),
 											},
 										},
+										"custom": schema.SingleNestedAttribute{
+											Description:         "Custom Specify set of labels for grouping the alerts",
+											MarkdownDescription: "",
+											Required:            false,
+											Optional:            true,
+											Computed:            false,
+											Attributes: map[string]schema.Attribute{
+												"labels": schema.ListAttribute{
+													Description:         "labels Name of labels to group/aggregate the alerts",
+													MarkdownDescription: "",
+													ElementType:         types.StringType,
+													Required:            false,
+													Optional:            true,
+													Computed:            false,
+													Validators: []validator.List{
+														listvalidator.SizeAtMost(5),
+														listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
+															regexp.MustCompile(`^[a-zA-Z_][a-zA-Z0-9_]*$`),
+															"must be valid pattern",
+														)),
+													},
+												},
+											},
+										},
 									},
-								},
-								"group_wait": schema.StringAttribute{
-									Description:         "Group Wait Time value used to specify how long to initially wait for an inhibiting alert to arrive or collect more alerts for the same group. Format: [0-9][smhd], where s - seconds, m - minutes, h - hours, d - days If not specified, group_wait defaults to '30s'",
-									MarkdownDescription: "<br>**Default:** `30s`",
-									Required:            false,
-									Optional:            true,
-									Computed:            true,
-									Default:             stringdefault.StaticString("30s"),
 								},
 							},
 						},
+					},
+				},
+			},
+			"notification_parameters": schema.SingleNestedAttribute{
+				Description:         "Notification Parameters Notification parameters to decide how and when the alerts should be sent to the receivers.",
+				MarkdownDescription: "",
+				Required:            false,
+				Optional:            true,
+				Computed:            false,
+				Attributes: map[string]schema.Attribute{
+					"group_by_choice": schema.SingleNestedAttribute{
+						Description:         "Group By Set of labels to group the alerts",
+						MarkdownDescription: "",
+						Required:            true,
+						Optional:            false,
+						Computed:            false,
+						Validators: []validator.Object{
+							atmostoneofvalidator.AtMostOneOf(
+								"custom",
+								"default",
+								"individual",
+								"ves_io_group",
+							),
+						},
+						Attributes: map[string]schema.Attribute{
+							"custom": schema.SingleNestedAttribute{
+								Description:         "Custom Specify set of labels for grouping the alerts",
+								MarkdownDescription: "",
+								Required:            false,
+								Optional:            true,
+								Computed:            false,
+								Attributes: map[string]schema.Attribute{
+									"labels": schema.ListAttribute{
+										Description:         "labels Name of labels to group/aggregate the alerts",
+										MarkdownDescription: "",
+										ElementType:         types.StringType,
+										Required:            false,
+										Optional:            true,
+										Computed:            false,
+										Validators: []validator.List{
+											listvalidator.SizeAtMost(5),
+											listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
+												regexp.MustCompile(`^[a-zA-Z_][a-zA-Z0-9_]*$`),
+												"must be valid pattern",
+											)),
+										},
+									},
+								},
+							},
+							"default": schema.BoolAttribute{
+								Description:         "Default Group the alerts by severity, group name and alert name",
+								MarkdownDescription: "",
+								Required:            false,
+								Optional:            true,
+								Computed:            false,
+								Validators: []validator.Bool{
+									boolvalidator.Equals(true),
+								},
+							},
+							"individual": schema.BoolAttribute{
+								Description:         "Individual This option disables grouping of alerts",
+								MarkdownDescription: "",
+								Required:            false,
+								Optional:            true,
+								Computed:            false,
+								Validators: []validator.Bool{
+									boolvalidator.Equals(true),
+								},
+							},
+							"ves_io_group": schema.BoolAttribute{
+								Description:         "F5XC Defined Group Group the alerts by severity, group name and alert name",
+								MarkdownDescription: "",
+								Required:            false,
+								Optional:            true,
+								Computed:            false,
+								Validators: []validator.Bool{
+									boolvalidator.Equals(true),
+								},
+							},
+						},
+					},
+					"group_wait": schema.StringAttribute{
+						Description:         "Group Wait Time value used to specify how long to initially wait for an inhibiting alert to arrive or collect more alerts for the same group. Format: [0-9][smhd], where s - seconds, m - minutes, h - hours, d - days If not specified, group_wait defaults to '30s'",
+						MarkdownDescription: "<br>**Default:** `30s`",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Default:             stringdefault.StaticString("30s"),
+					},
+					"group_interval": schema.StringAttribute{
+						Description:         "Group Interval Group Interval is used to specify how long to wait before sending a notification about new alerts that are added to the group for which an initial notification has already been sent. Format: [0-9][smhd], where s - seconds, m - minutes, h - hours, d - days If not specified, group_interval defaults to '1m'",
+						MarkdownDescription: "<br>**Default:** `1m`",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Default:             stringdefault.StaticString("1m"),
+					},
+					"repeat_interval": schema.StringAttribute{
+						Description:         "Repeat Interval Repeat Interval is used to specify how long to wait before sending a notification again if it has already been sent successfully. Format: [0-9][smhd], where s - seconds, m - minutes, h - hours, d - days If not specified, group_interval defaults to '4h'",
+						MarkdownDescription: "<br>**Default:** `4h`",
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Default:             stringdefault.StaticString("4h"),
 					},
 				},
 			},
@@ -1093,93 +1099,6 @@ func (r *ResourceF5XCAlertPolicy) Create(ctx context.Context, request resource.C
 	}
 
 	{
-		// resource modelToSpecRoot PointerField --> NotificationParameters
-		if !data.NotificationParameters.IsNull() && !data.NotificationParameters.IsUnknown() {
-			notificationParametersSpec := &ves_io_schema_alert_policy.NotificationParameters{}
-			spec.NotificationParameters = notificationParametersSpec
-			var notificationParametersModel AlertPolicyAlertPolicyNotificationParameters
-
-			// Populate the nested model from the main data model
-			diags.Append(data.NotificationParameters.As(ctx, &notificationParametersModel, basetypes.ObjectAsOptions{})...)
-			response.Diagnostics.Append(diags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			// resource modelToSpecNested RequiredOneOfField --> GroupBy
-			if !notificationParametersModel.GroupByChoice.IsNull() && !notificationParametersModel.GroupByChoice.IsUnknown() {
-				notificationParametersGroupByChoiceModel := AlertPolicyNotificationParametersGroupByChoice{}
-				response.Diagnostics.Append(notificationParametersModel.GroupByChoice.As(ctx, &notificationParametersGroupByChoiceModel, basetypes.ObjectAsOptions{})...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// resource modelToSpecNested BoolOfOneOfPointerField --> Default
-				if !notificationParametersGroupByChoiceModel.Default.IsNull() && !notificationParametersGroupByChoiceModel.Default.IsUnknown() {
-					defaultSpecBool := &ves_io_schema_alert_policy.NotificationParameters_Default{}
-					defaultSpecBool.Default = &ves_io_schema.Empty{}
-					notificationParametersSpec.GroupBy = defaultSpecBool
-				}
-
-				// resource modelToSpecNested BoolOfOneOfPointerField --> Individual
-				if !notificationParametersGroupByChoiceModel.Individual.IsNull() && !notificationParametersGroupByChoiceModel.Individual.IsUnknown() {
-					individualSpecBool := &ves_io_schema_alert_policy.NotificationParameters_Individual{}
-					individualSpecBool.Individual = &ves_io_schema.Empty{}
-					notificationParametersSpec.GroupBy = individualSpecBool
-				}
-
-				// resource modelToSpecNested BoolOfOneOfPointerField --> VesIoGroup
-				if !notificationParametersGroupByChoiceModel.VesIoGroup.IsNull() && !notificationParametersGroupByChoiceModel.VesIoGroup.IsUnknown() {
-					vesIoGroupSpecBool := &ves_io_schema_alert_policy.NotificationParameters_VesIoGroup{}
-					vesIoGroupSpecBool.VesIoGroup = &ves_io_schema.Empty{}
-					notificationParametersSpec.GroupBy = vesIoGroupSpecBool
-				}
-
-				// resource modelToSpecNested PointerOfOneOfField --> Custom
-				if !notificationParametersGroupByChoiceModel.Custom.IsNull() && !notificationParametersGroupByChoiceModel.Custom.IsUnknown() {
-					var alertPolicyNotificationParametersCustomModel AlertPolicyNotificationParametersCustom
-					response.Diagnostics.Append(notificationParametersGroupByChoiceModel.Custom.As(ctx, &alertPolicyNotificationParametersCustomModel, basetypes.ObjectAsOptions{})...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					customOneOfSpec := &ves_io_schema_alert_policy.NotificationParameters_Custom{}
-					customOneOfSpec.Custom = &ves_io_schema_alert_policy.CustomGroupBy{}
-					notificationParametersSpec.GroupBy = customOneOfSpec
-
-					// resource modelToSpecNested ArrayOfStringField --> Labels
-					if !alertPolicyNotificationParametersCustomModel.Labels.IsNull() && !alertPolicyNotificationParametersCustomModel.Labels.IsUnknown() {
-						elements := make([]string, 0, len(alertPolicyNotificationParametersCustomModel.Labels.Elements()))
-						diags := alertPolicyNotificationParametersCustomModel.Labels.ElementsAs(ctx, &elements, false)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						customOneOfSpec.Custom.Labels = elements
-					}
-
-				}
-
-			}
-
-			// resource modelToSpecNested StringField --> GroupWait
-			if !notificationParametersModel.GroupWait.IsNull() && !notificationParametersModel.GroupWait.IsUnknown() {
-				notificationParametersSpec.GroupWait = string(notificationParametersModel.GroupWait.ValueString())
-			}
-
-			// resource modelToSpecNested StringField --> GroupInterval
-			if !notificationParametersModel.GroupInterval.IsNull() && !notificationParametersModel.GroupInterval.IsUnknown() {
-				notificationParametersSpec.GroupInterval = string(notificationParametersModel.GroupInterval.ValueString())
-			}
-
-			// resource modelToSpecNested StringField --> RepeatInterval
-			if !notificationParametersModel.RepeatInterval.IsNull() && !notificationParametersModel.RepeatInterval.IsUnknown() {
-				notificationParametersSpec.RepeatInterval = string(notificationParametersModel.RepeatInterval.ValueString())
-			}
-
-		}
-	}
-
-	{
 		// resource modelToSpecRoot RequiredArrayOfPointerField --> Receivers
 		var receiversElementsModelToSpec []ObjectRefTypeModel
 		response.Diagnostics.Append(data.Receivers.ElementsAs(ctx, &receiversElementsModelToSpec, false)...)
@@ -1228,6 +1147,13 @@ func (r *ResourceF5XCAlertPolicy) Create(ctx context.Context, request resource.C
 					return
 				}
 
+				// resource modelToSpecNested StringOfOneOfField --> AlertnameRegex
+				if !routesMatcherChoiceModel.AlertnameRegex.IsNull() && !routesMatcherChoiceModel.AlertnameRegex.IsUnknown() {
+					alertnameRegexSpecStr := &ves_io_schema_alert_policy.Route_AlertnameRegex{}
+					alertnameRegexSpecStr.AlertnameRegex = string(routesMatcherChoiceModel.AlertnameRegex.ValueString())
+					routesSpec[i].Matcher = alertnameRegexSpecStr
+				}
+
 				// resource modelToSpecNested PointerOfOneOfField --> Custom
 				if !routesMatcherChoiceModel.Custom.IsNull() && !routesMatcherChoiceModel.Custom.IsUnknown() {
 					var alertPolicyRouteCustomModel AlertPolicyRouteCustom
@@ -1258,18 +1184,18 @@ func (r *ResourceF5XCAlertPolicy) Create(ctx context.Context, request resource.C
 								return
 							}
 
-							// resource modelToSpecNested StringOfOneOfField --> RegexMatch
-							if !severityMatcherTypeChoiceModel.RegexMatch.IsNull() && !severityMatcherTypeChoiceModel.RegexMatch.IsUnknown() {
-								regexMatchSpecStr := &ves_io_schema_alert_policy.LabelMatcher_RegexMatch{}
-								regexMatchSpecStr.RegexMatch = string(severityMatcherTypeChoiceModel.RegexMatch.ValueString())
-								severitySpec.MatcherType = regexMatchSpecStr
-							}
-
 							// resource modelToSpecNested StringOfOneOfField --> ExactMatch
 							if !severityMatcherTypeChoiceModel.ExactMatch.IsNull() && !severityMatcherTypeChoiceModel.ExactMatch.IsUnknown() {
 								exactMatchSpecStr := &ves_io_schema_alert_policy.LabelMatcher_ExactMatch{}
 								exactMatchSpecStr.ExactMatch = string(severityMatcherTypeChoiceModel.ExactMatch.ValueString())
 								severitySpec.MatcherType = exactMatchSpecStr
+							}
+
+							// resource modelToSpecNested StringOfOneOfField --> RegexMatch
+							if !severityMatcherTypeChoiceModel.RegexMatch.IsNull() && !severityMatcherTypeChoiceModel.RegexMatch.IsUnknown() {
+								regexMatchSpecStr := &ves_io_schema_alert_policy.LabelMatcher_RegexMatch{}
+								regexMatchSpecStr.RegexMatch = string(severityMatcherTypeChoiceModel.RegexMatch.ValueString())
+								severitySpec.MatcherType = regexMatchSpecStr
 							}
 
 						}
@@ -1508,13 +1434,6 @@ func (r *ResourceF5XCAlertPolicy) Create(ctx context.Context, request resource.C
 					}
 				}
 
-				// resource modelToSpecNested StringOfOneOfField --> AlertnameRegex
-				if !routesMatcherChoiceModel.AlertnameRegex.IsNull() && !routesMatcherChoiceModel.AlertnameRegex.IsUnknown() {
-					alertnameRegexSpecStr := &ves_io_schema_alert_policy.Route_AlertnameRegex{}
-					alertnameRegexSpecStr.AlertnameRegex = string(routesMatcherChoiceModel.AlertnameRegex.ValueString())
-					routesSpec[i].Matcher = alertnameRegexSpecStr
-				}
-
 			}
 
 			// resource modelToSpecNested RequiredOneOfField --> Action
@@ -1525,18 +1444,18 @@ func (r *ResourceF5XCAlertPolicy) Create(ctx context.Context, request resource.C
 					return
 				}
 
-				// resource modelToSpecNested BoolOfOneOfPointerField --> Send
-				if !routesActionChoiceModel.Send.IsNull() && !routesActionChoiceModel.Send.IsUnknown() {
-					sendSpecBool := &ves_io_schema_alert_policy.Route_Send{}
-					sendSpecBool.Send = &ves_io_schema.Empty{}
-					routesSpec[i].Action = sendSpecBool
-				}
-
 				// resource modelToSpecNested BoolOfOneOfPointerField --> DontSend
 				if !routesActionChoiceModel.DontSend.IsNull() && !routesActionChoiceModel.DontSend.IsUnknown() {
 					dontSendSpecBool := &ves_io_schema_alert_policy.Route_DontSend{}
 					dontSendSpecBool.DontSend = &ves_io_schema.Empty{}
 					routesSpec[i].Action = dontSendSpecBool
+				}
+
+				// resource modelToSpecNested BoolOfOneOfPointerField --> Send
+				if !routesActionChoiceModel.Send.IsNull() && !routesActionChoiceModel.Send.IsUnknown() {
+					sendSpecBool := &ves_io_schema_alert_policy.Route_Send{}
+					sendSpecBool.Send = &ves_io_schema.Empty{}
+					routesSpec[i].Action = sendSpecBool
 				}
 
 			}
@@ -1551,6 +1470,11 @@ func (r *ResourceF5XCAlertPolicy) Create(ctx context.Context, request resource.C
 
 				notificationParametersSpec := &ves_io_schema_alert_policy.NotificationParameters{}
 				routesSpec[i].NotificationParameters = notificationParametersSpec
+
+				// resource modelToSpecNested StringField --> GroupWait
+				if !notificationParametersModel.GroupWait.IsNull() && !notificationParametersModel.GroupWait.IsUnknown() {
+					notificationParametersSpec.GroupWait = string(notificationParametersModel.GroupWait.ValueString())
+				}
 
 				// resource modelToSpecNested StringField --> GroupInterval
 				if !notificationParametersModel.GroupInterval.IsNull() && !notificationParametersModel.GroupInterval.IsUnknown() {
@@ -1568,6 +1492,27 @@ func (r *ResourceF5XCAlertPolicy) Create(ctx context.Context, request resource.C
 					response.Diagnostics.Append(notificationParametersModel.GroupByChoice.As(ctx, &notificationParametersGroupByChoiceModel, basetypes.ObjectAsOptions{})...)
 					if response.Diagnostics.HasError() {
 						return
+					}
+
+					// resource modelToSpecNested BoolOfOneOfPointerField --> Default
+					if !notificationParametersGroupByChoiceModel.Default.IsNull() && !notificationParametersGroupByChoiceModel.Default.IsUnknown() {
+						defaultSpecBool := &ves_io_schema_alert_policy.NotificationParameters_Default{}
+						defaultSpecBool.Default = &ves_io_schema.Empty{}
+						notificationParametersSpec.GroupBy = defaultSpecBool
+					}
+
+					// resource modelToSpecNested BoolOfOneOfPointerField --> Individual
+					if !notificationParametersGroupByChoiceModel.Individual.IsNull() && !notificationParametersGroupByChoiceModel.Individual.IsUnknown() {
+						individualSpecBool := &ves_io_schema_alert_policy.NotificationParameters_Individual{}
+						individualSpecBool.Individual = &ves_io_schema.Empty{}
+						notificationParametersSpec.GroupBy = individualSpecBool
+					}
+
+					// resource modelToSpecNested BoolOfOneOfPointerField --> VesIoGroup
+					if !notificationParametersGroupByChoiceModel.VesIoGroup.IsNull() && !notificationParametersGroupByChoiceModel.VesIoGroup.IsUnknown() {
+						vesIoGroupSpecBool := &ves_io_schema_alert_policy.NotificationParameters_VesIoGroup{}
+						vesIoGroupSpecBool.VesIoGroup = &ves_io_schema.Empty{}
+						notificationParametersSpec.GroupBy = vesIoGroupSpecBool
 					}
 
 					// resource modelToSpecNested PointerOfOneOfField --> Custom
@@ -1594,32 +1539,6 @@ func (r *ResourceF5XCAlertPolicy) Create(ctx context.Context, request resource.C
 
 					}
 
-					// resource modelToSpecNested BoolOfOneOfPointerField --> Default
-					if !notificationParametersGroupByChoiceModel.Default.IsNull() && !notificationParametersGroupByChoiceModel.Default.IsUnknown() {
-						defaultSpecBool := &ves_io_schema_alert_policy.NotificationParameters_Default{}
-						defaultSpecBool.Default = &ves_io_schema.Empty{}
-						notificationParametersSpec.GroupBy = defaultSpecBool
-					}
-
-					// resource modelToSpecNested BoolOfOneOfPointerField --> Individual
-					if !notificationParametersGroupByChoiceModel.Individual.IsNull() && !notificationParametersGroupByChoiceModel.Individual.IsUnknown() {
-						individualSpecBool := &ves_io_schema_alert_policy.NotificationParameters_Individual{}
-						individualSpecBool.Individual = &ves_io_schema.Empty{}
-						notificationParametersSpec.GroupBy = individualSpecBool
-					}
-
-					// resource modelToSpecNested BoolOfOneOfPointerField --> VesIoGroup
-					if !notificationParametersGroupByChoiceModel.VesIoGroup.IsNull() && !notificationParametersGroupByChoiceModel.VesIoGroup.IsUnknown() {
-						vesIoGroupSpecBool := &ves_io_schema_alert_policy.NotificationParameters_VesIoGroup{}
-						vesIoGroupSpecBool.VesIoGroup = &ves_io_schema.Empty{}
-						notificationParametersSpec.GroupBy = vesIoGroupSpecBool
-					}
-
-				}
-
-				// resource modelToSpecNested StringField --> GroupWait
-				if !notificationParametersModel.GroupWait.IsNull() && !notificationParametersModel.GroupWait.IsUnknown() {
-					notificationParametersSpec.GroupWait = string(notificationParametersModel.GroupWait.ValueString())
 				}
 
 			}
@@ -1627,6 +1546,93 @@ func (r *ResourceF5XCAlertPolicy) Create(ctx context.Context, request resource.C
 		}
 
 		spec.Routes = routesSpec
+	}
+
+	{
+		// resource modelToSpecRoot PointerField --> NotificationParameters
+		if !data.NotificationParameters.IsNull() && !data.NotificationParameters.IsUnknown() {
+			notificationParametersSpec := &ves_io_schema_alert_policy.NotificationParameters{}
+			spec.NotificationParameters = notificationParametersSpec
+			var notificationParametersModel AlertPolicyAlertPolicyNotificationParameters
+
+			// Populate the nested model from the main data model
+			diags.Append(data.NotificationParameters.As(ctx, &notificationParametersModel, basetypes.ObjectAsOptions{})...)
+			response.Diagnostics.Append(diags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			// resource modelToSpecNested RequiredOneOfField --> GroupBy
+			if !notificationParametersModel.GroupByChoice.IsNull() && !notificationParametersModel.GroupByChoice.IsUnknown() {
+				notificationParametersGroupByChoiceModel := AlertPolicyNotificationParametersGroupByChoice{}
+				response.Diagnostics.Append(notificationParametersModel.GroupByChoice.As(ctx, &notificationParametersGroupByChoiceModel, basetypes.ObjectAsOptions{})...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				// resource modelToSpecNested PointerOfOneOfField --> Custom
+				if !notificationParametersGroupByChoiceModel.Custom.IsNull() && !notificationParametersGroupByChoiceModel.Custom.IsUnknown() {
+					var alertPolicyNotificationParametersCustomModel AlertPolicyNotificationParametersCustom
+					response.Diagnostics.Append(notificationParametersGroupByChoiceModel.Custom.As(ctx, &alertPolicyNotificationParametersCustomModel, basetypes.ObjectAsOptions{})...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					customOneOfSpec := &ves_io_schema_alert_policy.NotificationParameters_Custom{}
+					customOneOfSpec.Custom = &ves_io_schema_alert_policy.CustomGroupBy{}
+					notificationParametersSpec.GroupBy = customOneOfSpec
+
+					// resource modelToSpecNested ArrayOfStringField --> Labels
+					if !alertPolicyNotificationParametersCustomModel.Labels.IsNull() && !alertPolicyNotificationParametersCustomModel.Labels.IsUnknown() {
+						elements := make([]string, 0, len(alertPolicyNotificationParametersCustomModel.Labels.Elements()))
+						diags := alertPolicyNotificationParametersCustomModel.Labels.ElementsAs(ctx, &elements, false)
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						customOneOfSpec.Custom.Labels = elements
+					}
+
+				}
+
+				// resource modelToSpecNested BoolOfOneOfPointerField --> Default
+				if !notificationParametersGroupByChoiceModel.Default.IsNull() && !notificationParametersGroupByChoiceModel.Default.IsUnknown() {
+					defaultSpecBool := &ves_io_schema_alert_policy.NotificationParameters_Default{}
+					defaultSpecBool.Default = &ves_io_schema.Empty{}
+					notificationParametersSpec.GroupBy = defaultSpecBool
+				}
+
+				// resource modelToSpecNested BoolOfOneOfPointerField --> Individual
+				if !notificationParametersGroupByChoiceModel.Individual.IsNull() && !notificationParametersGroupByChoiceModel.Individual.IsUnknown() {
+					individualSpecBool := &ves_io_schema_alert_policy.NotificationParameters_Individual{}
+					individualSpecBool.Individual = &ves_io_schema.Empty{}
+					notificationParametersSpec.GroupBy = individualSpecBool
+				}
+
+				// resource modelToSpecNested BoolOfOneOfPointerField --> VesIoGroup
+				if !notificationParametersGroupByChoiceModel.VesIoGroup.IsNull() && !notificationParametersGroupByChoiceModel.VesIoGroup.IsUnknown() {
+					vesIoGroupSpecBool := &ves_io_schema_alert_policy.NotificationParameters_VesIoGroup{}
+					vesIoGroupSpecBool.VesIoGroup = &ves_io_schema.Empty{}
+					notificationParametersSpec.GroupBy = vesIoGroupSpecBool
+				}
+
+			}
+
+			// resource modelToSpecNested StringField --> GroupWait
+			if !notificationParametersModel.GroupWait.IsNull() && !notificationParametersModel.GroupWait.IsUnknown() {
+				notificationParametersSpec.GroupWait = string(notificationParametersModel.GroupWait.ValueString())
+			}
+
+			// resource modelToSpecNested StringField --> GroupInterval
+			if !notificationParametersModel.GroupInterval.IsNull() && !notificationParametersModel.GroupInterval.IsUnknown() {
+				notificationParametersSpec.GroupInterval = string(notificationParametersModel.GroupInterval.ValueString())
+			}
+
+			// resource modelToSpecNested StringField --> RepeatInterval
+			if !notificationParametersModel.RepeatInterval.IsNull() && !notificationParametersModel.RepeatInterval.IsUnknown() {
+				notificationParametersSpec.RepeatInterval = string(notificationParametersModel.RepeatInterval.ValueString())
+			}
+
+		}
 	}
 
 	if response.Diagnostics.HasError() {
@@ -1661,6 +1667,45 @@ func (r *ResourceF5XCAlertPolicy) Create(ctx context.Context, request resource.C
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
+	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
+	//
+	// Create/Update (called from Create/Update handlers):
+	//
+	//	The apply result must match the plan exactly. We store only what the plan
+	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
+	//	the plan are intentionally omitted here — they will be picked up by Read.
+	//
+	// Read (called from Read handler):
+	//
+	//	We merge the current state (user-configured labels) with the API response
+	//	(which may contain backend-injected labels). The merged result is stored in
+	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
+	//	Terraform sees no diff and no "inconsistent result" error occurs.
+	if metaData.GetLabels() != nil {
+		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
+		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+		response.Diagnostics.Append(labelsDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		// CREATE / UPDATE: Store the plan value as-is so the apply result matches the plan.
+		// The plan is either:
+		//   - Unknown (config=null): store the full API response.
+		//   - config value (first create with user labels): store only user labels.
+		//   - prior state (update with user+backend labels): store the merged labels.
+		// In all cases, data.Labels already holds the correct plan value
+		// except when it is Unknown — in that case we use the API response.
+		if data.Labels.IsUnknown() {
+			data.Labels = labelsMap
+		}
+		// When plan is a known map, leave data.Labels unchanged (= plan value).
+	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
+		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
+		data.Labels = types.MapNull(types.StringType)
+	}
 
 	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
 	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
@@ -1713,190 +1758,11 @@ func (r *ResourceF5XCAlertPolicy) Create(ctx context.Context, request resource.C
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// CREATE / UPDATE: Store the plan value as-is so the apply result matches the plan.
-		// The plan is either:
-		//   - Unknown (config=null): store the full API response.
-		//   - config value (first create with user labels): store only user labels.
-		//   - prior state (update with user+backend labels): store the merged labels.
-		// In all cases, data.Labels already holds the correct plan value
-		// except when it is Unknown — in that case we use the API response.
-		if data.Labels.IsUnknown() {
-			data.Labels = labelsMap
-		}
-		// When plan is a known map, leave data.Labels unchanged (= plan value).
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
-
-	// resource SpecToModelRoot PointerField --> NotificationParameters
-	if specData.GetNotificationParameters() != nil {
-		var alertPolicyAlertPolicyNotificationParametersModel = &AlertPolicyAlertPolicyNotificationParameters{}
-		notificationParametersElement := specData.GetNotificationParameters()
-
-		// resource specToModelNested RequiredOneOfField --> GroupBy
-		// GlobalSpecType
-		if notificationParametersElement.GetGroupBy() != nil {
-			// Create a temporary attribute map for the choices within this OneOf
-			notificationParametersgroupByChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-			// Define a variable for the spec choices to be passed down to nested templates
-			notificationParametersgroupByChoiceChoices := notificationParametersElement.GetGroupBy()
-
-			// Process nested choices, populating the temporary attribute map
-
-			// resource specToModelNested BoolOfOneOfPointerField --> Default
-			_, isDefault := notificationParametersgroupByChoiceChoices.(*ves_io_schema_alert_policy.NotificationParameters_Default)
-
-			if isDefault {
-				notificationParametersgroupByChoiceChoicesAttributeMap["default"] = types.BoolValue(true)
-			} else {
-				notificationParametersgroupByChoiceChoicesAttributeMap["default"] = types.BoolNull()
-			}
-
-			// resource specToModelNested BoolOfOneOfPointerField --> Individual
-			_, isIndividual := notificationParametersgroupByChoiceChoices.(*ves_io_schema_alert_policy.NotificationParameters_Individual)
-
-			if isIndividual {
-				notificationParametersgroupByChoiceChoicesAttributeMap["individual"] = types.BoolValue(true)
-			} else {
-				notificationParametersgroupByChoiceChoicesAttributeMap["individual"] = types.BoolNull()
-			}
-
-			// resource specToModelNested BoolOfOneOfPointerField --> VesIoGroup
-			_, isVesIoGroup := notificationParametersgroupByChoiceChoices.(*ves_io_schema_alert_policy.NotificationParameters_VesIoGroup)
-
-			if isVesIoGroup {
-				notificationParametersgroupByChoiceChoicesAttributeMap["ves_io_group"] = types.BoolValue(true)
-			} else {
-				notificationParametersgroupByChoiceChoicesAttributeMap["ves_io_group"] = types.BoolNull()
-			}
-
-			// resource specToModelNested PointerOfOneOfField --> Custom
-			// GlobalSpecType
-			// false
-			{
-				customOptions, isCustom := notificationParametersgroupByChoiceChoices.(*ves_io_schema_alert_policy.NotificationParameters_Custom)
-				customAttributeMap := make(map[string]attr.Value)
-
-				if isCustom && customOptions != nil {
-
-					// resource specToModelNested ArrayOfStringField --> Labels
-					if len(customOptions.Custom.GetLabels()) > 0 {
-						listValue, diags := types.ListValueFrom(ctx, types.StringType, customOptions.Custom.GetLabels())
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						customAttributeMap["labels"] = listValue
-					} else {
-						customAttributeMap["labels"] = types.ListNull(types.StringType)
-					}
-
-					customObj, diags := types.ObjectValue(AlertPolicyNotificationParametersGroupByCustomModelAttributeMap, customAttributeMap)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					notificationParametersgroupByChoiceChoicesAttributeMap["custom"] = customObj
-				} else {
-					notificationParametersgroupByChoiceChoicesAttributeMap["custom"] = types.ObjectNull(AlertPolicyNotificationParametersGroupByCustomModelAttributeMap)
-				}
-			}
-
-			// --- End of Choices ---
-
-			// Create the final ObjectValue for this OneOf field
-			finalObj, notificationParametersgroupByChoiceChoicesObjDiags := types.ObjectValue(
-				AlertPolicyNotificationParametersGroupByModelAttributeMap, // The attribute schema for the OneOf choices
-				notificationParametersgroupByChoiceChoicesAttributeMap,
-			)
-			response.Diagnostics.Append(notificationParametersgroupByChoiceChoicesObjDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			alertPolicyAlertPolicyNotificationParametersModel.GroupByChoice = finalObj
-		} else {
-			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			alertPolicyAlertPolicyNotificationParametersModel.GroupByChoice = types.ObjectNull(AlertPolicyNotificationParametersGroupByModelAttributeMap)
-		}
-
-		// resource specToModelNested StringField --> GroupWait
-		if notificationParametersElement.GetGroupWait() != "" {
-			alertPolicyAlertPolicyNotificationParametersModel.GroupWait = types.StringValue(notificationParametersElement.GetGroupWait())
-		} else {
-			// Empty string, set to null
-			alertPolicyAlertPolicyNotificationParametersModel.GroupWait = types.StringNull()
-		}
-
-		// resource specToModelNested StringField --> GroupInterval
-		if notificationParametersElement.GetGroupInterval() != "" {
-			alertPolicyAlertPolicyNotificationParametersModel.GroupInterval = types.StringValue(notificationParametersElement.GetGroupInterval())
-		} else {
-			// Empty string, set to null
-			alertPolicyAlertPolicyNotificationParametersModel.GroupInterval = types.StringNull()
-		}
-
-		// resource specToModelNested StringField --> RepeatInterval
-		if notificationParametersElement.GetRepeatInterval() != "" {
-			alertPolicyAlertPolicyNotificationParametersModel.RepeatInterval = types.StringValue(notificationParametersElement.GetRepeatInterval())
-		} else {
-			// Empty string, set to null
-			alertPolicyAlertPolicyNotificationParametersModel.RepeatInterval = types.StringNull()
-		}
-
-		notificationParametersObj, notificationParametersDiags := utils.GoStructToObjectValue(
-			ctx,
-			AlertPolicyNotificationParametersModelAttributeMap,
-			alertPolicyAlertPolicyNotificationParametersModel,
-		)
-		response.Diagnostics.Append(notificationParametersDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.NotificationParameters = notificationParametersObj
-	} else {
-		data.NotificationParameters = types.ObjectNull(AlertPolicyNotificationParametersModelAttributeMap)
-	}
-
 	// resource SpecToModelRoot RequiredArrayOfPointerField --> Receivers
 	receiversElementsSpectToModel := make([]ObjectRefTypeModel, 0, len(specData.Receivers))
 
 	for _, receiversElement := range specData.Receivers {
 		objectRefTypeModelModel := ObjectRefTypeModel{}
-
-		// resource specToModelNested StringField --> Tenant
-		if receiversElement.GetTenant() != "" {
-			objectRefTypeModelModel.Tenant = types.StringValue(receiversElement.GetTenant())
-		} else {
-			// Empty string, set to null
-			objectRefTypeModelModel.Tenant = types.StringNull()
-		}
 
 		// resource specToModelNested RequiredStringField --> Namespace
 		if receiversElement.GetNamespace() != "" {
@@ -1912,6 +1778,14 @@ func (r *ResourceF5XCAlertPolicy) Create(ctx context.Context, request resource.C
 		} else {
 			// Empty string, set to null
 			objectRefTypeModelModel.Name = types.StringNull()
+		}
+
+		// resource specToModelNested StringField --> Tenant
+		if receiversElement.GetTenant() != "" {
+			objectRefTypeModelModel.Tenant = types.StringValue(receiversElement.GetTenant())
+		} else {
+			// Empty string, set to null
+			objectRefTypeModelModel.Tenant = types.StringNull()
 		}
 
 		receiversElementsSpectToModel = append(receiversElementsSpectToModel, objectRefTypeModelModel)
@@ -1946,6 +1820,16 @@ func (r *ResourceF5XCAlertPolicy) Create(ctx context.Context, request resource.C
 
 			// Process nested choices, populating the temporary attribute map
 
+			// resource specToModelNested StringOfOneOfField --> AlertnameRegex
+			alertnameRegexItem, isAlertnameRegex := routesmatcherChoiceChoices.(*ves_io_schema_alert_policy.Route_AlertnameRegex)
+
+			if isAlertnameRegex {
+				routesmatcherChoiceChoicesAttributeMap["alertname_regex"] = types.StringValue(string(alertnameRegexItem.AlertnameRegex))
+			} else {
+				// Empty string, set to null
+				routesmatcherChoiceChoicesAttributeMap["alertname_regex"] = types.StringNull()
+			}
+
 			// resource specToModelNested PointerOfOneOfField --> Custom
 			// GlobalSpecType
 			// false
@@ -1974,16 +1858,6 @@ func (r *ResourceF5XCAlertPolicy) Create(ctx context.Context, request resource.C
 
 							// Process nested choices, populating the temporary attribute map
 
-							// resource specToModelNested StringOfOneOfField --> RegexMatch
-							regexMatchItem, isRegexMatch := severitymatcherTypeChoiceChoices.(*ves_io_schema_alert_policy.LabelMatcher_RegexMatch)
-
-							if isRegexMatch {
-								severitymatcherTypeChoiceChoicesAttributeMap["regex_match"] = types.StringValue(string(regexMatchItem.RegexMatch))
-							} else {
-								// Empty string, set to null
-								severitymatcherTypeChoiceChoicesAttributeMap["regex_match"] = types.StringNull()
-							}
-
 							// resource specToModelNested StringOfOneOfField --> ExactMatch
 							exactMatchItem, isExactMatch := severitymatcherTypeChoiceChoices.(*ves_io_schema_alert_policy.LabelMatcher_ExactMatch)
 
@@ -1992,6 +1866,16 @@ func (r *ResourceF5XCAlertPolicy) Create(ctx context.Context, request resource.C
 							} else {
 								// Empty string, set to null
 								severitymatcherTypeChoiceChoicesAttributeMap["exact_match"] = types.StringNull()
+							}
+
+							// resource specToModelNested StringOfOneOfField --> RegexMatch
+							regexMatchItem, isRegexMatch := severitymatcherTypeChoiceChoices.(*ves_io_schema_alert_policy.LabelMatcher_RegexMatch)
+
+							if isRegexMatch {
+								severitymatcherTypeChoiceChoicesAttributeMap["regex_match"] = types.StringValue(string(regexMatchItem.RegexMatch))
+							} else {
+								// Empty string, set to null
+								severitymatcherTypeChoiceChoicesAttributeMap["regex_match"] = types.StringNull()
 							}
 
 							// --- End of Choices ---
@@ -2383,16 +2267,6 @@ func (r *ResourceF5XCAlertPolicy) Create(ctx context.Context, request resource.C
 				}
 			}
 
-			// resource specToModelNested StringOfOneOfField --> AlertnameRegex
-			alertnameRegexItem, isAlertnameRegex := routesmatcherChoiceChoices.(*ves_io_schema_alert_policy.Route_AlertnameRegex)
-
-			if isAlertnameRegex {
-				routesmatcherChoiceChoicesAttributeMap["alertname_regex"] = types.StringValue(string(alertnameRegexItem.AlertnameRegex))
-			} else {
-				// Empty string, set to null
-				routesmatcherChoiceChoicesAttributeMap["alertname_regex"] = types.StringNull()
-			}
-
 			// --- End of Choices ---
 
 			// Create the final ObjectValue for this OneOf field
@@ -2423,15 +2297,6 @@ func (r *ResourceF5XCAlertPolicy) Create(ctx context.Context, request resource.C
 
 			// Process nested choices, populating the temporary attribute map
 
-			// resource specToModelNested BoolOfOneOfPointerField --> Send
-			_, isSend := routesactionChoiceChoices.(*ves_io_schema_alert_policy.Route_Send)
-
-			if isSend {
-				routesactionChoiceChoicesAttributeMap["send"] = types.BoolValue(true)
-			} else {
-				routesactionChoiceChoicesAttributeMap["send"] = types.BoolNull()
-			}
-
 			// resource specToModelNested BoolOfOneOfPointerField --> DontSend
 			_, isDontSend := routesactionChoiceChoices.(*ves_io_schema_alert_policy.Route_DontSend)
 
@@ -2439,6 +2304,15 @@ func (r *ResourceF5XCAlertPolicy) Create(ctx context.Context, request resource.C
 				routesactionChoiceChoicesAttributeMap["dont_send"] = types.BoolValue(true)
 			} else {
 				routesactionChoiceChoicesAttributeMap["dont_send"] = types.BoolNull()
+			}
+
+			// resource specToModelNested BoolOfOneOfPointerField --> Send
+			_, isSend := routesactionChoiceChoices.(*ves_io_schema_alert_policy.Route_Send)
+
+			if isSend {
+				routesactionChoiceChoicesAttributeMap["send"] = types.BoolValue(true)
+			} else {
+				routesactionChoiceChoicesAttributeMap["send"] = types.BoolNull()
 			}
 
 			// --- End of Choices ---
@@ -2468,6 +2342,14 @@ func (r *ResourceF5XCAlertPolicy) Create(ctx context.Context, request resource.C
 
 			// Recursively populate the nested struct
 
+			// resource specToModelNested StringField --> GroupWait
+			if notificationParametersElement.GetGroupWait() != "" {
+				alertPolicyAlertPolicyNotificationParametersModel.GroupWait = types.StringValue(notificationParametersElement.GetGroupWait())
+			} else {
+				// Empty string, set to null
+				alertPolicyAlertPolicyNotificationParametersModel.GroupWait = types.StringNull()
+			}
+
 			// resource specToModelNested StringField --> GroupInterval
 			if notificationParametersElement.GetGroupInterval() != "" {
 				alertPolicyAlertPolicyNotificationParametersModel.GroupInterval = types.StringValue(notificationParametersElement.GetGroupInterval())
@@ -2494,6 +2376,33 @@ func (r *ResourceF5XCAlertPolicy) Create(ctx context.Context, request resource.C
 				notificationParametersgroupByChoiceChoices := notificationParametersElement.GetGroupBy()
 
 				// Process nested choices, populating the temporary attribute map
+
+				// resource specToModelNested BoolOfOneOfPointerField --> Default
+				_, isDefault := notificationParametersgroupByChoiceChoices.(*ves_io_schema_alert_policy.NotificationParameters_Default)
+
+				if isDefault {
+					notificationParametersgroupByChoiceChoicesAttributeMap["default"] = types.BoolValue(true)
+				} else {
+					notificationParametersgroupByChoiceChoicesAttributeMap["default"] = types.BoolNull()
+				}
+
+				// resource specToModelNested BoolOfOneOfPointerField --> Individual
+				_, isIndividual := notificationParametersgroupByChoiceChoices.(*ves_io_schema_alert_policy.NotificationParameters_Individual)
+
+				if isIndividual {
+					notificationParametersgroupByChoiceChoicesAttributeMap["individual"] = types.BoolValue(true)
+				} else {
+					notificationParametersgroupByChoiceChoicesAttributeMap["individual"] = types.BoolNull()
+				}
+
+				// resource specToModelNested BoolOfOneOfPointerField --> VesIoGroup
+				_, isVesIoGroup := notificationParametersgroupByChoiceChoices.(*ves_io_schema_alert_policy.NotificationParameters_VesIoGroup)
+
+				if isVesIoGroup {
+					notificationParametersgroupByChoiceChoicesAttributeMap["ves_io_group"] = types.BoolValue(true)
+				} else {
+					notificationParametersgroupByChoiceChoicesAttributeMap["ves_io_group"] = types.BoolNull()
+				}
 
 				// resource specToModelNested PointerOfOneOfField --> Custom
 				// GlobalSpecType
@@ -2527,33 +2436,6 @@ func (r *ResourceF5XCAlertPolicy) Create(ctx context.Context, request resource.C
 					}
 				}
 
-				// resource specToModelNested BoolOfOneOfPointerField --> Default
-				_, isDefault := notificationParametersgroupByChoiceChoices.(*ves_io_schema_alert_policy.NotificationParameters_Default)
-
-				if isDefault {
-					notificationParametersgroupByChoiceChoicesAttributeMap["default"] = types.BoolValue(true)
-				} else {
-					notificationParametersgroupByChoiceChoicesAttributeMap["default"] = types.BoolNull()
-				}
-
-				// resource specToModelNested BoolOfOneOfPointerField --> Individual
-				_, isIndividual := notificationParametersgroupByChoiceChoices.(*ves_io_schema_alert_policy.NotificationParameters_Individual)
-
-				if isIndividual {
-					notificationParametersgroupByChoiceChoicesAttributeMap["individual"] = types.BoolValue(true)
-				} else {
-					notificationParametersgroupByChoiceChoicesAttributeMap["individual"] = types.BoolNull()
-				}
-
-				// resource specToModelNested BoolOfOneOfPointerField --> VesIoGroup
-				_, isVesIoGroup := notificationParametersgroupByChoiceChoices.(*ves_io_schema_alert_policy.NotificationParameters_VesIoGroup)
-
-				if isVesIoGroup {
-					notificationParametersgroupByChoiceChoicesAttributeMap["ves_io_group"] = types.BoolValue(true)
-				} else {
-					notificationParametersgroupByChoiceChoicesAttributeMap["ves_io_group"] = types.BoolNull()
-				}
-
 				// --- End of Choices ---
 
 				// Create the final ObjectValue for this OneOf field
@@ -2571,14 +2453,6 @@ func (r *ResourceF5XCAlertPolicy) Create(ctx context.Context, request resource.C
 			} else {
 				// The OneOf field is nil in the source spec, so set the Terraform object to null.
 				alertPolicyAlertPolicyNotificationParametersModel.GroupByChoice = types.ObjectNull(AlertPolicyRoutesNotificationParametersGroupByModelAttributeMap)
-			}
-
-			// resource specToModelNested StringField --> GroupWait
-			if notificationParametersElement.GetGroupWait() != "" {
-				alertPolicyAlertPolicyNotificationParametersModel.GroupWait = types.StringValue(notificationParametersElement.GetGroupWait())
-			} else {
-				// Empty string, set to null
-				alertPolicyAlertPolicyNotificationParametersModel.GroupWait = types.StringNull()
 			}
 
 			// This field needs to be converted to a types.ObjectValue before assignment.
@@ -2614,6 +2488,138 @@ func (r *ResourceF5XCAlertPolicy) Create(ctx context.Context, request resource.C
 	}
 
 	data.Routes = routesList
+
+	// resource SpecToModelRoot PointerField --> NotificationParameters
+	if specData.GetNotificationParameters() != nil {
+		var alertPolicyAlertPolicyNotificationParametersModel = &AlertPolicyAlertPolicyNotificationParameters{}
+		notificationParametersElement := specData.GetNotificationParameters()
+
+		// resource specToModelNested RequiredOneOfField --> GroupBy
+		// GlobalSpecType
+		if notificationParametersElement.GetGroupBy() != nil {
+			// Create a temporary attribute map for the choices within this OneOf
+			notificationParametersgroupByChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+			// Define a variable for the spec choices to be passed down to nested templates
+			notificationParametersgroupByChoiceChoices := notificationParametersElement.GetGroupBy()
+
+			// Process nested choices, populating the temporary attribute map
+
+			// resource specToModelNested PointerOfOneOfField --> Custom
+			// GlobalSpecType
+			// false
+			{
+				customOptions, isCustom := notificationParametersgroupByChoiceChoices.(*ves_io_schema_alert_policy.NotificationParameters_Custom)
+				customAttributeMap := make(map[string]attr.Value)
+
+				if isCustom && customOptions != nil {
+
+					// resource specToModelNested ArrayOfStringField --> Labels
+					if len(customOptions.Custom.GetLabels()) > 0 {
+						listValue, diags := types.ListValueFrom(ctx, types.StringType, customOptions.Custom.GetLabels())
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						customAttributeMap["labels"] = listValue
+					} else {
+						customAttributeMap["labels"] = types.ListNull(types.StringType)
+					}
+
+					customObj, diags := types.ObjectValue(AlertPolicyNotificationParametersGroupByCustomModelAttributeMap, customAttributeMap)
+					response.Diagnostics.Append(diags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					notificationParametersgroupByChoiceChoicesAttributeMap["custom"] = customObj
+				} else {
+					notificationParametersgroupByChoiceChoicesAttributeMap["custom"] = types.ObjectNull(AlertPolicyNotificationParametersGroupByCustomModelAttributeMap)
+				}
+			}
+
+			// resource specToModelNested BoolOfOneOfPointerField --> Default
+			_, isDefault := notificationParametersgroupByChoiceChoices.(*ves_io_schema_alert_policy.NotificationParameters_Default)
+
+			if isDefault {
+				notificationParametersgroupByChoiceChoicesAttributeMap["default"] = types.BoolValue(true)
+			} else {
+				notificationParametersgroupByChoiceChoicesAttributeMap["default"] = types.BoolNull()
+			}
+
+			// resource specToModelNested BoolOfOneOfPointerField --> Individual
+			_, isIndividual := notificationParametersgroupByChoiceChoices.(*ves_io_schema_alert_policy.NotificationParameters_Individual)
+
+			if isIndividual {
+				notificationParametersgroupByChoiceChoicesAttributeMap["individual"] = types.BoolValue(true)
+			} else {
+				notificationParametersgroupByChoiceChoicesAttributeMap["individual"] = types.BoolNull()
+			}
+
+			// resource specToModelNested BoolOfOneOfPointerField --> VesIoGroup
+			_, isVesIoGroup := notificationParametersgroupByChoiceChoices.(*ves_io_schema_alert_policy.NotificationParameters_VesIoGroup)
+
+			if isVesIoGroup {
+				notificationParametersgroupByChoiceChoicesAttributeMap["ves_io_group"] = types.BoolValue(true)
+			} else {
+				notificationParametersgroupByChoiceChoicesAttributeMap["ves_io_group"] = types.BoolNull()
+			}
+
+			// --- End of Choices ---
+
+			// Create the final ObjectValue for this OneOf field
+			finalObj, notificationParametersgroupByChoiceChoicesObjDiags := types.ObjectValue(
+				AlertPolicyNotificationParametersGroupByModelAttributeMap, // The attribute schema for the OneOf choices
+				notificationParametersgroupByChoiceChoicesAttributeMap,
+			)
+			response.Diagnostics.Append(notificationParametersgroupByChoiceChoicesObjDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			// Assign the final object to the correct place (either the root model or a parent's attribute map)
+			alertPolicyAlertPolicyNotificationParametersModel.GroupByChoice = finalObj
+		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			alertPolicyAlertPolicyNotificationParametersModel.GroupByChoice = types.ObjectNull(AlertPolicyNotificationParametersGroupByModelAttributeMap)
+		}
+
+		// resource specToModelNested StringField --> GroupWait
+		if notificationParametersElement.GetGroupWait() != "" {
+			alertPolicyAlertPolicyNotificationParametersModel.GroupWait = types.StringValue(notificationParametersElement.GetGroupWait())
+		} else {
+			// Empty string, set to null
+			alertPolicyAlertPolicyNotificationParametersModel.GroupWait = types.StringNull()
+		}
+
+		// resource specToModelNested StringField --> GroupInterval
+		if notificationParametersElement.GetGroupInterval() != "" {
+			alertPolicyAlertPolicyNotificationParametersModel.GroupInterval = types.StringValue(notificationParametersElement.GetGroupInterval())
+		} else {
+			// Empty string, set to null
+			alertPolicyAlertPolicyNotificationParametersModel.GroupInterval = types.StringNull()
+		}
+
+		// resource specToModelNested StringField --> RepeatInterval
+		if notificationParametersElement.GetRepeatInterval() != "" {
+			alertPolicyAlertPolicyNotificationParametersModel.RepeatInterval = types.StringValue(notificationParametersElement.GetRepeatInterval())
+		} else {
+			// Empty string, set to null
+			alertPolicyAlertPolicyNotificationParametersModel.RepeatInterval = types.StringNull()
+		}
+
+		notificationParametersObj, notificationParametersDiags := utils.GoStructToObjectValue(
+			ctx,
+			AlertPolicyNotificationParametersModelAttributeMap,
+			alertPolicyAlertPolicyNotificationParametersModel,
+		)
+		response.Diagnostics.Append(notificationParametersDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.NotificationParameters = notificationParametersObj
+	} else {
+		data.NotificationParameters = types.ObjectNull(AlertPolicyNotificationParametersModelAttributeMap)
+	}
 
 	if response.Diagnostics.HasError() {
 		return
@@ -2678,6 +2684,53 @@ func (r *ResourceF5XCAlertPolicy) Read(ctx context.Context, request resource.Rea
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
+	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
+	//
+	// Create/Update (called from Create/Update handlers):
+	//
+	//	The apply result must match the plan exactly. We store only what the plan
+	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
+	//	the plan are intentionally omitted here — they will be picked up by Read.
+	//
+	// Read (called from Read handler):
+	//
+	//	We merge the current state (user-configured labels) with the API response
+	//	(which may contain backend-injected labels). The merged result is stored in
+	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
+	//	Terraform sees no diff and no "inconsistent result" error occurs.
+	if metaData.GetLabels() != nil {
+		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
+		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+		response.Diagnostics.Append(labelsDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
+		// Start with the API response as the base (backend is authoritative for its own keys).
+		mergedLabels := make(map[string]attr.Value)
+		for k, v := range labelsMap.Elements() {
+			mergedLabels[k] = v
+		}
+		// Overlay with user-configured labels from the current state so that user labels
+		// are preserved even if the backend does not echo them back.
+		if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
+			for k, v := range data.Labels.Elements() {
+				mergedLabels[k] = v
+			}
+		}
+		mergedLabelsMap, mergedLabelsDiags := types.MapValue(types.StringType, mergedLabels)
+		response.Diagnostics.Append(mergedLabelsDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.Labels = mergedLabelsMap
+	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
+		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
+		data.Labels = types.MapNull(types.StringType)
+	}
+
 	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
 	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
 	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
@@ -2737,198 +2790,11 @@ func (r *ResourceF5XCAlertPolicy) Read(ctx context.Context, request resource.Rea
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedLabels := make(map[string]attr.Value)
-		for k, v := range labelsMap.Elements() {
-			mergedLabels[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
-			for k, v := range data.Labels.Elements() {
-				mergedLabels[k] = v
-			}
-		}
-		mergedLabelsMap, mergedLabelsDiags := types.MapValue(types.StringType, mergedLabels)
-		response.Diagnostics.Append(mergedLabelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Labels = mergedLabelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
-
-	// resource SpecToModelRoot PointerField --> NotificationParameters
-	if specData.GetNotificationParameters() != nil {
-		var alertPolicyAlertPolicyNotificationParametersModel = &AlertPolicyAlertPolicyNotificationParameters{}
-		notificationParametersElement := specData.GetNotificationParameters()
-
-		// resource specToModelNested RequiredOneOfField --> GroupBy
-		// <no value>
-		if notificationParametersElement.GetGroupBy() != nil {
-			// Create a temporary attribute map for the choices within this OneOf
-			notificationParametersgroupByChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-			// Define a variable for the spec choices to be passed down to nested templates
-			notificationParametersgroupByChoiceChoices := notificationParametersElement.GetGroupBy()
-
-			// Process nested choices, populating the temporary attribute map
-
-			// resource specToModelNested BoolOfOneOfPointerField --> Default
-			_, isDefault := notificationParametersgroupByChoiceChoices.(*ves_io_schema_alert_policy.NotificationParameters_Default)
-
-			if isDefault {
-				notificationParametersgroupByChoiceChoicesAttributeMap["default"] = types.BoolValue(true)
-			} else {
-				notificationParametersgroupByChoiceChoicesAttributeMap["default"] = types.BoolNull()
-			}
-
-			// resource specToModelNested BoolOfOneOfPointerField --> Individual
-			_, isIndividual := notificationParametersgroupByChoiceChoices.(*ves_io_schema_alert_policy.NotificationParameters_Individual)
-
-			if isIndividual {
-				notificationParametersgroupByChoiceChoicesAttributeMap["individual"] = types.BoolValue(true)
-			} else {
-				notificationParametersgroupByChoiceChoicesAttributeMap["individual"] = types.BoolNull()
-			}
-
-			// resource specToModelNested BoolOfOneOfPointerField --> VesIoGroup
-			_, isVesIoGroup := notificationParametersgroupByChoiceChoices.(*ves_io_schema_alert_policy.NotificationParameters_VesIoGroup)
-
-			if isVesIoGroup {
-				notificationParametersgroupByChoiceChoicesAttributeMap["ves_io_group"] = types.BoolValue(true)
-			} else {
-				notificationParametersgroupByChoiceChoicesAttributeMap["ves_io_group"] = types.BoolNull()
-			}
-
-			// resource specToModelNested PointerOfOneOfField --> Custom
-			// <no value>
-			// false
-			{
-				customOptions, isCustom := notificationParametersgroupByChoiceChoices.(*ves_io_schema_alert_policy.NotificationParameters_Custom)
-				customAttributeMap := make(map[string]attr.Value)
-
-				if isCustom && customOptions != nil {
-
-					// resource specToModelNested ArrayOfStringField --> Labels
-					if len(customOptions.Custom.GetLabels()) > 0 {
-						listValue, diags := types.ListValueFrom(ctx, types.StringType, customOptions.Custom.GetLabels())
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						customAttributeMap["labels"] = listValue
-					} else {
-						customAttributeMap["labels"] = types.ListNull(types.StringType)
-					}
-
-					customObj, diags := types.ObjectValue(AlertPolicyNotificationParametersGroupByCustomModelAttributeMap, customAttributeMap)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					notificationParametersgroupByChoiceChoicesAttributeMap["custom"] = customObj
-				} else {
-					notificationParametersgroupByChoiceChoicesAttributeMap["custom"] = types.ObjectNull(AlertPolicyNotificationParametersGroupByCustomModelAttributeMap)
-				}
-			}
-
-			// --- End of Choices ---
-
-			// Create the final ObjectValue for this OneOf field
-			finalObj, notificationParametersgroupByChoiceChoicesObjDiags := types.ObjectValue(
-				AlertPolicyNotificationParametersGroupByModelAttributeMap, // The attribute schema for the OneOf choices
-				notificationParametersgroupByChoiceChoicesAttributeMap,
-			)
-			response.Diagnostics.Append(notificationParametersgroupByChoiceChoicesObjDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			alertPolicyAlertPolicyNotificationParametersModel.GroupByChoice = finalObj
-		} else {
-			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			alertPolicyAlertPolicyNotificationParametersModel.GroupByChoice = types.ObjectNull(AlertPolicyNotificationParametersGroupByModelAttributeMap)
-		}
-
-		// resource specToModelNested StringField --> GroupWait
-		if notificationParametersElement.GetGroupWait() != "" {
-			alertPolicyAlertPolicyNotificationParametersModel.GroupWait = types.StringValue(notificationParametersElement.GetGroupWait())
-		} else {
-			// Empty string, set to null
-			alertPolicyAlertPolicyNotificationParametersModel.GroupWait = types.StringNull()
-		}
-
-		// resource specToModelNested StringField --> GroupInterval
-		if notificationParametersElement.GetGroupInterval() != "" {
-			alertPolicyAlertPolicyNotificationParametersModel.GroupInterval = types.StringValue(notificationParametersElement.GetGroupInterval())
-		} else {
-			// Empty string, set to null
-			alertPolicyAlertPolicyNotificationParametersModel.GroupInterval = types.StringNull()
-		}
-
-		// resource specToModelNested StringField --> RepeatInterval
-		if notificationParametersElement.GetRepeatInterval() != "" {
-			alertPolicyAlertPolicyNotificationParametersModel.RepeatInterval = types.StringValue(notificationParametersElement.GetRepeatInterval())
-		} else {
-			// Empty string, set to null
-			alertPolicyAlertPolicyNotificationParametersModel.RepeatInterval = types.StringNull()
-		}
-
-		notificationParametersObj, notificationParametersDiags := utils.GoStructToObjectValue(
-			ctx,
-			AlertPolicyNotificationParametersModelAttributeMap,
-			alertPolicyAlertPolicyNotificationParametersModel,
-		)
-		response.Diagnostics.Append(notificationParametersDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.NotificationParameters = notificationParametersObj
-	} else {
-		data.NotificationParameters = types.ObjectNull(AlertPolicyNotificationParametersModelAttributeMap)
-	}
-
 	// resource SpecToModelRoot RequiredArrayOfPointerField --> Receivers
 	receiversElementsSpectToModel := make([]ObjectRefTypeModel, 0, len(specData.Receivers))
 
 	for _, receiversElement := range specData.Receivers {
 		objectRefTypeModelModel := ObjectRefTypeModel{}
-
-		// resource specToModelNested StringField --> Tenant
-		if receiversElement.GetTenant() != "" {
-			objectRefTypeModelModel.Tenant = types.StringValue(receiversElement.GetTenant())
-		} else {
-			// Empty string, set to null
-			objectRefTypeModelModel.Tenant = types.StringNull()
-		}
 
 		// resource specToModelNested RequiredStringField --> Namespace
 		if receiversElement.GetNamespace() != "" {
@@ -2944,6 +2810,14 @@ func (r *ResourceF5XCAlertPolicy) Read(ctx context.Context, request resource.Rea
 		} else {
 			// Empty string, set to null
 			objectRefTypeModelModel.Name = types.StringNull()
+		}
+
+		// resource specToModelNested StringField --> Tenant
+		if receiversElement.GetTenant() != "" {
+			objectRefTypeModelModel.Tenant = types.StringValue(receiversElement.GetTenant())
+		} else {
+			// Empty string, set to null
+			objectRefTypeModelModel.Tenant = types.StringNull()
 		}
 
 		receiversElementsSpectToModel = append(receiversElementsSpectToModel, objectRefTypeModelModel)
@@ -2978,6 +2852,16 @@ func (r *ResourceF5XCAlertPolicy) Read(ctx context.Context, request resource.Rea
 
 			// Process nested choices, populating the temporary attribute map
 
+			// resource specToModelNested StringOfOneOfField --> AlertnameRegex
+			alertnameRegexItem, isAlertnameRegex := routesmatcherChoiceChoices.(*ves_io_schema_alert_policy.Route_AlertnameRegex)
+
+			if isAlertnameRegex {
+				routesmatcherChoiceChoicesAttributeMap["alertname_regex"] = types.StringValue(string(alertnameRegexItem.AlertnameRegex))
+			} else {
+				// Empty string, set to null
+				routesmatcherChoiceChoicesAttributeMap["alertname_regex"] = types.StringNull()
+			}
+
 			// resource specToModelNested PointerOfOneOfField --> Custom
 			// <no value>
 			// false
@@ -3006,16 +2890,6 @@ func (r *ResourceF5XCAlertPolicy) Read(ctx context.Context, request resource.Rea
 
 							// Process nested choices, populating the temporary attribute map
 
-							// resource specToModelNested StringOfOneOfField --> RegexMatch
-							regexMatchItem, isRegexMatch := severitymatcherTypeChoiceChoices.(*ves_io_schema_alert_policy.LabelMatcher_RegexMatch)
-
-							if isRegexMatch {
-								severitymatcherTypeChoiceChoicesAttributeMap["regex_match"] = types.StringValue(string(regexMatchItem.RegexMatch))
-							} else {
-								// Empty string, set to null
-								severitymatcherTypeChoiceChoicesAttributeMap["regex_match"] = types.StringNull()
-							}
-
 							// resource specToModelNested StringOfOneOfField --> ExactMatch
 							exactMatchItem, isExactMatch := severitymatcherTypeChoiceChoices.(*ves_io_schema_alert_policy.LabelMatcher_ExactMatch)
 
@@ -3024,6 +2898,16 @@ func (r *ResourceF5XCAlertPolicy) Read(ctx context.Context, request resource.Rea
 							} else {
 								// Empty string, set to null
 								severitymatcherTypeChoiceChoicesAttributeMap["exact_match"] = types.StringNull()
+							}
+
+							// resource specToModelNested StringOfOneOfField --> RegexMatch
+							regexMatchItem, isRegexMatch := severitymatcherTypeChoiceChoices.(*ves_io_schema_alert_policy.LabelMatcher_RegexMatch)
+
+							if isRegexMatch {
+								severitymatcherTypeChoiceChoicesAttributeMap["regex_match"] = types.StringValue(string(regexMatchItem.RegexMatch))
+							} else {
+								// Empty string, set to null
+								severitymatcherTypeChoiceChoicesAttributeMap["regex_match"] = types.StringNull()
 							}
 
 							// --- End of Choices ---
@@ -3415,16 +3299,6 @@ func (r *ResourceF5XCAlertPolicy) Read(ctx context.Context, request resource.Rea
 				}
 			}
 
-			// resource specToModelNested StringOfOneOfField --> AlertnameRegex
-			alertnameRegexItem, isAlertnameRegex := routesmatcherChoiceChoices.(*ves_io_schema_alert_policy.Route_AlertnameRegex)
-
-			if isAlertnameRegex {
-				routesmatcherChoiceChoicesAttributeMap["alertname_regex"] = types.StringValue(string(alertnameRegexItem.AlertnameRegex))
-			} else {
-				// Empty string, set to null
-				routesmatcherChoiceChoicesAttributeMap["alertname_regex"] = types.StringNull()
-			}
-
 			// --- End of Choices ---
 
 			// Create the final ObjectValue for this OneOf field
@@ -3455,15 +3329,6 @@ func (r *ResourceF5XCAlertPolicy) Read(ctx context.Context, request resource.Rea
 
 			// Process nested choices, populating the temporary attribute map
 
-			// resource specToModelNested BoolOfOneOfPointerField --> Send
-			_, isSend := routesactionChoiceChoices.(*ves_io_schema_alert_policy.Route_Send)
-
-			if isSend {
-				routesactionChoiceChoicesAttributeMap["send"] = types.BoolValue(true)
-			} else {
-				routesactionChoiceChoicesAttributeMap["send"] = types.BoolNull()
-			}
-
 			// resource specToModelNested BoolOfOneOfPointerField --> DontSend
 			_, isDontSend := routesactionChoiceChoices.(*ves_io_schema_alert_policy.Route_DontSend)
 
@@ -3471,6 +3336,15 @@ func (r *ResourceF5XCAlertPolicy) Read(ctx context.Context, request resource.Rea
 				routesactionChoiceChoicesAttributeMap["dont_send"] = types.BoolValue(true)
 			} else {
 				routesactionChoiceChoicesAttributeMap["dont_send"] = types.BoolNull()
+			}
+
+			// resource specToModelNested BoolOfOneOfPointerField --> Send
+			_, isSend := routesactionChoiceChoices.(*ves_io_schema_alert_policy.Route_Send)
+
+			if isSend {
+				routesactionChoiceChoicesAttributeMap["send"] = types.BoolValue(true)
+			} else {
+				routesactionChoiceChoicesAttributeMap["send"] = types.BoolNull()
 			}
 
 			// --- End of Choices ---
@@ -3500,6 +3374,14 @@ func (r *ResourceF5XCAlertPolicy) Read(ctx context.Context, request resource.Rea
 
 			// Recursively populate the nested struct
 
+			// resource specToModelNested StringField --> GroupWait
+			if notificationParametersElement.GetGroupWait() != "" {
+				alertPolicyAlertPolicyNotificationParametersModel.GroupWait = types.StringValue(notificationParametersElement.GetGroupWait())
+			} else {
+				// Empty string, set to null
+				alertPolicyAlertPolicyNotificationParametersModel.GroupWait = types.StringNull()
+			}
+
 			// resource specToModelNested StringField --> GroupInterval
 			if notificationParametersElement.GetGroupInterval() != "" {
 				alertPolicyAlertPolicyNotificationParametersModel.GroupInterval = types.StringValue(notificationParametersElement.GetGroupInterval())
@@ -3526,6 +3408,33 @@ func (r *ResourceF5XCAlertPolicy) Read(ctx context.Context, request resource.Rea
 				notificationParametersgroupByChoiceChoices := notificationParametersElement.GetGroupBy()
 
 				// Process nested choices, populating the temporary attribute map
+
+				// resource specToModelNested BoolOfOneOfPointerField --> Default
+				_, isDefault := notificationParametersgroupByChoiceChoices.(*ves_io_schema_alert_policy.NotificationParameters_Default)
+
+				if isDefault {
+					notificationParametersgroupByChoiceChoicesAttributeMap["default"] = types.BoolValue(true)
+				} else {
+					notificationParametersgroupByChoiceChoicesAttributeMap["default"] = types.BoolNull()
+				}
+
+				// resource specToModelNested BoolOfOneOfPointerField --> Individual
+				_, isIndividual := notificationParametersgroupByChoiceChoices.(*ves_io_schema_alert_policy.NotificationParameters_Individual)
+
+				if isIndividual {
+					notificationParametersgroupByChoiceChoicesAttributeMap["individual"] = types.BoolValue(true)
+				} else {
+					notificationParametersgroupByChoiceChoicesAttributeMap["individual"] = types.BoolNull()
+				}
+
+				// resource specToModelNested BoolOfOneOfPointerField --> VesIoGroup
+				_, isVesIoGroup := notificationParametersgroupByChoiceChoices.(*ves_io_schema_alert_policy.NotificationParameters_VesIoGroup)
+
+				if isVesIoGroup {
+					notificationParametersgroupByChoiceChoicesAttributeMap["ves_io_group"] = types.BoolValue(true)
+				} else {
+					notificationParametersgroupByChoiceChoicesAttributeMap["ves_io_group"] = types.BoolNull()
+				}
 
 				// resource specToModelNested PointerOfOneOfField --> Custom
 				// <no value>
@@ -3559,33 +3468,6 @@ func (r *ResourceF5XCAlertPolicy) Read(ctx context.Context, request resource.Rea
 					}
 				}
 
-				// resource specToModelNested BoolOfOneOfPointerField --> Default
-				_, isDefault := notificationParametersgroupByChoiceChoices.(*ves_io_schema_alert_policy.NotificationParameters_Default)
-
-				if isDefault {
-					notificationParametersgroupByChoiceChoicesAttributeMap["default"] = types.BoolValue(true)
-				} else {
-					notificationParametersgroupByChoiceChoicesAttributeMap["default"] = types.BoolNull()
-				}
-
-				// resource specToModelNested BoolOfOneOfPointerField --> Individual
-				_, isIndividual := notificationParametersgroupByChoiceChoices.(*ves_io_schema_alert_policy.NotificationParameters_Individual)
-
-				if isIndividual {
-					notificationParametersgroupByChoiceChoicesAttributeMap["individual"] = types.BoolValue(true)
-				} else {
-					notificationParametersgroupByChoiceChoicesAttributeMap["individual"] = types.BoolNull()
-				}
-
-				// resource specToModelNested BoolOfOneOfPointerField --> VesIoGroup
-				_, isVesIoGroup := notificationParametersgroupByChoiceChoices.(*ves_io_schema_alert_policy.NotificationParameters_VesIoGroup)
-
-				if isVesIoGroup {
-					notificationParametersgroupByChoiceChoicesAttributeMap["ves_io_group"] = types.BoolValue(true)
-				} else {
-					notificationParametersgroupByChoiceChoicesAttributeMap["ves_io_group"] = types.BoolNull()
-				}
-
 				// --- End of Choices ---
 
 				// Create the final ObjectValue for this OneOf field
@@ -3603,14 +3485,6 @@ func (r *ResourceF5XCAlertPolicy) Read(ctx context.Context, request resource.Rea
 			} else {
 				// The OneOf field is nil in the source spec, so set the Terraform object to null.
 				alertPolicyAlertPolicyNotificationParametersModel.GroupByChoice = types.ObjectNull(AlertPolicyRoutesNotificationParametersGroupByModelAttributeMap)
-			}
-
-			// resource specToModelNested StringField --> GroupWait
-			if notificationParametersElement.GetGroupWait() != "" {
-				alertPolicyAlertPolicyNotificationParametersModel.GroupWait = types.StringValue(notificationParametersElement.GetGroupWait())
-			} else {
-				// Empty string, set to null
-				alertPolicyAlertPolicyNotificationParametersModel.GroupWait = types.StringNull()
 			}
 
 			// This field needs to be converted to a types.ObjectValue before assignment.
@@ -3646,6 +3520,138 @@ func (r *ResourceF5XCAlertPolicy) Read(ctx context.Context, request resource.Rea
 	}
 
 	data.Routes = routesList
+
+	// resource SpecToModelRoot PointerField --> NotificationParameters
+	if specData.GetNotificationParameters() != nil {
+		var alertPolicyAlertPolicyNotificationParametersModel = &AlertPolicyAlertPolicyNotificationParameters{}
+		notificationParametersElement := specData.GetNotificationParameters()
+
+		// resource specToModelNested RequiredOneOfField --> GroupBy
+		// <no value>
+		if notificationParametersElement.GetGroupBy() != nil {
+			// Create a temporary attribute map for the choices within this OneOf
+			notificationParametersgroupByChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+			// Define a variable for the spec choices to be passed down to nested templates
+			notificationParametersgroupByChoiceChoices := notificationParametersElement.GetGroupBy()
+
+			// Process nested choices, populating the temporary attribute map
+
+			// resource specToModelNested PointerOfOneOfField --> Custom
+			// <no value>
+			// false
+			{
+				customOptions, isCustom := notificationParametersgroupByChoiceChoices.(*ves_io_schema_alert_policy.NotificationParameters_Custom)
+				customAttributeMap := make(map[string]attr.Value)
+
+				if isCustom && customOptions != nil {
+
+					// resource specToModelNested ArrayOfStringField --> Labels
+					if len(customOptions.Custom.GetLabels()) > 0 {
+						listValue, diags := types.ListValueFrom(ctx, types.StringType, customOptions.Custom.GetLabels())
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						customAttributeMap["labels"] = listValue
+					} else {
+						customAttributeMap["labels"] = types.ListNull(types.StringType)
+					}
+
+					customObj, diags := types.ObjectValue(AlertPolicyNotificationParametersGroupByCustomModelAttributeMap, customAttributeMap)
+					response.Diagnostics.Append(diags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					notificationParametersgroupByChoiceChoicesAttributeMap["custom"] = customObj
+				} else {
+					notificationParametersgroupByChoiceChoicesAttributeMap["custom"] = types.ObjectNull(AlertPolicyNotificationParametersGroupByCustomModelAttributeMap)
+				}
+			}
+
+			// resource specToModelNested BoolOfOneOfPointerField --> Default
+			_, isDefault := notificationParametersgroupByChoiceChoices.(*ves_io_schema_alert_policy.NotificationParameters_Default)
+
+			if isDefault {
+				notificationParametersgroupByChoiceChoicesAttributeMap["default"] = types.BoolValue(true)
+			} else {
+				notificationParametersgroupByChoiceChoicesAttributeMap["default"] = types.BoolNull()
+			}
+
+			// resource specToModelNested BoolOfOneOfPointerField --> Individual
+			_, isIndividual := notificationParametersgroupByChoiceChoices.(*ves_io_schema_alert_policy.NotificationParameters_Individual)
+
+			if isIndividual {
+				notificationParametersgroupByChoiceChoicesAttributeMap["individual"] = types.BoolValue(true)
+			} else {
+				notificationParametersgroupByChoiceChoicesAttributeMap["individual"] = types.BoolNull()
+			}
+
+			// resource specToModelNested BoolOfOneOfPointerField --> VesIoGroup
+			_, isVesIoGroup := notificationParametersgroupByChoiceChoices.(*ves_io_schema_alert_policy.NotificationParameters_VesIoGroup)
+
+			if isVesIoGroup {
+				notificationParametersgroupByChoiceChoicesAttributeMap["ves_io_group"] = types.BoolValue(true)
+			} else {
+				notificationParametersgroupByChoiceChoicesAttributeMap["ves_io_group"] = types.BoolNull()
+			}
+
+			// --- End of Choices ---
+
+			// Create the final ObjectValue for this OneOf field
+			finalObj, notificationParametersgroupByChoiceChoicesObjDiags := types.ObjectValue(
+				AlertPolicyNotificationParametersGroupByModelAttributeMap, // The attribute schema for the OneOf choices
+				notificationParametersgroupByChoiceChoicesAttributeMap,
+			)
+			response.Diagnostics.Append(notificationParametersgroupByChoiceChoicesObjDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			// Assign the final object to the correct place (either the root model or a parent's attribute map)
+			alertPolicyAlertPolicyNotificationParametersModel.GroupByChoice = finalObj
+		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			alertPolicyAlertPolicyNotificationParametersModel.GroupByChoice = types.ObjectNull(AlertPolicyNotificationParametersGroupByModelAttributeMap)
+		}
+
+		// resource specToModelNested StringField --> GroupWait
+		if notificationParametersElement.GetGroupWait() != "" {
+			alertPolicyAlertPolicyNotificationParametersModel.GroupWait = types.StringValue(notificationParametersElement.GetGroupWait())
+		} else {
+			// Empty string, set to null
+			alertPolicyAlertPolicyNotificationParametersModel.GroupWait = types.StringNull()
+		}
+
+		// resource specToModelNested StringField --> GroupInterval
+		if notificationParametersElement.GetGroupInterval() != "" {
+			alertPolicyAlertPolicyNotificationParametersModel.GroupInterval = types.StringValue(notificationParametersElement.GetGroupInterval())
+		} else {
+			// Empty string, set to null
+			alertPolicyAlertPolicyNotificationParametersModel.GroupInterval = types.StringNull()
+		}
+
+		// resource specToModelNested StringField --> RepeatInterval
+		if notificationParametersElement.GetRepeatInterval() != "" {
+			alertPolicyAlertPolicyNotificationParametersModel.RepeatInterval = types.StringValue(notificationParametersElement.GetRepeatInterval())
+		} else {
+			// Empty string, set to null
+			alertPolicyAlertPolicyNotificationParametersModel.RepeatInterval = types.StringNull()
+		}
+
+		notificationParametersObj, notificationParametersDiags := utils.GoStructToObjectValue(
+			ctx,
+			AlertPolicyNotificationParametersModelAttributeMap,
+			alertPolicyAlertPolicyNotificationParametersModel,
+		)
+		response.Diagnostics.Append(notificationParametersDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.NotificationParameters = notificationParametersObj
+	} else {
+		data.NotificationParameters = types.ObjectNull(AlertPolicyNotificationParametersModelAttributeMap)
+	}
 
 	if response.Diagnostics.HasError() {
 		return
@@ -3724,93 +3730,6 @@ func (r *ResourceF5XCAlertPolicy) Update(ctx context.Context, request resource.U
 	}
 
 	{
-		// resource modelToSpecRoot PointerField --> NotificationParameters
-		if !data.NotificationParameters.IsNull() && !data.NotificationParameters.IsUnknown() {
-			notificationParametersSpec := &ves_io_schema_alert_policy.NotificationParameters{}
-			spec.NotificationParameters = notificationParametersSpec
-			var notificationParametersModel AlertPolicyAlertPolicyNotificationParameters
-
-			// Populate the nested model from the main data model
-			diags.Append(data.NotificationParameters.As(ctx, &notificationParametersModel, basetypes.ObjectAsOptions{})...)
-			response.Diagnostics.Append(diags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			// resource modelToSpecNested RequiredOneOfField --> GroupBy
-			if !notificationParametersModel.GroupByChoice.IsNull() && !notificationParametersModel.GroupByChoice.IsUnknown() {
-				notificationParametersGroupByChoiceModel := AlertPolicyNotificationParametersGroupByChoice{}
-				response.Diagnostics.Append(notificationParametersModel.GroupByChoice.As(ctx, &notificationParametersGroupByChoiceModel, basetypes.ObjectAsOptions{})...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// resource modelToSpecNested BoolOfOneOfPointerField --> Default
-				if !notificationParametersGroupByChoiceModel.Default.IsNull() && !notificationParametersGroupByChoiceModel.Default.IsUnknown() {
-					defaultSpecBool := &ves_io_schema_alert_policy.NotificationParameters_Default{}
-					defaultSpecBool.Default = &ves_io_schema.Empty{}
-					notificationParametersSpec.GroupBy = defaultSpecBool
-				}
-
-				// resource modelToSpecNested BoolOfOneOfPointerField --> Individual
-				if !notificationParametersGroupByChoiceModel.Individual.IsNull() && !notificationParametersGroupByChoiceModel.Individual.IsUnknown() {
-					individualSpecBool := &ves_io_schema_alert_policy.NotificationParameters_Individual{}
-					individualSpecBool.Individual = &ves_io_schema.Empty{}
-					notificationParametersSpec.GroupBy = individualSpecBool
-				}
-
-				// resource modelToSpecNested BoolOfOneOfPointerField --> VesIoGroup
-				if !notificationParametersGroupByChoiceModel.VesIoGroup.IsNull() && !notificationParametersGroupByChoiceModel.VesIoGroup.IsUnknown() {
-					vesIoGroupSpecBool := &ves_io_schema_alert_policy.NotificationParameters_VesIoGroup{}
-					vesIoGroupSpecBool.VesIoGroup = &ves_io_schema.Empty{}
-					notificationParametersSpec.GroupBy = vesIoGroupSpecBool
-				}
-
-				// resource modelToSpecNested PointerOfOneOfField --> Custom
-				if !notificationParametersGroupByChoiceModel.Custom.IsNull() && !notificationParametersGroupByChoiceModel.Custom.IsUnknown() {
-					var alertPolicyNotificationParametersCustomModel AlertPolicyNotificationParametersCustom
-					response.Diagnostics.Append(notificationParametersGroupByChoiceModel.Custom.As(ctx, &alertPolicyNotificationParametersCustomModel, basetypes.ObjectAsOptions{})...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					customOneOfSpec := &ves_io_schema_alert_policy.NotificationParameters_Custom{}
-					customOneOfSpec.Custom = &ves_io_schema_alert_policy.CustomGroupBy{}
-					notificationParametersSpec.GroupBy = customOneOfSpec
-
-					// resource modelToSpecNested ArrayOfStringField --> Labels
-					if !alertPolicyNotificationParametersCustomModel.Labels.IsNull() && !alertPolicyNotificationParametersCustomModel.Labels.IsUnknown() {
-						elements := make([]string, 0, len(alertPolicyNotificationParametersCustomModel.Labels.Elements()))
-						diags := alertPolicyNotificationParametersCustomModel.Labels.ElementsAs(ctx, &elements, false)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						customOneOfSpec.Custom.Labels = elements
-					}
-
-				}
-
-			}
-
-			// resource modelToSpecNested StringField --> GroupWait
-			if !notificationParametersModel.GroupWait.IsNull() && !notificationParametersModel.GroupWait.IsUnknown() {
-				notificationParametersSpec.GroupWait = string(notificationParametersModel.GroupWait.ValueString())
-			}
-
-			// resource modelToSpecNested StringField --> GroupInterval
-			if !notificationParametersModel.GroupInterval.IsNull() && !notificationParametersModel.GroupInterval.IsUnknown() {
-				notificationParametersSpec.GroupInterval = string(notificationParametersModel.GroupInterval.ValueString())
-			}
-
-			// resource modelToSpecNested StringField --> RepeatInterval
-			if !notificationParametersModel.RepeatInterval.IsNull() && !notificationParametersModel.RepeatInterval.IsUnknown() {
-				notificationParametersSpec.RepeatInterval = string(notificationParametersModel.RepeatInterval.ValueString())
-			}
-
-		}
-	}
-
-	{
 		// resource modelToSpecRoot RequiredArrayOfPointerField --> Receivers
 		var receiversElementsModelToSpec []ObjectRefTypeModel
 		response.Diagnostics.Append(data.Receivers.ElementsAs(ctx, &receiversElementsModelToSpec, false)...)
@@ -3859,6 +3778,13 @@ func (r *ResourceF5XCAlertPolicy) Update(ctx context.Context, request resource.U
 					return
 				}
 
+				// resource modelToSpecNested StringOfOneOfField --> AlertnameRegex
+				if !routesMatcherChoiceModel.AlertnameRegex.IsNull() && !routesMatcherChoiceModel.AlertnameRegex.IsUnknown() {
+					alertnameRegexSpecStr := &ves_io_schema_alert_policy.Route_AlertnameRegex{}
+					alertnameRegexSpecStr.AlertnameRegex = string(routesMatcherChoiceModel.AlertnameRegex.ValueString())
+					routesSpec[i].Matcher = alertnameRegexSpecStr
+				}
+
 				// resource modelToSpecNested PointerOfOneOfField --> Custom
 				if !routesMatcherChoiceModel.Custom.IsNull() && !routesMatcherChoiceModel.Custom.IsUnknown() {
 					var alertPolicyRouteCustomModel AlertPolicyRouteCustom
@@ -3889,18 +3815,18 @@ func (r *ResourceF5XCAlertPolicy) Update(ctx context.Context, request resource.U
 								return
 							}
 
-							// resource modelToSpecNested StringOfOneOfField --> RegexMatch
-							if !severityMatcherTypeChoiceModel.RegexMatch.IsNull() && !severityMatcherTypeChoiceModel.RegexMatch.IsUnknown() {
-								regexMatchSpecStr := &ves_io_schema_alert_policy.LabelMatcher_RegexMatch{}
-								regexMatchSpecStr.RegexMatch = string(severityMatcherTypeChoiceModel.RegexMatch.ValueString())
-								severitySpec.MatcherType = regexMatchSpecStr
-							}
-
 							// resource modelToSpecNested StringOfOneOfField --> ExactMatch
 							if !severityMatcherTypeChoiceModel.ExactMatch.IsNull() && !severityMatcherTypeChoiceModel.ExactMatch.IsUnknown() {
 								exactMatchSpecStr := &ves_io_schema_alert_policy.LabelMatcher_ExactMatch{}
 								exactMatchSpecStr.ExactMatch = string(severityMatcherTypeChoiceModel.ExactMatch.ValueString())
 								severitySpec.MatcherType = exactMatchSpecStr
+							}
+
+							// resource modelToSpecNested StringOfOneOfField --> RegexMatch
+							if !severityMatcherTypeChoiceModel.RegexMatch.IsNull() && !severityMatcherTypeChoiceModel.RegexMatch.IsUnknown() {
+								regexMatchSpecStr := &ves_io_schema_alert_policy.LabelMatcher_RegexMatch{}
+								regexMatchSpecStr.RegexMatch = string(severityMatcherTypeChoiceModel.RegexMatch.ValueString())
+								severitySpec.MatcherType = regexMatchSpecStr
 							}
 
 						}
@@ -4139,13 +4065,6 @@ func (r *ResourceF5XCAlertPolicy) Update(ctx context.Context, request resource.U
 					}
 				}
 
-				// resource modelToSpecNested StringOfOneOfField --> AlertnameRegex
-				if !routesMatcherChoiceModel.AlertnameRegex.IsNull() && !routesMatcherChoiceModel.AlertnameRegex.IsUnknown() {
-					alertnameRegexSpecStr := &ves_io_schema_alert_policy.Route_AlertnameRegex{}
-					alertnameRegexSpecStr.AlertnameRegex = string(routesMatcherChoiceModel.AlertnameRegex.ValueString())
-					routesSpec[i].Matcher = alertnameRegexSpecStr
-				}
-
 			}
 
 			// resource modelToSpecNested RequiredOneOfField --> Action
@@ -4156,18 +4075,18 @@ func (r *ResourceF5XCAlertPolicy) Update(ctx context.Context, request resource.U
 					return
 				}
 
-				// resource modelToSpecNested BoolOfOneOfPointerField --> Send
-				if !routesActionChoiceModel.Send.IsNull() && !routesActionChoiceModel.Send.IsUnknown() {
-					sendSpecBool := &ves_io_schema_alert_policy.Route_Send{}
-					sendSpecBool.Send = &ves_io_schema.Empty{}
-					routesSpec[i].Action = sendSpecBool
-				}
-
 				// resource modelToSpecNested BoolOfOneOfPointerField --> DontSend
 				if !routesActionChoiceModel.DontSend.IsNull() && !routesActionChoiceModel.DontSend.IsUnknown() {
 					dontSendSpecBool := &ves_io_schema_alert_policy.Route_DontSend{}
 					dontSendSpecBool.DontSend = &ves_io_schema.Empty{}
 					routesSpec[i].Action = dontSendSpecBool
+				}
+
+				// resource modelToSpecNested BoolOfOneOfPointerField --> Send
+				if !routesActionChoiceModel.Send.IsNull() && !routesActionChoiceModel.Send.IsUnknown() {
+					sendSpecBool := &ves_io_schema_alert_policy.Route_Send{}
+					sendSpecBool.Send = &ves_io_schema.Empty{}
+					routesSpec[i].Action = sendSpecBool
 				}
 
 			}
@@ -4182,6 +4101,11 @@ func (r *ResourceF5XCAlertPolicy) Update(ctx context.Context, request resource.U
 
 				notificationParametersSpec := &ves_io_schema_alert_policy.NotificationParameters{}
 				routesSpec[i].NotificationParameters = notificationParametersSpec
+
+				// resource modelToSpecNested StringField --> GroupWait
+				if !notificationParametersModel.GroupWait.IsNull() && !notificationParametersModel.GroupWait.IsUnknown() {
+					notificationParametersSpec.GroupWait = string(notificationParametersModel.GroupWait.ValueString())
+				}
 
 				// resource modelToSpecNested StringField --> GroupInterval
 				if !notificationParametersModel.GroupInterval.IsNull() && !notificationParametersModel.GroupInterval.IsUnknown() {
@@ -4199,6 +4123,27 @@ func (r *ResourceF5XCAlertPolicy) Update(ctx context.Context, request resource.U
 					response.Diagnostics.Append(notificationParametersModel.GroupByChoice.As(ctx, &notificationParametersGroupByChoiceModel, basetypes.ObjectAsOptions{})...)
 					if response.Diagnostics.HasError() {
 						return
+					}
+
+					// resource modelToSpecNested BoolOfOneOfPointerField --> Default
+					if !notificationParametersGroupByChoiceModel.Default.IsNull() && !notificationParametersGroupByChoiceModel.Default.IsUnknown() {
+						defaultSpecBool := &ves_io_schema_alert_policy.NotificationParameters_Default{}
+						defaultSpecBool.Default = &ves_io_schema.Empty{}
+						notificationParametersSpec.GroupBy = defaultSpecBool
+					}
+
+					// resource modelToSpecNested BoolOfOneOfPointerField --> Individual
+					if !notificationParametersGroupByChoiceModel.Individual.IsNull() && !notificationParametersGroupByChoiceModel.Individual.IsUnknown() {
+						individualSpecBool := &ves_io_schema_alert_policy.NotificationParameters_Individual{}
+						individualSpecBool.Individual = &ves_io_schema.Empty{}
+						notificationParametersSpec.GroupBy = individualSpecBool
+					}
+
+					// resource modelToSpecNested BoolOfOneOfPointerField --> VesIoGroup
+					if !notificationParametersGroupByChoiceModel.VesIoGroup.IsNull() && !notificationParametersGroupByChoiceModel.VesIoGroup.IsUnknown() {
+						vesIoGroupSpecBool := &ves_io_schema_alert_policy.NotificationParameters_VesIoGroup{}
+						vesIoGroupSpecBool.VesIoGroup = &ves_io_schema.Empty{}
+						notificationParametersSpec.GroupBy = vesIoGroupSpecBool
 					}
 
 					// resource modelToSpecNested PointerOfOneOfField --> Custom
@@ -4225,32 +4170,6 @@ func (r *ResourceF5XCAlertPolicy) Update(ctx context.Context, request resource.U
 
 					}
 
-					// resource modelToSpecNested BoolOfOneOfPointerField --> Default
-					if !notificationParametersGroupByChoiceModel.Default.IsNull() && !notificationParametersGroupByChoiceModel.Default.IsUnknown() {
-						defaultSpecBool := &ves_io_schema_alert_policy.NotificationParameters_Default{}
-						defaultSpecBool.Default = &ves_io_schema.Empty{}
-						notificationParametersSpec.GroupBy = defaultSpecBool
-					}
-
-					// resource modelToSpecNested BoolOfOneOfPointerField --> Individual
-					if !notificationParametersGroupByChoiceModel.Individual.IsNull() && !notificationParametersGroupByChoiceModel.Individual.IsUnknown() {
-						individualSpecBool := &ves_io_schema_alert_policy.NotificationParameters_Individual{}
-						individualSpecBool.Individual = &ves_io_schema.Empty{}
-						notificationParametersSpec.GroupBy = individualSpecBool
-					}
-
-					// resource modelToSpecNested BoolOfOneOfPointerField --> VesIoGroup
-					if !notificationParametersGroupByChoiceModel.VesIoGroup.IsNull() && !notificationParametersGroupByChoiceModel.VesIoGroup.IsUnknown() {
-						vesIoGroupSpecBool := &ves_io_schema_alert_policy.NotificationParameters_VesIoGroup{}
-						vesIoGroupSpecBool.VesIoGroup = &ves_io_schema.Empty{}
-						notificationParametersSpec.GroupBy = vesIoGroupSpecBool
-					}
-
-				}
-
-				// resource modelToSpecNested StringField --> GroupWait
-				if !notificationParametersModel.GroupWait.IsNull() && !notificationParametersModel.GroupWait.IsUnknown() {
-					notificationParametersSpec.GroupWait = string(notificationParametersModel.GroupWait.ValueString())
 				}
 
 			}
@@ -4258,6 +4177,93 @@ func (r *ResourceF5XCAlertPolicy) Update(ctx context.Context, request resource.U
 		}
 
 		spec.Routes = routesSpec
+	}
+
+	{
+		// resource modelToSpecRoot PointerField --> NotificationParameters
+		if !data.NotificationParameters.IsNull() && !data.NotificationParameters.IsUnknown() {
+			notificationParametersSpec := &ves_io_schema_alert_policy.NotificationParameters{}
+			spec.NotificationParameters = notificationParametersSpec
+			var notificationParametersModel AlertPolicyAlertPolicyNotificationParameters
+
+			// Populate the nested model from the main data model
+			diags.Append(data.NotificationParameters.As(ctx, &notificationParametersModel, basetypes.ObjectAsOptions{})...)
+			response.Diagnostics.Append(diags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			// resource modelToSpecNested RequiredOneOfField --> GroupBy
+			if !notificationParametersModel.GroupByChoice.IsNull() && !notificationParametersModel.GroupByChoice.IsUnknown() {
+				notificationParametersGroupByChoiceModel := AlertPolicyNotificationParametersGroupByChoice{}
+				response.Diagnostics.Append(notificationParametersModel.GroupByChoice.As(ctx, &notificationParametersGroupByChoiceModel, basetypes.ObjectAsOptions{})...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				// resource modelToSpecNested PointerOfOneOfField --> Custom
+				if !notificationParametersGroupByChoiceModel.Custom.IsNull() && !notificationParametersGroupByChoiceModel.Custom.IsUnknown() {
+					var alertPolicyNotificationParametersCustomModel AlertPolicyNotificationParametersCustom
+					response.Diagnostics.Append(notificationParametersGroupByChoiceModel.Custom.As(ctx, &alertPolicyNotificationParametersCustomModel, basetypes.ObjectAsOptions{})...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					customOneOfSpec := &ves_io_schema_alert_policy.NotificationParameters_Custom{}
+					customOneOfSpec.Custom = &ves_io_schema_alert_policy.CustomGroupBy{}
+					notificationParametersSpec.GroupBy = customOneOfSpec
+
+					// resource modelToSpecNested ArrayOfStringField --> Labels
+					if !alertPolicyNotificationParametersCustomModel.Labels.IsNull() && !alertPolicyNotificationParametersCustomModel.Labels.IsUnknown() {
+						elements := make([]string, 0, len(alertPolicyNotificationParametersCustomModel.Labels.Elements()))
+						diags := alertPolicyNotificationParametersCustomModel.Labels.ElementsAs(ctx, &elements, false)
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						customOneOfSpec.Custom.Labels = elements
+					}
+
+				}
+
+				// resource modelToSpecNested BoolOfOneOfPointerField --> Default
+				if !notificationParametersGroupByChoiceModel.Default.IsNull() && !notificationParametersGroupByChoiceModel.Default.IsUnknown() {
+					defaultSpecBool := &ves_io_schema_alert_policy.NotificationParameters_Default{}
+					defaultSpecBool.Default = &ves_io_schema.Empty{}
+					notificationParametersSpec.GroupBy = defaultSpecBool
+				}
+
+				// resource modelToSpecNested BoolOfOneOfPointerField --> Individual
+				if !notificationParametersGroupByChoiceModel.Individual.IsNull() && !notificationParametersGroupByChoiceModel.Individual.IsUnknown() {
+					individualSpecBool := &ves_io_schema_alert_policy.NotificationParameters_Individual{}
+					individualSpecBool.Individual = &ves_io_schema.Empty{}
+					notificationParametersSpec.GroupBy = individualSpecBool
+				}
+
+				// resource modelToSpecNested BoolOfOneOfPointerField --> VesIoGroup
+				if !notificationParametersGroupByChoiceModel.VesIoGroup.IsNull() && !notificationParametersGroupByChoiceModel.VesIoGroup.IsUnknown() {
+					vesIoGroupSpecBool := &ves_io_schema_alert_policy.NotificationParameters_VesIoGroup{}
+					vesIoGroupSpecBool.VesIoGroup = &ves_io_schema.Empty{}
+					notificationParametersSpec.GroupBy = vesIoGroupSpecBool
+				}
+
+			}
+
+			// resource modelToSpecNested StringField --> GroupWait
+			if !notificationParametersModel.GroupWait.IsNull() && !notificationParametersModel.GroupWait.IsUnknown() {
+				notificationParametersSpec.GroupWait = string(notificationParametersModel.GroupWait.ValueString())
+			}
+
+			// resource modelToSpecNested StringField --> GroupInterval
+			if !notificationParametersModel.GroupInterval.IsNull() && !notificationParametersModel.GroupInterval.IsUnknown() {
+				notificationParametersSpec.GroupInterval = string(notificationParametersModel.GroupInterval.ValueString())
+			}
+
+			// resource modelToSpecNested StringField --> RepeatInterval
+			if !notificationParametersModel.RepeatInterval.IsNull() && !notificationParametersModel.RepeatInterval.IsUnknown() {
+				notificationParametersSpec.RepeatInterval = string(notificationParametersModel.RepeatInterval.ValueString())
+			}
+
+		}
 	}
 
 	if response.Diagnostics.HasError() {
@@ -4293,6 +4299,53 @@ func (r *ResourceF5XCAlertPolicy) Update(ctx context.Context, request resource.U
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
+	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
+	//
+	// Create/Update (called from Create/Update handlers):
+	//
+	//	The apply result must match the plan exactly. We store only what the plan
+	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
+	//	the plan are intentionally omitted here — they will be picked up by Read.
+	//
+	// Read (called from Read handler):
+	//
+	//	We merge the current state (user-configured labels) with the API response
+	//	(which may contain backend-injected labels). The merged result is stored in
+	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
+	//	Terraform sees no diff and no "inconsistent result" error occurs.
+	if metaData.GetLabels() != nil {
+		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
+		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+		response.Diagnostics.Append(labelsDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
+		// Start with the API response as the base (backend is authoritative for its own keys).
+		mergedLabels := make(map[string]attr.Value)
+		for k, v := range labelsMap.Elements() {
+			mergedLabels[k] = v
+		}
+		// Overlay with user-configured labels from the current state so that user labels
+		// are preserved even if the backend does not echo them back.
+		if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
+			for k, v := range data.Labels.Elements() {
+				mergedLabels[k] = v
+			}
+		}
+		mergedLabelsMap, mergedLabelsDiags := types.MapValue(types.StringType, mergedLabels)
+		response.Diagnostics.Append(mergedLabelsDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.Labels = mergedLabelsMap
+	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
+		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
+		data.Labels = types.MapNull(types.StringType)
+	}
 
 	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
 	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
@@ -4353,198 +4406,11 @@ func (r *ResourceF5XCAlertPolicy) Update(ctx context.Context, request resource.U
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedLabels := make(map[string]attr.Value)
-		for k, v := range labelsMap.Elements() {
-			mergedLabels[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
-			for k, v := range data.Labels.Elements() {
-				mergedLabels[k] = v
-			}
-		}
-		mergedLabelsMap, mergedLabelsDiags := types.MapValue(types.StringType, mergedLabels)
-		response.Diagnostics.Append(mergedLabelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Labels = mergedLabelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
-
-	// resource SpecToModelRoot PointerField --> NotificationParameters
-	if specData.GetNotificationParameters() != nil {
-		var alertPolicyAlertPolicyNotificationParametersModel = &AlertPolicyAlertPolicyNotificationParameters{}
-		notificationParametersElement := specData.GetNotificationParameters()
-
-		// resource specToModelNested RequiredOneOfField --> GroupBy
-		// GlobalSpecType
-		if notificationParametersElement.GetGroupBy() != nil {
-			// Create a temporary attribute map for the choices within this OneOf
-			notificationParametersgroupByChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-			// Define a variable for the spec choices to be passed down to nested templates
-			notificationParametersgroupByChoiceChoices := notificationParametersElement.GetGroupBy()
-
-			// Process nested choices, populating the temporary attribute map
-
-			// resource specToModelNested BoolOfOneOfPointerField --> Default
-			_, isDefault := notificationParametersgroupByChoiceChoices.(*ves_io_schema_alert_policy.NotificationParameters_Default)
-
-			if isDefault {
-				notificationParametersgroupByChoiceChoicesAttributeMap["default"] = types.BoolValue(true)
-			} else {
-				notificationParametersgroupByChoiceChoicesAttributeMap["default"] = types.BoolNull()
-			}
-
-			// resource specToModelNested BoolOfOneOfPointerField --> Individual
-			_, isIndividual := notificationParametersgroupByChoiceChoices.(*ves_io_schema_alert_policy.NotificationParameters_Individual)
-
-			if isIndividual {
-				notificationParametersgroupByChoiceChoicesAttributeMap["individual"] = types.BoolValue(true)
-			} else {
-				notificationParametersgroupByChoiceChoicesAttributeMap["individual"] = types.BoolNull()
-			}
-
-			// resource specToModelNested BoolOfOneOfPointerField --> VesIoGroup
-			_, isVesIoGroup := notificationParametersgroupByChoiceChoices.(*ves_io_schema_alert_policy.NotificationParameters_VesIoGroup)
-
-			if isVesIoGroup {
-				notificationParametersgroupByChoiceChoicesAttributeMap["ves_io_group"] = types.BoolValue(true)
-			} else {
-				notificationParametersgroupByChoiceChoicesAttributeMap["ves_io_group"] = types.BoolNull()
-			}
-
-			// resource specToModelNested PointerOfOneOfField --> Custom
-			// GlobalSpecType
-			// false
-			{
-				customOptions, isCustom := notificationParametersgroupByChoiceChoices.(*ves_io_schema_alert_policy.NotificationParameters_Custom)
-				customAttributeMap := make(map[string]attr.Value)
-
-				if isCustom && customOptions != nil {
-
-					// resource specToModelNested ArrayOfStringField --> Labels
-					if len(customOptions.Custom.GetLabels()) > 0 {
-						listValue, diags := types.ListValueFrom(ctx, types.StringType, customOptions.Custom.GetLabels())
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						customAttributeMap["labels"] = listValue
-					} else {
-						customAttributeMap["labels"] = types.ListNull(types.StringType)
-					}
-
-					customObj, diags := types.ObjectValue(AlertPolicyNotificationParametersGroupByCustomModelAttributeMap, customAttributeMap)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					notificationParametersgroupByChoiceChoicesAttributeMap["custom"] = customObj
-				} else {
-					notificationParametersgroupByChoiceChoicesAttributeMap["custom"] = types.ObjectNull(AlertPolicyNotificationParametersGroupByCustomModelAttributeMap)
-				}
-			}
-
-			// --- End of Choices ---
-
-			// Create the final ObjectValue for this OneOf field
-			finalObj, notificationParametersgroupByChoiceChoicesObjDiags := types.ObjectValue(
-				AlertPolicyNotificationParametersGroupByModelAttributeMap, // The attribute schema for the OneOf choices
-				notificationParametersgroupByChoiceChoicesAttributeMap,
-			)
-			response.Diagnostics.Append(notificationParametersgroupByChoiceChoicesObjDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			alertPolicyAlertPolicyNotificationParametersModel.GroupByChoice = finalObj
-		} else {
-			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			alertPolicyAlertPolicyNotificationParametersModel.GroupByChoice = types.ObjectNull(AlertPolicyNotificationParametersGroupByModelAttributeMap)
-		}
-
-		// resource specToModelNested StringField --> GroupWait
-		if notificationParametersElement.GetGroupWait() != "" {
-			alertPolicyAlertPolicyNotificationParametersModel.GroupWait = types.StringValue(notificationParametersElement.GetGroupWait())
-		} else {
-			// Empty string, set to null
-			alertPolicyAlertPolicyNotificationParametersModel.GroupWait = types.StringNull()
-		}
-
-		// resource specToModelNested StringField --> GroupInterval
-		if notificationParametersElement.GetGroupInterval() != "" {
-			alertPolicyAlertPolicyNotificationParametersModel.GroupInterval = types.StringValue(notificationParametersElement.GetGroupInterval())
-		} else {
-			// Empty string, set to null
-			alertPolicyAlertPolicyNotificationParametersModel.GroupInterval = types.StringNull()
-		}
-
-		// resource specToModelNested StringField --> RepeatInterval
-		if notificationParametersElement.GetRepeatInterval() != "" {
-			alertPolicyAlertPolicyNotificationParametersModel.RepeatInterval = types.StringValue(notificationParametersElement.GetRepeatInterval())
-		} else {
-			// Empty string, set to null
-			alertPolicyAlertPolicyNotificationParametersModel.RepeatInterval = types.StringNull()
-		}
-
-		notificationParametersObj, notificationParametersDiags := utils.GoStructToObjectValue(
-			ctx,
-			AlertPolicyNotificationParametersModelAttributeMap,
-			alertPolicyAlertPolicyNotificationParametersModel,
-		)
-		response.Diagnostics.Append(notificationParametersDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.NotificationParameters = notificationParametersObj
-	} else {
-		data.NotificationParameters = types.ObjectNull(AlertPolicyNotificationParametersModelAttributeMap)
-	}
-
 	// resource SpecToModelRoot RequiredArrayOfPointerField --> Receivers
 	receiversElementsSpectToModel := make([]ObjectRefTypeModel, 0, len(specData.Receivers))
 
 	for _, receiversElement := range specData.Receivers {
 		objectRefTypeModelModel := ObjectRefTypeModel{}
-
-		// resource specToModelNested StringField --> Tenant
-		if receiversElement.GetTenant() != "" {
-			objectRefTypeModelModel.Tenant = types.StringValue(receiversElement.GetTenant())
-		} else {
-			// Empty string, set to null
-			objectRefTypeModelModel.Tenant = types.StringNull()
-		}
 
 		// resource specToModelNested RequiredStringField --> Namespace
 		if receiversElement.GetNamespace() != "" {
@@ -4560,6 +4426,14 @@ func (r *ResourceF5XCAlertPolicy) Update(ctx context.Context, request resource.U
 		} else {
 			// Empty string, set to null
 			objectRefTypeModelModel.Name = types.StringNull()
+		}
+
+		// resource specToModelNested StringField --> Tenant
+		if receiversElement.GetTenant() != "" {
+			objectRefTypeModelModel.Tenant = types.StringValue(receiversElement.GetTenant())
+		} else {
+			// Empty string, set to null
+			objectRefTypeModelModel.Tenant = types.StringNull()
 		}
 
 		receiversElementsSpectToModel = append(receiversElementsSpectToModel, objectRefTypeModelModel)
@@ -4594,6 +4468,16 @@ func (r *ResourceF5XCAlertPolicy) Update(ctx context.Context, request resource.U
 
 			// Process nested choices, populating the temporary attribute map
 
+			// resource specToModelNested StringOfOneOfField --> AlertnameRegex
+			alertnameRegexItem, isAlertnameRegex := routesmatcherChoiceChoices.(*ves_io_schema_alert_policy.Route_AlertnameRegex)
+
+			if isAlertnameRegex {
+				routesmatcherChoiceChoicesAttributeMap["alertname_regex"] = types.StringValue(string(alertnameRegexItem.AlertnameRegex))
+			} else {
+				// Empty string, set to null
+				routesmatcherChoiceChoicesAttributeMap["alertname_regex"] = types.StringNull()
+			}
+
 			// resource specToModelNested PointerOfOneOfField --> Custom
 			// GlobalSpecType
 			// false
@@ -4622,16 +4506,6 @@ func (r *ResourceF5XCAlertPolicy) Update(ctx context.Context, request resource.U
 
 							// Process nested choices, populating the temporary attribute map
 
-							// resource specToModelNested StringOfOneOfField --> RegexMatch
-							regexMatchItem, isRegexMatch := severitymatcherTypeChoiceChoices.(*ves_io_schema_alert_policy.LabelMatcher_RegexMatch)
-
-							if isRegexMatch {
-								severitymatcherTypeChoiceChoicesAttributeMap["regex_match"] = types.StringValue(string(regexMatchItem.RegexMatch))
-							} else {
-								// Empty string, set to null
-								severitymatcherTypeChoiceChoicesAttributeMap["regex_match"] = types.StringNull()
-							}
-
 							// resource specToModelNested StringOfOneOfField --> ExactMatch
 							exactMatchItem, isExactMatch := severitymatcherTypeChoiceChoices.(*ves_io_schema_alert_policy.LabelMatcher_ExactMatch)
 
@@ -4640,6 +4514,16 @@ func (r *ResourceF5XCAlertPolicy) Update(ctx context.Context, request resource.U
 							} else {
 								// Empty string, set to null
 								severitymatcherTypeChoiceChoicesAttributeMap["exact_match"] = types.StringNull()
+							}
+
+							// resource specToModelNested StringOfOneOfField --> RegexMatch
+							regexMatchItem, isRegexMatch := severitymatcherTypeChoiceChoices.(*ves_io_schema_alert_policy.LabelMatcher_RegexMatch)
+
+							if isRegexMatch {
+								severitymatcherTypeChoiceChoicesAttributeMap["regex_match"] = types.StringValue(string(regexMatchItem.RegexMatch))
+							} else {
+								// Empty string, set to null
+								severitymatcherTypeChoiceChoicesAttributeMap["regex_match"] = types.StringNull()
 							}
 
 							// --- End of Choices ---
@@ -5031,16 +4915,6 @@ func (r *ResourceF5XCAlertPolicy) Update(ctx context.Context, request resource.U
 				}
 			}
 
-			// resource specToModelNested StringOfOneOfField --> AlertnameRegex
-			alertnameRegexItem, isAlertnameRegex := routesmatcherChoiceChoices.(*ves_io_schema_alert_policy.Route_AlertnameRegex)
-
-			if isAlertnameRegex {
-				routesmatcherChoiceChoicesAttributeMap["alertname_regex"] = types.StringValue(string(alertnameRegexItem.AlertnameRegex))
-			} else {
-				// Empty string, set to null
-				routesmatcherChoiceChoicesAttributeMap["alertname_regex"] = types.StringNull()
-			}
-
 			// --- End of Choices ---
 
 			// Create the final ObjectValue for this OneOf field
@@ -5071,15 +4945,6 @@ func (r *ResourceF5XCAlertPolicy) Update(ctx context.Context, request resource.U
 
 			// Process nested choices, populating the temporary attribute map
 
-			// resource specToModelNested BoolOfOneOfPointerField --> Send
-			_, isSend := routesactionChoiceChoices.(*ves_io_schema_alert_policy.Route_Send)
-
-			if isSend {
-				routesactionChoiceChoicesAttributeMap["send"] = types.BoolValue(true)
-			} else {
-				routesactionChoiceChoicesAttributeMap["send"] = types.BoolNull()
-			}
-
 			// resource specToModelNested BoolOfOneOfPointerField --> DontSend
 			_, isDontSend := routesactionChoiceChoices.(*ves_io_schema_alert_policy.Route_DontSend)
 
@@ -5087,6 +4952,15 @@ func (r *ResourceF5XCAlertPolicy) Update(ctx context.Context, request resource.U
 				routesactionChoiceChoicesAttributeMap["dont_send"] = types.BoolValue(true)
 			} else {
 				routesactionChoiceChoicesAttributeMap["dont_send"] = types.BoolNull()
+			}
+
+			// resource specToModelNested BoolOfOneOfPointerField --> Send
+			_, isSend := routesactionChoiceChoices.(*ves_io_schema_alert_policy.Route_Send)
+
+			if isSend {
+				routesactionChoiceChoicesAttributeMap["send"] = types.BoolValue(true)
+			} else {
+				routesactionChoiceChoicesAttributeMap["send"] = types.BoolNull()
 			}
 
 			// --- End of Choices ---
@@ -5116,6 +4990,14 @@ func (r *ResourceF5XCAlertPolicy) Update(ctx context.Context, request resource.U
 
 			// Recursively populate the nested struct
 
+			// resource specToModelNested StringField --> GroupWait
+			if notificationParametersElement.GetGroupWait() != "" {
+				alertPolicyAlertPolicyNotificationParametersModel.GroupWait = types.StringValue(notificationParametersElement.GetGroupWait())
+			} else {
+				// Empty string, set to null
+				alertPolicyAlertPolicyNotificationParametersModel.GroupWait = types.StringNull()
+			}
+
 			// resource specToModelNested StringField --> GroupInterval
 			if notificationParametersElement.GetGroupInterval() != "" {
 				alertPolicyAlertPolicyNotificationParametersModel.GroupInterval = types.StringValue(notificationParametersElement.GetGroupInterval())
@@ -5142,6 +5024,33 @@ func (r *ResourceF5XCAlertPolicy) Update(ctx context.Context, request resource.U
 				notificationParametersgroupByChoiceChoices := notificationParametersElement.GetGroupBy()
 
 				// Process nested choices, populating the temporary attribute map
+
+				// resource specToModelNested BoolOfOneOfPointerField --> Default
+				_, isDefault := notificationParametersgroupByChoiceChoices.(*ves_io_schema_alert_policy.NotificationParameters_Default)
+
+				if isDefault {
+					notificationParametersgroupByChoiceChoicesAttributeMap["default"] = types.BoolValue(true)
+				} else {
+					notificationParametersgroupByChoiceChoicesAttributeMap["default"] = types.BoolNull()
+				}
+
+				// resource specToModelNested BoolOfOneOfPointerField --> Individual
+				_, isIndividual := notificationParametersgroupByChoiceChoices.(*ves_io_schema_alert_policy.NotificationParameters_Individual)
+
+				if isIndividual {
+					notificationParametersgroupByChoiceChoicesAttributeMap["individual"] = types.BoolValue(true)
+				} else {
+					notificationParametersgroupByChoiceChoicesAttributeMap["individual"] = types.BoolNull()
+				}
+
+				// resource specToModelNested BoolOfOneOfPointerField --> VesIoGroup
+				_, isVesIoGroup := notificationParametersgroupByChoiceChoices.(*ves_io_schema_alert_policy.NotificationParameters_VesIoGroup)
+
+				if isVesIoGroup {
+					notificationParametersgroupByChoiceChoicesAttributeMap["ves_io_group"] = types.BoolValue(true)
+				} else {
+					notificationParametersgroupByChoiceChoicesAttributeMap["ves_io_group"] = types.BoolNull()
+				}
 
 				// resource specToModelNested PointerOfOneOfField --> Custom
 				// GlobalSpecType
@@ -5175,33 +5084,6 @@ func (r *ResourceF5XCAlertPolicy) Update(ctx context.Context, request resource.U
 					}
 				}
 
-				// resource specToModelNested BoolOfOneOfPointerField --> Default
-				_, isDefault := notificationParametersgroupByChoiceChoices.(*ves_io_schema_alert_policy.NotificationParameters_Default)
-
-				if isDefault {
-					notificationParametersgroupByChoiceChoicesAttributeMap["default"] = types.BoolValue(true)
-				} else {
-					notificationParametersgroupByChoiceChoicesAttributeMap["default"] = types.BoolNull()
-				}
-
-				// resource specToModelNested BoolOfOneOfPointerField --> Individual
-				_, isIndividual := notificationParametersgroupByChoiceChoices.(*ves_io_schema_alert_policy.NotificationParameters_Individual)
-
-				if isIndividual {
-					notificationParametersgroupByChoiceChoicesAttributeMap["individual"] = types.BoolValue(true)
-				} else {
-					notificationParametersgroupByChoiceChoicesAttributeMap["individual"] = types.BoolNull()
-				}
-
-				// resource specToModelNested BoolOfOneOfPointerField --> VesIoGroup
-				_, isVesIoGroup := notificationParametersgroupByChoiceChoices.(*ves_io_schema_alert_policy.NotificationParameters_VesIoGroup)
-
-				if isVesIoGroup {
-					notificationParametersgroupByChoiceChoicesAttributeMap["ves_io_group"] = types.BoolValue(true)
-				} else {
-					notificationParametersgroupByChoiceChoicesAttributeMap["ves_io_group"] = types.BoolNull()
-				}
-
 				// --- End of Choices ---
 
 				// Create the final ObjectValue for this OneOf field
@@ -5219,14 +5101,6 @@ func (r *ResourceF5XCAlertPolicy) Update(ctx context.Context, request resource.U
 			} else {
 				// The OneOf field is nil in the source spec, so set the Terraform object to null.
 				alertPolicyAlertPolicyNotificationParametersModel.GroupByChoice = types.ObjectNull(AlertPolicyRoutesNotificationParametersGroupByModelAttributeMap)
-			}
-
-			// resource specToModelNested StringField --> GroupWait
-			if notificationParametersElement.GetGroupWait() != "" {
-				alertPolicyAlertPolicyNotificationParametersModel.GroupWait = types.StringValue(notificationParametersElement.GetGroupWait())
-			} else {
-				// Empty string, set to null
-				alertPolicyAlertPolicyNotificationParametersModel.GroupWait = types.StringNull()
 			}
 
 			// This field needs to be converted to a types.ObjectValue before assignment.
@@ -5262,6 +5136,138 @@ func (r *ResourceF5XCAlertPolicy) Update(ctx context.Context, request resource.U
 	}
 
 	data.Routes = routesList
+
+	// resource SpecToModelRoot PointerField --> NotificationParameters
+	if specData.GetNotificationParameters() != nil {
+		var alertPolicyAlertPolicyNotificationParametersModel = &AlertPolicyAlertPolicyNotificationParameters{}
+		notificationParametersElement := specData.GetNotificationParameters()
+
+		// resource specToModelNested RequiredOneOfField --> GroupBy
+		// GlobalSpecType
+		if notificationParametersElement.GetGroupBy() != nil {
+			// Create a temporary attribute map for the choices within this OneOf
+			notificationParametersgroupByChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+			// Define a variable for the spec choices to be passed down to nested templates
+			notificationParametersgroupByChoiceChoices := notificationParametersElement.GetGroupBy()
+
+			// Process nested choices, populating the temporary attribute map
+
+			// resource specToModelNested PointerOfOneOfField --> Custom
+			// GlobalSpecType
+			// false
+			{
+				customOptions, isCustom := notificationParametersgroupByChoiceChoices.(*ves_io_schema_alert_policy.NotificationParameters_Custom)
+				customAttributeMap := make(map[string]attr.Value)
+
+				if isCustom && customOptions != nil {
+
+					// resource specToModelNested ArrayOfStringField --> Labels
+					if len(customOptions.Custom.GetLabels()) > 0 {
+						listValue, diags := types.ListValueFrom(ctx, types.StringType, customOptions.Custom.GetLabels())
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						customAttributeMap["labels"] = listValue
+					} else {
+						customAttributeMap["labels"] = types.ListNull(types.StringType)
+					}
+
+					customObj, diags := types.ObjectValue(AlertPolicyNotificationParametersGroupByCustomModelAttributeMap, customAttributeMap)
+					response.Diagnostics.Append(diags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					notificationParametersgroupByChoiceChoicesAttributeMap["custom"] = customObj
+				} else {
+					notificationParametersgroupByChoiceChoicesAttributeMap["custom"] = types.ObjectNull(AlertPolicyNotificationParametersGroupByCustomModelAttributeMap)
+				}
+			}
+
+			// resource specToModelNested BoolOfOneOfPointerField --> Default
+			_, isDefault := notificationParametersgroupByChoiceChoices.(*ves_io_schema_alert_policy.NotificationParameters_Default)
+
+			if isDefault {
+				notificationParametersgroupByChoiceChoicesAttributeMap["default"] = types.BoolValue(true)
+			} else {
+				notificationParametersgroupByChoiceChoicesAttributeMap["default"] = types.BoolNull()
+			}
+
+			// resource specToModelNested BoolOfOneOfPointerField --> Individual
+			_, isIndividual := notificationParametersgroupByChoiceChoices.(*ves_io_schema_alert_policy.NotificationParameters_Individual)
+
+			if isIndividual {
+				notificationParametersgroupByChoiceChoicesAttributeMap["individual"] = types.BoolValue(true)
+			} else {
+				notificationParametersgroupByChoiceChoicesAttributeMap["individual"] = types.BoolNull()
+			}
+
+			// resource specToModelNested BoolOfOneOfPointerField --> VesIoGroup
+			_, isVesIoGroup := notificationParametersgroupByChoiceChoices.(*ves_io_schema_alert_policy.NotificationParameters_VesIoGroup)
+
+			if isVesIoGroup {
+				notificationParametersgroupByChoiceChoicesAttributeMap["ves_io_group"] = types.BoolValue(true)
+			} else {
+				notificationParametersgroupByChoiceChoicesAttributeMap["ves_io_group"] = types.BoolNull()
+			}
+
+			// --- End of Choices ---
+
+			// Create the final ObjectValue for this OneOf field
+			finalObj, notificationParametersgroupByChoiceChoicesObjDiags := types.ObjectValue(
+				AlertPolicyNotificationParametersGroupByModelAttributeMap, // The attribute schema for the OneOf choices
+				notificationParametersgroupByChoiceChoicesAttributeMap,
+			)
+			response.Diagnostics.Append(notificationParametersgroupByChoiceChoicesObjDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			// Assign the final object to the correct place (either the root model or a parent's attribute map)
+			alertPolicyAlertPolicyNotificationParametersModel.GroupByChoice = finalObj
+		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			alertPolicyAlertPolicyNotificationParametersModel.GroupByChoice = types.ObjectNull(AlertPolicyNotificationParametersGroupByModelAttributeMap)
+		}
+
+		// resource specToModelNested StringField --> GroupWait
+		if notificationParametersElement.GetGroupWait() != "" {
+			alertPolicyAlertPolicyNotificationParametersModel.GroupWait = types.StringValue(notificationParametersElement.GetGroupWait())
+		} else {
+			// Empty string, set to null
+			alertPolicyAlertPolicyNotificationParametersModel.GroupWait = types.StringNull()
+		}
+
+		// resource specToModelNested StringField --> GroupInterval
+		if notificationParametersElement.GetGroupInterval() != "" {
+			alertPolicyAlertPolicyNotificationParametersModel.GroupInterval = types.StringValue(notificationParametersElement.GetGroupInterval())
+		} else {
+			// Empty string, set to null
+			alertPolicyAlertPolicyNotificationParametersModel.GroupInterval = types.StringNull()
+		}
+
+		// resource specToModelNested StringField --> RepeatInterval
+		if notificationParametersElement.GetRepeatInterval() != "" {
+			alertPolicyAlertPolicyNotificationParametersModel.RepeatInterval = types.StringValue(notificationParametersElement.GetRepeatInterval())
+		} else {
+			// Empty string, set to null
+			alertPolicyAlertPolicyNotificationParametersModel.RepeatInterval = types.StringNull()
+		}
+
+		notificationParametersObj, notificationParametersDiags := utils.GoStructToObjectValue(
+			ctx,
+			AlertPolicyNotificationParametersModelAttributeMap,
+			alertPolicyAlertPolicyNotificationParametersModel,
+		)
+		response.Diagnostics.Append(notificationParametersDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.NotificationParameters = notificationParametersObj
+	} else {
+		data.NotificationParameters = types.ObjectNull(AlertPolicyNotificationParametersModelAttributeMap)
+	}
 
 	// Save updated data into Terraform state
 	response.Diagnostics.Append(response.State.Set(ctx, &data)...)

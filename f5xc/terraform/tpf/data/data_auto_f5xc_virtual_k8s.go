@@ -30,8 +30,8 @@ type DataSourceF5XCVirtualK8S struct {
 }
 
 type VirtualK8SGlobalSpecTypeServiceIsolationChoice struct {
-	Isolated types.Bool `tfsdk:"isolated"`
 	Disabled types.Bool `tfsdk:"disabled"`
+	Isolated types.Bool `tfsdk:"isolated"`
 }
 
 // DataSourceF5XCVirtualK8SModel describes the resource data model.
@@ -42,30 +42,30 @@ type DataSourceF5XCVirtualK8SModel struct {
 	Uid                    types.String   `tfsdk:"uid"`
 	Labels                 types.Map      `tfsdk:"labels"`
 	Annotations            types.Map      `tfsdk:"annotations"`
+	VsiteRefs              types.List     `tfsdk:"vsite_refs"`
 	ServiceIsolationChoice types.Object   `tfsdk:"service_isolation_choice"`
 	DefaultFlavorRef       types.Object   `tfsdk:"default_flavor_ref"`
-	VsiteRefs              types.List     `tfsdk:"vsite_refs"`
 	Timeouts               timeouts.Value `tfsdk:"timeouts"`
 }
 
 // --- Attribute Maps for Nested Structs ---
-// Attribute map for OneOfField --> ServiceIsolationChoice
-var VirtualK8sServiceIsolationChoiceModelAttributeMap = map[string]attr.Type{
-
-	"isolated": types.BoolType,
-	"disabled": types.BoolType,
-}
-
-// Attribute map for PointerField --> DefaultFlavorRef
-var VirtualK8sDefaultFlavorRefModelAttributeMap = map[string]attr.Type{
+// Attribute map for ArrayOfPointerField --> VsiteRefs
+var VirtualK8sVsiteRefsObjectRefModelAttributeMap = map[string]attr.Type{
 
 	"name":      types.StringType,
 	"tenant":    types.StringType,
 	"namespace": types.StringType,
 }
 
-// Attribute map for ArrayOfPointerField --> VsiteRefs
-var VirtualK8sVsiteRefsObjectRefModelAttributeMap = map[string]attr.Type{
+// Attribute map for OneOfField --> ServiceIsolationChoice
+var VirtualK8sServiceIsolationChoiceModelAttributeMap = map[string]attr.Type{
+
+	"disabled": types.BoolType,
+	"isolated": types.BoolType,
+}
+
+// Attribute map for PointerField --> DefaultFlavorRef
+var VirtualK8sDefaultFlavorRefModelAttributeMap = map[string]attr.Type{
 
 	"tenant":    types.StringType,
 	"namespace": types.StringType,
@@ -128,52 +128,6 @@ func (r *DataSourceF5XCVirtualK8S) Schema(ctx context.Context, request datasourc
 				Computed:    true,
 				ElementType: types.StringType,
 			},
-			"service_isolation_choice": schema.SingleNestedAttribute{
-				Description: "service_isolation_choice Service isolation choice",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				Attributes: map[string]schema.Attribute{
-					"isolated": schema.BoolAttribute{
-						Description: "Isolated Isolated K8s services restrict any K8s services created in the Virtual K8s from communicating outside the namespace unless overridden by the K8s service via setting the ves.io/serviceIsolation annotation to false",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-					},
-					"disabled": schema.BoolAttribute{
-						Description: "Disabled K8s services are not restricted and communcation can happen across namespaces unless overridden by the K8s service via setting the ves.io/serviceIsolation annotation to true",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-					},
-				},
-			},
-			"default_flavor_ref": schema.SingleNestedAttribute{
-				Description: "Default Workload Flavor Default workfload flavor for all workloads launched in this Virtual K8s",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				Attributes: map[string]schema.Attribute{
-					"name": schema.StringAttribute{
-						Description: "",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-					},
-					"tenant": schema.StringAttribute{
-						Description: "",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-					},
-					"namespace": schema.StringAttribute{
-						Description: "",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-					},
-				},
-			},
 			"vsite_refs": schema.ListNestedAttribute{
 				Description: "vsite_refs Reference to virtual-sites Default virtual-site of the Virtual K8s object. If no virtual-site is specified in the Kubernetes API resource object annotations via ves.io/virtual-sites, then this virtual-site is used select sites on which to instantiate the Kubernetes API resource object",
 				Required:    false,
@@ -181,6 +135,12 @@ func (r *DataSourceF5XCVirtualK8S) Schema(ctx context.Context, request datasourc
 				Computed:    true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
+						"name": schema.StringAttribute{
+							Description: "",
+							Required:    false,
+							Optional:    false,
+							Computed:    true,
+						},
 						"tenant": schema.StringAttribute{
 							Description: "",
 							Required:    false,
@@ -193,12 +153,52 @@ func (r *DataSourceF5XCVirtualK8S) Schema(ctx context.Context, request datasourc
 							Optional:    false,
 							Computed:    true,
 						},
-						"name": schema.StringAttribute{
-							Description: "",
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-						},
+					},
+				},
+			},
+			"service_isolation_choice": schema.SingleNestedAttribute{
+				Description: "service_isolation_choice Service isolation choice",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				Attributes: map[string]schema.Attribute{
+					"disabled": schema.BoolAttribute{
+						Description: "Disabled K8s services are not restricted and communcation can happen across namespaces unless overridden by the K8s service via setting the ves.io/serviceIsolation annotation to true",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
+					"isolated": schema.BoolAttribute{
+						Description: "Isolated Isolated K8s services restrict any K8s services created in the Virtual K8s from communicating outside the namespace unless overridden by the K8s service via setting the ves.io/serviceIsolation annotation to false",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
+				},
+			},
+			"default_flavor_ref": schema.SingleNestedAttribute{
+				Description: "Default Workload Flavor Default workfload flavor for all workloads launched in this Virtual K8s",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				Attributes: map[string]schema.Attribute{
+					"tenant": schema.StringAttribute{
+						Description: "",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
+					"namespace": schema.StringAttribute{
+						Description: "",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
+					"name": schema.StringAttribute{
+						Description: "",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
 					},
 				},
 			},
@@ -321,6 +321,60 @@ func (d *DataSourceF5XCVirtualK8S) Read(ctx context.Context, request datasource.
 		data.Annotations = types.MapNull(types.StringType)
 	}
 
+	// data SpecToModelRoot ArrayOfPointerField --> VsiteRefs
+	if len(specData.VsiteRefs) > 0 {
+		vsiteRefsElements := make([]ObjectRefTypeModel, 0, len(specData.VsiteRefs))
+
+		for _, vsiteRefsElement := range specData.VsiteRefs {
+			objectRefTypeModelModel := ObjectRefTypeModel{}
+
+			// data specToModelNested RequiredStringField --> Name
+			if vsiteRefsElement.GetName() != "" {
+				objectRefTypeModelModel.Name = types.StringValue(vsiteRefsElement.GetName())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Name = types.StringNull()
+			}
+
+			// data specToModelNested StringField --> Tenant
+			if vsiteRefsElement.GetTenant() != "" {
+				objectRefTypeModelModel.Tenant = types.StringValue(vsiteRefsElement.GetTenant())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Tenant = types.StringNull()
+			}
+
+			// data specToModelNested RequiredStringField --> Namespace
+			if vsiteRefsElement.GetNamespace() != "" {
+				objectRefTypeModelModel.Namespace = types.StringValue(vsiteRefsElement.GetNamespace())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Namespace = types.StringNull()
+			}
+
+			vsiteRefsElements = append(vsiteRefsElements, objectRefTypeModelModel)
+		}
+
+		vsiteRefsList, diags := utils.GoStructSliceToListValue(
+			ctx,
+			VirtualK8sVsiteRefsObjectRefModelAttributeMap,
+			vsiteRefsElements,
+		)
+
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+
+		data.VsiteRefs = vsiteRefsList
+	} else {
+		var vsiteRefsObjectType = basetypes.ObjectType{
+			AttrTypes: VirtualK8sVsiteRefsObjectRefModelAttributeMap,
+		}
+		nullVsiteRefsList := basetypes.NewListNull(vsiteRefsObjectType)
+		data.VsiteRefs = nullVsiteRefsList
+	}
+
 	// data SpecToModelRoot OneOfField --> ServiceIsolationChoice
 	// false
 	// false
@@ -335,15 +389,6 @@ func (d *DataSourceF5XCVirtualK8S) Read(ctx context.Context, request datasource.
 
 		// Recursively call the nested template to process the oneof choices.
 
-		// data specToModelNested BoolOfOneOfPointerField --> Isolated
-		_, isIsolated := serviceIsolationChoiceChoices.(*ves_io_schema_virtual_k8s.GlobalSpecType_Isolated)
-
-		if isIsolated {
-			serviceIsolationChoiceChoicesModel.Isolated = types.BoolValue(true)
-		} else {
-			serviceIsolationChoiceChoicesModel.Isolated = types.BoolNull()
-		}
-
 		// data specToModelNested BoolOfOneOfPointerField --> Disabled
 		_, isDisabled := serviceIsolationChoiceChoices.(*ves_io_schema_virtual_k8s.GlobalSpecType_Disabled)
 
@@ -351,6 +396,15 @@ func (d *DataSourceF5XCVirtualK8S) Read(ctx context.Context, request datasource.
 			serviceIsolationChoiceChoicesModel.Disabled = types.BoolValue(true)
 		} else {
 			serviceIsolationChoiceChoicesModel.Disabled = types.BoolNull()
+		}
+
+		// data specToModelNested BoolOfOneOfPointerField --> Isolated
+		_, isIsolated := serviceIsolationChoiceChoices.(*ves_io_schema_virtual_k8s.GlobalSpecType_Isolated)
+
+		if isIsolated {
+			serviceIsolationChoiceChoicesModel.Isolated = types.BoolValue(true)
+		} else {
+			serviceIsolationChoiceChoicesModel.Isolated = types.BoolNull()
 		}
 
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
@@ -376,14 +430,6 @@ func (d *DataSourceF5XCVirtualK8S) Read(ctx context.Context, request datasource.
 		var objectRefTypeModelModel = &ObjectRefTypeModel{}
 		defaultFlavorRefElement := specData.GetDefaultFlavorRef()
 
-		// data specToModelNested RequiredStringField --> Name
-		if defaultFlavorRefElement.GetName() != "" {
-			objectRefTypeModelModel.Name = types.StringValue(defaultFlavorRefElement.GetName())
-		} else {
-			// Empty string, set to null
-			objectRefTypeModelModel.Name = types.StringNull()
-		}
-
 		// data specToModelNested StringField --> Tenant
 		if defaultFlavorRefElement.GetTenant() != "" {
 			objectRefTypeModelModel.Tenant = types.StringValue(defaultFlavorRefElement.GetTenant())
@@ -400,6 +446,14 @@ func (d *DataSourceF5XCVirtualK8S) Read(ctx context.Context, request datasource.
 			objectRefTypeModelModel.Namespace = types.StringNull()
 		}
 
+		// data specToModelNested RequiredStringField --> Name
+		if defaultFlavorRefElement.GetName() != "" {
+			objectRefTypeModelModel.Name = types.StringValue(defaultFlavorRefElement.GetName())
+		} else {
+			// Empty string, set to null
+			objectRefTypeModelModel.Name = types.StringNull()
+		}
+
 		defaultFlavorRefObj, defaultFlavorRefDiags := utils.GoStructToObjectValue(
 			ctx,
 			VirtualK8sDefaultFlavorRefModelAttributeMap,
@@ -412,60 +466,6 @@ func (d *DataSourceF5XCVirtualK8S) Read(ctx context.Context, request datasource.
 		data.DefaultFlavorRef = defaultFlavorRefObj
 	} else {
 		data.DefaultFlavorRef = types.ObjectNull(VirtualK8sDefaultFlavorRefModelAttributeMap)
-	}
-
-	// data SpecToModelRoot ArrayOfPointerField --> VsiteRefs
-	if len(specData.VsiteRefs) > 0 {
-		vsiteRefsElements := make([]ObjectRefTypeModel, 0, len(specData.VsiteRefs))
-
-		for _, vsiteRefsElement := range specData.VsiteRefs {
-			objectRefTypeModelModel := ObjectRefTypeModel{}
-
-			// data specToModelNested StringField --> Tenant
-			if vsiteRefsElement.GetTenant() != "" {
-				objectRefTypeModelModel.Tenant = types.StringValue(vsiteRefsElement.GetTenant())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Tenant = types.StringNull()
-			}
-
-			// data specToModelNested RequiredStringField --> Namespace
-			if vsiteRefsElement.GetNamespace() != "" {
-				objectRefTypeModelModel.Namespace = types.StringValue(vsiteRefsElement.GetNamespace())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Namespace = types.StringNull()
-			}
-
-			// data specToModelNested RequiredStringField --> Name
-			if vsiteRefsElement.GetName() != "" {
-				objectRefTypeModelModel.Name = types.StringValue(vsiteRefsElement.GetName())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Name = types.StringNull()
-			}
-
-			vsiteRefsElements = append(vsiteRefsElements, objectRefTypeModelModel)
-		}
-
-		vsiteRefsList, diags := utils.GoStructSliceToListValue(
-			ctx,
-			VirtualK8sVsiteRefsObjectRefModelAttributeMap,
-			vsiteRefsElements,
-		)
-
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-
-		data.VsiteRefs = vsiteRefsList
-	} else {
-		var vsiteRefsObjectType = basetypes.ObjectType{
-			AttrTypes: VirtualK8sVsiteRefsObjectRefModelAttributeMap,
-		}
-		nullVsiteRefsList := basetypes.NewListNull(vsiteRefsObjectType)
-		data.VsiteRefs = nullVsiteRefsList
 	}
 
 	// Set state to fully populated data

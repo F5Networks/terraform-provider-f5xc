@@ -7,7 +7,7 @@ resource "f5xc_alert_policy" "example" {
   }]
   routes = [{
     action = {
-      send = true
+      dont_send = true
     }
   }]
 }

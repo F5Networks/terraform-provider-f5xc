@@ -34,11 +34,6 @@ type DataSourceF5XCV1HttpMonitor struct {
 	client *client.APIClient
 }
 
-type V1HttpMonitorV1HttpMonitorHTTPMonitorHeader struct {
-	Key   types.String `tfsdk:"key"`
-	Value types.String `tfsdk:"value"`
-}
-
 type V1HttpMonitorSyntheticMonitorHealthPolicy struct {
 	DynamicThresholdPolicyChoice   types.Object `tfsdk:"dynamic_threshold_policy_choice"`
 	StaticMaxThresholdPolicyChoice types.Object `tfsdk:"static_max_threshold_policy_choice"`
@@ -51,8 +46,8 @@ type V1HttpMonitorHealthPolicyDynamicThresholdPolicyChoice struct {
 }
 
 type V1HttpMonitorHealthPolicyDynamicThreshold struct {
-	StdDevVal  types.List `tfsdk:"std_dev_val"`
 	EvalPeriod types.List `tfsdk:"eval_period"`
+	StdDevVal  types.List `tfsdk:"std_dev_val"`
 }
 
 type V1HttpMonitorHealthPolicyStaticMaxThresholdPolicyChoice struct {
@@ -76,25 +71,29 @@ type V1HttpMonitorHealthPolicyStaticMinThreshold struct {
 }
 
 type V1HttpMonitorCreateSpecTypeIntervalChoice struct {
-	Interval_1Hour   types.Bool `tfsdk:"interval_1_hour"`
-	Interval_12Hours types.Bool `tfsdk:"interval_12_hours"`
-	Interval_30Secs  types.Bool `tfsdk:"interval_30_secs"`
-	Interval_1Min    types.Bool `tfsdk:"interval_1_min"`
-	Interval_15Mins  types.Bool `tfsdk:"interval_15_mins"`
-	Interval_30Mins  types.Bool `tfsdk:"interval_30_mins"`
 	Interval_6Hours  types.Bool `tfsdk:"interval_6_hours"`
+	Interval_15Mins  types.Bool `tfsdk:"interval_15_mins"`
 	Interval_1Day    types.Bool `tfsdk:"interval_1_day"`
+	Interval_12Hours types.Bool `tfsdk:"interval_12_hours"`
+	Interval_1Min    types.Bool `tfsdk:"interval_1_min"`
+	Interval_1Hour   types.Bool `tfsdk:"interval_1_hour"`
+	Interval_30Secs  types.Bool `tfsdk:"interval_30_secs"`
 	Interval_5Mins   types.Bool `tfsdk:"interval_5_mins"`
+	Interval_30Mins  types.Bool `tfsdk:"interval_30_mins"`
 }
 
 type V1HttpMonitorCreateSpecTypeMethodChoice struct {
-	Patch   types.Object `tfsdk:"patch"`
-	Post    types.Object `tfsdk:"post"`
-	Put     types.Object `tfsdk:"put"`
 	Delete  types.Object `tfsdk:"delete"`
 	Get     types.Bool   `tfsdk:"get"`
 	Head    types.Bool   `tfsdk:"head"`
 	Options types.Bool   `tfsdk:"options"`
+	Patch   types.Object `tfsdk:"patch"`
+	Post    types.Object `tfsdk:"post"`
+	Put     types.Object `tfsdk:"put"`
+}
+
+type V1HttpMonitorCreateSpecTypeDelete struct {
+	RequestBody types.String `tfsdk:"request_body"`
 }
 
 type V1HttpMonitorCreateSpecTypePatch struct {
@@ -109,8 +108,9 @@ type V1HttpMonitorCreateSpecTypePut struct {
 	RequestBody types.String `tfsdk:"request_body"`
 }
 
-type V1HttpMonitorCreateSpecTypeDelete struct {
-	RequestBody types.String `tfsdk:"request_body"`
+type V1HttpMonitorV1HttpMonitorHTTPMonitorHeader struct {
+	Value types.String `tfsdk:"value"`
+	Key   types.String `tfsdk:"key"`
 }
 
 type V1HttpMonitorSyntheticMonitorSourceExternal struct {
@@ -132,23 +132,23 @@ type V1HttpMonitorSourceExternalF5Xc struct {
 
 // DataSourceF5XCV1HttpMonitorModel describes the resource data model.
 type DataSourceF5XCV1HttpMonitorModel struct {
+	Uid                     types.String   `tfsdk:"uid"`
 	Labels                  types.Map      `tfsdk:"labels"`
 	Annotations             types.Map      `tfsdk:"annotations"`
 	Description             types.String   `tfsdk:"description"`
 	Name                    types.String   `tfsdk:"name"`
 	Namespace               types.String   `tfsdk:"namespace"`
-	Uid                     types.String   `tfsdk:"uid"`
-	ResponseCodes           types.List     `tfsdk:"response_codes"`
 	Url                     types.String   `tfsdk:"url"`
-	RequestHeaders          types.List     `tfsdk:"request_headers"`
-	OnFailureCount          types.Int64    `tfsdk:"on_failure_count"`
-	Receive                 types.String   `tfsdk:"receive"`
 	IgnoreCertErrors        types.Bool     `tfsdk:"ignore_cert_errors"`
 	SourceCriticalThreshold types.Int64    `tfsdk:"source_critical_threshold"`
 	SniHost                 types.String   `tfsdk:"sni_host"`
+	ResponseCodes           types.List     `tfsdk:"response_codes"`
 	HealthPolicy            types.Object   `tfsdk:"health_policy"`
 	IntervalChoice          types.Object   `tfsdk:"interval_choice"`
 	MethodChoice            types.Object   `tfsdk:"method_choice"`
+	RequestHeaders          types.List     `tfsdk:"request_headers"`
+	OnFailureCount          types.Int64    `tfsdk:"on_failure_count"`
+	Receive                 types.String   `tfsdk:"receive"`
 	FollowRedirects         types.Bool     `tfsdk:"follow_redirects"`
 	ResponseTimeout         types.Int64    `tfsdk:"response_timeout"`
 	ExternalSources         types.List     `tfsdk:"external_sources"`
@@ -156,13 +156,6 @@ type DataSourceF5XCV1HttpMonitorModel struct {
 }
 
 // --- Attribute Maps for Nested Structs ---
-// Attribute map for ArrayOfPointerField --> RequestHeaders
-var V1HttpMonitorRequestHeadersModelAttributeMap = map[string]attr.Type{
-
-	"key":   types.StringType,
-	"value": types.StringType,
-}
-
 // Attribute map for PointerField --> HealthPolicy
 var V1HttpMonitorHealthPolicyModelAttributeMap = map[string]attr.Type{
 
@@ -189,10 +182,10 @@ var V1HttpMonitorHealthPolicyDynamicThresholdPolicyModelAttributeMap = map[strin
 // Attribute map for PointerOfOneOfField --> DynamicThreshold
 var V1HttpMonitorHealthPolicyDynamicThresholdPolicyDynamicThresholdModelAttributeMap = map[string]attr.Type{
 
-	"std_dev_val": types.ListType{
+	"eval_period": types.ListType{
 		ElemType: types.StringType,
 	},
-	"eval_period": types.ListType{
+	"std_dev_val": types.ListType{
 		ElemType: types.StringType,
 	},
 }
@@ -236,20 +229,26 @@ var V1HttpMonitorHealthPolicyStaticMinThresholdPolicyStaticMinThresholdModelAttr
 // Attribute map for RequiredOneOfField --> IntervalChoice
 var V1HttpMonitorIntervalChoiceModelAttributeMap = map[string]attr.Type{
 
-	"interval_1_hour":   types.BoolType,
-	"interval_12_hours": types.BoolType,
-	"interval_30_secs":  types.BoolType,
-	"interval_1_min":    types.BoolType,
-	"interval_15_mins":  types.BoolType,
-	"interval_30_mins":  types.BoolType,
 	"interval_6_hours":  types.BoolType,
+	"interval_15_mins":  types.BoolType,
 	"interval_1_day":    types.BoolType,
+	"interval_12_hours": types.BoolType,
+	"interval_1_min":    types.BoolType,
+	"interval_1_hour":   types.BoolType,
+	"interval_30_secs":  types.BoolType,
 	"interval_5_mins":   types.BoolType,
+	"interval_30_mins":  types.BoolType,
 }
 
 // Attribute map for RequiredOneOfField --> Method
 var V1HttpMonitorMethodModelAttributeMap = map[string]attr.Type{
 
+	"delete": types.ObjectType{
+		AttrTypes: V1HttpMonitorMethodDeleteModelAttributeMap,
+	},
+	"get":     types.BoolType,
+	"head":    types.BoolType,
+	"options": types.BoolType,
 	"patch": types.ObjectType{
 		AttrTypes: V1HttpMonitorMethodPatchModelAttributeMap,
 	},
@@ -259,12 +258,12 @@ var V1HttpMonitorMethodModelAttributeMap = map[string]attr.Type{
 	"put": types.ObjectType{
 		AttrTypes: V1HttpMonitorMethodPutModelAttributeMap,
 	},
-	"delete": types.ObjectType{
-		AttrTypes: V1HttpMonitorMethodDeleteModelAttributeMap,
-	},
-	"get":     types.BoolType,
-	"head":    types.BoolType,
-	"options": types.BoolType,
+}
+
+// Attribute map for PointerOfOneOfField --> Delete
+var V1HttpMonitorMethodDeleteModelAttributeMap = map[string]attr.Type{
+
+	"request_body": types.StringType,
 }
 
 // Attribute map for PointerOfOneOfField --> Patch
@@ -285,10 +284,11 @@ var V1HttpMonitorMethodPutModelAttributeMap = map[string]attr.Type{
 	"request_body": types.StringType,
 }
 
-// Attribute map for PointerOfOneOfField --> Delete
-var V1HttpMonitorMethodDeleteModelAttributeMap = map[string]attr.Type{
+// Attribute map for ArrayOfPointerField --> RequestHeaders
+var V1HttpMonitorRequestHeadersModelAttributeMap = map[string]attr.Type{
 
-	"request_body": types.StringType,
+	"value": types.StringType,
+	"key":   types.StringType,
 }
 
 // Attribute map for RequiredArrayOfPointerField --> ExternalSources
@@ -344,6 +344,12 @@ func (r *DataSourceF5XCV1HttpMonitor) Schema(ctx context.Context, request dataso
 		Description:         "V1HttpMonitor data source",
 
 		Attributes: map[string]schema.Attribute{
+			"uid": schema.StringAttribute{
+				Description: "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+			},
 			"labels": schema.MapAttribute{
 				Description: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
 				Required:    false,
@@ -376,55 +382,8 @@ func (r *DataSourceF5XCV1HttpMonitor) Schema(ctx context.Context, request dataso
 				Optional:    true,
 				Computed:    true,
 			},
-			"uid": schema.StringAttribute{
-				Description: "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-			},
-			"response_codes": schema.ListAttribute{
-				Description: "response_codes HTTP response codes which will result in a healthy monitor. Use '*' as a wildcard character.",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
 			"url": schema.StringAttribute{
 				Description: "url",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-			},
-			"request_headers": schema.ListNestedAttribute{
-				Description: "request_headers",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-						"key": schema.StringAttribute{
-							Description: "Key",
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-						},
-						"value": schema.StringAttribute{
-							Description: "Value",
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-						},
-					},
-				},
-			},
-			"on_failure_count": schema.Int64Attribute{
-				Description: "on_failure_count The number of times a monitor must fail before the global monitor changes health",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-			},
-			"receive": schema.StringAttribute{
-				Description: "receive The regex pattern that the monitor looks for in the returned resource. If the text string is returned, the monitor is healthy. Note, headers are not considered in the matching.",
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
@@ -446,6 +405,13 @@ func (r *DataSourceF5XCV1HttpMonitor) Schema(ctx context.Context, request dataso
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
+			},
+			"response_codes": schema.ListAttribute{
+				Description: "response_codes HTTP response codes which will result in a healthy monitor. Use '*' as a wildcard character.",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				ElementType: types.StringType,
 			},
 			"health_policy": schema.SingleNestedAttribute{
 				Description: "health_policy",
@@ -471,15 +437,15 @@ func (r *DataSourceF5XCV1HttpMonitor) Schema(ctx context.Context, request dataso
 								Optional:    false,
 								Computed:    true,
 								Attributes: map[string]schema.Attribute{
-									"std_dev_val": schema.ListAttribute{
-										Description: "std_dev_val The number of standard deviations response time value must exceed before the monitor turns critical.",
+									"eval_period": schema.ListAttribute{
+										Description: "eval_period The duration that the response time value must exceed the set threshold before the monitor turns critical.",
 										ElementType: types.StringType,
 										Required:    false,
 										Optional:    false,
 										Computed:    true,
 									},
-									"eval_period": schema.ListAttribute{
-										Description: "eval_period The duration that the response time value must exceed the set threshold before the monitor turns critical.",
+									"std_dev_val": schema.ListAttribute{
+										Description: "std_dev_val The number of standard deviations response time value must exceed before the monitor turns critical.",
 										ElementType: types.StringType,
 										Required:    false,
 										Optional:    false,
@@ -567,26 +533,8 @@ func (r *DataSourceF5XCV1HttpMonitor) Schema(ctx context.Context, request dataso
 				Optional:    false,
 				Computed:    true,
 				Attributes: map[string]schema.Attribute{
-					"interval_1_hour": schema.BoolAttribute{
-						Description: "1 hour",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-					},
-					"interval_12_hours": schema.BoolAttribute{
-						Description: "12 hours",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-					},
-					"interval_30_secs": schema.BoolAttribute{
-						Description: "30 seconds",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-					},
-					"interval_1_min": schema.BoolAttribute{
-						Description: "1 minute",
+					"interval_6_hours": schema.BoolAttribute{
+						Description: "6 hours",
 						Required:    false,
 						Optional:    false,
 						Computed:    true,
@@ -597,26 +545,44 @@ func (r *DataSourceF5XCV1HttpMonitor) Schema(ctx context.Context, request dataso
 						Optional:    false,
 						Computed:    true,
 					},
-					"interval_30_mins": schema.BoolAttribute{
-						Description: "30 minutes",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-					},
-					"interval_6_hours": schema.BoolAttribute{
-						Description: "6 hours",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-					},
 					"interval_1_day": schema.BoolAttribute{
 						Description: "1 day",
 						Required:    false,
 						Optional:    false,
 						Computed:    true,
 					},
+					"interval_12_hours": schema.BoolAttribute{
+						Description: "12 hours",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
+					"interval_1_min": schema.BoolAttribute{
+						Description: "1 minute",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
+					"interval_1_hour": schema.BoolAttribute{
+						Description: "1 hour",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
+					"interval_30_secs": schema.BoolAttribute{
+						Description: "30 seconds",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
 					"interval_5_mins": schema.BoolAttribute{
 						Description: "5 minutes",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
+					"interval_30_mins": schema.BoolAttribute{
+						Description: "30 minutes",
 						Required:    false,
 						Optional:    false,
 						Computed:    true,
@@ -629,6 +595,38 @@ func (r *DataSourceF5XCV1HttpMonitor) Schema(ctx context.Context, request dataso
 				Optional:    false,
 				Computed:    true,
 				Attributes: map[string]schema.Attribute{
+					"delete": schema.SingleNestedAttribute{
+						Description: "DELETE DELETE method",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+						Attributes: map[string]schema.Attribute{
+							"request_body": schema.StringAttribute{
+								Description: "content Ensure appropriate request headers are added based on the content type added here",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
+						},
+					},
+					"get": schema.BoolAttribute{
+						Description: "GET GET method",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
+					"head": schema.BoolAttribute{
+						Description: "HEAD HEAD method",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
+					"options": schema.BoolAttribute{
+						Description: "OPTIONS OPTIONS method",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
 					"patch": schema.SingleNestedAttribute{
 						Description: "PATCH PATCH method",
 						Required:    false,
@@ -671,39 +669,41 @@ func (r *DataSourceF5XCV1HttpMonitor) Schema(ctx context.Context, request dataso
 							},
 						},
 					},
-					"delete": schema.SingleNestedAttribute{
-						Description: "DELETE DELETE method",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-						Attributes: map[string]schema.Attribute{
-							"request_body": schema.StringAttribute{
-								Description: "content Ensure appropriate request headers are added based on the content type added here",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-							},
+				},
+			},
+			"request_headers": schema.ListNestedAttribute{
+				Description: "request_headers",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"value": schema.StringAttribute{
+							Description: "Value",
+							Required:    false,
+							Optional:    false,
+							Computed:    true,
+						},
+						"key": schema.StringAttribute{
+							Description: "Key",
+							Required:    false,
+							Optional:    false,
+							Computed:    true,
 						},
 					},
-					"get": schema.BoolAttribute{
-						Description: "GET GET method",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-					},
-					"head": schema.BoolAttribute{
-						Description: "HEAD HEAD method",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-					},
-					"options": schema.BoolAttribute{
-						Description: "OPTIONS OPTIONS method",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-					},
 				},
+			},
+			"on_failure_count": schema.Int64Attribute{
+				Description: "on_failure_count The number of times a monitor must fail before the global monitor changes health",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+			},
+			"receive": schema.StringAttribute{
+				Description: "receive The regex pattern that the monitor looks for in the returned resource. If the text string is returned, the monitor is healthy. Note, headers are not considered in the matching.",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
 			},
 			"follow_redirects": schema.BoolAttribute{
 				Description: "follow_redirects Controls if the monitor will follow redirects while determining health",
@@ -866,6 +866,9 @@ func (d *DataSourceF5XCV1HttpMonitor) Read(ctx context.Context, request datasour
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
+	// data SpecToModelRoot Meta StringField --> Uid
+	data.Uid = types.StringValue(systemMetaData.GetUid())
+
 	// data SpecToModelRoot Meta MapOfStringField --> Labels
 	if metaData.GetLabels() != nil {
 		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
@@ -911,87 +914,12 @@ func (d *DataSourceF5XCV1HttpMonitor) Read(ctx context.Context, request datasour
 	// data SpecToModelRoot Meta RequiredStringField --> Namespace
 	data.Namespace = types.StringValue(metaData.GetNamespace())
 
-	// data SpecToModelRoot Meta StringField --> Uid
-	data.Uid = types.StringValue(systemMetaData.GetUid())
-
-	// data SpecToModelRoot RequiredArrayOfStringField --> ResponseCodes
-	if len(specData.GetResponseCodes()) > 0 {
-		listValue, diags := types.ListValueFrom(ctx, types.StringType, specData.GetResponseCodes())
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.ResponseCodes = listValue
-	} else {
-		data.ResponseCodes = types.ListNull(types.StringType)
-	}
-
 	// data SpecToModelRoot RequiredStringField --> Url
 	if specData.GetUrl() != "" {
 		data.Url = types.StringValue(specData.GetUrl())
 	} else {
 		// Empty string, set to null
 		data.Url = types.StringNull()
-	}
-
-	// data SpecToModelRoot ArrayOfPointerField --> RequestHeaders
-	if len(specData.RequestHeaders) > 0 {
-		requestHeadersElements := make([]V1HttpMonitorV1HttpMonitorHTTPMonitorHeader, 0, len(specData.RequestHeaders))
-
-		for _, requestHeadersElement := range specData.RequestHeaders {
-			v1HttpMonitorV1HttpMonitorHTTPMonitorHeaderModel := V1HttpMonitorV1HttpMonitorHTTPMonitorHeader{}
-
-			// data specToModelNested RequiredStringField --> Key
-			if requestHeadersElement.GetKey() != "" {
-				v1HttpMonitorV1HttpMonitorHTTPMonitorHeaderModel.Key = types.StringValue(requestHeadersElement.GetKey())
-			} else {
-				// Empty string, set to null
-				v1HttpMonitorV1HttpMonitorHTTPMonitorHeaderModel.Key = types.StringNull()
-			}
-
-			// data specToModelNested StringField --> Value
-			if requestHeadersElement.GetValue() != "" {
-				v1HttpMonitorV1HttpMonitorHTTPMonitorHeaderModel.Value = types.StringValue(requestHeadersElement.GetValue())
-			} else {
-				// Empty string, set to null
-				v1HttpMonitorV1HttpMonitorHTTPMonitorHeaderModel.Value = types.StringNull()
-			}
-
-			requestHeadersElements = append(requestHeadersElements, v1HttpMonitorV1HttpMonitorHTTPMonitorHeaderModel)
-		}
-
-		requestHeadersList, diags := utils.GoStructSliceToListValue(
-			ctx,
-			V1HttpMonitorRequestHeadersModelAttributeMap,
-			requestHeadersElements,
-		)
-
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-
-		data.RequestHeaders = requestHeadersList
-	} else {
-		var requestHeadersObjectType = basetypes.ObjectType{
-			AttrTypes: V1HttpMonitorRequestHeadersModelAttributeMap,
-		}
-		nullRequestHeadersList := basetypes.NewListNull(requestHeadersObjectType)
-		data.RequestHeaders = nullRequestHeadersList
-	}
-
-	// data SpecToModelRoot RequiredUintField --> OnFailureCount
-	onFailureCountValue := specData.GetOnFailureCount()
-	if onFailureCountValue > 0 {
-		data.OnFailureCount = types.Int64Value(int64(onFailureCountValue))
-	}
-
-	// data SpecToModelRoot StringField --> Receive
-	if specData.GetReceive() != "" {
-		data.Receive = types.StringValue(specData.GetReceive())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.Receive = types.StringNull()
 	}
 
 	// data SpecToModelRoot BoolField --> IgnoreCertErrors
@@ -1009,6 +937,18 @@ func (d *DataSourceF5XCV1HttpMonitor) Read(ctx context.Context, request datasour
 	} else {
 		// Empty string, set to null to avoid "inconsistent result after apply" errors
 		data.SniHost = types.StringNull()
+	}
+
+	// data SpecToModelRoot RequiredArrayOfStringField --> ResponseCodes
+	if len(specData.GetResponseCodes()) > 0 {
+		listValue, diags := types.ListValueFrom(ctx, types.StringType, specData.GetResponseCodes())
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.ResponseCodes = listValue
+	} else {
+		data.ResponseCodes = types.ListNull(types.StringType)
 	}
 
 	// data SpecToModelRoot PointerField --> HealthPolicy
@@ -1058,20 +998,6 @@ func (d *DataSourceF5XCV1HttpMonitor) Read(ctx context.Context, request datasour
 
 				if isDynamicThreshold && dynamicThresholdOptions != nil {
 
-					// data specToModelNested RequiredEnumField --> StdDevVal
-					if dynamicThresholdOptions.DynamicThreshold.GetStdDevVal().String() != "" {
-						stringValue := types.StringValue(dynamicThresholdOptions.DynamicThreshold.GetStdDevVal().String())
-						stringSlice := []types.String{stringValue}
-						listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						dynamicThresholdAttributeMap["std_dev_val"] = listValue
-					} else {
-						dynamicThresholdAttributeMap["std_dev_val"] = types.ListNull(types.StringType)
-					}
-
 					// data specToModelNested RequiredEnumField --> EvalPeriod
 					if dynamicThresholdOptions.DynamicThreshold.GetEvalPeriod().String() != "" {
 						stringValue := types.StringValue(dynamicThresholdOptions.DynamicThreshold.GetEvalPeriod().String())
@@ -1084,6 +1010,20 @@ func (d *DataSourceF5XCV1HttpMonitor) Read(ctx context.Context, request datasour
 						dynamicThresholdAttributeMap["eval_period"] = listValue
 					} else {
 						dynamicThresholdAttributeMap["eval_period"] = types.ListNull(types.StringType)
+					}
+
+					// data specToModelNested RequiredEnumField --> StdDevVal
+					if dynamicThresholdOptions.DynamicThreshold.GetStdDevVal().String() != "" {
+						stringValue := types.StringValue(dynamicThresholdOptions.DynamicThreshold.GetStdDevVal().String())
+						stringSlice := []types.String{stringValue}
+						listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						dynamicThresholdAttributeMap["std_dev_val"] = listValue
+					} else {
+						dynamicThresholdAttributeMap["std_dev_val"] = types.ListNull(types.StringType)
 					}
 
 					dynamicThresholdObj, diags := types.ObjectValue(V1HttpMonitorHealthPolicyDynamicThresholdPolicyDynamicThresholdModelAttributeMap, dynamicThresholdAttributeMap)
@@ -1316,46 +1256,46 @@ func (d *DataSourceF5XCV1HttpMonitor) Read(ctx context.Context, request datasour
 
 	// 1. Check for the choice inside a 'gc_spec' map, which is a common pattern in GET responses.
 	if gcSpec, gcSpecOk := rawSpecMap["gc_spec"].(map[string]interface{}); gcSpecOk {
-		if _, ok := gcSpec["interval_1_hour"]; ok {
+		if _, ok := gcSpec["interval_15_mins"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := gcSpec["interval_1_hour"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := gcSpec["interval_1_day"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := gcSpec["interval_30_secs"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := gcSpec["interval_5_mins"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := gcSpec["interval_30_mins"]; ok {
 			oneofIntervalChoicePresent = true
 		} else if _, ok := gcSpec["interval_6_hours"]; ok {
 			oneofIntervalChoicePresent = true
 		} else if _, ok := gcSpec["interval_12_hours"]; ok {
 			oneofIntervalChoicePresent = true
-		} else if _, ok := gcSpec["interval_30_secs"]; ok {
-			oneofIntervalChoicePresent = true
 		} else if _, ok := gcSpec["interval_1_min"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := gcSpec["interval_15_mins"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := gcSpec["interval_1_day"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := gcSpec["interval_5_mins"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := gcSpec["interval_30_mins"]; ok {
 			oneofIntervalChoicePresent = true
 		}
 	}
 
 	// 2. If not found in 'gc_spec', check for the choice at the top level of the spec.
 	if !oneofIntervalChoicePresent {
-		if _, ok := rawSpecMap["interval_1_hour"]; ok {
+		if _, ok := rawSpecMap["interval_15_mins"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := rawSpecMap["interval_1_hour"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := rawSpecMap["interval_1_day"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := rawSpecMap["interval_30_secs"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := rawSpecMap["interval_5_mins"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := rawSpecMap["interval_30_mins"]; ok {
 			oneofIntervalChoicePresent = true
 		} else if _, ok := rawSpecMap["interval_6_hours"]; ok {
 			oneofIntervalChoicePresent = true
 		} else if _, ok := rawSpecMap["interval_12_hours"]; ok {
 			oneofIntervalChoicePresent = true
-		} else if _, ok := rawSpecMap["interval_30_secs"]; ok {
-			oneofIntervalChoicePresent = true
 		} else if _, ok := rawSpecMap["interval_1_min"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := rawSpecMap["interval_15_mins"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := rawSpecMap["interval_1_day"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := rawSpecMap["interval_5_mins"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := rawSpecMap["interval_30_mins"]; ok {
 			oneofIntervalChoicePresent = true
 		}
 	}
@@ -1367,88 +1307,25 @@ func (d *DataSourceF5XCV1HttpMonitor) Read(ctx context.Context, request datasour
 
 		// Recursively call the nested template to process the oneof choices.
 
-		// data specToModelNested BoolOfOneOfPointerField --> Interval_1Hour
-		var interval1HourInMap bool
+		// data specToModelNested BoolOfOneOfPointerField --> Interval_6Hours
+		var interval6HoursInMap bool
 
 		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["interval_1_hour"]; found {
-				interval1HourInMap = true
+			if _, found := gcSpec["interval_6_hours"]; found {
+				interval6HoursInMap = true
 			}
 		}
 
-		if !interval1HourInMap {
-			if _, found := rawSpecMap["interval_1_hour"]; found {
-				interval1HourInMap = true
+		if !interval6HoursInMap {
+			if _, found := rawSpecMap["interval_6_hours"]; found {
+				interval6HoursInMap = true
 			}
 		}
 
-		if interval1HourInMap || specData.GetInterval_1Hour() != nil {
-			intervalChoiceChoicesModel.Interval_1Hour = types.BoolValue(true)
+		if interval6HoursInMap || specData.GetInterval_6Hours() != nil {
+			intervalChoiceChoicesModel.Interval_6Hours = types.BoolValue(true)
 		} else {
-			intervalChoiceChoicesModel.Interval_1Hour = types.BoolNull()
-		}
-
-		// data specToModelNested BoolOfOneOfPointerField --> Interval_12Hours
-		var interval12HoursInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["interval_12_hours"]; found {
-				interval12HoursInMap = true
-			}
-		}
-
-		if !interval12HoursInMap {
-			if _, found := rawSpecMap["interval_12_hours"]; found {
-				interval12HoursInMap = true
-			}
-		}
-
-		if interval12HoursInMap || specData.GetInterval_12Hours() != nil {
-			intervalChoiceChoicesModel.Interval_12Hours = types.BoolValue(true)
-		} else {
-			intervalChoiceChoicesModel.Interval_12Hours = types.BoolNull()
-		}
-
-		// data specToModelNested BoolOfOneOfPointerField --> Interval_30Secs
-		var interval30SecsInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["interval_30_secs"]; found {
-				interval30SecsInMap = true
-			}
-		}
-
-		if !interval30SecsInMap {
-			if _, found := rawSpecMap["interval_30_secs"]; found {
-				interval30SecsInMap = true
-			}
-		}
-
-		if interval30SecsInMap || specData.GetInterval_30Secs() != nil {
-			intervalChoiceChoicesModel.Interval_30Secs = types.BoolValue(true)
-		} else {
-			intervalChoiceChoicesModel.Interval_30Secs = types.BoolNull()
-		}
-
-		// data specToModelNested BoolOfOneOfPointerField --> Interval_1Min
-		var interval1MinInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["interval_1_min"]; found {
-				interval1MinInMap = true
-			}
-		}
-
-		if !interval1MinInMap {
-			if _, found := rawSpecMap["interval_1_min"]; found {
-				interval1MinInMap = true
-			}
-		}
-
-		if interval1MinInMap || specData.GetInterval_1Min() != nil {
-			intervalChoiceChoicesModel.Interval_1Min = types.BoolValue(true)
-		} else {
-			intervalChoiceChoicesModel.Interval_1Min = types.BoolNull()
+			intervalChoiceChoicesModel.Interval_6Hours = types.BoolNull()
 		}
 
 		// data specToModelNested BoolOfOneOfPointerField --> Interval_15Mins
@@ -1472,48 +1349,6 @@ func (d *DataSourceF5XCV1HttpMonitor) Read(ctx context.Context, request datasour
 			intervalChoiceChoicesModel.Interval_15Mins = types.BoolNull()
 		}
 
-		// data specToModelNested BoolOfOneOfPointerField --> Interval_30Mins
-		var interval30MinsInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["interval_30_mins"]; found {
-				interval30MinsInMap = true
-			}
-		}
-
-		if !interval30MinsInMap {
-			if _, found := rawSpecMap["interval_30_mins"]; found {
-				interval30MinsInMap = true
-			}
-		}
-
-		if interval30MinsInMap || specData.GetInterval_30Mins() != nil {
-			intervalChoiceChoicesModel.Interval_30Mins = types.BoolValue(true)
-		} else {
-			intervalChoiceChoicesModel.Interval_30Mins = types.BoolNull()
-		}
-
-		// data specToModelNested BoolOfOneOfPointerField --> Interval_6Hours
-		var interval6HoursInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["interval_6_hours"]; found {
-				interval6HoursInMap = true
-			}
-		}
-
-		if !interval6HoursInMap {
-			if _, found := rawSpecMap["interval_6_hours"]; found {
-				interval6HoursInMap = true
-			}
-		}
-
-		if interval6HoursInMap || specData.GetInterval_6Hours() != nil {
-			intervalChoiceChoicesModel.Interval_6Hours = types.BoolValue(true)
-		} else {
-			intervalChoiceChoicesModel.Interval_6Hours = types.BoolNull()
-		}
-
 		// data specToModelNested BoolOfOneOfPointerField --> Interval_1Day
 		var interval1DayInMap bool
 
@@ -1535,6 +1370,90 @@ func (d *DataSourceF5XCV1HttpMonitor) Read(ctx context.Context, request datasour
 			intervalChoiceChoicesModel.Interval_1Day = types.BoolNull()
 		}
 
+		// data specToModelNested BoolOfOneOfPointerField --> Interval_12Hours
+		var interval12HoursInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["interval_12_hours"]; found {
+				interval12HoursInMap = true
+			}
+		}
+
+		if !interval12HoursInMap {
+			if _, found := rawSpecMap["interval_12_hours"]; found {
+				interval12HoursInMap = true
+			}
+		}
+
+		if interval12HoursInMap || specData.GetInterval_12Hours() != nil {
+			intervalChoiceChoicesModel.Interval_12Hours = types.BoolValue(true)
+		} else {
+			intervalChoiceChoicesModel.Interval_12Hours = types.BoolNull()
+		}
+
+		// data specToModelNested BoolOfOneOfPointerField --> Interval_1Min
+		var interval1MinInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["interval_1_min"]; found {
+				interval1MinInMap = true
+			}
+		}
+
+		if !interval1MinInMap {
+			if _, found := rawSpecMap["interval_1_min"]; found {
+				interval1MinInMap = true
+			}
+		}
+
+		if interval1MinInMap || specData.GetInterval_1Min() != nil {
+			intervalChoiceChoicesModel.Interval_1Min = types.BoolValue(true)
+		} else {
+			intervalChoiceChoicesModel.Interval_1Min = types.BoolNull()
+		}
+
+		// data specToModelNested BoolOfOneOfPointerField --> Interval_1Hour
+		var interval1HourInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["interval_1_hour"]; found {
+				interval1HourInMap = true
+			}
+		}
+
+		if !interval1HourInMap {
+			if _, found := rawSpecMap["interval_1_hour"]; found {
+				interval1HourInMap = true
+			}
+		}
+
+		if interval1HourInMap || specData.GetInterval_1Hour() != nil {
+			intervalChoiceChoicesModel.Interval_1Hour = types.BoolValue(true)
+		} else {
+			intervalChoiceChoicesModel.Interval_1Hour = types.BoolNull()
+		}
+
+		// data specToModelNested BoolOfOneOfPointerField --> Interval_30Secs
+		var interval30SecsInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["interval_30_secs"]; found {
+				interval30SecsInMap = true
+			}
+		}
+
+		if !interval30SecsInMap {
+			if _, found := rawSpecMap["interval_30_secs"]; found {
+				interval30SecsInMap = true
+			}
+		}
+
+		if interval30SecsInMap || specData.GetInterval_30Secs() != nil {
+			intervalChoiceChoicesModel.Interval_30Secs = types.BoolValue(true)
+		} else {
+			intervalChoiceChoicesModel.Interval_30Secs = types.BoolNull()
+		}
+
 		// data specToModelNested BoolOfOneOfPointerField --> Interval_5Mins
 		var interval5MinsInMap bool
 
@@ -1554,6 +1473,27 @@ func (d *DataSourceF5XCV1HttpMonitor) Read(ctx context.Context, request datasour
 			intervalChoiceChoicesModel.Interval_5Mins = types.BoolValue(true)
 		} else {
 			intervalChoiceChoicesModel.Interval_5Mins = types.BoolNull()
+		}
+
+		// data specToModelNested BoolOfOneOfPointerField --> Interval_30Mins
+		var interval30MinsInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["interval_30_mins"]; found {
+				interval30MinsInMap = true
+			}
+		}
+
+		if !interval30MinsInMap {
+			if _, found := rawSpecMap["interval_30_mins"]; found {
+				interval30MinsInMap = true
+			}
+		}
+
+		if interval30MinsInMap || specData.GetInterval_30Mins() != nil {
+			intervalChoiceChoicesModel.Interval_30Mins = types.BoolValue(true)
+		} else {
+			intervalChoiceChoicesModel.Interval_30Mins = types.BoolNull()
 		}
 
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
@@ -1585,13 +1525,7 @@ func (d *DataSourceF5XCV1HttpMonitor) Read(ctx context.Context, request datasour
 
 	// 1. Check for the choice inside a 'gc_spec' map, which is a common pattern in GET responses.
 	if gcSpec, gcSpecOk := rawSpecMap["gc_spec"].(map[string]interface{}); gcSpecOk {
-		if _, ok := gcSpec["post"]; ok {
-			oneofMethodPresent = true
-		} else if _, ok := gcSpec["put"]; ok {
-			oneofMethodPresent = true
-		} else if _, ok := gcSpec["delete"]; ok {
-			oneofMethodPresent = true
-		} else if _, ok := gcSpec["get"]; ok {
+		if _, ok := gcSpec["get"]; ok {
 			oneofMethodPresent = true
 		} else if _, ok := gcSpec["head"]; ok {
 			oneofMethodPresent = true
@@ -1599,24 +1533,30 @@ func (d *DataSourceF5XCV1HttpMonitor) Read(ctx context.Context, request datasour
 			oneofMethodPresent = true
 		} else if _, ok := gcSpec["patch"]; ok {
 			oneofMethodPresent = true
+		} else if _, ok := gcSpec["post"]; ok {
+			oneofMethodPresent = true
+		} else if _, ok := gcSpec["put"]; ok {
+			oneofMethodPresent = true
+		} else if _, ok := gcSpec["delete"]; ok {
+			oneofMethodPresent = true
 		}
 	}
 
 	// 2. If not found in 'gc_spec', check for the choice at the top level of the spec.
 	if !oneofMethodPresent {
-		if _, ok := rawSpecMap["post"]; ok {
-			oneofMethodPresent = true
-		} else if _, ok := rawSpecMap["put"]; ok {
-			oneofMethodPresent = true
-		} else if _, ok := rawSpecMap["delete"]; ok {
-			oneofMethodPresent = true
-		} else if _, ok := rawSpecMap["get"]; ok {
+		if _, ok := rawSpecMap["get"]; ok {
 			oneofMethodPresent = true
 		} else if _, ok := rawSpecMap["head"]; ok {
 			oneofMethodPresent = true
 		} else if _, ok := rawSpecMap["options"]; ok {
 			oneofMethodPresent = true
 		} else if _, ok := rawSpecMap["patch"]; ok {
+			oneofMethodPresent = true
+		} else if _, ok := rawSpecMap["post"]; ok {
+			oneofMethodPresent = true
+		} else if _, ok := rawSpecMap["put"]; ok {
+			oneofMethodPresent = true
+		} else if _, ok := rawSpecMap["delete"]; ok {
 			oneofMethodPresent = true
 		}
 	}
@@ -1629,90 +1569,6 @@ func (d *DataSourceF5XCV1HttpMonitor) Read(ctx context.Context, request datasour
 		var methodChoiceChoicesModel = &V1HttpMonitorCreateSpecTypeMethodChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
-
-		// data specToModelNested PointerOfOneOfField --> Patch
-		// CreateSpecType
-		// true
-		{
-			patchOptions, isPatch := methodChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Patch)
-			patchAttributeMap := make(map[string]attr.Value)
-
-			if isPatch && patchOptions != nil {
-
-				// data specToModelNested StringField --> RequestBody
-				if patchOptions.Patch.GetRequestBody() != "" {
-					patchAttributeMap["request_body"] = types.StringValue(patchOptions.Patch.GetRequestBody())
-				} else {
-					// Empty string, set to null
-					patchAttributeMap["request_body"] = types.StringNull()
-				}
-
-				patchObj, diags := types.ObjectValue(V1HttpMonitorMethodPatchModelAttributeMap, patchAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				methodChoiceChoicesModel.Patch = patchObj
-			} else {
-				methodChoiceChoicesModel.Patch = types.ObjectNull(V1HttpMonitorMethodPatchModelAttributeMap)
-			}
-		}
-
-		// data specToModelNested PointerOfOneOfField --> Post
-		// CreateSpecType
-		// true
-		{
-			postOptions, isPost := methodChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Post)
-			postAttributeMap := make(map[string]attr.Value)
-
-			if isPost && postOptions != nil {
-
-				// data specToModelNested StringField --> RequestBody
-				if postOptions.Post.GetRequestBody() != "" {
-					postAttributeMap["request_body"] = types.StringValue(postOptions.Post.GetRequestBody())
-				} else {
-					// Empty string, set to null
-					postAttributeMap["request_body"] = types.StringNull()
-				}
-
-				postObj, diags := types.ObjectValue(V1HttpMonitorMethodPostModelAttributeMap, postAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				methodChoiceChoicesModel.Post = postObj
-			} else {
-				methodChoiceChoicesModel.Post = types.ObjectNull(V1HttpMonitorMethodPostModelAttributeMap)
-			}
-		}
-
-		// data specToModelNested PointerOfOneOfField --> Put
-		// CreateSpecType
-		// true
-		{
-			putOptions, isPut := methodChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Put)
-			putAttributeMap := make(map[string]attr.Value)
-
-			if isPut && putOptions != nil {
-
-				// data specToModelNested StringField --> RequestBody
-				if putOptions.Put.GetRequestBody() != "" {
-					putAttributeMap["request_body"] = types.StringValue(putOptions.Put.GetRequestBody())
-				} else {
-					// Empty string, set to null
-					putAttributeMap["request_body"] = types.StringNull()
-				}
-
-				putObj, diags := types.ObjectValue(V1HttpMonitorMethodPutModelAttributeMap, putAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				methodChoiceChoicesModel.Put = putObj
-			} else {
-				methodChoiceChoicesModel.Put = types.ObjectNull(V1HttpMonitorMethodPutModelAttributeMap)
-			}
-		}
 
 		// data specToModelNested PointerOfOneOfField --> Delete
 		// CreateSpecType
@@ -1805,6 +1661,90 @@ func (d *DataSourceF5XCV1HttpMonitor) Read(ctx context.Context, request datasour
 			methodChoiceChoicesModel.Options = types.BoolNull()
 		}
 
+		// data specToModelNested PointerOfOneOfField --> Patch
+		// CreateSpecType
+		// true
+		{
+			patchOptions, isPatch := methodChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Patch)
+			patchAttributeMap := make(map[string]attr.Value)
+
+			if isPatch && patchOptions != nil {
+
+				// data specToModelNested StringField --> RequestBody
+				if patchOptions.Patch.GetRequestBody() != "" {
+					patchAttributeMap["request_body"] = types.StringValue(patchOptions.Patch.GetRequestBody())
+				} else {
+					// Empty string, set to null
+					patchAttributeMap["request_body"] = types.StringNull()
+				}
+
+				patchObj, diags := types.ObjectValue(V1HttpMonitorMethodPatchModelAttributeMap, patchAttributeMap)
+				response.Diagnostics.Append(diags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				methodChoiceChoicesModel.Patch = patchObj
+			} else {
+				methodChoiceChoicesModel.Patch = types.ObjectNull(V1HttpMonitorMethodPatchModelAttributeMap)
+			}
+		}
+
+		// data specToModelNested PointerOfOneOfField --> Post
+		// CreateSpecType
+		// true
+		{
+			postOptions, isPost := methodChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Post)
+			postAttributeMap := make(map[string]attr.Value)
+
+			if isPost && postOptions != nil {
+
+				// data specToModelNested StringField --> RequestBody
+				if postOptions.Post.GetRequestBody() != "" {
+					postAttributeMap["request_body"] = types.StringValue(postOptions.Post.GetRequestBody())
+				} else {
+					// Empty string, set to null
+					postAttributeMap["request_body"] = types.StringNull()
+				}
+
+				postObj, diags := types.ObjectValue(V1HttpMonitorMethodPostModelAttributeMap, postAttributeMap)
+				response.Diagnostics.Append(diags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				methodChoiceChoicesModel.Post = postObj
+			} else {
+				methodChoiceChoicesModel.Post = types.ObjectNull(V1HttpMonitorMethodPostModelAttributeMap)
+			}
+		}
+
+		// data specToModelNested PointerOfOneOfField --> Put
+		// CreateSpecType
+		// true
+		{
+			putOptions, isPut := methodChoiceChoices.(*ves_io_schema_observability_synthetic_monitor_v1_http_monitor.CreateSpecType_Put)
+			putAttributeMap := make(map[string]attr.Value)
+
+			if isPut && putOptions != nil {
+
+				// data specToModelNested StringField --> RequestBody
+				if putOptions.Put.GetRequestBody() != "" {
+					putAttributeMap["request_body"] = types.StringValue(putOptions.Put.GetRequestBody())
+				} else {
+					// Empty string, set to null
+					putAttributeMap["request_body"] = types.StringNull()
+				}
+
+				putObj, diags := types.ObjectValue(V1HttpMonitorMethodPutModelAttributeMap, putAttributeMap)
+				response.Diagnostics.Append(diags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				methodChoiceChoicesModel.Put = putObj
+			} else {
+				methodChoiceChoicesModel.Put = types.ObjectNull(V1HttpMonitorMethodPutModelAttributeMap)
+			}
+		}
+
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
 		methodChoiceObj, diags := utils.GoStructToObjectValue(
 			ctx,
@@ -1821,6 +1761,66 @@ func (d *DataSourceF5XCV1HttpMonitor) Read(ctx context.Context, request datasour
 	} else {
 		// The oneof field is not present in the API response, so set the Terraform object to null.
 		data.MethodChoice = types.ObjectNull(V1HttpMonitorMethodModelAttributeMap)
+	}
+
+	// data SpecToModelRoot ArrayOfPointerField --> RequestHeaders
+	if len(specData.RequestHeaders) > 0 {
+		requestHeadersElements := make([]V1HttpMonitorV1HttpMonitorHTTPMonitorHeader, 0, len(specData.RequestHeaders))
+
+		for _, requestHeadersElement := range specData.RequestHeaders {
+			v1HttpMonitorV1HttpMonitorHTTPMonitorHeaderModel := V1HttpMonitorV1HttpMonitorHTTPMonitorHeader{}
+
+			// data specToModelNested StringField --> Value
+			if requestHeadersElement.GetValue() != "" {
+				v1HttpMonitorV1HttpMonitorHTTPMonitorHeaderModel.Value = types.StringValue(requestHeadersElement.GetValue())
+			} else {
+				// Empty string, set to null
+				v1HttpMonitorV1HttpMonitorHTTPMonitorHeaderModel.Value = types.StringNull()
+			}
+
+			// data specToModelNested RequiredStringField --> Key
+			if requestHeadersElement.GetKey() != "" {
+				v1HttpMonitorV1HttpMonitorHTTPMonitorHeaderModel.Key = types.StringValue(requestHeadersElement.GetKey())
+			} else {
+				// Empty string, set to null
+				v1HttpMonitorV1HttpMonitorHTTPMonitorHeaderModel.Key = types.StringNull()
+			}
+
+			requestHeadersElements = append(requestHeadersElements, v1HttpMonitorV1HttpMonitorHTTPMonitorHeaderModel)
+		}
+
+		requestHeadersList, diags := utils.GoStructSliceToListValue(
+			ctx,
+			V1HttpMonitorRequestHeadersModelAttributeMap,
+			requestHeadersElements,
+		)
+
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+
+		data.RequestHeaders = requestHeadersList
+	} else {
+		var requestHeadersObjectType = basetypes.ObjectType{
+			AttrTypes: V1HttpMonitorRequestHeadersModelAttributeMap,
+		}
+		nullRequestHeadersList := basetypes.NewListNull(requestHeadersObjectType)
+		data.RequestHeaders = nullRequestHeadersList
+	}
+
+	// data SpecToModelRoot RequiredUintField --> OnFailureCount
+	onFailureCountValue := specData.GetOnFailureCount()
+	if onFailureCountValue > 0 {
+		data.OnFailureCount = types.Int64Value(int64(onFailureCountValue))
+	}
+
+	// data SpecToModelRoot StringField --> Receive
+	if specData.GetReceive() != "" {
+		data.Receive = types.StringValue(specData.GetReceive())
+	} else {
+		// Empty string, set to null to avoid "inconsistent result after apply" errors
+		data.Receive = types.StringNull()
 	}
 
 	// data SpecToModelRoot BoolField --> FollowRedirects

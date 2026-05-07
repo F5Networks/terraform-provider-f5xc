@@ -52,6 +52,20 @@ type ResourceF5XCIkePhase1Profile struct {
 	client *client.APIClient
 }
 
+type IkePhase1ProfileGlobalSpecTypeIkeKeyLifetimeChoice struct {
+	IkeKeylifetimeHours   types.Object `tfsdk:"ike_keylifetime_hours"`
+	UseDefaultKeylifetime types.Bool   `tfsdk:"use_default_keylifetime"`
+	IkeKeylifetimeMinutes types.Object `tfsdk:"ike_keylifetime_minutes"`
+}
+
+type IkePhase1ProfileGlobalSpecTypeIkeKeylifetimeHours struct {
+	Duration types.Int64 `tfsdk:"duration"`
+}
+
+type IkePhase1ProfileGlobalSpecTypeIkeKeylifetimeMinutes struct {
+	Duration types.Int64 `tfsdk:"duration"`
+}
+
 type IkePhase1ProfileGlobalSpecTypeIkeReauthTimeoutChoice struct {
 	ReauthTimeoutHours types.Object `tfsdk:"reauth_timeout_hours"`
 	ReauthTimeoutDays  types.Object `tfsdk:"reauth_timeout_days"`
@@ -66,34 +80,20 @@ type IkePhase1ProfileGlobalSpecTypeReauthTimeoutDays struct {
 	Duration types.Int64 `tfsdk:"duration"`
 }
 
-type IkePhase1ProfileGlobalSpecTypeIkeKeyLifetimeChoice struct {
-	UseDefaultKeylifetime types.Bool   `tfsdk:"use_default_keylifetime"`
-	IkeKeylifetimeMinutes types.Object `tfsdk:"ike_keylifetime_minutes"`
-	IkeKeylifetimeHours   types.Object `tfsdk:"ike_keylifetime_hours"`
-}
-
-type IkePhase1ProfileGlobalSpecTypeIkeKeylifetimeMinutes struct {
-	Duration types.Int64 `tfsdk:"duration"`
-}
-
-type IkePhase1ProfileGlobalSpecTypeIkeKeylifetimeHours struct {
-	Duration types.Int64 `tfsdk:"duration"`
-}
-
 // ResourceF5XCIkePhase1ProfileModel describes the resource data model.
 type ResourceF5XCIkePhase1ProfileModel struct {
-	Name                   types.String   `tfsdk:"name"`
-	Namespace              types.String   `tfsdk:"namespace"`
-	Uid                    types.String   `tfsdk:"uid"`
 	Labels                 types.Map      `tfsdk:"labels"`
 	Annotations            types.Map      `tfsdk:"annotations"`
 	Description            types.String   `tfsdk:"description"`
-	IkeReauthTimeoutChoice types.Object   `tfsdk:"ike_reauth_timeout_choice"`
+	Name                   types.String   `tfsdk:"name"`
+	Namespace              types.String   `tfsdk:"namespace"`
+	Uid                    types.String   `tfsdk:"uid"`
 	EncryptionAlgos        types.List     `tfsdk:"encryption_algos"`
 	AuthenticationAlgos    types.List     `tfsdk:"authentication_algos"`
 	Prf                    types.List     `tfsdk:"prf"`
 	DhGroup                types.List     `tfsdk:"dh_group"`
 	IkeKeyLifetimeChoice   types.Object   `tfsdk:"ike_key_lifetime_choice"`
+	IkeReauthTimeoutChoice types.Object   `tfsdk:"ike_reauth_timeout_choice"`
 	Timeouts               timeouts.Value `tfsdk:"timeouts"`
 }
 
@@ -107,6 +107,30 @@ var (
 )
 
 // --- Attribute Maps for Nested Structs ---
+// Attribute map for RequiredOneOfField --> IkeKeyLifetime
+var IkePhase1ProfileIkeKeyLifetimeModelAttributeMap = map[string]attr.Type{
+
+	"ike_keylifetime_hours": types.ObjectType{
+		AttrTypes: IkePhase1ProfileIkeKeyLifetimeIkeKeylifetimeHoursModelAttributeMap,
+	},
+	"use_default_keylifetime": types.BoolType,
+	"ike_keylifetime_minutes": types.ObjectType{
+		AttrTypes: IkePhase1ProfileIkeKeyLifetimeIkeKeylifetimeMinutesModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> IkeKeylifetimeHours
+var IkePhase1ProfileIkeKeyLifetimeIkeKeylifetimeHoursModelAttributeMap = map[string]attr.Type{
+
+	"duration": types.Int64Type,
+}
+
+// Attribute map for PointerOfOneOfField --> IkeKeylifetimeMinutes
+var IkePhase1ProfileIkeKeyLifetimeIkeKeylifetimeMinutesModelAttributeMap = map[string]attr.Type{
+
+	"duration": types.Int64Type,
+}
+
 // Attribute map for RequiredOneOfField --> IkeReauthTimeout
 var IkePhase1ProfileIkeReauthTimeoutModelAttributeMap = map[string]attr.Type{
 
@@ -131,30 +155,6 @@ var IkePhase1ProfileIkeReauthTimeoutReauthTimeoutDaysModelAttributeMap = map[str
 	"duration": types.Int64Type,
 }
 
-// Attribute map for RequiredOneOfField --> IkeKeyLifetime
-var IkePhase1ProfileIkeKeyLifetimeModelAttributeMap = map[string]attr.Type{
-
-	"use_default_keylifetime": types.BoolType,
-	"ike_keylifetime_minutes": types.ObjectType{
-		AttrTypes: IkePhase1ProfileIkeKeyLifetimeIkeKeylifetimeMinutesModelAttributeMap,
-	},
-	"ike_keylifetime_hours": types.ObjectType{
-		AttrTypes: IkePhase1ProfileIkeKeyLifetimeIkeKeylifetimeHoursModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> IkeKeylifetimeMinutes
-var IkePhase1ProfileIkeKeyLifetimeIkeKeylifetimeMinutesModelAttributeMap = map[string]attr.Type{
-
-	"duration": types.Int64Type,
-}
-
-// Attribute map for PointerOfOneOfField --> IkeKeylifetimeHours
-var IkePhase1ProfileIkeKeyLifetimeIkeKeylifetimeHoursModelAttributeMap = map[string]attr.Type{
-
-	"duration": types.Int64Type,
-}
-
 func NewResourceF5XCIkePhase1Profile() resource.Resource {
 	return &ResourceF5XCIkePhase1Profile{}
 }
@@ -170,30 +170,6 @@ func (r *ResourceF5XCIkePhase1Profile) Schema(ctx context.Context, request resou
 		Description:         "IkePhase1Profile resource",
 
 		Attributes: map[string]schema.Attribute{
-			"name": schema.StringAttribute{
-				Description:         "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
-				MarkdownDescription: "",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
-			},
-			"namespace": schema.StringAttribute{
-				Description:         "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
-				MarkdownDescription: "",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
-			},
-			"uid": schema.StringAttribute{
-				Description:         "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            false,
-				Computed:            true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
-			},
 			"labels": schema.MapAttribute{
 				Description:         "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
 				MarkdownDescription: "",
@@ -224,6 +200,142 @@ func (r *ResourceF5XCIkePhase1Profile) Schema(ctx context.Context, request resou
 				Optional:            true,
 				Computed:            true,
 				Default:             stringdefault.StaticString(""),
+			},
+			"name": schema.StringAttribute{
+				Description:         "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
+				MarkdownDescription: "",
+				Required:            true,
+				Optional:            false,
+				Computed:            false,
+			},
+			"namespace": schema.StringAttribute{
+				Description:         "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
+				MarkdownDescription: "",
+				Required:            true,
+				Optional:            false,
+				Computed:            false,
+			},
+			"uid": schema.StringAttribute{
+				Description:         "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
+				MarkdownDescription: "",
+				Required:            false,
+				Optional:            false,
+				Computed:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"encryption_algos": schema.ListAttribute{
+				Description:         "Encryption Algorithms Choose one or more encryption algorithms.",
+				MarkdownDescription: "<br>**Valid Options:** `[\"AES256_CBC\", \"TRIPLE_DES_CBC\", \"AES128_GCM\", \"AES192_GCM\", \"AES256_GCM\", \"ENC_ALG_DEFAULT\", \"AES128_CBC\", \"AES192_CBC\"]` (Multiple selection allowed)<br>**Default:** `AES256_GCM`",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				ElementType:         types.StringType,
+				Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("AES256_GCM")),
+				Validators: []validator.List{
+					listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"AES256_CBC", "TRIPLE_DES_CBC", "AES128_GCM", "AES192_GCM", "AES256_GCM", "ENC_ALG_DEFAULT", "AES128_CBC", "AES192_CBC"}...)),
+				},
+			},
+			"authentication_algos": schema.ListAttribute{
+				Description:         "Authentication Algorithms Choose one or more Authentication Algorithm. Use None option when using the aes-gcm or aes-ccm encryption algorithms.",
+				MarkdownDescription: "<br>**Valid Options:** `[\"SHA384_HMAC\", \"SHA512_HMAC\", \"AUTH_ALG_NONE\", \"AUTH_ALG_DEFAULT\", \"SHA256_HMAC\"]` (Multiple selection allowed)<br>**Default:** `AUTH_ALG_NONE`",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				ElementType:         types.StringType,
+				Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("AUTH_ALG_NONE")),
+				Validators: []validator.List{
+					listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"SHA384_HMAC", "SHA512_HMAC", "AUTH_ALG_NONE", "AUTH_ALG_DEFAULT", "SHA256_HMAC"}...)),
+				},
+			},
+			"prf": schema.ListAttribute{
+				Description:         "PseudoRandomFunction Select PseudoRandomFunction for IKE SA.",
+				MarkdownDescription: "<br>**Valid Options:** `[\"PRF_DEFAULT\", \"PRFSHA256\", \"PRFSHA384\", \"PRFSHA512\"]` (Multiple selection allowed)<br>**Default:** `PRFSHA512`",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				ElementType:         types.StringType,
+				Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("PRFSHA512")),
+				Validators: []validator.List{
+					listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"PRF_DEFAULT", "PRFSHA256", "PRFSHA384", "PRFSHA512"}...)),
+				},
+			},
+			"dh_group": schema.ListAttribute{
+				Description:         "Diffie Hellman Groups Choose the acceptable Diffie Hellman (DH) Group or Groups that you are willing to accept as part of this profile.",
+				MarkdownDescription: "<br>**Valid Options:** `[\"DH_GROUP_26\", \"DH_GROUP_DEFAULT\", \"DH_GROUP_14\", \"DH_GROUP_15\", \"DH_GROUP_16\", \"DH_GROUP_17\", \"DH_GROUP_20\", \"DH_GROUP_18\", \"DH_GROUP_19\", \"DH_GROUP_21\"]` (Multiple selection allowed)<br>**Default:** `DH_GROUP_19`",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				ElementType:         types.StringType,
+				Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("DH_GROUP_19")),
+				Validators: []validator.List{
+					listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"DH_GROUP_26", "DH_GROUP_DEFAULT", "DH_GROUP_14", "DH_GROUP_15", "DH_GROUP_16", "DH_GROUP_17", "DH_GROUP_20", "DH_GROUP_18", "DH_GROUP_19", "DH_GROUP_21"}...)),
+				},
+			},
+			"ike_key_lifetime_choice": schema.SingleNestedAttribute{
+				Description:         "Key LifeTime Amount of time before the IKE Security Association (SA) key needs to be renegotiated",
+				MarkdownDescription: "",
+				Required:            true,
+				Optional:            false,
+				Computed:            false,
+				Validators: []validator.Object{
+					atmostoneofvalidator.AtMostOneOf(
+						"use_default_keylifetime",
+						"ike_keylifetime_minutes",
+						"ike_keylifetime_hours",
+					),
+				},
+				Attributes: map[string]schema.Attribute{
+					"ike_keylifetime_hours": schema.SingleNestedAttribute{
+						Description:         "Hours Set IKE Key Lifetime in Hours",
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Attributes: map[string]schema.Attribute{
+							"duration": schema.Int64Attribute{
+								Description:         "Duration",
+								MarkdownDescription: "",
+								Required:            false,
+								Optional:            true,
+								Computed:            false,
+								Validators: []validator.Int64{
+									int64validator.Between(1, 5),
+								},
+							},
+						},
+					},
+					"use_default_keylifetime": schema.BoolAttribute{
+						Description:         "Default Use default key lifetime (4Hrs)",
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Validators: []validator.Bool{
+							boolvalidator.Equals(true),
+						},
+					},
+					"ike_keylifetime_minutes": schema.SingleNestedAttribute{
+						Description:         "Minutes Set IKE Key Lifetime in minutes",
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Attributes: map[string]schema.Attribute{
+							"duration": schema.Int64Attribute{
+								Description:         "Duration",
+								MarkdownDescription: "",
+								Required:            false,
+								Optional:            true,
+								Computed:            false,
+								Validators: []validator.Int64{
+									int64validator.Between(10, 300),
+								},
+							},
+						},
+					},
+				},
 			},
 			"ike_reauth_timeout_choice": schema.SingleNestedAttribute{
 				Description:         "IKE Reauthentication Amount of time for IKE peers to reauthenticate one another",
@@ -285,118 +397,6 @@ func (r *ResourceF5XCIkePhase1Profile) Schema(ctx context.Context, request resou
 						Computed:            false,
 						Validators: []validator.Bool{
 							boolvalidator.Equals(true),
-						},
-					},
-				},
-			},
-			"encryption_algos": schema.ListAttribute{
-				Description:         "Encryption Algorithms Choose one or more encryption algorithms.",
-				MarkdownDescription: "<br>**Valid Options:** `[\"AES192_CBC\", \"AES256_CBC\", \"TRIPLE_DES_CBC\", \"AES128_GCM\", \"AES192_GCM\", \"AES256_GCM\", \"ENC_ALG_DEFAULT\", \"AES128_CBC\"]` (Multiple selection allowed)<br>**Default:** `AES256_GCM`",
-				Required:            false,
-				Optional:            true,
-				Computed:            true,
-				ElementType:         types.StringType,
-				Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("AES256_GCM")),
-				Validators: []validator.List{
-					listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"AES192_CBC", "AES256_CBC", "TRIPLE_DES_CBC", "AES128_GCM", "AES192_GCM", "AES256_GCM", "ENC_ALG_DEFAULT", "AES128_CBC"}...)),
-				},
-			},
-			"authentication_algos": schema.ListAttribute{
-				Description:         "Authentication Algorithms Choose one or more Authentication Algorithm. Use None option when using the aes-gcm or aes-ccm encryption algorithms.",
-				MarkdownDescription: "<br>**Valid Options:** `[\"AUTH_ALG_DEFAULT\", \"SHA256_HMAC\", \"SHA384_HMAC\", \"SHA512_HMAC\", \"AUTH_ALG_NONE\"]` (Multiple selection allowed)<br>**Default:** `AUTH_ALG_NONE`",
-				Required:            false,
-				Optional:            true,
-				Computed:            true,
-				ElementType:         types.StringType,
-				Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("AUTH_ALG_NONE")),
-				Validators: []validator.List{
-					listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"AUTH_ALG_DEFAULT", "SHA256_HMAC", "SHA384_HMAC", "SHA512_HMAC", "AUTH_ALG_NONE"}...)),
-				},
-			},
-			"prf": schema.ListAttribute{
-				Description:         "PseudoRandomFunction Select PseudoRandomFunction for IKE SA.",
-				MarkdownDescription: "<br>**Valid Options:** `[\"PRF_DEFAULT\", \"PRFSHA256\", \"PRFSHA384\", \"PRFSHA512\"]` (Multiple selection allowed)<br>**Default:** `PRFSHA512`",
-				Required:            false,
-				Optional:            true,
-				Computed:            true,
-				ElementType:         types.StringType,
-				Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("PRFSHA512")),
-				Validators: []validator.List{
-					listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"PRF_DEFAULT", "PRFSHA256", "PRFSHA384", "PRFSHA512"}...)),
-				},
-			},
-			"dh_group": schema.ListAttribute{
-				Description:         "Diffie Hellman Groups Choose the acceptable Diffie Hellman (DH) Group or Groups that you are willing to accept as part of this profile.",
-				MarkdownDescription: "<br>**Valid Options:** `[\"DH_GROUP_14\", \"DH_GROUP_15\", \"DH_GROUP_16\", \"DH_GROUP_17\", \"DH_GROUP_18\", \"DH_GROUP_21\", \"DH_GROUP_26\", \"DH_GROUP_DEFAULT\", \"DH_GROUP_19\", \"DH_GROUP_20\"]` (Multiple selection allowed)<br>**Default:** `DH_GROUP_19`",
-				Required:            false,
-				Optional:            true,
-				Computed:            true,
-				ElementType:         types.StringType,
-				Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("DH_GROUP_19")),
-				Validators: []validator.List{
-					listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"DH_GROUP_14", "DH_GROUP_15", "DH_GROUP_16", "DH_GROUP_17", "DH_GROUP_18", "DH_GROUP_21", "DH_GROUP_26", "DH_GROUP_DEFAULT", "DH_GROUP_19", "DH_GROUP_20"}...)),
-				},
-			},
-			"ike_key_lifetime_choice": schema.SingleNestedAttribute{
-				Description:         "Key LifeTime Amount of time before the IKE Security Association (SA) key needs to be renegotiated",
-				MarkdownDescription: "",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
-				Validators: []validator.Object{
-					atmostoneofvalidator.AtMostOneOf(
-						"use_default_keylifetime",
-						"ike_keylifetime_minutes",
-						"ike_keylifetime_hours",
-					),
-				},
-				Attributes: map[string]schema.Attribute{
-					"use_default_keylifetime": schema.BoolAttribute{
-						Description:         "Default Use default key lifetime (4Hrs)",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Validators: []validator.Bool{
-							boolvalidator.Equals(true),
-						},
-					},
-					"ike_keylifetime_minutes": schema.SingleNestedAttribute{
-						Description:         "Minutes Set IKE Key Lifetime in minutes",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Attributes: map[string]schema.Attribute{
-							"duration": schema.Int64Attribute{
-								Description:         "Duration",
-								MarkdownDescription: "",
-								Required:            false,
-								Optional:            true,
-								Computed:            false,
-								Validators: []validator.Int64{
-									int64validator.Between(10, 300),
-								},
-							},
-						},
-					},
-					"ike_keylifetime_hours": schema.SingleNestedAttribute{
-						Description:         "Hours Set IKE Key Lifetime in Hours",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Attributes: map[string]schema.Attribute{
-							"duration": schema.Int64Attribute{
-								Description:         "Duration",
-								MarkdownDescription: "",
-								Required:            false,
-								Optional:            true,
-								Computed:            false,
-								Validators: []validator.Int64{
-									int64validator.Between(1, 5),
-								},
-							},
 						},
 					},
 				},
@@ -503,16 +503,6 @@ func (r *ResourceF5XCIkePhase1Profile) Create(ctx context.Context, request resou
 
 	// Populate createReq from data model
 
-	// resource modelToMetaRoot RequiredStringField --> Name
-	if !data.Name.IsNull() && !data.Name.IsUnknown() {
-		meta.Name = string(data.Name.ValueString())
-	}
-
-	// resource modelToMetaRoot RequiredStringField --> Namespace
-	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
-		meta.Namespace = string(data.Namespace.ValueString())
-	}
-
 	// resource modelToMetaRoot MapOfStringField --> Annotations
 	if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
 		var labels map[string]string
@@ -532,57 +522,14 @@ func (r *ResourceF5XCIkePhase1Profile) Create(ctx context.Context, request resou
 		meta.Description = string(data.Description.ValueString())
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> IkeReauthTimeout
-	if !data.IkeReauthTimeoutChoice.IsNull() && !data.IkeReauthTimeoutChoice.IsUnknown() {
-		ikeReauthTimeoutChoiceModel := IkePhase1ProfileGlobalSpecTypeIkeReauthTimeoutChoice{}
-		response.Diagnostics.Append(data.IkeReauthTimeoutChoice.As(ctx, &ikeReauthTimeoutChoiceModel, basetypes.ObjectAsOptions{})...)
-		if response.Diagnostics.HasError() {
-			return
-		}
+	// resource modelToMetaRoot RequiredStringField --> Name
+	if !data.Name.IsNull() && !data.Name.IsUnknown() {
+		meta.Name = string(data.Name.ValueString())
+	}
 
-		// resource modelToSpecNested PointerOfOneOfField --> ReauthTimeoutHours
-		if !ikeReauthTimeoutChoiceModel.ReauthTimeoutHours.IsNull() && !ikeReauthTimeoutChoiceModel.ReauthTimeoutHours.IsUnknown() {
-			var ikePhase1ProfileGlobalSpecTypeReauthTimeoutHoursModel IkePhase1ProfileGlobalSpecTypeReauthTimeoutHours
-			response.Diagnostics.Append(ikeReauthTimeoutChoiceModel.ReauthTimeoutHours.As(ctx, &ikePhase1ProfileGlobalSpecTypeReauthTimeoutHoursModel, basetypes.ObjectAsOptions{})...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			reauthTimeoutHoursOneOfSpec := &ves_io_schema_views_ike_phase1_profile.CreateSpecType_ReauthTimeoutHours{}
-			reauthTimeoutHoursOneOfSpec.ReauthTimeoutHours = &ves_io_schema_views_ike_phase1_profile.InputHours{}
-			spec.IkeReauthTimeout = reauthTimeoutHoursOneOfSpec
-
-			// resource modelToSpecNested UintField --> Duration
-			if !ikePhase1ProfileGlobalSpecTypeReauthTimeoutHoursModel.Duration.IsNull() && !ikePhase1ProfileGlobalSpecTypeReauthTimeoutHoursModel.Duration.IsUnknown() {
-				reauthTimeoutHoursOneOfSpec.ReauthTimeoutHours.Duration = uint32(uint32(ikePhase1ProfileGlobalSpecTypeReauthTimeoutHoursModel.Duration.ValueInt64()))
-			}
-
-		}
-
-		// resource modelToSpecNested PointerOfOneOfField --> ReauthTimeoutDays
-		if !ikeReauthTimeoutChoiceModel.ReauthTimeoutDays.IsNull() && !ikeReauthTimeoutChoiceModel.ReauthTimeoutDays.IsUnknown() {
-			var ikePhase1ProfileGlobalSpecTypeReauthTimeoutDaysModel IkePhase1ProfileGlobalSpecTypeReauthTimeoutDays
-			response.Diagnostics.Append(ikeReauthTimeoutChoiceModel.ReauthTimeoutDays.As(ctx, &ikePhase1ProfileGlobalSpecTypeReauthTimeoutDaysModel, basetypes.ObjectAsOptions{})...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			reauthTimeoutDaysOneOfSpec := &ves_io_schema_views_ike_phase1_profile.CreateSpecType_ReauthTimeoutDays{}
-			reauthTimeoutDaysOneOfSpec.ReauthTimeoutDays = &ves_io_schema_views_ike_phase1_profile.InputDays{}
-			spec.IkeReauthTimeout = reauthTimeoutDaysOneOfSpec
-
-			// resource modelToSpecNested UintField --> Duration
-			if !ikePhase1ProfileGlobalSpecTypeReauthTimeoutDaysModel.Duration.IsNull() && !ikePhase1ProfileGlobalSpecTypeReauthTimeoutDaysModel.Duration.IsUnknown() {
-				reauthTimeoutDaysOneOfSpec.ReauthTimeoutDays.Duration = uint32(uint32(ikePhase1ProfileGlobalSpecTypeReauthTimeoutDaysModel.Duration.ValueInt64()))
-			}
-
-		}
-
-		// resource modelToSpecNested BoolOfOneOfPointerField --> ReauthDisabled
-		if !ikeReauthTimeoutChoiceModel.ReauthDisabled.IsNull() && !ikeReauthTimeoutChoiceModel.ReauthDisabled.IsUnknown() {
-			reauthDisabledSpecBool := &ves_io_schema_views_ike_phase1_profile.CreateSpecType_ReauthDisabled{}
-			reauthDisabledSpecBool.ReauthDisabled = &ves_io_schema.Empty{}
-			spec.IkeReauthTimeout = reauthDisabledSpecBool
-		}
-
+	// resource modelToMetaRoot RequiredStringField --> Namespace
+	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
+		meta.Namespace = string(data.Namespace.ValueString())
 	}
 
 	{
@@ -693,6 +640,24 @@ func (r *ResourceF5XCIkePhase1Profile) Create(ctx context.Context, request resou
 			return
 		}
 
+		// resource modelToSpecNested PointerOfOneOfField --> IkeKeylifetimeHours
+		if !ikeKeyLifetimeChoiceModel.IkeKeylifetimeHours.IsNull() && !ikeKeyLifetimeChoiceModel.IkeKeylifetimeHours.IsUnknown() {
+			var ikePhase1ProfileGlobalSpecTypeIkeKeylifetimeHoursModel IkePhase1ProfileGlobalSpecTypeIkeKeylifetimeHours
+			response.Diagnostics.Append(ikeKeyLifetimeChoiceModel.IkeKeylifetimeHours.As(ctx, &ikePhase1ProfileGlobalSpecTypeIkeKeylifetimeHoursModel, basetypes.ObjectAsOptions{})...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			ikeKeylifetimeHoursOneOfSpec := &ves_io_schema_views_ike_phase1_profile.CreateSpecType_IkeKeylifetimeHours{}
+			ikeKeylifetimeHoursOneOfSpec.IkeKeylifetimeHours = &ves_io_schema_views_ike_phase1_profile.InputHours{}
+			spec.IkeKeyLifetime = ikeKeylifetimeHoursOneOfSpec
+
+			// resource modelToSpecNested UintField --> Duration
+			if !ikePhase1ProfileGlobalSpecTypeIkeKeylifetimeHoursModel.Duration.IsNull() && !ikePhase1ProfileGlobalSpecTypeIkeKeylifetimeHoursModel.Duration.IsUnknown() {
+				ikeKeylifetimeHoursOneOfSpec.IkeKeylifetimeHours.Duration = uint32(uint32(ikePhase1ProfileGlobalSpecTypeIkeKeylifetimeHoursModel.Duration.ValueInt64()))
+			}
+
+		}
+
 		// resource modelToSpecNested BoolOfOneOfPointerField --> UseDefaultKeylifetime
 		if !ikeKeyLifetimeChoiceModel.UseDefaultKeylifetime.IsNull() && !ikeKeyLifetimeChoiceModel.UseDefaultKeylifetime.IsUnknown() {
 			useDefaultKeylifetimeSpecBool := &ves_io_schema_views_ike_phase1_profile.CreateSpecType_UseDefaultKeylifetime{}
@@ -718,22 +683,57 @@ func (r *ResourceF5XCIkePhase1Profile) Create(ctx context.Context, request resou
 
 		}
 
-		// resource modelToSpecNested PointerOfOneOfField --> IkeKeylifetimeHours
-		if !ikeKeyLifetimeChoiceModel.IkeKeylifetimeHours.IsNull() && !ikeKeyLifetimeChoiceModel.IkeKeylifetimeHours.IsUnknown() {
-			var ikePhase1ProfileGlobalSpecTypeIkeKeylifetimeHoursModel IkePhase1ProfileGlobalSpecTypeIkeKeylifetimeHours
-			response.Diagnostics.Append(ikeKeyLifetimeChoiceModel.IkeKeylifetimeHours.As(ctx, &ikePhase1ProfileGlobalSpecTypeIkeKeylifetimeHoursModel, basetypes.ObjectAsOptions{})...)
+	}
+
+	// resource modelToSpecRoot RequiredOneOfField --> IkeReauthTimeout
+	if !data.IkeReauthTimeoutChoice.IsNull() && !data.IkeReauthTimeoutChoice.IsUnknown() {
+		ikeReauthTimeoutChoiceModel := IkePhase1ProfileGlobalSpecTypeIkeReauthTimeoutChoice{}
+		response.Diagnostics.Append(data.IkeReauthTimeoutChoice.As(ctx, &ikeReauthTimeoutChoiceModel, basetypes.ObjectAsOptions{})...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+
+		// resource modelToSpecNested PointerOfOneOfField --> ReauthTimeoutHours
+		if !ikeReauthTimeoutChoiceModel.ReauthTimeoutHours.IsNull() && !ikeReauthTimeoutChoiceModel.ReauthTimeoutHours.IsUnknown() {
+			var ikePhase1ProfileGlobalSpecTypeReauthTimeoutHoursModel IkePhase1ProfileGlobalSpecTypeReauthTimeoutHours
+			response.Diagnostics.Append(ikeReauthTimeoutChoiceModel.ReauthTimeoutHours.As(ctx, &ikePhase1ProfileGlobalSpecTypeReauthTimeoutHoursModel, basetypes.ObjectAsOptions{})...)
 			if response.Diagnostics.HasError() {
 				return
 			}
-			ikeKeylifetimeHoursOneOfSpec := &ves_io_schema_views_ike_phase1_profile.CreateSpecType_IkeKeylifetimeHours{}
-			ikeKeylifetimeHoursOneOfSpec.IkeKeylifetimeHours = &ves_io_schema_views_ike_phase1_profile.InputHours{}
-			spec.IkeKeyLifetime = ikeKeylifetimeHoursOneOfSpec
+			reauthTimeoutHoursOneOfSpec := &ves_io_schema_views_ike_phase1_profile.CreateSpecType_ReauthTimeoutHours{}
+			reauthTimeoutHoursOneOfSpec.ReauthTimeoutHours = &ves_io_schema_views_ike_phase1_profile.InputHours{}
+			spec.IkeReauthTimeout = reauthTimeoutHoursOneOfSpec
 
 			// resource modelToSpecNested UintField --> Duration
-			if !ikePhase1ProfileGlobalSpecTypeIkeKeylifetimeHoursModel.Duration.IsNull() && !ikePhase1ProfileGlobalSpecTypeIkeKeylifetimeHoursModel.Duration.IsUnknown() {
-				ikeKeylifetimeHoursOneOfSpec.IkeKeylifetimeHours.Duration = uint32(uint32(ikePhase1ProfileGlobalSpecTypeIkeKeylifetimeHoursModel.Duration.ValueInt64()))
+			if !ikePhase1ProfileGlobalSpecTypeReauthTimeoutHoursModel.Duration.IsNull() && !ikePhase1ProfileGlobalSpecTypeReauthTimeoutHoursModel.Duration.IsUnknown() {
+				reauthTimeoutHoursOneOfSpec.ReauthTimeoutHours.Duration = uint32(uint32(ikePhase1ProfileGlobalSpecTypeReauthTimeoutHoursModel.Duration.ValueInt64()))
 			}
 
+		}
+
+		// resource modelToSpecNested PointerOfOneOfField --> ReauthTimeoutDays
+		if !ikeReauthTimeoutChoiceModel.ReauthTimeoutDays.IsNull() && !ikeReauthTimeoutChoiceModel.ReauthTimeoutDays.IsUnknown() {
+			var ikePhase1ProfileGlobalSpecTypeReauthTimeoutDaysModel IkePhase1ProfileGlobalSpecTypeReauthTimeoutDays
+			response.Diagnostics.Append(ikeReauthTimeoutChoiceModel.ReauthTimeoutDays.As(ctx, &ikePhase1ProfileGlobalSpecTypeReauthTimeoutDaysModel, basetypes.ObjectAsOptions{})...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			reauthTimeoutDaysOneOfSpec := &ves_io_schema_views_ike_phase1_profile.CreateSpecType_ReauthTimeoutDays{}
+			reauthTimeoutDaysOneOfSpec.ReauthTimeoutDays = &ves_io_schema_views_ike_phase1_profile.InputDays{}
+			spec.IkeReauthTimeout = reauthTimeoutDaysOneOfSpec
+
+			// resource modelToSpecNested UintField --> Duration
+			if !ikePhase1ProfileGlobalSpecTypeReauthTimeoutDaysModel.Duration.IsNull() && !ikePhase1ProfileGlobalSpecTypeReauthTimeoutDaysModel.Duration.IsUnknown() {
+				reauthTimeoutDaysOneOfSpec.ReauthTimeoutDays.Duration = uint32(uint32(ikePhase1ProfileGlobalSpecTypeReauthTimeoutDaysModel.Duration.ValueInt64()))
+			}
+
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> ReauthDisabled
+		if !ikeReauthTimeoutChoiceModel.ReauthDisabled.IsNull() && !ikeReauthTimeoutChoiceModel.ReauthDisabled.IsUnknown() {
+			reauthDisabledSpecBool := &ves_io_schema_views_ike_phase1_profile.CreateSpecType_ReauthDisabled{}
+			reauthDisabledSpecBool.ReauthDisabled = &ves_io_schema.Empty{}
+			spec.IkeReauthTimeout = reauthDisabledSpecBool
 		}
 
 	}
@@ -770,15 +770,6 @@ func (r *ResourceF5XCIkePhase1Profile) Create(ctx context.Context, request resou
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
-
-	// resource SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
-
-	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
-	data.Namespace = types.StringValue(metaData.GetNamespace())
-
-	// resource SpecToModelRoot Meta StringField --> Uid
-	data.Uid = types.StringValue(systemMetaData.GetUid())
 
 	// resource SpecToModelRoot Meta MapOfStringField --> Labels
 	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
@@ -861,91 +852,14 @@ func (r *ResourceF5XCIkePhase1Profile) Create(ctx context.Context, request resou
 	// resource SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
 
-	// resource SpecToModelRoot RequiredOneOfField --> IkeReauthTimeout
-	// false
-	// true
-	// This resource uses standard struct-based resolution.
-	if specData.GetIkeReauthTimeout() != nil {
-		// For standard resources, get the choice from the typed spec data.
-		ikeReauthTimeoutChoiceChoices := specData.GetIkeReauthTimeout()
+	// resource SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
 
-		// The model struct that will be populated by the nested template.
-		var ikeReauthTimeoutChoiceChoicesModel = &IkePhase1ProfileGlobalSpecTypeIkeReauthTimeoutChoice{}
+	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
+	data.Namespace = types.StringValue(metaData.GetNamespace())
 
-		// Recursively call the nested template to process the oneof choices.
-
-		// resource specToModelNested PointerOfOneOfField --> ReauthTimeoutHours
-		// GlobalSpecType
-		// false
-		{
-			reauthTimeoutHoursOptions, isReauthTimeoutHours := ikeReauthTimeoutChoiceChoices.(*ves_io_schema_views_ike_phase1_profile.GlobalSpecType_ReauthTimeoutHours)
-			reauthTimeoutHoursAttributeMap := make(map[string]attr.Value)
-
-			if isReauthTimeoutHours && reauthTimeoutHoursOptions != nil {
-
-				// resource specToModelNested UintField --> Duration
-				reauthTimeoutHoursAttributeMap["duration"] = types.Int64Value(int64(reauthTimeoutHoursOptions.ReauthTimeoutHours.GetDuration()))
-
-				reauthTimeoutHoursObj, diags := types.ObjectValue(IkePhase1ProfileIkeReauthTimeoutReauthTimeoutHoursModelAttributeMap, reauthTimeoutHoursAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				ikeReauthTimeoutChoiceChoicesModel.ReauthTimeoutHours = reauthTimeoutHoursObj
-			} else {
-				ikeReauthTimeoutChoiceChoicesModel.ReauthTimeoutHours = types.ObjectNull(IkePhase1ProfileIkeReauthTimeoutReauthTimeoutHoursModelAttributeMap)
-			}
-		}
-
-		// resource specToModelNested PointerOfOneOfField --> ReauthTimeoutDays
-		// GlobalSpecType
-		// false
-		{
-			reauthTimeoutDaysOptions, isReauthTimeoutDays := ikeReauthTimeoutChoiceChoices.(*ves_io_schema_views_ike_phase1_profile.GlobalSpecType_ReauthTimeoutDays)
-			reauthTimeoutDaysAttributeMap := make(map[string]attr.Value)
-
-			if isReauthTimeoutDays && reauthTimeoutDaysOptions != nil {
-
-				// resource specToModelNested UintField --> Duration
-				reauthTimeoutDaysAttributeMap["duration"] = types.Int64Value(int64(reauthTimeoutDaysOptions.ReauthTimeoutDays.GetDuration()))
-
-				reauthTimeoutDaysObj, diags := types.ObjectValue(IkePhase1ProfileIkeReauthTimeoutReauthTimeoutDaysModelAttributeMap, reauthTimeoutDaysAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				ikeReauthTimeoutChoiceChoicesModel.ReauthTimeoutDays = reauthTimeoutDaysObj
-			} else {
-				ikeReauthTimeoutChoiceChoicesModel.ReauthTimeoutDays = types.ObjectNull(IkePhase1ProfileIkeReauthTimeoutReauthTimeoutDaysModelAttributeMap)
-			}
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> ReauthDisabled
-		_, isReauthDisabled := ikeReauthTimeoutChoiceChoices.(*ves_io_schema_views_ike_phase1_profile.GlobalSpecType_ReauthDisabled)
-
-		if isReauthDisabled {
-			ikeReauthTimeoutChoiceChoicesModel.ReauthDisabled = types.BoolValue(true)
-		} else {
-			ikeReauthTimeoutChoiceChoicesModel.ReauthDisabled = types.BoolNull()
-		}
-
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		ikeReauthTimeoutChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			IkePhase1ProfileIkeReauthTimeoutModelAttributeMap,
-			ikeReauthTimeoutChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
-
-		// Assign the final object to the root data model.
-		data.IkeReauthTimeoutChoice = ikeReauthTimeoutChoiceObj
-	} else {
-		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		data.IkeReauthTimeoutChoice = types.ObjectNull(IkePhase1ProfileIkeReauthTimeoutModelAttributeMap)
-	}
+	// resource SpecToModelRoot Meta StringField --> Uid
+	data.Uid = types.StringValue(systemMetaData.GetUid())
 
 	// resource SpecToModelRoot RequiredArrayOfEnumField --> EncryptionAlgos
 	if len(specData.GetEncryptionAlgos()) > 0 {
@@ -1032,6 +946,29 @@ func (r *ResourceF5XCIkePhase1Profile) Create(ctx context.Context, request resou
 
 		// Recursively call the nested template to process the oneof choices.
 
+		// resource specToModelNested PointerOfOneOfField --> IkeKeylifetimeHours
+		// GlobalSpecType
+		// false
+		{
+			ikeKeylifetimeHoursOptions, isIkeKeylifetimeHours := ikeKeyLifetimeChoiceChoices.(*ves_io_schema_views_ike_phase1_profile.GlobalSpecType_IkeKeylifetimeHours)
+			ikeKeylifetimeHoursAttributeMap := make(map[string]attr.Value)
+
+			if isIkeKeylifetimeHours && ikeKeylifetimeHoursOptions != nil {
+
+				// resource specToModelNested UintField --> Duration
+				ikeKeylifetimeHoursAttributeMap["duration"] = types.Int64Value(int64(ikeKeylifetimeHoursOptions.IkeKeylifetimeHours.GetDuration()))
+
+				ikeKeylifetimeHoursObj, diags := types.ObjectValue(IkePhase1ProfileIkeKeyLifetimeIkeKeylifetimeHoursModelAttributeMap, ikeKeylifetimeHoursAttributeMap)
+				response.Diagnostics.Append(diags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				ikeKeyLifetimeChoiceChoicesModel.IkeKeylifetimeHours = ikeKeylifetimeHoursObj
+			} else {
+				ikeKeyLifetimeChoiceChoicesModel.IkeKeylifetimeHours = types.ObjectNull(IkePhase1ProfileIkeKeyLifetimeIkeKeylifetimeHoursModelAttributeMap)
+			}
+		}
+
 		// resource specToModelNested BoolOfOneOfPointerField --> UseDefaultKeylifetime
 		_, isUseDefaultKeylifetime := ikeKeyLifetimeChoiceChoices.(*ves_io_schema_views_ike_phase1_profile.GlobalSpecType_UseDefaultKeylifetime)
 
@@ -1064,29 +1001,6 @@ func (r *ResourceF5XCIkePhase1Profile) Create(ctx context.Context, request resou
 			}
 		}
 
-		// resource specToModelNested PointerOfOneOfField --> IkeKeylifetimeHours
-		// GlobalSpecType
-		// false
-		{
-			ikeKeylifetimeHoursOptions, isIkeKeylifetimeHours := ikeKeyLifetimeChoiceChoices.(*ves_io_schema_views_ike_phase1_profile.GlobalSpecType_IkeKeylifetimeHours)
-			ikeKeylifetimeHoursAttributeMap := make(map[string]attr.Value)
-
-			if isIkeKeylifetimeHours && ikeKeylifetimeHoursOptions != nil {
-
-				// resource specToModelNested UintField --> Duration
-				ikeKeylifetimeHoursAttributeMap["duration"] = types.Int64Value(int64(ikeKeylifetimeHoursOptions.IkeKeylifetimeHours.GetDuration()))
-
-				ikeKeylifetimeHoursObj, diags := types.ObjectValue(IkePhase1ProfileIkeKeyLifetimeIkeKeylifetimeHoursModelAttributeMap, ikeKeylifetimeHoursAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				ikeKeyLifetimeChoiceChoicesModel.IkeKeylifetimeHours = ikeKeylifetimeHoursObj
-			} else {
-				ikeKeyLifetimeChoiceChoicesModel.IkeKeylifetimeHours = types.ObjectNull(IkePhase1ProfileIkeKeyLifetimeIkeKeylifetimeHoursModelAttributeMap)
-			}
-		}
-
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
 		ikeKeyLifetimeChoiceObj, diags := utils.GoStructToObjectValue(
 			ctx,
@@ -1103,6 +1017,92 @@ func (r *ResourceF5XCIkePhase1Profile) Create(ctx context.Context, request resou
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		data.IkeKeyLifetimeChoice = types.ObjectNull(IkePhase1ProfileIkeKeyLifetimeModelAttributeMap)
+	}
+
+	// resource SpecToModelRoot RequiredOneOfField --> IkeReauthTimeout
+	// false
+	// true
+	// This resource uses standard struct-based resolution.
+	if specData.GetIkeReauthTimeout() != nil {
+		// For standard resources, get the choice from the typed spec data.
+		ikeReauthTimeoutChoiceChoices := specData.GetIkeReauthTimeout()
+
+		// The model struct that will be populated by the nested template.
+		var ikeReauthTimeoutChoiceChoicesModel = &IkePhase1ProfileGlobalSpecTypeIkeReauthTimeoutChoice{}
+
+		// Recursively call the nested template to process the oneof choices.
+
+		// resource specToModelNested PointerOfOneOfField --> ReauthTimeoutHours
+		// GlobalSpecType
+		// false
+		{
+			reauthTimeoutHoursOptions, isReauthTimeoutHours := ikeReauthTimeoutChoiceChoices.(*ves_io_schema_views_ike_phase1_profile.GlobalSpecType_ReauthTimeoutHours)
+			reauthTimeoutHoursAttributeMap := make(map[string]attr.Value)
+
+			if isReauthTimeoutHours && reauthTimeoutHoursOptions != nil {
+
+				// resource specToModelNested UintField --> Duration
+				reauthTimeoutHoursAttributeMap["duration"] = types.Int64Value(int64(reauthTimeoutHoursOptions.ReauthTimeoutHours.GetDuration()))
+
+				reauthTimeoutHoursObj, diags := types.ObjectValue(IkePhase1ProfileIkeReauthTimeoutReauthTimeoutHoursModelAttributeMap, reauthTimeoutHoursAttributeMap)
+				response.Diagnostics.Append(diags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				ikeReauthTimeoutChoiceChoicesModel.ReauthTimeoutHours = reauthTimeoutHoursObj
+			} else {
+				ikeReauthTimeoutChoiceChoicesModel.ReauthTimeoutHours = types.ObjectNull(IkePhase1ProfileIkeReauthTimeoutReauthTimeoutHoursModelAttributeMap)
+			}
+		}
+
+		// resource specToModelNested PointerOfOneOfField --> ReauthTimeoutDays
+		// GlobalSpecType
+		// false
+		{
+			reauthTimeoutDaysOptions, isReauthTimeoutDays := ikeReauthTimeoutChoiceChoices.(*ves_io_schema_views_ike_phase1_profile.GlobalSpecType_ReauthTimeoutDays)
+			reauthTimeoutDaysAttributeMap := make(map[string]attr.Value)
+
+			if isReauthTimeoutDays && reauthTimeoutDaysOptions != nil {
+
+				// resource specToModelNested UintField --> Duration
+				reauthTimeoutDaysAttributeMap["duration"] = types.Int64Value(int64(reauthTimeoutDaysOptions.ReauthTimeoutDays.GetDuration()))
+
+				reauthTimeoutDaysObj, diags := types.ObjectValue(IkePhase1ProfileIkeReauthTimeoutReauthTimeoutDaysModelAttributeMap, reauthTimeoutDaysAttributeMap)
+				response.Diagnostics.Append(diags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				ikeReauthTimeoutChoiceChoicesModel.ReauthTimeoutDays = reauthTimeoutDaysObj
+			} else {
+				ikeReauthTimeoutChoiceChoicesModel.ReauthTimeoutDays = types.ObjectNull(IkePhase1ProfileIkeReauthTimeoutReauthTimeoutDaysModelAttributeMap)
+			}
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> ReauthDisabled
+		_, isReauthDisabled := ikeReauthTimeoutChoiceChoices.(*ves_io_schema_views_ike_phase1_profile.GlobalSpecType_ReauthDisabled)
+
+		if isReauthDisabled {
+			ikeReauthTimeoutChoiceChoicesModel.ReauthDisabled = types.BoolValue(true)
+		} else {
+			ikeReauthTimeoutChoiceChoicesModel.ReauthDisabled = types.BoolNull()
+		}
+
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		ikeReauthTimeoutChoiceObj, diags := utils.GoStructToObjectValue(
+			ctx,
+			IkePhase1ProfileIkeReauthTimeoutModelAttributeMap,
+			ikeReauthTimeoutChoiceChoicesModel,
+		)
+		if diags.HasError() {
+			response.Diagnostics.Append(diags...)
+			return
+		}
+
+		// Assign the final object to the root data model.
+		data.IkeReauthTimeoutChoice = ikeReauthTimeoutChoiceObj
+	} else {
+		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		data.IkeReauthTimeoutChoice = types.ObjectNull(IkePhase1ProfileIkeReauthTimeoutModelAttributeMap)
 	}
 
 	if response.Diagnostics.HasError() {
@@ -1167,15 +1167,6 @@ func (r *ResourceF5XCIkePhase1Profile) Read(ctx context.Context, request resourc
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
-
-	// resource SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
-
-	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
-	data.Namespace = types.StringValue(metaData.GetNamespace())
-
-	// resource SpecToModelRoot Meta StringField --> Uid
-	data.Uid = types.StringValue(systemMetaData.GetUid())
 
 	// resource SpecToModelRoot Meta MapOfStringField --> Labels
 	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
@@ -1274,91 +1265,14 @@ func (r *ResourceF5XCIkePhase1Profile) Read(ctx context.Context, request resourc
 	// resource SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
 
-	// resource SpecToModelRoot RequiredOneOfField --> IkeReauthTimeout
-	// false
-	// true
-	// This resource uses standard struct-based resolution.
-	if specData.GetIkeReauthTimeout() != nil {
-		// For standard resources, get the choice from the typed spec data.
-		ikeReauthTimeoutChoiceChoices := specData.GetIkeReauthTimeout()
+	// resource SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
 
-		// The model struct that will be populated by the nested template.
-		var ikeReauthTimeoutChoiceChoicesModel = &IkePhase1ProfileGlobalSpecTypeIkeReauthTimeoutChoice{}
+	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
+	data.Namespace = types.StringValue(metaData.GetNamespace())
 
-		// Recursively call the nested template to process the oneof choices.
-
-		// resource specToModelNested PointerOfOneOfField --> ReauthTimeoutHours
-		// <no value>
-		// false
-		{
-			reauthTimeoutHoursOptions, isReauthTimeoutHours := ikeReauthTimeoutChoiceChoices.(*ves_io_schema_views_ike_phase1_profile.GlobalSpecType_ReauthTimeoutHours)
-			reauthTimeoutHoursAttributeMap := make(map[string]attr.Value)
-
-			if isReauthTimeoutHours && reauthTimeoutHoursOptions != nil {
-
-				// resource specToModelNested UintField --> Duration
-				reauthTimeoutHoursAttributeMap["duration"] = types.Int64Value(int64(reauthTimeoutHoursOptions.ReauthTimeoutHours.GetDuration()))
-
-				reauthTimeoutHoursObj, diags := types.ObjectValue(IkePhase1ProfileIkeReauthTimeoutReauthTimeoutHoursModelAttributeMap, reauthTimeoutHoursAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				ikeReauthTimeoutChoiceChoicesModel.ReauthTimeoutHours = reauthTimeoutHoursObj
-			} else {
-				ikeReauthTimeoutChoiceChoicesModel.ReauthTimeoutHours = types.ObjectNull(IkePhase1ProfileIkeReauthTimeoutReauthTimeoutHoursModelAttributeMap)
-			}
-		}
-
-		// resource specToModelNested PointerOfOneOfField --> ReauthTimeoutDays
-		// <no value>
-		// false
-		{
-			reauthTimeoutDaysOptions, isReauthTimeoutDays := ikeReauthTimeoutChoiceChoices.(*ves_io_schema_views_ike_phase1_profile.GlobalSpecType_ReauthTimeoutDays)
-			reauthTimeoutDaysAttributeMap := make(map[string]attr.Value)
-
-			if isReauthTimeoutDays && reauthTimeoutDaysOptions != nil {
-
-				// resource specToModelNested UintField --> Duration
-				reauthTimeoutDaysAttributeMap["duration"] = types.Int64Value(int64(reauthTimeoutDaysOptions.ReauthTimeoutDays.GetDuration()))
-
-				reauthTimeoutDaysObj, diags := types.ObjectValue(IkePhase1ProfileIkeReauthTimeoutReauthTimeoutDaysModelAttributeMap, reauthTimeoutDaysAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				ikeReauthTimeoutChoiceChoicesModel.ReauthTimeoutDays = reauthTimeoutDaysObj
-			} else {
-				ikeReauthTimeoutChoiceChoicesModel.ReauthTimeoutDays = types.ObjectNull(IkePhase1ProfileIkeReauthTimeoutReauthTimeoutDaysModelAttributeMap)
-			}
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> ReauthDisabled
-		_, isReauthDisabled := ikeReauthTimeoutChoiceChoices.(*ves_io_schema_views_ike_phase1_profile.GlobalSpecType_ReauthDisabled)
-
-		if isReauthDisabled {
-			ikeReauthTimeoutChoiceChoicesModel.ReauthDisabled = types.BoolValue(true)
-		} else {
-			ikeReauthTimeoutChoiceChoicesModel.ReauthDisabled = types.BoolNull()
-		}
-
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		ikeReauthTimeoutChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			IkePhase1ProfileIkeReauthTimeoutModelAttributeMap,
-			ikeReauthTimeoutChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
-
-		// Assign the final object to the root data model.
-		data.IkeReauthTimeoutChoice = ikeReauthTimeoutChoiceObj
-	} else {
-		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		data.IkeReauthTimeoutChoice = types.ObjectNull(IkePhase1ProfileIkeReauthTimeoutModelAttributeMap)
-	}
+	// resource SpecToModelRoot Meta StringField --> Uid
+	data.Uid = types.StringValue(systemMetaData.GetUid())
 
 	// resource SpecToModelRoot RequiredArrayOfEnumField --> EncryptionAlgos
 	if len(specData.GetEncryptionAlgos()) > 0 {
@@ -1445,6 +1359,29 @@ func (r *ResourceF5XCIkePhase1Profile) Read(ctx context.Context, request resourc
 
 		// Recursively call the nested template to process the oneof choices.
 
+		// resource specToModelNested PointerOfOneOfField --> IkeKeylifetimeHours
+		// <no value>
+		// false
+		{
+			ikeKeylifetimeHoursOptions, isIkeKeylifetimeHours := ikeKeyLifetimeChoiceChoices.(*ves_io_schema_views_ike_phase1_profile.GlobalSpecType_IkeKeylifetimeHours)
+			ikeKeylifetimeHoursAttributeMap := make(map[string]attr.Value)
+
+			if isIkeKeylifetimeHours && ikeKeylifetimeHoursOptions != nil {
+
+				// resource specToModelNested UintField --> Duration
+				ikeKeylifetimeHoursAttributeMap["duration"] = types.Int64Value(int64(ikeKeylifetimeHoursOptions.IkeKeylifetimeHours.GetDuration()))
+
+				ikeKeylifetimeHoursObj, diags := types.ObjectValue(IkePhase1ProfileIkeKeyLifetimeIkeKeylifetimeHoursModelAttributeMap, ikeKeylifetimeHoursAttributeMap)
+				response.Diagnostics.Append(diags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				ikeKeyLifetimeChoiceChoicesModel.IkeKeylifetimeHours = ikeKeylifetimeHoursObj
+			} else {
+				ikeKeyLifetimeChoiceChoicesModel.IkeKeylifetimeHours = types.ObjectNull(IkePhase1ProfileIkeKeyLifetimeIkeKeylifetimeHoursModelAttributeMap)
+			}
+		}
+
 		// resource specToModelNested BoolOfOneOfPointerField --> UseDefaultKeylifetime
 		_, isUseDefaultKeylifetime := ikeKeyLifetimeChoiceChoices.(*ves_io_schema_views_ike_phase1_profile.GlobalSpecType_UseDefaultKeylifetime)
 
@@ -1477,29 +1414,6 @@ func (r *ResourceF5XCIkePhase1Profile) Read(ctx context.Context, request resourc
 			}
 		}
 
-		// resource specToModelNested PointerOfOneOfField --> IkeKeylifetimeHours
-		// <no value>
-		// false
-		{
-			ikeKeylifetimeHoursOptions, isIkeKeylifetimeHours := ikeKeyLifetimeChoiceChoices.(*ves_io_schema_views_ike_phase1_profile.GlobalSpecType_IkeKeylifetimeHours)
-			ikeKeylifetimeHoursAttributeMap := make(map[string]attr.Value)
-
-			if isIkeKeylifetimeHours && ikeKeylifetimeHoursOptions != nil {
-
-				// resource specToModelNested UintField --> Duration
-				ikeKeylifetimeHoursAttributeMap["duration"] = types.Int64Value(int64(ikeKeylifetimeHoursOptions.IkeKeylifetimeHours.GetDuration()))
-
-				ikeKeylifetimeHoursObj, diags := types.ObjectValue(IkePhase1ProfileIkeKeyLifetimeIkeKeylifetimeHoursModelAttributeMap, ikeKeylifetimeHoursAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				ikeKeyLifetimeChoiceChoicesModel.IkeKeylifetimeHours = ikeKeylifetimeHoursObj
-			} else {
-				ikeKeyLifetimeChoiceChoicesModel.IkeKeylifetimeHours = types.ObjectNull(IkePhase1ProfileIkeKeyLifetimeIkeKeylifetimeHoursModelAttributeMap)
-			}
-		}
-
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
 		ikeKeyLifetimeChoiceObj, diags := utils.GoStructToObjectValue(
 			ctx,
@@ -1516,6 +1430,92 @@ func (r *ResourceF5XCIkePhase1Profile) Read(ctx context.Context, request resourc
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		data.IkeKeyLifetimeChoice = types.ObjectNull(IkePhase1ProfileIkeKeyLifetimeModelAttributeMap)
+	}
+
+	// resource SpecToModelRoot RequiredOneOfField --> IkeReauthTimeout
+	// false
+	// true
+	// This resource uses standard struct-based resolution.
+	if specData.GetIkeReauthTimeout() != nil {
+		// For standard resources, get the choice from the typed spec data.
+		ikeReauthTimeoutChoiceChoices := specData.GetIkeReauthTimeout()
+
+		// The model struct that will be populated by the nested template.
+		var ikeReauthTimeoutChoiceChoicesModel = &IkePhase1ProfileGlobalSpecTypeIkeReauthTimeoutChoice{}
+
+		// Recursively call the nested template to process the oneof choices.
+
+		// resource specToModelNested PointerOfOneOfField --> ReauthTimeoutHours
+		// <no value>
+		// false
+		{
+			reauthTimeoutHoursOptions, isReauthTimeoutHours := ikeReauthTimeoutChoiceChoices.(*ves_io_schema_views_ike_phase1_profile.GlobalSpecType_ReauthTimeoutHours)
+			reauthTimeoutHoursAttributeMap := make(map[string]attr.Value)
+
+			if isReauthTimeoutHours && reauthTimeoutHoursOptions != nil {
+
+				// resource specToModelNested UintField --> Duration
+				reauthTimeoutHoursAttributeMap["duration"] = types.Int64Value(int64(reauthTimeoutHoursOptions.ReauthTimeoutHours.GetDuration()))
+
+				reauthTimeoutHoursObj, diags := types.ObjectValue(IkePhase1ProfileIkeReauthTimeoutReauthTimeoutHoursModelAttributeMap, reauthTimeoutHoursAttributeMap)
+				response.Diagnostics.Append(diags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				ikeReauthTimeoutChoiceChoicesModel.ReauthTimeoutHours = reauthTimeoutHoursObj
+			} else {
+				ikeReauthTimeoutChoiceChoicesModel.ReauthTimeoutHours = types.ObjectNull(IkePhase1ProfileIkeReauthTimeoutReauthTimeoutHoursModelAttributeMap)
+			}
+		}
+
+		// resource specToModelNested PointerOfOneOfField --> ReauthTimeoutDays
+		// <no value>
+		// false
+		{
+			reauthTimeoutDaysOptions, isReauthTimeoutDays := ikeReauthTimeoutChoiceChoices.(*ves_io_schema_views_ike_phase1_profile.GlobalSpecType_ReauthTimeoutDays)
+			reauthTimeoutDaysAttributeMap := make(map[string]attr.Value)
+
+			if isReauthTimeoutDays && reauthTimeoutDaysOptions != nil {
+
+				// resource specToModelNested UintField --> Duration
+				reauthTimeoutDaysAttributeMap["duration"] = types.Int64Value(int64(reauthTimeoutDaysOptions.ReauthTimeoutDays.GetDuration()))
+
+				reauthTimeoutDaysObj, diags := types.ObjectValue(IkePhase1ProfileIkeReauthTimeoutReauthTimeoutDaysModelAttributeMap, reauthTimeoutDaysAttributeMap)
+				response.Diagnostics.Append(diags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				ikeReauthTimeoutChoiceChoicesModel.ReauthTimeoutDays = reauthTimeoutDaysObj
+			} else {
+				ikeReauthTimeoutChoiceChoicesModel.ReauthTimeoutDays = types.ObjectNull(IkePhase1ProfileIkeReauthTimeoutReauthTimeoutDaysModelAttributeMap)
+			}
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> ReauthDisabled
+		_, isReauthDisabled := ikeReauthTimeoutChoiceChoices.(*ves_io_schema_views_ike_phase1_profile.GlobalSpecType_ReauthDisabled)
+
+		if isReauthDisabled {
+			ikeReauthTimeoutChoiceChoicesModel.ReauthDisabled = types.BoolValue(true)
+		} else {
+			ikeReauthTimeoutChoiceChoicesModel.ReauthDisabled = types.BoolNull()
+		}
+
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		ikeReauthTimeoutChoiceObj, diags := utils.GoStructToObjectValue(
+			ctx,
+			IkePhase1ProfileIkeReauthTimeoutModelAttributeMap,
+			ikeReauthTimeoutChoiceChoicesModel,
+		)
+		if diags.HasError() {
+			response.Diagnostics.Append(diags...)
+			return
+		}
+
+		// Assign the final object to the root data model.
+		data.IkeReauthTimeoutChoice = ikeReauthTimeoutChoiceObj
+	} else {
+		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		data.IkeReauthTimeoutChoice = types.ObjectNull(IkePhase1ProfileIkeReauthTimeoutModelAttributeMap)
 	}
 
 	if response.Diagnostics.HasError() {
@@ -1565,16 +1565,6 @@ func (r *ResourceF5XCIkePhase1Profile) Update(ctx context.Context, request resou
 
 	// Populate updateReq from data model
 
-	// resource modelToMetaRoot RequiredStringField --> Name
-	if !data.Name.IsNull() && !data.Name.IsUnknown() {
-		meta.Name = string(data.Name.ValueString())
-	}
-
-	// resource modelToMetaRoot RequiredStringField --> Namespace
-	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
-		meta.Namespace = string(data.Namespace.ValueString())
-	}
-
 	// resource modelToMetaRoot MapOfStringField --> Annotations
 	if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
 		var labels map[string]string
@@ -1594,57 +1584,14 @@ func (r *ResourceF5XCIkePhase1Profile) Update(ctx context.Context, request resou
 		meta.Description = string(data.Description.ValueString())
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> IkeReauthTimeout
-	if !data.IkeReauthTimeoutChoice.IsNull() && !data.IkeReauthTimeoutChoice.IsUnknown() {
-		ikeReauthTimeoutChoiceModel := IkePhase1ProfileGlobalSpecTypeIkeReauthTimeoutChoice{}
-		response.Diagnostics.Append(data.IkeReauthTimeoutChoice.As(ctx, &ikeReauthTimeoutChoiceModel, basetypes.ObjectAsOptions{})...)
-		if response.Diagnostics.HasError() {
-			return
-		}
+	// resource modelToMetaRoot RequiredStringField --> Name
+	if !data.Name.IsNull() && !data.Name.IsUnknown() {
+		meta.Name = string(data.Name.ValueString())
+	}
 
-		// resource modelToSpecNested PointerOfOneOfField --> ReauthTimeoutHours
-		if !ikeReauthTimeoutChoiceModel.ReauthTimeoutHours.IsNull() && !ikeReauthTimeoutChoiceModel.ReauthTimeoutHours.IsUnknown() {
-			var ikePhase1ProfileGlobalSpecTypeReauthTimeoutHoursModel IkePhase1ProfileGlobalSpecTypeReauthTimeoutHours
-			response.Diagnostics.Append(ikeReauthTimeoutChoiceModel.ReauthTimeoutHours.As(ctx, &ikePhase1ProfileGlobalSpecTypeReauthTimeoutHoursModel, basetypes.ObjectAsOptions{})...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			reauthTimeoutHoursOneOfSpec := &ves_io_schema_views_ike_phase1_profile.ReplaceSpecType_ReauthTimeoutHours{}
-			reauthTimeoutHoursOneOfSpec.ReauthTimeoutHours = &ves_io_schema_views_ike_phase1_profile.InputHours{}
-			spec.IkeReauthTimeout = reauthTimeoutHoursOneOfSpec
-
-			// resource modelToSpecNested UintField --> Duration
-			if !ikePhase1ProfileGlobalSpecTypeReauthTimeoutHoursModel.Duration.IsNull() && !ikePhase1ProfileGlobalSpecTypeReauthTimeoutHoursModel.Duration.IsUnknown() {
-				reauthTimeoutHoursOneOfSpec.ReauthTimeoutHours.Duration = uint32(uint32(ikePhase1ProfileGlobalSpecTypeReauthTimeoutHoursModel.Duration.ValueInt64()))
-			}
-
-		}
-
-		// resource modelToSpecNested PointerOfOneOfField --> ReauthTimeoutDays
-		if !ikeReauthTimeoutChoiceModel.ReauthTimeoutDays.IsNull() && !ikeReauthTimeoutChoiceModel.ReauthTimeoutDays.IsUnknown() {
-			var ikePhase1ProfileGlobalSpecTypeReauthTimeoutDaysModel IkePhase1ProfileGlobalSpecTypeReauthTimeoutDays
-			response.Diagnostics.Append(ikeReauthTimeoutChoiceModel.ReauthTimeoutDays.As(ctx, &ikePhase1ProfileGlobalSpecTypeReauthTimeoutDaysModel, basetypes.ObjectAsOptions{})...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			reauthTimeoutDaysOneOfSpec := &ves_io_schema_views_ike_phase1_profile.ReplaceSpecType_ReauthTimeoutDays{}
-			reauthTimeoutDaysOneOfSpec.ReauthTimeoutDays = &ves_io_schema_views_ike_phase1_profile.InputDays{}
-			spec.IkeReauthTimeout = reauthTimeoutDaysOneOfSpec
-
-			// resource modelToSpecNested UintField --> Duration
-			if !ikePhase1ProfileGlobalSpecTypeReauthTimeoutDaysModel.Duration.IsNull() && !ikePhase1ProfileGlobalSpecTypeReauthTimeoutDaysModel.Duration.IsUnknown() {
-				reauthTimeoutDaysOneOfSpec.ReauthTimeoutDays.Duration = uint32(uint32(ikePhase1ProfileGlobalSpecTypeReauthTimeoutDaysModel.Duration.ValueInt64()))
-			}
-
-		}
-
-		// resource modelToSpecNested BoolOfOneOfPointerField --> ReauthDisabled
-		if !ikeReauthTimeoutChoiceModel.ReauthDisabled.IsNull() && !ikeReauthTimeoutChoiceModel.ReauthDisabled.IsUnknown() {
-			reauthDisabledSpecBool := &ves_io_schema_views_ike_phase1_profile.ReplaceSpecType_ReauthDisabled{}
-			reauthDisabledSpecBool.ReauthDisabled = &ves_io_schema.Empty{}
-			spec.IkeReauthTimeout = reauthDisabledSpecBool
-		}
-
+	// resource modelToMetaRoot RequiredStringField --> Namespace
+	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
+		meta.Namespace = string(data.Namespace.ValueString())
 	}
 
 	{
@@ -1755,6 +1702,24 @@ func (r *ResourceF5XCIkePhase1Profile) Update(ctx context.Context, request resou
 			return
 		}
 
+		// resource modelToSpecNested PointerOfOneOfField --> IkeKeylifetimeHours
+		if !ikeKeyLifetimeChoiceModel.IkeKeylifetimeHours.IsNull() && !ikeKeyLifetimeChoiceModel.IkeKeylifetimeHours.IsUnknown() {
+			var ikePhase1ProfileGlobalSpecTypeIkeKeylifetimeHoursModel IkePhase1ProfileGlobalSpecTypeIkeKeylifetimeHours
+			response.Diagnostics.Append(ikeKeyLifetimeChoiceModel.IkeKeylifetimeHours.As(ctx, &ikePhase1ProfileGlobalSpecTypeIkeKeylifetimeHoursModel, basetypes.ObjectAsOptions{})...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			ikeKeylifetimeHoursOneOfSpec := &ves_io_schema_views_ike_phase1_profile.ReplaceSpecType_IkeKeylifetimeHours{}
+			ikeKeylifetimeHoursOneOfSpec.IkeKeylifetimeHours = &ves_io_schema_views_ike_phase1_profile.InputHours{}
+			spec.IkeKeyLifetime = ikeKeylifetimeHoursOneOfSpec
+
+			// resource modelToSpecNested UintField --> Duration
+			if !ikePhase1ProfileGlobalSpecTypeIkeKeylifetimeHoursModel.Duration.IsNull() && !ikePhase1ProfileGlobalSpecTypeIkeKeylifetimeHoursModel.Duration.IsUnknown() {
+				ikeKeylifetimeHoursOneOfSpec.IkeKeylifetimeHours.Duration = uint32(uint32(ikePhase1ProfileGlobalSpecTypeIkeKeylifetimeHoursModel.Duration.ValueInt64()))
+			}
+
+		}
+
 		// resource modelToSpecNested BoolOfOneOfPointerField --> UseDefaultKeylifetime
 		if !ikeKeyLifetimeChoiceModel.UseDefaultKeylifetime.IsNull() && !ikeKeyLifetimeChoiceModel.UseDefaultKeylifetime.IsUnknown() {
 			useDefaultKeylifetimeSpecBool := &ves_io_schema_views_ike_phase1_profile.ReplaceSpecType_UseDefaultKeylifetime{}
@@ -1780,22 +1745,57 @@ func (r *ResourceF5XCIkePhase1Profile) Update(ctx context.Context, request resou
 
 		}
 
-		// resource modelToSpecNested PointerOfOneOfField --> IkeKeylifetimeHours
-		if !ikeKeyLifetimeChoiceModel.IkeKeylifetimeHours.IsNull() && !ikeKeyLifetimeChoiceModel.IkeKeylifetimeHours.IsUnknown() {
-			var ikePhase1ProfileGlobalSpecTypeIkeKeylifetimeHoursModel IkePhase1ProfileGlobalSpecTypeIkeKeylifetimeHours
-			response.Diagnostics.Append(ikeKeyLifetimeChoiceModel.IkeKeylifetimeHours.As(ctx, &ikePhase1ProfileGlobalSpecTypeIkeKeylifetimeHoursModel, basetypes.ObjectAsOptions{})...)
+	}
+
+	// resource modelToSpecRoot RequiredOneOfField --> IkeReauthTimeout
+	if !data.IkeReauthTimeoutChoice.IsNull() && !data.IkeReauthTimeoutChoice.IsUnknown() {
+		ikeReauthTimeoutChoiceModel := IkePhase1ProfileGlobalSpecTypeIkeReauthTimeoutChoice{}
+		response.Diagnostics.Append(data.IkeReauthTimeoutChoice.As(ctx, &ikeReauthTimeoutChoiceModel, basetypes.ObjectAsOptions{})...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+
+		// resource modelToSpecNested PointerOfOneOfField --> ReauthTimeoutHours
+		if !ikeReauthTimeoutChoiceModel.ReauthTimeoutHours.IsNull() && !ikeReauthTimeoutChoiceModel.ReauthTimeoutHours.IsUnknown() {
+			var ikePhase1ProfileGlobalSpecTypeReauthTimeoutHoursModel IkePhase1ProfileGlobalSpecTypeReauthTimeoutHours
+			response.Diagnostics.Append(ikeReauthTimeoutChoiceModel.ReauthTimeoutHours.As(ctx, &ikePhase1ProfileGlobalSpecTypeReauthTimeoutHoursModel, basetypes.ObjectAsOptions{})...)
 			if response.Diagnostics.HasError() {
 				return
 			}
-			ikeKeylifetimeHoursOneOfSpec := &ves_io_schema_views_ike_phase1_profile.ReplaceSpecType_IkeKeylifetimeHours{}
-			ikeKeylifetimeHoursOneOfSpec.IkeKeylifetimeHours = &ves_io_schema_views_ike_phase1_profile.InputHours{}
-			spec.IkeKeyLifetime = ikeKeylifetimeHoursOneOfSpec
+			reauthTimeoutHoursOneOfSpec := &ves_io_schema_views_ike_phase1_profile.ReplaceSpecType_ReauthTimeoutHours{}
+			reauthTimeoutHoursOneOfSpec.ReauthTimeoutHours = &ves_io_schema_views_ike_phase1_profile.InputHours{}
+			spec.IkeReauthTimeout = reauthTimeoutHoursOneOfSpec
 
 			// resource modelToSpecNested UintField --> Duration
-			if !ikePhase1ProfileGlobalSpecTypeIkeKeylifetimeHoursModel.Duration.IsNull() && !ikePhase1ProfileGlobalSpecTypeIkeKeylifetimeHoursModel.Duration.IsUnknown() {
-				ikeKeylifetimeHoursOneOfSpec.IkeKeylifetimeHours.Duration = uint32(uint32(ikePhase1ProfileGlobalSpecTypeIkeKeylifetimeHoursModel.Duration.ValueInt64()))
+			if !ikePhase1ProfileGlobalSpecTypeReauthTimeoutHoursModel.Duration.IsNull() && !ikePhase1ProfileGlobalSpecTypeReauthTimeoutHoursModel.Duration.IsUnknown() {
+				reauthTimeoutHoursOneOfSpec.ReauthTimeoutHours.Duration = uint32(uint32(ikePhase1ProfileGlobalSpecTypeReauthTimeoutHoursModel.Duration.ValueInt64()))
 			}
 
+		}
+
+		// resource modelToSpecNested PointerOfOneOfField --> ReauthTimeoutDays
+		if !ikeReauthTimeoutChoiceModel.ReauthTimeoutDays.IsNull() && !ikeReauthTimeoutChoiceModel.ReauthTimeoutDays.IsUnknown() {
+			var ikePhase1ProfileGlobalSpecTypeReauthTimeoutDaysModel IkePhase1ProfileGlobalSpecTypeReauthTimeoutDays
+			response.Diagnostics.Append(ikeReauthTimeoutChoiceModel.ReauthTimeoutDays.As(ctx, &ikePhase1ProfileGlobalSpecTypeReauthTimeoutDaysModel, basetypes.ObjectAsOptions{})...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			reauthTimeoutDaysOneOfSpec := &ves_io_schema_views_ike_phase1_profile.ReplaceSpecType_ReauthTimeoutDays{}
+			reauthTimeoutDaysOneOfSpec.ReauthTimeoutDays = &ves_io_schema_views_ike_phase1_profile.InputDays{}
+			spec.IkeReauthTimeout = reauthTimeoutDaysOneOfSpec
+
+			// resource modelToSpecNested UintField --> Duration
+			if !ikePhase1ProfileGlobalSpecTypeReauthTimeoutDaysModel.Duration.IsNull() && !ikePhase1ProfileGlobalSpecTypeReauthTimeoutDaysModel.Duration.IsUnknown() {
+				reauthTimeoutDaysOneOfSpec.ReauthTimeoutDays.Duration = uint32(uint32(ikePhase1ProfileGlobalSpecTypeReauthTimeoutDaysModel.Duration.ValueInt64()))
+			}
+
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> ReauthDisabled
+		if !ikeReauthTimeoutChoiceModel.ReauthDisabled.IsNull() && !ikeReauthTimeoutChoiceModel.ReauthDisabled.IsUnknown() {
+			reauthDisabledSpecBool := &ves_io_schema_views_ike_phase1_profile.ReplaceSpecType_ReauthDisabled{}
+			reauthDisabledSpecBool.ReauthDisabled = &ves_io_schema.Empty{}
+			spec.IkeReauthTimeout = reauthDisabledSpecBool
 		}
 
 	}
@@ -1833,15 +1833,6 @@ func (r *ResourceF5XCIkePhase1Profile) Update(ctx context.Context, request resou
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
-
-	// resource SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
-
-	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
-	data.Namespace = types.StringValue(metaData.GetNamespace())
-
-	// resource SpecToModelRoot Meta StringField --> Uid
-	data.Uid = types.StringValue(systemMetaData.GetUid())
 
 	// resource SpecToModelRoot Meta MapOfStringField --> Labels
 	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
@@ -1940,91 +1931,14 @@ func (r *ResourceF5XCIkePhase1Profile) Update(ctx context.Context, request resou
 	// resource SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
 
-	// resource SpecToModelRoot RequiredOneOfField --> IkeReauthTimeout
-	// false
-	// true
-	// This resource uses standard struct-based resolution.
-	if specData.GetIkeReauthTimeout() != nil {
-		// For standard resources, get the choice from the typed spec data.
-		ikeReauthTimeoutChoiceChoices := specData.GetIkeReauthTimeout()
+	// resource SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
 
-		// The model struct that will be populated by the nested template.
-		var ikeReauthTimeoutChoiceChoicesModel = &IkePhase1ProfileGlobalSpecTypeIkeReauthTimeoutChoice{}
+	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
+	data.Namespace = types.StringValue(metaData.GetNamespace())
 
-		// Recursively call the nested template to process the oneof choices.
-
-		// resource specToModelNested PointerOfOneOfField --> ReauthTimeoutHours
-		// GlobalSpecType
-		// false
-		{
-			reauthTimeoutHoursOptions, isReauthTimeoutHours := ikeReauthTimeoutChoiceChoices.(*ves_io_schema_views_ike_phase1_profile.GlobalSpecType_ReauthTimeoutHours)
-			reauthTimeoutHoursAttributeMap := make(map[string]attr.Value)
-
-			if isReauthTimeoutHours && reauthTimeoutHoursOptions != nil {
-
-				// resource specToModelNested UintField --> Duration
-				reauthTimeoutHoursAttributeMap["duration"] = types.Int64Value(int64(reauthTimeoutHoursOptions.ReauthTimeoutHours.GetDuration()))
-
-				reauthTimeoutHoursObj, diags := types.ObjectValue(IkePhase1ProfileIkeReauthTimeoutReauthTimeoutHoursModelAttributeMap, reauthTimeoutHoursAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				ikeReauthTimeoutChoiceChoicesModel.ReauthTimeoutHours = reauthTimeoutHoursObj
-			} else {
-				ikeReauthTimeoutChoiceChoicesModel.ReauthTimeoutHours = types.ObjectNull(IkePhase1ProfileIkeReauthTimeoutReauthTimeoutHoursModelAttributeMap)
-			}
-		}
-
-		// resource specToModelNested PointerOfOneOfField --> ReauthTimeoutDays
-		// GlobalSpecType
-		// false
-		{
-			reauthTimeoutDaysOptions, isReauthTimeoutDays := ikeReauthTimeoutChoiceChoices.(*ves_io_schema_views_ike_phase1_profile.GlobalSpecType_ReauthTimeoutDays)
-			reauthTimeoutDaysAttributeMap := make(map[string]attr.Value)
-
-			if isReauthTimeoutDays && reauthTimeoutDaysOptions != nil {
-
-				// resource specToModelNested UintField --> Duration
-				reauthTimeoutDaysAttributeMap["duration"] = types.Int64Value(int64(reauthTimeoutDaysOptions.ReauthTimeoutDays.GetDuration()))
-
-				reauthTimeoutDaysObj, diags := types.ObjectValue(IkePhase1ProfileIkeReauthTimeoutReauthTimeoutDaysModelAttributeMap, reauthTimeoutDaysAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				ikeReauthTimeoutChoiceChoicesModel.ReauthTimeoutDays = reauthTimeoutDaysObj
-			} else {
-				ikeReauthTimeoutChoiceChoicesModel.ReauthTimeoutDays = types.ObjectNull(IkePhase1ProfileIkeReauthTimeoutReauthTimeoutDaysModelAttributeMap)
-			}
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> ReauthDisabled
-		_, isReauthDisabled := ikeReauthTimeoutChoiceChoices.(*ves_io_schema_views_ike_phase1_profile.GlobalSpecType_ReauthDisabled)
-
-		if isReauthDisabled {
-			ikeReauthTimeoutChoiceChoicesModel.ReauthDisabled = types.BoolValue(true)
-		} else {
-			ikeReauthTimeoutChoiceChoicesModel.ReauthDisabled = types.BoolNull()
-		}
-
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		ikeReauthTimeoutChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			IkePhase1ProfileIkeReauthTimeoutModelAttributeMap,
-			ikeReauthTimeoutChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
-
-		// Assign the final object to the root data model.
-		data.IkeReauthTimeoutChoice = ikeReauthTimeoutChoiceObj
-	} else {
-		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		data.IkeReauthTimeoutChoice = types.ObjectNull(IkePhase1ProfileIkeReauthTimeoutModelAttributeMap)
-	}
+	// resource SpecToModelRoot Meta StringField --> Uid
+	data.Uid = types.StringValue(systemMetaData.GetUid())
 
 	// resource SpecToModelRoot RequiredArrayOfEnumField --> EncryptionAlgos
 	if len(specData.GetEncryptionAlgos()) > 0 {
@@ -2111,6 +2025,29 @@ func (r *ResourceF5XCIkePhase1Profile) Update(ctx context.Context, request resou
 
 		// Recursively call the nested template to process the oneof choices.
 
+		// resource specToModelNested PointerOfOneOfField --> IkeKeylifetimeHours
+		// GlobalSpecType
+		// false
+		{
+			ikeKeylifetimeHoursOptions, isIkeKeylifetimeHours := ikeKeyLifetimeChoiceChoices.(*ves_io_schema_views_ike_phase1_profile.GlobalSpecType_IkeKeylifetimeHours)
+			ikeKeylifetimeHoursAttributeMap := make(map[string]attr.Value)
+
+			if isIkeKeylifetimeHours && ikeKeylifetimeHoursOptions != nil {
+
+				// resource specToModelNested UintField --> Duration
+				ikeKeylifetimeHoursAttributeMap["duration"] = types.Int64Value(int64(ikeKeylifetimeHoursOptions.IkeKeylifetimeHours.GetDuration()))
+
+				ikeKeylifetimeHoursObj, diags := types.ObjectValue(IkePhase1ProfileIkeKeyLifetimeIkeKeylifetimeHoursModelAttributeMap, ikeKeylifetimeHoursAttributeMap)
+				response.Diagnostics.Append(diags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				ikeKeyLifetimeChoiceChoicesModel.IkeKeylifetimeHours = ikeKeylifetimeHoursObj
+			} else {
+				ikeKeyLifetimeChoiceChoicesModel.IkeKeylifetimeHours = types.ObjectNull(IkePhase1ProfileIkeKeyLifetimeIkeKeylifetimeHoursModelAttributeMap)
+			}
+		}
+
 		// resource specToModelNested BoolOfOneOfPointerField --> UseDefaultKeylifetime
 		_, isUseDefaultKeylifetime := ikeKeyLifetimeChoiceChoices.(*ves_io_schema_views_ike_phase1_profile.GlobalSpecType_UseDefaultKeylifetime)
 
@@ -2143,29 +2080,6 @@ func (r *ResourceF5XCIkePhase1Profile) Update(ctx context.Context, request resou
 			}
 		}
 
-		// resource specToModelNested PointerOfOneOfField --> IkeKeylifetimeHours
-		// GlobalSpecType
-		// false
-		{
-			ikeKeylifetimeHoursOptions, isIkeKeylifetimeHours := ikeKeyLifetimeChoiceChoices.(*ves_io_schema_views_ike_phase1_profile.GlobalSpecType_IkeKeylifetimeHours)
-			ikeKeylifetimeHoursAttributeMap := make(map[string]attr.Value)
-
-			if isIkeKeylifetimeHours && ikeKeylifetimeHoursOptions != nil {
-
-				// resource specToModelNested UintField --> Duration
-				ikeKeylifetimeHoursAttributeMap["duration"] = types.Int64Value(int64(ikeKeylifetimeHoursOptions.IkeKeylifetimeHours.GetDuration()))
-
-				ikeKeylifetimeHoursObj, diags := types.ObjectValue(IkePhase1ProfileIkeKeyLifetimeIkeKeylifetimeHoursModelAttributeMap, ikeKeylifetimeHoursAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				ikeKeyLifetimeChoiceChoicesModel.IkeKeylifetimeHours = ikeKeylifetimeHoursObj
-			} else {
-				ikeKeyLifetimeChoiceChoicesModel.IkeKeylifetimeHours = types.ObjectNull(IkePhase1ProfileIkeKeyLifetimeIkeKeylifetimeHoursModelAttributeMap)
-			}
-		}
-
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
 		ikeKeyLifetimeChoiceObj, diags := utils.GoStructToObjectValue(
 			ctx,
@@ -2182,6 +2096,92 @@ func (r *ResourceF5XCIkePhase1Profile) Update(ctx context.Context, request resou
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		data.IkeKeyLifetimeChoice = types.ObjectNull(IkePhase1ProfileIkeKeyLifetimeModelAttributeMap)
+	}
+
+	// resource SpecToModelRoot RequiredOneOfField --> IkeReauthTimeout
+	// false
+	// true
+	// This resource uses standard struct-based resolution.
+	if specData.GetIkeReauthTimeout() != nil {
+		// For standard resources, get the choice from the typed spec data.
+		ikeReauthTimeoutChoiceChoices := specData.GetIkeReauthTimeout()
+
+		// The model struct that will be populated by the nested template.
+		var ikeReauthTimeoutChoiceChoicesModel = &IkePhase1ProfileGlobalSpecTypeIkeReauthTimeoutChoice{}
+
+		// Recursively call the nested template to process the oneof choices.
+
+		// resource specToModelNested PointerOfOneOfField --> ReauthTimeoutHours
+		// GlobalSpecType
+		// false
+		{
+			reauthTimeoutHoursOptions, isReauthTimeoutHours := ikeReauthTimeoutChoiceChoices.(*ves_io_schema_views_ike_phase1_profile.GlobalSpecType_ReauthTimeoutHours)
+			reauthTimeoutHoursAttributeMap := make(map[string]attr.Value)
+
+			if isReauthTimeoutHours && reauthTimeoutHoursOptions != nil {
+
+				// resource specToModelNested UintField --> Duration
+				reauthTimeoutHoursAttributeMap["duration"] = types.Int64Value(int64(reauthTimeoutHoursOptions.ReauthTimeoutHours.GetDuration()))
+
+				reauthTimeoutHoursObj, diags := types.ObjectValue(IkePhase1ProfileIkeReauthTimeoutReauthTimeoutHoursModelAttributeMap, reauthTimeoutHoursAttributeMap)
+				response.Diagnostics.Append(diags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				ikeReauthTimeoutChoiceChoicesModel.ReauthTimeoutHours = reauthTimeoutHoursObj
+			} else {
+				ikeReauthTimeoutChoiceChoicesModel.ReauthTimeoutHours = types.ObjectNull(IkePhase1ProfileIkeReauthTimeoutReauthTimeoutHoursModelAttributeMap)
+			}
+		}
+
+		// resource specToModelNested PointerOfOneOfField --> ReauthTimeoutDays
+		// GlobalSpecType
+		// false
+		{
+			reauthTimeoutDaysOptions, isReauthTimeoutDays := ikeReauthTimeoutChoiceChoices.(*ves_io_schema_views_ike_phase1_profile.GlobalSpecType_ReauthTimeoutDays)
+			reauthTimeoutDaysAttributeMap := make(map[string]attr.Value)
+
+			if isReauthTimeoutDays && reauthTimeoutDaysOptions != nil {
+
+				// resource specToModelNested UintField --> Duration
+				reauthTimeoutDaysAttributeMap["duration"] = types.Int64Value(int64(reauthTimeoutDaysOptions.ReauthTimeoutDays.GetDuration()))
+
+				reauthTimeoutDaysObj, diags := types.ObjectValue(IkePhase1ProfileIkeReauthTimeoutReauthTimeoutDaysModelAttributeMap, reauthTimeoutDaysAttributeMap)
+				response.Diagnostics.Append(diags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				ikeReauthTimeoutChoiceChoicesModel.ReauthTimeoutDays = reauthTimeoutDaysObj
+			} else {
+				ikeReauthTimeoutChoiceChoicesModel.ReauthTimeoutDays = types.ObjectNull(IkePhase1ProfileIkeReauthTimeoutReauthTimeoutDaysModelAttributeMap)
+			}
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> ReauthDisabled
+		_, isReauthDisabled := ikeReauthTimeoutChoiceChoices.(*ves_io_schema_views_ike_phase1_profile.GlobalSpecType_ReauthDisabled)
+
+		if isReauthDisabled {
+			ikeReauthTimeoutChoiceChoicesModel.ReauthDisabled = types.BoolValue(true)
+		} else {
+			ikeReauthTimeoutChoiceChoicesModel.ReauthDisabled = types.BoolNull()
+		}
+
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		ikeReauthTimeoutChoiceObj, diags := utils.GoStructToObjectValue(
+			ctx,
+			IkePhase1ProfileIkeReauthTimeoutModelAttributeMap,
+			ikeReauthTimeoutChoiceChoicesModel,
+		)
+		if diags.HasError() {
+			response.Diagnostics.Append(diags...)
+			return
+		}
+
+		// Assign the final object to the root data model.
+		data.IkeReauthTimeoutChoice = ikeReauthTimeoutChoiceObj
+	} else {
+		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		data.IkeReauthTimeoutChoice = types.ObjectNull(IkePhase1ProfileIkeReauthTimeoutModelAttributeMap)
 	}
 
 	// Save updated data into Terraform state

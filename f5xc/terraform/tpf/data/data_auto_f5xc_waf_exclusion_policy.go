@@ -33,12 +33,18 @@ type DataSourceF5XCWafExclusionPolicy struct {
 }
 
 type WafExclusionPolicyPolicySimpleWafExclusionRule struct {
+	DomainChoice                   types.Object      `tfsdk:"domain_choice"`
 	PathChoice                     types.Object      `tfsdk:"path_choice"`
 	Methods                        types.List        `tfsdk:"methods"`
 	ExpirationTimestamp            timetypes.RFC3339 `tfsdk:"expiration_timestamp"`
 	Metadata                       types.Object      `tfsdk:"metadata"`
 	WafAdvancedConfigurationChoice types.Object      `tfsdk:"waf_advanced_configuration_choice"`
-	DomainChoice                   types.Object      `tfsdk:"domain_choice"`
+}
+
+type WafExclusionPolicySimpleWafExclusionRuleDomainChoice struct {
+	ExactValue  types.String `tfsdk:"exact_value"`
+	SuffixValue types.String `tfsdk:"suffix_value"`
+	AnyDomain   types.Bool   `tfsdk:"any_domain"`
 }
 
 type WafExclusionPolicySimpleWafExclusionRulePathChoice struct {
@@ -77,29 +83,23 @@ type WafExclusionPolicyPolicyAppFirewallViolationContext struct {
 }
 
 type WafExclusionPolicyPolicyAppFirewallAttackTypeContext struct {
+	ContextName       types.String `tfsdk:"context_name"`
 	ExcludeAttackType types.List   `tfsdk:"exclude_attack_type"`
 	Context           types.List   `tfsdk:"context"`
-	ContextName       types.String `tfsdk:"context_name"`
 }
 
 type WafExclusionPolicyPolicyBotNameContext struct {
 	BotName types.String `tfsdk:"bot_name"`
 }
 
-type WafExclusionPolicySimpleWafExclusionRuleDomainChoice struct {
-	AnyDomain   types.Bool   `tfsdk:"any_domain"`
-	ExactValue  types.String `tfsdk:"exact_value"`
-	SuffixValue types.String `tfsdk:"suffix_value"`
-}
-
 // DataSourceF5XCWafExclusionPolicyModel describes the resource data model.
 type DataSourceF5XCWafExclusionPolicyModel struct {
+	Name              types.String   `tfsdk:"name"`
 	Namespace         types.String   `tfsdk:"namespace"`
 	Uid               types.String   `tfsdk:"uid"`
 	Labels            types.Map      `tfsdk:"labels"`
 	Annotations       types.Map      `tfsdk:"annotations"`
 	Description       types.String   `tfsdk:"description"`
-	Name              types.String   `tfsdk:"name"`
 	WafExclusionRules types.List     `tfsdk:"waf_exclusion_rules"`
 	Timeouts          timeouts.Value `tfsdk:"timeouts"`
 }
@@ -108,6 +108,9 @@ type DataSourceF5XCWafExclusionPolicyModel struct {
 // Attribute map for RequiredArrayOfPointerField --> WafExclusionRules
 var WafExclusionPolicyWafExclusionRulesModelAttributeMap = map[string]attr.Type{
 
+	"domain_choice": types.ObjectType{
+		AttrTypes: WafExclusionPolicyWafExclusionRulesDomainChoiceModelAttributeMap,
+	},
 	"path_choice": types.ObjectType{
 		AttrTypes: WafExclusionPolicyWafExclusionRulesPathChoiceModelAttributeMap,
 	},
@@ -122,9 +125,14 @@ var WafExclusionPolicyWafExclusionRulesModelAttributeMap = map[string]attr.Type{
 	"waf_advanced_configuration_choice": types.ObjectType{
 		AttrTypes: WafExclusionPolicyWafExclusionRulesWafAdvancedConfigurationModelAttributeMap,
 	},
-	"domain_choice": types.ObjectType{
-		AttrTypes: WafExclusionPolicyWafExclusionRulesDomainChoiceModelAttributeMap,
-	},
+}
+
+// Attribute map for RequiredOneOfField --> DomainChoice
+var WafExclusionPolicyWafExclusionRulesDomainChoiceModelAttributeMap = map[string]attr.Type{
+
+	"exact_value":  types.StringType,
+	"suffix_value": types.StringType,
+	"any_domain":   types.BoolType,
 }
 
 // Attribute map for RequiredOneOfField --> PathChoice
@@ -184,13 +192,13 @@ var WafExclusionPolicyWafExclusionRulesWafAdvancedConfigurationAppFirewallDetect
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
 
+				"context_name": types.StringType,
 				"exclude_attack_type": types.ListType{
 					ElemType: types.StringType,
 				},
 				"context": types.ListType{
 					ElemType: types.StringType,
 				},
-				"context_name": types.StringType,
 			},
 		},
 	},
@@ -229,27 +237,19 @@ var WafExclusionPolicyWafExclusionRulesWafAdvancedConfigurationAppFirewallDetect
 // Attribute map for ArrayOfPointerField --> ExcludeAttackTypeContexts
 var WafExclusionPolicyWafExclusionRulesWafAdvancedConfigurationAppFirewallDetectionControlExcludeAttackTypeContextsModelAttributeMap = map[string]attr.Type{
 
+	"context_name": types.StringType,
 	"exclude_attack_type": types.ListType{
 		ElemType: types.StringType,
 	},
 	"context": types.ListType{
 		ElemType: types.StringType,
 	},
-	"context_name": types.StringType,
 }
 
 // Attribute map for ArrayOfPointerField --> ExcludeBotNameContexts
 var WafExclusionPolicyWafExclusionRulesWafAdvancedConfigurationAppFirewallDetectionControlExcludeBotNameContextsModelAttributeMap = map[string]attr.Type{
 
 	"bot_name": types.StringType,
-}
-
-// Attribute map for RequiredOneOfField --> DomainChoice
-var WafExclusionPolicyWafExclusionRulesDomainChoiceModelAttributeMap = map[string]attr.Type{
-
-	"any_domain":   types.BoolType,
-	"exact_value":  types.StringType,
-	"suffix_value": types.StringType,
 }
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -270,6 +270,12 @@ func (r *DataSourceF5XCWafExclusionPolicy) Schema(ctx context.Context, request d
 		Description:         "WafExclusionPolicy data source",
 
 		Attributes: map[string]schema.Attribute{
+			"name": schema.StringAttribute{
+				Description: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
+				Required:    false,
+				Optional:    true,
+				Computed:    true,
+			},
 			"namespace": schema.StringAttribute{
 				Description: "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
 				Required:    false,
@@ -302,12 +308,6 @@ func (r *DataSourceF5XCWafExclusionPolicy) Schema(ctx context.Context, request d
 				Optional:    false,
 				Computed:    true,
 			},
-			"name": schema.StringAttribute{
-				Description: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
-				Required:    false,
-				Optional:    true,
-				Computed:    true,
-			},
 			"waf_exclusion_rules": schema.ListNestedAttribute{
 				Description: "WAF Exclusion Rules An ordered list of rules.",
 				Required:    false,
@@ -315,6 +315,32 @@ func (r *DataSourceF5XCWafExclusionPolicy) Schema(ctx context.Context, request d
 				Computed:    true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
+						"domain_choice": schema.SingleNestedAttribute{
+							Description: "Domain Domain to be matched",
+							Required:    false,
+							Optional:    false,
+							Computed:    true,
+							Attributes: map[string]schema.Attribute{
+								"exact_value": schema.StringAttribute{
+									Description: "exact value Exact domain name",
+									Required:    false,
+									Optional:    false,
+									Computed:    true,
+								},
+								"suffix_value": schema.StringAttribute{
+									Description: "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'",
+									Required:    false,
+									Optional:    false,
+									Computed:    true,
+								},
+								"any_domain": schema.BoolAttribute{
+									Description: "Any domain Apply this WAF exclusion rule for any domain",
+									Required:    false,
+									Optional:    false,
+									Computed:    true,
+								},
+							},
+						},
 						"path_choice": schema.SingleNestedAttribute{
 							Description: "Path Path to be matched",
 							Required:    false,
@@ -453,6 +479,12 @@ func (r *DataSourceF5XCWafExclusionPolicy) Schema(ctx context.Context, request d
 											Computed:    true,
 											NestedObject: schema.NestedAttributeObject{
 												Attributes: map[string]schema.Attribute{
+													"context_name": schema.StringAttribute{
+														Description: "Context Name Relevant only for contexts: Header, Cookie and Parameter. Name of the Context that the WAF Exclusion Rules will check. Wildcard matching can be used by prefixing or suffixing the context name with an wildcard asterisk (*).",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+													},
 													"exclude_attack_type": schema.ListAttribute{
 														Description: "AttackType",
 														ElementType: types.StringType,
@@ -463,12 +495,6 @@ func (r *DataSourceF5XCWafExclusionPolicy) Schema(ctx context.Context, request d
 													"context": schema.ListAttribute{
 														Description: "Context",
 														ElementType: types.StringType,
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
-													"context_name": schema.StringAttribute{
-														Description: "Context Name Relevant only for contexts: Header, Cookie and Parameter. Name of the Context that the WAF Exclusion Rules will check. Wildcard matching can be used by prefixing or suffixing the context name with an wildcard asterisk (*).",
 														Required:    false,
 														Optional:    false,
 														Computed:    true,
@@ -496,32 +522,6 @@ func (r *DataSourceF5XCWafExclusionPolicy) Schema(ctx context.Context, request d
 								},
 								"waf_skip_processing": schema.BoolAttribute{
 									Description: "Skip App Firewall Processing Skip all App Firewall processing for this request",
-									Required:    false,
-									Optional:    false,
-									Computed:    true,
-								},
-							},
-						},
-						"domain_choice": schema.SingleNestedAttribute{
-							Description: "Domain Domain to be matched",
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-							Attributes: map[string]schema.Attribute{
-								"any_domain": schema.BoolAttribute{
-									Description: "Any domain Apply this WAF exclusion rule for any domain",
-									Required:    false,
-									Optional:    false,
-									Computed:    true,
-								},
-								"exact_value": schema.StringAttribute{
-									Description: "exact value Exact domain name",
-									Required:    false,
-									Optional:    false,
-									Computed:    true,
-								},
-								"suffix_value": schema.StringAttribute{
-									Description: "suffix value Suffix of domain name e.g 'xyz.com' will match '*.xyz.com' and 'xyz.com'",
 									Required:    false,
 									Optional:    false,
 									Computed:    true,
@@ -602,6 +602,9 @@ func (d *DataSourceF5XCWafExclusionPolicy) Read(ctx context.Context, request dat
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
+	// data SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
+
 	// data SpecToModelRoot Meta RequiredStringField --> Namespace
 	data.Namespace = types.StringValue(metaData.GetNamespace())
 
@@ -647,14 +650,71 @@ func (d *DataSourceF5XCWafExclusionPolicy) Read(ctx context.Context, request dat
 	// data SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
 
-	// data SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
-
 	// data SpecToModelRoot RequiredArrayOfPointerField --> WafExclusionRules
 	wafExclusionRulesElementsSpectToModel := make([]WafExclusionPolicyPolicySimpleWafExclusionRule, 0, len(specData.WafExclusionRules))
 
 	for _, wafExclusionRulesElement := range specData.WafExclusionRules {
 		wafExclusionPolicyPolicySimpleWafExclusionRuleModel := WafExclusionPolicyPolicySimpleWafExclusionRule{}
+
+		// data specToModelNested RequiredOneOfField --> DomainChoice
+		// <no value>
+		if wafExclusionRulesElement.GetDomainChoice() != nil {
+			// Create a temporary attribute map for the choices within this OneOf
+			wafExclusionRulesdomainChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+			// Define a variable for the spec choices to be passed down to nested templates.
+			// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+			wafExclusionRulesdomainChoiceChoices := wafExclusionRulesElement.GetDomainChoice()
+
+			// Process nested choices, populating the temporary attribute map
+
+			// data specToModelNested StringOfOneOfField --> ExactValue
+			exactValueItem, isExactValue := wafExclusionRulesdomainChoiceChoices.(*ves_io_schema_policy.SimpleWafExclusionRule_ExactValue)
+
+			if isExactValue {
+				wafExclusionRulesdomainChoiceChoicesAttributeMap["exact_value"] = types.StringValue(string(exactValueItem.ExactValue))
+			} else {
+				// Empty string, set to null
+				wafExclusionRulesdomainChoiceChoicesAttributeMap["exact_value"] = types.StringNull()
+			}
+
+			// data specToModelNested StringOfOneOfField --> SuffixValue
+			suffixValueItem, isSuffixValue := wafExclusionRulesdomainChoiceChoices.(*ves_io_schema_policy.SimpleWafExclusionRule_SuffixValue)
+
+			if isSuffixValue {
+				wafExclusionRulesdomainChoiceChoicesAttributeMap["suffix_value"] = types.StringValue(string(suffixValueItem.SuffixValue))
+			} else {
+				// Empty string, set to null
+				wafExclusionRulesdomainChoiceChoicesAttributeMap["suffix_value"] = types.StringNull()
+			}
+
+			// data specToModelNested BoolOfOneOfPointerField --> AnyDomain
+			_, isAnyDomain := wafExclusionRulesdomainChoiceChoices.(*ves_io_schema_policy.SimpleWafExclusionRule_AnyDomain)
+
+			if isAnyDomain {
+				wafExclusionRulesdomainChoiceChoicesAttributeMap["any_domain"] = types.BoolValue(true)
+			} else {
+				wafExclusionRulesdomainChoiceChoicesAttributeMap["any_domain"] = types.BoolNull()
+			}
+
+			// --- End of Choices ---
+
+			// Create the final ObjectValue for this OneOf field
+			finalObj, wafExclusionRulesdomainChoiceChoicesObjDiags := types.ObjectValue(
+				WafExclusionPolicyWafExclusionRulesDomainChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+				wafExclusionRulesdomainChoiceChoicesAttributeMap,
+			)
+			response.Diagnostics.Append(wafExclusionRulesdomainChoiceChoicesObjDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			// Assign the final object to the correct place (either the root model or a parent's attribute map)
+			wafExclusionPolicyPolicySimpleWafExclusionRuleModel.DomainChoice = finalObj
+		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			wafExclusionPolicyPolicySimpleWafExclusionRuleModel.DomainChoice = types.ObjectNull(WafExclusionPolicyWafExclusionRulesDomainChoiceModelAttributeMap)
+		}
 
 		// data specToModelNested RequiredOneOfField --> PathChoice
 		// <no value>
@@ -924,6 +984,14 @@ func (d *DataSourceF5XCWafExclusionPolicy) Read(ctx context.Context, request dat
 						for _, excludeAttackTypeContextsElement := range appFirewallDetectionControlOptions.AppFirewallDetectionControl.GetExcludeAttackTypeContexts() {
 							wafExclusionPolicyPolicyAppFirewallAttackTypeContextModel := WafExclusionPolicyPolicyAppFirewallAttackTypeContext{}
 
+							// data specToModelNested StringField --> ContextName
+							if excludeAttackTypeContextsElement.GetContextName() != "" {
+								wafExclusionPolicyPolicyAppFirewallAttackTypeContextModel.ContextName = types.StringValue(excludeAttackTypeContextsElement.GetContextName())
+							} else {
+								// Empty string, set to null
+								wafExclusionPolicyPolicyAppFirewallAttackTypeContextModel.ContextName = types.StringNull()
+							}
+
 							// data specToModelNested RequiredEnumField --> ExcludeAttackType
 							if excludeAttackTypeContextsElement.GetExcludeAttackType().String() != "" {
 								stringValue := types.StringValue(excludeAttackTypeContextsElement.GetExcludeAttackType().String())
@@ -950,14 +1018,6 @@ func (d *DataSourceF5XCWafExclusionPolicy) Read(ctx context.Context, request dat
 								wafExclusionPolicyPolicyAppFirewallAttackTypeContextModel.Context = listValue
 							} else {
 								wafExclusionPolicyPolicyAppFirewallAttackTypeContextModel.Context = types.ListNull(types.StringType)
-							}
-
-							// data specToModelNested StringField --> ContextName
-							if excludeAttackTypeContextsElement.GetContextName() != "" {
-								wafExclusionPolicyPolicyAppFirewallAttackTypeContextModel.ContextName = types.StringValue(excludeAttackTypeContextsElement.GetContextName())
-							} else {
-								// Empty string, set to null
-								wafExclusionPolicyPolicyAppFirewallAttackTypeContextModel.ContextName = types.StringNull()
 							}
 
 							excludeAttackTypeContextsElements = append(excludeAttackTypeContextsElements, wafExclusionPolicyPolicyAppFirewallAttackTypeContextModel)
@@ -1049,66 +1109,6 @@ func (d *DataSourceF5XCWafExclusionPolicy) Read(ctx context.Context, request dat
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			wafExclusionPolicyPolicySimpleWafExclusionRuleModel.WafAdvancedConfigurationChoice = types.ObjectNull(WafExclusionPolicyWafExclusionRulesWafAdvancedConfigurationModelAttributeMap)
-		}
-
-		// data specToModelNested RequiredOneOfField --> DomainChoice
-		// <no value>
-		if wafExclusionRulesElement.GetDomainChoice() != nil {
-			// Create a temporary attribute map for the choices within this OneOf
-			wafExclusionRulesdomainChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-			// Define a variable for the spec choices to be passed down to nested templates.
-			// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-			wafExclusionRulesdomainChoiceChoices := wafExclusionRulesElement.GetDomainChoice()
-
-			// Process nested choices, populating the temporary attribute map
-
-			// data specToModelNested BoolOfOneOfPointerField --> AnyDomain
-			_, isAnyDomain := wafExclusionRulesdomainChoiceChoices.(*ves_io_schema_policy.SimpleWafExclusionRule_AnyDomain)
-
-			if isAnyDomain {
-				wafExclusionRulesdomainChoiceChoicesAttributeMap["any_domain"] = types.BoolValue(true)
-			} else {
-				wafExclusionRulesdomainChoiceChoicesAttributeMap["any_domain"] = types.BoolNull()
-			}
-
-			// data specToModelNested StringOfOneOfField --> ExactValue
-			exactValueItem, isExactValue := wafExclusionRulesdomainChoiceChoices.(*ves_io_schema_policy.SimpleWafExclusionRule_ExactValue)
-
-			if isExactValue {
-				wafExclusionRulesdomainChoiceChoicesAttributeMap["exact_value"] = types.StringValue(string(exactValueItem.ExactValue))
-			} else {
-				// Empty string, set to null
-				wafExclusionRulesdomainChoiceChoicesAttributeMap["exact_value"] = types.StringNull()
-			}
-
-			// data specToModelNested StringOfOneOfField --> SuffixValue
-			suffixValueItem, isSuffixValue := wafExclusionRulesdomainChoiceChoices.(*ves_io_schema_policy.SimpleWafExclusionRule_SuffixValue)
-
-			if isSuffixValue {
-				wafExclusionRulesdomainChoiceChoicesAttributeMap["suffix_value"] = types.StringValue(string(suffixValueItem.SuffixValue))
-			} else {
-				// Empty string, set to null
-				wafExclusionRulesdomainChoiceChoicesAttributeMap["suffix_value"] = types.StringNull()
-			}
-
-			// --- End of Choices ---
-
-			// Create the final ObjectValue for this OneOf field
-			finalObj, wafExclusionRulesdomainChoiceChoicesObjDiags := types.ObjectValue(
-				WafExclusionPolicyWafExclusionRulesDomainChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-				wafExclusionRulesdomainChoiceChoicesAttributeMap,
-			)
-			response.Diagnostics.Append(wafExclusionRulesdomainChoiceChoicesObjDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			wafExclusionPolicyPolicySimpleWafExclusionRuleModel.DomainChoice = finalObj
-		} else {
-			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			wafExclusionPolicyPolicySimpleWafExclusionRuleModel.DomainChoice = types.ObjectNull(WafExclusionPolicyWafExclusionRulesDomainChoiceModelAttributeMap)
 		}
 
 		wafExclusionRulesElementsSpectToModel = append(wafExclusionRulesElementsSpectToModel, wafExclusionPolicyPolicySimpleWafExclusionRuleModel)

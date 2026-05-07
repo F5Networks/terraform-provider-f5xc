@@ -30,45 +30,54 @@ type DataSourceF5XCInfraprotectAsnPrefix struct {
 	client *client.APIClient
 }
 
-type InfraprotectAsnPrefixGlobalSpecTypeReviewTypeChoice struct {
-	ReviewTypeGrace    types.Bool `tfsdk:"review_type_grace"`
-	ReviewTypePending  types.Bool `tfsdk:"review_type_pending"`
-	ReviewTypeApproved types.Bool `tfsdk:"review_type_approved"`
-	ReviewTypeRejected types.Bool `tfsdk:"review_type_rejected"`
-}
-
-type InfraprotectAsnPrefixGlobalSpecTypeIrrStatusChoice struct {
-	IrrStatusValid      types.Bool `tfsdk:"irr_status_valid"`
-	IrrStatusUnverified types.Bool `tfsdk:"irr_status_unverified"`
-	IrrStatusMissing    types.Bool `tfsdk:"irr_status_missing"`
-}
-
 type InfraprotectAsnPrefixGlobalSpecTypeRpkiStatusChoice struct {
+	RpkiStatusUnknown    types.Bool `tfsdk:"rpki_status_unknown"`
 	RpkiStatusInvalid    types.Bool `tfsdk:"rpki_status_invalid"`
 	RpkiStatusValid      types.Bool `tfsdk:"rpki_status_valid"`
 	RpkiStatusUnverified types.Bool `tfsdk:"rpki_status_unverified"`
-	RpkiStatusUnknown    types.Bool `tfsdk:"rpki_status_unknown"`
+}
+
+type InfraprotectAsnPrefixGlobalSpecTypeReviewTypeChoice struct {
+	ReviewTypePending  types.Bool `tfsdk:"review_type_pending"`
+	ReviewTypeApproved types.Bool `tfsdk:"review_type_approved"`
+	ReviewTypeRejected types.Bool `tfsdk:"review_type_rejected"`
+	ReviewTypeGrace    types.Bool `tfsdk:"review_type_grace"`
+}
+
+type InfraprotectAsnPrefixGlobalSpecTypeIrrStatusChoice struct {
+	IrrStatusUnverified types.Bool `tfsdk:"irr_status_unverified"`
+	IrrStatusMissing    types.Bool `tfsdk:"irr_status_missing"`
+	IrrStatusValid      types.Bool `tfsdk:"irr_status_valid"`
 }
 
 // DataSourceF5XCInfraprotectAsnPrefixModel describes the resource data model.
 type DataSourceF5XCInfraprotectAsnPrefixModel struct {
-	Name                 types.String      `tfsdk:"name"`
-	Namespace            types.String      `tfsdk:"namespace"`
 	Uid                  types.String      `tfsdk:"uid"`
 	Labels               types.Map         `tfsdk:"labels"`
 	Annotations          types.Map         `tfsdk:"annotations"`
 	Description          types.String      `tfsdk:"description"`
+	Name                 types.String      `tfsdk:"name"`
+	Namespace            types.String      `tfsdk:"namespace"`
+	RpkiStatusChoice     types.Object      `tfsdk:"rpki_status_choice"`
+	StateChangeTimestamp timetypes.RFC3339 `tfsdk:"state_change_timestamp"`
+	CustomerAsn          types.Int64       `tfsdk:"customer_asn"`
 	Asn                  types.Object      `tfsdk:"asn"`
 	Prefix               types.String      `tfsdk:"prefix"`
 	ReviewTypeChoice     types.Object      `tfsdk:"review_type_choice"`
 	IrrStatusChoice      types.Object      `tfsdk:"irr_status_choice"`
-	RpkiStatusChoice     types.Object      `tfsdk:"rpki_status_choice"`
-	StateChangeTimestamp timetypes.RFC3339 `tfsdk:"state_change_timestamp"`
-	CustomerAsn          types.Int64       `tfsdk:"customer_asn"`
 	Timeouts             timeouts.Value    `tfsdk:"timeouts"`
 }
 
 // --- Attribute Maps for Nested Structs ---
+// Attribute map for RequiredOneOfField --> RpkiStatus
+var InfraprotectAsnPrefixRpkiStatusModelAttributeMap = map[string]attr.Type{
+
+	"rpki_status_unknown":    types.BoolType,
+	"rpki_status_invalid":    types.BoolType,
+	"rpki_status_valid":      types.BoolType,
+	"rpki_status_unverified": types.BoolType,
+}
+
 // Attribute map for RequiredPointerField --> Asn
 var InfraprotectAsnPrefixAsnModelAttributeMap = map[string]attr.Type{
 
@@ -80,27 +89,18 @@ var InfraprotectAsnPrefixAsnModelAttributeMap = map[string]attr.Type{
 // Attribute map for RequiredOneOfField --> ReviewType
 var InfraprotectAsnPrefixReviewTypeModelAttributeMap = map[string]attr.Type{
 
-	"review_type_grace":    types.BoolType,
 	"review_type_pending":  types.BoolType,
 	"review_type_approved": types.BoolType,
 	"review_type_rejected": types.BoolType,
+	"review_type_grace":    types.BoolType,
 }
 
 // Attribute map for RequiredOneOfField --> IrrStatus
 var InfraprotectAsnPrefixIrrStatusModelAttributeMap = map[string]attr.Type{
 
-	"irr_status_valid":      types.BoolType,
 	"irr_status_unverified": types.BoolType,
 	"irr_status_missing":    types.BoolType,
-}
-
-// Attribute map for RequiredOneOfField --> RpkiStatus
-var InfraprotectAsnPrefixRpkiStatusModelAttributeMap = map[string]attr.Type{
-
-	"rpki_status_invalid":    types.BoolType,
-	"rpki_status_valid":      types.BoolType,
-	"rpki_status_unverified": types.BoolType,
-	"rpki_status_unknown":    types.BoolType,
+	"irr_status_valid":      types.BoolType,
 }
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -121,18 +121,6 @@ func (r *DataSourceF5XCInfraprotectAsnPrefix) Schema(ctx context.Context, reques
 		Description:         "InfraprotectAsnPrefix data source",
 
 		Attributes: map[string]schema.Attribute{
-			"name": schema.StringAttribute{
-				Description: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
-				Required:    false,
-				Optional:    true,
-				Computed:    true,
-			},
-			"namespace": schema.StringAttribute{
-				Description: "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
-				Required:    false,
-				Optional:    true,
-				Computed:    true,
-			},
 			"uid": schema.StringAttribute{
 				Description: "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
 				Required:    false,
@@ -155,6 +143,63 @@ func (r *DataSourceF5XCInfraprotectAsnPrefix) Schema(ctx context.Context, reques
 			},
 			"description": schema.StringAttribute{
 				Description: "description Human readable description for the object",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+			},
+			"name": schema.StringAttribute{
+				Description: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
+				Required:    false,
+				Optional:    true,
+				Computed:    true,
+			},
+			"namespace": schema.StringAttribute{
+				Description: "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
+				Required:    false,
+				Optional:    true,
+				Computed:    true,
+			},
+			"rpki_status_choice": schema.SingleNestedAttribute{
+				Description: "RPKI Status Resource Public Key Infrastructure Status",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				Attributes: map[string]schema.Attribute{
+					"rpki_status_unknown": schema.BoolAttribute{
+						Description: "Unknown Unknown",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
+					"rpki_status_invalid": schema.BoolAttribute{
+						Description: "Invalid Invalid",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
+					"rpki_status_valid": schema.BoolAttribute{
+						Description: "Valid Valid",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
+					"rpki_status_unverified": schema.BoolAttribute{
+						Description: "Unverified Unverified",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
+				},
+			},
+			"state_change_timestamp": schema.StringAttribute{
+				Description: "Last State Change Last State Change",
+				CustomType:  timetypes.RFC3339Type{},
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+			},
+			"customer_asn": schema.Int64Attribute{
+				Description: "Customer ASN Customer ASN",
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
@@ -197,12 +242,6 @@ func (r *DataSourceF5XCInfraprotectAsnPrefix) Schema(ctx context.Context, reques
 				Optional:    false,
 				Computed:    true,
 				Attributes: map[string]schema.Attribute{
-					"review_type_grace": schema.BoolAttribute{
-						Description: "Grace Notify A prefix losing its valid status will transition to grace notify before being rejected",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-					},
 					"review_type_pending": schema.BoolAttribute{
 						Description: "Pending Pending",
 						Required:    false,
@@ -221,6 +260,12 @@ func (r *DataSourceF5XCInfraprotectAsnPrefix) Schema(ctx context.Context, reques
 						Optional:    false,
 						Computed:    true,
 					},
+					"review_type_grace": schema.BoolAttribute{
+						Description: "Grace Notify A prefix losing its valid status will transition to grace notify before being rejected",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
 				},
 			},
 			"irr_status_choice": schema.SingleNestedAttribute{
@@ -229,12 +274,6 @@ func (r *DataSourceF5XCInfraprotectAsnPrefix) Schema(ctx context.Context, reques
 				Optional:    false,
 				Computed:    true,
 				Attributes: map[string]schema.Attribute{
-					"irr_status_valid": schema.BoolAttribute{
-						Description: "Valid Valid",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-					},
 					"irr_status_unverified": schema.BoolAttribute{
 						Description: "Unverified Unverified",
 						Required:    false,
@@ -247,52 +286,13 @@ func (r *DataSourceF5XCInfraprotectAsnPrefix) Schema(ctx context.Context, reques
 						Optional:    false,
 						Computed:    true,
 					},
-				},
-			},
-			"rpki_status_choice": schema.SingleNestedAttribute{
-				Description: "RPKI Status Resource Public Key Infrastructure Status",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				Attributes: map[string]schema.Attribute{
-					"rpki_status_invalid": schema.BoolAttribute{
-						Description: "Invalid Invalid",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-					},
-					"rpki_status_valid": schema.BoolAttribute{
+					"irr_status_valid": schema.BoolAttribute{
 						Description: "Valid Valid",
 						Required:    false,
 						Optional:    false,
 						Computed:    true,
 					},
-					"rpki_status_unverified": schema.BoolAttribute{
-						Description: "Unverified Unverified",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-					},
-					"rpki_status_unknown": schema.BoolAttribute{
-						Description: "Unknown Unknown",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-					},
 				},
-			},
-			"state_change_timestamp": schema.StringAttribute{
-				Description: "Last State Change Last State Change",
-				CustomType:  timetypes.RFC3339Type{},
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-			},
-			"customer_asn": schema.Int64Attribute{
-				Description: "Customer ASN Customer ASN",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
 			},
 			"timeouts": timeouts.Attributes(ctx, timeouts.Opts{
 				Read: false, // activate timeouts.read
@@ -365,12 +365,6 @@ func (d *DataSourceF5XCInfraprotectAsnPrefix) Read(ctx context.Context, request 
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
-	// data SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
-
-	// data SpecToModelRoot Meta RequiredStringField --> Namespace
-	data.Namespace = types.StringValue(metaData.GetNamespace())
-
 	// data SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
@@ -412,6 +406,91 @@ func (d *DataSourceF5XCInfraprotectAsnPrefix) Read(ctx context.Context, request 
 
 	// data SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
+
+	// data SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
+
+	// data SpecToModelRoot Meta RequiredStringField --> Namespace
+	data.Namespace = types.StringValue(metaData.GetNamespace())
+
+	// data SpecToModelRoot RequiredOneOfField --> RpkiStatus
+	// false
+	// false
+	// This resource uses standard struct-based resolution.
+	if specData.GetRpkiStatus() != nil {
+		// Define a variable for the spec choices to be passed down to nested templates.
+		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+		rpkiStatusChoiceChoices := specData.GetRpkiStatus()
+
+		// The model struct that will be populated by the nested template.
+		var rpkiStatusChoiceChoicesModel = &InfraprotectAsnPrefixGlobalSpecTypeRpkiStatusChoice{}
+
+		// Recursively call the nested template to process the oneof choices.
+
+		// data specToModelNested BoolOfOneOfPointerField --> RpkiStatusUnknown
+		_, isRpkiStatusUnknown := rpkiStatusChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_RpkiStatusUnknown)
+
+		if isRpkiStatusUnknown {
+			rpkiStatusChoiceChoicesModel.RpkiStatusUnknown = types.BoolValue(true)
+		} else {
+			rpkiStatusChoiceChoicesModel.RpkiStatusUnknown = types.BoolNull()
+		}
+
+		// data specToModelNested BoolOfOneOfPointerField --> RpkiStatusInvalid
+		_, isRpkiStatusInvalid := rpkiStatusChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_RpkiStatusInvalid)
+
+		if isRpkiStatusInvalid {
+			rpkiStatusChoiceChoicesModel.RpkiStatusInvalid = types.BoolValue(true)
+		} else {
+			rpkiStatusChoiceChoicesModel.RpkiStatusInvalid = types.BoolNull()
+		}
+
+		// data specToModelNested BoolOfOneOfPointerField --> RpkiStatusValid
+		_, isRpkiStatusValid := rpkiStatusChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_RpkiStatusValid)
+
+		if isRpkiStatusValid {
+			rpkiStatusChoiceChoicesModel.RpkiStatusValid = types.BoolValue(true)
+		} else {
+			rpkiStatusChoiceChoicesModel.RpkiStatusValid = types.BoolNull()
+		}
+
+		// data specToModelNested BoolOfOneOfPointerField --> RpkiStatusUnverified
+		_, isRpkiStatusUnverified := rpkiStatusChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_RpkiStatusUnverified)
+
+		if isRpkiStatusUnverified {
+			rpkiStatusChoiceChoicesModel.RpkiStatusUnverified = types.BoolValue(true)
+		} else {
+			rpkiStatusChoiceChoicesModel.RpkiStatusUnverified = types.BoolNull()
+		}
+
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		rpkiStatusChoiceObj, diags := utils.GoStructToObjectValue(
+			ctx,
+			InfraprotectAsnPrefixRpkiStatusModelAttributeMap,
+			rpkiStatusChoiceChoicesModel,
+		)
+		if diags.HasError() {
+			response.Diagnostics.Append(diags...)
+			return
+		}
+
+		// Assign the final object to the root data model.
+		data.RpkiStatusChoice = rpkiStatusChoiceObj
+	} else {
+		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		data.RpkiStatusChoice = types.ObjectNull(InfraprotectAsnPrefixRpkiStatusModelAttributeMap)
+	}
+
+	// data SpecToModelRoot TimeStampField --> StateChangeTimestamp
+	data.StateChangeTimestamp = timetypes.NewRFC3339ProtobufPointerValue(specData.GetStateChangeTimestamp())
+
+	// data SpecToModelRoot UintField --> CustomerAsn
+	customerAsnValue := specData.GetCustomerAsn()
+	if customerAsnValue > 0 {
+		data.CustomerAsn = types.Int64Value(int64(customerAsnValue))
+	} else {
+		data.CustomerAsn = types.Int64Null()
+	}
 
 	// data SpecToModelRoot RequiredPointerField --> Asn
 	if specData.GetAsn() != nil {
@@ -478,15 +557,6 @@ func (d *DataSourceF5XCInfraprotectAsnPrefix) Read(ctx context.Context, request 
 
 		// Recursively call the nested template to process the oneof choices.
 
-		// data specToModelNested BoolOfOneOfPointerField --> ReviewTypeGrace
-		_, isReviewTypeGrace := reviewTypeChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_ReviewTypeGrace)
-
-		if isReviewTypeGrace {
-			reviewTypeChoiceChoicesModel.ReviewTypeGrace = types.BoolValue(true)
-		} else {
-			reviewTypeChoiceChoicesModel.ReviewTypeGrace = types.BoolNull()
-		}
-
 		// data specToModelNested BoolOfOneOfPointerField --> ReviewTypePending
 		_, isReviewTypePending := reviewTypeChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_ReviewTypePending)
 
@@ -512,6 +582,15 @@ func (d *DataSourceF5XCInfraprotectAsnPrefix) Read(ctx context.Context, request 
 			reviewTypeChoiceChoicesModel.ReviewTypeRejected = types.BoolValue(true)
 		} else {
 			reviewTypeChoiceChoicesModel.ReviewTypeRejected = types.BoolNull()
+		}
+
+		// data specToModelNested BoolOfOneOfPointerField --> ReviewTypeGrace
+		_, isReviewTypeGrace := reviewTypeChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_ReviewTypeGrace)
+
+		if isReviewTypeGrace {
+			reviewTypeChoiceChoicesModel.ReviewTypeGrace = types.BoolValue(true)
+		} else {
+			reviewTypeChoiceChoicesModel.ReviewTypeGrace = types.BoolNull()
 		}
 
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
@@ -546,15 +625,6 @@ func (d *DataSourceF5XCInfraprotectAsnPrefix) Read(ctx context.Context, request 
 
 		// Recursively call the nested template to process the oneof choices.
 
-		// data specToModelNested BoolOfOneOfPointerField --> IrrStatusValid
-		_, isIrrStatusValid := irrStatusChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_IrrStatusValid)
-
-		if isIrrStatusValid {
-			irrStatusChoiceChoicesModel.IrrStatusValid = types.BoolValue(true)
-		} else {
-			irrStatusChoiceChoicesModel.IrrStatusValid = types.BoolNull()
-		}
-
 		// data specToModelNested BoolOfOneOfPointerField --> IrrStatusUnverified
 		_, isIrrStatusUnverified := irrStatusChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_IrrStatusUnverified)
 
@@ -573,6 +643,15 @@ func (d *DataSourceF5XCInfraprotectAsnPrefix) Read(ctx context.Context, request 
 			irrStatusChoiceChoicesModel.IrrStatusMissing = types.BoolNull()
 		}
 
+		// data specToModelNested BoolOfOneOfPointerField --> IrrStatusValid
+		_, isIrrStatusValid := irrStatusChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_IrrStatusValid)
+
+		if isIrrStatusValid {
+			irrStatusChoiceChoicesModel.IrrStatusValid = types.BoolValue(true)
+		} else {
+			irrStatusChoiceChoicesModel.IrrStatusValid = types.BoolNull()
+		}
+
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
 		irrStatusChoiceObj, diags := utils.GoStructToObjectValue(
 			ctx,
@@ -589,85 +668,6 @@ func (d *DataSourceF5XCInfraprotectAsnPrefix) Read(ctx context.Context, request 
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		data.IrrStatusChoice = types.ObjectNull(InfraprotectAsnPrefixIrrStatusModelAttributeMap)
-	}
-
-	// data SpecToModelRoot RequiredOneOfField --> RpkiStatus
-	// false
-	// false
-	// This resource uses standard struct-based resolution.
-	if specData.GetRpkiStatus() != nil {
-		// Define a variable for the spec choices to be passed down to nested templates.
-		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-		rpkiStatusChoiceChoices := specData.GetRpkiStatus()
-
-		// The model struct that will be populated by the nested template.
-		var rpkiStatusChoiceChoicesModel = &InfraprotectAsnPrefixGlobalSpecTypeRpkiStatusChoice{}
-
-		// Recursively call the nested template to process the oneof choices.
-
-		// data specToModelNested BoolOfOneOfPointerField --> RpkiStatusInvalid
-		_, isRpkiStatusInvalid := rpkiStatusChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_RpkiStatusInvalid)
-
-		if isRpkiStatusInvalid {
-			rpkiStatusChoiceChoicesModel.RpkiStatusInvalid = types.BoolValue(true)
-		} else {
-			rpkiStatusChoiceChoicesModel.RpkiStatusInvalid = types.BoolNull()
-		}
-
-		// data specToModelNested BoolOfOneOfPointerField --> RpkiStatusValid
-		_, isRpkiStatusValid := rpkiStatusChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_RpkiStatusValid)
-
-		if isRpkiStatusValid {
-			rpkiStatusChoiceChoicesModel.RpkiStatusValid = types.BoolValue(true)
-		} else {
-			rpkiStatusChoiceChoicesModel.RpkiStatusValid = types.BoolNull()
-		}
-
-		// data specToModelNested BoolOfOneOfPointerField --> RpkiStatusUnverified
-		_, isRpkiStatusUnverified := rpkiStatusChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_RpkiStatusUnverified)
-
-		if isRpkiStatusUnverified {
-			rpkiStatusChoiceChoicesModel.RpkiStatusUnverified = types.BoolValue(true)
-		} else {
-			rpkiStatusChoiceChoicesModel.RpkiStatusUnverified = types.BoolNull()
-		}
-
-		// data specToModelNested BoolOfOneOfPointerField --> RpkiStatusUnknown
-		_, isRpkiStatusUnknown := rpkiStatusChoiceChoices.(*ves_io_schema_infraprotect_asn_prefix.GlobalSpecType_RpkiStatusUnknown)
-
-		if isRpkiStatusUnknown {
-			rpkiStatusChoiceChoicesModel.RpkiStatusUnknown = types.BoolValue(true)
-		} else {
-			rpkiStatusChoiceChoicesModel.RpkiStatusUnknown = types.BoolNull()
-		}
-
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		rpkiStatusChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			InfraprotectAsnPrefixRpkiStatusModelAttributeMap,
-			rpkiStatusChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
-
-		// Assign the final object to the root data model.
-		data.RpkiStatusChoice = rpkiStatusChoiceObj
-	} else {
-		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		data.RpkiStatusChoice = types.ObjectNull(InfraprotectAsnPrefixRpkiStatusModelAttributeMap)
-	}
-
-	// data SpecToModelRoot TimeStampField --> StateChangeTimestamp
-	data.StateChangeTimestamp = timetypes.NewRFC3339ProtobufPointerValue(specData.GetStateChangeTimestamp())
-
-	// data SpecToModelRoot UintField --> CustomerAsn
-	customerAsnValue := specData.GetCustomerAsn()
-	if customerAsnValue > 0 {
-		data.CustomerAsn = types.Int64Value(int64(customerAsnValue))
-	} else {
-		data.CustomerAsn = types.Int64Null()
 	}
 
 	// Set state to fully populated data

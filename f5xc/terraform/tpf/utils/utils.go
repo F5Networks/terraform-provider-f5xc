@@ -257,6 +257,25 @@ type PendingInitializersResource interface {
 	GetObjPendingInitializers() []string
 }
 
+// waitForPendingInitializersConfig holds configuration for WaitForPendingInitializers.
+// It is unexported and used only for testing via waitForPendingInitializersWithConfig.
+type waitForPendingInitializersConfig struct {
+	maxRetries     int
+	maxBackoff     time.Duration
+	initialBackoff time.Duration
+	sleep          func(time.Duration)
+}
+
+// defaultWaitConfig returns the production configuration for WaitForPendingInitializers.
+func defaultWaitConfig() waitForPendingInitializersConfig {
+	return waitForPendingInitializersConfig{
+		maxRetries:     20,
+		maxBackoff:     5 * time.Second,
+		initialBackoff: 1 * time.Second,
+		sleep:          time.Sleep,
+	}
+}
+
 // WaitForPendingInitializers waits for all pending initializers of a resource to complete.
 // It polls the resource status with exponential backoff, up to a maximum number of retries.
 // If the resource no longer exists (404), it returns an error so the caller can handle cleanup (e.g., clear UID).
@@ -277,16 +296,21 @@ func WaitForPendingInitializers[T PendingInitializersResource](
 	name, namespace, uid string,
 	getObject func(ctx context.Context, namespace, name string) (T, error),
 ) error {
-	const (
-		maxRetries     = 20
-		maxBackoff     = 5 * time.Second
-		initialBackoff = 1 * time.Second
-	)
+	return waitForPendingInitializersWithConfig(ctx, name, namespace, uid, getObject, defaultWaitConfig())
+}
 
-	backoff := initialBackoff
-	time.Sleep(backoff)
+// waitForPendingInitializersWithConfig is the internal implementation that accepts a config,
+// allowing tests to inject zero-duration sleeps and a small retry count.
+func waitForPendingInitializersWithConfig[T PendingInitializersResource](
+	ctx context.Context,
+	name, namespace, uid string,
+	getObject func(ctx context.Context, namespace, name string) (T, error),
+	cfg waitForPendingInitializersConfig,
+) error {
+	backoff := cfg.initialBackoff
+	cfg.sleep(backoff)
 
-	for attempt := 0; attempt <= maxRetries; attempt++ {
+	for attempt := 0; attempt <= cfg.maxRetries; attempt++ {
 		obj, err := getObject(ctx, namespace, name)
 		if err != nil {
 			if strings.Contains(err.Error(), "status code 404") {
@@ -300,15 +324,15 @@ func WaitForPendingInitializers[T PendingInitializersResource](
 			return nil
 		}
 
-		if attempt == maxRetries {
-			return fmt.Errorf("resource %s still has pending initializers after %d retries: %v", name, maxRetries, pending)
+		if attempt == cfg.maxRetries {
+			return fmt.Errorf("resource %s still has pending initializers after %d retries: %v", name, cfg.maxRetries, pending)
 		}
 
 		tflog.Info(ctx, fmt.Sprintf("[INFO] Resource %s has pending initializers: %v. Retrying in %s...", name, pending, backoff))
-		time.Sleep(backoff)
+		cfg.sleep(backoff)
 		backoff *= 2
-		if backoff > maxBackoff {
-			backoff = maxBackoff
+		if backoff > cfg.maxBackoff {
+			backoff = cfg.maxBackoff
 		}
 	}
 

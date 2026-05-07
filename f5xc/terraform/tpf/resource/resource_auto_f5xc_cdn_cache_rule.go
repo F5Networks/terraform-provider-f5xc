@@ -78,15 +78,15 @@ type CdnCacheRuleCdnCacheRuleCacheOperator struct {
 }
 
 type CdnCacheRuleCacheOperatorCacheOperatorChoice struct {
-	MatchRegex       types.String `tfsdk:"match_regex"`
-	Contains         types.String `tfsdk:"contains"`
-	Startswith       types.String `tfsdk:"startswith"`
-	DoesNotStartWith types.String `tfsdk:"does_not_start_with"`
-	DoesNotContain   types.String `tfsdk:"does_not_contain"`
-	Equals           types.String `tfsdk:"equals"`
-	DoesNotEqual     types.String `tfsdk:"does_not_equal"`
-	Endswith         types.String `tfsdk:"endswith"`
 	DoesNotEndWith   types.String `tfsdk:"does_not_end_with"`
+	DoesNotContain   types.String `tfsdk:"does_not_contain"`
+	Contains         types.String `tfsdk:"contains"`
+	Endswith         types.String `tfsdk:"endswith"`
+	MatchRegex       types.String `tfsdk:"match_regex"`
+	DoesNotEqual     types.String `tfsdk:"does_not_equal"`
+	Startswith       types.String `tfsdk:"startswith"`
+	Equals           types.String `tfsdk:"equals"`
+	DoesNotStartWith types.String `tfsdk:"does_not_start_with"`
 }
 
 type CdnCacheRuleCdnCacheRuleCacheQueryParameterMatcherType struct {
@@ -99,15 +99,15 @@ type CdnCacheRuleCdnCacheRuleQueryParamCacheOperator struct {
 }
 
 type CdnCacheRuleQueryParamCacheOperatorCacheOperatorChoice struct {
-	Equals           types.String `tfsdk:"equals"`
-	Startswith       types.String `tfsdk:"startswith"`
-	DoesNotStartWith types.String `tfsdk:"does_not_start_with"`
-	DoesNotEndWith   types.String `tfsdk:"does_not_end_with"`
-	Contains         types.String `tfsdk:"contains"`
-	DoesNotEqual     types.String `tfsdk:"does_not_equal"`
-	DoesNotContain   types.String `tfsdk:"does_not_contain"`
 	Endswith         types.String `tfsdk:"endswith"`
+	DoesNotEndWith   types.String `tfsdk:"does_not_end_with"`
+	Equals           types.String `tfsdk:"equals"`
+	DoesNotEqual     types.String `tfsdk:"does_not_equal"`
+	Contains         types.String `tfsdk:"contains"`
+	DoesNotStartWith types.String `tfsdk:"does_not_start_with"`
 	MatchRegex       types.String `tfsdk:"match_regex"`
+	DoesNotContain   types.String `tfsdk:"does_not_contain"`
+	Startswith       types.String `tfsdk:"startswith"`
 }
 
 type CdnCacheRuleCdnCacheRuleCacheHeaderMatcherType struct {
@@ -120,20 +120,20 @@ type CdnCacheRuleCdnCacheRuleHeaderCacheOperator struct {
 }
 
 type CdnCacheRuleHeaderCacheOperatorCacheOperatorChoice struct {
-	MatchRegex       types.String `tfsdk:"match_regex"`
-	Equals           types.String `tfsdk:"equals"`
-	DoesNotContain   types.String `tfsdk:"does_not_contain"`
-	DoesNotEqual     types.String `tfsdk:"does_not_equal"`
 	Contains         types.String `tfsdk:"contains"`
+	Startswith       types.String `tfsdk:"startswith"`
+	DoesNotEqual     types.String `tfsdk:"does_not_equal"`
+	DoesNotContain   types.String `tfsdk:"does_not_contain"`
+	DoesNotEndWith   types.String `tfsdk:"does_not_end_with"`
 	Endswith         types.String `tfsdk:"endswith"`
 	DoesNotStartWith types.String `tfsdk:"does_not_start_with"`
-	DoesNotEndWith   types.String `tfsdk:"does_not_end_with"`
-	Startswith       types.String `tfsdk:"startswith"`
+	MatchRegex       types.String `tfsdk:"match_regex"`
+	Equals           types.String `tfsdk:"equals"`
 }
 
 type CdnCacheRuleCdnCacheRuleCacheCookieMatcherType struct {
-	Name     types.String `tfsdk:"name"`
 	Operator types.Object `tfsdk:"operator"`
+	Name     types.String `tfsdk:"name"`
 }
 
 type CdnCacheRuleCdnCacheRuleCookieMatcherCacheOperator struct {
@@ -141,20 +141,20 @@ type CdnCacheRuleCdnCacheRuleCookieMatcherCacheOperator struct {
 }
 
 type CdnCacheRuleCookieMatcherCacheOperatorCacheOperatorChoice struct {
-	Equals           types.String `tfsdk:"equals"`
+	MatchRegex       types.String `tfsdk:"match_regex"`
 	DoesNotContain   types.String `tfsdk:"does_not_contain"`
 	Startswith       types.String `tfsdk:"startswith"`
+	DoesNotStartWith types.String `tfsdk:"does_not_start_with"`
 	Endswith         types.String `tfsdk:"endswith"`
-	MatchRegex       types.String `tfsdk:"match_regex"`
+	DoesNotEndWith   types.String `tfsdk:"does_not_end_with"`
+	Equals           types.String `tfsdk:"equals"`
 	DoesNotEqual     types.String `tfsdk:"does_not_equal"`
 	Contains         types.String `tfsdk:"contains"`
-	DoesNotStartWith types.String `tfsdk:"does_not_start_with"`
-	DoesNotEndWith   types.String `tfsdk:"does_not_end_with"`
 }
 
 type CdnCacheRuleCDNCacheRuleCacheActionsChoice struct {
-	CacheBypass      types.Bool   `tfsdk:"cache_bypass"`
 	EligibleForCache types.Object `tfsdk:"eligible_for_cache"`
+	CacheBypass      types.Bool   `tfsdk:"cache_bypass"`
 }
 
 type CdnCacheRuleCDNCacheRuleEligibleForCache struct {
@@ -180,12 +180,12 @@ type CdnCacheRuleCacheEligibleOptionsSchemeProxyHostRequestUri struct {
 
 // ResourceF5XCCdnCacheRuleModel describes the resource data model.
 type ResourceF5XCCdnCacheRuleModel struct {
-	Name        types.String   `tfsdk:"name"`
-	Namespace   types.String   `tfsdk:"namespace"`
-	Uid         types.String   `tfsdk:"uid"`
 	Labels      types.Map      `tfsdk:"labels"`
 	Annotations types.Map      `tfsdk:"annotations"`
 	Description types.String   `tfsdk:"description"`
+	Name        types.String   `tfsdk:"name"`
+	Namespace   types.String   `tfsdk:"namespace"`
+	Uid         types.String   `tfsdk:"uid"`
 	CacheRules  types.Object   `tfsdk:"cache_rules"`
 	Timeouts    timeouts.Value `tfsdk:"timeouts"`
 }
@@ -251,13 +251,13 @@ var CdnCacheRuleCacheRulesModelAttributeMap = map[string]attr.Type{
 							"cookie_matcher": types.ListType{
 								ElemType: types.ObjectType{
 									AttrTypes: map[string]attr.Type{
-
-										"name": types.StringType, "operator": types.ObjectType{
+										"operator": types.ObjectType{
 											AttrTypes: map[string]attr.Type{
 												"cache_operator_choice": types.ObjectType{
 													AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorCacheOperatorModelAttributeMap,
 												}},
 										},
+										"name": types.StringType,
 									},
 								},
 							},
@@ -318,13 +318,13 @@ var CdnCacheRuleCacheRulesRuleExpressionListModelAttributeMap = map[string]attr.
 				"cookie_matcher": types.ListType{
 					ElemType: types.ObjectType{
 						AttrTypes: map[string]attr.Type{
-
-							"name": types.StringType, "operator": types.ObjectType{
+							"operator": types.ObjectType{
 								AttrTypes: map[string]attr.Type{
 									"cache_operator_choice": types.ObjectType{
 										AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorCacheOperatorModelAttributeMap,
 									}},
 							},
+							"name": types.StringType,
 						},
 					},
 				},
@@ -374,13 +374,13 @@ var CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionModelAttributeMap
 	"cookie_matcher": types.ListType{
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
-
-				"name": types.StringType, "operator": types.ObjectType{
+				"operator": types.ObjectType{
 					AttrTypes: map[string]attr.Type{
 						"cache_operator_choice": types.ObjectType{
 							AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorCacheOperatorModelAttributeMap,
 						}},
 				},
+				"name": types.StringType,
 			},
 		},
 	},
@@ -407,15 +407,15 @@ var CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchOperator
 // Attribute map for RequiredOneOfField --> CacheOperator
 var CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionPathMatchOperatorCacheOperatorModelAttributeMap = map[string]attr.Type{
 
-	"match_regex":         types.StringType,
-	"contains":            types.StringType,
-	"startswith":          types.StringType,
-	"does_not_start_with": types.StringType,
-	"does_not_contain":    types.StringType,
-	"equals":              types.StringType,
-	"does_not_equal":      types.StringType,
-	"endswith":            types.StringType,
 	"does_not_end_with":   types.StringType,
+	"does_not_contain":    types.StringType,
+	"contains":            types.StringType,
+	"endswith":            types.StringType,
+	"match_regex":         types.StringType,
+	"does_not_equal":      types.StringType,
+	"startswith":          types.StringType,
+	"equals":              types.StringType,
+	"does_not_start_with": types.StringType,
 }
 
 // Attribute map for ArrayOfPointerField --> QueryParameters
@@ -440,15 +440,15 @@ var CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersOp
 // Attribute map for RequiredOneOfField --> CacheOperator
 var CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionQueryParametersOperatorCacheOperatorModelAttributeMap = map[string]attr.Type{
 
-	"equals":              types.StringType,
-	"startswith":          types.StringType,
-	"does_not_start_with": types.StringType,
-	"does_not_end_with":   types.StringType,
-	"contains":            types.StringType,
-	"does_not_equal":      types.StringType,
-	"does_not_contain":    types.StringType,
 	"endswith":            types.StringType,
+	"does_not_end_with":   types.StringType,
+	"equals":              types.StringType,
+	"does_not_equal":      types.StringType,
+	"contains":            types.StringType,
+	"does_not_start_with": types.StringType,
 	"match_regex":         types.StringType,
+	"does_not_contain":    types.StringType,
+	"startswith":          types.StringType,
 }
 
 // Attribute map for ArrayOfPointerField --> CacheHeaders
@@ -475,26 +475,26 @@ var CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCacheHeadersOpera
 // Attribute map for RequiredOneOfField --> CacheOperator
 var CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCacheHeadersOperatorCacheOperatorModelAttributeMap = map[string]attr.Type{
 
-	"match_regex":         types.StringType,
-	"equals":              types.StringType,
-	"does_not_contain":    types.StringType,
-	"does_not_equal":      types.StringType,
 	"contains":            types.StringType,
+	"startswith":          types.StringType,
+	"does_not_equal":      types.StringType,
+	"does_not_contain":    types.StringType,
+	"does_not_end_with":   types.StringType,
 	"endswith":            types.StringType,
 	"does_not_start_with": types.StringType,
-	"does_not_end_with":   types.StringType,
-	"startswith":          types.StringType,
+	"match_regex":         types.StringType,
+	"equals":              types.StringType,
 }
 
 // Attribute map for ArrayOfPointerField --> CookieMatcher
 var CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherModelAttributeMap = map[string]attr.Type{
-
-	"name": types.StringType, "operator": types.ObjectType{
+	"operator": types.ObjectType{
 		AttrTypes: map[string]attr.Type{
 			"cache_operator_choice": types.ObjectType{
 				AttrTypes: CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorCacheOperatorModelAttributeMap,
 			}},
 	},
+	"name": types.StringType,
 }
 
 // Attribute map for PointerField --> Operator
@@ -508,24 +508,24 @@ var CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOper
 // Attribute map for RequiredOneOfField --> CacheOperator
 var CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorCacheOperatorModelAttributeMap = map[string]attr.Type{
 
-	"equals":              types.StringType,
+	"match_regex":         types.StringType,
 	"does_not_contain":    types.StringType,
 	"startswith":          types.StringType,
+	"does_not_start_with": types.StringType,
 	"endswith":            types.StringType,
-	"match_regex":         types.StringType,
+	"does_not_end_with":   types.StringType,
+	"equals":              types.StringType,
 	"does_not_equal":      types.StringType,
 	"contains":            types.StringType,
-	"does_not_start_with": types.StringType,
-	"does_not_end_with":   types.StringType,
 }
 
 // Attribute map for RequiredOneOfField --> CacheActions
 var CdnCacheRuleCacheRulesCacheActionsModelAttributeMap = map[string]attr.Type{
 
-	"cache_bypass": types.BoolType,
 	"eligible_for_cache": types.ObjectType{
 		AttrTypes: CdnCacheRuleCacheRulesCacheActionsEligibleForCacheModelAttributeMap,
 	},
+	"cache_bypass": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> EligibleForCache
@@ -578,30 +578,6 @@ func (r *ResourceF5XCCdnCacheRule) Schema(ctx context.Context, request resource.
 		Description:         "CdnCacheRule resource",
 
 		Attributes: map[string]schema.Attribute{
-			"name": schema.StringAttribute{
-				Description:         "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
-				MarkdownDescription: "",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
-			},
-			"namespace": schema.StringAttribute{
-				Description:         "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
-				MarkdownDescription: "",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
-			},
-			"uid": schema.StringAttribute{
-				Description:         "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            false,
-				Computed:            true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
-			},
 			"labels": schema.MapAttribute{
 				Description:         "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
 				MarkdownDescription: "",
@@ -632,6 +608,30 @@ func (r *ResourceF5XCCdnCacheRule) Schema(ctx context.Context, request resource.
 				Optional:            true,
 				Computed:            true,
 				Default:             stringdefault.StaticString(""),
+			},
+			"name": schema.StringAttribute{
+				Description:         "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
+				MarkdownDescription: "",
+				Required:            true,
+				Optional:            false,
+				Computed:            false,
+			},
+			"namespace": schema.StringAttribute{
+				Description:         "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
+				MarkdownDescription: "",
+				Required:            true,
+				Optional:            false,
+				Computed:            false,
+			},
+			"uid": schema.StringAttribute{
+				Description:         "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
+				MarkdownDescription: "",
+				Required:            false,
+				Optional:            false,
+				Computed:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"cache_rules": schema.SingleNestedAttribute{
 				Description:         "List of Cache rules(These rules are ORed) Rules are evaluated in the order in which they are specified. The evaluation stops when the first rule match occurs.",
@@ -698,44 +698,20 @@ func (r *ResourceF5XCCdnCacheRule) Schema(ctx context.Context, request resource.
 																Computed:            false,
 																Validators: []validator.Object{
 																	atmostoneofvalidator.AtMostOneOf(
-																		"Equals",
-																		"DoesNotEqual",
-																		"Startswith",
-																		"DoesNotStartWith",
-																		"Endswith",
 																		"DoesNotEndWith",
 																		"MatchRegex",
-																		"Contains",
+																		"DoesNotEqual",
 																		"DoesNotContain",
+																		"Startswith",
+																		"Equals",
+																		"Contains",
+																		"DoesNotStartWith",
+																		"Endswith",
 																	),
 																},
 																Attributes: map[string]schema.Attribute{
-																	"match_regex": schema.StringAttribute{
-																		Description:         "Matches Regex The path must match the specified regular expression pattern in PCRE format.",
-																		MarkdownDescription: "<br>**Validation:** `Length LengthBetween(1, 256)`",
-																		Required:            false,
-																		Optional:            true,
-																		Computed:            false,
-																		Validators: []validator.String{
-																			stringvalidator.LengthBetween(1, 256),
-																		},
-																	},
-																	"contains": schema.StringAttribute{
-																		Description:         "Contains The path must include the specified value as a substring, up to the filename.",
-																		MarkdownDescription: "",
-																		Required:            false,
-																		Optional:            true,
-																		Computed:            false,
-																	},
-																	"startswith": schema.StringAttribute{
-																		Description:         "Starts With The path must begin with the specified value, up to the filename.",
-																		MarkdownDescription: "",
-																		Required:            false,
-																		Optional:            true,
-																		Computed:            false,
-																	},
-																	"does_not_start_with": schema.StringAttribute{
-																		Description:         "Does Not Start With The path must not begin with the specified value, up to the filename.",
+																	"does_not_end_with": schema.StringAttribute{
+																		Description:         "Does Not End With The path must not end with the specified value, up to the filename.",
 																		MarkdownDescription: "",
 																		Required:            false,
 																		Optional:            true,
@@ -748,15 +724,8 @@ func (r *ResourceF5XCCdnCacheRule) Schema(ctx context.Context, request resource.
 																		Optional:            true,
 																		Computed:            false,
 																	},
-																	"equals": schema.StringAttribute{
-																		Description:         "Equals The path must exactly match the specified value, up to the filename.",
-																		MarkdownDescription: "",
-																		Required:            false,
-																		Optional:            true,
-																		Computed:            false,
-																	},
-																	"does_not_equal": schema.StringAttribute{
-																		Description:         "Does Not Equal The path must not match the specified value, up to the filename.",
+																	"contains": schema.StringAttribute{
+																		Description:         "Contains The path must include the specified value as a substring, up to the filename.",
 																		MarkdownDescription: "",
 																		Required:            false,
 																		Optional:            true,
@@ -769,8 +738,39 @@ func (r *ResourceF5XCCdnCacheRule) Schema(ctx context.Context, request resource.
 																		Optional:            true,
 																		Computed:            false,
 																	},
-																	"does_not_end_with": schema.StringAttribute{
-																		Description:         "Does Not End With The path must not end with the specified value, up to the filename.",
+																	"match_regex": schema.StringAttribute{
+																		Description:         "Matches Regex The path must match the specified regular expression pattern in PCRE format.",
+																		MarkdownDescription: "<br>**Validation:** `Length LengthBetween(1, 256)`",
+																		Required:            false,
+																		Optional:            true,
+																		Computed:            false,
+																		Validators: []validator.String{
+																			stringvalidator.LengthBetween(1, 256),
+																		},
+																	},
+																	"does_not_equal": schema.StringAttribute{
+																		Description:         "Does Not Equal The path must not match the specified value, up to the filename.",
+																		MarkdownDescription: "",
+																		Required:            false,
+																		Optional:            true,
+																		Computed:            false,
+																	},
+																	"startswith": schema.StringAttribute{
+																		Description:         "Starts With The path must begin with the specified value, up to the filename.",
+																		MarkdownDescription: "",
+																		Required:            false,
+																		Optional:            true,
+																		Computed:            false,
+																	},
+																	"equals": schema.StringAttribute{
+																		Description:         "Equals The path must exactly match the specified value, up to the filename.",
+																		MarkdownDescription: "",
+																		Required:            false,
+																		Optional:            true,
+																		Computed:            false,
+																	},
+																	"does_not_start_with": schema.StringAttribute{
+																		Description:         "Does Not Start With The path must not begin with the specified value, up to the filename.",
 																		MarkdownDescription: "",
 																		Required:            false,
 																		Optional:            true,
@@ -812,34 +812,20 @@ func (r *ResourceF5XCCdnCacheRule) Schema(ctx context.Context, request resource.
 																	Computed:            false,
 																	Validators: []validator.Object{
 																		atmostoneofvalidator.AtMostOneOf(
-																			"Equals",
+																			"DoesNotContain",
 																			"Startswith",
 																			"DoesNotStartWith",
+																			"Endswith",
 																			"DoesNotEndWith",
+																			"Equals",
 																			"DoesNotEqual",
 																			"Contains",
-																			"DoesNotContain",
-																			"Endswith",
 																			"MatchRegex",
 																		),
 																	},
 																	Attributes: map[string]schema.Attribute{
-																		"equals": schema.StringAttribute{
-																			Description:         "Equals The query parameter value must exactly match the specified value.",
-																			MarkdownDescription: "",
-																			Required:            false,
-																			Optional:            true,
-																			Computed:            false,
-																		},
-																		"startswith": schema.StringAttribute{
-																			Description:         "Starts With The query parameter value must begin with the specified value.",
-																			MarkdownDescription: "",
-																			Required:            false,
-																			Optional:            true,
-																			Computed:            false,
-																		},
-																		"does_not_start_with": schema.StringAttribute{
-																			Description:         "Does Not Start With The query parameter value must not begin with the specified value.",
+																		"endswith": schema.StringAttribute{
+																			Description:         "Ends With The query parameter value must end with the specified value.",
 																			MarkdownDescription: "",
 																			Required:            false,
 																			Optional:            true,
@@ -852,8 +838,8 @@ func (r *ResourceF5XCCdnCacheRule) Schema(ctx context.Context, request resource.
 																			Optional:            true,
 																			Computed:            false,
 																		},
-																		"contains": schema.StringAttribute{
-																			Description:         "Contains The query parameter value must include the specified value as a substring.",
+																		"equals": schema.StringAttribute{
+																			Description:         "Equals The query parameter value must exactly match the specified value.",
 																			MarkdownDescription: "",
 																			Required:            false,
 																			Optional:            true,
@@ -866,15 +852,15 @@ func (r *ResourceF5XCCdnCacheRule) Schema(ctx context.Context, request resource.
 																			Optional:            true,
 																			Computed:            false,
 																		},
-																		"does_not_contain": schema.StringAttribute{
-																			Description:         "Does Not Contain The query parameter value must not include the specified value as a substring.",
+																		"contains": schema.StringAttribute{
+																			Description:         "Contains The query parameter value must include the specified value as a substring.",
 																			MarkdownDescription: "",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
 																		},
-																		"endswith": schema.StringAttribute{
-																			Description:         "Ends With The query parameter value must end with the specified value.",
+																		"does_not_start_with": schema.StringAttribute{
+																			Description:         "Does Not Start With The query parameter value must not begin with the specified value.",
 																			MarkdownDescription: "",
 																			Required:            false,
 																			Optional:            true,
@@ -889,6 +875,20 @@ func (r *ResourceF5XCCdnCacheRule) Schema(ctx context.Context, request resource.
 																			Validators: []validator.String{
 																				stringvalidator.LengthBetween(1, 256),
 																			},
+																		},
+																		"does_not_contain": schema.StringAttribute{
+																			Description:         "Does Not Contain The query parameter value must not include the specified value as a substring.",
+																			MarkdownDescription: "",
+																			Required:            false,
+																			Optional:            true,
+																			Computed:            false,
+																		},
+																		"startswith": schema.StringAttribute{
+																			Description:         "Starts With The query parameter value must begin with the specified value.",
+																			MarkdownDescription: "",
+																			Required:            false,
+																			Optional:            true,
+																			Computed:            false,
 																		},
 																	},
 																},
@@ -907,13 +907,13 @@ func (r *ResourceF5XCCdnCacheRule) Schema(ctx context.Context, request resource.
 													Attributes: map[string]schema.Attribute{
 														"name": schema.ListAttribute{
 															Description:         "Name Select the name of the header from the list",
-															MarkdownDescription: "<br>**Allowed Values (choose one):** `[\"SCHEME\", \"USER_AGENT\", \"PROXY_HOST\", \"REFERER\"]`",
+															MarkdownDescription: "<br>**Allowed Values (choose one):** `[\"PROXY_HOST\", \"REFERER\", \"SCHEME\", \"USER_AGENT\"]`",
 															ElementType:         types.StringType,
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
 															Validators: []validator.List{
-																listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"SCHEME", "USER_AGENT", "PROXY_HOST", "REFERER"}...)),
+																listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"PROXY_HOST", "REFERER", "SCHEME", "USER_AGENT"}...)),
 																listvalidator.SizeAtMost(1),
 															},
 														},
@@ -932,37 +932,27 @@ func (r *ResourceF5XCCdnCacheRule) Schema(ctx context.Context, request resource.
 																	Computed:            false,
 																	Validators: []validator.Object{
 																		atmostoneofvalidator.AtMostOneOf(
-																			"Endswith",
-																			"MatchRegex",
-																			"Equals",
+																			"DoesNotEqual",
 																			"DoesNotContain",
 																			"DoesNotStartWith",
 																			"DoesNotEndWith",
-																			"DoesNotEqual",
+																			"MatchRegex",
+																			"Equals",
 																			"Contains",
 																			"Startswith",
+																			"Endswith",
 																		),
 																	},
 																	Attributes: map[string]schema.Attribute{
-																		"match_regex": schema.StringAttribute{
-																			Description:         "Matches Regex The header value must match the specified regular expression pattern.",
-																			MarkdownDescription: "<br>**Validation:** `Length LengthBetween(1, 256)`",
-																			Required:            false,
-																			Optional:            true,
-																			Computed:            false,
-																			Validators: []validator.String{
-																				stringvalidator.LengthBetween(1, 256),
-																			},
-																		},
-																		"equals": schema.StringAttribute{
-																			Description:         "Equals The header value must exactly match the specified value.",
+																		"contains": schema.StringAttribute{
+																			Description:         "Contains The header value must include the specified value as a substring.",
 																			MarkdownDescription: "",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
 																		},
-																		"does_not_contain": schema.StringAttribute{
-																			Description:         "Does Not Contain The header value must not include the specified value as a substring.",
+																		"startswith": schema.StringAttribute{
+																			Description:         "Starts With The header value must begin with the specified value.",
 																			MarkdownDescription: "",
 																			Required:            false,
 																			Optional:            true,
@@ -975,8 +965,15 @@ func (r *ResourceF5XCCdnCacheRule) Schema(ctx context.Context, request resource.
 																			Optional:            true,
 																			Computed:            false,
 																		},
-																		"contains": schema.StringAttribute{
-																			Description:         "Contains The header value must include the specified value as a substring.",
+																		"does_not_contain": schema.StringAttribute{
+																			Description:         "Does Not Contain The header value must not include the specified value as a substring.",
+																			MarkdownDescription: "",
+																			Required:            false,
+																			Optional:            true,
+																			Computed:            false,
+																		},
+																		"does_not_end_with": schema.StringAttribute{
+																			Description:         "Does Not End With The header value must not end with the specified value.",
 																			MarkdownDescription: "",
 																			Required:            false,
 																			Optional:            true,
@@ -996,15 +993,18 @@ func (r *ResourceF5XCCdnCacheRule) Schema(ctx context.Context, request resource.
 																			Optional:            true,
 																			Computed:            false,
 																		},
-																		"does_not_end_with": schema.StringAttribute{
-																			Description:         "Does Not End With The header value must not end with the specified value.",
-																			MarkdownDescription: "",
+																		"match_regex": schema.StringAttribute{
+																			Description:         "Matches Regex The header value must match the specified regular expression pattern.",
+																			MarkdownDescription: "<br>**Validation:** `Length LengthBetween(1, 256)`",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
+																			Validators: []validator.String{
+																				stringvalidator.LengthBetween(1, 256),
+																			},
 																		},
-																		"startswith": schema.StringAttribute{
-																			Description:         "Starts With The header value must begin with the specified value.",
+																		"equals": schema.StringAttribute{
+																			Description:         "Equals The header value must exactly match the specified value.",
 																			MarkdownDescription: "",
 																			Required:            false,
 																			Optional:            true,
@@ -1025,13 +1025,6 @@ func (r *ResourceF5XCCdnCacheRule) Schema(ctx context.Context, request resource.
 												Computed:            false,
 												NestedObject: schema.NestedAttributeObject{
 													Attributes: map[string]schema.Attribute{
-														"name": schema.StringAttribute{
-															Description:         "name Enter the name of the cookie to match",
-															MarkdownDescription: "",
-															Required:            true,
-															Optional:            false,
-															Computed:            false,
-														},
 														"operator": schema.SingleNestedAttribute{
 															Description:         "cache_operator",
 															MarkdownDescription: "",
@@ -1047,24 +1040,27 @@ func (r *ResourceF5XCCdnCacheRule) Schema(ctx context.Context, request resource.
 																	Computed:            false,
 																	Validators: []validator.Object{
 																		atmostoneofvalidator.AtMostOneOf(
+																			"Endswith",
+																			"DoesNotEndWith",
 																			"Equals",
+																			"MatchRegex",
 																			"DoesNotEqual",
 																			"Contains",
 																			"DoesNotContain",
 																			"Startswith",
 																			"DoesNotStartWith",
-																			"Endswith",
-																			"DoesNotEndWith",
-																			"MatchRegex",
 																		),
 																	},
 																	Attributes: map[string]schema.Attribute{
-																		"equals": schema.StringAttribute{
-																			Description:         "Equals The cookie value must exactly match the specified value.",
-																			MarkdownDescription: "",
+																		"match_regex": schema.StringAttribute{
+																			Description:         "Matches Regex The cookie value must match the specified regular expression pattern in PCRE format.",
+																			MarkdownDescription: "<br>**Validation:** `Length LengthBetween(1, 256)`",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
+																			Validators: []validator.String{
+																				stringvalidator.LengthBetween(1, 256),
+																			},
 																		},
 																		"does_not_contain": schema.StringAttribute{
 																			Description:         "Does Not Contain The cookie value must not include the specified value as a substring.",
@@ -1080,6 +1076,13 @@ func (r *ResourceF5XCCdnCacheRule) Schema(ctx context.Context, request resource.
 																			Optional:            true,
 																			Computed:            false,
 																		},
+																		"does_not_start_with": schema.StringAttribute{
+																			Description:         "Does Not Start With The cookie value must not begin with the specified value.",
+																			MarkdownDescription: "",
+																			Required:            false,
+																			Optional:            true,
+																			Computed:            false,
+																		},
 																		"endswith": schema.StringAttribute{
 																			Description:         "Ends With The cookie value must end with the specified value.",
 																			MarkdownDescription: "",
@@ -1087,15 +1090,19 @@ func (r *ResourceF5XCCdnCacheRule) Schema(ctx context.Context, request resource.
 																			Optional:            true,
 																			Computed:            false,
 																		},
-																		"match_regex": schema.StringAttribute{
-																			Description:         "Matches Regex The cookie value must match the specified regular expression pattern in PCRE format.",
-																			MarkdownDescription: "<br>**Validation:** `Length LengthBetween(1, 256)`",
+																		"does_not_end_with": schema.StringAttribute{
+																			Description:         "Does Not End With The cookie value must not end with the specified value.",
+																			MarkdownDescription: "",
 																			Required:            false,
 																			Optional:            true,
 																			Computed:            false,
-																			Validators: []validator.String{
-																				stringvalidator.LengthBetween(1, 256),
-																			},
+																		},
+																		"equals": schema.StringAttribute{
+																			Description:         "Equals The cookie value must exactly match the specified value.",
+																			MarkdownDescription: "",
+																			Required:            false,
+																			Optional:            true,
+																			Computed:            false,
 																		},
 																		"does_not_equal": schema.StringAttribute{
 																			Description:         "Does Not Equal The cookie value must not match the specified value.",
@@ -1111,23 +1118,16 @@ func (r *ResourceF5XCCdnCacheRule) Schema(ctx context.Context, request resource.
 																			Optional:            true,
 																			Computed:            false,
 																		},
-																		"does_not_start_with": schema.StringAttribute{
-																			Description:         "Does Not Start With The cookie value must not begin with the specified value.",
-																			MarkdownDescription: "",
-																			Required:            false,
-																			Optional:            true,
-																			Computed:            false,
-																		},
-																		"does_not_end_with": schema.StringAttribute{
-																			Description:         "Does Not End With The cookie value must not end with the specified value.",
-																			MarkdownDescription: "",
-																			Required:            false,
-																			Optional:            true,
-																			Computed:            false,
-																		},
 																	},
 																},
 															},
+														},
+														"name": schema.StringAttribute{
+															Description:         "name Enter the name of the cookie to match",
+															MarkdownDescription: "",
+															Required:            true,
+															Optional:            false,
+															Computed:            false,
 														},
 													},
 												},
@@ -1146,21 +1146,11 @@ func (r *ResourceF5XCCdnCacheRule) Schema(ctx context.Context, request resource.
 						Computed:            false,
 						Validators: []validator.Object{
 							atmostoneofvalidator.AtMostOneOf(
-								"cache_bypass",
 								"eligible_for_cache",
+								"cache_bypass",
 							),
 						},
 						Attributes: map[string]schema.Attribute{
-							"cache_bypass": schema.BoolAttribute{
-								Description:         "Bypass Cache Do not cache content if rule match occurs",
-								MarkdownDescription: "",
-								Required:            false,
-								Optional:            true,
-								Computed:            false,
-								Validators: []validator.Bool{
-									boolvalidator.Equals(true),
-								},
-							},
 							"eligible_for_cache": schema.SingleNestedAttribute{
 								Description:         "Eligible For Cache Cache content if rule match occurs",
 								MarkdownDescription: "",
@@ -1247,6 +1237,16 @@ func (r *ResourceF5XCCdnCacheRule) Schema(ctx context.Context, request resource.
 											},
 										},
 									},
+								},
+							},
+							"cache_bypass": schema.BoolAttribute{
+								Description:         "Bypass Cache Do not cache content if rule match occurs",
+								MarkdownDescription: "",
+								Required:            false,
+								Optional:            true,
+								Computed:            false,
+								Validators: []validator.Bool{
+									boolvalidator.Equals(true),
 								},
 							},
 						},
@@ -1355,16 +1355,6 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 
 	// Populate createReq from data model
 
-	// resource modelToMetaRoot RequiredStringField --> Name
-	if !data.Name.IsNull() && !data.Name.IsUnknown() {
-		meta.Name = string(data.Name.ValueString())
-	}
-
-	// resource modelToMetaRoot RequiredStringField --> Namespace
-	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
-		meta.Namespace = string(data.Namespace.ValueString())
-	}
-
 	// resource modelToMetaRoot MapOfStringField --> Annotations
 	if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
 		var labels map[string]string
@@ -1382,6 +1372,16 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 	// resource modelToMetaRoot StringField --> Description
 	if !data.Description.IsNull() && !data.Description.IsUnknown() {
 		meta.Description = string(data.Description.ValueString())
+	}
+
+	// resource modelToMetaRoot RequiredStringField --> Name
+	if !data.Name.IsNull() && !data.Name.IsUnknown() {
+		meta.Name = string(data.Name.ValueString())
+	}
+
+	// resource modelToMetaRoot RequiredStringField --> Namespace
+	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
+		meta.Namespace = string(data.Namespace.ValueString())
 	}
 
 	{
@@ -1478,32 +1478,11 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 											return
 										}
 
-										// resource modelToSpecNested StringOfOneOfField --> MatchRegex
-										if !operatorCacheOperatorChoiceModel.MatchRegex.IsNull() && !operatorCacheOperatorChoiceModel.MatchRegex.IsUnknown() {
-											matchRegexSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_MatchRegex{}
-											matchRegexSpecStr.MatchRegex = string(operatorCacheOperatorChoiceModel.MatchRegex.ValueString())
-											operatorSpec.CacheOperator = matchRegexSpecStr
-										}
-
-										// resource modelToSpecNested StringOfOneOfField --> Contains
-										if !operatorCacheOperatorChoiceModel.Contains.IsNull() && !operatorCacheOperatorChoiceModel.Contains.IsUnknown() {
-											containsSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_Contains{}
-											containsSpecStr.Contains = string(operatorCacheOperatorChoiceModel.Contains.ValueString())
-											operatorSpec.CacheOperator = containsSpecStr
-										}
-
-										// resource modelToSpecNested StringOfOneOfField --> Startswith
-										if !operatorCacheOperatorChoiceModel.Startswith.IsNull() && !operatorCacheOperatorChoiceModel.Startswith.IsUnknown() {
-											startswithSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_Startswith{}
-											startswithSpecStr.Startswith = string(operatorCacheOperatorChoiceModel.Startswith.ValueString())
-											operatorSpec.CacheOperator = startswithSpecStr
-										}
-
-										// resource modelToSpecNested StringOfOneOfField --> DoesNotStartWith
-										if !operatorCacheOperatorChoiceModel.DoesNotStartWith.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotStartWith.IsUnknown() {
-											doesNotStartWithSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotStartWith{}
-											doesNotStartWithSpecStr.DoesNotStartWith = string(operatorCacheOperatorChoiceModel.DoesNotStartWith.ValueString())
-											operatorSpec.CacheOperator = doesNotStartWithSpecStr
+										// resource modelToSpecNested StringOfOneOfField --> DoesNotEndWith
+										if !operatorCacheOperatorChoiceModel.DoesNotEndWith.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotEndWith.IsUnknown() {
+											doesNotEndWithSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotEndWith{}
+											doesNotEndWithSpecStr.DoesNotEndWith = string(operatorCacheOperatorChoiceModel.DoesNotEndWith.ValueString())
+											operatorSpec.CacheOperator = doesNotEndWithSpecStr
 										}
 
 										// resource modelToSpecNested StringOfOneOfField --> DoesNotContain
@@ -1513,18 +1492,11 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 											operatorSpec.CacheOperator = doesNotContainSpecStr
 										}
 
-										// resource modelToSpecNested StringOfOneOfField --> Equals
-										if !operatorCacheOperatorChoiceModel.Equals.IsNull() && !operatorCacheOperatorChoiceModel.Equals.IsUnknown() {
-											equalsSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_Equals{}
-											equalsSpecStr.Equals = string(operatorCacheOperatorChoiceModel.Equals.ValueString())
-											operatorSpec.CacheOperator = equalsSpecStr
-										}
-
-										// resource modelToSpecNested StringOfOneOfField --> DoesNotEqual
-										if !operatorCacheOperatorChoiceModel.DoesNotEqual.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotEqual.IsUnknown() {
-											doesNotEqualSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotEqual{}
-											doesNotEqualSpecStr.DoesNotEqual = string(operatorCacheOperatorChoiceModel.DoesNotEqual.ValueString())
-											operatorSpec.CacheOperator = doesNotEqualSpecStr
+										// resource modelToSpecNested StringOfOneOfField --> Contains
+										if !operatorCacheOperatorChoiceModel.Contains.IsNull() && !operatorCacheOperatorChoiceModel.Contains.IsUnknown() {
+											containsSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_Contains{}
+											containsSpecStr.Contains = string(operatorCacheOperatorChoiceModel.Contains.ValueString())
+											operatorSpec.CacheOperator = containsSpecStr
 										}
 
 										// resource modelToSpecNested StringOfOneOfField --> Endswith
@@ -1534,11 +1506,39 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 											operatorSpec.CacheOperator = endswithSpecStr
 										}
 
-										// resource modelToSpecNested StringOfOneOfField --> DoesNotEndWith
-										if !operatorCacheOperatorChoiceModel.DoesNotEndWith.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotEndWith.IsUnknown() {
-											doesNotEndWithSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotEndWith{}
-											doesNotEndWithSpecStr.DoesNotEndWith = string(operatorCacheOperatorChoiceModel.DoesNotEndWith.ValueString())
-											operatorSpec.CacheOperator = doesNotEndWithSpecStr
+										// resource modelToSpecNested StringOfOneOfField --> MatchRegex
+										if !operatorCacheOperatorChoiceModel.MatchRegex.IsNull() && !operatorCacheOperatorChoiceModel.MatchRegex.IsUnknown() {
+											matchRegexSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_MatchRegex{}
+											matchRegexSpecStr.MatchRegex = string(operatorCacheOperatorChoiceModel.MatchRegex.ValueString())
+											operatorSpec.CacheOperator = matchRegexSpecStr
+										}
+
+										// resource modelToSpecNested StringOfOneOfField --> DoesNotEqual
+										if !operatorCacheOperatorChoiceModel.DoesNotEqual.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotEqual.IsUnknown() {
+											doesNotEqualSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotEqual{}
+											doesNotEqualSpecStr.DoesNotEqual = string(operatorCacheOperatorChoiceModel.DoesNotEqual.ValueString())
+											operatorSpec.CacheOperator = doesNotEqualSpecStr
+										}
+
+										// resource modelToSpecNested StringOfOneOfField --> Startswith
+										if !operatorCacheOperatorChoiceModel.Startswith.IsNull() && !operatorCacheOperatorChoiceModel.Startswith.IsUnknown() {
+											startswithSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_Startswith{}
+											startswithSpecStr.Startswith = string(operatorCacheOperatorChoiceModel.Startswith.ValueString())
+											operatorSpec.CacheOperator = startswithSpecStr
+										}
+
+										// resource modelToSpecNested StringOfOneOfField --> Equals
+										if !operatorCacheOperatorChoiceModel.Equals.IsNull() && !operatorCacheOperatorChoiceModel.Equals.IsUnknown() {
+											equalsSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_Equals{}
+											equalsSpecStr.Equals = string(operatorCacheOperatorChoiceModel.Equals.ValueString())
+											operatorSpec.CacheOperator = equalsSpecStr
+										}
+
+										// resource modelToSpecNested StringOfOneOfField --> DoesNotStartWith
+										if !operatorCacheOperatorChoiceModel.DoesNotStartWith.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotStartWith.IsUnknown() {
+											doesNotStartWithSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotStartWith{}
+											doesNotStartWithSpecStr.DoesNotStartWith = string(operatorCacheOperatorChoiceModel.DoesNotStartWith.ValueString())
+											operatorSpec.CacheOperator = doesNotStartWithSpecStr
 										}
 
 									}
@@ -1591,25 +1591,11 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 												return
 											}
 
-											// resource modelToSpecNested StringOfOneOfField --> Equals
-											if !operatorCacheOperatorChoiceModel.Equals.IsNull() && !operatorCacheOperatorChoiceModel.Equals.IsUnknown() {
-												equalsSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Equals{}
-												equalsSpecStr.Equals = string(operatorCacheOperatorChoiceModel.Equals.ValueString())
-												operatorSpec.CacheOperator = equalsSpecStr
-											}
-
-											// resource modelToSpecNested StringOfOneOfField --> Startswith
-											if !operatorCacheOperatorChoiceModel.Startswith.IsNull() && !operatorCacheOperatorChoiceModel.Startswith.IsUnknown() {
-												startswithSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Startswith{}
-												startswithSpecStr.Startswith = string(operatorCacheOperatorChoiceModel.Startswith.ValueString())
-												operatorSpec.CacheOperator = startswithSpecStr
-											}
-
-											// resource modelToSpecNested StringOfOneOfField --> DoesNotStartWith
-											if !operatorCacheOperatorChoiceModel.DoesNotStartWith.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotStartWith.IsUnknown() {
-												doesNotStartWithSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotStartWith{}
-												doesNotStartWithSpecStr.DoesNotStartWith = string(operatorCacheOperatorChoiceModel.DoesNotStartWith.ValueString())
-												operatorSpec.CacheOperator = doesNotStartWithSpecStr
+											// resource modelToSpecNested StringOfOneOfField --> Endswith
+											if !operatorCacheOperatorChoiceModel.Endswith.IsNull() && !operatorCacheOperatorChoiceModel.Endswith.IsUnknown() {
+												endswithSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Endswith{}
+												endswithSpecStr.Endswith = string(operatorCacheOperatorChoiceModel.Endswith.ValueString())
+												operatorSpec.CacheOperator = endswithSpecStr
 											}
 
 											// resource modelToSpecNested StringOfOneOfField --> DoesNotEndWith
@@ -1619,11 +1605,11 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 												operatorSpec.CacheOperator = doesNotEndWithSpecStr
 											}
 
-											// resource modelToSpecNested StringOfOneOfField --> Contains
-											if !operatorCacheOperatorChoiceModel.Contains.IsNull() && !operatorCacheOperatorChoiceModel.Contains.IsUnknown() {
-												containsSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Contains{}
-												containsSpecStr.Contains = string(operatorCacheOperatorChoiceModel.Contains.ValueString())
-												operatorSpec.CacheOperator = containsSpecStr
+											// resource modelToSpecNested StringOfOneOfField --> Equals
+											if !operatorCacheOperatorChoiceModel.Equals.IsNull() && !operatorCacheOperatorChoiceModel.Equals.IsUnknown() {
+												equalsSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Equals{}
+												equalsSpecStr.Equals = string(operatorCacheOperatorChoiceModel.Equals.ValueString())
+												operatorSpec.CacheOperator = equalsSpecStr
 											}
 
 											// resource modelToSpecNested StringOfOneOfField --> DoesNotEqual
@@ -1633,18 +1619,18 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 												operatorSpec.CacheOperator = doesNotEqualSpecStr
 											}
 
-											// resource modelToSpecNested StringOfOneOfField --> DoesNotContain
-											if !operatorCacheOperatorChoiceModel.DoesNotContain.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotContain.IsUnknown() {
-												doesNotContainSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotContain{}
-												doesNotContainSpecStr.DoesNotContain = string(operatorCacheOperatorChoiceModel.DoesNotContain.ValueString())
-												operatorSpec.CacheOperator = doesNotContainSpecStr
+											// resource modelToSpecNested StringOfOneOfField --> Contains
+											if !operatorCacheOperatorChoiceModel.Contains.IsNull() && !operatorCacheOperatorChoiceModel.Contains.IsUnknown() {
+												containsSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Contains{}
+												containsSpecStr.Contains = string(operatorCacheOperatorChoiceModel.Contains.ValueString())
+												operatorSpec.CacheOperator = containsSpecStr
 											}
 
-											// resource modelToSpecNested StringOfOneOfField --> Endswith
-											if !operatorCacheOperatorChoiceModel.Endswith.IsNull() && !operatorCacheOperatorChoiceModel.Endswith.IsUnknown() {
-												endswithSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Endswith{}
-												endswithSpecStr.Endswith = string(operatorCacheOperatorChoiceModel.Endswith.ValueString())
-												operatorSpec.CacheOperator = endswithSpecStr
+											// resource modelToSpecNested StringOfOneOfField --> DoesNotStartWith
+											if !operatorCacheOperatorChoiceModel.DoesNotStartWith.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotStartWith.IsUnknown() {
+												doesNotStartWithSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotStartWith{}
+												doesNotStartWithSpecStr.DoesNotStartWith = string(operatorCacheOperatorChoiceModel.DoesNotStartWith.ValueString())
+												operatorSpec.CacheOperator = doesNotStartWithSpecStr
 											}
 
 											// resource modelToSpecNested StringOfOneOfField --> MatchRegex
@@ -1652,6 +1638,20 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 												matchRegexSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_MatchRegex{}
 												matchRegexSpecStr.MatchRegex = string(operatorCacheOperatorChoiceModel.MatchRegex.ValueString())
 												operatorSpec.CacheOperator = matchRegexSpecStr
+											}
+
+											// resource modelToSpecNested StringOfOneOfField --> DoesNotContain
+											if !operatorCacheOperatorChoiceModel.DoesNotContain.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotContain.IsUnknown() {
+												doesNotContainSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotContain{}
+												doesNotContainSpecStr.DoesNotContain = string(operatorCacheOperatorChoiceModel.DoesNotContain.ValueString())
+												operatorSpec.CacheOperator = doesNotContainSpecStr
+											}
+
+											// resource modelToSpecNested StringOfOneOfField --> Startswith
+											if !operatorCacheOperatorChoiceModel.Startswith.IsNull() && !operatorCacheOperatorChoiceModel.Startswith.IsUnknown() {
+												startswithSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Startswith{}
+												startswithSpecStr.Startswith = string(operatorCacheOperatorChoiceModel.Startswith.ValueString())
+												operatorSpec.CacheOperator = startswithSpecStr
 											}
 
 										}
@@ -1724,25 +1724,18 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 												return
 											}
 
-											// resource modelToSpecNested StringOfOneOfField --> MatchRegex
-											if !operatorCacheOperatorChoiceModel.MatchRegex.IsNull() && !operatorCacheOperatorChoiceModel.MatchRegex.IsUnknown() {
-												matchRegexSpecStr := &ves_io_schema_cdn_cache_rule.HeaderCacheOperator_MatchRegex{}
-												matchRegexSpecStr.MatchRegex = string(operatorCacheOperatorChoiceModel.MatchRegex.ValueString())
-												operatorSpec.CacheOperator = matchRegexSpecStr
+											// resource modelToSpecNested StringOfOneOfField --> Contains
+											if !operatorCacheOperatorChoiceModel.Contains.IsNull() && !operatorCacheOperatorChoiceModel.Contains.IsUnknown() {
+												containsSpecStr := &ves_io_schema_cdn_cache_rule.HeaderCacheOperator_Contains{}
+												containsSpecStr.Contains = string(operatorCacheOperatorChoiceModel.Contains.ValueString())
+												operatorSpec.CacheOperator = containsSpecStr
 											}
 
-											// resource modelToSpecNested StringOfOneOfField --> Equals
-											if !operatorCacheOperatorChoiceModel.Equals.IsNull() && !operatorCacheOperatorChoiceModel.Equals.IsUnknown() {
-												equalsSpecStr := &ves_io_schema_cdn_cache_rule.HeaderCacheOperator_Equals{}
-												equalsSpecStr.Equals = string(operatorCacheOperatorChoiceModel.Equals.ValueString())
-												operatorSpec.CacheOperator = equalsSpecStr
-											}
-
-											// resource modelToSpecNested StringOfOneOfField --> DoesNotContain
-											if !operatorCacheOperatorChoiceModel.DoesNotContain.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotContain.IsUnknown() {
-												doesNotContainSpecStr := &ves_io_schema_cdn_cache_rule.HeaderCacheOperator_DoesNotContain{}
-												doesNotContainSpecStr.DoesNotContain = string(operatorCacheOperatorChoiceModel.DoesNotContain.ValueString())
-												operatorSpec.CacheOperator = doesNotContainSpecStr
+											// resource modelToSpecNested StringOfOneOfField --> Startswith
+											if !operatorCacheOperatorChoiceModel.Startswith.IsNull() && !operatorCacheOperatorChoiceModel.Startswith.IsUnknown() {
+												startswithSpecStr := &ves_io_schema_cdn_cache_rule.HeaderCacheOperator_Startswith{}
+												startswithSpecStr.Startswith = string(operatorCacheOperatorChoiceModel.Startswith.ValueString())
+												operatorSpec.CacheOperator = startswithSpecStr
 											}
 
 											// resource modelToSpecNested StringOfOneOfField --> DoesNotEqual
@@ -1752,11 +1745,18 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 												operatorSpec.CacheOperator = doesNotEqualSpecStr
 											}
 
-											// resource modelToSpecNested StringOfOneOfField --> Contains
-											if !operatorCacheOperatorChoiceModel.Contains.IsNull() && !operatorCacheOperatorChoiceModel.Contains.IsUnknown() {
-												containsSpecStr := &ves_io_schema_cdn_cache_rule.HeaderCacheOperator_Contains{}
-												containsSpecStr.Contains = string(operatorCacheOperatorChoiceModel.Contains.ValueString())
-												operatorSpec.CacheOperator = containsSpecStr
+											// resource modelToSpecNested StringOfOneOfField --> DoesNotContain
+											if !operatorCacheOperatorChoiceModel.DoesNotContain.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotContain.IsUnknown() {
+												doesNotContainSpecStr := &ves_io_schema_cdn_cache_rule.HeaderCacheOperator_DoesNotContain{}
+												doesNotContainSpecStr.DoesNotContain = string(operatorCacheOperatorChoiceModel.DoesNotContain.ValueString())
+												operatorSpec.CacheOperator = doesNotContainSpecStr
+											}
+
+											// resource modelToSpecNested StringOfOneOfField --> DoesNotEndWith
+											if !operatorCacheOperatorChoiceModel.DoesNotEndWith.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotEndWith.IsUnknown() {
+												doesNotEndWithSpecStr := &ves_io_schema_cdn_cache_rule.HeaderCacheOperator_DoesNotEndWith{}
+												doesNotEndWithSpecStr.DoesNotEndWith = string(operatorCacheOperatorChoiceModel.DoesNotEndWith.ValueString())
+												operatorSpec.CacheOperator = doesNotEndWithSpecStr
 											}
 
 											// resource modelToSpecNested StringOfOneOfField --> Endswith
@@ -1773,18 +1773,18 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 												operatorSpec.CacheOperator = doesNotStartWithSpecStr
 											}
 
-											// resource modelToSpecNested StringOfOneOfField --> DoesNotEndWith
-											if !operatorCacheOperatorChoiceModel.DoesNotEndWith.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotEndWith.IsUnknown() {
-												doesNotEndWithSpecStr := &ves_io_schema_cdn_cache_rule.HeaderCacheOperator_DoesNotEndWith{}
-												doesNotEndWithSpecStr.DoesNotEndWith = string(operatorCacheOperatorChoiceModel.DoesNotEndWith.ValueString())
-												operatorSpec.CacheOperator = doesNotEndWithSpecStr
+											// resource modelToSpecNested StringOfOneOfField --> MatchRegex
+											if !operatorCacheOperatorChoiceModel.MatchRegex.IsNull() && !operatorCacheOperatorChoiceModel.MatchRegex.IsUnknown() {
+												matchRegexSpecStr := &ves_io_schema_cdn_cache_rule.HeaderCacheOperator_MatchRegex{}
+												matchRegexSpecStr.MatchRegex = string(operatorCacheOperatorChoiceModel.MatchRegex.ValueString())
+												operatorSpec.CacheOperator = matchRegexSpecStr
 											}
 
-											// resource modelToSpecNested StringOfOneOfField --> Startswith
-											if !operatorCacheOperatorChoiceModel.Startswith.IsNull() && !operatorCacheOperatorChoiceModel.Startswith.IsUnknown() {
-												startswithSpecStr := &ves_io_schema_cdn_cache_rule.HeaderCacheOperator_Startswith{}
-												startswithSpecStr.Startswith = string(operatorCacheOperatorChoiceModel.Startswith.ValueString())
-												operatorSpec.CacheOperator = startswithSpecStr
+											// resource modelToSpecNested StringOfOneOfField --> Equals
+											if !operatorCacheOperatorChoiceModel.Equals.IsNull() && !operatorCacheOperatorChoiceModel.Equals.IsUnknown() {
+												equalsSpecStr := &ves_io_schema_cdn_cache_rule.HeaderCacheOperator_Equals{}
+												equalsSpecStr.Equals = string(operatorCacheOperatorChoiceModel.Equals.ValueString())
+												operatorSpec.CacheOperator = equalsSpecStr
 											}
 
 										}
@@ -1814,11 +1814,6 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 
 									// Recursively process nested elements
 
-									// resource modelToSpecNested RequiredStringField --> Name
-									if !cookieMatcherElement.Name.IsNull() && !cookieMatcherElement.Name.IsUnknown() {
-										cookieMatcherSpec[i].Name = string(cookieMatcherElement.Name.ValueString())
-									}
-
 									// resource modelToSpecNested PointerField --> Operator
 									if !cookieMatcherElement.Operator.IsNull() && !cookieMatcherElement.Operator.IsUnknown() {
 										var operatorModel CdnCacheRuleCdnCacheRuleCookieMatcherCacheOperator
@@ -1838,11 +1833,11 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 												return
 											}
 
-											// resource modelToSpecNested StringOfOneOfField --> Equals
-											if !operatorCacheOperatorChoiceModel.Equals.IsNull() && !operatorCacheOperatorChoiceModel.Equals.IsUnknown() {
-												equalsSpecStr := &ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_Equals{}
-												equalsSpecStr.Equals = string(operatorCacheOperatorChoiceModel.Equals.ValueString())
-												operatorSpec.CacheOperator = equalsSpecStr
+											// resource modelToSpecNested StringOfOneOfField --> MatchRegex
+											if !operatorCacheOperatorChoiceModel.MatchRegex.IsNull() && !operatorCacheOperatorChoiceModel.MatchRegex.IsUnknown() {
+												matchRegexSpecStr := &ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_MatchRegex{}
+												matchRegexSpecStr.MatchRegex = string(operatorCacheOperatorChoiceModel.MatchRegex.ValueString())
+												operatorSpec.CacheOperator = matchRegexSpecStr
 											}
 
 											// resource modelToSpecNested StringOfOneOfField --> DoesNotContain
@@ -1859,6 +1854,13 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 												operatorSpec.CacheOperator = startswithSpecStr
 											}
 
+											// resource modelToSpecNested StringOfOneOfField --> DoesNotStartWith
+											if !operatorCacheOperatorChoiceModel.DoesNotStartWith.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotStartWith.IsUnknown() {
+												doesNotStartWithSpecStr := &ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_DoesNotStartWith{}
+												doesNotStartWithSpecStr.DoesNotStartWith = string(operatorCacheOperatorChoiceModel.DoesNotStartWith.ValueString())
+												operatorSpec.CacheOperator = doesNotStartWithSpecStr
+											}
+
 											// resource modelToSpecNested StringOfOneOfField --> Endswith
 											if !operatorCacheOperatorChoiceModel.Endswith.IsNull() && !operatorCacheOperatorChoiceModel.Endswith.IsUnknown() {
 												endswithSpecStr := &ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_Endswith{}
@@ -1866,11 +1868,18 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 												operatorSpec.CacheOperator = endswithSpecStr
 											}
 
-											// resource modelToSpecNested StringOfOneOfField --> MatchRegex
-											if !operatorCacheOperatorChoiceModel.MatchRegex.IsNull() && !operatorCacheOperatorChoiceModel.MatchRegex.IsUnknown() {
-												matchRegexSpecStr := &ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_MatchRegex{}
-												matchRegexSpecStr.MatchRegex = string(operatorCacheOperatorChoiceModel.MatchRegex.ValueString())
-												operatorSpec.CacheOperator = matchRegexSpecStr
+											// resource modelToSpecNested StringOfOneOfField --> DoesNotEndWith
+											if !operatorCacheOperatorChoiceModel.DoesNotEndWith.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotEndWith.IsUnknown() {
+												doesNotEndWithSpecStr := &ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_DoesNotEndWith{}
+												doesNotEndWithSpecStr.DoesNotEndWith = string(operatorCacheOperatorChoiceModel.DoesNotEndWith.ValueString())
+												operatorSpec.CacheOperator = doesNotEndWithSpecStr
+											}
+
+											// resource modelToSpecNested StringOfOneOfField --> Equals
+											if !operatorCacheOperatorChoiceModel.Equals.IsNull() && !operatorCacheOperatorChoiceModel.Equals.IsUnknown() {
+												equalsSpecStr := &ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_Equals{}
+												equalsSpecStr.Equals = string(operatorCacheOperatorChoiceModel.Equals.ValueString())
+												operatorSpec.CacheOperator = equalsSpecStr
 											}
 
 											// resource modelToSpecNested StringOfOneOfField --> DoesNotEqual
@@ -1887,22 +1896,13 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 												operatorSpec.CacheOperator = containsSpecStr
 											}
 
-											// resource modelToSpecNested StringOfOneOfField --> DoesNotStartWith
-											if !operatorCacheOperatorChoiceModel.DoesNotStartWith.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotStartWith.IsUnknown() {
-												doesNotStartWithSpecStr := &ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_DoesNotStartWith{}
-												doesNotStartWithSpecStr.DoesNotStartWith = string(operatorCacheOperatorChoiceModel.DoesNotStartWith.ValueString())
-												operatorSpec.CacheOperator = doesNotStartWithSpecStr
-											}
-
-											// resource modelToSpecNested StringOfOneOfField --> DoesNotEndWith
-											if !operatorCacheOperatorChoiceModel.DoesNotEndWith.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotEndWith.IsUnknown() {
-												doesNotEndWithSpecStr := &ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_DoesNotEndWith{}
-												doesNotEndWithSpecStr.DoesNotEndWith = string(operatorCacheOperatorChoiceModel.DoesNotEndWith.ValueString())
-												operatorSpec.CacheOperator = doesNotEndWithSpecStr
-											}
-
 										}
 
+									}
+
+									// resource modelToSpecNested RequiredStringField --> Name
+									if !cookieMatcherElement.Name.IsNull() && !cookieMatcherElement.Name.IsUnknown() {
+										cookieMatcherSpec[i].Name = string(cookieMatcherElement.Name.ValueString())
 									}
 
 								}
@@ -1920,13 +1920,6 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 				response.Diagnostics.Append(cacheRulesModel.CacheActionsChoice.As(ctx, &cacheRulesCacheActionsChoiceModel, basetypes.ObjectAsOptions{})...)
 				if response.Diagnostics.HasError() {
 					return
-				}
-
-				// resource modelToSpecNested BoolOfOneOfPointerField --> CacheBypass
-				if !cacheRulesCacheActionsChoiceModel.CacheBypass.IsNull() && !cacheRulesCacheActionsChoiceModel.CacheBypass.IsUnknown() {
-					cacheBypassSpecBool := &ves_io_schema_cdn_cache_rule.CDNCacheRule_CacheBypass{}
-					cacheBypassSpecBool.CacheBypass = &ves_io_schema.Empty{}
-					cacheRulesSpec.CacheActions = cacheBypassSpecBool
 				}
 
 				// resource modelToSpecNested PointerOfOneOfField --> EligibleForCache
@@ -2008,6 +2001,13 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 
 				}
 
+				// resource modelToSpecNested BoolOfOneOfPointerField --> CacheBypass
+				if !cacheRulesCacheActionsChoiceModel.CacheBypass.IsNull() && !cacheRulesCacheActionsChoiceModel.CacheBypass.IsUnknown() {
+					cacheBypassSpecBool := &ves_io_schema_cdn_cache_rule.CDNCacheRule_CacheBypass{}
+					cacheBypassSpecBool.CacheBypass = &ves_io_schema.Empty{}
+					cacheRulesSpec.CacheActions = cacheBypassSpecBool
+				}
+
 			}
 
 		}
@@ -2045,15 +2045,6 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
-
-	// resource SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
-
-	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
-	data.Namespace = types.StringValue(metaData.GetNamespace())
-
-	// resource SpecToModelRoot Meta StringField --> Uid
-	data.Uid = types.StringValue(systemMetaData.GetUid())
 
 	// resource SpecToModelRoot Meta MapOfStringField --> Labels
 	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
@@ -2136,6 +2127,15 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 	// resource SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
 
+	// resource SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
+
+	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
+	data.Namespace = types.StringValue(metaData.GetNamespace())
+
+	// resource SpecToModelRoot Meta StringField --> Uid
+	data.Uid = types.StringValue(systemMetaData.GetUid())
+
 	// resource SpecToModelRoot PointerField --> CacheRules
 	if specData.GetCacheRules() != nil {
 		var cdnCacheRuleCdnCacheRuleCDNCacheRuleModel = &CdnCacheRuleCdnCacheRuleCDNCacheRule{}
@@ -2200,44 +2200,14 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 
 									// Process nested choices, populating the temporary attribute map
 
-									// resource specToModelNested StringOfOneOfField --> MatchRegex
-									matchRegexItem, isMatchRegex := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_MatchRegex)
+									// resource specToModelNested StringOfOneOfField --> DoesNotEndWith
+									doesNotEndWithItem, isDoesNotEndWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotEndWith)
 
-									if isMatchRegex {
-										operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringValue(string(matchRegexItem.MatchRegex))
+									if isDoesNotEndWith {
+										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringValue(string(doesNotEndWithItem.DoesNotEndWith))
 									} else {
 										// Empty string, set to null
-										operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringNull()
-									}
-
-									// resource specToModelNested StringOfOneOfField --> Contains
-									containsItem, isContains := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_Contains)
-
-									if isContains {
-										operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringValue(string(containsItem.Contains))
-									} else {
-										// Empty string, set to null
-										operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringNull()
-									}
-
-									// resource specToModelNested StringOfOneOfField --> Startswith
-									startswithItem, isStartswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_Startswith)
-
-									if isStartswith {
-										operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringValue(string(startswithItem.Startswith))
-									} else {
-										// Empty string, set to null
-										operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringNull()
-									}
-
-									// resource specToModelNested StringOfOneOfField --> DoesNotStartWith
-									doesNotStartWithItem, isDoesNotStartWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotStartWith)
-
-									if isDoesNotStartWith {
-										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringValue(string(doesNotStartWithItem.DoesNotStartWith))
-									} else {
-										// Empty string, set to null
-										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringNull()
+										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringNull()
 									}
 
 									// resource specToModelNested StringOfOneOfField --> DoesNotContain
@@ -2250,24 +2220,14 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringNull()
 									}
 
-									// resource specToModelNested StringOfOneOfField --> Equals
-									equalsItem, isEquals := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_Equals)
+									// resource specToModelNested StringOfOneOfField --> Contains
+									containsItem, isContains := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_Contains)
 
-									if isEquals {
-										operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringValue(string(equalsItem.Equals))
+									if isContains {
+										operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringValue(string(containsItem.Contains))
 									} else {
 										// Empty string, set to null
-										operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringNull()
-									}
-
-									// resource specToModelNested StringOfOneOfField --> DoesNotEqual
-									doesNotEqualItem, isDoesNotEqual := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotEqual)
-
-									if isDoesNotEqual {
-										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringValue(string(doesNotEqualItem.DoesNotEqual))
-									} else {
-										// Empty string, set to null
-										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringNull()
+										operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringNull()
 									}
 
 									// resource specToModelNested StringOfOneOfField --> Endswith
@@ -2280,14 +2240,54 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 										operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringNull()
 									}
 
-									// resource specToModelNested StringOfOneOfField --> DoesNotEndWith
-									doesNotEndWithItem, isDoesNotEndWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotEndWith)
+									// resource specToModelNested StringOfOneOfField --> MatchRegex
+									matchRegexItem, isMatchRegex := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_MatchRegex)
 
-									if isDoesNotEndWith {
-										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringValue(string(doesNotEndWithItem.DoesNotEndWith))
+									if isMatchRegex {
+										operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringValue(string(matchRegexItem.MatchRegex))
 									} else {
 										// Empty string, set to null
-										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringNull()
+										operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringNull()
+									}
+
+									// resource specToModelNested StringOfOneOfField --> DoesNotEqual
+									doesNotEqualItem, isDoesNotEqual := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotEqual)
+
+									if isDoesNotEqual {
+										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringValue(string(doesNotEqualItem.DoesNotEqual))
+									} else {
+										// Empty string, set to null
+										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringNull()
+									}
+
+									// resource specToModelNested StringOfOneOfField --> Startswith
+									startswithItem, isStartswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_Startswith)
+
+									if isStartswith {
+										operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringValue(string(startswithItem.Startswith))
+									} else {
+										// Empty string, set to null
+										operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringNull()
+									}
+
+									// resource specToModelNested StringOfOneOfField --> Equals
+									equalsItem, isEquals := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_Equals)
+
+									if isEquals {
+										operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringValue(string(equalsItem.Equals))
+									} else {
+										// Empty string, set to null
+										operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringNull()
+									}
+
+									// resource specToModelNested StringOfOneOfField --> DoesNotStartWith
+									doesNotStartWithItem, isDoesNotStartWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotStartWith)
+
+									if isDoesNotStartWith {
+										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringValue(string(doesNotStartWithItem.DoesNotStartWith))
+									} else {
+										// Empty string, set to null
+										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringNull()
 									}
 
 									// --- End of Choices ---
@@ -2380,34 +2380,14 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 
 										// Process nested choices, populating the temporary attribute map
 
-										// resource specToModelNested StringOfOneOfField --> Equals
-										equalsItem, isEquals := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Equals)
+										// resource specToModelNested StringOfOneOfField --> Endswith
+										endswithItem, isEndswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Endswith)
 
-										if isEquals {
-											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringValue(string(equalsItem.Equals))
+										if isEndswith {
+											operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringValue(string(endswithItem.Endswith))
 										} else {
 											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringNull()
-										}
-
-										// resource specToModelNested StringOfOneOfField --> Startswith
-										startswithItem, isStartswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Startswith)
-
-										if isStartswith {
-											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringValue(string(startswithItem.Startswith))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringNull()
-										}
-
-										// resource specToModelNested StringOfOneOfField --> DoesNotStartWith
-										doesNotStartWithItem, isDoesNotStartWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotStartWith)
-
-										if isDoesNotStartWith {
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringValue(string(doesNotStartWithItem.DoesNotStartWith))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringNull()
+											operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringNull()
 										}
 
 										// resource specToModelNested StringOfOneOfField --> DoesNotEndWith
@@ -2420,14 +2400,14 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringNull()
 										}
 
-										// resource specToModelNested StringOfOneOfField --> Contains
-										containsItem, isContains := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Contains)
+										// resource specToModelNested StringOfOneOfField --> Equals
+										equalsItem, isEquals := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Equals)
 
-										if isContains {
-											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringValue(string(containsItem.Contains))
+										if isEquals {
+											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringValue(string(equalsItem.Equals))
 										} else {
 											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringNull()
+											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringNull()
 										}
 
 										// resource specToModelNested StringOfOneOfField --> DoesNotEqual
@@ -2440,24 +2420,24 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringNull()
 										}
 
-										// resource specToModelNested StringOfOneOfField --> DoesNotContain
-										doesNotContainItem, isDoesNotContain := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotContain)
+										// resource specToModelNested StringOfOneOfField --> Contains
+										containsItem, isContains := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Contains)
 
-										if isDoesNotContain {
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringValue(string(doesNotContainItem.DoesNotContain))
+										if isContains {
+											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringValue(string(containsItem.Contains))
 										} else {
 											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringNull()
+											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringNull()
 										}
 
-										// resource specToModelNested StringOfOneOfField --> Endswith
-										endswithItem, isEndswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Endswith)
+										// resource specToModelNested StringOfOneOfField --> DoesNotStartWith
+										doesNotStartWithItem, isDoesNotStartWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotStartWith)
 
-										if isEndswith {
-											operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringValue(string(endswithItem.Endswith))
+										if isDoesNotStartWith {
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringValue(string(doesNotStartWithItem.DoesNotStartWith))
 										} else {
 											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringNull()
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringNull()
 										}
 
 										// resource specToModelNested StringOfOneOfField --> MatchRegex
@@ -2468,6 +2448,26 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 										} else {
 											// Empty string, set to null
 											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringNull()
+										}
+
+										// resource specToModelNested StringOfOneOfField --> DoesNotContain
+										doesNotContainItem, isDoesNotContain := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotContain)
+
+										if isDoesNotContain {
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringValue(string(doesNotContainItem.DoesNotContain))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringNull()
+										}
+
+										// resource specToModelNested StringOfOneOfField --> Startswith
+										startswithItem, isStartswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Startswith)
+
+										if isStartswith {
+											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringValue(string(startswithItem.Startswith))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringNull()
 										}
 
 										// --- End of Choices ---
@@ -2566,34 +2566,24 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 
 										// Process nested choices, populating the temporary attribute map
 
-										// resource specToModelNested StringOfOneOfField --> MatchRegex
-										matchRegexItem, isMatchRegex := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_MatchRegex)
+										// resource specToModelNested StringOfOneOfField --> Contains
+										containsItem, isContains := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_Contains)
 
-										if isMatchRegex {
-											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringValue(string(matchRegexItem.MatchRegex))
+										if isContains {
+											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringValue(string(containsItem.Contains))
 										} else {
 											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringNull()
+											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringNull()
 										}
 
-										// resource specToModelNested StringOfOneOfField --> Equals
-										equalsItem, isEquals := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_Equals)
+										// resource specToModelNested StringOfOneOfField --> Startswith
+										startswithItem, isStartswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_Startswith)
 
-										if isEquals {
-											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringValue(string(equalsItem.Equals))
+										if isStartswith {
+											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringValue(string(startswithItem.Startswith))
 										} else {
 											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringNull()
-										}
-
-										// resource specToModelNested StringOfOneOfField --> DoesNotContain
-										doesNotContainItem, isDoesNotContain := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_DoesNotContain)
-
-										if isDoesNotContain {
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringValue(string(doesNotContainItem.DoesNotContain))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringNull()
+											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringNull()
 										}
 
 										// resource specToModelNested StringOfOneOfField --> DoesNotEqual
@@ -2606,14 +2596,24 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringNull()
 										}
 
-										// resource specToModelNested StringOfOneOfField --> Contains
-										containsItem, isContains := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_Contains)
+										// resource specToModelNested StringOfOneOfField --> DoesNotContain
+										doesNotContainItem, isDoesNotContain := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_DoesNotContain)
 
-										if isContains {
-											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringValue(string(containsItem.Contains))
+										if isDoesNotContain {
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringValue(string(doesNotContainItem.DoesNotContain))
 										} else {
 											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringNull()
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringNull()
+										}
+
+										// resource specToModelNested StringOfOneOfField --> DoesNotEndWith
+										doesNotEndWithItem, isDoesNotEndWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_DoesNotEndWith)
+
+										if isDoesNotEndWith {
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringValue(string(doesNotEndWithItem.DoesNotEndWith))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringNull()
 										}
 
 										// resource specToModelNested StringOfOneOfField --> Endswith
@@ -2636,24 +2636,24 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringNull()
 										}
 
-										// resource specToModelNested StringOfOneOfField --> DoesNotEndWith
-										doesNotEndWithItem, isDoesNotEndWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_DoesNotEndWith)
+										// resource specToModelNested StringOfOneOfField --> MatchRegex
+										matchRegexItem, isMatchRegex := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_MatchRegex)
 
-										if isDoesNotEndWith {
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringValue(string(doesNotEndWithItem.DoesNotEndWith))
+										if isMatchRegex {
+											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringValue(string(matchRegexItem.MatchRegex))
 										} else {
 											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringNull()
+											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringNull()
 										}
 
-										// resource specToModelNested StringOfOneOfField --> Startswith
-										startswithItem, isStartswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_Startswith)
+										// resource specToModelNested StringOfOneOfField --> Equals
+										equalsItem, isEquals := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_Equals)
 
-										if isStartswith {
-											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringValue(string(startswithItem.Startswith))
+										if isEquals {
+											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringValue(string(equalsItem.Equals))
 										} else {
 											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringNull()
+											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringNull()
 										}
 
 										// --- End of Choices ---
@@ -2719,14 +2719,6 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 							for _, cookieMatcherElement := range cacheRuleExpressionElement.GetCookieMatcher() {
 								cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel := CdnCacheRuleCdnCacheRuleCacheCookieMatcherType{}
 
-								// resource specToModelNested RequiredStringField --> Name
-								if cookieMatcherElement.GetName() != "" {
-									cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel.Name = types.StringValue(cookieMatcherElement.GetName())
-								} else {
-									// Empty string, set to null
-									cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel.Name = types.StringNull()
-								}
-
 								// resource specToModelNested PointerField --> Operator
 								if cookieMatcherElement.GetOperator() != nil {
 									// Create the nested Go struct
@@ -2746,14 +2738,14 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 
 										// Process nested choices, populating the temporary attribute map
 
-										// resource specToModelNested StringOfOneOfField --> Equals
-										equalsItem, isEquals := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_Equals)
+										// resource specToModelNested StringOfOneOfField --> MatchRegex
+										matchRegexItem, isMatchRegex := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_MatchRegex)
 
-										if isEquals {
-											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringValue(string(equalsItem.Equals))
+										if isMatchRegex {
+											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringValue(string(matchRegexItem.MatchRegex))
 										} else {
 											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringNull()
+											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringNull()
 										}
 
 										// resource specToModelNested StringOfOneOfField --> DoesNotContain
@@ -2776,6 +2768,16 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringNull()
 										}
 
+										// resource specToModelNested StringOfOneOfField --> DoesNotStartWith
+										doesNotStartWithItem, isDoesNotStartWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_DoesNotStartWith)
+
+										if isDoesNotStartWith {
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringValue(string(doesNotStartWithItem.DoesNotStartWith))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringNull()
+										}
+
 										// resource specToModelNested StringOfOneOfField --> Endswith
 										endswithItem, isEndswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_Endswith)
 
@@ -2786,14 +2788,24 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 											operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringNull()
 										}
 
-										// resource specToModelNested StringOfOneOfField --> MatchRegex
-										matchRegexItem, isMatchRegex := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_MatchRegex)
+										// resource specToModelNested StringOfOneOfField --> DoesNotEndWith
+										doesNotEndWithItem, isDoesNotEndWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_DoesNotEndWith)
 
-										if isMatchRegex {
-											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringValue(string(matchRegexItem.MatchRegex))
+										if isDoesNotEndWith {
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringValue(string(doesNotEndWithItem.DoesNotEndWith))
 										} else {
 											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringNull()
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringNull()
+										}
+
+										// resource specToModelNested StringOfOneOfField --> Equals
+										equalsItem, isEquals := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_Equals)
+
+										if isEquals {
+											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringValue(string(equalsItem.Equals))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringNull()
 										}
 
 										// resource specToModelNested StringOfOneOfField --> DoesNotEqual
@@ -2814,26 +2826,6 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 										} else {
 											// Empty string, set to null
 											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringNull()
-										}
-
-										// resource specToModelNested StringOfOneOfField --> DoesNotStartWith
-										doesNotStartWithItem, isDoesNotStartWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_DoesNotStartWith)
-
-										if isDoesNotStartWith {
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringValue(string(doesNotStartWithItem.DoesNotStartWith))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringNull()
-										}
-
-										// resource specToModelNested StringOfOneOfField --> DoesNotEndWith
-										doesNotEndWithItem, isDoesNotEndWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_DoesNotEndWith)
-
-										if isDoesNotEndWith {
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringValue(string(doesNotEndWithItem.DoesNotEndWith))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringNull()
 										}
 
 										// --- End of Choices ---
@@ -2871,6 +2863,14 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 									// making this else-branch unreachable. The child OneOf handles the actual healing.
 									// The target is a types.Object, so we use types.ObjectNull.
 									cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel.Operator = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorModelAttributeMap)
+								}
+
+								// resource specToModelNested RequiredStringField --> Name
+								if cookieMatcherElement.GetName() != "" {
+									cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel.Name = types.StringValue(cookieMatcherElement.GetName())
+								} else {
+									// Empty string, set to null
+									cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel.Name = types.StringNull()
 								}
 
 								cookieMatcherElements = append(cookieMatcherElements, cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel)
@@ -2937,15 +2937,6 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 			cacheRulescacheActionsChoiceChoices := cacheRulesElement.GetCacheActions()
 
 			// Process nested choices, populating the temporary attribute map
-
-			// resource specToModelNested BoolOfOneOfPointerField --> CacheBypass
-			_, isCacheBypass := cacheRulescacheActionsChoiceChoices.(*ves_io_schema_cdn_cache_rule.CDNCacheRule_CacheBypass)
-
-			if isCacheBypass {
-				cacheRulescacheActionsChoiceChoicesAttributeMap["cache_bypass"] = types.BoolValue(true)
-			} else {
-				cacheRulescacheActionsChoiceChoicesAttributeMap["cache_bypass"] = types.BoolNull()
-			}
 
 			// resource specToModelNested PointerOfOneOfField --> EligibleForCache
 			// GlobalSpecType
@@ -3065,6 +3056,15 @@ func (r *ResourceF5XCCdnCacheRule) Create(ctx context.Context, request resource.
 				}
 			}
 
+			// resource specToModelNested BoolOfOneOfPointerField --> CacheBypass
+			_, isCacheBypass := cacheRulescacheActionsChoiceChoices.(*ves_io_schema_cdn_cache_rule.CDNCacheRule_CacheBypass)
+
+			if isCacheBypass {
+				cacheRulescacheActionsChoiceChoicesAttributeMap["cache_bypass"] = types.BoolValue(true)
+			} else {
+				cacheRulescacheActionsChoiceChoicesAttributeMap["cache_bypass"] = types.BoolNull()
+			}
+
 			// --- End of Choices ---
 
 			// Create the final ObjectValue for this OneOf field
@@ -3160,15 +3160,6 @@ func (r *ResourceF5XCCdnCacheRule) Read(ctx context.Context, request resource.Re
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
-
-	// resource SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
-
-	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
-	data.Namespace = types.StringValue(metaData.GetNamespace())
-
-	// resource SpecToModelRoot Meta StringField --> Uid
-	data.Uid = types.StringValue(systemMetaData.GetUid())
 
 	// resource SpecToModelRoot Meta MapOfStringField --> Labels
 	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
@@ -3267,6 +3258,15 @@ func (r *ResourceF5XCCdnCacheRule) Read(ctx context.Context, request resource.Re
 	// resource SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
 
+	// resource SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
+
+	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
+	data.Namespace = types.StringValue(metaData.GetNamespace())
+
+	// resource SpecToModelRoot Meta StringField --> Uid
+	data.Uid = types.StringValue(systemMetaData.GetUid())
+
 	// resource SpecToModelRoot PointerField --> CacheRules
 	if specData.GetCacheRules() != nil {
 		var cdnCacheRuleCdnCacheRuleCDNCacheRuleModel = &CdnCacheRuleCdnCacheRuleCDNCacheRule{}
@@ -3331,44 +3331,14 @@ func (r *ResourceF5XCCdnCacheRule) Read(ctx context.Context, request resource.Re
 
 									// Process nested choices, populating the temporary attribute map
 
-									// resource specToModelNested StringOfOneOfField --> MatchRegex
-									matchRegexItem, isMatchRegex := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_MatchRegex)
+									// resource specToModelNested StringOfOneOfField --> DoesNotEndWith
+									doesNotEndWithItem, isDoesNotEndWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotEndWith)
 
-									if isMatchRegex {
-										operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringValue(string(matchRegexItem.MatchRegex))
+									if isDoesNotEndWith {
+										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringValue(string(doesNotEndWithItem.DoesNotEndWith))
 									} else {
 										// Empty string, set to null
-										operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringNull()
-									}
-
-									// resource specToModelNested StringOfOneOfField --> Contains
-									containsItem, isContains := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_Contains)
-
-									if isContains {
-										operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringValue(string(containsItem.Contains))
-									} else {
-										// Empty string, set to null
-										operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringNull()
-									}
-
-									// resource specToModelNested StringOfOneOfField --> Startswith
-									startswithItem, isStartswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_Startswith)
-
-									if isStartswith {
-										operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringValue(string(startswithItem.Startswith))
-									} else {
-										// Empty string, set to null
-										operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringNull()
-									}
-
-									// resource specToModelNested StringOfOneOfField --> DoesNotStartWith
-									doesNotStartWithItem, isDoesNotStartWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotStartWith)
-
-									if isDoesNotStartWith {
-										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringValue(string(doesNotStartWithItem.DoesNotStartWith))
-									} else {
-										// Empty string, set to null
-										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringNull()
+										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringNull()
 									}
 
 									// resource specToModelNested StringOfOneOfField --> DoesNotContain
@@ -3381,24 +3351,14 @@ func (r *ResourceF5XCCdnCacheRule) Read(ctx context.Context, request resource.Re
 										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringNull()
 									}
 
-									// resource specToModelNested StringOfOneOfField --> Equals
-									equalsItem, isEquals := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_Equals)
+									// resource specToModelNested StringOfOneOfField --> Contains
+									containsItem, isContains := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_Contains)
 
-									if isEquals {
-										operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringValue(string(equalsItem.Equals))
+									if isContains {
+										operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringValue(string(containsItem.Contains))
 									} else {
 										// Empty string, set to null
-										operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringNull()
-									}
-
-									// resource specToModelNested StringOfOneOfField --> DoesNotEqual
-									doesNotEqualItem, isDoesNotEqual := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotEqual)
-
-									if isDoesNotEqual {
-										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringValue(string(doesNotEqualItem.DoesNotEqual))
-									} else {
-										// Empty string, set to null
-										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringNull()
+										operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringNull()
 									}
 
 									// resource specToModelNested StringOfOneOfField --> Endswith
@@ -3411,14 +3371,54 @@ func (r *ResourceF5XCCdnCacheRule) Read(ctx context.Context, request resource.Re
 										operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringNull()
 									}
 
-									// resource specToModelNested StringOfOneOfField --> DoesNotEndWith
-									doesNotEndWithItem, isDoesNotEndWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotEndWith)
+									// resource specToModelNested StringOfOneOfField --> MatchRegex
+									matchRegexItem, isMatchRegex := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_MatchRegex)
 
-									if isDoesNotEndWith {
-										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringValue(string(doesNotEndWithItem.DoesNotEndWith))
+									if isMatchRegex {
+										operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringValue(string(matchRegexItem.MatchRegex))
 									} else {
 										// Empty string, set to null
-										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringNull()
+										operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringNull()
+									}
+
+									// resource specToModelNested StringOfOneOfField --> DoesNotEqual
+									doesNotEqualItem, isDoesNotEqual := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotEqual)
+
+									if isDoesNotEqual {
+										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringValue(string(doesNotEqualItem.DoesNotEqual))
+									} else {
+										// Empty string, set to null
+										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringNull()
+									}
+
+									// resource specToModelNested StringOfOneOfField --> Startswith
+									startswithItem, isStartswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_Startswith)
+
+									if isStartswith {
+										operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringValue(string(startswithItem.Startswith))
+									} else {
+										// Empty string, set to null
+										operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringNull()
+									}
+
+									// resource specToModelNested StringOfOneOfField --> Equals
+									equalsItem, isEquals := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_Equals)
+
+									if isEquals {
+										operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringValue(string(equalsItem.Equals))
+									} else {
+										// Empty string, set to null
+										operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringNull()
+									}
+
+									// resource specToModelNested StringOfOneOfField --> DoesNotStartWith
+									doesNotStartWithItem, isDoesNotStartWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotStartWith)
+
+									if isDoesNotStartWith {
+										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringValue(string(doesNotStartWithItem.DoesNotStartWith))
+									} else {
+										// Empty string, set to null
+										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringNull()
 									}
 
 									// --- End of Choices ---
@@ -3511,34 +3511,14 @@ func (r *ResourceF5XCCdnCacheRule) Read(ctx context.Context, request resource.Re
 
 										// Process nested choices, populating the temporary attribute map
 
-										// resource specToModelNested StringOfOneOfField --> Equals
-										equalsItem, isEquals := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Equals)
+										// resource specToModelNested StringOfOneOfField --> Endswith
+										endswithItem, isEndswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Endswith)
 
-										if isEquals {
-											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringValue(string(equalsItem.Equals))
+										if isEndswith {
+											operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringValue(string(endswithItem.Endswith))
 										} else {
 											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringNull()
-										}
-
-										// resource specToModelNested StringOfOneOfField --> Startswith
-										startswithItem, isStartswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Startswith)
-
-										if isStartswith {
-											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringValue(string(startswithItem.Startswith))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringNull()
-										}
-
-										// resource specToModelNested StringOfOneOfField --> DoesNotStartWith
-										doesNotStartWithItem, isDoesNotStartWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotStartWith)
-
-										if isDoesNotStartWith {
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringValue(string(doesNotStartWithItem.DoesNotStartWith))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringNull()
+											operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringNull()
 										}
 
 										// resource specToModelNested StringOfOneOfField --> DoesNotEndWith
@@ -3551,14 +3531,14 @@ func (r *ResourceF5XCCdnCacheRule) Read(ctx context.Context, request resource.Re
 											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringNull()
 										}
 
-										// resource specToModelNested StringOfOneOfField --> Contains
-										containsItem, isContains := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Contains)
+										// resource specToModelNested StringOfOneOfField --> Equals
+										equalsItem, isEquals := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Equals)
 
-										if isContains {
-											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringValue(string(containsItem.Contains))
+										if isEquals {
+											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringValue(string(equalsItem.Equals))
 										} else {
 											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringNull()
+											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringNull()
 										}
 
 										// resource specToModelNested StringOfOneOfField --> DoesNotEqual
@@ -3571,24 +3551,24 @@ func (r *ResourceF5XCCdnCacheRule) Read(ctx context.Context, request resource.Re
 											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringNull()
 										}
 
-										// resource specToModelNested StringOfOneOfField --> DoesNotContain
-										doesNotContainItem, isDoesNotContain := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotContain)
+										// resource specToModelNested StringOfOneOfField --> Contains
+										containsItem, isContains := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Contains)
 
-										if isDoesNotContain {
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringValue(string(doesNotContainItem.DoesNotContain))
+										if isContains {
+											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringValue(string(containsItem.Contains))
 										} else {
 											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringNull()
+											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringNull()
 										}
 
-										// resource specToModelNested StringOfOneOfField --> Endswith
-										endswithItem, isEndswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Endswith)
+										// resource specToModelNested StringOfOneOfField --> DoesNotStartWith
+										doesNotStartWithItem, isDoesNotStartWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotStartWith)
 
-										if isEndswith {
-											operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringValue(string(endswithItem.Endswith))
+										if isDoesNotStartWith {
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringValue(string(doesNotStartWithItem.DoesNotStartWith))
 										} else {
 											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringNull()
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringNull()
 										}
 
 										// resource specToModelNested StringOfOneOfField --> MatchRegex
@@ -3599,6 +3579,26 @@ func (r *ResourceF5XCCdnCacheRule) Read(ctx context.Context, request resource.Re
 										} else {
 											// Empty string, set to null
 											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringNull()
+										}
+
+										// resource specToModelNested StringOfOneOfField --> DoesNotContain
+										doesNotContainItem, isDoesNotContain := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotContain)
+
+										if isDoesNotContain {
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringValue(string(doesNotContainItem.DoesNotContain))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringNull()
+										}
+
+										// resource specToModelNested StringOfOneOfField --> Startswith
+										startswithItem, isStartswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Startswith)
+
+										if isStartswith {
+											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringValue(string(startswithItem.Startswith))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringNull()
 										}
 
 										// --- End of Choices ---
@@ -3697,34 +3697,24 @@ func (r *ResourceF5XCCdnCacheRule) Read(ctx context.Context, request resource.Re
 
 										// Process nested choices, populating the temporary attribute map
 
-										// resource specToModelNested StringOfOneOfField --> MatchRegex
-										matchRegexItem, isMatchRegex := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_MatchRegex)
+										// resource specToModelNested StringOfOneOfField --> Contains
+										containsItem, isContains := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_Contains)
 
-										if isMatchRegex {
-											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringValue(string(matchRegexItem.MatchRegex))
+										if isContains {
+											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringValue(string(containsItem.Contains))
 										} else {
 											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringNull()
+											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringNull()
 										}
 
-										// resource specToModelNested StringOfOneOfField --> Equals
-										equalsItem, isEquals := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_Equals)
+										// resource specToModelNested StringOfOneOfField --> Startswith
+										startswithItem, isStartswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_Startswith)
 
-										if isEquals {
-											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringValue(string(equalsItem.Equals))
+										if isStartswith {
+											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringValue(string(startswithItem.Startswith))
 										} else {
 											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringNull()
-										}
-
-										// resource specToModelNested StringOfOneOfField --> DoesNotContain
-										doesNotContainItem, isDoesNotContain := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_DoesNotContain)
-
-										if isDoesNotContain {
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringValue(string(doesNotContainItem.DoesNotContain))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringNull()
+											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringNull()
 										}
 
 										// resource specToModelNested StringOfOneOfField --> DoesNotEqual
@@ -3737,14 +3727,24 @@ func (r *ResourceF5XCCdnCacheRule) Read(ctx context.Context, request resource.Re
 											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringNull()
 										}
 
-										// resource specToModelNested StringOfOneOfField --> Contains
-										containsItem, isContains := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_Contains)
+										// resource specToModelNested StringOfOneOfField --> DoesNotContain
+										doesNotContainItem, isDoesNotContain := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_DoesNotContain)
 
-										if isContains {
-											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringValue(string(containsItem.Contains))
+										if isDoesNotContain {
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringValue(string(doesNotContainItem.DoesNotContain))
 										} else {
 											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringNull()
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringNull()
+										}
+
+										// resource specToModelNested StringOfOneOfField --> DoesNotEndWith
+										doesNotEndWithItem, isDoesNotEndWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_DoesNotEndWith)
+
+										if isDoesNotEndWith {
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringValue(string(doesNotEndWithItem.DoesNotEndWith))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringNull()
 										}
 
 										// resource specToModelNested StringOfOneOfField --> Endswith
@@ -3767,24 +3767,24 @@ func (r *ResourceF5XCCdnCacheRule) Read(ctx context.Context, request resource.Re
 											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringNull()
 										}
 
-										// resource specToModelNested StringOfOneOfField --> DoesNotEndWith
-										doesNotEndWithItem, isDoesNotEndWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_DoesNotEndWith)
+										// resource specToModelNested StringOfOneOfField --> MatchRegex
+										matchRegexItem, isMatchRegex := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_MatchRegex)
 
-										if isDoesNotEndWith {
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringValue(string(doesNotEndWithItem.DoesNotEndWith))
+										if isMatchRegex {
+											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringValue(string(matchRegexItem.MatchRegex))
 										} else {
 											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringNull()
+											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringNull()
 										}
 
-										// resource specToModelNested StringOfOneOfField --> Startswith
-										startswithItem, isStartswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_Startswith)
+										// resource specToModelNested StringOfOneOfField --> Equals
+										equalsItem, isEquals := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_Equals)
 
-										if isStartswith {
-											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringValue(string(startswithItem.Startswith))
+										if isEquals {
+											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringValue(string(equalsItem.Equals))
 										} else {
 											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringNull()
+											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringNull()
 										}
 
 										// --- End of Choices ---
@@ -3850,14 +3850,6 @@ func (r *ResourceF5XCCdnCacheRule) Read(ctx context.Context, request resource.Re
 							for _, cookieMatcherElement := range cacheRuleExpressionElement.GetCookieMatcher() {
 								cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel := CdnCacheRuleCdnCacheRuleCacheCookieMatcherType{}
 
-								// resource specToModelNested RequiredStringField --> Name
-								if cookieMatcherElement.GetName() != "" {
-									cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel.Name = types.StringValue(cookieMatcherElement.GetName())
-								} else {
-									// Empty string, set to null
-									cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel.Name = types.StringNull()
-								}
-
 								// resource specToModelNested PointerField --> Operator
 								if cookieMatcherElement.GetOperator() != nil {
 									// Create the nested Go struct
@@ -3877,14 +3869,14 @@ func (r *ResourceF5XCCdnCacheRule) Read(ctx context.Context, request resource.Re
 
 										// Process nested choices, populating the temporary attribute map
 
-										// resource specToModelNested StringOfOneOfField --> Equals
-										equalsItem, isEquals := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_Equals)
+										// resource specToModelNested StringOfOneOfField --> MatchRegex
+										matchRegexItem, isMatchRegex := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_MatchRegex)
 
-										if isEquals {
-											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringValue(string(equalsItem.Equals))
+										if isMatchRegex {
+											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringValue(string(matchRegexItem.MatchRegex))
 										} else {
 											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringNull()
+											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringNull()
 										}
 
 										// resource specToModelNested StringOfOneOfField --> DoesNotContain
@@ -3907,6 +3899,16 @@ func (r *ResourceF5XCCdnCacheRule) Read(ctx context.Context, request resource.Re
 											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringNull()
 										}
 
+										// resource specToModelNested StringOfOneOfField --> DoesNotStartWith
+										doesNotStartWithItem, isDoesNotStartWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_DoesNotStartWith)
+
+										if isDoesNotStartWith {
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringValue(string(doesNotStartWithItem.DoesNotStartWith))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringNull()
+										}
+
 										// resource specToModelNested StringOfOneOfField --> Endswith
 										endswithItem, isEndswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_Endswith)
 
@@ -3917,14 +3919,24 @@ func (r *ResourceF5XCCdnCacheRule) Read(ctx context.Context, request resource.Re
 											operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringNull()
 										}
 
-										// resource specToModelNested StringOfOneOfField --> MatchRegex
-										matchRegexItem, isMatchRegex := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_MatchRegex)
+										// resource specToModelNested StringOfOneOfField --> DoesNotEndWith
+										doesNotEndWithItem, isDoesNotEndWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_DoesNotEndWith)
 
-										if isMatchRegex {
-											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringValue(string(matchRegexItem.MatchRegex))
+										if isDoesNotEndWith {
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringValue(string(doesNotEndWithItem.DoesNotEndWith))
 										} else {
 											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringNull()
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringNull()
+										}
+
+										// resource specToModelNested StringOfOneOfField --> Equals
+										equalsItem, isEquals := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_Equals)
+
+										if isEquals {
+											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringValue(string(equalsItem.Equals))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringNull()
 										}
 
 										// resource specToModelNested StringOfOneOfField --> DoesNotEqual
@@ -3945,26 +3957,6 @@ func (r *ResourceF5XCCdnCacheRule) Read(ctx context.Context, request resource.Re
 										} else {
 											// Empty string, set to null
 											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringNull()
-										}
-
-										// resource specToModelNested StringOfOneOfField --> DoesNotStartWith
-										doesNotStartWithItem, isDoesNotStartWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_DoesNotStartWith)
-
-										if isDoesNotStartWith {
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringValue(string(doesNotStartWithItem.DoesNotStartWith))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringNull()
-										}
-
-										// resource specToModelNested StringOfOneOfField --> DoesNotEndWith
-										doesNotEndWithItem, isDoesNotEndWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_DoesNotEndWith)
-
-										if isDoesNotEndWith {
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringValue(string(doesNotEndWithItem.DoesNotEndWith))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringNull()
 										}
 
 										// --- End of Choices ---
@@ -4002,6 +3994,14 @@ func (r *ResourceF5XCCdnCacheRule) Read(ctx context.Context, request resource.Re
 									// making this else-branch unreachable. The child OneOf handles the actual healing.
 									// The target is a types.Object, so we use types.ObjectNull.
 									cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel.Operator = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorModelAttributeMap)
+								}
+
+								// resource specToModelNested RequiredStringField --> Name
+								if cookieMatcherElement.GetName() != "" {
+									cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel.Name = types.StringValue(cookieMatcherElement.GetName())
+								} else {
+									// Empty string, set to null
+									cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel.Name = types.StringNull()
 								}
 
 								cookieMatcherElements = append(cookieMatcherElements, cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel)
@@ -4068,15 +4068,6 @@ func (r *ResourceF5XCCdnCacheRule) Read(ctx context.Context, request resource.Re
 			cacheRulescacheActionsChoiceChoices := cacheRulesElement.GetCacheActions()
 
 			// Process nested choices, populating the temporary attribute map
-
-			// resource specToModelNested BoolOfOneOfPointerField --> CacheBypass
-			_, isCacheBypass := cacheRulescacheActionsChoiceChoices.(*ves_io_schema_cdn_cache_rule.CDNCacheRule_CacheBypass)
-
-			if isCacheBypass {
-				cacheRulescacheActionsChoiceChoicesAttributeMap["cache_bypass"] = types.BoolValue(true)
-			} else {
-				cacheRulescacheActionsChoiceChoicesAttributeMap["cache_bypass"] = types.BoolNull()
-			}
 
 			// resource specToModelNested PointerOfOneOfField --> EligibleForCache
 			// <no value>
@@ -4196,6 +4187,15 @@ func (r *ResourceF5XCCdnCacheRule) Read(ctx context.Context, request resource.Re
 				}
 			}
 
+			// resource specToModelNested BoolOfOneOfPointerField --> CacheBypass
+			_, isCacheBypass := cacheRulescacheActionsChoiceChoices.(*ves_io_schema_cdn_cache_rule.CDNCacheRule_CacheBypass)
+
+			if isCacheBypass {
+				cacheRulescacheActionsChoiceChoicesAttributeMap["cache_bypass"] = types.BoolValue(true)
+			} else {
+				cacheRulescacheActionsChoiceChoicesAttributeMap["cache_bypass"] = types.BoolNull()
+			}
+
 			// --- End of Choices ---
 
 			// Create the final ObjectValue for this OneOf field
@@ -4276,16 +4276,6 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 
 	// Populate updateReq from data model
 
-	// resource modelToMetaRoot RequiredStringField --> Name
-	if !data.Name.IsNull() && !data.Name.IsUnknown() {
-		meta.Name = string(data.Name.ValueString())
-	}
-
-	// resource modelToMetaRoot RequiredStringField --> Namespace
-	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
-		meta.Namespace = string(data.Namespace.ValueString())
-	}
-
 	// resource modelToMetaRoot MapOfStringField --> Annotations
 	if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
 		var labels map[string]string
@@ -4303,6 +4293,16 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 	// resource modelToMetaRoot StringField --> Description
 	if !data.Description.IsNull() && !data.Description.IsUnknown() {
 		meta.Description = string(data.Description.ValueString())
+	}
+
+	// resource modelToMetaRoot RequiredStringField --> Name
+	if !data.Name.IsNull() && !data.Name.IsUnknown() {
+		meta.Name = string(data.Name.ValueString())
+	}
+
+	// resource modelToMetaRoot RequiredStringField --> Namespace
+	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
+		meta.Namespace = string(data.Namespace.ValueString())
 	}
 
 	{
@@ -4399,32 +4399,11 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 											return
 										}
 
-										// resource modelToSpecNested StringOfOneOfField --> MatchRegex
-										if !operatorCacheOperatorChoiceModel.MatchRegex.IsNull() && !operatorCacheOperatorChoiceModel.MatchRegex.IsUnknown() {
-											matchRegexSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_MatchRegex{}
-											matchRegexSpecStr.MatchRegex = string(operatorCacheOperatorChoiceModel.MatchRegex.ValueString())
-											operatorSpec.CacheOperator = matchRegexSpecStr
-										}
-
-										// resource modelToSpecNested StringOfOneOfField --> Contains
-										if !operatorCacheOperatorChoiceModel.Contains.IsNull() && !operatorCacheOperatorChoiceModel.Contains.IsUnknown() {
-											containsSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_Contains{}
-											containsSpecStr.Contains = string(operatorCacheOperatorChoiceModel.Contains.ValueString())
-											operatorSpec.CacheOperator = containsSpecStr
-										}
-
-										// resource modelToSpecNested StringOfOneOfField --> Startswith
-										if !operatorCacheOperatorChoiceModel.Startswith.IsNull() && !operatorCacheOperatorChoiceModel.Startswith.IsUnknown() {
-											startswithSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_Startswith{}
-											startswithSpecStr.Startswith = string(operatorCacheOperatorChoiceModel.Startswith.ValueString())
-											operatorSpec.CacheOperator = startswithSpecStr
-										}
-
-										// resource modelToSpecNested StringOfOneOfField --> DoesNotStartWith
-										if !operatorCacheOperatorChoiceModel.DoesNotStartWith.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotStartWith.IsUnknown() {
-											doesNotStartWithSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotStartWith{}
-											doesNotStartWithSpecStr.DoesNotStartWith = string(operatorCacheOperatorChoiceModel.DoesNotStartWith.ValueString())
-											operatorSpec.CacheOperator = doesNotStartWithSpecStr
+										// resource modelToSpecNested StringOfOneOfField --> DoesNotEndWith
+										if !operatorCacheOperatorChoiceModel.DoesNotEndWith.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotEndWith.IsUnknown() {
+											doesNotEndWithSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotEndWith{}
+											doesNotEndWithSpecStr.DoesNotEndWith = string(operatorCacheOperatorChoiceModel.DoesNotEndWith.ValueString())
+											operatorSpec.CacheOperator = doesNotEndWithSpecStr
 										}
 
 										// resource modelToSpecNested StringOfOneOfField --> DoesNotContain
@@ -4434,18 +4413,11 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 											operatorSpec.CacheOperator = doesNotContainSpecStr
 										}
 
-										// resource modelToSpecNested StringOfOneOfField --> Equals
-										if !operatorCacheOperatorChoiceModel.Equals.IsNull() && !operatorCacheOperatorChoiceModel.Equals.IsUnknown() {
-											equalsSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_Equals{}
-											equalsSpecStr.Equals = string(operatorCacheOperatorChoiceModel.Equals.ValueString())
-											operatorSpec.CacheOperator = equalsSpecStr
-										}
-
-										// resource modelToSpecNested StringOfOneOfField --> DoesNotEqual
-										if !operatorCacheOperatorChoiceModel.DoesNotEqual.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotEqual.IsUnknown() {
-											doesNotEqualSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotEqual{}
-											doesNotEqualSpecStr.DoesNotEqual = string(operatorCacheOperatorChoiceModel.DoesNotEqual.ValueString())
-											operatorSpec.CacheOperator = doesNotEqualSpecStr
+										// resource modelToSpecNested StringOfOneOfField --> Contains
+										if !operatorCacheOperatorChoiceModel.Contains.IsNull() && !operatorCacheOperatorChoiceModel.Contains.IsUnknown() {
+											containsSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_Contains{}
+											containsSpecStr.Contains = string(operatorCacheOperatorChoiceModel.Contains.ValueString())
+											operatorSpec.CacheOperator = containsSpecStr
 										}
 
 										// resource modelToSpecNested StringOfOneOfField --> Endswith
@@ -4455,11 +4427,39 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 											operatorSpec.CacheOperator = endswithSpecStr
 										}
 
-										// resource modelToSpecNested StringOfOneOfField --> DoesNotEndWith
-										if !operatorCacheOperatorChoiceModel.DoesNotEndWith.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotEndWith.IsUnknown() {
-											doesNotEndWithSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotEndWith{}
-											doesNotEndWithSpecStr.DoesNotEndWith = string(operatorCacheOperatorChoiceModel.DoesNotEndWith.ValueString())
-											operatorSpec.CacheOperator = doesNotEndWithSpecStr
+										// resource modelToSpecNested StringOfOneOfField --> MatchRegex
+										if !operatorCacheOperatorChoiceModel.MatchRegex.IsNull() && !operatorCacheOperatorChoiceModel.MatchRegex.IsUnknown() {
+											matchRegexSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_MatchRegex{}
+											matchRegexSpecStr.MatchRegex = string(operatorCacheOperatorChoiceModel.MatchRegex.ValueString())
+											operatorSpec.CacheOperator = matchRegexSpecStr
+										}
+
+										// resource modelToSpecNested StringOfOneOfField --> DoesNotEqual
+										if !operatorCacheOperatorChoiceModel.DoesNotEqual.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotEqual.IsUnknown() {
+											doesNotEqualSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotEqual{}
+											doesNotEqualSpecStr.DoesNotEqual = string(operatorCacheOperatorChoiceModel.DoesNotEqual.ValueString())
+											operatorSpec.CacheOperator = doesNotEqualSpecStr
+										}
+
+										// resource modelToSpecNested StringOfOneOfField --> Startswith
+										if !operatorCacheOperatorChoiceModel.Startswith.IsNull() && !operatorCacheOperatorChoiceModel.Startswith.IsUnknown() {
+											startswithSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_Startswith{}
+											startswithSpecStr.Startswith = string(operatorCacheOperatorChoiceModel.Startswith.ValueString())
+											operatorSpec.CacheOperator = startswithSpecStr
+										}
+
+										// resource modelToSpecNested StringOfOneOfField --> Equals
+										if !operatorCacheOperatorChoiceModel.Equals.IsNull() && !operatorCacheOperatorChoiceModel.Equals.IsUnknown() {
+											equalsSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_Equals{}
+											equalsSpecStr.Equals = string(operatorCacheOperatorChoiceModel.Equals.ValueString())
+											operatorSpec.CacheOperator = equalsSpecStr
+										}
+
+										// resource modelToSpecNested StringOfOneOfField --> DoesNotStartWith
+										if !operatorCacheOperatorChoiceModel.DoesNotStartWith.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotStartWith.IsUnknown() {
+											doesNotStartWithSpecStr := &ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotStartWith{}
+											doesNotStartWithSpecStr.DoesNotStartWith = string(operatorCacheOperatorChoiceModel.DoesNotStartWith.ValueString())
+											operatorSpec.CacheOperator = doesNotStartWithSpecStr
 										}
 
 									}
@@ -4512,25 +4512,11 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 												return
 											}
 
-											// resource modelToSpecNested StringOfOneOfField --> Equals
-											if !operatorCacheOperatorChoiceModel.Equals.IsNull() && !operatorCacheOperatorChoiceModel.Equals.IsUnknown() {
-												equalsSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Equals{}
-												equalsSpecStr.Equals = string(operatorCacheOperatorChoiceModel.Equals.ValueString())
-												operatorSpec.CacheOperator = equalsSpecStr
-											}
-
-											// resource modelToSpecNested StringOfOneOfField --> Startswith
-											if !operatorCacheOperatorChoiceModel.Startswith.IsNull() && !operatorCacheOperatorChoiceModel.Startswith.IsUnknown() {
-												startswithSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Startswith{}
-												startswithSpecStr.Startswith = string(operatorCacheOperatorChoiceModel.Startswith.ValueString())
-												operatorSpec.CacheOperator = startswithSpecStr
-											}
-
-											// resource modelToSpecNested StringOfOneOfField --> DoesNotStartWith
-											if !operatorCacheOperatorChoiceModel.DoesNotStartWith.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotStartWith.IsUnknown() {
-												doesNotStartWithSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotStartWith{}
-												doesNotStartWithSpecStr.DoesNotStartWith = string(operatorCacheOperatorChoiceModel.DoesNotStartWith.ValueString())
-												operatorSpec.CacheOperator = doesNotStartWithSpecStr
+											// resource modelToSpecNested StringOfOneOfField --> Endswith
+											if !operatorCacheOperatorChoiceModel.Endswith.IsNull() && !operatorCacheOperatorChoiceModel.Endswith.IsUnknown() {
+												endswithSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Endswith{}
+												endswithSpecStr.Endswith = string(operatorCacheOperatorChoiceModel.Endswith.ValueString())
+												operatorSpec.CacheOperator = endswithSpecStr
 											}
 
 											// resource modelToSpecNested StringOfOneOfField --> DoesNotEndWith
@@ -4540,11 +4526,11 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 												operatorSpec.CacheOperator = doesNotEndWithSpecStr
 											}
 
-											// resource modelToSpecNested StringOfOneOfField --> Contains
-											if !operatorCacheOperatorChoiceModel.Contains.IsNull() && !operatorCacheOperatorChoiceModel.Contains.IsUnknown() {
-												containsSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Contains{}
-												containsSpecStr.Contains = string(operatorCacheOperatorChoiceModel.Contains.ValueString())
-												operatorSpec.CacheOperator = containsSpecStr
+											// resource modelToSpecNested StringOfOneOfField --> Equals
+											if !operatorCacheOperatorChoiceModel.Equals.IsNull() && !operatorCacheOperatorChoiceModel.Equals.IsUnknown() {
+												equalsSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Equals{}
+												equalsSpecStr.Equals = string(operatorCacheOperatorChoiceModel.Equals.ValueString())
+												operatorSpec.CacheOperator = equalsSpecStr
 											}
 
 											// resource modelToSpecNested StringOfOneOfField --> DoesNotEqual
@@ -4554,18 +4540,18 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 												operatorSpec.CacheOperator = doesNotEqualSpecStr
 											}
 
-											// resource modelToSpecNested StringOfOneOfField --> DoesNotContain
-											if !operatorCacheOperatorChoiceModel.DoesNotContain.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotContain.IsUnknown() {
-												doesNotContainSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotContain{}
-												doesNotContainSpecStr.DoesNotContain = string(operatorCacheOperatorChoiceModel.DoesNotContain.ValueString())
-												operatorSpec.CacheOperator = doesNotContainSpecStr
+											// resource modelToSpecNested StringOfOneOfField --> Contains
+											if !operatorCacheOperatorChoiceModel.Contains.IsNull() && !operatorCacheOperatorChoiceModel.Contains.IsUnknown() {
+												containsSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Contains{}
+												containsSpecStr.Contains = string(operatorCacheOperatorChoiceModel.Contains.ValueString())
+												operatorSpec.CacheOperator = containsSpecStr
 											}
 
-											// resource modelToSpecNested StringOfOneOfField --> Endswith
-											if !operatorCacheOperatorChoiceModel.Endswith.IsNull() && !operatorCacheOperatorChoiceModel.Endswith.IsUnknown() {
-												endswithSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Endswith{}
-												endswithSpecStr.Endswith = string(operatorCacheOperatorChoiceModel.Endswith.ValueString())
-												operatorSpec.CacheOperator = endswithSpecStr
+											// resource modelToSpecNested StringOfOneOfField --> DoesNotStartWith
+											if !operatorCacheOperatorChoiceModel.DoesNotStartWith.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotStartWith.IsUnknown() {
+												doesNotStartWithSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotStartWith{}
+												doesNotStartWithSpecStr.DoesNotStartWith = string(operatorCacheOperatorChoiceModel.DoesNotStartWith.ValueString())
+												operatorSpec.CacheOperator = doesNotStartWithSpecStr
 											}
 
 											// resource modelToSpecNested StringOfOneOfField --> MatchRegex
@@ -4573,6 +4559,20 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 												matchRegexSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_MatchRegex{}
 												matchRegexSpecStr.MatchRegex = string(operatorCacheOperatorChoiceModel.MatchRegex.ValueString())
 												operatorSpec.CacheOperator = matchRegexSpecStr
+											}
+
+											// resource modelToSpecNested StringOfOneOfField --> DoesNotContain
+											if !operatorCacheOperatorChoiceModel.DoesNotContain.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotContain.IsUnknown() {
+												doesNotContainSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotContain{}
+												doesNotContainSpecStr.DoesNotContain = string(operatorCacheOperatorChoiceModel.DoesNotContain.ValueString())
+												operatorSpec.CacheOperator = doesNotContainSpecStr
+											}
+
+											// resource modelToSpecNested StringOfOneOfField --> Startswith
+											if !operatorCacheOperatorChoiceModel.Startswith.IsNull() && !operatorCacheOperatorChoiceModel.Startswith.IsUnknown() {
+												startswithSpecStr := &ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Startswith{}
+												startswithSpecStr.Startswith = string(operatorCacheOperatorChoiceModel.Startswith.ValueString())
+												operatorSpec.CacheOperator = startswithSpecStr
 											}
 
 										}
@@ -4645,25 +4645,18 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 												return
 											}
 
-											// resource modelToSpecNested StringOfOneOfField --> MatchRegex
-											if !operatorCacheOperatorChoiceModel.MatchRegex.IsNull() && !operatorCacheOperatorChoiceModel.MatchRegex.IsUnknown() {
-												matchRegexSpecStr := &ves_io_schema_cdn_cache_rule.HeaderCacheOperator_MatchRegex{}
-												matchRegexSpecStr.MatchRegex = string(operatorCacheOperatorChoiceModel.MatchRegex.ValueString())
-												operatorSpec.CacheOperator = matchRegexSpecStr
+											// resource modelToSpecNested StringOfOneOfField --> Contains
+											if !operatorCacheOperatorChoiceModel.Contains.IsNull() && !operatorCacheOperatorChoiceModel.Contains.IsUnknown() {
+												containsSpecStr := &ves_io_schema_cdn_cache_rule.HeaderCacheOperator_Contains{}
+												containsSpecStr.Contains = string(operatorCacheOperatorChoiceModel.Contains.ValueString())
+												operatorSpec.CacheOperator = containsSpecStr
 											}
 
-											// resource modelToSpecNested StringOfOneOfField --> Equals
-											if !operatorCacheOperatorChoiceModel.Equals.IsNull() && !operatorCacheOperatorChoiceModel.Equals.IsUnknown() {
-												equalsSpecStr := &ves_io_schema_cdn_cache_rule.HeaderCacheOperator_Equals{}
-												equalsSpecStr.Equals = string(operatorCacheOperatorChoiceModel.Equals.ValueString())
-												operatorSpec.CacheOperator = equalsSpecStr
-											}
-
-											// resource modelToSpecNested StringOfOneOfField --> DoesNotContain
-											if !operatorCacheOperatorChoiceModel.DoesNotContain.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotContain.IsUnknown() {
-												doesNotContainSpecStr := &ves_io_schema_cdn_cache_rule.HeaderCacheOperator_DoesNotContain{}
-												doesNotContainSpecStr.DoesNotContain = string(operatorCacheOperatorChoiceModel.DoesNotContain.ValueString())
-												operatorSpec.CacheOperator = doesNotContainSpecStr
+											// resource modelToSpecNested StringOfOneOfField --> Startswith
+											if !operatorCacheOperatorChoiceModel.Startswith.IsNull() && !operatorCacheOperatorChoiceModel.Startswith.IsUnknown() {
+												startswithSpecStr := &ves_io_schema_cdn_cache_rule.HeaderCacheOperator_Startswith{}
+												startswithSpecStr.Startswith = string(operatorCacheOperatorChoiceModel.Startswith.ValueString())
+												operatorSpec.CacheOperator = startswithSpecStr
 											}
 
 											// resource modelToSpecNested StringOfOneOfField --> DoesNotEqual
@@ -4673,11 +4666,18 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 												operatorSpec.CacheOperator = doesNotEqualSpecStr
 											}
 
-											// resource modelToSpecNested StringOfOneOfField --> Contains
-											if !operatorCacheOperatorChoiceModel.Contains.IsNull() && !operatorCacheOperatorChoiceModel.Contains.IsUnknown() {
-												containsSpecStr := &ves_io_schema_cdn_cache_rule.HeaderCacheOperator_Contains{}
-												containsSpecStr.Contains = string(operatorCacheOperatorChoiceModel.Contains.ValueString())
-												operatorSpec.CacheOperator = containsSpecStr
+											// resource modelToSpecNested StringOfOneOfField --> DoesNotContain
+											if !operatorCacheOperatorChoiceModel.DoesNotContain.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotContain.IsUnknown() {
+												doesNotContainSpecStr := &ves_io_schema_cdn_cache_rule.HeaderCacheOperator_DoesNotContain{}
+												doesNotContainSpecStr.DoesNotContain = string(operatorCacheOperatorChoiceModel.DoesNotContain.ValueString())
+												operatorSpec.CacheOperator = doesNotContainSpecStr
+											}
+
+											// resource modelToSpecNested StringOfOneOfField --> DoesNotEndWith
+											if !operatorCacheOperatorChoiceModel.DoesNotEndWith.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotEndWith.IsUnknown() {
+												doesNotEndWithSpecStr := &ves_io_schema_cdn_cache_rule.HeaderCacheOperator_DoesNotEndWith{}
+												doesNotEndWithSpecStr.DoesNotEndWith = string(operatorCacheOperatorChoiceModel.DoesNotEndWith.ValueString())
+												operatorSpec.CacheOperator = doesNotEndWithSpecStr
 											}
 
 											// resource modelToSpecNested StringOfOneOfField --> Endswith
@@ -4694,18 +4694,18 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 												operatorSpec.CacheOperator = doesNotStartWithSpecStr
 											}
 
-											// resource modelToSpecNested StringOfOneOfField --> DoesNotEndWith
-											if !operatorCacheOperatorChoiceModel.DoesNotEndWith.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotEndWith.IsUnknown() {
-												doesNotEndWithSpecStr := &ves_io_schema_cdn_cache_rule.HeaderCacheOperator_DoesNotEndWith{}
-												doesNotEndWithSpecStr.DoesNotEndWith = string(operatorCacheOperatorChoiceModel.DoesNotEndWith.ValueString())
-												operatorSpec.CacheOperator = doesNotEndWithSpecStr
+											// resource modelToSpecNested StringOfOneOfField --> MatchRegex
+											if !operatorCacheOperatorChoiceModel.MatchRegex.IsNull() && !operatorCacheOperatorChoiceModel.MatchRegex.IsUnknown() {
+												matchRegexSpecStr := &ves_io_schema_cdn_cache_rule.HeaderCacheOperator_MatchRegex{}
+												matchRegexSpecStr.MatchRegex = string(operatorCacheOperatorChoiceModel.MatchRegex.ValueString())
+												operatorSpec.CacheOperator = matchRegexSpecStr
 											}
 
-											// resource modelToSpecNested StringOfOneOfField --> Startswith
-											if !operatorCacheOperatorChoiceModel.Startswith.IsNull() && !operatorCacheOperatorChoiceModel.Startswith.IsUnknown() {
-												startswithSpecStr := &ves_io_schema_cdn_cache_rule.HeaderCacheOperator_Startswith{}
-												startswithSpecStr.Startswith = string(operatorCacheOperatorChoiceModel.Startswith.ValueString())
-												operatorSpec.CacheOperator = startswithSpecStr
+											// resource modelToSpecNested StringOfOneOfField --> Equals
+											if !operatorCacheOperatorChoiceModel.Equals.IsNull() && !operatorCacheOperatorChoiceModel.Equals.IsUnknown() {
+												equalsSpecStr := &ves_io_schema_cdn_cache_rule.HeaderCacheOperator_Equals{}
+												equalsSpecStr.Equals = string(operatorCacheOperatorChoiceModel.Equals.ValueString())
+												operatorSpec.CacheOperator = equalsSpecStr
 											}
 
 										}
@@ -4735,11 +4735,6 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 
 									// Recursively process nested elements
 
-									// resource modelToSpecNested RequiredStringField --> Name
-									if !cookieMatcherElement.Name.IsNull() && !cookieMatcherElement.Name.IsUnknown() {
-										cookieMatcherSpec[i].Name = string(cookieMatcherElement.Name.ValueString())
-									}
-
 									// resource modelToSpecNested PointerField --> Operator
 									if !cookieMatcherElement.Operator.IsNull() && !cookieMatcherElement.Operator.IsUnknown() {
 										var operatorModel CdnCacheRuleCdnCacheRuleCookieMatcherCacheOperator
@@ -4759,11 +4754,11 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 												return
 											}
 
-											// resource modelToSpecNested StringOfOneOfField --> Equals
-											if !operatorCacheOperatorChoiceModel.Equals.IsNull() && !operatorCacheOperatorChoiceModel.Equals.IsUnknown() {
-												equalsSpecStr := &ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_Equals{}
-												equalsSpecStr.Equals = string(operatorCacheOperatorChoiceModel.Equals.ValueString())
-												operatorSpec.CacheOperator = equalsSpecStr
+											// resource modelToSpecNested StringOfOneOfField --> MatchRegex
+											if !operatorCacheOperatorChoiceModel.MatchRegex.IsNull() && !operatorCacheOperatorChoiceModel.MatchRegex.IsUnknown() {
+												matchRegexSpecStr := &ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_MatchRegex{}
+												matchRegexSpecStr.MatchRegex = string(operatorCacheOperatorChoiceModel.MatchRegex.ValueString())
+												operatorSpec.CacheOperator = matchRegexSpecStr
 											}
 
 											// resource modelToSpecNested StringOfOneOfField --> DoesNotContain
@@ -4780,6 +4775,13 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 												operatorSpec.CacheOperator = startswithSpecStr
 											}
 
+											// resource modelToSpecNested StringOfOneOfField --> DoesNotStartWith
+											if !operatorCacheOperatorChoiceModel.DoesNotStartWith.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotStartWith.IsUnknown() {
+												doesNotStartWithSpecStr := &ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_DoesNotStartWith{}
+												doesNotStartWithSpecStr.DoesNotStartWith = string(operatorCacheOperatorChoiceModel.DoesNotStartWith.ValueString())
+												operatorSpec.CacheOperator = doesNotStartWithSpecStr
+											}
+
 											// resource modelToSpecNested StringOfOneOfField --> Endswith
 											if !operatorCacheOperatorChoiceModel.Endswith.IsNull() && !operatorCacheOperatorChoiceModel.Endswith.IsUnknown() {
 												endswithSpecStr := &ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_Endswith{}
@@ -4787,11 +4789,18 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 												operatorSpec.CacheOperator = endswithSpecStr
 											}
 
-											// resource modelToSpecNested StringOfOneOfField --> MatchRegex
-											if !operatorCacheOperatorChoiceModel.MatchRegex.IsNull() && !operatorCacheOperatorChoiceModel.MatchRegex.IsUnknown() {
-												matchRegexSpecStr := &ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_MatchRegex{}
-												matchRegexSpecStr.MatchRegex = string(operatorCacheOperatorChoiceModel.MatchRegex.ValueString())
-												operatorSpec.CacheOperator = matchRegexSpecStr
+											// resource modelToSpecNested StringOfOneOfField --> DoesNotEndWith
+											if !operatorCacheOperatorChoiceModel.DoesNotEndWith.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotEndWith.IsUnknown() {
+												doesNotEndWithSpecStr := &ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_DoesNotEndWith{}
+												doesNotEndWithSpecStr.DoesNotEndWith = string(operatorCacheOperatorChoiceModel.DoesNotEndWith.ValueString())
+												operatorSpec.CacheOperator = doesNotEndWithSpecStr
+											}
+
+											// resource modelToSpecNested StringOfOneOfField --> Equals
+											if !operatorCacheOperatorChoiceModel.Equals.IsNull() && !operatorCacheOperatorChoiceModel.Equals.IsUnknown() {
+												equalsSpecStr := &ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_Equals{}
+												equalsSpecStr.Equals = string(operatorCacheOperatorChoiceModel.Equals.ValueString())
+												operatorSpec.CacheOperator = equalsSpecStr
 											}
 
 											// resource modelToSpecNested StringOfOneOfField --> DoesNotEqual
@@ -4808,22 +4817,13 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 												operatorSpec.CacheOperator = containsSpecStr
 											}
 
-											// resource modelToSpecNested StringOfOneOfField --> DoesNotStartWith
-											if !operatorCacheOperatorChoiceModel.DoesNotStartWith.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotStartWith.IsUnknown() {
-												doesNotStartWithSpecStr := &ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_DoesNotStartWith{}
-												doesNotStartWithSpecStr.DoesNotStartWith = string(operatorCacheOperatorChoiceModel.DoesNotStartWith.ValueString())
-												operatorSpec.CacheOperator = doesNotStartWithSpecStr
-											}
-
-											// resource modelToSpecNested StringOfOneOfField --> DoesNotEndWith
-											if !operatorCacheOperatorChoiceModel.DoesNotEndWith.IsNull() && !operatorCacheOperatorChoiceModel.DoesNotEndWith.IsUnknown() {
-												doesNotEndWithSpecStr := &ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_DoesNotEndWith{}
-												doesNotEndWithSpecStr.DoesNotEndWith = string(operatorCacheOperatorChoiceModel.DoesNotEndWith.ValueString())
-												operatorSpec.CacheOperator = doesNotEndWithSpecStr
-											}
-
 										}
 
+									}
+
+									// resource modelToSpecNested RequiredStringField --> Name
+									if !cookieMatcherElement.Name.IsNull() && !cookieMatcherElement.Name.IsUnknown() {
+										cookieMatcherSpec[i].Name = string(cookieMatcherElement.Name.ValueString())
 									}
 
 								}
@@ -4841,13 +4841,6 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 				response.Diagnostics.Append(cacheRulesModel.CacheActionsChoice.As(ctx, &cacheRulesCacheActionsChoiceModel, basetypes.ObjectAsOptions{})...)
 				if response.Diagnostics.HasError() {
 					return
-				}
-
-				// resource modelToSpecNested BoolOfOneOfPointerField --> CacheBypass
-				if !cacheRulesCacheActionsChoiceModel.CacheBypass.IsNull() && !cacheRulesCacheActionsChoiceModel.CacheBypass.IsUnknown() {
-					cacheBypassSpecBool := &ves_io_schema_cdn_cache_rule.CDNCacheRule_CacheBypass{}
-					cacheBypassSpecBool.CacheBypass = &ves_io_schema.Empty{}
-					cacheRulesSpec.CacheActions = cacheBypassSpecBool
 				}
 
 				// resource modelToSpecNested PointerOfOneOfField --> EligibleForCache
@@ -4929,6 +4922,13 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 
 				}
 
+				// resource modelToSpecNested BoolOfOneOfPointerField --> CacheBypass
+				if !cacheRulesCacheActionsChoiceModel.CacheBypass.IsNull() && !cacheRulesCacheActionsChoiceModel.CacheBypass.IsUnknown() {
+					cacheBypassSpecBool := &ves_io_schema_cdn_cache_rule.CDNCacheRule_CacheBypass{}
+					cacheBypassSpecBool.CacheBypass = &ves_io_schema.Empty{}
+					cacheRulesSpec.CacheActions = cacheBypassSpecBool
+				}
+
 			}
 
 		}
@@ -4967,15 +4967,6 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
-
-	// resource SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
-
-	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
-	data.Namespace = types.StringValue(metaData.GetNamespace())
-
-	// resource SpecToModelRoot Meta StringField --> Uid
-	data.Uid = types.StringValue(systemMetaData.GetUid())
 
 	// resource SpecToModelRoot Meta MapOfStringField --> Labels
 	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
@@ -5074,6 +5065,15 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 	// resource SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
 
+	// resource SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
+
+	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
+	data.Namespace = types.StringValue(metaData.GetNamespace())
+
+	// resource SpecToModelRoot Meta StringField --> Uid
+	data.Uid = types.StringValue(systemMetaData.GetUid())
+
 	// resource SpecToModelRoot PointerField --> CacheRules
 	if specData.GetCacheRules() != nil {
 		var cdnCacheRuleCdnCacheRuleCDNCacheRuleModel = &CdnCacheRuleCdnCacheRuleCDNCacheRule{}
@@ -5138,44 +5138,14 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 
 									// Process nested choices, populating the temporary attribute map
 
-									// resource specToModelNested StringOfOneOfField --> MatchRegex
-									matchRegexItem, isMatchRegex := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_MatchRegex)
+									// resource specToModelNested StringOfOneOfField --> DoesNotEndWith
+									doesNotEndWithItem, isDoesNotEndWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotEndWith)
 
-									if isMatchRegex {
-										operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringValue(string(matchRegexItem.MatchRegex))
+									if isDoesNotEndWith {
+										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringValue(string(doesNotEndWithItem.DoesNotEndWith))
 									} else {
 										// Empty string, set to null
-										operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringNull()
-									}
-
-									// resource specToModelNested StringOfOneOfField --> Contains
-									containsItem, isContains := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_Contains)
-
-									if isContains {
-										operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringValue(string(containsItem.Contains))
-									} else {
-										// Empty string, set to null
-										operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringNull()
-									}
-
-									// resource specToModelNested StringOfOneOfField --> Startswith
-									startswithItem, isStartswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_Startswith)
-
-									if isStartswith {
-										operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringValue(string(startswithItem.Startswith))
-									} else {
-										// Empty string, set to null
-										operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringNull()
-									}
-
-									// resource specToModelNested StringOfOneOfField --> DoesNotStartWith
-									doesNotStartWithItem, isDoesNotStartWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotStartWith)
-
-									if isDoesNotStartWith {
-										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringValue(string(doesNotStartWithItem.DoesNotStartWith))
-									} else {
-										// Empty string, set to null
-										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringNull()
+										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringNull()
 									}
 
 									// resource specToModelNested StringOfOneOfField --> DoesNotContain
@@ -5188,24 +5158,14 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringNull()
 									}
 
-									// resource specToModelNested StringOfOneOfField --> Equals
-									equalsItem, isEquals := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_Equals)
+									// resource specToModelNested StringOfOneOfField --> Contains
+									containsItem, isContains := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_Contains)
 
-									if isEquals {
-										operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringValue(string(equalsItem.Equals))
+									if isContains {
+										operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringValue(string(containsItem.Contains))
 									} else {
 										// Empty string, set to null
-										operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringNull()
-									}
-
-									// resource specToModelNested StringOfOneOfField --> DoesNotEqual
-									doesNotEqualItem, isDoesNotEqual := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotEqual)
-
-									if isDoesNotEqual {
-										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringValue(string(doesNotEqualItem.DoesNotEqual))
-									} else {
-										// Empty string, set to null
-										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringNull()
+										operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringNull()
 									}
 
 									// resource specToModelNested StringOfOneOfField --> Endswith
@@ -5218,14 +5178,54 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 										operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringNull()
 									}
 
-									// resource specToModelNested StringOfOneOfField --> DoesNotEndWith
-									doesNotEndWithItem, isDoesNotEndWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotEndWith)
+									// resource specToModelNested StringOfOneOfField --> MatchRegex
+									matchRegexItem, isMatchRegex := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_MatchRegex)
 
-									if isDoesNotEndWith {
-										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringValue(string(doesNotEndWithItem.DoesNotEndWith))
+									if isMatchRegex {
+										operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringValue(string(matchRegexItem.MatchRegex))
 									} else {
 										// Empty string, set to null
-										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringNull()
+										operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringNull()
+									}
+
+									// resource specToModelNested StringOfOneOfField --> DoesNotEqual
+									doesNotEqualItem, isDoesNotEqual := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotEqual)
+
+									if isDoesNotEqual {
+										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringValue(string(doesNotEqualItem.DoesNotEqual))
+									} else {
+										// Empty string, set to null
+										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringNull()
+									}
+
+									// resource specToModelNested StringOfOneOfField --> Startswith
+									startswithItem, isStartswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_Startswith)
+
+									if isStartswith {
+										operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringValue(string(startswithItem.Startswith))
+									} else {
+										// Empty string, set to null
+										operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringNull()
+									}
+
+									// resource specToModelNested StringOfOneOfField --> Equals
+									equalsItem, isEquals := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_Equals)
+
+									if isEquals {
+										operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringValue(string(equalsItem.Equals))
+									} else {
+										// Empty string, set to null
+										operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringNull()
+									}
+
+									// resource specToModelNested StringOfOneOfField --> DoesNotStartWith
+									doesNotStartWithItem, isDoesNotStartWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CacheOperator_DoesNotStartWith)
+
+									if isDoesNotStartWith {
+										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringValue(string(doesNotStartWithItem.DoesNotStartWith))
+									} else {
+										// Empty string, set to null
+										operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringNull()
 									}
 
 									// --- End of Choices ---
@@ -5318,34 +5318,14 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 
 										// Process nested choices, populating the temporary attribute map
 
-										// resource specToModelNested StringOfOneOfField --> Equals
-										equalsItem, isEquals := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Equals)
+										// resource specToModelNested StringOfOneOfField --> Endswith
+										endswithItem, isEndswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Endswith)
 
-										if isEquals {
-											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringValue(string(equalsItem.Equals))
+										if isEndswith {
+											operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringValue(string(endswithItem.Endswith))
 										} else {
 											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringNull()
-										}
-
-										// resource specToModelNested StringOfOneOfField --> Startswith
-										startswithItem, isStartswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Startswith)
-
-										if isStartswith {
-											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringValue(string(startswithItem.Startswith))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringNull()
-										}
-
-										// resource specToModelNested StringOfOneOfField --> DoesNotStartWith
-										doesNotStartWithItem, isDoesNotStartWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotStartWith)
-
-										if isDoesNotStartWith {
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringValue(string(doesNotStartWithItem.DoesNotStartWith))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringNull()
+											operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringNull()
 										}
 
 										// resource specToModelNested StringOfOneOfField --> DoesNotEndWith
@@ -5358,14 +5338,14 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringNull()
 										}
 
-										// resource specToModelNested StringOfOneOfField --> Contains
-										containsItem, isContains := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Contains)
+										// resource specToModelNested StringOfOneOfField --> Equals
+										equalsItem, isEquals := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Equals)
 
-										if isContains {
-											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringValue(string(containsItem.Contains))
+										if isEquals {
+											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringValue(string(equalsItem.Equals))
 										} else {
 											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringNull()
+											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringNull()
 										}
 
 										// resource specToModelNested StringOfOneOfField --> DoesNotEqual
@@ -5378,24 +5358,24 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringNull()
 										}
 
-										// resource specToModelNested StringOfOneOfField --> DoesNotContain
-										doesNotContainItem, isDoesNotContain := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotContain)
+										// resource specToModelNested StringOfOneOfField --> Contains
+										containsItem, isContains := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Contains)
 
-										if isDoesNotContain {
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringValue(string(doesNotContainItem.DoesNotContain))
+										if isContains {
+											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringValue(string(containsItem.Contains))
 										} else {
 											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringNull()
+											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringNull()
 										}
 
-										// resource specToModelNested StringOfOneOfField --> Endswith
-										endswithItem, isEndswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Endswith)
+										// resource specToModelNested StringOfOneOfField --> DoesNotStartWith
+										doesNotStartWithItem, isDoesNotStartWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotStartWith)
 
-										if isEndswith {
-											operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringValue(string(endswithItem.Endswith))
+										if isDoesNotStartWith {
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringValue(string(doesNotStartWithItem.DoesNotStartWith))
 										} else {
 											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringNull()
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringNull()
 										}
 
 										// resource specToModelNested StringOfOneOfField --> MatchRegex
@@ -5406,6 +5386,26 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 										} else {
 											// Empty string, set to null
 											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringNull()
+										}
+
+										// resource specToModelNested StringOfOneOfField --> DoesNotContain
+										doesNotContainItem, isDoesNotContain := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_DoesNotContain)
+
+										if isDoesNotContain {
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringValue(string(doesNotContainItem.DoesNotContain))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringNull()
+										}
+
+										// resource specToModelNested StringOfOneOfField --> Startswith
+										startswithItem, isStartswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.QueryParamCacheOperator_Startswith)
+
+										if isStartswith {
+											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringValue(string(startswithItem.Startswith))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringNull()
 										}
 
 										// --- End of Choices ---
@@ -5504,34 +5504,24 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 
 										// Process nested choices, populating the temporary attribute map
 
-										// resource specToModelNested StringOfOneOfField --> MatchRegex
-										matchRegexItem, isMatchRegex := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_MatchRegex)
+										// resource specToModelNested StringOfOneOfField --> Contains
+										containsItem, isContains := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_Contains)
 
-										if isMatchRegex {
-											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringValue(string(matchRegexItem.MatchRegex))
+										if isContains {
+											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringValue(string(containsItem.Contains))
 										} else {
 											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringNull()
+											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringNull()
 										}
 
-										// resource specToModelNested StringOfOneOfField --> Equals
-										equalsItem, isEquals := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_Equals)
+										// resource specToModelNested StringOfOneOfField --> Startswith
+										startswithItem, isStartswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_Startswith)
 
-										if isEquals {
-											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringValue(string(equalsItem.Equals))
+										if isStartswith {
+											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringValue(string(startswithItem.Startswith))
 										} else {
 											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringNull()
-										}
-
-										// resource specToModelNested StringOfOneOfField --> DoesNotContain
-										doesNotContainItem, isDoesNotContain := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_DoesNotContain)
-
-										if isDoesNotContain {
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringValue(string(doesNotContainItem.DoesNotContain))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringNull()
+											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringNull()
 										}
 
 										// resource specToModelNested StringOfOneOfField --> DoesNotEqual
@@ -5544,14 +5534,24 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_equal"] = types.StringNull()
 										}
 
-										// resource specToModelNested StringOfOneOfField --> Contains
-										containsItem, isContains := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_Contains)
+										// resource specToModelNested StringOfOneOfField --> DoesNotContain
+										doesNotContainItem, isDoesNotContain := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_DoesNotContain)
 
-										if isContains {
-											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringValue(string(containsItem.Contains))
+										if isDoesNotContain {
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringValue(string(doesNotContainItem.DoesNotContain))
 										} else {
 											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringNull()
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_contain"] = types.StringNull()
+										}
+
+										// resource specToModelNested StringOfOneOfField --> DoesNotEndWith
+										doesNotEndWithItem, isDoesNotEndWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_DoesNotEndWith)
+
+										if isDoesNotEndWith {
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringValue(string(doesNotEndWithItem.DoesNotEndWith))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringNull()
 										}
 
 										// resource specToModelNested StringOfOneOfField --> Endswith
@@ -5574,24 +5574,24 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringNull()
 										}
 
-										// resource specToModelNested StringOfOneOfField --> DoesNotEndWith
-										doesNotEndWithItem, isDoesNotEndWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_DoesNotEndWith)
+										// resource specToModelNested StringOfOneOfField --> MatchRegex
+										matchRegexItem, isMatchRegex := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_MatchRegex)
 
-										if isDoesNotEndWith {
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringValue(string(doesNotEndWithItem.DoesNotEndWith))
+										if isMatchRegex {
+											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringValue(string(matchRegexItem.MatchRegex))
 										} else {
 											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringNull()
+											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringNull()
 										}
 
-										// resource specToModelNested StringOfOneOfField --> Startswith
-										startswithItem, isStartswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_Startswith)
+										// resource specToModelNested StringOfOneOfField --> Equals
+										equalsItem, isEquals := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.HeaderCacheOperator_Equals)
 
-										if isStartswith {
-											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringValue(string(startswithItem.Startswith))
+										if isEquals {
+											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringValue(string(equalsItem.Equals))
 										} else {
 											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringNull()
+											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringNull()
 										}
 
 										// --- End of Choices ---
@@ -5657,14 +5657,6 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 							for _, cookieMatcherElement := range cacheRuleExpressionElement.GetCookieMatcher() {
 								cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel := CdnCacheRuleCdnCacheRuleCacheCookieMatcherType{}
 
-								// resource specToModelNested RequiredStringField --> Name
-								if cookieMatcherElement.GetName() != "" {
-									cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel.Name = types.StringValue(cookieMatcherElement.GetName())
-								} else {
-									// Empty string, set to null
-									cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel.Name = types.StringNull()
-								}
-
 								// resource specToModelNested PointerField --> Operator
 								if cookieMatcherElement.GetOperator() != nil {
 									// Create the nested Go struct
@@ -5684,14 +5676,14 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 
 										// Process nested choices, populating the temporary attribute map
 
-										// resource specToModelNested StringOfOneOfField --> Equals
-										equalsItem, isEquals := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_Equals)
+										// resource specToModelNested StringOfOneOfField --> MatchRegex
+										matchRegexItem, isMatchRegex := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_MatchRegex)
 
-										if isEquals {
-											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringValue(string(equalsItem.Equals))
+										if isMatchRegex {
+											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringValue(string(matchRegexItem.MatchRegex))
 										} else {
 											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringNull()
+											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringNull()
 										}
 
 										// resource specToModelNested StringOfOneOfField --> DoesNotContain
@@ -5714,6 +5706,16 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 											operatorcacheOperatorChoiceChoicesAttributeMap["startswith"] = types.StringNull()
 										}
 
+										// resource specToModelNested StringOfOneOfField --> DoesNotStartWith
+										doesNotStartWithItem, isDoesNotStartWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_DoesNotStartWith)
+
+										if isDoesNotStartWith {
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringValue(string(doesNotStartWithItem.DoesNotStartWith))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringNull()
+										}
+
 										// resource specToModelNested StringOfOneOfField --> Endswith
 										endswithItem, isEndswith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_Endswith)
 
@@ -5724,14 +5726,24 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 											operatorcacheOperatorChoiceChoicesAttributeMap["endswith"] = types.StringNull()
 										}
 
-										// resource specToModelNested StringOfOneOfField --> MatchRegex
-										matchRegexItem, isMatchRegex := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_MatchRegex)
+										// resource specToModelNested StringOfOneOfField --> DoesNotEndWith
+										doesNotEndWithItem, isDoesNotEndWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_DoesNotEndWith)
 
-										if isMatchRegex {
-											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringValue(string(matchRegexItem.MatchRegex))
+										if isDoesNotEndWith {
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringValue(string(doesNotEndWithItem.DoesNotEndWith))
 										} else {
 											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["match_regex"] = types.StringNull()
+											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringNull()
+										}
+
+										// resource specToModelNested StringOfOneOfField --> Equals
+										equalsItem, isEquals := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_Equals)
+
+										if isEquals {
+											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringValue(string(equalsItem.Equals))
+										} else {
+											// Empty string, set to null
+											operatorcacheOperatorChoiceChoicesAttributeMap["equals"] = types.StringNull()
 										}
 
 										// resource specToModelNested StringOfOneOfField --> DoesNotEqual
@@ -5752,26 +5764,6 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 										} else {
 											// Empty string, set to null
 											operatorcacheOperatorChoiceChoicesAttributeMap["contains"] = types.StringNull()
-										}
-
-										// resource specToModelNested StringOfOneOfField --> DoesNotStartWith
-										doesNotStartWithItem, isDoesNotStartWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_DoesNotStartWith)
-
-										if isDoesNotStartWith {
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringValue(string(doesNotStartWithItem.DoesNotStartWith))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_start_with"] = types.StringNull()
-										}
-
-										// resource specToModelNested StringOfOneOfField --> DoesNotEndWith
-										doesNotEndWithItem, isDoesNotEndWith := operatorcacheOperatorChoiceChoices.(*ves_io_schema_cdn_cache_rule.CookieMatcherCacheOperator_DoesNotEndWith)
-
-										if isDoesNotEndWith {
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringValue(string(doesNotEndWithItem.DoesNotEndWith))
-										} else {
-											// Empty string, set to null
-											operatorcacheOperatorChoiceChoicesAttributeMap["does_not_end_with"] = types.StringNull()
 										}
 
 										// --- End of Choices ---
@@ -5809,6 +5801,14 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 									// making this else-branch unreachable. The child OneOf handles the actual healing.
 									// The target is a types.Object, so we use types.ObjectNull.
 									cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel.Operator = types.ObjectNull(CdnCacheRuleCacheRulesRuleExpressionListCacheRuleExpressionCookieMatcherOperatorModelAttributeMap)
+								}
+
+								// resource specToModelNested RequiredStringField --> Name
+								if cookieMatcherElement.GetName() != "" {
+									cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel.Name = types.StringValue(cookieMatcherElement.GetName())
+								} else {
+									// Empty string, set to null
+									cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel.Name = types.StringNull()
 								}
 
 								cookieMatcherElements = append(cookieMatcherElements, cdnCacheRuleCdnCacheRuleCacheCookieMatcherTypeModel)
@@ -5875,15 +5875,6 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 			cacheRulescacheActionsChoiceChoices := cacheRulesElement.GetCacheActions()
 
 			// Process nested choices, populating the temporary attribute map
-
-			// resource specToModelNested BoolOfOneOfPointerField --> CacheBypass
-			_, isCacheBypass := cacheRulescacheActionsChoiceChoices.(*ves_io_schema_cdn_cache_rule.CDNCacheRule_CacheBypass)
-
-			if isCacheBypass {
-				cacheRulescacheActionsChoiceChoicesAttributeMap["cache_bypass"] = types.BoolValue(true)
-			} else {
-				cacheRulescacheActionsChoiceChoicesAttributeMap["cache_bypass"] = types.BoolNull()
-			}
 
 			// resource specToModelNested PointerOfOneOfField --> EligibleForCache
 			// GlobalSpecType
@@ -6001,6 +5992,15 @@ func (r *ResourceF5XCCdnCacheRule) Update(ctx context.Context, request resource.
 				} else {
 					cacheRulescacheActionsChoiceChoicesAttributeMap["eligible_for_cache"] = types.ObjectNull(CdnCacheRuleCacheRulesCacheActionsEligibleForCacheModelAttributeMap)
 				}
+			}
+
+			// resource specToModelNested BoolOfOneOfPointerField --> CacheBypass
+			_, isCacheBypass := cacheRulescacheActionsChoiceChoices.(*ves_io_schema_cdn_cache_rule.CDNCacheRule_CacheBypass)
+
+			if isCacheBypass {
+				cacheRulescacheActionsChoiceChoicesAttributeMap["cache_bypass"] = types.BoolValue(true)
+			} else {
+				cacheRulescacheActionsChoiceChoicesAttributeMap["cache_bypass"] = types.BoolNull()
 			}
 
 			// --- End of Choices ---

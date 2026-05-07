@@ -38,11 +38,11 @@ type NatPolicyGlobalSpecTypeSite struct {
 }
 
 type NatPolicyNatPolicyRuleType struct {
+	Name         types.String `tfsdk:"name"`
 	EnableChoice types.Object `tfsdk:"enable_choice"`
 	ScopeChoice  types.Object `tfsdk:"scope_choice"`
 	Criteria     types.Object `tfsdk:"criteria"`
 	Action       types.Object `tfsdk:"action"`
-	Name         types.String `tfsdk:"name"`
 }
 
 type NatPolicyRuleTypeEnableChoice struct {
@@ -50,19 +50,10 @@ type NatPolicyRuleTypeEnableChoice struct {
 }
 
 type NatPolicyRuleTypeScopeChoice struct {
-	NodeInterface  types.Object `tfsdk:"node_interface"`
 	CloudConnect   types.Object `tfsdk:"cloud_connect"`
 	Segment        types.Object `tfsdk:"segment"`
 	VirtualNetwork types.Object `tfsdk:"virtual_network"`
-}
-
-type NatPolicyRuleTypeNodeInterface struct {
-	List types.List `tfsdk:"list"`
-}
-
-type NatPolicyNodeInterfaceInfo struct {
-	Node      types.String `tfsdk:"node"`
-	Interface types.List   `tfsdk:"interface"`
+	NodeInterface  types.Object `tfsdk:"node_interface"`
 }
 
 type NatPolicyRuleTypeCloudConnect struct {
@@ -75,6 +66,15 @@ type NatPolicyRuleTypeSegment struct {
 
 type NatPolicyRuleTypeVirtualNetwork struct {
 	Refs types.List `tfsdk:"refs"`
+}
+
+type NatPolicyRuleTypeNodeInterface struct {
+	List types.List `tfsdk:"list"`
+}
+
+type NatPolicyNodeInterfaceInfo struct {
+	Interface types.List   `tfsdk:"interface"`
+	Node      types.String `tfsdk:"node"`
 }
 
 type NatPolicyNatPolicyMatchCriteriaType struct {
@@ -106,14 +106,14 @@ type NatPolicyPortMatcherType struct {
 }
 
 type NatPolicyPortMatcherTypePortMatchChoice struct {
+	Port        types.Int64  `tfsdk:"port"`
 	PortRanges  types.String `tfsdk:"port_ranges"`
 	NoPortMatch types.Bool   `tfsdk:"no_port_match"`
-	Port        types.Int64  `tfsdk:"port"`
 }
 
 type NatPolicyMatchCriteriaTypeTcp struct {
-	SourcePort      types.Object `tfsdk:"source_port"`
 	DestinationPort types.Object `tfsdk:"destination_port"`
+	SourcePort      types.Object `tfsdk:"source_port"`
 }
 
 type NatPolicyNatPolicyActionType struct {
@@ -121,8 +121,8 @@ type NatPolicyNatPolicyActionType struct {
 }
 
 type NatPolicyActionTypeSourceNatChoice struct {
-	Dynamic     types.Object `tfsdk:"dynamic"`
 	VirtualCidr types.String `tfsdk:"virtual_cidr"`
+	Dynamic     types.Object `tfsdk:"dynamic"`
 }
 
 type NatPolicyActionTypeDynamic struct {
@@ -145,12 +145,12 @@ type NatPolicyDynamicPoolElasticIps struct {
 
 // DataSourceF5XCNatPolicyModel describes the resource data model.
 type DataSourceF5XCNatPolicyModel struct {
-	Namespace       types.String   `tfsdk:"namespace"`
-	Uid             types.String   `tfsdk:"uid"`
 	Labels          types.Map      `tfsdk:"labels"`
 	Annotations     types.Map      `tfsdk:"annotations"`
 	Description     types.String   `tfsdk:"description"`
 	Name            types.String   `tfsdk:"name"`
+	Namespace       types.String   `tfsdk:"namespace"`
+	Uid             types.String   `tfsdk:"uid"`
 	AppliesToChoice types.Object   `tfsdk:"applies_to_choice"`
 	Rules           types.List     `tfsdk:"rules"`
 	Timeouts        timeouts.Value `tfsdk:"timeouts"`
@@ -191,6 +191,7 @@ var NatPolicyRefsObjectRefModelAttributeMap = map[string]attr.Type{
 // Attribute map for RequiredArrayOfPointerField --> Rules
 var NatPolicyRulesModelAttributeMap = map[string]attr.Type{
 
+	"name": types.StringType,
 	"enable_choice": types.ObjectType{
 		AttrTypes: NatPolicyRulesEnableChoiceModelAttributeMap,
 	},
@@ -216,7 +217,6 @@ var NatPolicyRulesModelAttributeMap = map[string]attr.Type{
 				AttrTypes: NatPolicyRulesActionSourceNatChoiceModelAttributeMap,
 			}},
 	},
-	"name": types.StringType,
 }
 
 // Attribute map for RequiredOneOfField --> EnableChoice
@@ -228,9 +228,6 @@ var NatPolicyRulesEnableChoiceModelAttributeMap = map[string]attr.Type{
 // Attribute map for RequiredOneOfField --> ScopeChoice
 var NatPolicyRulesScopeChoiceModelAttributeMap = map[string]attr.Type{
 
-	"node_interface": types.ObjectType{
-		AttrTypes: NatPolicyRulesScopeChoiceNodeInterfaceModelAttributeMap,
-	},
 	"cloud_connect": types.ObjectType{
 		AttrTypes: NatPolicyRulesScopeChoiceCloudConnectModelAttributeMap,
 	},
@@ -240,53 +237,9 @@ var NatPolicyRulesScopeChoiceModelAttributeMap = map[string]attr.Type{
 	"virtual_network": types.ObjectType{
 		AttrTypes: NatPolicyRulesScopeChoiceVirtualNetworkModelAttributeMap,
 	},
-}
-
-// Attribute map for PointerOfOneOfField --> NodeInterface
-var NatPolicyRulesScopeChoiceNodeInterfaceModelAttributeMap = map[string]attr.Type{
-
-	"list": types.ListType{
-		ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-
-				"node": types.StringType,
-				"interface": types.ListType{
-					ElemType: types.ObjectType{
-						AttrTypes: map[string]attr.Type{
-
-							"name":      types.StringType,
-							"tenant":    types.StringType,
-							"namespace": types.StringType,
-						},
-					},
-				},
-			},
-		},
+	"node_interface": types.ObjectType{
+		AttrTypes: NatPolicyRulesScopeChoiceNodeInterfaceModelAttributeMap,
 	},
-}
-
-// Attribute map for ArrayOfPointerField --> List
-var NatPolicyListObjectRefModelAttributeMap = map[string]attr.Type{
-
-	"node": types.StringType,
-	"interface": types.ListType{
-		ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-
-				"name":      types.StringType,
-				"tenant":    types.StringType,
-				"namespace": types.StringType,
-			},
-		},
-	},
-}
-
-// Attribute map for ArrayOfPointerField --> Interface
-var NatPolicyInterfaceObjectRefModelAttributeMap = map[string]attr.Type{
-
-	"name":      types.StringType,
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
 }
 
 // Attribute map for PointerOfOneOfField --> CloudConnect
@@ -311,9 +264,9 @@ var NatPolicyRulesScopeChoiceSegmentModelAttributeMap = map[string]attr.Type{
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
 
-				"name":      types.StringType,
 				"tenant":    types.StringType,
 				"namespace": types.StringType,
+				"name":      types.StringType,
 			},
 		},
 	},
@@ -326,12 +279,59 @@ var NatPolicyRulesScopeChoiceVirtualNetworkModelAttributeMap = map[string]attr.T
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
 
-				"namespace": types.StringType,
 				"name":      types.StringType,
 				"tenant":    types.StringType,
+				"namespace": types.StringType,
 			},
 		},
 	},
+}
+
+// Attribute map for PointerOfOneOfField --> NodeInterface
+var NatPolicyRulesScopeChoiceNodeInterfaceModelAttributeMap = map[string]attr.Type{
+
+	"list": types.ListType{
+		ElemType: types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+
+				"interface": types.ListType{
+					ElemType: types.ObjectType{
+						AttrTypes: map[string]attr.Type{
+
+							"name":      types.StringType,
+							"tenant":    types.StringType,
+							"namespace": types.StringType,
+						},
+					},
+				},
+				"node": types.StringType,
+			},
+		},
+	},
+}
+
+// Attribute map for ArrayOfPointerField --> List
+var NatPolicyListObjectRefModelAttributeMap = map[string]attr.Type{
+
+	"interface": types.ListType{
+		ElemType: types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+
+				"name":      types.StringType,
+				"tenant":    types.StringType,
+				"namespace": types.StringType,
+			},
+		},
+	},
+	"node": types.StringType,
+}
+
+// Attribute map for ArrayOfPointerField --> Interface
+var NatPolicyInterfaceObjectRefModelAttributeMap = map[string]attr.Type{
+
+	"name":      types.StringType,
+	"tenant":    types.StringType,
+	"namespace": types.StringType,
 }
 
 // Attribute map for PointerField --> Criteria
@@ -397,9 +397,9 @@ var NatPolicyRulesCriteriaProtocolChoiceUdpSourcePortModelAttributeMap = map[str
 // Attribute map for OneOfField --> PortMatch
 var NatPolicyRulesCriteriaProtocolChoiceUdpSourcePortPortMatchModelAttributeMap = map[string]attr.Type{
 
+	"port":          types.Int64Type,
 	"port_ranges":   types.StringType,
 	"no_port_match": types.BoolType,
-	"port":          types.Int64Type,
 }
 
 // Attribute map for PointerField --> DestinationPort
@@ -413,24 +413,40 @@ var NatPolicyRulesCriteriaProtocolChoiceUdpDestinationPortModelAttributeMap = ma
 // Attribute map for OneOfField --> PortMatch
 var NatPolicyRulesCriteriaProtocolChoiceUdpDestinationPortPortMatchModelAttributeMap = map[string]attr.Type{
 
-	"no_port_match": types.BoolType,
 	"port":          types.Int64Type,
 	"port_ranges":   types.StringType,
+	"no_port_match": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> Tcp
 var NatPolicyRulesCriteriaProtocolChoiceTcpModelAttributeMap = map[string]attr.Type{
-	"source_port": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"port_match_choice": types.ObjectType{
-				AttrTypes: NatPolicyRulesCriteriaProtocolChoiceTcpSourcePortPortMatchModelAttributeMap,
-			}},
-	}, "destination_port": types.ObjectType{
+	"destination_port": types.ObjectType{
 		AttrTypes: map[string]attr.Type{
 			"port_match_choice": types.ObjectType{
 				AttrTypes: NatPolicyRulesCriteriaProtocolChoiceTcpDestinationPortPortMatchModelAttributeMap,
 			}},
+	}, "source_port": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"port_match_choice": types.ObjectType{
+				AttrTypes: NatPolicyRulesCriteriaProtocolChoiceTcpSourcePortPortMatchModelAttributeMap,
+			}},
 	},
+}
+
+// Attribute map for PointerField --> DestinationPort
+var NatPolicyRulesCriteriaProtocolChoiceTcpDestinationPortModelAttributeMap = map[string]attr.Type{
+
+	"port_match_choice": types.ObjectType{
+		AttrTypes: NatPolicyRulesCriteriaProtocolChoiceTcpDestinationPortPortMatchModelAttributeMap,
+	},
+}
+
+// Attribute map for OneOfField --> PortMatch
+var NatPolicyRulesCriteriaProtocolChoiceTcpDestinationPortPortMatchModelAttributeMap = map[string]attr.Type{
+
+	"port":          types.Int64Type,
+	"port_ranges":   types.StringType,
+	"no_port_match": types.BoolType,
 }
 
 // Attribute map for PointerField --> SourcePort
@@ -449,22 +465,6 @@ var NatPolicyRulesCriteriaProtocolChoiceTcpSourcePortPortMatchModelAttributeMap 
 	"port":          types.Int64Type,
 }
 
-// Attribute map for PointerField --> DestinationPort
-var NatPolicyRulesCriteriaProtocolChoiceTcpDestinationPortModelAttributeMap = map[string]attr.Type{
-
-	"port_match_choice": types.ObjectType{
-		AttrTypes: NatPolicyRulesCriteriaProtocolChoiceTcpDestinationPortPortMatchModelAttributeMap,
-	},
-}
-
-// Attribute map for OneOfField --> PortMatch
-var NatPolicyRulesCriteriaProtocolChoiceTcpDestinationPortPortMatchModelAttributeMap = map[string]attr.Type{
-
-	"port_ranges":   types.StringType,
-	"no_port_match": types.BoolType,
-	"port":          types.Int64Type,
-}
-
 // Attribute map for RequiredPointerField --> Action
 var NatPolicyRulesActionModelAttributeMap = map[string]attr.Type{
 
@@ -476,10 +476,10 @@ var NatPolicyRulesActionModelAttributeMap = map[string]attr.Type{
 // Attribute map for OneOfField --> SourceNatChoice
 var NatPolicyRulesActionSourceNatChoiceModelAttributeMap = map[string]attr.Type{
 
+	"virtual_cidr": types.StringType,
 	"dynamic": types.ObjectType{
 		AttrTypes: NatPolicyRulesActionSourceNatChoiceDynamicModelAttributeMap,
 	},
-	"virtual_cidr": types.StringType,
 }
 
 // Attribute map for PointerOfOneOfField --> Dynamic
@@ -519,9 +519,9 @@ var NatPolicyRulesActionSourceNatChoiceDynamicPoolChoiceElasticIpsModelAttribute
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
 
-				"namespace": types.StringType,
 				"name":      types.StringType,
 				"tenant":    types.StringType,
+				"namespace": types.StringType,
 			},
 		},
 	},
@@ -545,18 +545,6 @@ func (r *DataSourceF5XCNatPolicy) Schema(ctx context.Context, request datasource
 		Description:         "NatPolicy data source",
 
 		Attributes: map[string]schema.Attribute{
-			"namespace": schema.StringAttribute{
-				Description: "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
-				Required:    false,
-				Optional:    true,
-				Computed:    true,
-			},
-			"uid": schema.StringAttribute{
-				Description: "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-			},
 			"labels": schema.MapAttribute{
 				Description: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
 				Required:    false,
@@ -581,6 +569,18 @@ func (r *DataSourceF5XCNatPolicy) Schema(ctx context.Context, request datasource
 				Description: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
 				Required:    false,
 				Optional:    true,
+				Computed:    true,
+			},
+			"namespace": schema.StringAttribute{
+				Description: "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
+				Required:    false,
+				Optional:    true,
+				Computed:    true,
+			},
+			"uid": schema.StringAttribute{
+				Description: "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
+				Required:    false,
+				Optional:    false,
 				Computed:    true,
 			},
 			"applies_to_choice": schema.SingleNestedAttribute{
@@ -634,6 +634,12 @@ func (r *DataSourceF5XCNatPolicy) Schema(ctx context.Context, request datasource
 				Computed:    true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
+						"name": schema.StringAttribute{
+							Description: "name Name of the Rule",
+							Required:    false,
+							Optional:    false,
+							Computed:    true,
+						},
 						"enable_choice": schema.SingleNestedAttribute{
 							Description: "enable Enable or disable the rule",
 							Required:    false,
@@ -654,58 +660,6 @@ func (r *DataSourceF5XCNatPolicy) Schema(ctx context.Context, request datasource
 							Optional:    false,
 							Computed:    true,
 							Attributes: map[string]schema.Attribute{
-								"node_interface": schema.SingleNestedAttribute{
-									Description: "node interface NAT rule is applied to packet coming from one or more interfaces of nodes",
-									Required:    false,
-									Optional:    false,
-									Computed:    true,
-									Attributes: map[string]schema.Attribute{
-										"list": schema.ListNestedAttribute{
-											Description: "NodeInterfaceInfo On a multinode site, this list holds the nodes and corresponding networking_interface",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-											NestedObject: schema.NestedAttributeObject{
-												Attributes: map[string]schema.Attribute{
-													"node": schema.StringAttribute{
-														Description: "Node Node name on this site",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
-													"interface": schema.ListNestedAttribute{
-														Description: "Interface Interface reference on this node",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-														NestedObject: schema.NestedAttributeObject{
-															Attributes: map[string]schema.Attribute{
-																"name": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"tenant": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"namespace": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-															},
-														},
-													},
-												},
-											},
-										},
-									},
-								},
 								"cloud_connect": schema.SingleNestedAttribute{
 									Description: "cloud connect NAT rule is applied to packet coming from cloud connect",
 									Required:    false,
@@ -755,12 +709,6 @@ func (r *DataSourceF5XCNatPolicy) Schema(ctx context.Context, request datasource
 											Computed:    true,
 											NestedObject: schema.NestedAttributeObject{
 												Attributes: map[string]schema.Attribute{
-													"name": schema.StringAttribute{
-														Description: "",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
 													"tenant": schema.StringAttribute{
 														Description: "",
 														Required:    false,
@@ -768,6 +716,12 @@ func (r *DataSourceF5XCNatPolicy) Schema(ctx context.Context, request datasource
 														Computed:    true,
 													},
 													"namespace": schema.StringAttribute{
+														Description: "",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+													},
+													"name": schema.StringAttribute{
 														Description: "",
 														Required:    false,
 														Optional:    false,
@@ -791,12 +745,6 @@ func (r *DataSourceF5XCNatPolicy) Schema(ctx context.Context, request datasource
 											Computed:    true,
 											NestedObject: schema.NestedAttributeObject{
 												Attributes: map[string]schema.Attribute{
-													"namespace": schema.StringAttribute{
-														Description: "",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
 													"name": schema.StringAttribute{
 														Description: "",
 														Required:    false,
@@ -805,6 +753,64 @@ func (r *DataSourceF5XCNatPolicy) Schema(ctx context.Context, request datasource
 													},
 													"tenant": schema.StringAttribute{
 														Description: "",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+													},
+													"namespace": schema.StringAttribute{
+														Description: "",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+													},
+												},
+											},
+										},
+									},
+								},
+								"node_interface": schema.SingleNestedAttribute{
+									Description: "node interface NAT rule is applied to packet coming from one or more interfaces of nodes",
+									Required:    false,
+									Optional:    false,
+									Computed:    true,
+									Attributes: map[string]schema.Attribute{
+										"list": schema.ListNestedAttribute{
+											Description: "NodeInterfaceInfo On a multinode site, this list holds the nodes and corresponding networking_interface",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+											NestedObject: schema.NestedAttributeObject{
+												Attributes: map[string]schema.Attribute{
+													"interface": schema.ListNestedAttribute{
+														Description: "Interface Interface reference on this node",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+														NestedObject: schema.NestedAttributeObject{
+															Attributes: map[string]schema.Attribute{
+																"name": schema.StringAttribute{
+																	Description: "",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
+																"tenant": schema.StringAttribute{
+																	Description: "",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
+																"namespace": schema.StringAttribute{
+																	Description: "",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
+															},
+														},
+													},
+													"node": schema.StringAttribute{
+														Description: "Node Node name on this site",
 														Required:    false,
 														Optional:    false,
 														Computed:    true,
@@ -880,6 +886,12 @@ func (r *DataSourceF5XCNatPolicy) Schema(ctx context.Context, request datasource
 															Optional:    false,
 															Computed:    true,
 															Attributes: map[string]schema.Attribute{
+																"port": schema.Int64Attribute{
+																	Description: "port Exact Port to match",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
 																"port_ranges": schema.StringAttribute{
 																	Description: "port_range Port range to match",
 																	Required:    false,
@@ -888,12 +900,6 @@ func (r *DataSourceF5XCNatPolicy) Schema(ctx context.Context, request datasource
 																},
 																"no_port_match": schema.BoolAttribute{
 																	Description: "disable port Match Disable matching of ports",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"port": schema.Int64Attribute{
-																	Description: "port Exact Port to match",
 																	Required:    false,
 																	Optional:    false,
 																	Computed:    true,
@@ -914,12 +920,6 @@ func (r *DataSourceF5XCNatPolicy) Schema(ctx context.Context, request datasource
 															Optional:    false,
 															Computed:    true,
 															Attributes: map[string]schema.Attribute{
-																"no_port_match": schema.BoolAttribute{
-																	Description: "disable port Match Disable matching of ports",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
 																"port": schema.Int64Attribute{
 																	Description: "port Exact Port to match",
 																	Required:    false,
@@ -928,6 +928,12 @@ func (r *DataSourceF5XCNatPolicy) Schema(ctx context.Context, request datasource
 																},
 																"port_ranges": schema.StringAttribute{
 																	Description: "port_range Port range to match",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
+																"no_port_match": schema.BoolAttribute{
+																	Description: "disable port Match Disable matching of ports",
 																	Required:    false,
 																	Optional:    false,
 																	Computed:    true,
@@ -956,8 +962,8 @@ func (r *DataSourceF5XCNatPolicy) Schema(ctx context.Context, request datasource
 											Optional:    false,
 											Computed:    true,
 											Attributes: map[string]schema.Attribute{
-												"source_port": schema.SingleNestedAttribute{
-													Description: "source port Source port of the packet to match",
+												"destination_port": schema.SingleNestedAttribute{
+													Description: "destination port Destination port of the packet to match",
 													Required:    false,
 													Optional:    false,
 													Computed:    true,
@@ -968,6 +974,12 @@ func (r *DataSourceF5XCNatPolicy) Schema(ctx context.Context, request datasource
 															Optional:    false,
 															Computed:    true,
 															Attributes: map[string]schema.Attribute{
+																"port": schema.Int64Attribute{
+																	Description: "port Exact Port to match",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
 																"port_ranges": schema.StringAttribute{
 																	Description: "port_range Port range to match",
 																	Required:    false,
@@ -980,18 +992,12 @@ func (r *DataSourceF5XCNatPolicy) Schema(ctx context.Context, request datasource
 																	Optional:    false,
 																	Computed:    true,
 																},
-																"port": schema.Int64Attribute{
-																	Description: "port Exact Port to match",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
 															},
 														},
 													},
 												},
-												"destination_port": schema.SingleNestedAttribute{
-													Description: "destination port Destination port of the packet to match",
+												"source_port": schema.SingleNestedAttribute{
+													Description: "source port Source port of the packet to match",
 													Required:    false,
 													Optional:    false,
 													Computed:    true,
@@ -1042,6 +1048,12 @@ func (r *DataSourceF5XCNatPolicy) Schema(ctx context.Context, request datasource
 									Optional:    false,
 									Computed:    true,
 									Attributes: map[string]schema.Attribute{
+										"virtual_cidr": schema.StringAttribute{
+											Description: "Virtual Subnet NAT Virtual Subnet NAT is static NAT that does a one-to-one translation between the real source IP CIDR in the policy and the virtual CIDR in a bidirectional fashion. The range of the real CIDR and virtual CIDRs should be the same (e.g. if the real CIDR has the CIDR 10.10.10.0/24, the virtual CIDR has 100.100.100.0/24.",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+										},
 										"dynamic": schema.SingleNestedAttribute{
 											Description: "Source NAT Source NAT to either an SNAT Pool for East-West traffic or to a Cloud Elastic IP Object. Note that for a 3-node cluster the IPv4 prefix list should provide a minimum of 3 addresses to ensure each node gets an IP address from the pool.",
 											Required:    false,
@@ -1089,12 +1101,6 @@ func (r *DataSourceF5XCNatPolicy) Schema(ctx context.Context, request datasource
 																	Computed:    true,
 																	NestedObject: schema.NestedAttributeObject{
 																		Attributes: map[string]schema.Attribute{
-																			"namespace": schema.StringAttribute{
-																				Description: "",
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																			},
 																			"name": schema.StringAttribute{
 																				Description: "",
 																				Required:    false,
@@ -1102,6 +1108,12 @@ func (r *DataSourceF5XCNatPolicy) Schema(ctx context.Context, request datasource
 																				Computed:    true,
 																			},
 																			"tenant": schema.StringAttribute{
+																				Description: "",
+																				Required:    false,
+																				Optional:    false,
+																				Computed:    true,
+																			},
+																			"namespace": schema.StringAttribute{
 																				Description: "",
 																				Required:    false,
 																				Optional:    false,
@@ -1116,21 +1128,9 @@ func (r *DataSourceF5XCNatPolicy) Schema(ctx context.Context, request datasource
 												},
 											},
 										},
-										"virtual_cidr": schema.StringAttribute{
-											Description: "Virtual Subnet NAT Virtual Subnet NAT is static NAT that does a one-to-one translation between the real source IP CIDR in the policy and the virtual CIDR in a bidirectional fashion. The range of the real CIDR and virtual CIDRs should be the same (e.g. if the real CIDR has the CIDR 10.10.10.0/24, the virtual CIDR has 100.100.100.0/24.",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
 									},
 								},
 							},
-						},
-						"name": schema.StringAttribute{
-							Description: "name Name of the Rule",
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
 						},
 					},
 				},
@@ -1206,12 +1206,6 @@ func (d *DataSourceF5XCNatPolicy) Read(ctx context.Context, request datasource.R
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
-	// data SpecToModelRoot Meta RequiredStringField --> Namespace
-	data.Namespace = types.StringValue(metaData.GetNamespace())
-
-	// data SpecToModelRoot Meta StringField --> Uid
-	data.Uid = types.StringValue(systemMetaData.GetUid())
-
 	// data SpecToModelRoot Meta MapOfStringField --> Labels
 	if metaData.GetLabels() != nil {
 		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
@@ -1253,6 +1247,12 @@ func (d *DataSourceF5XCNatPolicy) Read(ctx context.Context, request datasource.R
 
 	// data SpecToModelRoot Meta RequiredStringField --> Name
 	data.Name = types.StringValue(metaData.GetName())
+
+	// data SpecToModelRoot Meta RequiredStringField --> Namespace
+	data.Namespace = types.StringValue(metaData.GetNamespace())
+
+	// data SpecToModelRoot Meta StringField --> Uid
+	data.Uid = types.StringValue(systemMetaData.GetUid())
 
 	// data SpecToModelRoot RequiredOneOfField --> AppliesToChoice
 	// false
@@ -1362,6 +1362,14 @@ func (d *DataSourceF5XCNatPolicy) Read(ctx context.Context, request datasource.R
 	for _, rulesElement := range specData.Rules {
 		natPolicyNatPolicyRuleTypeModel := NatPolicyNatPolicyRuleType{}
 
+		// data specToModelNested RequiredStringField --> Name
+		if rulesElement.GetName() != "" {
+			natPolicyNatPolicyRuleTypeModel.Name = types.StringValue(rulesElement.GetName())
+		} else {
+			// Empty string, set to null
+			natPolicyNatPolicyRuleTypeModel.Name = types.StringNull()
+		}
+
 		// data specToModelNested RequiredOneOfField --> EnableChoice
 		// <no value>
 		if rulesElement.GetEnableChoice() != nil {
@@ -1413,110 +1421,6 @@ func (d *DataSourceF5XCNatPolicy) Read(ctx context.Context, request datasource.R
 			rulesscopeChoiceChoices := rulesElement.GetScopeChoice()
 
 			// Process nested choices, populating the temporary attribute map
-
-			// data specToModelNested PointerOfOneOfField --> NodeInterface
-			// <no value>
-			// false
-			{
-				nodeInterfaceOptions, isNodeInterface := rulesscopeChoiceChoices.(*ves_io_schema_nat_policy.RuleType_NodeInterface)
-				nodeInterfaceAttributeMap := make(map[string]attr.Value)
-
-				if isNodeInterface && nodeInterfaceOptions != nil {
-
-					// data specToModelNested ArrayOfPointerField --> List
-					if len(nodeInterfaceOptions.NodeInterface.GetList()) > 0 {
-						// Step 1: Always create a slice of model structs from the spec data.
-						// This slice serves as an intermediate representation.
-						listElements := make([]NatPolicyNodeInterfaceInfo, 0, len(nodeInterfaceOptions.NodeInterface.GetList()))
-						for _, listElement := range nodeInterfaceOptions.NodeInterface.GetList() {
-							natPolicyNodeInterfaceInfoModel := NatPolicyNodeInterfaceInfo{}
-
-							// data specToModelNested StringField --> Node
-							if listElement.GetNode() != "" {
-								natPolicyNodeInterfaceInfoModel.Node = types.StringValue(listElement.GetNode())
-							} else {
-								// Empty string, set to null
-								natPolicyNodeInterfaceInfoModel.Node = types.StringNull()
-							}
-
-							// data specToModelNested ArrayOfPointerField --> Interface
-							if len(listElement.GetInterface()) > 0 {
-								// Step 1: Always create a slice of model structs from the spec data.
-								// This slice serves as an intermediate representation.
-								interfaceElements := make([]ObjectRefTypeModel, 0, len(listElement.GetInterface()))
-								for _, interfaceElement := range listElement.GetInterface() {
-									objectRefTypeModelModel := ObjectRefTypeModel{}
-
-									// data specToModelNested RequiredStringField --> Name
-									if interfaceElement.GetName() != "" {
-										objectRefTypeModelModel.Name = types.StringValue(interfaceElement.GetName())
-									} else {
-										// Empty string, set to null
-										objectRefTypeModelModel.Name = types.StringNull()
-									}
-
-									// data specToModelNested StringField --> Tenant
-									if interfaceElement.GetTenant() != "" {
-										objectRefTypeModelModel.Tenant = types.StringValue(interfaceElement.GetTenant())
-									} else {
-										// Empty string, set to null
-										objectRefTypeModelModel.Tenant = types.StringNull()
-									}
-
-									// data specToModelNested RequiredStringField --> Namespace
-									if interfaceElement.GetNamespace() != "" {
-										objectRefTypeModelModel.Namespace = types.StringValue(interfaceElement.GetNamespace())
-									} else {
-										// Empty string, set to null
-										objectRefTypeModelModel.Namespace = types.StringNull()
-									}
-
-									interfaceElements = append(interfaceElements, objectRefTypeModelModel)
-								}
-								// CASE 1: The target field is a `types.List` or an attribute map.
-								// The intermediate slice of structs must be converted to a `types.ListValue`.
-								interfaceListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: NatPolicyInterfaceObjectRefModelAttributeMap}, interfaceElements)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								natPolicyNodeInterfaceInfoModel.Interface = interfaceListValue
-
-							} else {
-								// The source list is empty or nil.
-								// CASE 1: The target field is a `types.List` or an attribute map.
-								// Assign a null `types.ListValue`.
-								natPolicyNodeInterfaceInfoModel.Interface = types.ListNull(types.ObjectType{AttrTypes: NatPolicyInterfaceObjectRefModelAttributeMap})
-							}
-
-							listElements = append(listElements, natPolicyNodeInterfaceInfoModel)
-						}
-						// CASE 1: The target field is a `types.List` or an attribute map.
-						// The intermediate slice of structs must be converted to a `types.ListValue`.
-						listListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: NatPolicyListObjectRefModelAttributeMap}, listElements)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						nodeInterfaceAttributeMap["list"] = listListValue
-
-					} else {
-						// The source list is empty or nil.
-						// CASE 1: The target field is a `types.List` or an attribute map.
-						// Assign a null `types.ListValue`.
-						nodeInterfaceAttributeMap["list"] = types.ListNull(types.ObjectType{AttrTypes: NatPolicyListObjectRefModelAttributeMap})
-					}
-
-					nodeInterfaceObj, diags := types.ObjectValue(NatPolicyRulesScopeChoiceNodeInterfaceModelAttributeMap, nodeInterfaceAttributeMap)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					rulesscopeChoiceChoicesAttributeMap["node_interface"] = nodeInterfaceObj
-				} else {
-					rulesscopeChoiceChoicesAttributeMap["node_interface"] = types.ObjectNull(NatPolicyRulesScopeChoiceNodeInterfaceModelAttributeMap)
-				}
-			}
 
 			// data specToModelNested PointerOfOneOfField --> CloudConnect
 			// <no value>
@@ -1605,14 +1509,6 @@ func (d *DataSourceF5XCNatPolicy) Read(ctx context.Context, request datasource.R
 						for _, refsElement := range segmentOptions.Segment.GetRefs() {
 							objectRefTypeModelModel := ObjectRefTypeModel{}
 
-							// data specToModelNested RequiredStringField --> Name
-							if refsElement.GetName() != "" {
-								objectRefTypeModelModel.Name = types.StringValue(refsElement.GetName())
-							} else {
-								// Empty string, set to null
-								objectRefTypeModelModel.Name = types.StringNull()
-							}
-
 							// data specToModelNested StringField --> Tenant
 							if refsElement.GetTenant() != "" {
 								objectRefTypeModelModel.Tenant = types.StringValue(refsElement.GetTenant())
@@ -1627,6 +1523,14 @@ func (d *DataSourceF5XCNatPolicy) Read(ctx context.Context, request datasource.R
 							} else {
 								// Empty string, set to null
 								objectRefTypeModelModel.Namespace = types.StringNull()
+							}
+
+							// data specToModelNested RequiredStringField --> Name
+							if refsElement.GetName() != "" {
+								objectRefTypeModelModel.Name = types.StringValue(refsElement.GetName())
+							} else {
+								// Empty string, set to null
+								objectRefTypeModelModel.Name = types.StringNull()
 							}
 
 							refsElements = append(refsElements, objectRefTypeModelModel)
@@ -1675,14 +1579,6 @@ func (d *DataSourceF5XCNatPolicy) Read(ctx context.Context, request datasource.R
 						for _, refsElement := range virtualNetworkOptions.VirtualNetwork.GetRefs() {
 							objectRefTypeModelModel := ObjectRefTypeModel{}
 
-							// data specToModelNested RequiredStringField --> Namespace
-							if refsElement.GetNamespace() != "" {
-								objectRefTypeModelModel.Namespace = types.StringValue(refsElement.GetNamespace())
-							} else {
-								// Empty string, set to null
-								objectRefTypeModelModel.Namespace = types.StringNull()
-							}
-
 							// data specToModelNested RequiredStringField --> Name
 							if refsElement.GetName() != "" {
 								objectRefTypeModelModel.Name = types.StringValue(refsElement.GetName())
@@ -1697,6 +1593,14 @@ func (d *DataSourceF5XCNatPolicy) Read(ctx context.Context, request datasource.R
 							} else {
 								// Empty string, set to null
 								objectRefTypeModelModel.Tenant = types.StringNull()
+							}
+
+							// data specToModelNested RequiredStringField --> Namespace
+							if refsElement.GetNamespace() != "" {
+								objectRefTypeModelModel.Namespace = types.StringValue(refsElement.GetNamespace())
+							} else {
+								// Empty string, set to null
+								objectRefTypeModelModel.Namespace = types.StringNull()
 							}
 
 							refsElements = append(refsElements, objectRefTypeModelModel)
@@ -1725,6 +1629,110 @@ func (d *DataSourceF5XCNatPolicy) Read(ctx context.Context, request datasource.R
 					rulesscopeChoiceChoicesAttributeMap["virtual_network"] = virtualNetworkObj
 				} else {
 					rulesscopeChoiceChoicesAttributeMap["virtual_network"] = types.ObjectNull(NatPolicyRulesScopeChoiceVirtualNetworkModelAttributeMap)
+				}
+			}
+
+			// data specToModelNested PointerOfOneOfField --> NodeInterface
+			// <no value>
+			// false
+			{
+				nodeInterfaceOptions, isNodeInterface := rulesscopeChoiceChoices.(*ves_io_schema_nat_policy.RuleType_NodeInterface)
+				nodeInterfaceAttributeMap := make(map[string]attr.Value)
+
+				if isNodeInterface && nodeInterfaceOptions != nil {
+
+					// data specToModelNested ArrayOfPointerField --> List
+					if len(nodeInterfaceOptions.NodeInterface.GetList()) > 0 {
+						// Step 1: Always create a slice of model structs from the spec data.
+						// This slice serves as an intermediate representation.
+						listElements := make([]NatPolicyNodeInterfaceInfo, 0, len(nodeInterfaceOptions.NodeInterface.GetList()))
+						for _, listElement := range nodeInterfaceOptions.NodeInterface.GetList() {
+							natPolicyNodeInterfaceInfoModel := NatPolicyNodeInterfaceInfo{}
+
+							// data specToModelNested ArrayOfPointerField --> Interface
+							if len(listElement.GetInterface()) > 0 {
+								// Step 1: Always create a slice of model structs from the spec data.
+								// This slice serves as an intermediate representation.
+								interfaceElements := make([]ObjectRefTypeModel, 0, len(listElement.GetInterface()))
+								for _, interfaceElement := range listElement.GetInterface() {
+									objectRefTypeModelModel := ObjectRefTypeModel{}
+
+									// data specToModelNested RequiredStringField --> Name
+									if interfaceElement.GetName() != "" {
+										objectRefTypeModelModel.Name = types.StringValue(interfaceElement.GetName())
+									} else {
+										// Empty string, set to null
+										objectRefTypeModelModel.Name = types.StringNull()
+									}
+
+									// data specToModelNested StringField --> Tenant
+									if interfaceElement.GetTenant() != "" {
+										objectRefTypeModelModel.Tenant = types.StringValue(interfaceElement.GetTenant())
+									} else {
+										// Empty string, set to null
+										objectRefTypeModelModel.Tenant = types.StringNull()
+									}
+
+									// data specToModelNested RequiredStringField --> Namespace
+									if interfaceElement.GetNamespace() != "" {
+										objectRefTypeModelModel.Namespace = types.StringValue(interfaceElement.GetNamespace())
+									} else {
+										// Empty string, set to null
+										objectRefTypeModelModel.Namespace = types.StringNull()
+									}
+
+									interfaceElements = append(interfaceElements, objectRefTypeModelModel)
+								}
+								// CASE 1: The target field is a `types.List` or an attribute map.
+								// The intermediate slice of structs must be converted to a `types.ListValue`.
+								interfaceListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: NatPolicyInterfaceObjectRefModelAttributeMap}, interfaceElements)
+								response.Diagnostics.Append(diags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								natPolicyNodeInterfaceInfoModel.Interface = interfaceListValue
+
+							} else {
+								// The source list is empty or nil.
+								// CASE 1: The target field is a `types.List` or an attribute map.
+								// Assign a null `types.ListValue`.
+								natPolicyNodeInterfaceInfoModel.Interface = types.ListNull(types.ObjectType{AttrTypes: NatPolicyInterfaceObjectRefModelAttributeMap})
+							}
+
+							// data specToModelNested StringField --> Node
+							if listElement.GetNode() != "" {
+								natPolicyNodeInterfaceInfoModel.Node = types.StringValue(listElement.GetNode())
+							} else {
+								// Empty string, set to null
+								natPolicyNodeInterfaceInfoModel.Node = types.StringNull()
+							}
+
+							listElements = append(listElements, natPolicyNodeInterfaceInfoModel)
+						}
+						// CASE 1: The target field is a `types.List` or an attribute map.
+						// The intermediate slice of structs must be converted to a `types.ListValue`.
+						listListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: NatPolicyListObjectRefModelAttributeMap}, listElements)
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						nodeInterfaceAttributeMap["list"] = listListValue
+
+					} else {
+						// The source list is empty or nil.
+						// CASE 1: The target field is a `types.List` or an attribute map.
+						// Assign a null `types.ListValue`.
+						nodeInterfaceAttributeMap["list"] = types.ListNull(types.ObjectType{AttrTypes: NatPolicyListObjectRefModelAttributeMap})
+					}
+
+					nodeInterfaceObj, diags := types.ObjectValue(NatPolicyRulesScopeChoiceNodeInterfaceModelAttributeMap, nodeInterfaceAttributeMap)
+					response.Diagnostics.Append(diags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					rulesscopeChoiceChoicesAttributeMap["node_interface"] = nodeInterfaceObj
+				} else {
+					rulesscopeChoiceChoicesAttributeMap["node_interface"] = types.ObjectNull(NatPolicyRulesScopeChoiceNodeInterfaceModelAttributeMap)
 				}
 			}
 
@@ -1866,6 +1874,16 @@ func (d *DataSourceF5XCNatPolicy) Read(ctx context.Context, request datasource.R
 
 								// Process nested choices, populating the temporary attribute map
 
+								// data specToModelNested UintOfOneOfField --> Port
+								portItem, isPort := sourcePortportMatchChoiceChoices.(*ves_io_schema.PortMatcherType_Port)
+
+								if isPort {
+									sourcePortportMatchChoiceChoicesAttributeMap["port"] = types.Int64Value(int64(portItem.Port))
+								} else {
+									// Empty uint, set to null
+									sourcePortportMatchChoiceChoicesAttributeMap["port"] = types.Int64Null()
+								}
+
 								// data specToModelNested StringOfOneOfField --> PortRanges
 								portRangesItem, isPortRanges := sourcePortportMatchChoiceChoices.(*ves_io_schema.PortMatcherType_PortRanges)
 
@@ -1883,16 +1901,6 @@ func (d *DataSourceF5XCNatPolicy) Read(ctx context.Context, request datasource.R
 									sourcePortportMatchChoiceChoicesAttributeMap["no_port_match"] = types.BoolValue(true)
 								} else {
 									sourcePortportMatchChoiceChoicesAttributeMap["no_port_match"] = types.BoolNull()
-								}
-
-								// data specToModelNested UintOfOneOfField --> Port
-								portItem, isPort := sourcePortportMatchChoiceChoices.(*ves_io_schema.PortMatcherType_Port)
-
-								if isPort {
-									sourcePortportMatchChoiceChoicesAttributeMap["port"] = types.Int64Value(int64(portItem.Port))
-								} else {
-									// Empty uint, set to null
-									sourcePortportMatchChoiceChoicesAttributeMap["port"] = types.Int64Null()
 								}
 
 								// --- End of Choices ---
@@ -1951,15 +1959,6 @@ func (d *DataSourceF5XCNatPolicy) Read(ctx context.Context, request datasource.R
 
 								// Process nested choices, populating the temporary attribute map
 
-								// data specToModelNested BoolOfOneOfPointerField --> NoPortMatch
-								_, isNoPortMatch := destinationPortportMatchChoiceChoices.(*ves_io_schema.PortMatcherType_NoPortMatch)
-
-								if isNoPortMatch {
-									destinationPortportMatchChoiceChoicesAttributeMap["no_port_match"] = types.BoolValue(true)
-								} else {
-									destinationPortportMatchChoiceChoicesAttributeMap["no_port_match"] = types.BoolNull()
-								}
-
 								// data specToModelNested UintOfOneOfField --> Port
 								portItem, isPort := destinationPortportMatchChoiceChoices.(*ves_io_schema.PortMatcherType_Port)
 
@@ -1978,6 +1977,15 @@ func (d *DataSourceF5XCNatPolicy) Read(ctx context.Context, request datasource.R
 								} else {
 									// Empty string, set to null
 									destinationPortportMatchChoiceChoicesAttributeMap["port_ranges"] = types.StringNull()
+								}
+
+								// data specToModelNested BoolOfOneOfPointerField --> NoPortMatch
+								_, isNoPortMatch := destinationPortportMatchChoiceChoices.(*ves_io_schema.PortMatcherType_NoPortMatch)
+
+								if isNoPortMatch {
+									destinationPortportMatchChoiceChoicesAttributeMap["no_port_match"] = types.BoolValue(true)
+								} else {
+									destinationPortportMatchChoiceChoicesAttributeMap["no_port_match"] = types.BoolNull()
 								}
 
 								// --- End of Choices ---
@@ -2054,6 +2062,91 @@ func (d *DataSourceF5XCNatPolicy) Read(ctx context.Context, request datasource.R
 					tcpAttributeMap := make(map[string]attr.Value)
 
 					if isTcp && tcpOptions != nil {
+
+						// data specToModelNested PointerField --> DestinationPort
+						if tcpOptions.Tcp.GetDestinationPort() != nil {
+							// Create the nested Go struct
+							natPolicyPortMatcherTypeModel := &NatPolicyPortMatcherType{}
+							destinationPortElement := tcpOptions.Tcp.GetDestinationPort()
+
+							// Recursively populate the nested struct
+
+							// data specToModelNested OneOfField --> PortMatch
+							if destinationPortElement.GetPortMatch() != nil {
+								// Create a temporary attribute map for the choices within this OneOf
+								destinationPortportMatchChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+								// Define a variable for the spec choices to be passed down to nested templates.
+								// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+								destinationPortportMatchChoiceChoices := destinationPortElement.GetPortMatch()
+
+								// Process nested choices, populating the temporary attribute map
+
+								// data specToModelNested UintOfOneOfField --> Port
+								portItem, isPort := destinationPortportMatchChoiceChoices.(*ves_io_schema.PortMatcherType_Port)
+
+								if isPort {
+									destinationPortportMatchChoiceChoicesAttributeMap["port"] = types.Int64Value(int64(portItem.Port))
+								} else {
+									// Empty uint, set to null
+									destinationPortportMatchChoiceChoicesAttributeMap["port"] = types.Int64Null()
+								}
+
+								// data specToModelNested StringOfOneOfField --> PortRanges
+								portRangesItem, isPortRanges := destinationPortportMatchChoiceChoices.(*ves_io_schema.PortMatcherType_PortRanges)
+
+								if isPortRanges {
+									destinationPortportMatchChoiceChoicesAttributeMap["port_ranges"] = types.StringValue(string(portRangesItem.PortRanges))
+								} else {
+									// Empty string, set to null
+									destinationPortportMatchChoiceChoicesAttributeMap["port_ranges"] = types.StringNull()
+								}
+
+								// data specToModelNested BoolOfOneOfPointerField --> NoPortMatch
+								_, isNoPortMatch := destinationPortportMatchChoiceChoices.(*ves_io_schema.PortMatcherType_NoPortMatch)
+
+								if isNoPortMatch {
+									destinationPortportMatchChoiceChoicesAttributeMap["no_port_match"] = types.BoolValue(true)
+								} else {
+									destinationPortportMatchChoiceChoicesAttributeMap["no_port_match"] = types.BoolNull()
+								}
+
+								// --- End of Choices ---
+
+								// Create the final ObjectValue for this OneOf field
+								finalObj, destinationPortportMatchChoiceChoicesObjDiags := types.ObjectValue(
+									NatPolicyRulesCriteriaProtocolChoiceTcpDestinationPortPortMatchModelAttributeMap, // The attribute schema for the OneOf choices
+									destinationPortportMatchChoiceChoicesAttributeMap,
+								)
+								response.Diagnostics.Append(destinationPortportMatchChoiceChoicesObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+
+								// Assign the final object to the correct place (either the root model or a parent's attribute map)
+								natPolicyPortMatcherTypeModel.PortMatchChoice = finalObj
+							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
+								natPolicyPortMatcherTypeModel.PortMatchChoice = types.ObjectNull(NatPolicyRulesCriteriaProtocolChoiceTcpDestinationPortPortMatchModelAttributeMap)
+							}
+
+							// This field needs to be converted to a types.ObjectValue before assignment.
+							natPolicyPortMatcherTypeModelObj, diags := types.ObjectValueFrom(ctx, NatPolicyRulesCriteriaProtocolChoiceTcpDestinationPortModelAttributeMap, natPolicyPortMatcherTypeModel)
+							response.Diagnostics.Append(diags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							tcpAttributeMap["destination_port"] = natPolicyPortMatcherTypeModelObj
+
+						} else {
+							// The source field is nil (e.g. redacted by the API).
+							// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
+							// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
+							// because the API may always return a non-nil struct (with REDACTED values) for this field,
+							// making this else-branch unreachable. The child OneOf handles the actual healing.
+							// The target is a types.Object, so we use types.ObjectNull.
+							tcpAttributeMap["destination_port"] = types.ObjectNull(NatPolicyRulesCriteriaProtocolChoiceTcpDestinationPortModelAttributeMap)
+						}
 
 						// data specToModelNested PointerField --> SourcePort
 						if tcpOptions.Tcp.GetSourcePort() != nil {
@@ -2140,91 +2233,6 @@ func (d *DataSourceF5XCNatPolicy) Read(ctx context.Context, request datasource.R
 							tcpAttributeMap["source_port"] = types.ObjectNull(NatPolicyRulesCriteriaProtocolChoiceTcpSourcePortModelAttributeMap)
 						}
 
-						// data specToModelNested PointerField --> DestinationPort
-						if tcpOptions.Tcp.GetDestinationPort() != nil {
-							// Create the nested Go struct
-							natPolicyPortMatcherTypeModel := &NatPolicyPortMatcherType{}
-							destinationPortElement := tcpOptions.Tcp.GetDestinationPort()
-
-							// Recursively populate the nested struct
-
-							// data specToModelNested OneOfField --> PortMatch
-							if destinationPortElement.GetPortMatch() != nil {
-								// Create a temporary attribute map for the choices within this OneOf
-								destinationPortportMatchChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-								// Define a variable for the spec choices to be passed down to nested templates.
-								// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-								destinationPortportMatchChoiceChoices := destinationPortElement.GetPortMatch()
-
-								// Process nested choices, populating the temporary attribute map
-
-								// data specToModelNested StringOfOneOfField --> PortRanges
-								portRangesItem, isPortRanges := destinationPortportMatchChoiceChoices.(*ves_io_schema.PortMatcherType_PortRanges)
-
-								if isPortRanges {
-									destinationPortportMatchChoiceChoicesAttributeMap["port_ranges"] = types.StringValue(string(portRangesItem.PortRanges))
-								} else {
-									// Empty string, set to null
-									destinationPortportMatchChoiceChoicesAttributeMap["port_ranges"] = types.StringNull()
-								}
-
-								// data specToModelNested BoolOfOneOfPointerField --> NoPortMatch
-								_, isNoPortMatch := destinationPortportMatchChoiceChoices.(*ves_io_schema.PortMatcherType_NoPortMatch)
-
-								if isNoPortMatch {
-									destinationPortportMatchChoiceChoicesAttributeMap["no_port_match"] = types.BoolValue(true)
-								} else {
-									destinationPortportMatchChoiceChoicesAttributeMap["no_port_match"] = types.BoolNull()
-								}
-
-								// data specToModelNested UintOfOneOfField --> Port
-								portItem, isPort := destinationPortportMatchChoiceChoices.(*ves_io_schema.PortMatcherType_Port)
-
-								if isPort {
-									destinationPortportMatchChoiceChoicesAttributeMap["port"] = types.Int64Value(int64(portItem.Port))
-								} else {
-									// Empty uint, set to null
-									destinationPortportMatchChoiceChoicesAttributeMap["port"] = types.Int64Null()
-								}
-
-								// --- End of Choices ---
-
-								// Create the final ObjectValue for this OneOf field
-								finalObj, destinationPortportMatchChoiceChoicesObjDiags := types.ObjectValue(
-									NatPolicyRulesCriteriaProtocolChoiceTcpDestinationPortPortMatchModelAttributeMap, // The attribute schema for the OneOf choices
-									destinationPortportMatchChoiceChoicesAttributeMap,
-								)
-								response.Diagnostics.Append(destinationPortportMatchChoiceChoicesObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-
-								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								natPolicyPortMatcherTypeModel.PortMatchChoice = finalObj
-							} else {
-								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								natPolicyPortMatcherTypeModel.PortMatchChoice = types.ObjectNull(NatPolicyRulesCriteriaProtocolChoiceTcpDestinationPortPortMatchModelAttributeMap)
-							}
-
-							// This field needs to be converted to a types.ObjectValue before assignment.
-							natPolicyPortMatcherTypeModelObj, diags := types.ObjectValueFrom(ctx, NatPolicyRulesCriteriaProtocolChoiceTcpDestinationPortModelAttributeMap, natPolicyPortMatcherTypeModel)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							tcpAttributeMap["destination_port"] = natPolicyPortMatcherTypeModelObj
-
-						} else {
-							// The source field is nil (e.g. redacted by the API).
-							// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-							// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-							// because the API may always return a non-nil struct (with REDACTED values) for this field,
-							// making this else-branch unreachable. The child OneOf handles the actual healing.
-							// The target is a types.Object, so we use types.ObjectNull.
-							tcpAttributeMap["destination_port"] = types.ObjectNull(NatPolicyRulesCriteriaProtocolChoiceTcpDestinationPortModelAttributeMap)
-						}
-
 						tcpObj, diags := types.ObjectValue(NatPolicyRulesCriteriaProtocolChoiceTcpModelAttributeMap, tcpAttributeMap)
 						response.Diagnostics.Append(diags...)
 						if response.Diagnostics.HasError() {
@@ -2291,6 +2299,16 @@ func (d *DataSourceF5XCNatPolicy) Read(ctx context.Context, request datasource.R
 				actionsourceNatChoiceChoices := actionElement.GetSourceNatChoice()
 
 				// Process nested choices, populating the temporary attribute map
+
+				// data specToModelNested StringOfOneOfField --> VirtualCidr
+				virtualCidrItem, isVirtualCidr := actionsourceNatChoiceChoices.(*ves_io_schema_nat_policy.ActionType_VirtualCidr)
+
+				if isVirtualCidr {
+					actionsourceNatChoiceChoicesAttributeMap["virtual_cidr"] = types.StringValue(string(virtualCidrItem.VirtualCidr))
+				} else {
+					// Empty string, set to null
+					actionsourceNatChoiceChoicesAttributeMap["virtual_cidr"] = types.StringNull()
+				}
 
 				// data specToModelNested PointerOfOneOfField --> Dynamic
 				// <no value>
@@ -2374,14 +2392,6 @@ func (d *DataSourceF5XCNatPolicy) Read(ctx context.Context, request datasource.R
 										for _, refsElement := range elasticIpsOptions.ElasticIps.GetRefs() {
 											objectRefTypeModelModel := ObjectRefTypeModel{}
 
-											// data specToModelNested RequiredStringField --> Namespace
-											if refsElement.GetNamespace() != "" {
-												objectRefTypeModelModel.Namespace = types.StringValue(refsElement.GetNamespace())
-											} else {
-												// Empty string, set to null
-												objectRefTypeModelModel.Namespace = types.StringNull()
-											}
-
 											// data specToModelNested RequiredStringField --> Name
 											if refsElement.GetName() != "" {
 												objectRefTypeModelModel.Name = types.StringValue(refsElement.GetName())
@@ -2396,6 +2406,14 @@ func (d *DataSourceF5XCNatPolicy) Read(ctx context.Context, request datasource.R
 											} else {
 												// Empty string, set to null
 												objectRefTypeModelModel.Tenant = types.StringNull()
+											}
+
+											// data specToModelNested RequiredStringField --> Namespace
+											if refsElement.GetNamespace() != "" {
+												objectRefTypeModelModel.Namespace = types.StringValue(refsElement.GetNamespace())
+											} else {
+												// Empty string, set to null
+												objectRefTypeModelModel.Namespace = types.StringNull()
 											}
 
 											refsElements = append(refsElements, objectRefTypeModelModel)
@@ -2457,16 +2475,6 @@ func (d *DataSourceF5XCNatPolicy) Read(ctx context.Context, request datasource.R
 					}
 				}
 
-				// data specToModelNested StringOfOneOfField --> VirtualCidr
-				virtualCidrItem, isVirtualCidr := actionsourceNatChoiceChoices.(*ves_io_schema_nat_policy.ActionType_VirtualCidr)
-
-				if isVirtualCidr {
-					actionsourceNatChoiceChoicesAttributeMap["virtual_cidr"] = types.StringValue(string(virtualCidrItem.VirtualCidr))
-				} else {
-					// Empty string, set to null
-					actionsourceNatChoiceChoicesAttributeMap["virtual_cidr"] = types.StringNull()
-				}
-
 				// --- End of Choices ---
 
 				// Create the final ObjectValue for this OneOf field
@@ -2502,14 +2510,6 @@ func (d *DataSourceF5XCNatPolicy) Read(ctx context.Context, request datasource.R
 			// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 			// The target is a types.Object, so we use types.ObjectNull.
 			natPolicyNatPolicyRuleTypeModel.Action = types.ObjectNull(NatPolicyRulesActionModelAttributeMap)
-		}
-
-		// data specToModelNested RequiredStringField --> Name
-		if rulesElement.GetName() != "" {
-			natPolicyNatPolicyRuleTypeModel.Name = types.StringValue(rulesElement.GetName())
-		} else {
-			// Empty string, set to null
-			natPolicyNatPolicyRuleTypeModel.Name = types.StringNull()
 		}
 
 		rulesElementsSpectToModel = append(rulesElementsSpectToModel, natPolicyNatPolicyRuleTypeModel)

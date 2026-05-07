@@ -30,12 +30,12 @@ type DataSourceF5XCCloudElasticIp struct {
 
 // DataSourceF5XCCloudElasticIpModel describes the resource data model.
 type DataSourceF5XCCloudElasticIpModel struct {
-	Annotations types.Map      `tfsdk:"annotations"`
-	Description types.String   `tfsdk:"description"`
 	Name        types.String   `tfsdk:"name"`
 	Namespace   types.String   `tfsdk:"namespace"`
 	Uid         types.String   `tfsdk:"uid"`
 	Labels      types.Map      `tfsdk:"labels"`
+	Annotations types.Map      `tfsdk:"annotations"`
+	Description types.String   `tfsdk:"description"`
 	SiteRef     types.List     `tfsdk:"site_ref"`
 	Count       types.Int64    `tfsdk:"count_cloud_elastic_ip"`
 	Timeouts    timeouts.Value `tfsdk:"timeouts"`
@@ -45,9 +45,9 @@ type DataSourceF5XCCloudElasticIpModel struct {
 // Attribute map for RequiredArrayOfPointerField --> SiteRef
 var CloudElasticIpSiteRefObjectRefModelAttributeMap = map[string]attr.Type{
 
+	"namespace": types.StringType,
 	"name":      types.StringType,
 	"tenant":    types.StringType,
-	"namespace": types.StringType,
 }
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -68,19 +68,6 @@ func (r *DataSourceF5XCCloudElasticIp) Schema(ctx context.Context, request datas
 		Description:         "CloudElasticIp data source",
 
 		Attributes: map[string]schema.Attribute{
-			"annotations": schema.MapAttribute{
-				Description: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
-			"description": schema.StringAttribute{
-				Description: "description Human readable description for the object",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-			},
 			"name": schema.StringAttribute{
 				Description: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
 				Required:    false,
@@ -106,6 +93,19 @@ func (r *DataSourceF5XCCloudElasticIp) Schema(ctx context.Context, request datas
 				Computed:    true,
 				ElementType: types.StringType,
 			},
+			"annotations": schema.MapAttribute{
+				Description: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				ElementType: types.StringType,
+			},
+			"description": schema.StringAttribute{
+				Description: "description Human readable description for the object",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+			},
 			"site_ref": schema.ListNestedAttribute{
 				Description: "site reference Site to which this cloud elastic ip object is attached",
 				Required:    false,
@@ -113,6 +113,12 @@ func (r *DataSourceF5XCCloudElasticIp) Schema(ctx context.Context, request datas
 				Computed:    true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
+						"namespace": schema.StringAttribute{
+							Description: "",
+							Required:    false,
+							Optional:    false,
+							Computed:    true,
+						},
 						"name": schema.StringAttribute{
 							Description: "",
 							Required:    false,
@@ -120,12 +126,6 @@ func (r *DataSourceF5XCCloudElasticIp) Schema(ctx context.Context, request datas
 							Computed:    true,
 						},
 						"tenant": schema.StringAttribute{
-							Description: "",
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-						},
-						"namespace": schema.StringAttribute{
 							Description: "",
 							Required:    false,
 							Optional:    false,
@@ -211,27 +211,6 @@ func (d *DataSourceF5XCCloudElasticIp) Read(ctx context.Context, request datasou
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
-	// data SpecToModelRoot Meta MapOfStringField --> Annotations
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// Assign the typed map to the model
-		data.Annotations = annotationsMap
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil and the model has no value: set an explicit Null map to avoid
-		// DynamicPseudoType errors. If the model already contains a value (e.g. labels were set
-		// but the API did not echo them back in the response), preserve the existing value to prevent
-		// "Provider produced inconsistent result after apply" errors.
-		data.Annotations = types.MapNull(types.StringType)
-	}
-
-	// data SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
-
 	// data SpecToModelRoot Meta RequiredStringField --> Name
 	data.Name = types.StringValue(metaData.GetName())
 
@@ -259,11 +238,40 @@ func (d *DataSourceF5XCCloudElasticIp) Read(ctx context.Context, request datasou
 		data.Labels = types.MapNull(types.StringType)
 	}
 
+	// data SpecToModelRoot Meta MapOfStringField --> Annotations
+	if metaData.GetAnnotations() != nil {
+		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
+		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+		response.Diagnostics.Append(annotationsDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		// Assign the typed map to the model
+		data.Annotations = annotationsMap
+	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
+		// API returned nil and the model has no value: set an explicit Null map to avoid
+		// DynamicPseudoType errors. If the model already contains a value (e.g. labels were set
+		// but the API did not echo them back in the response), preserve the existing value to prevent
+		// "Provider produced inconsistent result after apply" errors.
+		data.Annotations = types.MapNull(types.StringType)
+	}
+
+	// data SpecToModelRoot Meta StringField --> Description
+	data.Description = types.StringValue(metaData.GetDescription())
+
 	// data SpecToModelRoot RequiredArrayOfPointerField --> SiteRef
 	siteRefElementsSpectToModel := make([]ObjectRefTypeModel, 0, len(specData.SiteRef))
 
 	for _, siteRefElement := range specData.SiteRef {
 		objectRefTypeModelModel := ObjectRefTypeModel{}
+
+		// data specToModelNested RequiredStringField --> Namespace
+		if siteRefElement.GetNamespace() != "" {
+			objectRefTypeModelModel.Namespace = types.StringValue(siteRefElement.GetNamespace())
+		} else {
+			// Empty string, set to null
+			objectRefTypeModelModel.Namespace = types.StringNull()
+		}
 
 		// data specToModelNested RequiredStringField --> Name
 		if siteRefElement.GetName() != "" {
@@ -279,14 +287,6 @@ func (d *DataSourceF5XCCloudElasticIp) Read(ctx context.Context, request datasou
 		} else {
 			// Empty string, set to null
 			objectRefTypeModelModel.Tenant = types.StringNull()
-		}
-
-		// data specToModelNested RequiredStringField --> Namespace
-		if siteRefElement.GetNamespace() != "" {
-			objectRefTypeModelModel.Namespace = types.StringValue(siteRefElement.GetNamespace())
-		} else {
-			// Empty string, set to null
-			objectRefTypeModelModel.Namespace = types.StringNull()
 		}
 
 		siteRefElementsSpectToModel = append(siteRefElementsSpectToModel, objectRefTypeModelModel)

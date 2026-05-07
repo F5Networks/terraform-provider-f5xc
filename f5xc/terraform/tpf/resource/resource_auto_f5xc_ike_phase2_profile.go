@@ -54,8 +54,8 @@ type ResourceF5XCIkePhase2Profile struct {
 }
 
 type IkePhase2ProfileGlobalSpecTypePfsModeChoice struct {
-	DhGroupSet types.Object `tfsdk:"dh_group_set"`
 	DisablePfs types.Bool   `tfsdk:"disable_pfs"`
+	DhGroupSet types.Object `tfsdk:"dh_group_set"`
 }
 
 type IkePhase2ProfileGlobalSpecTypeDhGroupSet struct {
@@ -63,27 +63,27 @@ type IkePhase2ProfileGlobalSpecTypeDhGroupSet struct {
 }
 
 type IkePhase2ProfileGlobalSpecTypeIkeKeyLifetimeChoice struct {
+	IkeKeylifetimeHours   types.Object `tfsdk:"ike_keylifetime_hours"`
 	UseDefaultKeylifetime types.Bool   `tfsdk:"use_default_keylifetime"`
 	IkeKeylifetimeMinutes types.Object `tfsdk:"ike_keylifetime_minutes"`
-	IkeKeylifetimeHours   types.Object `tfsdk:"ike_keylifetime_hours"`
-}
-
-type IkePhase2ProfileGlobalSpecTypeIkeKeylifetimeMinutes struct {
-	Duration types.Int64 `tfsdk:"duration"`
 }
 
 type IkePhase2ProfileGlobalSpecTypeIkeKeylifetimeHours struct {
 	Duration types.Int64 `tfsdk:"duration"`
 }
 
+type IkePhase2ProfileGlobalSpecTypeIkeKeylifetimeMinutes struct {
+	Duration types.Int64 `tfsdk:"duration"`
+}
+
 // ResourceF5XCIkePhase2ProfileModel describes the resource data model.
 type ResourceF5XCIkePhase2ProfileModel struct {
-	Labels               types.Map      `tfsdk:"labels"`
 	Annotations          types.Map      `tfsdk:"annotations"`
 	Description          types.String   `tfsdk:"description"`
 	Name                 types.String   `tfsdk:"name"`
 	Namespace            types.String   `tfsdk:"namespace"`
 	Uid                  types.String   `tfsdk:"uid"`
+	Labels               types.Map      `tfsdk:"labels"`
 	EncryptionAlgos      types.List     `tfsdk:"encryption_algos"`
 	AuthenticationAlgos  types.List     `tfsdk:"authentication_algos"`
 	PfsModeChoice        types.Object   `tfsdk:"pfs_mode_choice"`
@@ -104,10 +104,10 @@ var (
 // Attribute map for OneOfField --> PfsMode
 var IkePhase2ProfilePfsModeModelAttributeMap = map[string]attr.Type{
 
+	"disable_pfs": types.BoolType,
 	"dh_group_set": types.ObjectType{
 		AttrTypes: IkePhase2ProfilePfsModeDhGroupSetModelAttributeMap,
 	},
-	"disable_pfs": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> DhGroupSet
@@ -121,23 +121,23 @@ var IkePhase2ProfilePfsModeDhGroupSetModelAttributeMap = map[string]attr.Type{
 // Attribute map for RequiredOneOfField --> IkeKeyLifetime
 var IkePhase2ProfileIkeKeyLifetimeModelAttributeMap = map[string]attr.Type{
 
+	"ike_keylifetime_hours": types.ObjectType{
+		AttrTypes: IkePhase2ProfileIkeKeyLifetimeIkeKeylifetimeHoursModelAttributeMap,
+	},
 	"use_default_keylifetime": types.BoolType,
 	"ike_keylifetime_minutes": types.ObjectType{
 		AttrTypes: IkePhase2ProfileIkeKeyLifetimeIkeKeylifetimeMinutesModelAttributeMap,
 	},
-	"ike_keylifetime_hours": types.ObjectType{
-		AttrTypes: IkePhase2ProfileIkeKeyLifetimeIkeKeylifetimeHoursModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> IkeKeylifetimeMinutes
-var IkePhase2ProfileIkeKeyLifetimeIkeKeylifetimeMinutesModelAttributeMap = map[string]attr.Type{
-
-	"duration": types.Int64Type,
 }
 
 // Attribute map for PointerOfOneOfField --> IkeKeylifetimeHours
 var IkePhase2ProfileIkeKeyLifetimeIkeKeylifetimeHoursModelAttributeMap = map[string]attr.Type{
+
+	"duration": types.Int64Type,
+}
+
+// Attribute map for PointerOfOneOfField --> IkeKeylifetimeMinutes
+var IkePhase2ProfileIkeKeyLifetimeIkeKeylifetimeMinutesModelAttributeMap = map[string]attr.Type{
 
 	"duration": types.Int64Type,
 }
@@ -157,17 +157,6 @@ func (r *ResourceF5XCIkePhase2Profile) Schema(ctx context.Context, request resou
 		Description:         "IkePhase2Profile resource",
 
 		Attributes: map[string]schema.Attribute{
-			"labels": schema.MapAttribute{
-				Description:         "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            true,
-				ElementType:         types.StringType,
-				PlanModifiers: []planmodifier.Map{
-					mapmergemodifier.New(),
-				},
-			},
 			"annotations": schema.MapAttribute{
 				Description:         "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
 				MarkdownDescription: "",
@@ -212,28 +201,39 @@ func (r *ResourceF5XCIkePhase2Profile) Schema(ctx context.Context, request resou
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
+			"labels": schema.MapAttribute{
+				Description:         "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				MarkdownDescription: "",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				ElementType:         types.StringType,
+				PlanModifiers: []planmodifier.Map{
+					mapmergemodifier.New(),
+				},
+			},
 			"encryption_algos": schema.ListAttribute{
 				Description:         "Encryption Algorithms Choose one or more encryption algorithms.",
-				MarkdownDescription: "<br>**Valid Options:** `[\"AES128_CBC\", \"AES192_CBC\", \"AES256_CBC\", \"TRIPLE_DES_CBC\", \"AES128_GCM\", \"AES192_GCM\", \"AES256_GCM\", \"ENC_ALG_DEFAULT\"]` (Multiple selection allowed)<br>**Default:** `AES256_GCM`",
+				MarkdownDescription: "<br>**Valid Options:** `[\"AES192_CBC\", \"AES256_CBC\", \"TRIPLE_DES_CBC\", \"AES128_GCM\", \"AES192_GCM\", \"AES256_GCM\", \"ENC_ALG_DEFAULT\", \"AES128_CBC\"]` (Multiple selection allowed)<br>**Default:** `AES256_GCM`",
 				Required:            false,
 				Optional:            true,
 				Computed:            true,
 				ElementType:         types.StringType,
 				Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("AES256_GCM")),
 				Validators: []validator.List{
-					listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"AES128_CBC", "AES192_CBC", "AES256_CBC", "TRIPLE_DES_CBC", "AES128_GCM", "AES192_GCM", "AES256_GCM", "ENC_ALG_DEFAULT"}...)),
+					listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"AES192_CBC", "AES256_CBC", "TRIPLE_DES_CBC", "AES128_GCM", "AES192_GCM", "AES256_GCM", "ENC_ALG_DEFAULT", "AES128_CBC"}...)),
 				},
 			},
 			"authentication_algos": schema.ListAttribute{
 				Description:         "Authentication Algorithms Choose one or more Authentication Algorithm. Use None option when using the aes-gcm or aes-ccm encryption algorithms.",
-				MarkdownDescription: "<br>**Valid Options:** `[\"SHA512_HMAC\", \"AUTH_ALG_NONE\", \"AUTH_ALG_DEFAULT\", \"SHA256_HMAC\", \"SHA384_HMAC\"]` (Multiple selection allowed)<br>**Default:** `AUTH_ALG_NONE`",
+				MarkdownDescription: "<br>**Valid Options:** `[\"AUTH_ALG_DEFAULT\", \"SHA256_HMAC\", \"SHA384_HMAC\", \"SHA512_HMAC\", \"AUTH_ALG_NONE\"]` (Multiple selection allowed)<br>**Default:** `AUTH_ALG_NONE`",
 				Required:            false,
 				Optional:            true,
 				Computed:            true,
 				ElementType:         types.StringType,
 				Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("AUTH_ALG_NONE")),
 				Validators: []validator.List{
-					listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"SHA512_HMAC", "AUTH_ALG_NONE", "AUTH_ALG_DEFAULT", "SHA256_HMAC", "SHA384_HMAC"}...)),
+					listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"AUTH_ALG_DEFAULT", "SHA256_HMAC", "SHA384_HMAC", "SHA512_HMAC", "AUTH_ALG_NONE"}...)),
 				},
 			},
 			"pfs_mode_choice": schema.SingleNestedAttribute{
@@ -244,11 +244,21 @@ func (r *ResourceF5XCIkePhase2Profile) Schema(ctx context.Context, request resou
 				Computed:            false,
 				Validators: []validator.Object{
 					atmostoneofvalidator.AtMostOneOf(
-						"dh_group_set",
 						"disable_pfs",
+						"dh_group_set",
 					),
 				},
 				Attributes: map[string]schema.Attribute{
+					"disable_pfs": schema.BoolAttribute{
+						Description:         "Disabled Disable PFS for this tunnel",
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Validators: []validator.Bool{
+							boolvalidator.Equals(true),
+						},
+					},
 					"dh_group_set": schema.SingleNestedAttribute{
 						Description:         "Enabled Choose the acceptable Diffie Hellman(DH) Group or Groups that you are willing to accept as part of this profile.",
 						MarkdownDescription: "",
@@ -258,26 +268,16 @@ func (r *ResourceF5XCIkePhase2Profile) Schema(ctx context.Context, request resou
 						Attributes: map[string]schema.Attribute{
 							"dh_groups": schema.ListAttribute{
 								Description:         "Diffie Hellman Groups Choose the acceptable Diffie Hellman(DH) Group or Groups that you are willing to accept as part of this profile.",
-								MarkdownDescription: "<br>**Valid Options:** `[\"DH_GROUP_DEFAULT\", \"DH_GROUP_19\", \"DH_GROUP_20\", \"DH_GROUP_14\", \"DH_GROUP_15\", \"DH_GROUP_16\", \"DH_GROUP_17\", \"DH_GROUP_18\", \"DH_GROUP_21\", \"DH_GROUP_26\"]` (Multiple selection allowed)<br>**Default:** `DH_GROUP_19`",
+								MarkdownDescription: "<br>**Valid Options:** `[\"DH_GROUP_DEFAULT\", \"DH_GROUP_14\", \"DH_GROUP_15\", \"DH_GROUP_16\", \"DH_GROUP_17\", \"DH_GROUP_20\", \"DH_GROUP_18\", \"DH_GROUP_19\", \"DH_GROUP_21\", \"DH_GROUP_26\"]` (Multiple selection allowed)<br>**Default:** `DH_GROUP_19`",
 								ElementType:         types.StringType,
 								Required:            false,
 								Optional:            true,
 								Computed:            true,
 								Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("DH_GROUP_19")),
 								Validators: []validator.List{
-									listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"DH_GROUP_DEFAULT", "DH_GROUP_19", "DH_GROUP_20", "DH_GROUP_14", "DH_GROUP_15", "DH_GROUP_16", "DH_GROUP_17", "DH_GROUP_18", "DH_GROUP_21", "DH_GROUP_26"}...)),
+									listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"DH_GROUP_DEFAULT", "DH_GROUP_14", "DH_GROUP_15", "DH_GROUP_16", "DH_GROUP_17", "DH_GROUP_20", "DH_GROUP_18", "DH_GROUP_19", "DH_GROUP_21", "DH_GROUP_26"}...)),
 								},
 							},
-						},
-					},
-					"disable_pfs": schema.BoolAttribute{
-						Description:         "Disabled Disable PFS for this tunnel",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Validators: []validator.Bool{
-							boolvalidator.Equals(true),
 						},
 					},
 				},
@@ -290,12 +290,31 @@ func (r *ResourceF5XCIkePhase2Profile) Schema(ctx context.Context, request resou
 				Computed:            false,
 				Validators: []validator.Object{
 					atmostoneofvalidator.AtMostOneOf(
+						"ike_keylifetime_hours",
 						"use_default_keylifetime",
 						"ike_keylifetime_minutes",
-						"ike_keylifetime_hours",
 					),
 				},
 				Attributes: map[string]schema.Attribute{
+					"ike_keylifetime_hours": schema.SingleNestedAttribute{
+						Description:         "Hours Set IKE Key Lifetime in Hours",
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Attributes: map[string]schema.Attribute{
+							"duration": schema.Int64Attribute{
+								Description:         "Duration",
+								MarkdownDescription: "",
+								Required:            false,
+								Optional:            true,
+								Computed:            false,
+								Validators: []validator.Int64{
+									int64validator.Between(1, 5),
+								},
+							},
+						},
+					},
 					"use_default_keylifetime": schema.BoolAttribute{
 						Description:         "Default Use default key lifetime (4Hrs)",
 						MarkdownDescription: "",
@@ -321,25 +340,6 @@ func (r *ResourceF5XCIkePhase2Profile) Schema(ctx context.Context, request resou
 								Computed:            false,
 								Validators: []validator.Int64{
 									int64validator.Between(10, 300),
-								},
-							},
-						},
-					},
-					"ike_keylifetime_hours": schema.SingleNestedAttribute{
-						Description:         "Hours Set IKE Key Lifetime in Hours",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Attributes: map[string]schema.Attribute{
-							"duration": schema.Int64Attribute{
-								Description:         "Duration",
-								MarkdownDescription: "",
-								Required:            false,
-								Optional:            true,
-								Computed:            false,
-								Validators: []validator.Int64{
-									int64validator.Between(1, 5),
 								},
 							},
 						},
@@ -535,6 +535,24 @@ func (r *ResourceF5XCIkePhase2Profile) Create(ctx context.Context, request resou
 			return
 		}
 
+		// resource modelToSpecNested PointerOfOneOfField --> IkeKeylifetimeHours
+		if !ikeKeyLifetimeChoiceModel.IkeKeylifetimeHours.IsNull() && !ikeKeyLifetimeChoiceModel.IkeKeylifetimeHours.IsUnknown() {
+			var ikePhase2ProfileGlobalSpecTypeIkeKeylifetimeHoursModel IkePhase2ProfileGlobalSpecTypeIkeKeylifetimeHours
+			response.Diagnostics.Append(ikeKeyLifetimeChoiceModel.IkeKeylifetimeHours.As(ctx, &ikePhase2ProfileGlobalSpecTypeIkeKeylifetimeHoursModel, basetypes.ObjectAsOptions{})...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			ikeKeylifetimeHoursOneOfSpec := &ves_io_schema_views_ike_phase2_profile.CreateSpecType_IkeKeylifetimeHours{}
+			ikeKeylifetimeHoursOneOfSpec.IkeKeylifetimeHours = &ves_io_schema_views_ike_phase1_profile.InputHours{}
+			spec.IkeKeyLifetime = ikeKeylifetimeHoursOneOfSpec
+
+			// resource modelToSpecNested UintField --> Duration
+			if !ikePhase2ProfileGlobalSpecTypeIkeKeylifetimeHoursModel.Duration.IsNull() && !ikePhase2ProfileGlobalSpecTypeIkeKeylifetimeHoursModel.Duration.IsUnknown() {
+				ikeKeylifetimeHoursOneOfSpec.IkeKeylifetimeHours.Duration = uint32(uint32(ikePhase2ProfileGlobalSpecTypeIkeKeylifetimeHoursModel.Duration.ValueInt64()))
+			}
+
+		}
+
 		// resource modelToSpecNested BoolOfOneOfPointerField --> UseDefaultKeylifetime
 		if !ikeKeyLifetimeChoiceModel.UseDefaultKeylifetime.IsNull() && !ikeKeyLifetimeChoiceModel.UseDefaultKeylifetime.IsUnknown() {
 			useDefaultKeylifetimeSpecBool := &ves_io_schema_views_ike_phase2_profile.CreateSpecType_UseDefaultKeylifetime{}
@@ -556,24 +574,6 @@ func (r *ResourceF5XCIkePhase2Profile) Create(ctx context.Context, request resou
 			// resource modelToSpecNested UintField --> Duration
 			if !ikePhase2ProfileGlobalSpecTypeIkeKeylifetimeMinutesModel.Duration.IsNull() && !ikePhase2ProfileGlobalSpecTypeIkeKeylifetimeMinutesModel.Duration.IsUnknown() {
 				ikeKeylifetimeMinutesOneOfSpec.IkeKeylifetimeMinutes.Duration = uint32(uint32(ikePhase2ProfileGlobalSpecTypeIkeKeylifetimeMinutesModel.Duration.ValueInt64()))
-			}
-
-		}
-
-		// resource modelToSpecNested PointerOfOneOfField --> IkeKeylifetimeHours
-		if !ikeKeyLifetimeChoiceModel.IkeKeylifetimeHours.IsNull() && !ikeKeyLifetimeChoiceModel.IkeKeylifetimeHours.IsUnknown() {
-			var ikePhase2ProfileGlobalSpecTypeIkeKeylifetimeHoursModel IkePhase2ProfileGlobalSpecTypeIkeKeylifetimeHours
-			response.Diagnostics.Append(ikeKeyLifetimeChoiceModel.IkeKeylifetimeHours.As(ctx, &ikePhase2ProfileGlobalSpecTypeIkeKeylifetimeHoursModel, basetypes.ObjectAsOptions{})...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			ikeKeylifetimeHoursOneOfSpec := &ves_io_schema_views_ike_phase2_profile.CreateSpecType_IkeKeylifetimeHours{}
-			ikeKeylifetimeHoursOneOfSpec.IkeKeylifetimeHours = &ves_io_schema_views_ike_phase1_profile.InputHours{}
-			spec.IkeKeyLifetime = ikeKeylifetimeHoursOneOfSpec
-
-			// resource modelToSpecNested UintField --> Duration
-			if !ikePhase2ProfileGlobalSpecTypeIkeKeylifetimeHoursModel.Duration.IsNull() && !ikePhase2ProfileGlobalSpecTypeIkeKeylifetimeHoursModel.Duration.IsUnknown() {
-				ikeKeylifetimeHoursOneOfSpec.IkeKeylifetimeHours.Duration = uint32(uint32(ikePhase2ProfileGlobalSpecTypeIkeKeylifetimeHoursModel.Duration.ValueInt64()))
 			}
 
 		}
@@ -612,45 +612,6 @@ func (r *ResourceF5XCIkePhase2Profile) Create(ctx context.Context, request resou
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
-
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// CREATE / UPDATE: Store the plan value as-is so the apply result matches the plan.
-		// The plan is either:
-		//   - Unknown (config=null): store the full API response.
-		//   - config value (first create with user labels): store only user labels.
-		//   - prior state (update with user+backend labels): store the merged labels.
-		// In all cases, data.Labels already holds the correct plan value
-		// except when it is Unknown — in that case we use the API response.
-		if data.Labels.IsUnknown() {
-			data.Labels = labelsMap
-		}
-		// When plan is a known map, leave data.Labels unchanged (= plan value).
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
 
 	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
 	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
@@ -703,6 +664,45 @@ func (r *ResourceF5XCIkePhase2Profile) Create(ctx context.Context, request resou
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
+	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
+	//
+	// Create/Update (called from Create/Update handlers):
+	//
+	//	The apply result must match the plan exactly. We store only what the plan
+	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
+	//	the plan are intentionally omitted here — they will be picked up by Read.
+	//
+	// Read (called from Read handler):
+	//
+	//	We merge the current state (user-configured labels) with the API response
+	//	(which may contain backend-injected labels). The merged result is stored in
+	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
+	//	Terraform sees no diff and no "inconsistent result" error occurs.
+	if metaData.GetLabels() != nil {
+		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
+		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+		response.Diagnostics.Append(labelsDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		// CREATE / UPDATE: Store the plan value as-is so the apply result matches the plan.
+		// The plan is either:
+		//   - Unknown (config=null): store the full API response.
+		//   - config value (first create with user labels): store only user labels.
+		//   - prior state (update with user+backend labels): store the merged labels.
+		// In all cases, data.Labels already holds the correct plan value
+		// except when it is Unknown — in that case we use the API response.
+		if data.Labels.IsUnknown() {
+			data.Labels = labelsMap
+		}
+		// When plan is a known map, leave data.Labels unchanged (= plan value).
+	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
+		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
+		data.Labels = types.MapNull(types.StringType)
+	}
+
 	// resource SpecToModelRoot RequiredArrayOfEnumField --> EncryptionAlgos
 	if len(specData.GetEncryptionAlgos()) > 0 {
 		encryptionAlgosStrings := make([]string, 0, len(specData.GetEncryptionAlgos()))
@@ -752,6 +752,15 @@ func (r *ResourceF5XCIkePhase2Profile) Create(ctx context.Context, request resou
 
 		// Recursively call the nested template to process the oneof choices.
 
+		// resource specToModelNested BoolOfOneOfPointerField --> DisablePfs
+		_, isDisablePfs := pfsModeChoiceChoices.(*ves_io_schema_views_ike_phase2_profile.GlobalSpecType_DisablePfs)
+
+		if isDisablePfs {
+			pfsModeChoiceChoicesModel.DisablePfs = types.BoolValue(true)
+		} else {
+			pfsModeChoiceChoicesModel.DisablePfs = types.BoolNull()
+		}
+
 		// resource specToModelNested PointerOfOneOfField --> DhGroupSet
 		// GlobalSpecType
 		// false
@@ -790,15 +799,6 @@ func (r *ResourceF5XCIkePhase2Profile) Create(ctx context.Context, request resou
 			}
 		}
 
-		// resource specToModelNested BoolOfOneOfPointerField --> DisablePfs
-		_, isDisablePfs := pfsModeChoiceChoices.(*ves_io_schema_views_ike_phase2_profile.GlobalSpecType_DisablePfs)
-
-		if isDisablePfs {
-			pfsModeChoiceChoicesModel.DisablePfs = types.BoolValue(true)
-		} else {
-			pfsModeChoiceChoicesModel.DisablePfs = types.BoolNull()
-		}
-
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
 		pfsModeChoiceObj, diags := utils.GoStructToObjectValue(
 			ctx,
@@ -830,6 +830,29 @@ func (r *ResourceF5XCIkePhase2Profile) Create(ctx context.Context, request resou
 
 		// Recursively call the nested template to process the oneof choices.
 
+		// resource specToModelNested PointerOfOneOfField --> IkeKeylifetimeHours
+		// GlobalSpecType
+		// false
+		{
+			ikeKeylifetimeHoursOptions, isIkeKeylifetimeHours := ikeKeyLifetimeChoiceChoices.(*ves_io_schema_views_ike_phase2_profile.GlobalSpecType_IkeKeylifetimeHours)
+			ikeKeylifetimeHoursAttributeMap := make(map[string]attr.Value)
+
+			if isIkeKeylifetimeHours && ikeKeylifetimeHoursOptions != nil {
+
+				// resource specToModelNested UintField --> Duration
+				ikeKeylifetimeHoursAttributeMap["duration"] = types.Int64Value(int64(ikeKeylifetimeHoursOptions.IkeKeylifetimeHours.GetDuration()))
+
+				ikeKeylifetimeHoursObj, diags := types.ObjectValue(IkePhase2ProfileIkeKeyLifetimeIkeKeylifetimeHoursModelAttributeMap, ikeKeylifetimeHoursAttributeMap)
+				response.Diagnostics.Append(diags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				ikeKeyLifetimeChoiceChoicesModel.IkeKeylifetimeHours = ikeKeylifetimeHoursObj
+			} else {
+				ikeKeyLifetimeChoiceChoicesModel.IkeKeylifetimeHours = types.ObjectNull(IkePhase2ProfileIkeKeyLifetimeIkeKeylifetimeHoursModelAttributeMap)
+			}
+		}
+
 		// resource specToModelNested BoolOfOneOfPointerField --> UseDefaultKeylifetime
 		_, isUseDefaultKeylifetime := ikeKeyLifetimeChoiceChoices.(*ves_io_schema_views_ike_phase2_profile.GlobalSpecType_UseDefaultKeylifetime)
 
@@ -859,29 +882,6 @@ func (r *ResourceF5XCIkePhase2Profile) Create(ctx context.Context, request resou
 				ikeKeyLifetimeChoiceChoicesModel.IkeKeylifetimeMinutes = ikeKeylifetimeMinutesObj
 			} else {
 				ikeKeyLifetimeChoiceChoicesModel.IkeKeylifetimeMinutes = types.ObjectNull(IkePhase2ProfileIkeKeyLifetimeIkeKeylifetimeMinutesModelAttributeMap)
-			}
-		}
-
-		// resource specToModelNested PointerOfOneOfField --> IkeKeylifetimeHours
-		// GlobalSpecType
-		// false
-		{
-			ikeKeylifetimeHoursOptions, isIkeKeylifetimeHours := ikeKeyLifetimeChoiceChoices.(*ves_io_schema_views_ike_phase2_profile.GlobalSpecType_IkeKeylifetimeHours)
-			ikeKeylifetimeHoursAttributeMap := make(map[string]attr.Value)
-
-			if isIkeKeylifetimeHours && ikeKeylifetimeHoursOptions != nil {
-
-				// resource specToModelNested UintField --> Duration
-				ikeKeylifetimeHoursAttributeMap["duration"] = types.Int64Value(int64(ikeKeylifetimeHoursOptions.IkeKeylifetimeHours.GetDuration()))
-
-				ikeKeylifetimeHoursObj, diags := types.ObjectValue(IkePhase2ProfileIkeKeyLifetimeIkeKeylifetimeHoursModelAttributeMap, ikeKeylifetimeHoursAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				ikeKeyLifetimeChoiceChoicesModel.IkeKeylifetimeHours = ikeKeylifetimeHoursObj
-			} else {
-				ikeKeyLifetimeChoiceChoicesModel.IkeKeylifetimeHours = types.ObjectNull(IkePhase2ProfileIkeKeyLifetimeIkeKeylifetimeHoursModelAttributeMap)
 			}
 		}
 
@@ -966,53 +966,6 @@ func (r *ResourceF5XCIkePhase2Profile) Read(ctx context.Context, request resourc
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedLabels := make(map[string]attr.Value)
-		for k, v := range labelsMap.Elements() {
-			mergedLabels[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
-			for k, v := range data.Labels.Elements() {
-				mergedLabels[k] = v
-			}
-		}
-		mergedLabelsMap, mergedLabelsDiags := types.MapValue(types.StringType, mergedLabels)
-		response.Diagnostics.Append(mergedLabelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Labels = mergedLabelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
-
 	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
 	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
 	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
@@ -1072,6 +1025,53 @@ func (r *ResourceF5XCIkePhase2Profile) Read(ctx context.Context, request resourc
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
+	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
+	//
+	// Create/Update (called from Create/Update handlers):
+	//
+	//	The apply result must match the plan exactly. We store only what the plan
+	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
+	//	the plan are intentionally omitted here — they will be picked up by Read.
+	//
+	// Read (called from Read handler):
+	//
+	//	We merge the current state (user-configured labels) with the API response
+	//	(which may contain backend-injected labels). The merged result is stored in
+	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
+	//	Terraform sees no diff and no "inconsistent result" error occurs.
+	if metaData.GetLabels() != nil {
+		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
+		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+		response.Diagnostics.Append(labelsDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
+		// Start with the API response as the base (backend is authoritative for its own keys).
+		mergedLabels := make(map[string]attr.Value)
+		for k, v := range labelsMap.Elements() {
+			mergedLabels[k] = v
+		}
+		// Overlay with user-configured labels from the current state so that user labels
+		// are preserved even if the backend does not echo them back.
+		if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
+			for k, v := range data.Labels.Elements() {
+				mergedLabels[k] = v
+			}
+		}
+		mergedLabelsMap, mergedLabelsDiags := types.MapValue(types.StringType, mergedLabels)
+		response.Diagnostics.Append(mergedLabelsDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.Labels = mergedLabelsMap
+	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
+		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
+		data.Labels = types.MapNull(types.StringType)
+	}
+
 	// resource SpecToModelRoot RequiredArrayOfEnumField --> EncryptionAlgos
 	if len(specData.GetEncryptionAlgos()) > 0 {
 		encryptionAlgosStrings := make([]string, 0, len(specData.GetEncryptionAlgos()))
@@ -1121,6 +1121,15 @@ func (r *ResourceF5XCIkePhase2Profile) Read(ctx context.Context, request resourc
 
 		// Recursively call the nested template to process the oneof choices.
 
+		// resource specToModelNested BoolOfOneOfPointerField --> DisablePfs
+		_, isDisablePfs := pfsModeChoiceChoices.(*ves_io_schema_views_ike_phase2_profile.GlobalSpecType_DisablePfs)
+
+		if isDisablePfs {
+			pfsModeChoiceChoicesModel.DisablePfs = types.BoolValue(true)
+		} else {
+			pfsModeChoiceChoicesModel.DisablePfs = types.BoolNull()
+		}
+
 		// resource specToModelNested PointerOfOneOfField --> DhGroupSet
 		// <no value>
 		// false
@@ -1159,15 +1168,6 @@ func (r *ResourceF5XCIkePhase2Profile) Read(ctx context.Context, request resourc
 			}
 		}
 
-		// resource specToModelNested BoolOfOneOfPointerField --> DisablePfs
-		_, isDisablePfs := pfsModeChoiceChoices.(*ves_io_schema_views_ike_phase2_profile.GlobalSpecType_DisablePfs)
-
-		if isDisablePfs {
-			pfsModeChoiceChoicesModel.DisablePfs = types.BoolValue(true)
-		} else {
-			pfsModeChoiceChoicesModel.DisablePfs = types.BoolNull()
-		}
-
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
 		pfsModeChoiceObj, diags := utils.GoStructToObjectValue(
 			ctx,
@@ -1199,6 +1199,29 @@ func (r *ResourceF5XCIkePhase2Profile) Read(ctx context.Context, request resourc
 
 		// Recursively call the nested template to process the oneof choices.
 
+		// resource specToModelNested PointerOfOneOfField --> IkeKeylifetimeHours
+		// <no value>
+		// false
+		{
+			ikeKeylifetimeHoursOptions, isIkeKeylifetimeHours := ikeKeyLifetimeChoiceChoices.(*ves_io_schema_views_ike_phase2_profile.GlobalSpecType_IkeKeylifetimeHours)
+			ikeKeylifetimeHoursAttributeMap := make(map[string]attr.Value)
+
+			if isIkeKeylifetimeHours && ikeKeylifetimeHoursOptions != nil {
+
+				// resource specToModelNested UintField --> Duration
+				ikeKeylifetimeHoursAttributeMap["duration"] = types.Int64Value(int64(ikeKeylifetimeHoursOptions.IkeKeylifetimeHours.GetDuration()))
+
+				ikeKeylifetimeHoursObj, diags := types.ObjectValue(IkePhase2ProfileIkeKeyLifetimeIkeKeylifetimeHoursModelAttributeMap, ikeKeylifetimeHoursAttributeMap)
+				response.Diagnostics.Append(diags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				ikeKeyLifetimeChoiceChoicesModel.IkeKeylifetimeHours = ikeKeylifetimeHoursObj
+			} else {
+				ikeKeyLifetimeChoiceChoicesModel.IkeKeylifetimeHours = types.ObjectNull(IkePhase2ProfileIkeKeyLifetimeIkeKeylifetimeHoursModelAttributeMap)
+			}
+		}
+
 		// resource specToModelNested BoolOfOneOfPointerField --> UseDefaultKeylifetime
 		_, isUseDefaultKeylifetime := ikeKeyLifetimeChoiceChoices.(*ves_io_schema_views_ike_phase2_profile.GlobalSpecType_UseDefaultKeylifetime)
 
@@ -1228,29 +1251,6 @@ func (r *ResourceF5XCIkePhase2Profile) Read(ctx context.Context, request resourc
 				ikeKeyLifetimeChoiceChoicesModel.IkeKeylifetimeMinutes = ikeKeylifetimeMinutesObj
 			} else {
 				ikeKeyLifetimeChoiceChoicesModel.IkeKeylifetimeMinutes = types.ObjectNull(IkePhase2ProfileIkeKeyLifetimeIkeKeylifetimeMinutesModelAttributeMap)
-			}
-		}
-
-		// resource specToModelNested PointerOfOneOfField --> IkeKeylifetimeHours
-		// <no value>
-		// false
-		{
-			ikeKeylifetimeHoursOptions, isIkeKeylifetimeHours := ikeKeyLifetimeChoiceChoices.(*ves_io_schema_views_ike_phase2_profile.GlobalSpecType_IkeKeylifetimeHours)
-			ikeKeylifetimeHoursAttributeMap := make(map[string]attr.Value)
-
-			if isIkeKeylifetimeHours && ikeKeylifetimeHoursOptions != nil {
-
-				// resource specToModelNested UintField --> Duration
-				ikeKeylifetimeHoursAttributeMap["duration"] = types.Int64Value(int64(ikeKeylifetimeHoursOptions.IkeKeylifetimeHours.GetDuration()))
-
-				ikeKeylifetimeHoursObj, diags := types.ObjectValue(IkePhase2ProfileIkeKeyLifetimeIkeKeylifetimeHoursModelAttributeMap, ikeKeylifetimeHoursAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				ikeKeyLifetimeChoiceChoicesModel.IkeKeylifetimeHours = ikeKeylifetimeHoursObj
-			} else {
-				ikeKeyLifetimeChoiceChoicesModel.IkeKeylifetimeHours = types.ObjectNull(IkePhase2ProfileIkeKeyLifetimeIkeKeylifetimeHoursModelAttributeMap)
 			}
 		}
 
@@ -1406,6 +1406,24 @@ func (r *ResourceF5XCIkePhase2Profile) Update(ctx context.Context, request resou
 			return
 		}
 
+		// resource modelToSpecNested PointerOfOneOfField --> IkeKeylifetimeHours
+		if !ikeKeyLifetimeChoiceModel.IkeKeylifetimeHours.IsNull() && !ikeKeyLifetimeChoiceModel.IkeKeylifetimeHours.IsUnknown() {
+			var ikePhase2ProfileGlobalSpecTypeIkeKeylifetimeHoursModel IkePhase2ProfileGlobalSpecTypeIkeKeylifetimeHours
+			response.Diagnostics.Append(ikeKeyLifetimeChoiceModel.IkeKeylifetimeHours.As(ctx, &ikePhase2ProfileGlobalSpecTypeIkeKeylifetimeHoursModel, basetypes.ObjectAsOptions{})...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			ikeKeylifetimeHoursOneOfSpec := &ves_io_schema_views_ike_phase2_profile.ReplaceSpecType_IkeKeylifetimeHours{}
+			ikeKeylifetimeHoursOneOfSpec.IkeKeylifetimeHours = &ves_io_schema_views_ike_phase1_profile.InputHours{}
+			spec.IkeKeyLifetime = ikeKeylifetimeHoursOneOfSpec
+
+			// resource modelToSpecNested UintField --> Duration
+			if !ikePhase2ProfileGlobalSpecTypeIkeKeylifetimeHoursModel.Duration.IsNull() && !ikePhase2ProfileGlobalSpecTypeIkeKeylifetimeHoursModel.Duration.IsUnknown() {
+				ikeKeylifetimeHoursOneOfSpec.IkeKeylifetimeHours.Duration = uint32(uint32(ikePhase2ProfileGlobalSpecTypeIkeKeylifetimeHoursModel.Duration.ValueInt64()))
+			}
+
+		}
+
 		// resource modelToSpecNested BoolOfOneOfPointerField --> UseDefaultKeylifetime
 		if !ikeKeyLifetimeChoiceModel.UseDefaultKeylifetime.IsNull() && !ikeKeyLifetimeChoiceModel.UseDefaultKeylifetime.IsUnknown() {
 			useDefaultKeylifetimeSpecBool := &ves_io_schema_views_ike_phase2_profile.ReplaceSpecType_UseDefaultKeylifetime{}
@@ -1427,24 +1445,6 @@ func (r *ResourceF5XCIkePhase2Profile) Update(ctx context.Context, request resou
 			// resource modelToSpecNested UintField --> Duration
 			if !ikePhase2ProfileGlobalSpecTypeIkeKeylifetimeMinutesModel.Duration.IsNull() && !ikePhase2ProfileGlobalSpecTypeIkeKeylifetimeMinutesModel.Duration.IsUnknown() {
 				ikeKeylifetimeMinutesOneOfSpec.IkeKeylifetimeMinutes.Duration = uint32(uint32(ikePhase2ProfileGlobalSpecTypeIkeKeylifetimeMinutesModel.Duration.ValueInt64()))
-			}
-
-		}
-
-		// resource modelToSpecNested PointerOfOneOfField --> IkeKeylifetimeHours
-		if !ikeKeyLifetimeChoiceModel.IkeKeylifetimeHours.IsNull() && !ikeKeyLifetimeChoiceModel.IkeKeylifetimeHours.IsUnknown() {
-			var ikePhase2ProfileGlobalSpecTypeIkeKeylifetimeHoursModel IkePhase2ProfileGlobalSpecTypeIkeKeylifetimeHours
-			response.Diagnostics.Append(ikeKeyLifetimeChoiceModel.IkeKeylifetimeHours.As(ctx, &ikePhase2ProfileGlobalSpecTypeIkeKeylifetimeHoursModel, basetypes.ObjectAsOptions{})...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			ikeKeylifetimeHoursOneOfSpec := &ves_io_schema_views_ike_phase2_profile.ReplaceSpecType_IkeKeylifetimeHours{}
-			ikeKeylifetimeHoursOneOfSpec.IkeKeylifetimeHours = &ves_io_schema_views_ike_phase1_profile.InputHours{}
-			spec.IkeKeyLifetime = ikeKeylifetimeHoursOneOfSpec
-
-			// resource modelToSpecNested UintField --> Duration
-			if !ikePhase2ProfileGlobalSpecTypeIkeKeylifetimeHoursModel.Duration.IsNull() && !ikePhase2ProfileGlobalSpecTypeIkeKeylifetimeHoursModel.Duration.IsUnknown() {
-				ikeKeylifetimeHoursOneOfSpec.IkeKeylifetimeHours.Duration = uint32(uint32(ikePhase2ProfileGlobalSpecTypeIkeKeylifetimeHoursModel.Duration.ValueInt64()))
 			}
 
 		}
@@ -1484,53 +1484,6 @@ func (r *ResourceF5XCIkePhase2Profile) Update(ctx context.Context, request resou
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
-
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedLabels := make(map[string]attr.Value)
-		for k, v := range labelsMap.Elements() {
-			mergedLabels[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
-			for k, v := range data.Labels.Elements() {
-				mergedLabels[k] = v
-			}
-		}
-		mergedLabelsMap, mergedLabelsDiags := types.MapValue(types.StringType, mergedLabels)
-		response.Diagnostics.Append(mergedLabelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Labels = mergedLabelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
 
 	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
 	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
@@ -1591,6 +1544,53 @@ func (r *ResourceF5XCIkePhase2Profile) Update(ctx context.Context, request resou
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
+	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
+	//
+	// Create/Update (called from Create/Update handlers):
+	//
+	//	The apply result must match the plan exactly. We store only what the plan
+	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
+	//	the plan are intentionally omitted here — they will be picked up by Read.
+	//
+	// Read (called from Read handler):
+	//
+	//	We merge the current state (user-configured labels) with the API response
+	//	(which may contain backend-injected labels). The merged result is stored in
+	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
+	//	Terraform sees no diff and no "inconsistent result" error occurs.
+	if metaData.GetLabels() != nil {
+		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
+		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+		response.Diagnostics.Append(labelsDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
+		// Start with the API response as the base (backend is authoritative for its own keys).
+		mergedLabels := make(map[string]attr.Value)
+		for k, v := range labelsMap.Elements() {
+			mergedLabels[k] = v
+		}
+		// Overlay with user-configured labels from the current state so that user labels
+		// are preserved even if the backend does not echo them back.
+		if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
+			for k, v := range data.Labels.Elements() {
+				mergedLabels[k] = v
+			}
+		}
+		mergedLabelsMap, mergedLabelsDiags := types.MapValue(types.StringType, mergedLabels)
+		response.Diagnostics.Append(mergedLabelsDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.Labels = mergedLabelsMap
+	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
+		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
+		data.Labels = types.MapNull(types.StringType)
+	}
+
 	// resource SpecToModelRoot RequiredArrayOfEnumField --> EncryptionAlgos
 	if len(specData.GetEncryptionAlgos()) > 0 {
 		encryptionAlgosStrings := make([]string, 0, len(specData.GetEncryptionAlgos()))
@@ -1640,6 +1640,15 @@ func (r *ResourceF5XCIkePhase2Profile) Update(ctx context.Context, request resou
 
 		// Recursively call the nested template to process the oneof choices.
 
+		// resource specToModelNested BoolOfOneOfPointerField --> DisablePfs
+		_, isDisablePfs := pfsModeChoiceChoices.(*ves_io_schema_views_ike_phase2_profile.GlobalSpecType_DisablePfs)
+
+		if isDisablePfs {
+			pfsModeChoiceChoicesModel.DisablePfs = types.BoolValue(true)
+		} else {
+			pfsModeChoiceChoicesModel.DisablePfs = types.BoolNull()
+		}
+
 		// resource specToModelNested PointerOfOneOfField --> DhGroupSet
 		// GlobalSpecType
 		// false
@@ -1678,15 +1687,6 @@ func (r *ResourceF5XCIkePhase2Profile) Update(ctx context.Context, request resou
 			}
 		}
 
-		// resource specToModelNested BoolOfOneOfPointerField --> DisablePfs
-		_, isDisablePfs := pfsModeChoiceChoices.(*ves_io_schema_views_ike_phase2_profile.GlobalSpecType_DisablePfs)
-
-		if isDisablePfs {
-			pfsModeChoiceChoicesModel.DisablePfs = types.BoolValue(true)
-		} else {
-			pfsModeChoiceChoicesModel.DisablePfs = types.BoolNull()
-		}
-
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
 		pfsModeChoiceObj, diags := utils.GoStructToObjectValue(
 			ctx,
@@ -1718,6 +1718,29 @@ func (r *ResourceF5XCIkePhase2Profile) Update(ctx context.Context, request resou
 
 		// Recursively call the nested template to process the oneof choices.
 
+		// resource specToModelNested PointerOfOneOfField --> IkeKeylifetimeHours
+		// GlobalSpecType
+		// false
+		{
+			ikeKeylifetimeHoursOptions, isIkeKeylifetimeHours := ikeKeyLifetimeChoiceChoices.(*ves_io_schema_views_ike_phase2_profile.GlobalSpecType_IkeKeylifetimeHours)
+			ikeKeylifetimeHoursAttributeMap := make(map[string]attr.Value)
+
+			if isIkeKeylifetimeHours && ikeKeylifetimeHoursOptions != nil {
+
+				// resource specToModelNested UintField --> Duration
+				ikeKeylifetimeHoursAttributeMap["duration"] = types.Int64Value(int64(ikeKeylifetimeHoursOptions.IkeKeylifetimeHours.GetDuration()))
+
+				ikeKeylifetimeHoursObj, diags := types.ObjectValue(IkePhase2ProfileIkeKeyLifetimeIkeKeylifetimeHoursModelAttributeMap, ikeKeylifetimeHoursAttributeMap)
+				response.Diagnostics.Append(diags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				ikeKeyLifetimeChoiceChoicesModel.IkeKeylifetimeHours = ikeKeylifetimeHoursObj
+			} else {
+				ikeKeyLifetimeChoiceChoicesModel.IkeKeylifetimeHours = types.ObjectNull(IkePhase2ProfileIkeKeyLifetimeIkeKeylifetimeHoursModelAttributeMap)
+			}
+		}
+
 		// resource specToModelNested BoolOfOneOfPointerField --> UseDefaultKeylifetime
 		_, isUseDefaultKeylifetime := ikeKeyLifetimeChoiceChoices.(*ves_io_schema_views_ike_phase2_profile.GlobalSpecType_UseDefaultKeylifetime)
 
@@ -1747,29 +1770,6 @@ func (r *ResourceF5XCIkePhase2Profile) Update(ctx context.Context, request resou
 				ikeKeyLifetimeChoiceChoicesModel.IkeKeylifetimeMinutes = ikeKeylifetimeMinutesObj
 			} else {
 				ikeKeyLifetimeChoiceChoicesModel.IkeKeylifetimeMinutes = types.ObjectNull(IkePhase2ProfileIkeKeyLifetimeIkeKeylifetimeMinutesModelAttributeMap)
-			}
-		}
-
-		// resource specToModelNested PointerOfOneOfField --> IkeKeylifetimeHours
-		// GlobalSpecType
-		// false
-		{
-			ikeKeylifetimeHoursOptions, isIkeKeylifetimeHours := ikeKeyLifetimeChoiceChoices.(*ves_io_schema_views_ike_phase2_profile.GlobalSpecType_IkeKeylifetimeHours)
-			ikeKeylifetimeHoursAttributeMap := make(map[string]attr.Value)
-
-			if isIkeKeylifetimeHours && ikeKeylifetimeHoursOptions != nil {
-
-				// resource specToModelNested UintField --> Duration
-				ikeKeylifetimeHoursAttributeMap["duration"] = types.Int64Value(int64(ikeKeylifetimeHoursOptions.IkeKeylifetimeHours.GetDuration()))
-
-				ikeKeylifetimeHoursObj, diags := types.ObjectValue(IkePhase2ProfileIkeKeyLifetimeIkeKeylifetimeHoursModelAttributeMap, ikeKeylifetimeHoursAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				ikeKeyLifetimeChoiceChoicesModel.IkeKeylifetimeHours = ikeKeylifetimeHoursObj
-			} else {
-				ikeKeyLifetimeChoiceChoicesModel.IkeKeylifetimeHours = types.ObjectNull(IkePhase2ProfileIkeKeyLifetimeIkeKeylifetimeHoursModelAttributeMap)
 			}
 		}
 

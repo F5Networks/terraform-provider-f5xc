@@ -280,12 +280,13 @@ func (p *F5XCProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 	var limiterRate rate.Limit = rate.Inf
 	var limiterBurst int32 = 1
 
-	if !config.Limiter.Rate.IsNull() {
-		limiterRate = rate.Limit(config.Limiter.Rate.ValueFloat64())
-	}
-
-	if !config.Limiter.Burst.IsNull() {
-		limiterBurst = config.Limiter.Burst.ValueInt32()
+	if config.Limiter != nil {
+		if !config.Limiter.Rate.IsNull() {
+			limiterRate = rate.Limit(config.Limiter.Rate.ValueFloat64())
+		}
+		if !config.Limiter.Burst.IsNull() {
+			limiterBurst = config.Limiter.Burst.ValueInt32()
+		}
 	}
 
 	// If any of the expected configurations are missing, return

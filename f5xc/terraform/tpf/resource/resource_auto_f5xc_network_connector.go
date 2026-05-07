@@ -59,20 +59,20 @@ type NetworkConnectorForwardProxyConfigType struct {
 
 // ResourceF5XCNetworkConnectorModel describes the resource data model.
 type ResourceF5XCNetworkConnectorModel struct {
+	Annotations         types.Map      `tfsdk:"annotations"`
 	Description         types.String   `tfsdk:"description"`
 	Name                types.String   `tfsdk:"name"`
 	Namespace           types.String   `tfsdk:"namespace"`
 	Uid                 types.String   `tfsdk:"uid"`
 	Labels              types.Map      `tfsdk:"labels"`
-	Annotations         types.Map      `tfsdk:"annotations"`
 	ConnectorType       types.List     `tfsdk:"connector_type"`
 	OutsideNetworkType  types.List     `tfsdk:"outside_network_type"`
 	OutsideNetwork      types.List     `tfsdk:"outside_network"`
-	InsideNetworkType   types.List     `tfsdk:"inside_network_type"`
+	SnatPoolType        types.List     `tfsdk:"snat_pool_type"`
 	DynamicReverseProxy types.List     `tfsdk:"dynamic_reverse_proxy"`
 	ForwardProxy        types.Object   `tfsdk:"forward_proxy"`
+	InsideNetworkType   types.List     `tfsdk:"inside_network_type"`
 	InsideNetwork       types.List     `tfsdk:"inside_network"`
-	SnatPoolType        types.List     `tfsdk:"snat_pool_type"`
 	ProxyType           types.List     `tfsdk:"proxy_type"`
 	Timeouts            timeouts.Value `tfsdk:"timeouts"`
 }
@@ -90,17 +90,17 @@ var (
 // Attribute map for ArrayOfPointerField --> OutsideNetwork
 var NetworkConnectorOutsideNetworkObjectRefModelAttributeMap = map[string]attr.Type{
 
-	"name":      types.StringType,
 	"tenant":    types.StringType,
 	"namespace": types.StringType,
+	"name":      types.StringType,
 }
 
 // Attribute map for ArrayOfPointerField --> DynamicReverseProxy
 var NetworkConnectorDynamicReverseProxyObjectRefModelAttributeMap = map[string]attr.Type{
 
-	"name":      types.StringType,
 	"tenant":    types.StringType,
 	"namespace": types.StringType,
+	"name":      types.StringType,
 }
 
 // Attribute map for PointerField --> ForwardProxy
@@ -139,6 +139,18 @@ func (r *ResourceF5XCNetworkConnector) Schema(ctx context.Context, request resou
 		Description:         "NetworkConnector resource",
 
 		Attributes: map[string]schema.Attribute{
+			"annotations": schema.MapAttribute{
+				Description:         "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
+				MarkdownDescription: "",
+				Required:            false,
+				Optional:            true,
+				Computed:            false,
+				ElementType:         types.StringType,
+				Validators: []validator.Map{
+					mapvalidator.KeysAre(stringvalidator.LengthBetween(1, 64)),
+					mapvalidator.ValueStringsAre(stringvalidator.LengthBetween(1, 1024)),
+				},
+			},
 			"description": schema.StringAttribute{
 				Description:         "description Human readable description for the object",
 				MarkdownDescription: "",
@@ -182,18 +194,6 @@ func (r *ResourceF5XCNetworkConnector) Schema(ctx context.Context, request resou
 					mapmergemodifier.New(),
 				},
 			},
-			"annotations": schema.MapAttribute{
-				Description:         "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            false,
-				ElementType:         types.StringType,
-				Validators: []validator.Map{
-					mapvalidator.KeysAre(stringvalidator.LengthBetween(1, 64)),
-					mapvalidator.ValueStringsAre(stringvalidator.LengthBetween(1, 1024)),
-				},
-			},
 			"connector_type": schema.ListAttribute{
 				Description:         "Network Connector Type Type of connector to use between inside virtual network and outside virtual network",
 				MarkdownDescription: "<br>**Allowed Values (choose one):** `[\"NETWORK_CONNECTOR_TYPE_DEFAULT_GATEWAY_SNAT\", \"NETWORK_CONNECTOR_TYPE_DYNAMIC_GATEWAY_SNAT\", \"NETWORK_CONNECTOR_TYPE_DYNAMIC_GATEWAY\"]`",
@@ -208,13 +208,13 @@ func (r *ResourceF5XCNetworkConnector) Schema(ctx context.Context, request resou
 			},
 			"outside_network_type": schema.ListAttribute{
 				Description:         "Outside VN type Type of the outside network. The network can be well known virtual network like site local inside / site local/ public etc. If the  virtual network is well known virtual network, the outside_network ref need not be present and will be auto derived. If virtual network is not well known like per site virtual network outside_network reference need to be specified outside_network_type can be one of type VIRTUAL_NETWORK_SITE_LOCAL, VIRTUAL_NETWORK_SITE_LOCAL_INSIDE, VIRTUAL_NETWORK_PER_SITE, VIRTUAL_NETWORK_PUBLIC or VIRTUAL_NETWORK_GLOBAL",
-				MarkdownDescription: "<br>**Allowed Values (choose one):** `[\"VIRTUAL_NETWORK_SITE_LOCAL\", \"VIRTUAL_NETWORK_SITE_LOCAL_INSIDE\", \"VIRTUAL_NETWORK_PUBLIC\", \"VIRTUAL_NETWORK_GLOBAL\", \"VIRTUAL_NETWORK_SITE_SERVICE\", \"VIRTUAL_NETWORK_VER_INTERNAL\", \"VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE\", \"VIRTUAL_NETWORK_IP_AUTO\", \"VIRTUAL_NETWORK_PER_SITE\", \"VIRTUAL_NETWORK_VOLTADN_PRIVATE_NETWORK\", \"VIRTUAL_NETWORK_SRV6_NETWORK\", \"VIRTUAL_NETWORK_IP_FABRIC\", \"VIRTUAL_NETWORK_SEGMENT\", \"VIRTUAL_NETWORK_MANAGEMENT\"]`",
+				MarkdownDescription: "<br>**Allowed Values (choose one):** `[\"VIRTUAL_NETWORK_IP_FABRIC\", \"VIRTUAL_NETWORK_SEGMENT\", \"VIRTUAL_NETWORK_MANAGEMENT\", \"VIRTUAL_NETWORK_SITE_LOCAL\", \"VIRTUAL_NETWORK_SITE_LOCAL_INSIDE\", \"VIRTUAL_NETWORK_PER_SITE\", \"VIRTUAL_NETWORK_PUBLIC\", \"VIRTUAL_NETWORK_SITE_SERVICE\", \"VIRTUAL_NETWORK_VER_INTERNAL\", \"VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE\", \"VIRTUAL_NETWORK_SRV6_NETWORK\", \"VIRTUAL_NETWORK_GLOBAL\", \"VIRTUAL_NETWORK_IP_AUTO\", \"VIRTUAL_NETWORK_VOLTADN_PRIVATE_NETWORK\"]`",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
 				ElementType:         types.StringType,
 				Validators: []validator.List{
-					listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"VIRTUAL_NETWORK_SITE_LOCAL", "VIRTUAL_NETWORK_SITE_LOCAL_INSIDE", "VIRTUAL_NETWORK_PUBLIC", "VIRTUAL_NETWORK_GLOBAL", "VIRTUAL_NETWORK_SITE_SERVICE", "VIRTUAL_NETWORK_VER_INTERNAL", "VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE", "VIRTUAL_NETWORK_IP_AUTO", "VIRTUAL_NETWORK_PER_SITE", "VIRTUAL_NETWORK_VOLTADN_PRIVATE_NETWORK", "VIRTUAL_NETWORK_SRV6_NETWORK", "VIRTUAL_NETWORK_IP_FABRIC", "VIRTUAL_NETWORK_SEGMENT", "VIRTUAL_NETWORK_MANAGEMENT"}...)),
+					listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"VIRTUAL_NETWORK_IP_FABRIC", "VIRTUAL_NETWORK_SEGMENT", "VIRTUAL_NETWORK_MANAGEMENT", "VIRTUAL_NETWORK_SITE_LOCAL", "VIRTUAL_NETWORK_SITE_LOCAL_INSIDE", "VIRTUAL_NETWORK_PER_SITE", "VIRTUAL_NETWORK_PUBLIC", "VIRTUAL_NETWORK_SITE_SERVICE", "VIRTUAL_NETWORK_VER_INTERNAL", "VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE", "VIRTUAL_NETWORK_SRV6_NETWORK", "VIRTUAL_NETWORK_GLOBAL", "VIRTUAL_NETWORK_IP_AUTO", "VIRTUAL_NETWORK_VOLTADN_PRIVATE_NETWORK"}...)),
 					listvalidator.SizeAtMost(1),
 				},
 			},
@@ -226,13 +226,6 @@ func (r *ResourceF5XCNetworkConnector) Schema(ctx context.Context, request resou
 				Computed:            false,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
-						"name": schema.StringAttribute{
-							Description:         "",
-							MarkdownDescription: "",
-							Required:            true,
-							Optional:            false,
-							Computed:            false,
-						},
 						"tenant": schema.StringAttribute{
 							Description:         "",
 							MarkdownDescription: "",
@@ -250,18 +243,25 @@ func (r *ResourceF5XCNetworkConnector) Schema(ctx context.Context, request resou
 							Optional:            false,
 							Computed:            false,
 						},
+						"name": schema.StringAttribute{
+							Description:         "",
+							MarkdownDescription: "",
+							Required:            true,
+							Optional:            false,
+							Computed:            false,
+						},
 					},
 				},
 			},
-			"inside_network_type": schema.ListAttribute{
-				Description:         "Inside VN Type Type of the inside network. The network can be well known virtual network like site local inside / site local. If the virtual network is well known virtual network, the inside_network ref need not be present and will be auto derived. If virtual network is not well known like per site virtual network inside_network reference need to be specified inside_network_type can be one of type VIRTUAL_NETWORK_SITE_LOCAL, VIRTUAL_NETWORK_SITE_LOCAL_INSIDE or VIRTUAL_NETWORK_PER_SITE When inside_network_type is VIRTUAL_NETWORK_SITE_LOCAL outside_network_type can only be VIRTUAL_NETWORK_GLOBAL",
-				MarkdownDescription: "<br>**Allowed Values (choose one):** `[\"VIRTUAL_NETWORK_PER_SITE\", \"VIRTUAL_NETWORK_VOLTADN_PRIVATE_NETWORK\", \"VIRTUAL_NETWORK_SRV6_NETWORK\", \"VIRTUAL_NETWORK_IP_FABRIC\", \"VIRTUAL_NETWORK_SEGMENT\", \"VIRTUAL_NETWORK_MANAGEMENT\", \"VIRTUAL_NETWORK_SITE_LOCAL\", \"VIRTUAL_NETWORK_SITE_LOCAL_INSIDE\", \"VIRTUAL_NETWORK_PUBLIC\", \"VIRTUAL_NETWORK_GLOBAL\", \"VIRTUAL_NETWORK_SITE_SERVICE\", \"VIRTUAL_NETWORK_VER_INTERNAL\", \"VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE\", \"VIRTUAL_NETWORK_IP_AUTO\"]`",
-				Required:            true,
-				Optional:            false,
+			"snat_pool_type": schema.ListAttribute{
+				Description:         "Snat Pool Type SNAT setting not valid when  network connector type is Dynamic Gateway without SNAT. Type of Snat configuration to be used.",
+				MarkdownDescription: "<br>**Allowed Values (choose one):** `[\"NETWORK_CONNECTOR_SNAT_SIP_USE_INTERFACE\", \"NETWORK_CONNECTOR_SNAT_SIP_USE_POOL\"]`",
+				Required:            false,
+				Optional:            true,
 				Computed:            false,
 				ElementType:         types.StringType,
 				Validators: []validator.List{
-					listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"VIRTUAL_NETWORK_PER_SITE", "VIRTUAL_NETWORK_VOLTADN_PRIVATE_NETWORK", "VIRTUAL_NETWORK_SRV6_NETWORK", "VIRTUAL_NETWORK_IP_FABRIC", "VIRTUAL_NETWORK_SEGMENT", "VIRTUAL_NETWORK_MANAGEMENT", "VIRTUAL_NETWORK_SITE_LOCAL", "VIRTUAL_NETWORK_SITE_LOCAL_INSIDE", "VIRTUAL_NETWORK_PUBLIC", "VIRTUAL_NETWORK_GLOBAL", "VIRTUAL_NETWORK_SITE_SERVICE", "VIRTUAL_NETWORK_VER_INTERNAL", "VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE", "VIRTUAL_NETWORK_IP_AUTO"}...)),
+					listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"NETWORK_CONNECTOR_SNAT_SIP_USE_INTERFACE", "NETWORK_CONNECTOR_SNAT_SIP_USE_POOL"}...)),
 					listvalidator.SizeAtMost(1),
 				},
 			},
@@ -273,13 +273,6 @@ func (r *ResourceF5XCNetworkConnector) Schema(ctx context.Context, request resou
 				Computed:            false,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
-						"name": schema.StringAttribute{
-							Description:         "",
-							MarkdownDescription: "",
-							Required:            true,
-							Optional:            false,
-							Computed:            false,
-						},
 						"tenant": schema.StringAttribute{
 							Description:         "",
 							MarkdownDescription: "",
@@ -291,6 +284,13 @@ func (r *ResourceF5XCNetworkConnector) Schema(ctx context.Context, request resou
 							},
 						},
 						"namespace": schema.StringAttribute{
+							Description:         "",
+							MarkdownDescription: "",
+							Required:            true,
+							Optional:            false,
+							Computed:            false,
+						},
+						"name": schema.StringAttribute{
 							Description:         "",
 							MarkdownDescription: "",
 							Required:            true,
@@ -350,6 +350,18 @@ func (r *ResourceF5XCNetworkConnector) Schema(ctx context.Context, request resou
 					},
 				},
 			},
+			"inside_network_type": schema.ListAttribute{
+				Description:         "Inside VN Type Type of the inside network. The network can be well known virtual network like site local inside / site local. If the virtual network is well known virtual network, the inside_network ref need not be present and will be auto derived. If virtual network is not well known like per site virtual network inside_network reference need to be specified inside_network_type can be one of type VIRTUAL_NETWORK_SITE_LOCAL, VIRTUAL_NETWORK_SITE_LOCAL_INSIDE or VIRTUAL_NETWORK_PER_SITE When inside_network_type is VIRTUAL_NETWORK_SITE_LOCAL outside_network_type can only be VIRTUAL_NETWORK_GLOBAL",
+				MarkdownDescription: "<br>**Allowed Values (choose one):** `[\"VIRTUAL_NETWORK_SITE_LOCAL\", \"VIRTUAL_NETWORK_SITE_LOCAL_INSIDE\", \"VIRTUAL_NETWORK_PER_SITE\", \"VIRTUAL_NETWORK_PUBLIC\", \"VIRTUAL_NETWORK_SITE_SERVICE\", \"VIRTUAL_NETWORK_VER_INTERNAL\", \"VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE\", \"VIRTUAL_NETWORK_SRV6_NETWORK\", \"VIRTUAL_NETWORK_GLOBAL\", \"VIRTUAL_NETWORK_IP_AUTO\", \"VIRTUAL_NETWORK_VOLTADN_PRIVATE_NETWORK\", \"VIRTUAL_NETWORK_IP_FABRIC\", \"VIRTUAL_NETWORK_SEGMENT\", \"VIRTUAL_NETWORK_MANAGEMENT\"]`",
+				Required:            true,
+				Optional:            false,
+				Computed:            false,
+				ElementType:         types.StringType,
+				Validators: []validator.List{
+					listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"VIRTUAL_NETWORK_SITE_LOCAL", "VIRTUAL_NETWORK_SITE_LOCAL_INSIDE", "VIRTUAL_NETWORK_PER_SITE", "VIRTUAL_NETWORK_PUBLIC", "VIRTUAL_NETWORK_SITE_SERVICE", "VIRTUAL_NETWORK_VER_INTERNAL", "VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE", "VIRTUAL_NETWORK_SRV6_NETWORK", "VIRTUAL_NETWORK_GLOBAL", "VIRTUAL_NETWORK_IP_AUTO", "VIRTUAL_NETWORK_VOLTADN_PRIVATE_NETWORK", "VIRTUAL_NETWORK_IP_FABRIC", "VIRTUAL_NETWORK_SEGMENT", "VIRTUAL_NETWORK_MANAGEMENT"}...)),
+					listvalidator.SizeAtMost(1),
+				},
+			},
 			"inside_network": schema.ListNestedAttribute{
 				Description:         "Inside VN Reference to inside network. Reference is valid only when the network type is per site virtual network or global virtual network. It is ignored for all other network types. public virtual network is not allowed as inside network",
 				MarkdownDescription: "",
@@ -383,18 +395,6 @@ func (r *ResourceF5XCNetworkConnector) Schema(ctx context.Context, request resou
 							Computed:            false,
 						},
 					},
-				},
-			},
-			"snat_pool_type": schema.ListAttribute{
-				Description:         "Snat Pool Type SNAT setting not valid when  network connector type is Dynamic Gateway without SNAT. Type of Snat configuration to be used.",
-				MarkdownDescription: "<br>**Allowed Values (choose one):** `[\"NETWORK_CONNECTOR_SNAT_SIP_USE_INTERFACE\", \"NETWORK_CONNECTOR_SNAT_SIP_USE_POOL\"]`",
-				Required:            false,
-				Optional:            true,
-				Computed:            false,
-				ElementType:         types.StringType,
-				Validators: []validator.List{
-					listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"NETWORK_CONNECTOR_SNAT_SIP_USE_INTERFACE", "NETWORK_CONNECTOR_SNAT_SIP_USE_POOL"}...)),
-					listvalidator.SizeAtMost(1),
 				},
 			},
 			"proxy_type": schema.ListAttribute{
@@ -511,6 +511,20 @@ func (r *ResourceF5XCNetworkConnector) Create(ctx context.Context, request resou
 
 	// Populate createReq from data model
 
+	// resource modelToMetaRoot MapOfStringField --> Annotations
+	if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
+		var labels map[string]string
+		diags = data.Annotations.ElementsAs(ctx, &labels, false)
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			tflog.Error(ctx, "Failed to convert annotations from map to model")
+			return
+		}
+		meta.Annotations = labels
+	} else {
+		meta.Annotations = nil
+	}
+
 	// resource modelToMetaRoot StringField --> Description
 	if !data.Description.IsNull() && !data.Description.IsUnknown() {
 		meta.Description = string(data.Description.ValueString())
@@ -524,20 +538,6 @@ func (r *ResourceF5XCNetworkConnector) Create(ctx context.Context, request resou
 	// resource modelToMetaRoot RequiredStringField --> Namespace
 	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
 		meta.Namespace = string(data.Namespace.ValueString())
-	}
-
-	// resource modelToMetaRoot MapOfStringField --> Annotations
-	if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
-		var labels map[string]string
-		diags = data.Annotations.ElementsAs(ctx, &labels, false)
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			tflog.Error(ctx, "Failed to convert annotations from map to model")
-			return
-		}
-		meta.Annotations = labels
-	} else {
-		meta.Annotations = nil
 	}
 
 	if response.Diagnostics.HasError() {
@@ -572,6 +572,45 @@ func (r *ResourceF5XCNetworkConnector) Create(ctx context.Context, request resou
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
+	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
+	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
+	//
+	// Create/Update (called from Create/Update handlers):
+	//
+	//	The apply result must match the plan exactly. We store only what the plan
+	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
+	//	the plan are intentionally omitted here — they will be picked up by Read.
+	//
+	// Read (called from Read handler):
+	//
+	//	We merge the current state (user-configured labels) with the API response
+	//	(which may contain backend-injected labels). The merged result is stored in
+	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
+	//	Terraform sees no diff and no "inconsistent result" error occurs.
+	if metaData.GetAnnotations() != nil {
+		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
+		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+		response.Diagnostics.Append(annotationsDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		// CREATE / UPDATE: Store the plan value as-is so the apply result matches the plan.
+		// The plan is either:
+		//   - Unknown (config=null): store the full API response.
+		//   - config value (first create with user labels): store only user labels.
+		//   - prior state (update with user+backend labels): store the merged labels.
+		// In all cases, data.Annotations already holds the correct plan value
+		// except when it is Unknown — in that case we use the API response.
+		if data.Annotations.IsUnknown() {
+			data.Annotations = annotationsMap
+		}
+		// When plan is a known map, leave data.Annotations unchanged (= plan value).
+	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
+		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
+		data.Annotations = types.MapNull(types.StringType)
+	}
 
 	// resource SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
@@ -624,45 +663,6 @@ func (r *ResourceF5XCNetworkConnector) Create(ctx context.Context, request resou
 		data.Labels = types.MapNull(types.StringType)
 	}
 
-	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// CREATE / UPDATE: Store the plan value as-is so the apply result matches the plan.
-		// The plan is either:
-		//   - Unknown (config=null): store the full API response.
-		//   - config value (first create with user labels): store only user labels.
-		//   - prior state (update with user+backend labels): store the merged labels.
-		// In all cases, data.Annotations already holds the correct plan value
-		// except when it is Unknown — in that case we use the API response.
-		if data.Annotations.IsUnknown() {
-			data.Annotations = annotationsMap
-		}
-		// When plan is a known map, leave data.Annotations unchanged (= plan value).
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Annotations = types.MapNull(types.StringType)
-	}
-
 	// resource SpecToModelRoot RequiredEnumField --> ConnectorType
 	if specData.GetConnectorType().String() != "" {
 		stringValue := types.StringValue(specData.GetConnectorType().String())
@@ -700,14 +700,6 @@ func (r *ResourceF5XCNetworkConnector) Create(ctx context.Context, request resou
 		for _, outsideNetworkElement := range specData.OutsideNetwork {
 			objectRefTypeModelModel := ObjectRefTypeModel{}
 
-			// resource specToModelNested RequiredStringField --> Name
-			if outsideNetworkElement.GetName() != "" {
-				objectRefTypeModelModel.Name = types.StringValue(outsideNetworkElement.GetName())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Name = types.StringNull()
-			}
-
 			// resource specToModelNested StringField --> Tenant
 			if outsideNetworkElement.GetTenant() != "" {
 				objectRefTypeModelModel.Tenant = types.StringValue(outsideNetworkElement.GetTenant())
@@ -722,6 +714,14 @@ func (r *ResourceF5XCNetworkConnector) Create(ctx context.Context, request resou
 			} else {
 				// Empty string, set to null
 				objectRefTypeModelModel.Namespace = types.StringNull()
+			}
+
+			// resource specToModelNested RequiredStringField --> Name
+			if outsideNetworkElement.GetName() != "" {
+				objectRefTypeModelModel.Name = types.StringValue(outsideNetworkElement.GetName())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Name = types.StringNull()
 			}
 
 			outsideNetworkElements = append(outsideNetworkElements, objectRefTypeModelModel)
@@ -747,19 +747,19 @@ func (r *ResourceF5XCNetworkConnector) Create(ctx context.Context, request resou
 		data.OutsideNetwork = nullOutsideNetworkList
 	}
 
-	// resource SpecToModelRoot RequiredEnumField --> InsideNetworkType
-	if specData.GetInsideNetworkType().String() != "" {
-		stringValue := types.StringValue(specData.GetInsideNetworkType().String())
+	// resource SpecToModelRoot EnumField --> SnatPoolType
+	if specData.GetSnatPoolType().String() != "" {
+		stringValue := types.StringValue(specData.GetSnatPoolType().String())
 		stringSlice := []types.String{stringValue}
 		listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
 		response.Diagnostics.Append(diags...)
 		if response.Diagnostics.HasError() {
 			return
 		}
-		data.InsideNetworkType = listValue
+		data.SnatPoolType = listValue
 	} else {
 		// Empty string, set to null
-		data.InsideNetworkType = types.ListNull(types.StringType)
+		data.SnatPoolType = types.ListNull(types.StringType)
 	}
 
 	// resource SpecToModelRoot ArrayOfPointerField --> DynamicReverseProxy
@@ -768,14 +768,6 @@ func (r *ResourceF5XCNetworkConnector) Create(ctx context.Context, request resou
 
 		for _, dynamicReverseProxyElement := range specData.DynamicReverseProxy {
 			objectRefTypeModelModel := ObjectRefTypeModel{}
-
-			// resource specToModelNested RequiredStringField --> Name
-			if dynamicReverseProxyElement.GetName() != "" {
-				objectRefTypeModelModel.Name = types.StringValue(dynamicReverseProxyElement.GetName())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Name = types.StringNull()
-			}
 
 			// resource specToModelNested StringField --> Tenant
 			if dynamicReverseProxyElement.GetTenant() != "" {
@@ -791,6 +783,14 @@ func (r *ResourceF5XCNetworkConnector) Create(ctx context.Context, request resou
 			} else {
 				// Empty string, set to null
 				objectRefTypeModelModel.Namespace = types.StringNull()
+			}
+
+			// resource specToModelNested RequiredStringField --> Name
+			if dynamicReverseProxyElement.GetName() != "" {
+				objectRefTypeModelModel.Name = types.StringValue(dynamicReverseProxyElement.GetName())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Name = types.StringNull()
 			}
 
 			dynamicReverseProxyElements = append(dynamicReverseProxyElements, objectRefTypeModelModel)
@@ -853,6 +853,21 @@ func (r *ResourceF5XCNetworkConnector) Create(ctx context.Context, request resou
 		data.ForwardProxy = types.ObjectNull(NetworkConnectorForwardProxyModelAttributeMap)
 	}
 
+	// resource SpecToModelRoot RequiredEnumField --> InsideNetworkType
+	if specData.GetInsideNetworkType().String() != "" {
+		stringValue := types.StringValue(specData.GetInsideNetworkType().String())
+		stringSlice := []types.String{stringValue}
+		listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.InsideNetworkType = listValue
+	} else {
+		// Empty string, set to null
+		data.InsideNetworkType = types.ListNull(types.StringType)
+	}
+
 	// resource SpecToModelRoot ArrayOfPointerField --> InsideNetwork
 	if len(specData.InsideNetwork) > 0 {
 		insideNetworkElements := make([]ObjectRefTypeModel, 0, len(specData.InsideNetwork))
@@ -905,21 +920,6 @@ func (r *ResourceF5XCNetworkConnector) Create(ctx context.Context, request resou
 		}
 		nullInsideNetworkList := basetypes.NewListNull(insideNetworkObjectType)
 		data.InsideNetwork = nullInsideNetworkList
-	}
-
-	// resource SpecToModelRoot EnumField --> SnatPoolType
-	if specData.GetSnatPoolType().String() != "" {
-		stringValue := types.StringValue(specData.GetSnatPoolType().String())
-		stringSlice := []types.String{stringValue}
-		listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.SnatPoolType = listValue
-	} else {
-		// Empty string, set to null
-		data.SnatPoolType = types.ListNull(types.StringType)
 	}
 
 	// resource SpecToModelRoot EnumField --> ProxyType
@@ -1000,6 +1000,53 @@ func (r *ResourceF5XCNetworkConnector) Read(ctx context.Context, request resourc
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
+	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
+	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
+	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
+	//
+	// Create/Update (called from Create/Update handlers):
+	//
+	//	The apply result must match the plan exactly. We store only what the plan
+	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
+	//	the plan are intentionally omitted here — they will be picked up by Read.
+	//
+	// Read (called from Read handler):
+	//
+	//	We merge the current state (user-configured labels) with the API response
+	//	(which may contain backend-injected labels). The merged result is stored in
+	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
+	//	Terraform sees no diff and no "inconsistent result" error occurs.
+	if metaData.GetAnnotations() != nil {
+		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
+		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+		response.Diagnostics.Append(annotationsDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
+		// Start with the API response as the base (backend is authoritative for its own keys).
+		mergedAnnotations := make(map[string]attr.Value)
+		for k, v := range annotationsMap.Elements() {
+			mergedAnnotations[k] = v
+		}
+		// Overlay with user-configured labels from the current state so that user labels
+		// are preserved even if the backend does not echo them back.
+		if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
+			for k, v := range data.Annotations.Elements() {
+				mergedAnnotations[k] = v
+			}
+		}
+		mergedAnnotationsMap, mergedAnnotationsDiags := types.MapValue(types.StringType, mergedAnnotations)
+		response.Diagnostics.Append(mergedAnnotationsDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.Annotations = mergedAnnotationsMap
+	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
+		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
+		data.Annotations = types.MapNull(types.StringType)
+	}
+
 	// resource SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
 
@@ -1059,53 +1106,6 @@ func (r *ResourceF5XCNetworkConnector) Read(ctx context.Context, request resourc
 		data.Labels = types.MapNull(types.StringType)
 	}
 
-	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedAnnotations := make(map[string]attr.Value)
-		for k, v := range annotationsMap.Elements() {
-			mergedAnnotations[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
-			for k, v := range data.Annotations.Elements() {
-				mergedAnnotations[k] = v
-			}
-		}
-		mergedAnnotationsMap, mergedAnnotationsDiags := types.MapValue(types.StringType, mergedAnnotations)
-		response.Diagnostics.Append(mergedAnnotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Annotations = mergedAnnotationsMap
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Annotations = types.MapNull(types.StringType)
-	}
-
 	// resource SpecToModelRoot RequiredEnumField --> ConnectorType
 	if specData.GetConnectorType().String() != "" {
 		stringValue := types.StringValue(specData.GetConnectorType().String())
@@ -1143,14 +1143,6 @@ func (r *ResourceF5XCNetworkConnector) Read(ctx context.Context, request resourc
 		for _, outsideNetworkElement := range specData.OutsideNetwork {
 			objectRefTypeModelModel := ObjectRefTypeModel{}
 
-			// resource specToModelNested RequiredStringField --> Name
-			if outsideNetworkElement.GetName() != "" {
-				objectRefTypeModelModel.Name = types.StringValue(outsideNetworkElement.GetName())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Name = types.StringNull()
-			}
-
 			// resource specToModelNested StringField --> Tenant
 			if outsideNetworkElement.GetTenant() != "" {
 				objectRefTypeModelModel.Tenant = types.StringValue(outsideNetworkElement.GetTenant())
@@ -1165,6 +1157,14 @@ func (r *ResourceF5XCNetworkConnector) Read(ctx context.Context, request resourc
 			} else {
 				// Empty string, set to null
 				objectRefTypeModelModel.Namespace = types.StringNull()
+			}
+
+			// resource specToModelNested RequiredStringField --> Name
+			if outsideNetworkElement.GetName() != "" {
+				objectRefTypeModelModel.Name = types.StringValue(outsideNetworkElement.GetName())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Name = types.StringNull()
 			}
 
 			outsideNetworkElements = append(outsideNetworkElements, objectRefTypeModelModel)
@@ -1190,19 +1190,19 @@ func (r *ResourceF5XCNetworkConnector) Read(ctx context.Context, request resourc
 		data.OutsideNetwork = nullOutsideNetworkList
 	}
 
-	// resource SpecToModelRoot RequiredEnumField --> InsideNetworkType
-	if specData.GetInsideNetworkType().String() != "" {
-		stringValue := types.StringValue(specData.GetInsideNetworkType().String())
+	// resource SpecToModelRoot EnumField --> SnatPoolType
+	if specData.GetSnatPoolType().String() != "" {
+		stringValue := types.StringValue(specData.GetSnatPoolType().String())
 		stringSlice := []types.String{stringValue}
 		listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
 		response.Diagnostics.Append(diags...)
 		if response.Diagnostics.HasError() {
 			return
 		}
-		data.InsideNetworkType = listValue
+		data.SnatPoolType = listValue
 	} else {
 		// Empty string, set to null
-		data.InsideNetworkType = types.ListNull(types.StringType)
+		data.SnatPoolType = types.ListNull(types.StringType)
 	}
 
 	// resource SpecToModelRoot ArrayOfPointerField --> DynamicReverseProxy
@@ -1211,14 +1211,6 @@ func (r *ResourceF5XCNetworkConnector) Read(ctx context.Context, request resourc
 
 		for _, dynamicReverseProxyElement := range specData.DynamicReverseProxy {
 			objectRefTypeModelModel := ObjectRefTypeModel{}
-
-			// resource specToModelNested RequiredStringField --> Name
-			if dynamicReverseProxyElement.GetName() != "" {
-				objectRefTypeModelModel.Name = types.StringValue(dynamicReverseProxyElement.GetName())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Name = types.StringNull()
-			}
 
 			// resource specToModelNested StringField --> Tenant
 			if dynamicReverseProxyElement.GetTenant() != "" {
@@ -1234,6 +1226,14 @@ func (r *ResourceF5XCNetworkConnector) Read(ctx context.Context, request resourc
 			} else {
 				// Empty string, set to null
 				objectRefTypeModelModel.Namespace = types.StringNull()
+			}
+
+			// resource specToModelNested RequiredStringField --> Name
+			if dynamicReverseProxyElement.GetName() != "" {
+				objectRefTypeModelModel.Name = types.StringValue(dynamicReverseProxyElement.GetName())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Name = types.StringNull()
 			}
 
 			dynamicReverseProxyElements = append(dynamicReverseProxyElements, objectRefTypeModelModel)
@@ -1296,6 +1296,21 @@ func (r *ResourceF5XCNetworkConnector) Read(ctx context.Context, request resourc
 		data.ForwardProxy = types.ObjectNull(NetworkConnectorForwardProxyModelAttributeMap)
 	}
 
+	// resource SpecToModelRoot RequiredEnumField --> InsideNetworkType
+	if specData.GetInsideNetworkType().String() != "" {
+		stringValue := types.StringValue(specData.GetInsideNetworkType().String())
+		stringSlice := []types.String{stringValue}
+		listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.InsideNetworkType = listValue
+	} else {
+		// Empty string, set to null
+		data.InsideNetworkType = types.ListNull(types.StringType)
+	}
+
 	// resource SpecToModelRoot ArrayOfPointerField --> InsideNetwork
 	if len(specData.InsideNetwork) > 0 {
 		insideNetworkElements := make([]ObjectRefTypeModel, 0, len(specData.InsideNetwork))
@@ -1348,21 +1363,6 @@ func (r *ResourceF5XCNetworkConnector) Read(ctx context.Context, request resourc
 		}
 		nullInsideNetworkList := basetypes.NewListNull(insideNetworkObjectType)
 		data.InsideNetwork = nullInsideNetworkList
-	}
-
-	// resource SpecToModelRoot EnumField --> SnatPoolType
-	if specData.GetSnatPoolType().String() != "" {
-		stringValue := types.StringValue(specData.GetSnatPoolType().String())
-		stringSlice := []types.String{stringValue}
-		listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.SnatPoolType = listValue
-	} else {
-		// Empty string, set to null
-		data.SnatPoolType = types.ListNull(types.StringType)
 	}
 
 	// resource SpecToModelRoot EnumField --> ProxyType
@@ -1427,6 +1427,20 @@ func (r *ResourceF5XCNetworkConnector) Update(ctx context.Context, request resou
 
 	// Populate updateReq from data model
 
+	// resource modelToMetaRoot MapOfStringField --> Annotations
+	if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
+		var labels map[string]string
+		diags = data.Annotations.ElementsAs(ctx, &labels, false)
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			tflog.Error(ctx, "Failed to convert annotations from map to model")
+			return
+		}
+		meta.Annotations = labels
+	} else {
+		meta.Annotations = nil
+	}
+
 	// resource modelToMetaRoot StringField --> Description
 	if !data.Description.IsNull() && !data.Description.IsUnknown() {
 		meta.Description = string(data.Description.ValueString())
@@ -1440,20 +1454,6 @@ func (r *ResourceF5XCNetworkConnector) Update(ctx context.Context, request resou
 	// resource modelToMetaRoot RequiredStringField --> Namespace
 	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
 		meta.Namespace = string(data.Namespace.ValueString())
-	}
-
-	// resource modelToMetaRoot MapOfStringField --> Annotations
-	if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
-		var labels map[string]string
-		diags = data.Annotations.ElementsAs(ctx, &labels, false)
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			tflog.Error(ctx, "Failed to convert annotations from map to model")
-			return
-		}
-		meta.Annotations = labels
-	} else {
-		meta.Annotations = nil
 	}
 
 	if response.Diagnostics.HasError() {
@@ -1489,6 +1489,53 @@ func (r *ResourceF5XCNetworkConnector) Update(ctx context.Context, request resou
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
+	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
+	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
+	//
+	// Create/Update (called from Create/Update handlers):
+	//
+	//	The apply result must match the plan exactly. We store only what the plan
+	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
+	//	the plan are intentionally omitted here — they will be picked up by Read.
+	//
+	// Read (called from Read handler):
+	//
+	//	We merge the current state (user-configured labels) with the API response
+	//	(which may contain backend-injected labels). The merged result is stored in
+	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
+	//	Terraform sees no diff and no "inconsistent result" error occurs.
+	if metaData.GetAnnotations() != nil {
+		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
+		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+		response.Diagnostics.Append(annotationsDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
+		// Start with the API response as the base (backend is authoritative for its own keys).
+		mergedAnnotations := make(map[string]attr.Value)
+		for k, v := range annotationsMap.Elements() {
+			mergedAnnotations[k] = v
+		}
+		// Overlay with user-configured labels from the current state so that user labels
+		// are preserved even if the backend does not echo them back.
+		if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
+			for k, v := range data.Annotations.Elements() {
+				mergedAnnotations[k] = v
+			}
+		}
+		mergedAnnotationsMap, mergedAnnotationsDiags := types.MapValue(types.StringType, mergedAnnotations)
+		response.Diagnostics.Append(mergedAnnotationsDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.Annotations = mergedAnnotationsMap
+	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
+		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
+		data.Annotations = types.MapNull(types.StringType)
+	}
 
 	// resource SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
@@ -1549,53 +1596,6 @@ func (r *ResourceF5XCNetworkConnector) Update(ctx context.Context, request resou
 		data.Labels = types.MapNull(types.StringType)
 	}
 
-	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedAnnotations := make(map[string]attr.Value)
-		for k, v := range annotationsMap.Elements() {
-			mergedAnnotations[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
-			for k, v := range data.Annotations.Elements() {
-				mergedAnnotations[k] = v
-			}
-		}
-		mergedAnnotationsMap, mergedAnnotationsDiags := types.MapValue(types.StringType, mergedAnnotations)
-		response.Diagnostics.Append(mergedAnnotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Annotations = mergedAnnotationsMap
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Annotations = types.MapNull(types.StringType)
-	}
-
 	// resource SpecToModelRoot RequiredEnumField --> ConnectorType
 	if specData.GetConnectorType().String() != "" {
 		stringValue := types.StringValue(specData.GetConnectorType().String())
@@ -1633,14 +1633,6 @@ func (r *ResourceF5XCNetworkConnector) Update(ctx context.Context, request resou
 		for _, outsideNetworkElement := range specData.OutsideNetwork {
 			objectRefTypeModelModel := ObjectRefTypeModel{}
 
-			// resource specToModelNested RequiredStringField --> Name
-			if outsideNetworkElement.GetName() != "" {
-				objectRefTypeModelModel.Name = types.StringValue(outsideNetworkElement.GetName())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Name = types.StringNull()
-			}
-
 			// resource specToModelNested StringField --> Tenant
 			if outsideNetworkElement.GetTenant() != "" {
 				objectRefTypeModelModel.Tenant = types.StringValue(outsideNetworkElement.GetTenant())
@@ -1655,6 +1647,14 @@ func (r *ResourceF5XCNetworkConnector) Update(ctx context.Context, request resou
 			} else {
 				// Empty string, set to null
 				objectRefTypeModelModel.Namespace = types.StringNull()
+			}
+
+			// resource specToModelNested RequiredStringField --> Name
+			if outsideNetworkElement.GetName() != "" {
+				objectRefTypeModelModel.Name = types.StringValue(outsideNetworkElement.GetName())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Name = types.StringNull()
 			}
 
 			outsideNetworkElements = append(outsideNetworkElements, objectRefTypeModelModel)
@@ -1680,19 +1680,19 @@ func (r *ResourceF5XCNetworkConnector) Update(ctx context.Context, request resou
 		data.OutsideNetwork = nullOutsideNetworkList
 	}
 
-	// resource SpecToModelRoot RequiredEnumField --> InsideNetworkType
-	if specData.GetInsideNetworkType().String() != "" {
-		stringValue := types.StringValue(specData.GetInsideNetworkType().String())
+	// resource SpecToModelRoot EnumField --> SnatPoolType
+	if specData.GetSnatPoolType().String() != "" {
+		stringValue := types.StringValue(specData.GetSnatPoolType().String())
 		stringSlice := []types.String{stringValue}
 		listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
 		response.Diagnostics.Append(diags...)
 		if response.Diagnostics.HasError() {
 			return
 		}
-		data.InsideNetworkType = listValue
+		data.SnatPoolType = listValue
 	} else {
 		// Empty string, set to null
-		data.InsideNetworkType = types.ListNull(types.StringType)
+		data.SnatPoolType = types.ListNull(types.StringType)
 	}
 
 	// resource SpecToModelRoot ArrayOfPointerField --> DynamicReverseProxy
@@ -1701,14 +1701,6 @@ func (r *ResourceF5XCNetworkConnector) Update(ctx context.Context, request resou
 
 		for _, dynamicReverseProxyElement := range specData.DynamicReverseProxy {
 			objectRefTypeModelModel := ObjectRefTypeModel{}
-
-			// resource specToModelNested RequiredStringField --> Name
-			if dynamicReverseProxyElement.GetName() != "" {
-				objectRefTypeModelModel.Name = types.StringValue(dynamicReverseProxyElement.GetName())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Name = types.StringNull()
-			}
 
 			// resource specToModelNested StringField --> Tenant
 			if dynamicReverseProxyElement.GetTenant() != "" {
@@ -1724,6 +1716,14 @@ func (r *ResourceF5XCNetworkConnector) Update(ctx context.Context, request resou
 			} else {
 				// Empty string, set to null
 				objectRefTypeModelModel.Namespace = types.StringNull()
+			}
+
+			// resource specToModelNested RequiredStringField --> Name
+			if dynamicReverseProxyElement.GetName() != "" {
+				objectRefTypeModelModel.Name = types.StringValue(dynamicReverseProxyElement.GetName())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Name = types.StringNull()
 			}
 
 			dynamicReverseProxyElements = append(dynamicReverseProxyElements, objectRefTypeModelModel)
@@ -1786,6 +1786,21 @@ func (r *ResourceF5XCNetworkConnector) Update(ctx context.Context, request resou
 		data.ForwardProxy = types.ObjectNull(NetworkConnectorForwardProxyModelAttributeMap)
 	}
 
+	// resource SpecToModelRoot RequiredEnumField --> InsideNetworkType
+	if specData.GetInsideNetworkType().String() != "" {
+		stringValue := types.StringValue(specData.GetInsideNetworkType().String())
+		stringSlice := []types.String{stringValue}
+		listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.InsideNetworkType = listValue
+	} else {
+		// Empty string, set to null
+		data.InsideNetworkType = types.ListNull(types.StringType)
+	}
+
 	// resource SpecToModelRoot ArrayOfPointerField --> InsideNetwork
 	if len(specData.InsideNetwork) > 0 {
 		insideNetworkElements := make([]ObjectRefTypeModel, 0, len(specData.InsideNetwork))
@@ -1838,21 +1853,6 @@ func (r *ResourceF5XCNetworkConnector) Update(ctx context.Context, request resou
 		}
 		nullInsideNetworkList := basetypes.NewListNull(insideNetworkObjectType)
 		data.InsideNetwork = nullInsideNetworkList
-	}
-
-	// resource SpecToModelRoot EnumField --> SnatPoolType
-	if specData.GetSnatPoolType().String() != "" {
-		stringValue := types.StringValue(specData.GetSnatPoolType().String())
-		stringSlice := []types.String{stringValue}
-		listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.SnatPoolType = listValue
-	} else {
-		// Empty string, set to null
-		data.SnatPoolType = types.ListNull(types.StringType)
 	}
 
 	// resource SpecToModelRoot EnumField --> ProxyType

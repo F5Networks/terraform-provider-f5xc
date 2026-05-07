@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -258,7 +259,23 @@ func (m *mockPendingResource) GetObjPendingInitializers() []string {
 		m.calls++
 		return res
 	}
+	// Once all pre-configured responses are exhausted, keep returning the last entry
+	// so that a timeout test can simulate a resource that never finishes initializing.
+	if len(m.pending) > 0 {
+		return m.pending[len(m.pending)-1]
+	}
 	return nil
+}
+
+// testWaitConfig returns a fast configuration for use in tests: zero-duration sleeps
+// and a small retry count so tests complete instantly.
+func testWaitConfig(maxRetries int) waitForPendingInitializersConfig {
+	return waitForPendingInitializersConfig{
+		maxRetries:     maxRetries,
+		maxBackoff:     0,
+		initialBackoff: 0,
+		sleep:          func(time.Duration) {},
+	}
 }
 
 func TestWaitForPendingInitializers(t *testing.T) {
@@ -269,7 +286,7 @@ func TestWaitForPendingInitializers(t *testing.T) {
 	getter := func(ctx context.Context, ns, name string) (*mockPendingResource, error) {
 		return resource, nil
 	}
-	err := WaitForPendingInitializers(ctx, "n", "ns", "uid", getter)
+	err := waitForPendingInitializersWithConfig(ctx, "n", "ns", "uid", getter, testWaitConfig(5))
 	if err != nil {
 		t.Fatalf("expected nil error, got %v", err)
 	}
@@ -280,7 +297,7 @@ func TestWaitForPendingInitializers_404(t *testing.T) {
 	getter := func(ctx context.Context, ns, name string) (*mockPendingResource, error) {
 		return nil, fmt.Errorf("status code 404")
 	}
-	err := WaitForPendingInitializers(ctx, "n", "ns", "uid", getter)
+	err := waitForPendingInitializersWithConfig(ctx, "n", "ns", "uid", getter, testWaitConfig(5))
 	if err == nil || !strings.Contains(err.Error(), "no longer exists") {
 		t.Fatalf("expected 404 error, got %v", err)
 	}
@@ -291,7 +308,7 @@ func TestWaitForPendingInitializers_GenericError(t *testing.T) {
 	getter := func(ctx context.Context, ns, name string) (*mockPendingResource, error) {
 		return nil, fmt.Errorf("internal server error")
 	}
-	err := WaitForPendingInitializers(ctx, "n", "ns", "uid", getter)
+	err := waitForPendingInitializersWithConfig(ctx, "n", "ns", "uid", getter, testWaitConfig(5))
 	if err == nil || !strings.Contains(err.Error(), "error finding resource") {
 		t.Fatalf("expected generic error, got %v", err)
 	}
@@ -299,13 +316,15 @@ func TestWaitForPendingInitializers_GenericError(t *testing.T) {
 
 func TestWaitForPendingInitializers_Timeout(t *testing.T) {
 	ctx := context.Background()
+	// The mock always returns pending initializers (last entry is non-empty),
+	// so the function must exhaust all retries and return a timeout error.
 	resource := &mockPendingResource{
-		pending: [][]string{{"init1"}, {"init2"}, {"init3"}, {"init4"}, {"init5"}, {"init6"}, {"init7"}, {"init8"}, {"init9"}, {"init10"}, {"init11"}},
+		pending: [][]string{{"init1"}, {"init2"}, {"init3"}},
 	}
 	getter := func(ctx context.Context, ns, name string) (*mockPendingResource, error) {
 		return resource, nil
 	}
-	err := WaitForPendingInitializers(ctx, "n", "ns", "uid", getter)
+	err := waitForPendingInitializersWithConfig(ctx, "n", "ns", "uid", getter, testWaitConfig(5))
 	if err == nil || !strings.Contains(err.Error(), "still has pending initializers") {
 		t.Fatalf("expected timeout error, got %v", err)
 	}

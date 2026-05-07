@@ -30,21 +30,334 @@ type DataSourceF5XCRoute struct {
 }
 
 type RouteRouteRouteType struct {
-	ResponseHeadersToAdd                types.List   `tfsdk:"response_headers_to_add"`
+	ResponseCookiesToRemove             types.List   `tfsdk:"response_cookies_to_remove"`
 	WafExclusionChoice                  types.Object `tfsdk:"waf_exclusion_choice"`
 	ResponseHeadersToRemove             types.List   `tfsdk:"response_headers_to_remove"`
-	RequestCookiesToRemove              types.List   `tfsdk:"request_cookies_to_remove"`
+	ResponseCookiesToAdd                types.List   `tfsdk:"response_cookies_to_add"`
 	WafType                             types.Object `tfsdk:"waf_type"`
-	DisableLocationAdd                  types.Bool   `tfsdk:"disable_location_add"`
-	Match                               types.List   `tfsdk:"match"`
+	RouteActionChoice                   types.Object `tfsdk:"route_action_choice"`
+	BotDefenseJavascriptInjectionChoice types.Object `tfsdk:"bot_defense_javascript_injection_choice"`
 	ServicePolicy                       types.Object `tfsdk:"service_policy"`
 	RequestHeadersToAdd                 types.List   `tfsdk:"request_headers_to_add"`
+	RequestCookiesToRemove              types.List   `tfsdk:"request_cookies_to_remove"`
+	DisableLocationAdd                  types.Bool   `tfsdk:"disable_location_add"`
+	Match                               types.List   `tfsdk:"match"`
+	ResponseHeadersToAdd                types.List   `tfsdk:"response_headers_to_add"`
 	RequestHeadersToRemove              types.List   `tfsdk:"request_headers_to_remove"`
 	RequestCookiesToAdd                 types.List   `tfsdk:"request_cookies_to_add"`
-	ResponseCookiesToRemove             types.List   `tfsdk:"response_cookies_to_remove"`
-	RouteActionChoice                   types.Object `tfsdk:"route_action_choice"`
-	ResponseCookiesToAdd                types.List   `tfsdk:"response_cookies_to_add"`
-	BotDefenseJavascriptInjectionChoice types.Object `tfsdk:"bot_defense_javascript_injection_choice"`
+}
+
+type RouteRouteTypeWafExclusionChoice struct {
+	InheritedWafExclusion types.Bool   `tfsdk:"inherited_waf_exclusion"`
+	WafExclusionPolicy    types.Object `tfsdk:"waf_exclusion_policy"`
+}
+
+type RouteSetCookieValueOption struct {
+	Name              types.String `tfsdk:"name"`
+	SamesiteChoice    types.Object `tfsdk:"samesite_choice"`
+	PartitionedChoice types.Object `tfsdk:"partitioned_choice"`
+	MaxAgeChoice      types.Object `tfsdk:"max_age_choice"`
+	DomainChoice      types.Object `tfsdk:"domain_choice"`
+	ValueChoice       types.Object `tfsdk:"value_choice"`
+	SecureChoice      types.Object `tfsdk:"secure_choice"`
+	HttponlyChoice    types.Object `tfsdk:"httponly_choice"`
+	PathChoice        types.Object `tfsdk:"path_choice"`
+	ExpiryChoice      types.Object `tfsdk:"expiry_choice"`
+	Overwrite         types.Bool   `tfsdk:"overwrite"`
+}
+
+type RouteSetCookieValueOptionSamesiteChoice struct {
+	SamesiteStrict types.Bool `tfsdk:"samesite_strict"`
+	SamesiteLax    types.Bool `tfsdk:"samesite_lax"`
+	SamesiteNone   types.Bool `tfsdk:"samesite_none"`
+	IgnoreSamesite types.Bool `tfsdk:"ignore_samesite"`
+}
+
+type RouteSetCookieValueOptionPartitionedChoice struct {
+	IgnorePartitioned types.Bool `tfsdk:"ignore_partitioned"`
+	AddPartitioned    types.Bool `tfsdk:"add_partitioned"`
+}
+
+type RouteSetCookieValueOptionMaxAgeChoice struct {
+	MaxAgeValue  types.Int32 `tfsdk:"max_age_value"`
+	IgnoreMaxAge types.Bool  `tfsdk:"ignore_max_age"`
+}
+
+type RouteSetCookieValueOptionDomainChoice struct {
+	IgnoreDomain types.Bool   `tfsdk:"ignore_domain"`
+	AddDomain    types.String `tfsdk:"add_domain"`
+}
+
+type RouteSetCookieValueOptionValueChoice struct {
+	IgnoreValue types.Bool   `tfsdk:"ignore_value"`
+	Value       types.String `tfsdk:"value"`
+	SecretValue types.Object `tfsdk:"secret_value"`
+}
+
+type RouteSetCookieValueOptionSecretValue struct {
+	SecretInfoChoice types.Object `tfsdk:"secret_info_choice"`
+}
+
+type RouteSecretTypeSecretInfoChoice struct {
+	BlindfoldSecretInfo types.Object `tfsdk:"blindfold_secret_info"`
+	ClearSecretInfo     types.Object `tfsdk:"clear_secret_info"`
+}
+
+type RouteSecretTypeBlindfoldSecretInfo struct {
+	DecryptionProvider types.String `tfsdk:"decryption_provider"`
+	StoreProvider      types.String `tfsdk:"store_provider"`
+	Location           types.String `tfsdk:"location"`
+}
+
+type RouteSecretTypeClearSecretInfo struct {
+	Provider types.String `tfsdk:"provider"`
+	Url      types.String `tfsdk:"url"`
+}
+
+type RouteSetCookieValueOptionSecureChoice struct {
+	IgnoreSecure types.Bool `tfsdk:"ignore_secure"`
+	AddSecure    types.Bool `tfsdk:"add_secure"`
+}
+
+type RouteSetCookieValueOptionHttponlyChoice struct {
+	IgnoreHttponly types.Bool `tfsdk:"ignore_httponly"`
+	AddHttponly    types.Bool `tfsdk:"add_httponly"`
+}
+
+type RouteSetCookieValueOptionPathChoice struct {
+	AddPath    types.String `tfsdk:"add_path"`
+	IgnorePath types.Bool   `tfsdk:"ignore_path"`
+}
+
+type RouteSetCookieValueOptionExpiryChoice struct {
+	IgnoreExpiry types.Bool   `tfsdk:"ignore_expiry"`
+	AddExpiry    types.String `tfsdk:"add_expiry"`
+}
+
+type RouteWafType struct {
+	RefTypeChoice types.Object `tfsdk:"ref_type_choice"`
+}
+
+type RouteWafTypeRefTypeChoice struct {
+	DisableWaf  types.Bool   `tfsdk:"disable_waf"`
+	InheritWaf  types.Bool   `tfsdk:"inherit_waf"`
+	AppFirewall types.Object `tfsdk:"app_firewall"`
+}
+
+type RouteWafTypeAppFirewall struct {
+	AppFirewall types.List `tfsdk:"app_firewall"`
+}
+
+type RouteRouteTypeRouteActionChoice struct {
+	RouteDestination    types.Object `tfsdk:"route_destination"`
+	RouteRedirect       types.Object `tfsdk:"route_redirect"`
+	RouteDirectResponse types.Object `tfsdk:"route_direct_response"`
+}
+
+type RouteRouteTypeRouteDestination struct {
+	QueryParams                   types.Object `tfsdk:"query_params"`
+	RouteDestinationRewriteChoice types.Object `tfsdk:"route_destination_rewrite_choice"`
+	HostRewriteParamsChoice       types.Object `tfsdk:"host_rewrite_params_choice"`
+	Timeout                       types.Int64  `tfsdk:"timeout"`
+	RetryPolicy                   types.Object `tfsdk:"retry_policy"`
+	CsrfPolicy                    types.Object `tfsdk:"csrf_policy"`
+	ClusterRetractChoice          types.Object `tfsdk:"cluster_retract_choice"`
+	EndpointSubsets               types.Map    `tfsdk:"endpoint_subsets"`
+	WebSocketConfig               types.Object `tfsdk:"web_socket_config"`
+	Priority                      types.List   `tfsdk:"priority"`
+	Destinations                  types.List   `tfsdk:"destinations"`
+	MirrorPolicy                  types.Object `tfsdk:"mirror_policy"`
+	BufferPolicy                  types.Object `tfsdk:"buffer_policy"`
+	CorsPolicy                    types.Object `tfsdk:"cors_policy"`
+	HashPolicy                    types.List   `tfsdk:"hash_policy"`
+	SpdyConfig                    types.Object `tfsdk:"spdy_config"`
+}
+
+type RouteRouteQueryParamsSimpleRoute struct {
+	QueryParamsChoice types.Object `tfsdk:"query_params_choice"`
+}
+
+type RouteQueryParamsSimpleRouteQueryParamsChoice struct {
+	RetainAllParams types.Bool   `tfsdk:"retain_all_params"`
+	RemoveAllParams types.Bool   `tfsdk:"remove_all_params"`
+	ReplaceParams   types.String `tfsdk:"replace_params"`
+}
+
+type RouteRouteDestinationListRouteDestinationRewriteChoice struct {
+	RegexRewrite  types.Object `tfsdk:"regex_rewrite"`
+	PrefixRewrite types.String `tfsdk:"prefix_rewrite"`
+}
+
+type RouteRouteDestinationListRegexRewrite struct {
+	Pattern      types.String `tfsdk:"pattern"`
+	Substitution types.String `tfsdk:"substitution"`
+}
+
+type RouteRouteDestinationListHostRewriteParamsChoice struct {
+	HostRewrite     types.String `tfsdk:"host_rewrite"`
+	AutoHostRewrite types.Bool   `tfsdk:"auto_host_rewrite"`
+}
+
+type RouteRetryPolicyType struct {
+	RetriableStatusCodes types.List   `tfsdk:"retriable_status_codes"`
+	BackOff              types.Object `tfsdk:"back_off"`
+	RetryCondition       types.List   `tfsdk:"retry_condition"`
+	NumRetries           types.Int64  `tfsdk:"num_retries"`
+	PerTryTimeout        types.Int64  `tfsdk:"per_try_timeout"`
+}
+
+type RouteRetryBackOff struct {
+	BaseInterval types.Int64 `tfsdk:"base_interval"`
+	MaxInterval  types.Int64 `tfsdk:"max_interval"`
+}
+
+type RouteCsrfPolicy struct {
+	AllowedDomainsChoice types.Object `tfsdk:"allowed_domains_choice"`
+}
+
+type RouteCsrfPolicyAllowedDomainsChoice struct {
+	Disabled               types.Bool   `tfsdk:"disabled"`
+	AllLoadBalancerDomains types.Bool   `tfsdk:"all_load_balancer_domains"`
+	CustomDomainList       types.Object `tfsdk:"custom_domain_list"`
+}
+
+type RouteCsrfPolicyCustomDomainList struct {
+	Domains types.List `tfsdk:"domains"`
+}
+
+type RouteRouteDestinationListClusterRetractChoice struct {
+	DoNotRetractCluster types.Bool `tfsdk:"do_not_retract_cluster"`
+	RetractCluster      types.Bool `tfsdk:"retract_cluster"`
+}
+
+type RouteRouteWebsocketConfigType struct {
+	UseWebsocket types.Bool `tfsdk:"use_websocket"`
+}
+
+type RouteRouteRouteDestination struct {
+	Cluster         types.List  `tfsdk:"cluster"`
+	Weight          types.Int64 `tfsdk:"weight"`
+	Priority        types.Int64 `tfsdk:"priority"`
+	EndpointSubsets types.Map   `tfsdk:"endpoint_subsets"`
+}
+
+type RouteRouteMirrorPolicyType struct {
+	Cluster types.List   `tfsdk:"cluster"`
+	Percent types.Object `tfsdk:"percent"`
+}
+
+type RouteFractionalPercent struct {
+	Numerator   types.Int64 `tfsdk:"numerator"`
+	Denominator types.List  `tfsdk:"denominator"`
+}
+
+type RouteBufferConfigType struct {
+	Disabled        types.Bool  `tfsdk:"disabled"`
+	MaxRequestBytes types.Int64 `tfsdk:"max_request_bytes"`
+}
+
+type RouteCorsPolicy struct {
+	Disabled         types.Bool   `tfsdk:"disabled"`
+	AllowOrigin      types.List   `tfsdk:"allow_origin"`
+	AllowMethods     types.String `tfsdk:"allow_methods"`
+	AllowHeaders     types.String `tfsdk:"allow_headers"`
+	ExposeHeaders    types.String `tfsdk:"expose_headers"`
+	AllowCredentials types.Bool   `tfsdk:"allow_credentials"`
+	AllowOriginRegex types.List   `tfsdk:"allow_origin_regex"`
+	MaximumAge       types.Int32  `tfsdk:"maximum_age"`
+}
+
+type RouteRouteHashPolicyType struct {
+	PolicySpecifierChoice types.Object `tfsdk:"policy_specifier_choice"`
+	Terminal              types.Bool   `tfsdk:"terminal"`
+}
+
+type RouteHashPolicyTypePolicySpecifierChoice struct {
+	Cookie     types.Object `tfsdk:"cookie"`
+	SourceIp   types.Bool   `tfsdk:"source_ip"`
+	HeaderName types.String `tfsdk:"header_name"`
+}
+
+type RouteHashPolicyTypeCookie struct {
+	Path           types.String `tfsdk:"path"`
+	SamesiteChoice types.Object `tfsdk:"samesite_choice"`
+	SecureChoice   types.Object `tfsdk:"secure_choice"`
+	HttponlyChoice types.Object `tfsdk:"httponly_choice"`
+	Name           types.String `tfsdk:"name"`
+	Ttl            types.Int64  `tfsdk:"ttl"`
+}
+
+type RouteCookieForHashingSamesiteChoice struct {
+	SamesiteStrict types.Bool `tfsdk:"samesite_strict"`
+	SamesiteLax    types.Bool `tfsdk:"samesite_lax"`
+	SamesiteNone   types.Bool `tfsdk:"samesite_none"`
+	IgnoreSamesite types.Bool `tfsdk:"ignore_samesite"`
+}
+
+type RouteCookieForHashingSecureChoice struct {
+	IgnoreSecure types.Bool `tfsdk:"ignore_secure"`
+	AddSecure    types.Bool `tfsdk:"add_secure"`
+}
+
+type RouteCookieForHashingHttponlyChoice struct {
+	IgnoreHttponly types.Bool `tfsdk:"ignore_httponly"`
+	AddHttponly    types.Bool `tfsdk:"add_httponly"`
+}
+
+type RouteRouteSpdyConfigType struct {
+	UseSpdy types.Bool `tfsdk:"use_spdy"`
+}
+
+type RouteRouteTypeRouteRedirect struct {
+	HostRedirect       types.String `tfsdk:"host_redirect"`
+	RedirectPathChoice types.Object `tfsdk:"redirect_path_choice"`
+	ProtoRedirect      types.String `tfsdk:"proto_redirect"`
+	QueryParamsChoice  types.Object `tfsdk:"query_params_choice"`
+	ResponseCode       types.Int64  `tfsdk:"response_code"`
+}
+
+type RouteRouteRedirectRedirectPathChoice struct {
+	PathRedirect  types.String `tfsdk:"path_redirect"`
+	PrefixRewrite types.String `tfsdk:"prefix_rewrite"`
+}
+
+type RouteRouteRedirectQueryParamsChoice struct {
+	RetainAllParams types.Bool   `tfsdk:"retain_all_params"`
+	RemoveAllParams types.Bool   `tfsdk:"remove_all_params"`
+	ReplaceParams   types.String `tfsdk:"replace_params"`
+}
+
+type RouteRouteTypeRouteDirectResponse struct {
+	ResponseCode        types.Int64  `tfsdk:"response_code"`
+	ResponseBodyEncoded types.String `tfsdk:"response_body_encoded"`
+}
+
+type RouteRouteTypeBotDefenseJavascriptInjectionChoice struct {
+	InheritedBotDefenseJavascriptInjection types.Bool   `tfsdk:"inherited_bot_defense_javascript_injection"`
+	BotDefenseJavascriptInjection          types.Object `tfsdk:"bot_defense_javascript_injection"`
+}
+
+type RouteRouteTypeBotDefenseJavascriptInjection struct {
+	JavascriptLocation types.List `tfsdk:"javascript_location"`
+	JavascriptTags     types.List `tfsdk:"javascript_tags"`
+}
+
+type RouteRouteJavaScriptTag struct {
+	JavascriptUrl types.String `tfsdk:"javascript_url"`
+	TagAttributes types.List   `tfsdk:"tag_attributes"`
+}
+
+type RouteRouteTagAttribute struct {
+	JavascriptTag types.List   `tfsdk:"javascript_tag"`
+	TagValue      types.String `tfsdk:"tag_value"`
+}
+
+type RouteRouteServicePolicyInfo struct {
+	ServicePolicyChoice types.Object `tfsdk:"service_policy_choice"`
+}
+
+type RouteServicePolicyInfoServicePolicyChoice struct {
+	Disable types.Bool `tfsdk:"disable"`
 }
 
 type RouteHeaderManipulationOptionType struct {
@@ -62,47 +375,22 @@ type RouteHeaderManipulationOptionTypeSecretValue struct {
 	SecretInfoChoice types.Object `tfsdk:"secret_info_choice"`
 }
 
-type RouteSecretTypeSecretInfoChoice struct {
-	ClearSecretInfo     types.Object `tfsdk:"clear_secret_info"`
-	BlindfoldSecretInfo types.Object `tfsdk:"blindfold_secret_info"`
-}
-
-type RouteSecretTypeClearSecretInfo struct {
-	Provider types.String `tfsdk:"provider"`
-	Url      types.String `tfsdk:"url"`
-}
-
-type RouteSecretTypeBlindfoldSecretInfo struct {
-	Location           types.String `tfsdk:"location"`
-	DecryptionProvider types.String `tfsdk:"decryption_provider"`
-	StoreProvider      types.String `tfsdk:"store_provider"`
-}
-
-type RouteRouteTypeWafExclusionChoice struct {
-	InheritedWafExclusion types.Bool   `tfsdk:"inherited_waf_exclusion"`
-	WafExclusionPolicy    types.Object `tfsdk:"waf_exclusion_policy"`
-}
-
-type RouteWafType struct {
-	RefTypeChoice types.Object `tfsdk:"ref_type_choice"`
-}
-
-type RouteWafTypeRefTypeChoice struct {
-	DisableWaf  types.Bool   `tfsdk:"disable_waf"`
-	InheritWaf  types.Bool   `tfsdk:"inherit_waf"`
-	AppFirewall types.Object `tfsdk:"app_firewall"`
-}
-
-type RouteWafTypeAppFirewall struct {
-	AppFirewall types.List `tfsdk:"app_firewall"`
-}
-
 type RouteRouteMatch struct {
+	Path         types.Object `tfsdk:"path"`
 	Headers      types.List   `tfsdk:"headers"`
 	QueryParams  types.List   `tfsdk:"query_params"`
 	HttpMethod   types.List   `tfsdk:"http_method"`
 	IncomingPort types.Object `tfsdk:"incoming_port"`
-	Path         types.Object `tfsdk:"path"`
+}
+
+type RoutePathMatcherType struct {
+	PathMatchChoice types.Object `tfsdk:"path_match_choice"`
+}
+
+type RoutePathMatcherTypePathMatchChoice struct {
+	Prefix types.String `tfsdk:"prefix"`
+	Path   types.String `tfsdk:"path"`
+	Regex  types.String `tfsdk:"regex"`
 }
 
 type RouteHeaderMatcherType struct {
@@ -137,28 +425,10 @@ type RoutePortMatcherTypePortMatchChoice struct {
 	NoPortMatch types.Bool   `tfsdk:"no_port_match"`
 }
 
-type RoutePathMatcherType struct {
-	PathMatchChoice types.Object `tfsdk:"path_match_choice"`
-}
-
-type RoutePathMatcherTypePathMatchChoice struct {
-	Prefix types.String `tfsdk:"prefix"`
-	Path   types.String `tfsdk:"path"`
-	Regex  types.String `tfsdk:"regex"`
-}
-
-type RouteRouteServicePolicyInfo struct {
-	ServicePolicyChoice types.Object `tfsdk:"service_policy_choice"`
-}
-
-type RouteServicePolicyInfoServicePolicyChoice struct {
-	Disable types.Bool `tfsdk:"disable"`
-}
-
 type RouteCookieValueOption struct {
+	Name        types.String `tfsdk:"name"`
 	ValueChoice types.Object `tfsdk:"value_choice"`
 	Overwrite   types.Bool   `tfsdk:"overwrite"`
-	Name        types.String `tfsdk:"name"`
 }
 
 type RouteCookieValueOptionValueChoice struct {
@@ -170,284 +440,14 @@ type RouteCookieValueOptionSecretValue struct {
 	SecretInfoChoice types.Object `tfsdk:"secret_info_choice"`
 }
 
-type RouteRouteTypeRouteActionChoice struct {
-	RouteDestination    types.Object `tfsdk:"route_destination"`
-	RouteRedirect       types.Object `tfsdk:"route_redirect"`
-	RouteDirectResponse types.Object `tfsdk:"route_direct_response"`
-}
-
-type RouteRouteTypeRouteDestination struct {
-	RetryPolicy                   types.Object `tfsdk:"retry_policy"`
-	MirrorPolicy                  types.Object `tfsdk:"mirror_policy"`
-	WebSocketConfig               types.Object `tfsdk:"web_socket_config"`
-	BufferPolicy                  types.Object `tfsdk:"buffer_policy"`
-	Priority                      types.List   `tfsdk:"priority"`
-	Destinations                  types.List   `tfsdk:"destinations"`
-	EndpointSubsets               types.Map    `tfsdk:"endpoint_subsets"`
-	HashPolicy                    types.List   `tfsdk:"hash_policy"`
-	SpdyConfig                    types.Object `tfsdk:"spdy_config"`
-	CorsPolicy                    types.Object `tfsdk:"cors_policy"`
-	CsrfPolicy                    types.Object `tfsdk:"csrf_policy"`
-	ClusterRetractChoice          types.Object `tfsdk:"cluster_retract_choice"`
-	QueryParams                   types.Object `tfsdk:"query_params"`
-	RouteDestinationRewriteChoice types.Object `tfsdk:"route_destination_rewrite_choice"`
-	HostRewriteParamsChoice       types.Object `tfsdk:"host_rewrite_params_choice"`
-	Timeout                       types.Int64  `tfsdk:"timeout"`
-}
-
-type RouteRetryPolicyType struct {
-	NumRetries           types.Int64  `tfsdk:"num_retries"`
-	PerTryTimeout        types.Int64  `tfsdk:"per_try_timeout"`
-	RetriableStatusCodes types.List   `tfsdk:"retriable_status_codes"`
-	BackOff              types.Object `tfsdk:"back_off"`
-	RetryCondition       types.List   `tfsdk:"retry_condition"`
-}
-
-type RouteRetryBackOff struct {
-	BaseInterval types.Int64 `tfsdk:"base_interval"`
-	MaxInterval  types.Int64 `tfsdk:"max_interval"`
-}
-
-type RouteRouteMirrorPolicyType struct {
-	Cluster types.List   `tfsdk:"cluster"`
-	Percent types.Object `tfsdk:"percent"`
-}
-
-type RouteFractionalPercent struct {
-	Denominator types.List  `tfsdk:"denominator"`
-	Numerator   types.Int64 `tfsdk:"numerator"`
-}
-
-type RouteRouteWebsocketConfigType struct {
-	UseWebsocket types.Bool `tfsdk:"use_websocket"`
-}
-
-type RouteBufferConfigType struct {
-	Disabled        types.Bool  `tfsdk:"disabled"`
-	MaxRequestBytes types.Int64 `tfsdk:"max_request_bytes"`
-}
-
-type RouteRouteRouteDestination struct {
-	Cluster         types.List  `tfsdk:"cluster"`
-	Weight          types.Int64 `tfsdk:"weight"`
-	Priority        types.Int64 `tfsdk:"priority"`
-	EndpointSubsets types.Map   `tfsdk:"endpoint_subsets"`
-}
-
-type RouteRouteHashPolicyType struct {
-	PolicySpecifierChoice types.Object `tfsdk:"policy_specifier_choice"`
-	Terminal              types.Bool   `tfsdk:"terminal"`
-}
-
-type RouteHashPolicyTypePolicySpecifierChoice struct {
-	HeaderName types.String `tfsdk:"header_name"`
-	Cookie     types.Object `tfsdk:"cookie"`
-	SourceIp   types.Bool   `tfsdk:"source_ip"`
-}
-
-type RouteHashPolicyTypeCookie struct {
-	SamesiteChoice types.Object `tfsdk:"samesite_choice"`
-	SecureChoice   types.Object `tfsdk:"secure_choice"`
-	HttponlyChoice types.Object `tfsdk:"httponly_choice"`
-	Name           types.String `tfsdk:"name"`
-	Ttl            types.Int64  `tfsdk:"ttl"`
-	Path           types.String `tfsdk:"path"`
-}
-
-type RouteCookieForHashingSamesiteChoice struct {
-	SamesiteLax    types.Bool `tfsdk:"samesite_lax"`
-	SamesiteNone   types.Bool `tfsdk:"samesite_none"`
-	IgnoreSamesite types.Bool `tfsdk:"ignore_samesite"`
-	SamesiteStrict types.Bool `tfsdk:"samesite_strict"`
-}
-
-type RouteCookieForHashingSecureChoice struct {
-	IgnoreSecure types.Bool `tfsdk:"ignore_secure"`
-	AddSecure    types.Bool `tfsdk:"add_secure"`
-}
-
-type RouteCookieForHashingHttponlyChoice struct {
-	IgnoreHttponly types.Bool `tfsdk:"ignore_httponly"`
-	AddHttponly    types.Bool `tfsdk:"add_httponly"`
-}
-
-type RouteRouteSpdyConfigType struct {
-	UseSpdy types.Bool `tfsdk:"use_spdy"`
-}
-
-type RouteCorsPolicy struct {
-	AllowMethods     types.String `tfsdk:"allow_methods"`
-	ExposeHeaders    types.String `tfsdk:"expose_headers"`
-	AllowCredentials types.Bool   `tfsdk:"allow_credentials"`
-	AllowOrigin      types.List   `tfsdk:"allow_origin"`
-	AllowHeaders     types.String `tfsdk:"allow_headers"`
-	MaximumAge       types.Int32  `tfsdk:"maximum_age"`
-	Disabled         types.Bool   `tfsdk:"disabled"`
-	AllowOriginRegex types.List   `tfsdk:"allow_origin_regex"`
-}
-
-type RouteCsrfPolicy struct {
-	AllowedDomainsChoice types.Object `tfsdk:"allowed_domains_choice"`
-}
-
-type RouteCsrfPolicyAllowedDomainsChoice struct {
-	Disabled               types.Bool   `tfsdk:"disabled"`
-	AllLoadBalancerDomains types.Bool   `tfsdk:"all_load_balancer_domains"`
-	CustomDomainList       types.Object `tfsdk:"custom_domain_list"`
-}
-
-type RouteCsrfPolicyCustomDomainList struct {
-	Domains types.List `tfsdk:"domains"`
-}
-
-type RouteRouteDestinationListClusterRetractChoice struct {
-	RetractCluster      types.Bool `tfsdk:"retract_cluster"`
-	DoNotRetractCluster types.Bool `tfsdk:"do_not_retract_cluster"`
-}
-
-type RouteRouteQueryParamsSimpleRoute struct {
-	QueryParamsChoice types.Object `tfsdk:"query_params_choice"`
-}
-
-type RouteQueryParamsSimpleRouteQueryParamsChoice struct {
-	RetainAllParams types.Bool   `tfsdk:"retain_all_params"`
-	RemoveAllParams types.Bool   `tfsdk:"remove_all_params"`
-	ReplaceParams   types.String `tfsdk:"replace_params"`
-}
-
-type RouteRouteDestinationListRouteDestinationRewriteChoice struct {
-	PrefixRewrite types.String `tfsdk:"prefix_rewrite"`
-	RegexRewrite  types.Object `tfsdk:"regex_rewrite"`
-}
-
-type RouteRouteDestinationListRegexRewrite struct {
-	Pattern      types.String `tfsdk:"pattern"`
-	Substitution types.String `tfsdk:"substitution"`
-}
-
-type RouteRouteDestinationListHostRewriteParamsChoice struct {
-	HostRewrite     types.String `tfsdk:"host_rewrite"`
-	AutoHostRewrite types.Bool   `tfsdk:"auto_host_rewrite"`
-}
-
-type RouteRouteTypeRouteRedirect struct {
-	HostRedirect       types.String `tfsdk:"host_redirect"`
-	RedirectPathChoice types.Object `tfsdk:"redirect_path_choice"`
-	ProtoRedirect      types.String `tfsdk:"proto_redirect"`
-	QueryParamsChoice  types.Object `tfsdk:"query_params_choice"`
-	ResponseCode       types.Int64  `tfsdk:"response_code"`
-}
-
-type RouteRouteRedirectRedirectPathChoice struct {
-	PathRedirect  types.String `tfsdk:"path_redirect"`
-	PrefixRewrite types.String `tfsdk:"prefix_rewrite"`
-}
-
-type RouteRouteRedirectQueryParamsChoice struct {
-	ReplaceParams   types.String `tfsdk:"replace_params"`
-	RetainAllParams types.Bool   `tfsdk:"retain_all_params"`
-	RemoveAllParams types.Bool   `tfsdk:"remove_all_params"`
-}
-
-type RouteRouteTypeRouteDirectResponse struct {
-	ResponseCode        types.Int64  `tfsdk:"response_code"`
-	ResponseBodyEncoded types.String `tfsdk:"response_body_encoded"`
-}
-
-type RouteSetCookieValueOption struct {
-	ValueChoice       types.Object `tfsdk:"value_choice"`
-	SamesiteChoice    types.Object `tfsdk:"samesite_choice"`
-	HttponlyChoice    types.Object `tfsdk:"httponly_choice"`
-	PartitionedChoice types.Object `tfsdk:"partitioned_choice"`
-	MaxAgeChoice      types.Object `tfsdk:"max_age_choice"`
-	DomainChoice      types.Object `tfsdk:"domain_choice"`
-	ExpiryChoice      types.Object `tfsdk:"expiry_choice"`
-	Overwrite         types.Bool   `tfsdk:"overwrite"`
-	Name              types.String `tfsdk:"name"`
-	SecureChoice      types.Object `tfsdk:"secure_choice"`
-	PathChoice        types.Object `tfsdk:"path_choice"`
-}
-
-type RouteSetCookieValueOptionValueChoice struct {
-	IgnoreValue types.Bool   `tfsdk:"ignore_value"`
-	Value       types.String `tfsdk:"value"`
-	SecretValue types.Object `tfsdk:"secret_value"`
-}
-
-type RouteSetCookieValueOptionSecretValue struct {
-	SecretInfoChoice types.Object `tfsdk:"secret_info_choice"`
-}
-
-type RouteSetCookieValueOptionSamesiteChoice struct {
-	SamesiteLax    types.Bool `tfsdk:"samesite_lax"`
-	SamesiteNone   types.Bool `tfsdk:"samesite_none"`
-	IgnoreSamesite types.Bool `tfsdk:"ignore_samesite"`
-	SamesiteStrict types.Bool `tfsdk:"samesite_strict"`
-}
-
-type RouteSetCookieValueOptionHttponlyChoice struct {
-	IgnoreHttponly types.Bool `tfsdk:"ignore_httponly"`
-	AddHttponly    types.Bool `tfsdk:"add_httponly"`
-}
-
-type RouteSetCookieValueOptionPartitionedChoice struct {
-	IgnorePartitioned types.Bool `tfsdk:"ignore_partitioned"`
-	AddPartitioned    types.Bool `tfsdk:"add_partitioned"`
-}
-
-type RouteSetCookieValueOptionMaxAgeChoice struct {
-	IgnoreMaxAge types.Bool  `tfsdk:"ignore_max_age"`
-	MaxAgeValue  types.Int32 `tfsdk:"max_age_value"`
-}
-
-type RouteSetCookieValueOptionDomainChoice struct {
-	IgnoreDomain types.Bool   `tfsdk:"ignore_domain"`
-	AddDomain    types.String `tfsdk:"add_domain"`
-}
-
-type RouteSetCookieValueOptionExpiryChoice struct {
-	AddExpiry    types.String `tfsdk:"add_expiry"`
-	IgnoreExpiry types.Bool   `tfsdk:"ignore_expiry"`
-}
-
-type RouteSetCookieValueOptionSecureChoice struct {
-	AddSecure    types.Bool `tfsdk:"add_secure"`
-	IgnoreSecure types.Bool `tfsdk:"ignore_secure"`
-}
-
-type RouteSetCookieValueOptionPathChoice struct {
-	IgnorePath types.Bool   `tfsdk:"ignore_path"`
-	AddPath    types.String `tfsdk:"add_path"`
-}
-
-type RouteRouteTypeBotDefenseJavascriptInjectionChoice struct {
-	InheritedBotDefenseJavascriptInjection types.Bool   `tfsdk:"inherited_bot_defense_javascript_injection"`
-	BotDefenseJavascriptInjection          types.Object `tfsdk:"bot_defense_javascript_injection"`
-}
-
-type RouteRouteTypeBotDefenseJavascriptInjection struct {
-	JavascriptLocation types.List `tfsdk:"javascript_location"`
-	JavascriptTags     types.List `tfsdk:"javascript_tags"`
-}
-
-type RouteRouteJavaScriptTag struct {
-	JavascriptUrl types.String `tfsdk:"javascript_url"`
-	TagAttributes types.List   `tfsdk:"tag_attributes"`
-}
-
-type RouteRouteTagAttribute struct {
-	JavascriptTag types.List   `tfsdk:"javascript_tag"`
-	TagValue      types.String `tfsdk:"tag_value"`
-}
-
 // DataSourceF5XCRouteModel describes the resource data model.
 type DataSourceF5XCRouteModel struct {
+	Name        types.String   `tfsdk:"name"`
+	Namespace   types.String   `tfsdk:"namespace"`
 	Uid         types.String   `tfsdk:"uid"`
 	Labels      types.Map      `tfsdk:"labels"`
 	Annotations types.Map      `tfsdk:"annotations"`
 	Description types.String   `tfsdk:"description"`
-	Name        types.String   `tfsdk:"name"`
-	Namespace   types.String   `tfsdk:"namespace"`
 	Routes      types.List     `tfsdk:"routes"`
 	Timeouts    timeouts.Value `tfsdk:"timeouts"`
 }
@@ -456,17 +456,8 @@ type DataSourceF5XCRouteModel struct {
 // Attribute map for RequiredArrayOfPointerField --> Routes
 var RouteRoutesModelAttributeMap = map[string]attr.Type{
 
-	"response_headers_to_add": types.ListType{
-		ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-
-				"name": types.StringType,
-				"value_choice": types.ObjectType{
-					AttrTypes: RouteRoutesResponseHeadersToAddValueChoiceModelAttributeMap,
-				},
-				"append": types.BoolType,
-			},
-		},
+	"response_cookies_to_remove": types.ListType{
+		ElemType: types.StringType,
 	},
 	"waf_exclusion_choice": types.ObjectType{
 		AttrTypes: RouteRoutesWafExclusionChoiceModelAttributeMap,
@@ -474,19 +465,83 @@ var RouteRoutesModelAttributeMap = map[string]attr.Type{
 	"response_headers_to_remove": types.ListType{
 		ElemType: types.StringType,
 	},
-	"request_cookies_to_remove": types.ListType{
-		ElemType: types.StringType,
+	"response_cookies_to_add": types.ListType{
+		ElemType: types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+
+				"name": types.StringType,
+				"samesite_choice": types.ObjectType{
+					AttrTypes: RouteRoutesResponseCookiesToAddSamesiteChoiceModelAttributeMap,
+				},
+				"partitioned_choice": types.ObjectType{
+					AttrTypes: RouteRoutesResponseCookiesToAddPartitionedChoiceModelAttributeMap,
+				},
+				"max_age_choice": types.ObjectType{
+					AttrTypes: RouteRoutesResponseCookiesToAddMaxAgeChoiceModelAttributeMap,
+				},
+				"domain_choice": types.ObjectType{
+					AttrTypes: RouteRoutesResponseCookiesToAddDomainChoiceModelAttributeMap,
+				},
+				"value_choice": types.ObjectType{
+					AttrTypes: RouteRoutesResponseCookiesToAddValueChoiceModelAttributeMap,
+				},
+				"secure_choice": types.ObjectType{
+					AttrTypes: RouteRoutesResponseCookiesToAddSecureChoiceModelAttributeMap,
+				},
+				"httponly_choice": types.ObjectType{
+					AttrTypes: RouteRoutesResponseCookiesToAddHttponlyChoiceModelAttributeMap,
+				},
+				"path_choice": types.ObjectType{
+					AttrTypes: RouteRoutesResponseCookiesToAddPathChoiceModelAttributeMap,
+				},
+				"expiry_choice": types.ObjectType{
+					AttrTypes: RouteRoutesResponseCookiesToAddExpiryChoiceModelAttributeMap,
+				},
+				"overwrite": types.BoolType,
+			},
+		},
 	}, "waf_type": types.ObjectType{
 		AttrTypes: map[string]attr.Type{
 			"ref_type_choice": types.ObjectType{
 				AttrTypes: RouteRoutesWafTypeRefTypeModelAttributeMap,
 			}},
 	},
+	"route_action_choice": types.ObjectType{
+		AttrTypes: RouteRoutesRouteActionModelAttributeMap,
+	},
+	"bot_defense_javascript_injection_choice": types.ObjectType{
+		AttrTypes: RouteRoutesBotDefenseJavascriptInjectionChoiceModelAttributeMap,
+	}, "service_policy": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"service_policy_choice": types.ObjectType{
+				AttrTypes: RouteRoutesServicePolicyServicePolicyChoiceModelAttributeMap,
+			}},
+	},
+	"request_headers_to_add": types.ListType{
+		ElemType: types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+
+				"name": types.StringType,
+				"value_choice": types.ObjectType{
+					AttrTypes: RouteRoutesRequestHeadersToAddValueChoiceModelAttributeMap,
+				},
+				"append": types.BoolType,
+			},
+		},
+	},
+	"request_cookies_to_remove": types.ListType{
+		ElemType: types.StringType,
+	},
 	"disable_location_add": types.BoolType,
 	"match": types.ListType{
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
-
+				"path": types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"path_match_choice": types.ObjectType{
+							AttrTypes: RouteRoutesMatchPathPathMatchModelAttributeMap,
+						}},
+				},
 				"headers": types.ListType{
 					ElemType: types.ObjectType{
 						AttrTypes: map[string]attr.Type{
@@ -517,27 +572,17 @@ var RouteRoutesModelAttributeMap = map[string]attr.Type{
 						"port_match_choice": types.ObjectType{
 							AttrTypes: RouteRoutesMatchIncomingPortPortMatchModelAttributeMap,
 						}},
-				}, "path": types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"path_match_choice": types.ObjectType{
-							AttrTypes: RouteRoutesMatchPathPathMatchModelAttributeMap,
-						}},
 				},
 			},
 		},
-	}, "service_policy": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"service_policy_choice": types.ObjectType{
-				AttrTypes: RouteRoutesServicePolicyServicePolicyChoiceModelAttributeMap,
-			}},
 	},
-	"request_headers_to_add": types.ListType{
+	"response_headers_to_add": types.ListType{
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
 
 				"name": types.StringType,
 				"value_choice": types.ObjectType{
-					AttrTypes: RouteRoutesRequestHeadersToAddValueChoiceModelAttributeMap,
+					AttrTypes: RouteRoutesResponseHeadersToAddValueChoiceModelAttributeMap,
 				},
 				"append": types.BoolType,
 			},
@@ -550,112 +595,14 @@ var RouteRoutesModelAttributeMap = map[string]attr.Type{
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
 
+				"name": types.StringType,
 				"value_choice": types.ObjectType{
 					AttrTypes: RouteRoutesRequestCookiesToAddValueChoiceModelAttributeMap,
 				},
 				"overwrite": types.BoolType,
-				"name":      types.StringType,
 			},
 		},
 	},
-	"response_cookies_to_remove": types.ListType{
-		ElemType: types.StringType,
-	},
-	"route_action_choice": types.ObjectType{
-		AttrTypes: RouteRoutesRouteActionModelAttributeMap,
-	},
-	"response_cookies_to_add": types.ListType{
-		ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-
-				"value_choice": types.ObjectType{
-					AttrTypes: RouteRoutesResponseCookiesToAddValueChoiceModelAttributeMap,
-				},
-				"samesite_choice": types.ObjectType{
-					AttrTypes: RouteRoutesResponseCookiesToAddSamesiteChoiceModelAttributeMap,
-				},
-				"httponly_choice": types.ObjectType{
-					AttrTypes: RouteRoutesResponseCookiesToAddHttponlyChoiceModelAttributeMap,
-				},
-				"partitioned_choice": types.ObjectType{
-					AttrTypes: RouteRoutesResponseCookiesToAddPartitionedChoiceModelAttributeMap,
-				},
-				"max_age_choice": types.ObjectType{
-					AttrTypes: RouteRoutesResponseCookiesToAddMaxAgeChoiceModelAttributeMap,
-				},
-				"domain_choice": types.ObjectType{
-					AttrTypes: RouteRoutesResponseCookiesToAddDomainChoiceModelAttributeMap,
-				},
-				"expiry_choice": types.ObjectType{
-					AttrTypes: RouteRoutesResponseCookiesToAddExpiryChoiceModelAttributeMap,
-				},
-				"overwrite": types.BoolType,
-				"name":      types.StringType,
-				"secure_choice": types.ObjectType{
-					AttrTypes: RouteRoutesResponseCookiesToAddSecureChoiceModelAttributeMap,
-				},
-				"path_choice": types.ObjectType{
-					AttrTypes: RouteRoutesResponseCookiesToAddPathChoiceModelAttributeMap,
-				},
-			},
-		},
-	},
-	"bot_defense_javascript_injection_choice": types.ObjectType{
-		AttrTypes: RouteRoutesBotDefenseJavascriptInjectionChoiceModelAttributeMap,
-	},
-}
-
-// Attribute map for ArrayOfPointerField --> ResponseHeadersToAdd
-var RouteResponseHeadersToAddObjectRefModelAttributeMap = map[string]attr.Type{
-
-	"name": types.StringType,
-	"value_choice": types.ObjectType{
-		AttrTypes: RouteRoutesResponseHeadersToAddValueChoiceModelAttributeMap,
-	},
-	"append": types.BoolType,
-}
-
-// Attribute map for RequiredOneOfField --> ValueChoice
-var RouteRoutesResponseHeadersToAddValueChoiceModelAttributeMap = map[string]attr.Type{
-
-	"value": types.StringType,
-	"secret_value": types.ObjectType{
-		AttrTypes: RouteRoutesResponseHeadersToAddValueChoiceSecretValueModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> SecretValue
-var RouteRoutesResponseHeadersToAddValueChoiceSecretValueModelAttributeMap = map[string]attr.Type{
-
-	"secret_info_choice": types.ObjectType{
-		AttrTypes: RouteRoutesResponseHeadersToAddValueChoiceSecretValueSecretInfoOneofModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> SecretInfoOneof
-var RouteRoutesResponseHeadersToAddValueChoiceSecretValueSecretInfoOneofModelAttributeMap = map[string]attr.Type{
-
-	"clear_secret_info": types.ObjectType{
-		AttrTypes: RouteRoutesResponseHeadersToAddValueChoiceSecretValueSecretInfoOneofClearSecretInfoModelAttributeMap,
-	},
-	"blindfold_secret_info": types.ObjectType{
-		AttrTypes: RouteRoutesResponseHeadersToAddValueChoiceSecretValueSecretInfoOneofBlindfoldSecretInfoModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> ClearSecretInfo
-var RouteRoutesResponseHeadersToAddValueChoiceSecretValueSecretInfoOneofClearSecretInfoModelAttributeMap = map[string]attr.Type{
-
-	"provider": types.StringType,
-	"url":      types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
-var RouteRoutesResponseHeadersToAddValueChoiceSecretValueSecretInfoOneofBlindfoldSecretInfoModelAttributeMap = map[string]attr.Type{
-
-	"location":            types.StringType,
-	"decryption_provider": types.StringType,
-	"store_provider":      types.StringType,
 }
 
 // Attribute map for OneOfField --> WafExclusionChoice
@@ -673,6 +620,142 @@ var RouteRoutesWafExclusionChoiceWafExclusionPolicyModelAttributeMap = map[strin
 	"name":      types.StringType,
 	"tenant":    types.StringType,
 	"namespace": types.StringType,
+}
+
+// Attribute map for ArrayOfPointerField --> ResponseCookiesToAdd
+var RouteResponseCookiesToAddObjectRefModelAttributeMap = map[string]attr.Type{
+
+	"name": types.StringType,
+	"samesite_choice": types.ObjectType{
+		AttrTypes: RouteRoutesResponseCookiesToAddSamesiteChoiceModelAttributeMap,
+	},
+	"partitioned_choice": types.ObjectType{
+		AttrTypes: RouteRoutesResponseCookiesToAddPartitionedChoiceModelAttributeMap,
+	},
+	"max_age_choice": types.ObjectType{
+		AttrTypes: RouteRoutesResponseCookiesToAddMaxAgeChoiceModelAttributeMap,
+	},
+	"domain_choice": types.ObjectType{
+		AttrTypes: RouteRoutesResponseCookiesToAddDomainChoiceModelAttributeMap,
+	},
+	"value_choice": types.ObjectType{
+		AttrTypes: RouteRoutesResponseCookiesToAddValueChoiceModelAttributeMap,
+	},
+	"secure_choice": types.ObjectType{
+		AttrTypes: RouteRoutesResponseCookiesToAddSecureChoiceModelAttributeMap,
+	},
+	"httponly_choice": types.ObjectType{
+		AttrTypes: RouteRoutesResponseCookiesToAddHttponlyChoiceModelAttributeMap,
+	},
+	"path_choice": types.ObjectType{
+		AttrTypes: RouteRoutesResponseCookiesToAddPathChoiceModelAttributeMap,
+	},
+	"expiry_choice": types.ObjectType{
+		AttrTypes: RouteRoutesResponseCookiesToAddExpiryChoiceModelAttributeMap,
+	},
+	"overwrite": types.BoolType,
+}
+
+// Attribute map for OneOfField --> SamesiteChoice
+var RouteRoutesResponseCookiesToAddSamesiteChoiceModelAttributeMap = map[string]attr.Type{
+
+	"samesite_strict": types.BoolType,
+	"samesite_lax":    types.BoolType,
+	"samesite_none":   types.BoolType,
+	"ignore_samesite": types.BoolType,
+}
+
+// Attribute map for OneOfField --> PartitionedChoice
+var RouteRoutesResponseCookiesToAddPartitionedChoiceModelAttributeMap = map[string]attr.Type{
+
+	"ignore_partitioned": types.BoolType,
+	"add_partitioned":    types.BoolType,
+}
+
+// Attribute map for OneOfField --> MaxAgeChoice
+var RouteRoutesResponseCookiesToAddMaxAgeChoiceModelAttributeMap = map[string]attr.Type{
+
+	"max_age_value":  types.Int32Type,
+	"ignore_max_age": types.BoolType,
+}
+
+// Attribute map for OneOfField --> DomainChoice
+var RouteRoutesResponseCookiesToAddDomainChoiceModelAttributeMap = map[string]attr.Type{
+
+	"ignore_domain": types.BoolType,
+	"add_domain":    types.StringType,
+}
+
+// Attribute map for OneOfField --> ValueChoice
+var RouteRoutesResponseCookiesToAddValueChoiceModelAttributeMap = map[string]attr.Type{
+
+	"ignore_value": types.BoolType,
+	"value":        types.StringType,
+	"secret_value": types.ObjectType{
+		AttrTypes: RouteRoutesResponseCookiesToAddValueChoiceSecretValueModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> SecretValue
+var RouteRoutesResponseCookiesToAddValueChoiceSecretValueModelAttributeMap = map[string]attr.Type{
+
+	"secret_info_choice": types.ObjectType{
+		AttrTypes: RouteRoutesResponseCookiesToAddValueChoiceSecretValueSecretInfoOneofModelAttributeMap,
+	},
+}
+
+// Attribute map for RequiredOneOfField --> SecretInfoOneof
+var RouteRoutesResponseCookiesToAddValueChoiceSecretValueSecretInfoOneofModelAttributeMap = map[string]attr.Type{
+
+	"blindfold_secret_info": types.ObjectType{
+		AttrTypes: RouteRoutesResponseCookiesToAddValueChoiceSecretValueSecretInfoOneofBlindfoldSecretInfoModelAttributeMap,
+	},
+	"clear_secret_info": types.ObjectType{
+		AttrTypes: RouteRoutesResponseCookiesToAddValueChoiceSecretValueSecretInfoOneofClearSecretInfoModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
+var RouteRoutesResponseCookiesToAddValueChoiceSecretValueSecretInfoOneofBlindfoldSecretInfoModelAttributeMap = map[string]attr.Type{
+
+	"decryption_provider": types.StringType,
+	"store_provider":      types.StringType,
+	"location":            types.StringType,
+}
+
+// Attribute map for PointerOfOneOfField --> ClearSecretInfo
+var RouteRoutesResponseCookiesToAddValueChoiceSecretValueSecretInfoOneofClearSecretInfoModelAttributeMap = map[string]attr.Type{
+
+	"provider": types.StringType,
+	"url":      types.StringType,
+}
+
+// Attribute map for OneOfField --> SecureChoice
+var RouteRoutesResponseCookiesToAddSecureChoiceModelAttributeMap = map[string]attr.Type{
+
+	"ignore_secure": types.BoolType,
+	"add_secure":    types.BoolType,
+}
+
+// Attribute map for OneOfField --> HttponlyChoice
+var RouteRoutesResponseCookiesToAddHttponlyChoiceModelAttributeMap = map[string]attr.Type{
+
+	"ignore_httponly": types.BoolType,
+	"add_httponly":    types.BoolType,
+}
+
+// Attribute map for OneOfField --> PathChoice
+var RouteRoutesResponseCookiesToAddPathChoiceModelAttributeMap = map[string]attr.Type{
+
+	"add_path":    types.StringType,
+	"ignore_path": types.BoolType,
+}
+
+// Attribute map for OneOfField --> ExpiryChoice
+var RouteRoutesResponseCookiesToAddExpiryChoiceModelAttributeMap = map[string]attr.Type{
+
+	"ignore_expiry": types.BoolType,
+	"add_expiry":    types.StringType,
 }
 
 // Attribute map for PointerField --> WafType
@@ -700,9 +783,9 @@ var RouteRoutesWafTypeRefTypeAppFirewallModelAttributeMap = map[string]attr.Type
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
 
+				"name":      types.StringType,
 				"tenant":    types.StringType,
 				"namespace": types.StringType,
-				"name":      types.StringType,
 			},
 		},
 	},
@@ -711,116 +794,490 @@ var RouteRoutesWafTypeRefTypeAppFirewallModelAttributeMap = map[string]attr.Type
 // Attribute map for RequiredArrayOfPointerField --> AppFirewall
 var RouteAppFirewallObjectRefModelAttributeMap = map[string]attr.Type{
 
+	"name":      types.StringType,
 	"tenant":    types.StringType,
 	"namespace": types.StringType,
-	"name":      types.StringType,
 }
 
-// Attribute map for ArrayOfPointerField --> Match
-var RouteMatchObjectRefModelAttributeMap = map[string]attr.Type{
+// Attribute map for RequiredOneOfField --> RouteAction
+var RouteRoutesRouteActionModelAttributeMap = map[string]attr.Type{
 
-	"headers": types.ListType{
-		ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-
-				"name": types.StringType,
-				"value_match_choice": types.ObjectType{
-					AttrTypes: RouteRoutesMatchHeadersValueMatchModelAttributeMap,
-				},
-				"invert_match": types.BoolType,
-			},
-		},
+	"route_destination": types.ObjectType{
+		AttrTypes: RouteRoutesRouteActionRouteDestinationModelAttributeMap,
 	},
-	"query_params": types.ListType{
-		ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-
-				"key": types.StringType,
-				"value_match_choice": types.ObjectType{
-					AttrTypes: RouteRoutesMatchQueryParamsValueMatchModelAttributeMap,
-				},
-			},
-		},
+	"route_redirect": types.ObjectType{
+		AttrTypes: RouteRoutesRouteActionRouteRedirectModelAttributeMap,
 	},
-	"http_method": types.ListType{
+	"route_direct_response": types.ObjectType{
+		AttrTypes: RouteRoutesRouteActionRouteDirectResponseModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> RouteDestination
+var RouteRoutesRouteActionRouteDestinationModelAttributeMap = map[string]attr.Type{
+	"query_params": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"query_params_choice": types.ObjectType{
+				AttrTypes: RouteRoutesRouteActionRouteDestinationQueryParamsQueryParamsModelAttributeMap,
+			}},
+	},
+	"route_destination_rewrite_choice": types.ObjectType{
+		AttrTypes: RouteRoutesRouteActionRouteDestinationRouteDestinationRewriteModelAttributeMap,
+	},
+	"host_rewrite_params_choice": types.ObjectType{
+		AttrTypes: RouteRoutesRouteActionRouteDestinationHostRewriteParamsModelAttributeMap,
+	},
+	"timeout": types.Int64Type, "retry_policy": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"retriable_status_codes": types.ListType{
+				ElemType: types.Int64Type,
+			}, "back_off": types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"base_interval": types.Int64Type,
+					"max_interval":  types.Int64Type},
+			},
+			"retry_condition": types.ListType{
+				ElemType: types.StringType,
+			},
+			"num_retries":     types.Int64Type,
+			"per_try_timeout": types.Int64Type},
+	}, "csrf_policy": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"allowed_domains_choice": types.ObjectType{
+				AttrTypes: RouteRoutesRouteActionRouteDestinationCsrfPolicyAllowedDomainsModelAttributeMap,
+			}},
+	},
+	"cluster_retract_choice": types.ObjectType{
+		AttrTypes: RouteRoutesRouteActionRouteDestinationClusterRetractChoiceModelAttributeMap,
+	},
+	"endpoint_subsets": types.MapType{
 		ElemType: types.StringType,
-	}, "incoming_port": types.ObjectType{
+	}, "web_socket_config": types.ObjectType{
 		AttrTypes: map[string]attr.Type{
-			"port_match_choice": types.ObjectType{
-				AttrTypes: RouteRoutesMatchIncomingPortPortMatchModelAttributeMap,
+			"use_websocket": types.BoolType},
+	},
+	"priority": types.ListType{
+		ElemType: types.StringType,
+	},
+	"destinations": types.ListType{
+		ElemType: types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+
+				"cluster": types.ListType{
+					ElemType: types.ObjectType{
+						AttrTypes: map[string]attr.Type{
+
+							"name":      types.StringType,
+							"tenant":    types.StringType,
+							"namespace": types.StringType,
+						},
+					},
+				},
+				"weight":   types.Int64Type,
+				"priority": types.Int64Type,
+				"endpoint_subsets": types.MapType{
+					ElemType: types.StringType,
+				},
+			},
+		},
+	}, "mirror_policy": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"cluster": types.ListType{
+				ElemType: types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+
+						"name":      types.StringType,
+						"tenant":    types.StringType,
+						"namespace": types.StringType,
+					},
+				},
+			}, "percent": types.ObjectType{
+				AttrTypes: map[string]attr.Type{
+					"numerator": types.Int64Type,
+					"denominator": types.ListType{
+						ElemType: types.StringType,
+					}},
 			}},
-	}, "path": types.ObjectType{
+	}, "buffer_policy": types.ObjectType{
 		AttrTypes: map[string]attr.Type{
-			"path_match_choice": types.ObjectType{
-				AttrTypes: RouteRoutesMatchPathPathMatchModelAttributeMap,
+			"disabled":          types.BoolType,
+			"max_request_bytes": types.Int64Type},
+	}, "cors_policy": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"disabled": types.BoolType,
+			"allow_origin": types.ListType{
+				ElemType: types.StringType,
+			},
+			"allow_methods":     types.StringType,
+			"allow_headers":     types.StringType,
+			"expose_headers":    types.StringType,
+			"allow_credentials": types.BoolType,
+			"allow_origin_regex": types.ListType{
+				ElemType: types.StringType,
+			},
+			"maximum_age": types.Int32Type},
+	},
+	"hash_policy": types.ListType{
+		ElemType: types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+
+				"policy_specifier_choice": types.ObjectType{
+					AttrTypes: RouteRoutesRouteActionRouteDestinationHashPolicyPolicySpecifierModelAttributeMap,
+				},
+				"terminal": types.BoolType,
+			},
+		},
+	}, "spdy_config": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"use_spdy": types.BoolType},
+	},
+}
+
+// Attribute map for PointerField --> QueryParams
+var RouteRoutesRouteActionRouteDestinationQueryParamsModelAttributeMap = map[string]attr.Type{
+
+	"query_params_choice": types.ObjectType{
+		AttrTypes: RouteRoutesRouteActionRouteDestinationQueryParamsQueryParamsModelAttributeMap,
+	},
+}
+
+// Attribute map for RequiredOneOfField --> QueryParams
+var RouteRoutesRouteActionRouteDestinationQueryParamsQueryParamsModelAttributeMap = map[string]attr.Type{
+
+	"retain_all_params": types.BoolType,
+	"remove_all_params": types.BoolType,
+	"replace_params":    types.StringType,
+}
+
+// Attribute map for OneOfField --> RouteDestinationRewrite
+var RouteRoutesRouteActionRouteDestinationRouteDestinationRewriteModelAttributeMap = map[string]attr.Type{
+
+	"regex_rewrite": types.ObjectType{
+		AttrTypes: RouteRoutesRouteActionRouteDestinationRouteDestinationRewriteRegexRewriteModelAttributeMap,
+	},
+	"prefix_rewrite": types.StringType,
+}
+
+// Attribute map for PointerOfOneOfField --> RegexRewrite
+var RouteRoutesRouteActionRouteDestinationRouteDestinationRewriteRegexRewriteModelAttributeMap = map[string]attr.Type{
+
+	"pattern":      types.StringType,
+	"substitution": types.StringType,
+}
+
+// Attribute map for RequiredOneOfField --> HostRewriteParams
+var RouteRoutesRouteActionRouteDestinationHostRewriteParamsModelAttributeMap = map[string]attr.Type{
+
+	"host_rewrite":      types.StringType,
+	"auto_host_rewrite": types.BoolType,
+}
+
+// Attribute map for PointerField --> RetryPolicy
+var RouteRoutesRouteActionRouteDestinationRetryPolicyModelAttributeMap = map[string]attr.Type{
+
+	"retriable_status_codes": types.ListType{
+		ElemType: types.Int64Type,
+	}, "back_off": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"base_interval": types.Int64Type,
+			"max_interval":  types.Int64Type},
+	},
+	"retry_condition": types.ListType{
+		ElemType: types.StringType,
+	},
+	"num_retries":     types.Int64Type,
+	"per_try_timeout": types.Int64Type,
+}
+
+// Attribute map for PointerField --> BackOff
+var RouteRoutesRouteActionRouteDestinationRetryPolicyBackOffModelAttributeMap = map[string]attr.Type{
+
+	"base_interval": types.Int64Type,
+	"max_interval":  types.Int64Type,
+}
+
+// Attribute map for PointerField --> CsrfPolicy
+var RouteRoutesRouteActionRouteDestinationCsrfPolicyModelAttributeMap = map[string]attr.Type{
+
+	"allowed_domains_choice": types.ObjectType{
+		AttrTypes: RouteRoutesRouteActionRouteDestinationCsrfPolicyAllowedDomainsModelAttributeMap,
+	},
+}
+
+// Attribute map for RequiredOneOfField --> AllowedDomains
+var RouteRoutesRouteActionRouteDestinationCsrfPolicyAllowedDomainsModelAttributeMap = map[string]attr.Type{
+
+	"disabled":                  types.BoolType,
+	"all_load_balancer_domains": types.BoolType,
+	"custom_domain_list": types.ObjectType{
+		AttrTypes: RouteRoutesRouteActionRouteDestinationCsrfPolicyAllowedDomainsCustomDomainListModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> CustomDomainList
+var RouteRoutesRouteActionRouteDestinationCsrfPolicyAllowedDomainsCustomDomainListModelAttributeMap = map[string]attr.Type{
+
+	"domains": types.ListType{
+		ElemType: types.StringType,
+	},
+}
+
+// Attribute map for OneOfField --> ClusterRetractChoice
+var RouteRoutesRouteActionRouteDestinationClusterRetractChoiceModelAttributeMap = map[string]attr.Type{
+
+	"do_not_retract_cluster": types.BoolType,
+	"retract_cluster":        types.BoolType,
+}
+
+// Attribute map for PointerField --> WebSocketConfig
+var RouteRoutesRouteActionRouteDestinationWebSocketConfigModelAttributeMap = map[string]attr.Type{
+
+	"use_websocket": types.BoolType,
+}
+
+// Attribute map for RequiredArrayOfPointerField --> Destinations
+var RouteRoutesRouteActionRouteDestinationDestinationsModelAttributeMap = map[string]attr.Type{
+
+	"cluster": types.ListType{
+		ElemType: types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+
+				"name":      types.StringType,
+				"tenant":    types.StringType,
+				"namespace": types.StringType,
+			},
+		},
+	},
+	"weight":   types.Int64Type,
+	"priority": types.Int64Type,
+	"endpoint_subsets": types.MapType{
+		ElemType: types.StringType,
+	},
+}
+
+// Attribute map for RequiredArrayOfPointerField --> Cluster
+var RouteClusterObjectRefModelAttributeMap = map[string]attr.Type{
+
+	"name":      types.StringType,
+	"tenant":    types.StringType,
+	"namespace": types.StringType,
+}
+
+// Attribute map for PointerField --> MirrorPolicy
+var RouteRoutesRouteActionRouteDestinationMirrorPolicyModelAttributeMap = map[string]attr.Type{
+
+	"cluster": types.ListType{
+		ElemType: types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+
+				"name":      types.StringType,
+				"tenant":    types.StringType,
+				"namespace": types.StringType,
+			},
+		},
+	}, "percent": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"numerator": types.Int64Type,
+			"denominator": types.ListType{
+				ElemType: types.StringType,
 			}},
 	},
 }
 
-// Attribute map for ArrayOfPointerField --> Headers
-var RouteHeadersObjectRefModelAttributeMap = map[string]attr.Type{
+// Attribute map for PointerField --> Percent
+var RouteRoutesRouteActionRouteDestinationMirrorPolicyPercentModelAttributeMap = map[string]attr.Type{
 
+	"numerator": types.Int64Type,
+	"denominator": types.ListType{
+		ElemType: types.StringType,
+	},
+}
+
+// Attribute map for PointerField --> BufferPolicy
+var RouteRoutesRouteActionRouteDestinationBufferPolicyModelAttributeMap = map[string]attr.Type{
+
+	"disabled":          types.BoolType,
+	"max_request_bytes": types.Int64Type,
+}
+
+// Attribute map for PointerField --> CorsPolicy
+var RouteRoutesRouteActionRouteDestinationCorsPolicyModelAttributeMap = map[string]attr.Type{
+
+	"disabled": types.BoolType,
+	"allow_origin": types.ListType{
+		ElemType: types.StringType,
+	},
+	"allow_methods":     types.StringType,
+	"allow_headers":     types.StringType,
+	"expose_headers":    types.StringType,
+	"allow_credentials": types.BoolType,
+	"allow_origin_regex": types.ListType{
+		ElemType: types.StringType,
+	},
+	"maximum_age": types.Int32Type,
+}
+
+// Attribute map for ArrayOfPointerField --> HashPolicy
+var RouteRoutesRouteActionRouteDestinationHashPolicyModelAttributeMap = map[string]attr.Type{
+
+	"policy_specifier_choice": types.ObjectType{
+		AttrTypes: RouteRoutesRouteActionRouteDestinationHashPolicyPolicySpecifierModelAttributeMap,
+	},
+	"terminal": types.BoolType,
+}
+
+// Attribute map for RequiredOneOfField --> PolicySpecifier
+var RouteRoutesRouteActionRouteDestinationHashPolicyPolicySpecifierModelAttributeMap = map[string]attr.Type{
+
+	"cookie": types.ObjectType{
+		AttrTypes: RouteRoutesRouteActionRouteDestinationHashPolicyPolicySpecifierCookieModelAttributeMap,
+	},
+	"source_ip":   types.BoolType,
+	"header_name": types.StringType,
+}
+
+// Attribute map for PointerOfOneOfField --> Cookie
+var RouteRoutesRouteActionRouteDestinationHashPolicyPolicySpecifierCookieModelAttributeMap = map[string]attr.Type{
+
+	"path": types.StringType,
+	"samesite_choice": types.ObjectType{
+		AttrTypes: RouteRoutesRouteActionRouteDestinationHashPolicyPolicySpecifierCookieSamesiteModelAttributeMap,
+	},
+	"secure_choice": types.ObjectType{
+		AttrTypes: RouteRoutesRouteActionRouteDestinationHashPolicyPolicySpecifierCookieSecureModelAttributeMap,
+	},
+	"httponly_choice": types.ObjectType{
+		AttrTypes: RouteRoutesRouteActionRouteDestinationHashPolicyPolicySpecifierCookieHttponlyModelAttributeMap,
+	},
 	"name": types.StringType,
-	"value_match_choice": types.ObjectType{
-		AttrTypes: RouteRoutesMatchHeadersValueMatchModelAttributeMap,
+	"ttl":  types.Int64Type,
+}
+
+// Attribute map for OneOfField --> Samesite
+var RouteRoutesRouteActionRouteDestinationHashPolicyPolicySpecifierCookieSamesiteModelAttributeMap = map[string]attr.Type{
+
+	"samesite_strict": types.BoolType,
+	"samesite_lax":    types.BoolType,
+	"samesite_none":   types.BoolType,
+	"ignore_samesite": types.BoolType,
+}
+
+// Attribute map for OneOfField --> Secure
+var RouteRoutesRouteActionRouteDestinationHashPolicyPolicySpecifierCookieSecureModelAttributeMap = map[string]attr.Type{
+
+	"ignore_secure": types.BoolType,
+	"add_secure":    types.BoolType,
+}
+
+// Attribute map for OneOfField --> Httponly
+var RouteRoutesRouteActionRouteDestinationHashPolicyPolicySpecifierCookieHttponlyModelAttributeMap = map[string]attr.Type{
+
+	"ignore_httponly": types.BoolType,
+	"add_httponly":    types.BoolType,
+}
+
+// Attribute map for PointerField --> SpdyConfig
+var RouteRoutesRouteActionRouteDestinationSpdyConfigModelAttributeMap = map[string]attr.Type{
+
+	"use_spdy": types.BoolType,
+}
+
+// Attribute map for PointerOfOneOfField --> RouteRedirect
+var RouteRoutesRouteActionRouteRedirectModelAttributeMap = map[string]attr.Type{
+
+	"host_redirect": types.StringType,
+	"redirect_path_choice": types.ObjectType{
+		AttrTypes: RouteRoutesRouteActionRouteRedirectRedirectPathChoiceModelAttributeMap,
 	},
-	"invert_match": types.BoolType,
+	"proto_redirect": types.StringType,
+	"query_params_choice": types.ObjectType{
+		AttrTypes: RouteRoutesRouteActionRouteRedirectQueryParamsModelAttributeMap,
+	},
+	"response_code": types.Int64Type,
 }
 
-// Attribute map for OneOfField --> ValueMatch
-var RouteRoutesMatchHeadersValueMatchModelAttributeMap = map[string]attr.Type{
+// Attribute map for OneOfField --> RedirectPathChoice
+var RouteRoutesRouteActionRouteRedirectRedirectPathChoiceModelAttributeMap = map[string]attr.Type{
 
-	"exact":    types.StringType,
-	"regex":    types.StringType,
-	"presence": types.BoolType,
+	"path_redirect":  types.StringType,
+	"prefix_rewrite": types.StringType,
 }
 
-// Attribute map for ArrayOfPointerField --> QueryParams
-var RouteQueryParamsObjectRefModelAttributeMap = map[string]attr.Type{
+// Attribute map for OneOfField --> QueryParams
+var RouteRoutesRouteActionRouteRedirectQueryParamsModelAttributeMap = map[string]attr.Type{
 
-	"key": types.StringType,
-	"value_match_choice": types.ObjectType{
-		AttrTypes: RouteRoutesMatchQueryParamsValueMatchModelAttributeMap,
+	"retain_all_params": types.BoolType,
+	"remove_all_params": types.BoolType,
+	"replace_params":    types.StringType,
+}
+
+// Attribute map for PointerOfOneOfField --> RouteDirectResponse
+var RouteRoutesRouteActionRouteDirectResponseModelAttributeMap = map[string]attr.Type{
+
+	"response_code":         types.Int64Type,
+	"response_body_encoded": types.StringType,
+}
+
+// Attribute map for OneOfField --> BotDefenseJavascriptInjectionChoice
+var RouteRoutesBotDefenseJavascriptInjectionChoiceModelAttributeMap = map[string]attr.Type{
+
+	"inherited_bot_defense_javascript_injection": types.BoolType,
+	"bot_defense_javascript_injection": types.ObjectType{
+		AttrTypes: RouteRoutesBotDefenseJavascriptInjectionChoiceBotDefenseJavascriptInjectionModelAttributeMap,
 	},
 }
 
-// Attribute map for OneOfField --> ValueMatch
-var RouteRoutesMatchQueryParamsValueMatchModelAttributeMap = map[string]attr.Type{
+// Attribute map for PointerOfOneOfField --> BotDefenseJavascriptInjection
+var RouteRoutesBotDefenseJavascriptInjectionChoiceBotDefenseJavascriptInjectionModelAttributeMap = map[string]attr.Type{
 
-	"exact": types.StringType,
-	"regex": types.StringType,
-}
+	"javascript_location": types.ListType{
+		ElemType: types.StringType,
+	},
+	"javascript_tags": types.ListType{
+		ElemType: types.ObjectType{
+			AttrTypes: map[string]attr.Type{
 
-// Attribute map for PointerField --> IncomingPort
-var RouteRoutesMatchIncomingPortModelAttributeMap = map[string]attr.Type{
+				"javascript_url": types.StringType,
+				"tag_attributes": types.ListType{
+					ElemType: types.ObjectType{
+						AttrTypes: map[string]attr.Type{
 
-	"port_match_choice": types.ObjectType{
-		AttrTypes: RouteRoutesMatchIncomingPortPortMatchModelAttributeMap,
+							"javascript_tag": types.ListType{
+								ElemType: types.StringType,
+							},
+							"tag_value": types.StringType,
+						},
+					},
+				},
+			},
+		},
 	},
 }
 
-// Attribute map for OneOfField --> PortMatch
-var RouteRoutesMatchIncomingPortPortMatchModelAttributeMap = map[string]attr.Type{
+// Attribute map for RequiredArrayOfPointerField --> JavascriptTags
+var RouteRoutesBotDefenseJavascriptInjectionChoiceBotDefenseJavascriptInjectionJavascriptTagsModelAttributeMap = map[string]attr.Type{
 
-	"port":          types.Int64Type,
-	"port_ranges":   types.StringType,
-	"no_port_match": types.BoolType,
-}
+	"javascript_url": types.StringType,
+	"tag_attributes": types.ListType{
+		ElemType: types.ObjectType{
+			AttrTypes: map[string]attr.Type{
 
-// Attribute map for PointerField --> Path
-var RouteRoutesMatchPathModelAttributeMap = map[string]attr.Type{
-
-	"path_match_choice": types.ObjectType{
-		AttrTypes: RouteRoutesMatchPathPathMatchModelAttributeMap,
+				"javascript_tag": types.ListType{
+					ElemType: types.StringType,
+				},
+				"tag_value": types.StringType,
+			},
+		},
 	},
 }
 
-// Attribute map for RequiredOneOfField --> PathMatch
-var RouteRoutesMatchPathPathMatchModelAttributeMap = map[string]attr.Type{
+// Attribute map for ArrayOfPointerField --> TagAttributes
+var RouteRoutesBotDefenseJavascriptInjectionChoiceBotDefenseJavascriptInjectionJavascriptTagsTagAttributesModelAttributeMap = map[string]attr.Type{
 
-	"prefix": types.StringType,
-	"path":   types.StringType,
-	"regex":  types.StringType,
+	"javascript_tag": types.ListType{
+		ElemType: types.StringType,
+	},
+	"tag_value": types.StringType,
 }
 
 // Attribute map for PointerField --> ServicePolicy
@@ -890,14 +1347,174 @@ var RouteRoutesRequestHeadersToAddValueChoiceSecretValueSecretInfoOneofClearSecr
 	"url":      types.StringType,
 }
 
+// Attribute map for ArrayOfPointerField --> Match
+var RouteMatchObjectRefModelAttributeMap = map[string]attr.Type{
+	"path": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"path_match_choice": types.ObjectType{
+				AttrTypes: RouteRoutesMatchPathPathMatchModelAttributeMap,
+			}},
+	},
+	"headers": types.ListType{
+		ElemType: types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+
+				"name": types.StringType,
+				"value_match_choice": types.ObjectType{
+					AttrTypes: RouteRoutesMatchHeadersValueMatchModelAttributeMap,
+				},
+				"invert_match": types.BoolType,
+			},
+		},
+	},
+	"query_params": types.ListType{
+		ElemType: types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+
+				"key": types.StringType,
+				"value_match_choice": types.ObjectType{
+					AttrTypes: RouteRoutesMatchQueryParamsValueMatchModelAttributeMap,
+				},
+			},
+		},
+	},
+	"http_method": types.ListType{
+		ElemType: types.StringType,
+	}, "incoming_port": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"port_match_choice": types.ObjectType{
+				AttrTypes: RouteRoutesMatchIncomingPortPortMatchModelAttributeMap,
+			}},
+	},
+}
+
+// Attribute map for PointerField --> Path
+var RouteRoutesMatchPathModelAttributeMap = map[string]attr.Type{
+
+	"path_match_choice": types.ObjectType{
+		AttrTypes: RouteRoutesMatchPathPathMatchModelAttributeMap,
+	},
+}
+
+// Attribute map for RequiredOneOfField --> PathMatch
+var RouteRoutesMatchPathPathMatchModelAttributeMap = map[string]attr.Type{
+
+	"prefix": types.StringType,
+	"path":   types.StringType,
+	"regex":  types.StringType,
+}
+
+// Attribute map for ArrayOfPointerField --> Headers
+var RouteHeadersObjectRefModelAttributeMap = map[string]attr.Type{
+
+	"name": types.StringType,
+	"value_match_choice": types.ObjectType{
+		AttrTypes: RouteRoutesMatchHeadersValueMatchModelAttributeMap,
+	},
+	"invert_match": types.BoolType,
+}
+
+// Attribute map for OneOfField --> ValueMatch
+var RouteRoutesMatchHeadersValueMatchModelAttributeMap = map[string]attr.Type{
+
+	"exact":    types.StringType,
+	"regex":    types.StringType,
+	"presence": types.BoolType,
+}
+
+// Attribute map for ArrayOfPointerField --> QueryParams
+var RouteQueryParamsObjectRefModelAttributeMap = map[string]attr.Type{
+
+	"key": types.StringType,
+	"value_match_choice": types.ObjectType{
+		AttrTypes: RouteRoutesMatchQueryParamsValueMatchModelAttributeMap,
+	},
+}
+
+// Attribute map for OneOfField --> ValueMatch
+var RouteRoutesMatchQueryParamsValueMatchModelAttributeMap = map[string]attr.Type{
+
+	"exact": types.StringType,
+	"regex": types.StringType,
+}
+
+// Attribute map for PointerField --> IncomingPort
+var RouteRoutesMatchIncomingPortModelAttributeMap = map[string]attr.Type{
+
+	"port_match_choice": types.ObjectType{
+		AttrTypes: RouteRoutesMatchIncomingPortPortMatchModelAttributeMap,
+	},
+}
+
+// Attribute map for OneOfField --> PortMatch
+var RouteRoutesMatchIncomingPortPortMatchModelAttributeMap = map[string]attr.Type{
+
+	"port":          types.Int64Type,
+	"port_ranges":   types.StringType,
+	"no_port_match": types.BoolType,
+}
+
+// Attribute map for ArrayOfPointerField --> ResponseHeadersToAdd
+var RouteResponseHeadersToAddObjectRefModelAttributeMap = map[string]attr.Type{
+
+	"name": types.StringType,
+	"value_choice": types.ObjectType{
+		AttrTypes: RouteRoutesResponseHeadersToAddValueChoiceModelAttributeMap,
+	},
+	"append": types.BoolType,
+}
+
+// Attribute map for RequiredOneOfField --> ValueChoice
+var RouteRoutesResponseHeadersToAddValueChoiceModelAttributeMap = map[string]attr.Type{
+
+	"secret_value": types.ObjectType{
+		AttrTypes: RouteRoutesResponseHeadersToAddValueChoiceSecretValueModelAttributeMap,
+	},
+	"value": types.StringType,
+}
+
+// Attribute map for PointerOfOneOfField --> SecretValue
+var RouteRoutesResponseHeadersToAddValueChoiceSecretValueModelAttributeMap = map[string]attr.Type{
+
+	"secret_info_choice": types.ObjectType{
+		AttrTypes: RouteRoutesResponseHeadersToAddValueChoiceSecretValueSecretInfoOneofModelAttributeMap,
+	},
+}
+
+// Attribute map for RequiredOneOfField --> SecretInfoOneof
+var RouteRoutesResponseHeadersToAddValueChoiceSecretValueSecretInfoOneofModelAttributeMap = map[string]attr.Type{
+
+	"blindfold_secret_info": types.ObjectType{
+		AttrTypes: RouteRoutesResponseHeadersToAddValueChoiceSecretValueSecretInfoOneofBlindfoldSecretInfoModelAttributeMap,
+	},
+	"clear_secret_info": types.ObjectType{
+		AttrTypes: RouteRoutesResponseHeadersToAddValueChoiceSecretValueSecretInfoOneofClearSecretInfoModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
+var RouteRoutesResponseHeadersToAddValueChoiceSecretValueSecretInfoOneofBlindfoldSecretInfoModelAttributeMap = map[string]attr.Type{
+
+	"store_provider":      types.StringType,
+	"location":            types.StringType,
+	"decryption_provider": types.StringType,
+}
+
+// Attribute map for PointerOfOneOfField --> ClearSecretInfo
+var RouteRoutesResponseHeadersToAddValueChoiceSecretValueSecretInfoOneofClearSecretInfoModelAttributeMap = map[string]attr.Type{
+
+	"provider": types.StringType,
+	"url":      types.StringType,
+}
+
 // Attribute map for ArrayOfPointerField --> RequestCookiesToAdd
 var RouteRequestCookiesToAddObjectRefModelAttributeMap = map[string]attr.Type{
 
+	"name": types.StringType,
 	"value_choice": types.ObjectType{
 		AttrTypes: RouteRoutesRequestCookiesToAddValueChoiceModelAttributeMap,
 	},
 	"overwrite": types.BoolType,
-	"name":      types.StringType,
 }
 
 // Attribute map for RequiredOneOfField --> ValueChoice
@@ -931,9 +1548,9 @@ var RouteRoutesRequestCookiesToAddValueChoiceSecretValueSecretInfoOneofModelAttr
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
 var RouteRoutesRequestCookiesToAddValueChoiceSecretValueSecretInfoOneofBlindfoldSecretInfoModelAttributeMap = map[string]attr.Type{
 
-	"location":            types.StringType,
 	"decryption_provider": types.StringType,
 	"store_provider":      types.StringType,
+	"location":            types.StringType,
 }
 
 // Attribute map for PointerOfOneOfField --> ClearSecretInfo
@@ -941,623 +1558,6 @@ var RouteRoutesRequestCookiesToAddValueChoiceSecretValueSecretInfoOneofClearSecr
 
 	"provider": types.StringType,
 	"url":      types.StringType,
-}
-
-// Attribute map for RequiredOneOfField --> RouteAction
-var RouteRoutesRouteActionModelAttributeMap = map[string]attr.Type{
-
-	"route_destination": types.ObjectType{
-		AttrTypes: RouteRoutesRouteActionRouteDestinationModelAttributeMap,
-	},
-	"route_redirect": types.ObjectType{
-		AttrTypes: RouteRoutesRouteActionRouteRedirectModelAttributeMap,
-	},
-	"route_direct_response": types.ObjectType{
-		AttrTypes: RouteRoutesRouteActionRouteDirectResponseModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> RouteDestination
-var RouteRoutesRouteActionRouteDestinationModelAttributeMap = map[string]attr.Type{
-	"retry_policy": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"num_retries":     types.Int64Type,
-			"per_try_timeout": types.Int64Type,
-			"retriable_status_codes": types.ListType{
-				ElemType: types.Int64Type,
-			}, "back_off": types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"base_interval": types.Int64Type,
-					"max_interval":  types.Int64Type},
-			},
-			"retry_condition": types.ListType{
-				ElemType: types.StringType,
-			}},
-	}, "mirror_policy": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"cluster": types.ListType{
-				ElemType: types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-
-						"tenant":    types.StringType,
-						"namespace": types.StringType,
-						"name":      types.StringType,
-					},
-				},
-			}, "percent": types.ObjectType{
-				AttrTypes: map[string]attr.Type{
-					"denominator": types.ListType{
-						ElemType: types.StringType,
-					},
-					"numerator": types.Int64Type},
-			}},
-	}, "web_socket_config": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"use_websocket": types.BoolType},
-	}, "buffer_policy": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"disabled":          types.BoolType,
-			"max_request_bytes": types.Int64Type},
-	},
-	"priority": types.ListType{
-		ElemType: types.StringType,
-	},
-	"destinations": types.ListType{
-		ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-
-				"cluster": types.ListType{
-					ElemType: types.ObjectType{
-						AttrTypes: map[string]attr.Type{
-
-							"name":      types.StringType,
-							"tenant":    types.StringType,
-							"namespace": types.StringType,
-						},
-					},
-				},
-				"weight":   types.Int64Type,
-				"priority": types.Int64Type,
-				"endpoint_subsets": types.MapType{
-					ElemType: types.StringType,
-				},
-			},
-		},
-	},
-	"endpoint_subsets": types.MapType{
-		ElemType: types.StringType,
-	},
-	"hash_policy": types.ListType{
-		ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-
-				"policy_specifier_choice": types.ObjectType{
-					AttrTypes: RouteRoutesRouteActionRouteDestinationHashPolicyPolicySpecifierModelAttributeMap,
-				},
-				"terminal": types.BoolType,
-			},
-		},
-	}, "spdy_config": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"use_spdy": types.BoolType},
-	}, "cors_policy": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"allow_methods":     types.StringType,
-			"expose_headers":    types.StringType,
-			"allow_credentials": types.BoolType,
-			"allow_origin": types.ListType{
-				ElemType: types.StringType,
-			},
-			"allow_headers": types.StringType,
-			"maximum_age":   types.Int32Type,
-			"disabled":      types.BoolType,
-			"allow_origin_regex": types.ListType{
-				ElemType: types.StringType,
-			}},
-	}, "csrf_policy": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"allowed_domains_choice": types.ObjectType{
-				AttrTypes: RouteRoutesRouteActionRouteDestinationCsrfPolicyAllowedDomainsModelAttributeMap,
-			}},
-	},
-	"cluster_retract_choice": types.ObjectType{
-		AttrTypes: RouteRoutesRouteActionRouteDestinationClusterRetractChoiceModelAttributeMap,
-	}, "query_params": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"query_params_choice": types.ObjectType{
-				AttrTypes: RouteRoutesRouteActionRouteDestinationQueryParamsQueryParamsModelAttributeMap,
-			}},
-	},
-	"route_destination_rewrite_choice": types.ObjectType{
-		AttrTypes: RouteRoutesRouteActionRouteDestinationRouteDestinationRewriteModelAttributeMap,
-	},
-	"host_rewrite_params_choice": types.ObjectType{
-		AttrTypes: RouteRoutesRouteActionRouteDestinationHostRewriteParamsModelAttributeMap,
-	},
-	"timeout": types.Int64Type,
-}
-
-// Attribute map for PointerField --> RetryPolicy
-var RouteRoutesRouteActionRouteDestinationRetryPolicyModelAttributeMap = map[string]attr.Type{
-
-	"num_retries":     types.Int64Type,
-	"per_try_timeout": types.Int64Type,
-	"retriable_status_codes": types.ListType{
-		ElemType: types.Int64Type,
-	}, "back_off": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"base_interval": types.Int64Type,
-			"max_interval":  types.Int64Type},
-	},
-	"retry_condition": types.ListType{
-		ElemType: types.StringType,
-	},
-}
-
-// Attribute map for PointerField --> BackOff
-var RouteRoutesRouteActionRouteDestinationRetryPolicyBackOffModelAttributeMap = map[string]attr.Type{
-
-	"base_interval": types.Int64Type,
-	"max_interval":  types.Int64Type,
-}
-
-// Attribute map for PointerField --> MirrorPolicy
-var RouteRoutesRouteActionRouteDestinationMirrorPolicyModelAttributeMap = map[string]attr.Type{
-
-	"cluster": types.ListType{
-		ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-
-				"tenant":    types.StringType,
-				"namespace": types.StringType,
-				"name":      types.StringType,
-			},
-		},
-	}, "percent": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"denominator": types.ListType{
-				ElemType: types.StringType,
-			},
-			"numerator": types.Int64Type},
-	},
-}
-
-// Attribute map for RequiredArrayOfPointerField --> Cluster
-var RouteClusterObjectRefModelAttributeMap = map[string]attr.Type{
-
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
-	"name":      types.StringType,
-}
-
-// Attribute map for PointerField --> Percent
-var RouteRoutesRouteActionRouteDestinationMirrorPolicyPercentModelAttributeMap = map[string]attr.Type{
-
-	"denominator": types.ListType{
-		ElemType: types.StringType,
-	},
-	"numerator": types.Int64Type,
-}
-
-// Attribute map for PointerField --> WebSocketConfig
-var RouteRoutesRouteActionRouteDestinationWebSocketConfigModelAttributeMap = map[string]attr.Type{
-
-	"use_websocket": types.BoolType,
-}
-
-// Attribute map for PointerField --> BufferPolicy
-var RouteRoutesRouteActionRouteDestinationBufferPolicyModelAttributeMap = map[string]attr.Type{
-
-	"disabled":          types.BoolType,
-	"max_request_bytes": types.Int64Type,
-}
-
-// Attribute map for RequiredArrayOfPointerField --> Destinations
-var RouteRoutesRouteActionRouteDestinationDestinationsModelAttributeMap = map[string]attr.Type{
-
-	"cluster": types.ListType{
-		ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-
-				"name":      types.StringType,
-				"tenant":    types.StringType,
-				"namespace": types.StringType,
-			},
-		},
-	},
-	"weight":   types.Int64Type,
-	"priority": types.Int64Type,
-	"endpoint_subsets": types.MapType{
-		ElemType: types.StringType,
-	},
-}
-
-// Attribute map for ArrayOfPointerField --> HashPolicy
-var RouteRoutesRouteActionRouteDestinationHashPolicyModelAttributeMap = map[string]attr.Type{
-
-	"policy_specifier_choice": types.ObjectType{
-		AttrTypes: RouteRoutesRouteActionRouteDestinationHashPolicyPolicySpecifierModelAttributeMap,
-	},
-	"terminal": types.BoolType,
-}
-
-// Attribute map for RequiredOneOfField --> PolicySpecifier
-var RouteRoutesRouteActionRouteDestinationHashPolicyPolicySpecifierModelAttributeMap = map[string]attr.Type{
-
-	"header_name": types.StringType,
-	"cookie": types.ObjectType{
-		AttrTypes: RouteRoutesRouteActionRouteDestinationHashPolicyPolicySpecifierCookieModelAttributeMap,
-	},
-	"source_ip": types.BoolType,
-}
-
-// Attribute map for PointerOfOneOfField --> Cookie
-var RouteRoutesRouteActionRouteDestinationHashPolicyPolicySpecifierCookieModelAttributeMap = map[string]attr.Type{
-
-	"samesite_choice": types.ObjectType{
-		AttrTypes: RouteRoutesRouteActionRouteDestinationHashPolicyPolicySpecifierCookieSamesiteModelAttributeMap,
-	},
-	"secure_choice": types.ObjectType{
-		AttrTypes: RouteRoutesRouteActionRouteDestinationHashPolicyPolicySpecifierCookieSecureModelAttributeMap,
-	},
-	"httponly_choice": types.ObjectType{
-		AttrTypes: RouteRoutesRouteActionRouteDestinationHashPolicyPolicySpecifierCookieHttponlyModelAttributeMap,
-	},
-	"name": types.StringType,
-	"ttl":  types.Int64Type,
-	"path": types.StringType,
-}
-
-// Attribute map for OneOfField --> Samesite
-var RouteRoutesRouteActionRouteDestinationHashPolicyPolicySpecifierCookieSamesiteModelAttributeMap = map[string]attr.Type{
-
-	"samesite_lax":    types.BoolType,
-	"samesite_none":   types.BoolType,
-	"ignore_samesite": types.BoolType,
-	"samesite_strict": types.BoolType,
-}
-
-// Attribute map for OneOfField --> Secure
-var RouteRoutesRouteActionRouteDestinationHashPolicyPolicySpecifierCookieSecureModelAttributeMap = map[string]attr.Type{
-
-	"ignore_secure": types.BoolType,
-	"add_secure":    types.BoolType,
-}
-
-// Attribute map for OneOfField --> Httponly
-var RouteRoutesRouteActionRouteDestinationHashPolicyPolicySpecifierCookieHttponlyModelAttributeMap = map[string]attr.Type{
-
-	"ignore_httponly": types.BoolType,
-	"add_httponly":    types.BoolType,
-}
-
-// Attribute map for PointerField --> SpdyConfig
-var RouteRoutesRouteActionRouteDestinationSpdyConfigModelAttributeMap = map[string]attr.Type{
-
-	"use_spdy": types.BoolType,
-}
-
-// Attribute map for PointerField --> CorsPolicy
-var RouteRoutesRouteActionRouteDestinationCorsPolicyModelAttributeMap = map[string]attr.Type{
-
-	"allow_methods":     types.StringType,
-	"expose_headers":    types.StringType,
-	"allow_credentials": types.BoolType,
-	"allow_origin": types.ListType{
-		ElemType: types.StringType,
-	},
-	"allow_headers": types.StringType,
-	"maximum_age":   types.Int32Type,
-	"disabled":      types.BoolType,
-	"allow_origin_regex": types.ListType{
-		ElemType: types.StringType,
-	},
-}
-
-// Attribute map for PointerField --> CsrfPolicy
-var RouteRoutesRouteActionRouteDestinationCsrfPolicyModelAttributeMap = map[string]attr.Type{
-
-	"allowed_domains_choice": types.ObjectType{
-		AttrTypes: RouteRoutesRouteActionRouteDestinationCsrfPolicyAllowedDomainsModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> AllowedDomains
-var RouteRoutesRouteActionRouteDestinationCsrfPolicyAllowedDomainsModelAttributeMap = map[string]attr.Type{
-
-	"disabled":                  types.BoolType,
-	"all_load_balancer_domains": types.BoolType,
-	"custom_domain_list": types.ObjectType{
-		AttrTypes: RouteRoutesRouteActionRouteDestinationCsrfPolicyAllowedDomainsCustomDomainListModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> CustomDomainList
-var RouteRoutesRouteActionRouteDestinationCsrfPolicyAllowedDomainsCustomDomainListModelAttributeMap = map[string]attr.Type{
-
-	"domains": types.ListType{
-		ElemType: types.StringType,
-	},
-}
-
-// Attribute map for OneOfField --> ClusterRetractChoice
-var RouteRoutesRouteActionRouteDestinationClusterRetractChoiceModelAttributeMap = map[string]attr.Type{
-
-	"retract_cluster":        types.BoolType,
-	"do_not_retract_cluster": types.BoolType,
-}
-
-// Attribute map for PointerField --> QueryParams
-var RouteRoutesRouteActionRouteDestinationQueryParamsModelAttributeMap = map[string]attr.Type{
-
-	"query_params_choice": types.ObjectType{
-		AttrTypes: RouteRoutesRouteActionRouteDestinationQueryParamsQueryParamsModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> QueryParams
-var RouteRoutesRouteActionRouteDestinationQueryParamsQueryParamsModelAttributeMap = map[string]attr.Type{
-
-	"retain_all_params": types.BoolType,
-	"remove_all_params": types.BoolType,
-	"replace_params":    types.StringType,
-}
-
-// Attribute map for OneOfField --> RouteDestinationRewrite
-var RouteRoutesRouteActionRouteDestinationRouteDestinationRewriteModelAttributeMap = map[string]attr.Type{
-
-	"prefix_rewrite": types.StringType,
-	"regex_rewrite": types.ObjectType{
-		AttrTypes: RouteRoutesRouteActionRouteDestinationRouteDestinationRewriteRegexRewriteModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> RegexRewrite
-var RouteRoutesRouteActionRouteDestinationRouteDestinationRewriteRegexRewriteModelAttributeMap = map[string]attr.Type{
-
-	"pattern":      types.StringType,
-	"substitution": types.StringType,
-}
-
-// Attribute map for RequiredOneOfField --> HostRewriteParams
-var RouteRoutesRouteActionRouteDestinationHostRewriteParamsModelAttributeMap = map[string]attr.Type{
-
-	"host_rewrite":      types.StringType,
-	"auto_host_rewrite": types.BoolType,
-}
-
-// Attribute map for PointerOfOneOfField --> RouteRedirect
-var RouteRoutesRouteActionRouteRedirectModelAttributeMap = map[string]attr.Type{
-
-	"host_redirect": types.StringType,
-	"redirect_path_choice": types.ObjectType{
-		AttrTypes: RouteRoutesRouteActionRouteRedirectRedirectPathChoiceModelAttributeMap,
-	},
-	"proto_redirect": types.StringType,
-	"query_params_choice": types.ObjectType{
-		AttrTypes: RouteRoutesRouteActionRouteRedirectQueryParamsModelAttributeMap,
-	},
-	"response_code": types.Int64Type,
-}
-
-// Attribute map for OneOfField --> RedirectPathChoice
-var RouteRoutesRouteActionRouteRedirectRedirectPathChoiceModelAttributeMap = map[string]attr.Type{
-
-	"path_redirect":  types.StringType,
-	"prefix_rewrite": types.StringType,
-}
-
-// Attribute map for OneOfField --> QueryParams
-var RouteRoutesRouteActionRouteRedirectQueryParamsModelAttributeMap = map[string]attr.Type{
-
-	"replace_params":    types.StringType,
-	"retain_all_params": types.BoolType,
-	"remove_all_params": types.BoolType,
-}
-
-// Attribute map for PointerOfOneOfField --> RouteDirectResponse
-var RouteRoutesRouteActionRouteDirectResponseModelAttributeMap = map[string]attr.Type{
-
-	"response_code":         types.Int64Type,
-	"response_body_encoded": types.StringType,
-}
-
-// Attribute map for ArrayOfPointerField --> ResponseCookiesToAdd
-var RouteResponseCookiesToAddObjectRefModelAttributeMap = map[string]attr.Type{
-
-	"value_choice": types.ObjectType{
-		AttrTypes: RouteRoutesResponseCookiesToAddValueChoiceModelAttributeMap,
-	},
-	"samesite_choice": types.ObjectType{
-		AttrTypes: RouteRoutesResponseCookiesToAddSamesiteChoiceModelAttributeMap,
-	},
-	"httponly_choice": types.ObjectType{
-		AttrTypes: RouteRoutesResponseCookiesToAddHttponlyChoiceModelAttributeMap,
-	},
-	"partitioned_choice": types.ObjectType{
-		AttrTypes: RouteRoutesResponseCookiesToAddPartitionedChoiceModelAttributeMap,
-	},
-	"max_age_choice": types.ObjectType{
-		AttrTypes: RouteRoutesResponseCookiesToAddMaxAgeChoiceModelAttributeMap,
-	},
-	"domain_choice": types.ObjectType{
-		AttrTypes: RouteRoutesResponseCookiesToAddDomainChoiceModelAttributeMap,
-	},
-	"expiry_choice": types.ObjectType{
-		AttrTypes: RouteRoutesResponseCookiesToAddExpiryChoiceModelAttributeMap,
-	},
-	"overwrite": types.BoolType,
-	"name":      types.StringType,
-	"secure_choice": types.ObjectType{
-		AttrTypes: RouteRoutesResponseCookiesToAddSecureChoiceModelAttributeMap,
-	},
-	"path_choice": types.ObjectType{
-		AttrTypes: RouteRoutesResponseCookiesToAddPathChoiceModelAttributeMap,
-	},
-}
-
-// Attribute map for OneOfField --> ValueChoice
-var RouteRoutesResponseCookiesToAddValueChoiceModelAttributeMap = map[string]attr.Type{
-
-	"ignore_value": types.BoolType,
-	"value":        types.StringType,
-	"secret_value": types.ObjectType{
-		AttrTypes: RouteRoutesResponseCookiesToAddValueChoiceSecretValueModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> SecretValue
-var RouteRoutesResponseCookiesToAddValueChoiceSecretValueModelAttributeMap = map[string]attr.Type{
-
-	"secret_info_choice": types.ObjectType{
-		AttrTypes: RouteRoutesResponseCookiesToAddValueChoiceSecretValueSecretInfoOneofModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> SecretInfoOneof
-var RouteRoutesResponseCookiesToAddValueChoiceSecretValueSecretInfoOneofModelAttributeMap = map[string]attr.Type{
-
-	"blindfold_secret_info": types.ObjectType{
-		AttrTypes: RouteRoutesResponseCookiesToAddValueChoiceSecretValueSecretInfoOneofBlindfoldSecretInfoModelAttributeMap,
-	},
-	"clear_secret_info": types.ObjectType{
-		AttrTypes: RouteRoutesResponseCookiesToAddValueChoiceSecretValueSecretInfoOneofClearSecretInfoModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
-var RouteRoutesResponseCookiesToAddValueChoiceSecretValueSecretInfoOneofBlindfoldSecretInfoModelAttributeMap = map[string]attr.Type{
-
-	"decryption_provider": types.StringType,
-	"store_provider":      types.StringType,
-	"location":            types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> ClearSecretInfo
-var RouteRoutesResponseCookiesToAddValueChoiceSecretValueSecretInfoOneofClearSecretInfoModelAttributeMap = map[string]attr.Type{
-
-	"provider": types.StringType,
-	"url":      types.StringType,
-}
-
-// Attribute map for OneOfField --> SamesiteChoice
-var RouteRoutesResponseCookiesToAddSamesiteChoiceModelAttributeMap = map[string]attr.Type{
-
-	"samesite_lax":    types.BoolType,
-	"samesite_none":   types.BoolType,
-	"ignore_samesite": types.BoolType,
-	"samesite_strict": types.BoolType,
-}
-
-// Attribute map for OneOfField --> HttponlyChoice
-var RouteRoutesResponseCookiesToAddHttponlyChoiceModelAttributeMap = map[string]attr.Type{
-
-	"ignore_httponly": types.BoolType,
-	"add_httponly":    types.BoolType,
-}
-
-// Attribute map for OneOfField --> PartitionedChoice
-var RouteRoutesResponseCookiesToAddPartitionedChoiceModelAttributeMap = map[string]attr.Type{
-
-	"ignore_partitioned": types.BoolType,
-	"add_partitioned":    types.BoolType,
-}
-
-// Attribute map for OneOfField --> MaxAgeChoice
-var RouteRoutesResponseCookiesToAddMaxAgeChoiceModelAttributeMap = map[string]attr.Type{
-
-	"ignore_max_age": types.BoolType,
-	"max_age_value":  types.Int32Type,
-}
-
-// Attribute map for OneOfField --> DomainChoice
-var RouteRoutesResponseCookiesToAddDomainChoiceModelAttributeMap = map[string]attr.Type{
-
-	"ignore_domain": types.BoolType,
-	"add_domain":    types.StringType,
-}
-
-// Attribute map for OneOfField --> ExpiryChoice
-var RouteRoutesResponseCookiesToAddExpiryChoiceModelAttributeMap = map[string]attr.Type{
-
-	"add_expiry":    types.StringType,
-	"ignore_expiry": types.BoolType,
-}
-
-// Attribute map for OneOfField --> SecureChoice
-var RouteRoutesResponseCookiesToAddSecureChoiceModelAttributeMap = map[string]attr.Type{
-
-	"add_secure":    types.BoolType,
-	"ignore_secure": types.BoolType,
-}
-
-// Attribute map for OneOfField --> PathChoice
-var RouteRoutesResponseCookiesToAddPathChoiceModelAttributeMap = map[string]attr.Type{
-
-	"ignore_path": types.BoolType,
-	"add_path":    types.StringType,
-}
-
-// Attribute map for OneOfField --> BotDefenseJavascriptInjectionChoice
-var RouteRoutesBotDefenseJavascriptInjectionChoiceModelAttributeMap = map[string]attr.Type{
-
-	"inherited_bot_defense_javascript_injection": types.BoolType,
-	"bot_defense_javascript_injection": types.ObjectType{
-		AttrTypes: RouteRoutesBotDefenseJavascriptInjectionChoiceBotDefenseJavascriptInjectionModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> BotDefenseJavascriptInjection
-var RouteRoutesBotDefenseJavascriptInjectionChoiceBotDefenseJavascriptInjectionModelAttributeMap = map[string]attr.Type{
-
-	"javascript_location": types.ListType{
-		ElemType: types.StringType,
-	},
-	"javascript_tags": types.ListType{
-		ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-
-				"javascript_url": types.StringType,
-				"tag_attributes": types.ListType{
-					ElemType: types.ObjectType{
-						AttrTypes: map[string]attr.Type{
-
-							"javascript_tag": types.ListType{
-								ElemType: types.StringType,
-							},
-							"tag_value": types.StringType,
-						},
-					},
-				},
-			},
-		},
-	},
-}
-
-// Attribute map for RequiredArrayOfPointerField --> JavascriptTags
-var RouteRoutesBotDefenseJavascriptInjectionChoiceBotDefenseJavascriptInjectionJavascriptTagsModelAttributeMap = map[string]attr.Type{
-
-	"javascript_url": types.StringType,
-	"tag_attributes": types.ListType{
-		ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-
-				"javascript_tag": types.ListType{
-					ElemType: types.StringType,
-				},
-				"tag_value": types.StringType,
-			},
-		},
-	},
-}
-
-// Attribute map for ArrayOfPointerField --> TagAttributes
-var RouteRoutesBotDefenseJavascriptInjectionChoiceBotDefenseJavascriptInjectionJavascriptTagsTagAttributesModelAttributeMap = map[string]attr.Type{
-
-	"javascript_tag": types.ListType{
-		ElemType: types.StringType,
-	},
-	"tag_value": types.StringType,
 }
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -1578,6 +1578,18 @@ func (r *DataSourceF5XCRoute) Schema(ctx context.Context, request datasource.Sch
 		Description:         "Route data source",
 
 		Attributes: map[string]schema.Attribute{
+			"name": schema.StringAttribute{
+				Description: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
+				Required:    false,
+				Optional:    true,
+				Computed:    true,
+			},
+			"namespace": schema.StringAttribute{
+				Description: "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
+				Required:    false,
+				Optional:    true,
+				Computed:    true,
+			},
 			"uid": schema.StringAttribute{
 				Description: "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
 				Required:    false,
@@ -1604,18 +1616,6 @@ func (r *DataSourceF5XCRoute) Schema(ctx context.Context, request datasource.Sch
 				Optional:    false,
 				Computed:    true,
 			},
-			"name": schema.StringAttribute{
-				Description: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
-				Required:    false,
-				Optional:    true,
-				Computed:    true,
-			},
-			"namespace": schema.StringAttribute{
-				Description: "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
-				Required:    false,
-				Optional:    true,
-				Computed:    true,
-			},
 			"routes": schema.ListNestedAttribute{
 				Description: "routes List of routes to match for incoming request",
 				Required:    false,
@@ -1623,103 +1623,12 @@ func (r *DataSourceF5XCRoute) Schema(ctx context.Context, request datasource.Sch
 				Computed:    true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
-						"response_headers_to_add": schema.ListNestedAttribute{
-							Description: "Headers to add in response Headers are key-value pairs to be added to HTTP response being sent towards downstream. Headers specified at this level are applied before headers from the enclosing VirtualHost object level",
+						"response_cookies_to_remove": schema.ListAttribute{
+							Description: "Cookies to be removed from response List of name of Cookies to be removed from the HTTP response being sent towards downstream. Entire set-cookie header will be removed",
+							ElementType: types.StringType,
 							Required:    false,
 							Optional:    false,
 							Computed:    true,
-							NestedObject: schema.NestedAttributeObject{
-								Attributes: map[string]schema.Attribute{
-									"name": schema.StringAttribute{
-										Description: "name Name of the HTTP header.",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-									},
-									"value_choice": schema.SingleNestedAttribute{
-										Description: "value Enter Header value as string or blindfolded secret.",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-										Attributes: map[string]schema.Attribute{
-											"value": schema.StringAttribute{
-												Description: "value Value of the HTTP header.",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-											"secret_value": schema.SingleNestedAttribute{
-												Description: "Secret Value Secret Value of the HTTP header.",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-												Attributes: map[string]schema.Attribute{
-													"secret_info_choice": schema.SingleNestedAttribute{
-														Description: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-														Attributes: map[string]schema.Attribute{
-															"clear_secret_info": schema.SingleNestedAttribute{
-																Description: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-																Attributes: map[string]schema.Attribute{
-																	"provider": schema.StringAttribute{
-																		Description: "Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																	},
-																	"url": schema.StringAttribute{
-																		Description: "URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																	},
-																},
-															},
-															"blindfold_secret_info": schema.SingleNestedAttribute{
-																Description: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-																Attributes: map[string]schema.Attribute{
-																	"location": schema.StringAttribute{
-																		Description: "Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																	},
-																	"decryption_provider": schema.StringAttribute{
-																		Description: "Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																	},
-																	"store_provider": schema.StringAttribute{
-																		Description: "Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																	},
-																},
-															},
-														},
-													},
-												},
-											},
-										},
-									},
-									"append": schema.BoolAttribute{
-										Description: "append Should the value be appended? If true, the value is appended to existing values. Default value is do not append",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-									},
-								},
-							},
 						},
 						"waf_exclusion_choice": schema.SingleNestedAttribute{
 							Description: "Enable the WAF Exclusion functionality for VirtualHost WAF Exclusion details at the route level The WAF Exclusion is evaluated sequentially and can only be matched once per request.",
@@ -1768,12 +1677,281 @@ func (r *DataSourceF5XCRoute) Schema(ctx context.Context, request datasource.Sch
 							Optional:    false,
 							Computed:    true,
 						},
-						"request_cookies_to_remove": schema.ListAttribute{
-							Description: "Cookies to be removed from request List of keys of Cookies to be removed from the HTTP request being sent towards upstream.",
-							ElementType: types.StringType,
+						"response_cookies_to_add": schema.ListNestedAttribute{
+							Description: "Cookies to add in set-cookie header in response Cookies are name-value pairs along with optional attribute parameters to be added to HTTP response being sent towards downstream.",
 							Required:    false,
 							Optional:    false,
 							Computed:    true,
+							NestedObject: schema.NestedAttributeObject{
+								Attributes: map[string]schema.Attribute{
+									"name": schema.StringAttribute{
+										Description: "name Name of the cookie in Cookie header.",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+									},
+									"samesite_choice": schema.SingleNestedAttribute{
+										Description: "samesite Controls whether or not a cookie is sent with cross-site requests",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+										Attributes: map[string]schema.Attribute{
+											"samesite_strict": schema.BoolAttribute{
+												Description: "strict Add Samesite attribute with Strict. Means that the browser sends the cookie only for same-site requests",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+											},
+											"samesite_lax": schema.BoolAttribute{
+												Description: "lax Add Samesite attribute with Lax. Means that the cookie is not sent on cross-site requests",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+											},
+											"samesite_none": schema.BoolAttribute{
+												Description: "none Add Samesite attribute with None. Means that the browser sends the cookie with both cross-site and same-site requests",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+											},
+											"ignore_samesite": schema.BoolAttribute{
+												Description: "ignore_samesite Ignore Samesite attribute",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+											},
+										},
+									},
+									"partitioned_choice": schema.SingleNestedAttribute{
+										Description: "Partitioned A cookie with the Partitioned attribute is stored using partitioned storage.",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+										Attributes: map[string]schema.Attribute{
+											"ignore_partitioned": schema.BoolAttribute{
+												Description: "ignore_partitioned",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+											},
+											"add_partitioned": schema.BoolAttribute{
+												Description: "add_partitioned",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+											},
+										},
+									},
+									"max_age_choice": schema.SingleNestedAttribute{
+										Description: "max_age Enter the maximum age in minutes for session cookies after which cookies are automatically expired",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+										Attributes: map[string]schema.Attribute{
+											"max_age_value": schema.Int32Attribute{
+												Description: "add_max_age Add max age attribute",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+											},
+											"ignore_max_age": schema.BoolAttribute{
+												Description: "ignore_max_age Ignore max age attribute",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+											},
+										},
+									},
+									"domain_choice": schema.SingleNestedAttribute{
+										Description: "domain Domain to which cookie will be sent during request",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+										Attributes: map[string]schema.Attribute{
+											"ignore_domain": schema.BoolAttribute{
+												Description: "ignore_domain Ignore max age attribute",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+											},
+											"add_domain": schema.StringAttribute{
+												Description: "add_domain Add domain attribute",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+											},
+										},
+									},
+									"value_choice": schema.SingleNestedAttribute{
+										Description: "value Enter Cookie value as string or blindfolded secret.",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+										Attributes: map[string]schema.Attribute{
+											"ignore_value": schema.BoolAttribute{
+												Description: "ignore_value Ignore value of cookie",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+											},
+											"value": schema.StringAttribute{
+												Description: "value Value of the Cookie header.",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+											},
+											"secret_value": schema.SingleNestedAttribute{
+												Description: "Secret Value Secret Value of the Cookie header",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+												Attributes: map[string]schema.Attribute{
+													"secret_info_choice": schema.SingleNestedAttribute{
+														Description: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+														Attributes: map[string]schema.Attribute{
+															"blindfold_secret_info": schema.SingleNestedAttribute{
+																Description: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
+																Attributes: map[string]schema.Attribute{
+																	"decryption_provider": schema.StringAttribute{
+																		Description: "Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
+																	},
+																	"store_provider": schema.StringAttribute{
+																		Description: "Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
+																	},
+																	"location": schema.StringAttribute{
+																		Description: "Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
+																	},
+																},
+															},
+															"clear_secret_info": schema.SingleNestedAttribute{
+																Description: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
+																Attributes: map[string]schema.Attribute{
+																	"provider": schema.StringAttribute{
+																		Description: "Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
+																	},
+																	"url": schema.StringAttribute{
+																		Description: "URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
+																	},
+																},
+															},
+														},
+													},
+												},
+											},
+										},
+									},
+									"secure_choice": schema.SingleNestedAttribute{
+										Description: "secure A cookie with the Secure attribute is only sent to the server with an encrypted request over the HTTPS protocol and therefore, is more resistant to man-in-the-middle attacks.",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+										Attributes: map[string]schema.Attribute{
+											"ignore_secure": schema.BoolAttribute{
+												Description: "ignore_secure",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+											},
+											"add_secure": schema.BoolAttribute{
+												Description: "add_secure",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+											},
+										},
+									},
+									"httponly_choice": schema.SingleNestedAttribute{
+										Description: "httponly A cookie with the HttpOnly attribute is inaccessible to the JavaScript.",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+										Attributes: map[string]schema.Attribute{
+											"ignore_httponly": schema.BoolAttribute{
+												Description: "ignore_httponly",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+											},
+											"add_httponly": schema.BoolAttribute{
+												Description: "add_httponly",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+											},
+										},
+									},
+									"path_choice": schema.SingleNestedAttribute{
+										Description: "path The path that must exist in the requested URL for the browser to send the Cookie header.",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+										Attributes: map[string]schema.Attribute{
+											"add_path": schema.StringAttribute{
+												Description: "add_path Add path attribute",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+											},
+											"ignore_path": schema.BoolAttribute{
+												Description: "ignore_domain Ignore path attribute",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+											},
+										},
+									},
+									"expiry_choice": schema.SingleNestedAttribute{
+										Description: "Expiry Indicates the maximum lifetime of the cookie as an HTTP-date timestamp. Eg. Mon, 01 Dec 2008 00:23:53 GMT",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+										Attributes: map[string]schema.Attribute{
+											"ignore_expiry": schema.BoolAttribute{
+												Description: "ignore_expiry Ignore expiry attribute",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+											},
+											"add_expiry": schema.StringAttribute{
+												Description: "add_expiry Add expiry attribute",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+											},
+										},
+									},
+									"overwrite": schema.BoolAttribute{
+										Description: "overwrite Should the value be overwritten? If true, the value is overwritten to existing values. Default value is do not overwrite",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+									},
+								},
+							},
 						},
 						"waf_type": schema.SingleNestedAttribute{
 							Description: "Enable the WAF (Web Application Firewall) functionality for Route WAF can be used to analyze inbound and outbound HTTP/HTTPS traffic. WAF can be configured either in BLOCKing Mode or ALERTing Mode. In BLOCKing mode if WAF detects suspicious inbound/outbound traffic it blocks the request or response. In ALERTing mode if suspicious traffic is detected, WAF generates ALERTs with details on the suspicious traffic (instead of blocking traffic). waf_type is the App Firewall profile to use. waf_type specified at route level overrides waf configuration at VirtualHost level",
@@ -1812,6 +1990,12 @@ func (r *DataSourceF5XCRoute) Schema(ctx context.Context, request datasource.Sch
 													Computed:    true,
 													NestedObject: schema.NestedAttributeObject{
 														Attributes: map[string]schema.Attribute{
+															"name": schema.StringAttribute{
+																Description: "",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
+															},
 															"tenant": schema.StringAttribute{
 																Description: "",
 																Required:    false,
@@ -1819,12 +2003,6 @@ func (r *DataSourceF5XCRoute) Schema(ctx context.Context, request datasource.Sch
 																Computed:    true,
 															},
 															"namespace": schema.StringAttribute{
-																Description: "",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-															"name": schema.StringAttribute{
 																Description: "",
 																Required:    false,
 																Optional:    false,
@@ -1839,173 +2017,753 @@ func (r *DataSourceF5XCRoute) Schema(ctx context.Context, request datasource.Sch
 								},
 							},
 						},
-						"disable_location_add": schema.BoolAttribute{
-							Description: "disable_location_add virtual-host level. This configuration is ignored on CE sites.",
+						"route_action_choice": schema.SingleNestedAttribute{
+							Description: "route_action one of action to take when match is successful",
 							Required:    false,
 							Optional:    false,
 							Computed:    true,
+							Attributes: map[string]schema.Attribute{
+								"route_destination": schema.SingleNestedAttribute{
+									Description: "route_destination Send request to one of the destination from list of destinations",
+									Required:    false,
+									Optional:    false,
+									Computed:    true,
+									Attributes: map[string]schema.Attribute{
+										"query_params": schema.SingleNestedAttribute{
+											Description: "query_params Handling of incoming query parameters in simple route.",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+											Attributes: map[string]schema.Attribute{
+												"query_params_choice": schema.SingleNestedAttribute{
+													Description: "query_params Handling of incoming query parameters in simple route.",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+													Attributes: map[string]schema.Attribute{
+														"retain_all_params": schema.BoolAttribute{
+															Description: "Retain All Params",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+														"remove_all_params": schema.BoolAttribute{
+															Description: "Remove All Params",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+														"replace_params": schema.StringAttribute{
+															Description: "Replace All Params",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+													},
+												},
+											},
+										},
+										"route_destination_rewrite_choice": schema.SingleNestedAttribute{
+											Description: "RouteDestinationRewrite Specifies how the path can be modified during forwarding",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+											Attributes: map[string]schema.Attribute{
+												"regex_rewrite": schema.SingleNestedAttribute{
+													Description: "regex_rewrite regex_rewrite indicates that during forwarding, the matched regex should be swapped with the substitution value. Example : gcSpec: routes: - match: - headers: [] path: regex : '^/service/([^/]+)(/.*)$' query_params: [] routeDestination: regexRewrite: pattern: '^/service/([^/]+)(/.*)$' substitution: '\\2/instance/\\1' destinations: - cluster: - kind: cluster.Object uid: cluster-1 The path pattern '^/service/([^/]+)(/.*)$' paired with a substitution string of '\\2/instance/\\1' would transform '/service/foo/v1/api' into '/v1/api/instance/foo'.",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+													Attributes: map[string]schema.Attribute{
+														"pattern": schema.StringAttribute{
+															Description: "Pattern The regular expression used to find portions of a string that should be replaced.",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+														"substitution": schema.StringAttribute{
+															Description: "Substitution The string that should be substituted into matching portions of the subject string during a substitution operation to produce a new string.",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+													},
+												},
+												"prefix_rewrite": schema.StringAttribute{
+													Description: "prefix_rewrite prefix_rewrite indicates that during forwarding, the matched prefix (or path) should be swapped with its value. When using regex path matching, the entire path (not including the query string) will be swapped with this value. This option allows application URLs to be rooted at a different path from those exposed at the reverse proxy layer. Example : gcSpec: routes: - match: - headers: [] path: prefix : /register/ query_params: [] - headers: [] path: prefix: /register query_params: [] routeDestination: prefixRewrite: '/' destinations: - cluster: - kind: cluster.Object uid: cluster-1 Having above entries in the config, requests to /register will be stripped to /, while requests to /register/public will be stripped to /public",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+											},
+										},
+										"host_rewrite_params_choice": schema.SingleNestedAttribute{
+											Description: "HostRewriteParams Specifies how the host header can be modified during forwarding",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+											Attributes: map[string]schema.Attribute{
+												"host_rewrite": schema.StringAttribute{
+													Description: "HostRewrite Indicates that during forwarding, the host header will be swapped with this value",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"auto_host_rewrite": schema.BoolAttribute{
+													Description: "Auto Host Rewrite Indicates that during forwarding, the host header will be swapped with the hostname of the upstream host chosen by the cluster",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+											},
+										},
+										"timeout": schema.Int64Attribute{
+											Description: "timeout Specifies the timeout for the route in milliseconds. This timeout includes all retries. For server side streaming, configure this field with higher value or leave it un-configured for infinite timeout",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+										},
+										"retry_policy": schema.SingleNestedAttribute{
+											Description: "retry_policy Indicates that the route has a retry policy.",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+											Attributes: map[string]schema.Attribute{
+												"retriable_status_codes": schema.ListAttribute{
+													Description: "Retriable status Code HTTP status codes that should trigger a retry in addition to those specified by retry_on.",
+													ElementType: types.Int64Type,
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"back_off": schema.SingleNestedAttribute{
+													Description: "Retry BackOff Specifies parameters that control retry back off. This parameter is optional, in which case the default base interval is 25 milliseconds. The default maximum interval is 10 times the base interval",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+													Attributes: map[string]schema.Attribute{
+														"base_interval": schema.Int64Attribute{
+															Description: "base_interval Specifies the base interval between retries in milliseconds",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+														"max_interval": schema.Int64Attribute{
+															Description: "max_interval Specifies the maximum interval between retries in milliseconds. This parameter is optional, but must be greater than or equal to the base_interval if set. The default is 10 times the base_interval.",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+													},
+												},
+												"retry_condition": schema.ListAttribute{
+													Description: "retry_condition Specifies the conditions under which retry takes place. Retries can be on different types of condition depending on application requirements. For example, network failure, all 5xx response codes, idempotent 4xx response codes, etc The possible values are '5xx'             : Retry will be done if the upstream server responds with any 5xx response code, or does not respond at all (disconnect/reset/read timeout). 'gateway-error'   : Retry will be done only if the upstream server responds with 502, 503 or 504 responses (Included in 5xx) 'connect-failure' : Retry will be done if the request fails because of a connection failure to the upstream server (connect timeout, etc.). (Included in 5xx) 'refused-stream'  : Retry is done if the upstream server resets the stream with a REFUSED_STREAM error code (Included in 5xx) 'retriable-4xx'   : Retry is done if the upstream server responds with a retriable 4xx response code. The only response code in this category is HTTP CONFLICT (409) 'retriable-status-codes' :  Retry is done if the upstream server responds with any response code matching one defined in retriable_status_codes field 'reset'           : Retry is done if the upstream server does not respond at all (disconnect/reset/read timeout.)",
+													ElementType: types.StringType,
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"num_retries": schema.Int64Attribute{
+													Description: "num_retries Specifies the allowed number of retries. Defaults to 1. Retries can be done any number of times. An exponential back-off algorithm is used between each retry",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"per_try_timeout": schema.Int64Attribute{
+													Description: "per_try_timeout Specifies a non-zero timeout per retry attempt. In milliseconds",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+											},
+										},
+										"csrf_policy": schema.SingleNestedAttribute{
+											Description: "csrf_policy Cross-Site Request Forgery (CSRF) is an attack that occurs when a malicious third-party website exploits a vulnerability thats allows them to submit an undesired request on user's behalf. The policy checks where a request is coming from to determine if the request's origin is the same as its destination. The policy relies on two pieces of information used in determining if a request originated from the same host. 1. The origin that caused the user agent to issue the request (source origin). 2. The origin that the request is going to (target origin). When the policy evaluating a request, it ensures both pieces of information are present and compare their values. If the source origin is missing or origins do not match the request is rejected. The exception to this being the source-origin has been added to the policy as valid. Because CSRF attacks specifically target state-changing requests, the policy only acts on the HTTP requests that have state-changing method (PUT,POST, etc.).",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+											Attributes: map[string]schema.Attribute{
+												"allowed_domains_choice": schema.SingleNestedAttribute{
+													Description: "allowed_domains The list of source origin that should be allowed.",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+													Attributes: map[string]schema.Attribute{
+														"disabled": schema.BoolAttribute{
+															Description: "disabled Allow all source origin domains.",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+														"all_load_balancer_domains": schema.BoolAttribute{
+															Description: "all_load_balancer_domains Add All load balancer domains to source origin (allow) list.",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+														"custom_domain_list": schema.SingleNestedAttribute{
+															Description: "custom_domain_list Add one or more domains to source origin (allow) list.",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+															Attributes: map[string]schema.Attribute{
+																"domains": schema.ListAttribute{
+																	Description: "Domains A list of domain names that will be matched to loadbalancer. These domains are not used for SNI match. Wildcard names are supported in the suffix or prefix form.",
+																	ElementType: types.StringType,
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
+															},
+														},
+													},
+												},
+											},
+										},
+										"cluster_retract_choice": schema.SingleNestedAttribute{
+											Description: "Oneof for Cluster retraction Specifies whether retraction of cluster has to be enabled or disabled",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+											Attributes: map[string]schema.Attribute{
+												"do_not_retract_cluster": schema.BoolAttribute{
+													Description: "do_not_retract_cluster When this option is configured, cluster with no healthy endpoints is not retracted from route having weighted cluster configuration.",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"retract_cluster": schema.BoolAttribute{
+													Description: "retract_cluster When this option is enabled, weighted cluster will not be considered for loadbalancing, if all its endpoints are unhealthy. Since the cluster with all unhealthy endpoints is removed, the traffic will be distributed among remaining clusters as per their weight. Also panic-threshold configuration is ignored for retracted cluster. This option is ignored when single destination cluster is configured for route",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+											},
+										},
+										"endpoint_subsets": schema.MapAttribute{
+											Description: "endpoint_subsets Upstream cluster may be configured to divide its endpoints into subsets based on metadata attached to the endpoints. Routes may then specify the metadata that a endpoint must match in order to be selected by the load balancer Labels field of endpoint object's metadata is used for subset matching. For endpoint's which are discovered in K8S or Consul cluster, the label of the service is merged with endpoint's labels. In case of Consul, the label is derived from the 'Tag' field. For labels that are common between configured endpoint and discovered service, labels from discovered service takes precedence. List of key-value pairs that will be used as matching metadata. Only those endpoints of upstream cluster which match this metadata will be selected for load balancing",
+											ElementType: types.StringType,
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+										},
+										"web_socket_config": schema.SingleNestedAttribute{
+											Description: "web_socket_config Websocket configuration for each route",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+											Attributes: map[string]schema.Attribute{
+												"use_websocket": schema.BoolAttribute{
+													Description: "use_websocket Specifies that the HTTP client connection to this route is allowed to upgrade to a WebSocket connection",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+											},
+										},
+										"priority": schema.ListAttribute{
+											Description: "priority Priority routing for each route. Different connection pools are used based on the priority of the route. Also, circuit-breaker configuration at destination cluster is chosen based on the route priority.",
+											ElementType: types.StringType,
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+										},
+										"destinations": schema.ListNestedAttribute{
+											Description: "destinations When requests have to distributed among multiple upstream clusters, multiple destinations are configured, each having its own cluster and weight. Traffic is distributed among clusters based on the weight configured. Example: destinations: - cluster: - kind: ves.io.vega.cfg.adc.cluster.Object uid: cluster-1 weight: 20 - cluster: - kind: ves.io.vega.cfg.adc.cluster.Object uid: cluster-2 weight: 30 - cluster: - kind: ves.io.vega.cfg.adc.cluster.Object uid: cluster-3 weight: 50 This indicates that out of every 100 requests, 50 goes to cluster-3, 30 to cluster-2 and 20 to cluster-1 When single destination is configured, weight is ignored. All the requests are sent to the cluster specified in the destination",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+											NestedObject: schema.NestedAttributeObject{
+												Attributes: map[string]schema.Attribute{
+													"cluster": schema.ListNestedAttribute{
+														Description: "cluster Indicates the upstream cluster to which the request should be sent. If the cluster does not exist ServiceUnavailable response will be sent",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+														NestedObject: schema.NestedAttributeObject{
+															Attributes: map[string]schema.Attribute{
+																"name": schema.StringAttribute{
+																	Description: "",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
+																"tenant": schema.StringAttribute{
+																	Description: "",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
+																"namespace": schema.StringAttribute{
+																	Description: "",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
+															},
+														},
+													},
+													"weight": schema.Int64Attribute{
+														Description: "weight When requests have to distributed among multiple upstream clusters, multiple destinations are configured, each having its own cluster and weight. Traffic is distributed among clusters based on the weight configured. Example: destinations: - cluster: - kind: ves.io.vega.cfg.adc.cluster.Object uid: cluster-1 weight: 20 - cluster: - kind: ves.io.vega.cfg.adc.cluster.Object uid: cluster-2 weight: 30 - cluster: - kind: ves.io.vega.cfg.adc.cluster.Object uid: cluster-3 weight: 10 This indicates that out of every 60 requests, 10 goes to cluster-3, 30 to cluster-2 and 20 to cluster-1 When single destination is configured, weight is ignored. All the requests are sent to the cluster specified in the destination",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+													},
+													"priority": schema.Int64Attribute{
+														Description: "Priority Priority of this cluster, valid only with multiple destinations are configured. Value of 0 will make the cluster as lowest priority upstream cluster Priority of 1 means highest priority and is considered active. When active cluster is not available, lower priority clusters are made active as per the increasing priority.",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+													},
+													"endpoint_subsets": schema.MapAttribute{
+														Description: "endpoint_subsets Upstream cluster may be configured to divide its endpoints into subsets based on metadata attached to the endpoints. Routes may then specify the metadata that a endpoint must match in order to be selected by the load balancer Labels field of endpoint object's metadata is used for subset matching. For endpoints which are discovered in K8S or Consul cluster, the label of the service is merged with endpoint's labels. In case of Consul, the label is derived from the 'Tag' field. For labels that are common between configured endpoint and discovered service, labels from discovered service takes precedence. List of key-value pairs that will be used as matching metadata. Only those endpoints of upstream cluster which match this metadata will be selected for load balancing",
+														ElementType: types.StringType,
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+													},
+												},
+											},
+										},
+										"mirror_policy": schema.SingleNestedAttribute{
+											Description: "mirror_policy MirrorPolicy is used for shadowing traffic from one cluster to another. The current implementation is 'fire and forget,' meaning it will not wait for the shadow cluster to respond before returning the response from the primary cluster. All normal statistics are collected for the shadow cluster making this feature useful for testing. During shadowing, the host/authority header is altered such that *-shadow* is appended. This is useful for logging. For example, *cluster1* becomes *cluster1-shadow*.",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+											Attributes: map[string]schema.Attribute{
+												"cluster": schema.ListNestedAttribute{
+													Description: "cluster Specifies the cluster to which the requests will be mirrored. The cluster object referred here must be present.",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+													NestedObject: schema.NestedAttributeObject{
+														Attributes: map[string]schema.Attribute{
+															"name": schema.StringAttribute{
+																Description: "",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
+															},
+															"tenant": schema.StringAttribute{
+																Description: "",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
+															},
+															"namespace": schema.StringAttribute{
+																Description: "",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
+															},
+														},
+													},
+												},
+												"percent": schema.SingleNestedAttribute{
+													Description: "percent Percentage of requests to be mirrored",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+													Attributes: map[string]schema.Attribute{
+														"numerator": schema.Int64Attribute{
+															Description: "numerator sampled parts per denominator. If denominator was 10000, then value of 5 will be 5 in 10000",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+														"denominator": schema.ListAttribute{
+															Description: "denominator Samples per denominator. numerator part per 100 or 10000 ro 1000000",
+															ElementType: types.StringType,
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+													},
+												},
+											},
+										},
+										"buffer_policy": schema.SingleNestedAttribute{
+											Description: "buffer_policy Buffering configuration for requests Some upstream applications are not capable of handling streamed data. This config enables buffering the entire request before sending to upstream application. We can specify the maximum buffer size and buffer interval with this config. Route level buffer configuration overrides any configuration at VirtualHost level.",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+											Attributes: map[string]schema.Attribute{
+												"disabled": schema.BoolAttribute{
+													Description: "disable Disable buffering for a particular route. This is useful when virtual-host has buffering, but we need to disable it on a specific route. The value of this field is ignored for virtual-host",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"max_request_bytes": schema.Int64Attribute{
+													Description: "max_request_bytes The maximum request size that the filter will buffer before the connection manager will stop buffering and return a RequestEntityTooLarge (413) response.",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+											},
+										},
+										"cors_policy": schema.SingleNestedAttribute{
+											Description: "cors_policy Cross-Origin Resource Sharing requests configuration CORS is a mechanism that uses additional HTTP headers to tell a browser to let a web application running at one origin (domain) have permission to access selected resources from a server at a different origin",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+											Attributes: map[string]schema.Attribute{
+												"disabled": schema.BoolAttribute{
+													Description: "disabled Disable the CorsPolicy for a particular route. This is useful when virtual-host has CorsPolicy, but we need to disable it on a specific route. The value of this field is ignored for virtual-host",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"allow_origin": schema.ListAttribute{
+													Description: "allow_origin Specifies the origins that will be allowed to do CORS requests. An origin is allowed if either allow_origin or allow_origin_regex match",
+													ElementType: types.StringType,
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"allow_methods": schema.StringAttribute{
+													Description: "allow_methods Specifies the content for the access-control-allow-methods header",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"allow_headers": schema.StringAttribute{
+													Description: "allow_headers Specifies the content for the access-control-allow-headers header",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"expose_headers": schema.StringAttribute{
+													Description: "expose_headers Specifies the content for the access-control-expose-headers header",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"allow_credentials": schema.BoolAttribute{
+													Description: "allow_credentials Specifies whether the resource allows credentials",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"allow_origin_regex": schema.ListAttribute{
+													Description: "allow_origin_regex Specifies regex patterns that match allowed origins. An origin is allowed if either allow_origin or allow_origin_regex match",
+													ElementType: types.StringType,
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"maximum_age": schema.Int32Attribute{
+													Description: "maximum_age This indicates the maximum number of seconds the results can be cached A value of -1 will disable caching. Maximum permitted value is 86400 seconds (24 hours)",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+											},
+										},
+										"hash_policy": schema.ListNestedAttribute{
+											Description: "hash_policy Specifies a list of hash policies to use for ring hash load balancing. Each hash policy is evaluated individually and the combined result is used to route the request",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+											NestedObject: schema.NestedAttributeObject{
+												Attributes: map[string]schema.Attribute{
+													"policy_specifier_choice": schema.SingleNestedAttribute{
+														Description: "PolicySpecifier Specifies whether hashing is done on incoming request header, cookie or source IP",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+														Attributes: map[string]schema.Attribute{
+															"cookie": schema.SingleNestedAttribute{
+																Description: "Cookie Hash based on cookie",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
+																Attributes: map[string]schema.Attribute{
+																	"path": schema.StringAttribute{
+																		Description: "path The name of the path for the cookie. If no path is specified here, no path will be set for the cookie",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
+																	},
+																	"samesite_choice": schema.SingleNestedAttribute{
+																		Description: "samesite Controls whether or not a cookie is sent with cross-site requests",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
+																		Attributes: map[string]schema.Attribute{
+																			"samesite_strict": schema.BoolAttribute{
+																				Description: "strict Add Samesite attribute with Strict. Means that the browser sends the cookie only for same-site requests",
+																				Required:    false,
+																				Optional:    false,
+																				Computed:    true,
+																			},
+																			"samesite_lax": schema.BoolAttribute{
+																				Description: "lax Add Samesite attribute with Lax. Means that the cookie is not sent on cross-site requests",
+																				Required:    false,
+																				Optional:    false,
+																				Computed:    true,
+																			},
+																			"samesite_none": schema.BoolAttribute{
+																				Description: "none Add Samesite attribute with None. Means that the browser sends the cookie with both cross-site and same-site requests",
+																				Required:    false,
+																				Optional:    false,
+																				Computed:    true,
+																			},
+																			"ignore_samesite": schema.BoolAttribute{
+																				Description: "ignore_samesite Ignore Samesite attribute",
+																				Required:    false,
+																				Optional:    false,
+																				Computed:    true,
+																			},
+																		},
+																	},
+																	"secure_choice": schema.SingleNestedAttribute{
+																		Description: "secure A cookie with the Secure attribute is only sent to the server with an encrypted request over the HTTPS protocol and therefore, is more resistant to man-in-the-middle attacks.",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
+																		Attributes: map[string]schema.Attribute{
+																			"ignore_secure": schema.BoolAttribute{
+																				Description: "ignore_secure Ignore secure attribute",
+																				Required:    false,
+																				Optional:    false,
+																				Computed:    true,
+																			},
+																			"add_secure": schema.BoolAttribute{
+																				Description: "add_secure Add secure attribute",
+																				Required:    false,
+																				Optional:    false,
+																				Computed:    true,
+																			},
+																		},
+																	},
+																	"httponly_choice": schema.SingleNestedAttribute{
+																		Description: "httponly A cookie with the HttpOnly attribute is inaccessible to the JavaScript.",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
+																		Attributes: map[string]schema.Attribute{
+																			"ignore_httponly": schema.BoolAttribute{
+																				Description: "ignore_httponly Ignore httponly attribute",
+																				Required:    false,
+																				Optional:    false,
+																				Computed:    true,
+																			},
+																			"add_httponly": schema.BoolAttribute{
+																				Description: "add_httponly Add httponly attribute",
+																				Required:    false,
+																				Optional:    false,
+																				Computed:    true,
+																			},
+																		},
+																	},
+																	"name": schema.StringAttribute{
+																		Description: "name The name of the cookie that will be used to obtain the hash key. If the cookie is not present and TTL below is not set, no hash will be produced",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
+																	},
+																	"ttl": schema.Int64Attribute{
+																		Description: "ttl If specified, a cookie with the TTL will be generated if the cookie is not present. If the TTL is present and zero, the generated cookie will be a session cookie. TTL value is in milliseconds",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
+																	},
+																},
+															},
+															"source_ip": schema.BoolAttribute{
+																Description: "Source IP Hash based on source IP address",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
+															},
+															"header_name": schema.StringAttribute{
+																Description: "Header The name or key of the request header that will be used to obtain the hash key",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
+															},
+														},
+													},
+													"terminal": schema.BoolAttribute{
+														Description: "terminal Specify if its a terminal policy",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+													},
+												},
+											},
+										},
+										"spdy_config": schema.SingleNestedAttribute{
+											Description: "spdy_config SPDY configuration for each route",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+											Attributes: map[string]schema.Attribute{
+												"use_spdy": schema.BoolAttribute{
+													Description: "use_spdy Specifies that the HTTP client connection to this route is allowed to upgrade to a SPDY connection",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+											},
+										},
+									},
+								},
+								"route_redirect": schema.SingleNestedAttribute{
+									Description: "route_redirect Send redirect response",
+									Required:    false,
+									Optional:    false,
+									Computed:    true,
+									Attributes: map[string]schema.Attribute{
+										"host_redirect": schema.StringAttribute{
+											Description: "host_redirect swap host part of incoming URL in redirect URL",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+										},
+										"redirect_path_choice": schema.SingleNestedAttribute{
+											Description: "Redirect Path Path in the redirect response",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+											Attributes: map[string]schema.Attribute{
+												"path_redirect": schema.StringAttribute{
+													Description: "path_redirect swap path part of incoming URL in redirect URL",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"prefix_rewrite": schema.StringAttribute{
+													Description: "prefix_rewrite In Redirect response, the matched prefix (or path) should be swapped with this value. This option allows redirect URLs be dynamically created based on the request",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+											},
+										},
+										"proto_redirect": schema.StringAttribute{
+											Description: "proto_redirect swap protocol part of incoming URL in redirect URL The protocol can be swapped with either http or https When incoming-proto option is specified, swapping of protocol is not done.",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+										},
+										"query_params_choice": schema.SingleNestedAttribute{
+											Description: "query_params handling of incoming query parameters in redirect request.",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+											Attributes: map[string]schema.Attribute{
+												"retain_all_params": schema.BoolAttribute{
+													Description: "Retain All Params",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"remove_all_params": schema.BoolAttribute{
+													Description: "Remove All Params",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"replace_params": schema.StringAttribute{
+													Description: "Replace All Params",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+											},
+										},
+										"response_code": schema.Int64Attribute{
+											Description: "response_code The HTTP status code to use in the redirect response.",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+										},
+									},
+								},
+								"route_direct_response": schema.SingleNestedAttribute{
+									Description: "route_direct_response Send direct response",
+									Required:    false,
+									Optional:    false,
+									Computed:    true,
+									Attributes: map[string]schema.Attribute{
+										"response_code": schema.Int64Attribute{
+											Description: "response_code response code to send",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+										},
+										"response_body_encoded": schema.StringAttribute{
+											Description: "response_body Response body to send. Currently supported URL schemes is string:/// for which message should be encoded in Base64 format. The message can be either plain text or html. E.g. '<p> Access Denied </p>'. Base64 encoded string url for this is string:///PHA+IEFjY2VzcyBEZW5pZWQgPC9wPg==",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+										},
+									},
+								},
+							},
 						},
-						"match": schema.ListNestedAttribute{
-							Description: "match route match condition",
+						"bot_defense_javascript_injection_choice": schema.SingleNestedAttribute{
+							Description: "Oneof Bot Defense Javascript Injection Insert JavaScript Tags for Bot Defense Advance and Fraud Services",
 							Required:    false,
 							Optional:    false,
 							Computed:    true,
-							NestedObject: schema.NestedAttributeObject{
-								Attributes: map[string]schema.Attribute{
-									"headers": schema.ListNestedAttribute{
-										Description: "headers List of (key, value) headers",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-										NestedObject: schema.NestedAttributeObject{
-											Attributes: map[string]schema.Attribute{
-												"name": schema.StringAttribute{
-													Description: "name Name of the header",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"value_match_choice": schema.SingleNestedAttribute{
-													Description: "value_match The variants of matching a header value",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-													Attributes: map[string]schema.Attribute{
-														"exact": schema.StringAttribute{
-															Description: "exact Header value to match exactly",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-														"regex": schema.StringAttribute{
-															Description: "regex Regex match of the header value in re2 format",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-														"presence": schema.BoolAttribute{
-															Description: "presence If true, check for presence of header",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-													},
-												},
-												"invert_match": schema.BoolAttribute{
-													Description: "invert_match Invert the result of the match to detect missing header or non-matching value",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-											},
+							Attributes: map[string]schema.Attribute{
+								"inherited_bot_defense_javascript_injection": schema.BoolAttribute{
+									Description: "Inherited Bot Defense Javascript Injection Bot Defense Javascript Injection configuration is taken from Load Balancer. Hence no custom configuration is applied on the route",
+									Required:    false,
+									Optional:    false,
+									Computed:    true,
+								},
+								"bot_defense_javascript_injection": schema.SingleNestedAttribute{
+									Description: "Bot Defense Javascript Injection for inline bot defense deployments Configuration for Bot Defense Javascript Injection",
+									Required:    false,
+									Optional:    false,
+									Computed:    true,
+									Attributes: map[string]schema.Attribute{
+										"javascript_location": schema.ListAttribute{
+											Description: "javascript_location Select the location where you would like to insert the Javascript tag(s).",
+											ElementType: types.StringType,
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
 										},
-									},
-									"query_params": schema.ListNestedAttribute{
-										Description: "query_params List of (key, value) query parameters",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-										NestedObject: schema.NestedAttributeObject{
-											Attributes: map[string]schema.Attribute{
-												"key": schema.StringAttribute{
-													Description: "key Query parameter key In the above example, assignee_username is the key",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"value_match_choice": schema.SingleNestedAttribute{
-													Description: "value_match Query parameter value regex match or exact match In the above example, xxyyxx is the value for the matching key",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-													Attributes: map[string]schema.Attribute{
-														"exact": schema.StringAttribute{
-															Description: "exact Exact match value for the query parameter key",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-														"regex": schema.StringAttribute{
-															Description: "regex Regex match value for the query parameter key",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-													},
-												},
-											},
-										},
-									},
-									"http_method": schema.ListAttribute{
-										Description: "http_method The name of the HTTP Method (GET, PUT, POST, etc)",
-										ElementType: types.StringType,
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-									},
-									"incoming_port": schema.SingleNestedAttribute{
-										Description: "incoming_port The port on which the request is received",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-										Attributes: map[string]schema.Attribute{
-											"port_match_choice": schema.SingleNestedAttribute{
-												Description: "port_match A specification of port match",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
+										"javascript_tags": schema.ListNestedAttribute{
+											Description: "javascript_tags Select Add item to configure your javascript tag. If adding both Bot Adv and Fraud, the Bot Javascript should be added first.",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+											NestedObject: schema.NestedAttributeObject{
 												Attributes: map[string]schema.Attribute{
-													"port": schema.Int64Attribute{
-														Description: "port Exact Port to match",
+													"javascript_url": schema.StringAttribute{
+														Description: "JavaScriptURL Please enter the full URL (include domain and path), or relative path.",
 														Required:    false,
 														Optional:    false,
 														Computed:    true,
 													},
-													"port_ranges": schema.StringAttribute{
-														Description: "port_range Port range to match",
+													"tag_attributes": schema.ListNestedAttribute{
+														Description: "TagAttributes Add the tag attributes you want to include in your Javascript tag.",
 														Required:    false,
 														Optional:    false,
 														Computed:    true,
-													},
-													"no_port_match": schema.BoolAttribute{
-														Description: "disable port Match Disable matching of ports",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
-												},
-											},
-										},
-									},
-									"path": schema.SingleNestedAttribute{
-										Description: "path URI path of route",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-										Attributes: map[string]schema.Attribute{
-											"path_match_choice": schema.SingleNestedAttribute{
-												Description: "path_match A specification of path match",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-												Attributes: map[string]schema.Attribute{
-													"prefix": schema.StringAttribute{
-														Description: "prefix Path prefix to match (e.g. the value / will match on all paths)",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
-													"path": schema.StringAttribute{
-														Description: "exact Exact path value to match",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
-													"regex": schema.StringAttribute{
-														Description: "regex Regular expression of path match (e.g. the value .* will match on all paths)",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
+														NestedObject: schema.NestedAttributeObject{
+															Attributes: map[string]schema.Attribute{
+																"javascript_tag": schema.ListAttribute{
+																	Description: "JavaScriptTags Select from one of the predefined tag attibutes.",
+																	ElementType: types.StringType,
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
+																"tag_value": schema.StringAttribute{
+																	Description: "TagValue Add the tag attribute value.",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
+															},
+														},
 													},
 												},
 											},
@@ -2134,6 +2892,286 @@ func (r *DataSourceF5XCRoute) Schema(ctx context.Context, request datasource.Sch
 								},
 							},
 						},
+						"request_cookies_to_remove": schema.ListAttribute{
+							Description: "Cookies to be removed from request List of keys of Cookies to be removed from the HTTP request being sent towards upstream.",
+							ElementType: types.StringType,
+							Required:    false,
+							Optional:    false,
+							Computed:    true,
+						},
+						"disable_location_add": schema.BoolAttribute{
+							Description: "disable_location_add virtual-host level. This configuration is ignored on CE sites.",
+							Required:    false,
+							Optional:    false,
+							Computed:    true,
+						},
+						"match": schema.ListNestedAttribute{
+							Description: "match route match condition",
+							Required:    false,
+							Optional:    false,
+							Computed:    true,
+							NestedObject: schema.NestedAttributeObject{
+								Attributes: map[string]schema.Attribute{
+									"path": schema.SingleNestedAttribute{
+										Description: "path URI path of route",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+										Attributes: map[string]schema.Attribute{
+											"path_match_choice": schema.SingleNestedAttribute{
+												Description: "path_match A specification of path match",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+												Attributes: map[string]schema.Attribute{
+													"prefix": schema.StringAttribute{
+														Description: "prefix Path prefix to match (e.g. the value / will match on all paths)",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+													},
+													"path": schema.StringAttribute{
+														Description: "exact Exact path value to match",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+													},
+													"regex": schema.StringAttribute{
+														Description: "regex Regular expression of path match (e.g. the value .* will match on all paths)",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+													},
+												},
+											},
+										},
+									},
+									"headers": schema.ListNestedAttribute{
+										Description: "headers List of (key, value) headers",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+										NestedObject: schema.NestedAttributeObject{
+											Attributes: map[string]schema.Attribute{
+												"name": schema.StringAttribute{
+													Description: "name Name of the header",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"value_match_choice": schema.SingleNestedAttribute{
+													Description: "value_match The variants of matching a header value",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+													Attributes: map[string]schema.Attribute{
+														"exact": schema.StringAttribute{
+															Description: "exact Header value to match exactly",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+														"regex": schema.StringAttribute{
+															Description: "regex Regex match of the header value in re2 format",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+														"presence": schema.BoolAttribute{
+															Description: "presence If true, check for presence of header",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+													},
+												},
+												"invert_match": schema.BoolAttribute{
+													Description: "invert_match Invert the result of the match to detect missing header or non-matching value",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+											},
+										},
+									},
+									"query_params": schema.ListNestedAttribute{
+										Description: "query_params List of (key, value) query parameters",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+										NestedObject: schema.NestedAttributeObject{
+											Attributes: map[string]schema.Attribute{
+												"key": schema.StringAttribute{
+													Description: "key Query parameter key In the above example, assignee_username is the key",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"value_match_choice": schema.SingleNestedAttribute{
+													Description: "value_match Query parameter value regex match or exact match In the above example, xxyyxx is the value for the matching key",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+													Attributes: map[string]schema.Attribute{
+														"exact": schema.StringAttribute{
+															Description: "exact Exact match value for the query parameter key",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+														"regex": schema.StringAttribute{
+															Description: "regex Regex match value for the query parameter key",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+													},
+												},
+											},
+										},
+									},
+									"http_method": schema.ListAttribute{
+										Description: "http_method The name of the HTTP Method (GET, PUT, POST, etc)",
+										ElementType: types.StringType,
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+									},
+									"incoming_port": schema.SingleNestedAttribute{
+										Description: "incoming_port The port on which the request is received",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+										Attributes: map[string]schema.Attribute{
+											"port_match_choice": schema.SingleNestedAttribute{
+												Description: "port_match A specification of port match",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+												Attributes: map[string]schema.Attribute{
+													"port": schema.Int64Attribute{
+														Description: "port Exact Port to match",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+													},
+													"port_ranges": schema.StringAttribute{
+														Description: "port_range Port range to match",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+													},
+													"no_port_match": schema.BoolAttribute{
+														Description: "disable port Match Disable matching of ports",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+						"response_headers_to_add": schema.ListNestedAttribute{
+							Description: "Headers to add in response Headers are key-value pairs to be added to HTTP response being sent towards downstream. Headers specified at this level are applied before headers from the enclosing VirtualHost object level",
+							Required:    false,
+							Optional:    false,
+							Computed:    true,
+							NestedObject: schema.NestedAttributeObject{
+								Attributes: map[string]schema.Attribute{
+									"name": schema.StringAttribute{
+										Description: "name Name of the HTTP header.",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+									},
+									"value_choice": schema.SingleNestedAttribute{
+										Description: "value Enter Header value as string or blindfolded secret.",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+										Attributes: map[string]schema.Attribute{
+											"secret_value": schema.SingleNestedAttribute{
+												Description: "Secret Value Secret Value of the HTTP header.",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+												Attributes: map[string]schema.Attribute{
+													"secret_info_choice": schema.SingleNestedAttribute{
+														Description: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+														Attributes: map[string]schema.Attribute{
+															"blindfold_secret_info": schema.SingleNestedAttribute{
+																Description: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
+																Attributes: map[string]schema.Attribute{
+																	"store_provider": schema.StringAttribute{
+																		Description: "Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
+																	},
+																	"location": schema.StringAttribute{
+																		Description: "Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
+																	},
+																	"decryption_provider": schema.StringAttribute{
+																		Description: "Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
+																	},
+																},
+															},
+															"clear_secret_info": schema.SingleNestedAttribute{
+																Description: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
+																Attributes: map[string]schema.Attribute{
+																	"provider": schema.StringAttribute{
+																		Description: "Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
+																	},
+																	"url": schema.StringAttribute{
+																		Description: "URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
+																	},
+																},
+															},
+														},
+													},
+												},
+											},
+											"value": schema.StringAttribute{
+												Description: "value Value of the HTTP header.",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+											},
+										},
+									},
+									"append": schema.BoolAttribute{
+										Description: "append Should the value be appended? If true, the value is appended to existing values. Default value is do not append",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+									},
+								},
+							},
+						},
 						"request_headers_to_remove": schema.ListAttribute{
 							Description: "Header to be removed from request List of keys of Headers to be removed from the HTTP request being sent towards upstream.",
 							ElementType: types.StringType,
@@ -2148,816 +3186,18 @@ func (r *DataSourceF5XCRoute) Schema(ctx context.Context, request datasource.Sch
 							Computed:    true,
 							NestedObject: schema.NestedAttributeObject{
 								Attributes: map[string]schema.Attribute{
-									"value_choice": schema.SingleNestedAttribute{
-										Description: "value Enter Cookie value as string or blindfolded secret.",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-										Attributes: map[string]schema.Attribute{
-											"secret_value": schema.SingleNestedAttribute{
-												Description: "Secret Value Secret Value of the Cookie header",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-												Attributes: map[string]schema.Attribute{
-													"secret_info_choice": schema.SingleNestedAttribute{
-														Description: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-														Attributes: map[string]schema.Attribute{
-															"blindfold_secret_info": schema.SingleNestedAttribute{
-																Description: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-																Attributes: map[string]schema.Attribute{
-																	"location": schema.StringAttribute{
-																		Description: "Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																	},
-																	"decryption_provider": schema.StringAttribute{
-																		Description: "Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																	},
-																	"store_provider": schema.StringAttribute{
-																		Description: "Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																	},
-																},
-															},
-															"clear_secret_info": schema.SingleNestedAttribute{
-																Description: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-																Attributes: map[string]schema.Attribute{
-																	"provider": schema.StringAttribute{
-																		Description: "Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																	},
-																	"url": schema.StringAttribute{
-																		Description: "URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																	},
-																},
-															},
-														},
-													},
-												},
-											},
-											"value": schema.StringAttribute{
-												Description: "value Value of the Cookie header.",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-										},
-									},
-									"overwrite": schema.BoolAttribute{
-										Description: "overwrite Should the value be overwritten? If true, the value is overwritten to existing values. Default value is do not overwrite",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-									},
 									"name": schema.StringAttribute{
 										Description: "name Name of the cookie in Cookie header.",
 										Required:    false,
 										Optional:    false,
 										Computed:    true,
 									},
-								},
-							},
-						},
-						"response_cookies_to_remove": schema.ListAttribute{
-							Description: "Cookies to be removed from response List of name of Cookies to be removed from the HTTP response being sent towards downstream. Entire set-cookie header will be removed",
-							ElementType: types.StringType,
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-						},
-						"route_action_choice": schema.SingleNestedAttribute{
-							Description: "route_action one of action to take when match is successful",
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-							Attributes: map[string]schema.Attribute{
-								"route_destination": schema.SingleNestedAttribute{
-									Description: "route_destination Send request to one of the destination from list of destinations",
-									Required:    false,
-									Optional:    false,
-									Computed:    true,
-									Attributes: map[string]schema.Attribute{
-										"retry_policy": schema.SingleNestedAttribute{
-											Description: "retry_policy Indicates that the route has a retry policy.",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-											Attributes: map[string]schema.Attribute{
-												"num_retries": schema.Int64Attribute{
-													Description: "num_retries Specifies the allowed number of retries. Defaults to 1. Retries can be done any number of times. An exponential back-off algorithm is used between each retry",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"per_try_timeout": schema.Int64Attribute{
-													Description: "per_try_timeout Specifies a non-zero timeout per retry attempt. In milliseconds",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"retriable_status_codes": schema.ListAttribute{
-													Description: "Retriable status Code HTTP status codes that should trigger a retry in addition to those specified by retry_on.",
-													ElementType: types.Int64Type,
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"back_off": schema.SingleNestedAttribute{
-													Description: "Retry BackOff Specifies parameters that control retry back off. This parameter is optional, in which case the default base interval is 25 milliseconds. The default maximum interval is 10 times the base interval",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-													Attributes: map[string]schema.Attribute{
-														"base_interval": schema.Int64Attribute{
-															Description: "base_interval Specifies the base interval between retries in milliseconds",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-														"max_interval": schema.Int64Attribute{
-															Description: "max_interval Specifies the maximum interval between retries in milliseconds. This parameter is optional, but must be greater than or equal to the base_interval if set. The default is 10 times the base_interval.",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-													},
-												},
-												"retry_condition": schema.ListAttribute{
-													Description: "retry_condition Specifies the conditions under which retry takes place. Retries can be on different types of condition depending on application requirements. For example, network failure, all 5xx response codes, idempotent 4xx response codes, etc The possible values are '5xx'             : Retry will be done if the upstream server responds with any 5xx response code, or does not respond at all (disconnect/reset/read timeout). 'gateway-error'   : Retry will be done only if the upstream server responds with 502, 503 or 504 responses (Included in 5xx) 'connect-failure' : Retry will be done if the request fails because of a connection failure to the upstream server (connect timeout, etc.). (Included in 5xx) 'refused-stream'  : Retry is done if the upstream server resets the stream with a REFUSED_STREAM error code (Included in 5xx) 'retriable-4xx'   : Retry is done if the upstream server responds with a retriable 4xx response code. The only response code in this category is HTTP CONFLICT (409) 'retriable-status-codes' :  Retry is done if the upstream server responds with any response code matching one defined in retriable_status_codes field 'reset'           : Retry is done if the upstream server does not respond at all (disconnect/reset/read timeout.)",
-													ElementType: types.StringType,
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-											},
-										},
-										"mirror_policy": schema.SingleNestedAttribute{
-											Description: "mirror_policy MirrorPolicy is used for shadowing traffic from one cluster to another. The current implementation is 'fire and forget,' meaning it will not wait for the shadow cluster to respond before returning the response from the primary cluster. All normal statistics are collected for the shadow cluster making this feature useful for testing. During shadowing, the host/authority header is altered such that *-shadow* is appended. This is useful for logging. For example, *cluster1* becomes *cluster1-shadow*.",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-											Attributes: map[string]schema.Attribute{
-												"cluster": schema.ListNestedAttribute{
-													Description: "cluster Specifies the cluster to which the requests will be mirrored. The cluster object referred here must be present.",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-													NestedObject: schema.NestedAttributeObject{
-														Attributes: map[string]schema.Attribute{
-															"tenant": schema.StringAttribute{
-																Description: "",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-															"namespace": schema.StringAttribute{
-																Description: "",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-															"name": schema.StringAttribute{
-																Description: "",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-														},
-													},
-												},
-												"percent": schema.SingleNestedAttribute{
-													Description: "percent Percentage of requests to be mirrored",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-													Attributes: map[string]schema.Attribute{
-														"denominator": schema.ListAttribute{
-															Description: "denominator Samples per denominator. numerator part per 100 or 10000 ro 1000000",
-															ElementType: types.StringType,
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-														"numerator": schema.Int64Attribute{
-															Description: "numerator sampled parts per denominator. If denominator was 10000, then value of 5 will be 5 in 10000",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-													},
-												},
-											},
-										},
-										"web_socket_config": schema.SingleNestedAttribute{
-											Description: "web_socket_config Websocket configuration for each route",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-											Attributes: map[string]schema.Attribute{
-												"use_websocket": schema.BoolAttribute{
-													Description: "use_websocket Specifies that the HTTP client connection to this route is allowed to upgrade to a WebSocket connection",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-											},
-										},
-										"buffer_policy": schema.SingleNestedAttribute{
-											Description: "buffer_policy Buffering configuration for requests Some upstream applications are not capable of handling streamed data. This config enables buffering the entire request before sending to upstream application. We can specify the maximum buffer size and buffer interval with this config. Route level buffer configuration overrides any configuration at VirtualHost level.",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-											Attributes: map[string]schema.Attribute{
-												"disabled": schema.BoolAttribute{
-													Description: "disable Disable buffering for a particular route. This is useful when virtual-host has buffering, but we need to disable it on a specific route. The value of this field is ignored for virtual-host",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"max_request_bytes": schema.Int64Attribute{
-													Description: "max_request_bytes The maximum request size that the filter will buffer before the connection manager will stop buffering and return a RequestEntityTooLarge (413) response.",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-											},
-										},
-										"priority": schema.ListAttribute{
-											Description: "priority Priority routing for each route. Different connection pools are used based on the priority of the route. Also, circuit-breaker configuration at destination cluster is chosen based on the route priority.",
-											ElementType: types.StringType,
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
-										"destinations": schema.ListNestedAttribute{
-											Description: "destinations When requests have to distributed among multiple upstream clusters, multiple destinations are configured, each having its own cluster and weight. Traffic is distributed among clusters based on the weight configured. Example: destinations: - cluster: - kind: ves.io.vega.cfg.adc.cluster.Object uid: cluster-1 weight: 20 - cluster: - kind: ves.io.vega.cfg.adc.cluster.Object uid: cluster-2 weight: 30 - cluster: - kind: ves.io.vega.cfg.adc.cluster.Object uid: cluster-3 weight: 50 This indicates that out of every 100 requests, 50 goes to cluster-3, 30 to cluster-2 and 20 to cluster-1 When single destination is configured, weight is ignored. All the requests are sent to the cluster specified in the destination",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-											NestedObject: schema.NestedAttributeObject{
-												Attributes: map[string]schema.Attribute{
-													"cluster": schema.ListNestedAttribute{
-														Description: "cluster Indicates the upstream cluster to which the request should be sent. If the cluster does not exist ServiceUnavailable response will be sent",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-														NestedObject: schema.NestedAttributeObject{
-															Attributes: map[string]schema.Attribute{
-																"name": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"tenant": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"namespace": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-															},
-														},
-													},
-													"weight": schema.Int64Attribute{
-														Description: "weight When requests have to distributed among multiple upstream clusters, multiple destinations are configured, each having its own cluster and weight. Traffic is distributed among clusters based on the weight configured. Example: destinations: - cluster: - kind: ves.io.vega.cfg.adc.cluster.Object uid: cluster-1 weight: 20 - cluster: - kind: ves.io.vega.cfg.adc.cluster.Object uid: cluster-2 weight: 30 - cluster: - kind: ves.io.vega.cfg.adc.cluster.Object uid: cluster-3 weight: 10 This indicates that out of every 60 requests, 10 goes to cluster-3, 30 to cluster-2 and 20 to cluster-1 When single destination is configured, weight is ignored. All the requests are sent to the cluster specified in the destination",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
-													"priority": schema.Int64Attribute{
-														Description: "Priority Priority of this cluster, valid only with multiple destinations are configured. Value of 0 will make the cluster as lowest priority upstream cluster Priority of 1 means highest priority and is considered active. When active cluster is not available, lower priority clusters are made active as per the increasing priority.",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
-													"endpoint_subsets": schema.MapAttribute{
-														Description: "endpoint_subsets Upstream cluster may be configured to divide its endpoints into subsets based on metadata attached to the endpoints. Routes may then specify the metadata that a endpoint must match in order to be selected by the load balancer Labels field of endpoint object's metadata is used for subset matching. For endpoints which are discovered in K8S or Consul cluster, the label of the service is merged with endpoint's labels. In case of Consul, the label is derived from the 'Tag' field. For labels that are common between configured endpoint and discovered service, labels from discovered service takes precedence. List of key-value pairs that will be used as matching metadata. Only those endpoints of upstream cluster which match this metadata will be selected for load balancing",
-														ElementType: types.StringType,
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
-												},
-											},
-										},
-										"endpoint_subsets": schema.MapAttribute{
-											Description: "endpoint_subsets Upstream cluster may be configured to divide its endpoints into subsets based on metadata attached to the endpoints. Routes may then specify the metadata that a endpoint must match in order to be selected by the load balancer Labels field of endpoint object's metadata is used for subset matching. For endpoint's which are discovered in K8S or Consul cluster, the label of the service is merged with endpoint's labels. In case of Consul, the label is derived from the 'Tag' field. For labels that are common between configured endpoint and discovered service, labels from discovered service takes precedence. List of key-value pairs that will be used as matching metadata. Only those endpoints of upstream cluster which match this metadata will be selected for load balancing",
-											ElementType: types.StringType,
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
-										"hash_policy": schema.ListNestedAttribute{
-											Description: "hash_policy Specifies a list of hash policies to use for ring hash load balancing. Each hash policy is evaluated individually and the combined result is used to route the request",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-											NestedObject: schema.NestedAttributeObject{
-												Attributes: map[string]schema.Attribute{
-													"policy_specifier_choice": schema.SingleNestedAttribute{
-														Description: "PolicySpecifier Specifies whether hashing is done on incoming request header, cookie or source IP",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-														Attributes: map[string]schema.Attribute{
-															"header_name": schema.StringAttribute{
-																Description: "Header The name or key of the request header that will be used to obtain the hash key",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-															"cookie": schema.SingleNestedAttribute{
-																Description: "Cookie Hash based on cookie",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-																Attributes: map[string]schema.Attribute{
-																	"samesite_choice": schema.SingleNestedAttribute{
-																		Description: "samesite Controls whether or not a cookie is sent with cross-site requests",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																		Attributes: map[string]schema.Attribute{
-																			"samesite_lax": schema.BoolAttribute{
-																				Description: "lax Add Samesite attribute with Lax. Means that the cookie is not sent on cross-site requests",
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																			},
-																			"samesite_none": schema.BoolAttribute{
-																				Description: "none Add Samesite attribute with None. Means that the browser sends the cookie with both cross-site and same-site requests",
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																			},
-																			"ignore_samesite": schema.BoolAttribute{
-																				Description: "ignore_samesite Ignore Samesite attribute",
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																			},
-																			"samesite_strict": schema.BoolAttribute{
-																				Description: "strict Add Samesite attribute with Strict. Means that the browser sends the cookie only for same-site requests",
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																			},
-																		},
-																	},
-																	"secure_choice": schema.SingleNestedAttribute{
-																		Description: "secure A cookie with the Secure attribute is only sent to the server with an encrypted request over the HTTPS protocol and therefore, is more resistant to man-in-the-middle attacks.",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																		Attributes: map[string]schema.Attribute{
-																			"ignore_secure": schema.BoolAttribute{
-																				Description: "ignore_secure Ignore secure attribute",
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																			},
-																			"add_secure": schema.BoolAttribute{
-																				Description: "add_secure Add secure attribute",
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																			},
-																		},
-																	},
-																	"httponly_choice": schema.SingleNestedAttribute{
-																		Description: "httponly A cookie with the HttpOnly attribute is inaccessible to the JavaScript.",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																		Attributes: map[string]schema.Attribute{
-																			"ignore_httponly": schema.BoolAttribute{
-																				Description: "ignore_httponly Ignore httponly attribute",
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																			},
-																			"add_httponly": schema.BoolAttribute{
-																				Description: "add_httponly Add httponly attribute",
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																			},
-																		},
-																	},
-																	"name": schema.StringAttribute{
-																		Description: "name The name of the cookie that will be used to obtain the hash key. If the cookie is not present and TTL below is not set, no hash will be produced",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																	},
-																	"ttl": schema.Int64Attribute{
-																		Description: "ttl If specified, a cookie with the TTL will be generated if the cookie is not present. If the TTL is present and zero, the generated cookie will be a session cookie. TTL value is in milliseconds",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																	},
-																	"path": schema.StringAttribute{
-																		Description: "path The name of the path for the cookie. If no path is specified here, no path will be set for the cookie",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																	},
-																},
-															},
-															"source_ip": schema.BoolAttribute{
-																Description: "Source IP Hash based on source IP address",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-														},
-													},
-													"terminal": schema.BoolAttribute{
-														Description: "terminal Specify if its a terminal policy",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
-												},
-											},
-										},
-										"spdy_config": schema.SingleNestedAttribute{
-											Description: "spdy_config SPDY configuration for each route",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-											Attributes: map[string]schema.Attribute{
-												"use_spdy": schema.BoolAttribute{
-													Description: "use_spdy Specifies that the HTTP client connection to this route is allowed to upgrade to a SPDY connection",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-											},
-										},
-										"cors_policy": schema.SingleNestedAttribute{
-											Description: "cors_policy Cross-Origin Resource Sharing requests configuration CORS is a mechanism that uses additional HTTP headers to tell a browser to let a web application running at one origin (domain) have permission to access selected resources from a server at a different origin",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-											Attributes: map[string]schema.Attribute{
-												"allow_methods": schema.StringAttribute{
-													Description: "allow_methods Specifies the content for the access-control-allow-methods header",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"expose_headers": schema.StringAttribute{
-													Description: "expose_headers Specifies the content for the access-control-expose-headers header",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"allow_credentials": schema.BoolAttribute{
-													Description: "allow_credentials Specifies whether the resource allows credentials",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"allow_origin": schema.ListAttribute{
-													Description: "allow_origin Specifies the origins that will be allowed to do CORS requests. An origin is allowed if either allow_origin or allow_origin_regex match",
-													ElementType: types.StringType,
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"allow_headers": schema.StringAttribute{
-													Description: "allow_headers Specifies the content for the access-control-allow-headers header",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"maximum_age": schema.Int32Attribute{
-													Description: "maximum_age This indicates the maximum number of seconds the results can be cached A value of -1 will disable caching. Maximum permitted value is 86400 seconds (24 hours)",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"disabled": schema.BoolAttribute{
-													Description: "disabled Disable the CorsPolicy for a particular route. This is useful when virtual-host has CorsPolicy, but we need to disable it on a specific route. The value of this field is ignored for virtual-host",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"allow_origin_regex": schema.ListAttribute{
-													Description: "allow_origin_regex Specifies regex patterns that match allowed origins. An origin is allowed if either allow_origin or allow_origin_regex match",
-													ElementType: types.StringType,
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-											},
-										},
-										"csrf_policy": schema.SingleNestedAttribute{
-											Description: "csrf_policy Cross-Site Request Forgery (CSRF) is an attack that occurs when a malicious third-party website exploits a vulnerability thats allows them to submit an undesired request on user's behalf. The policy checks where a request is coming from to determine if the request's origin is the same as its destination. The policy relies on two pieces of information used in determining if a request originated from the same host. 1. The origin that caused the user agent to issue the request (source origin). 2. The origin that the request is going to (target origin). When the policy evaluating a request, it ensures both pieces of information are present and compare their values. If the source origin is missing or origins do not match the request is rejected. The exception to this being the source-origin has been added to the policy as valid. Because CSRF attacks specifically target state-changing requests, the policy only acts on the HTTP requests that have state-changing method (PUT,POST, etc.).",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-											Attributes: map[string]schema.Attribute{
-												"allowed_domains_choice": schema.SingleNestedAttribute{
-													Description: "allowed_domains The list of source origin that should be allowed.",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-													Attributes: map[string]schema.Attribute{
-														"disabled": schema.BoolAttribute{
-															Description: "disabled Allow all source origin domains.",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-														"all_load_balancer_domains": schema.BoolAttribute{
-															Description: "all_load_balancer_domains Add All load balancer domains to source origin (allow) list.",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-														"custom_domain_list": schema.SingleNestedAttribute{
-															Description: "custom_domain_list Add one or more domains to source origin (allow) list.",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-															Attributes: map[string]schema.Attribute{
-																"domains": schema.ListAttribute{
-																	Description: "Domains A list of domain names that will be matched to loadbalancer. These domains are not used for SNI match. Wildcard names are supported in the suffix or prefix form.",
-																	ElementType: types.StringType,
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-															},
-														},
-													},
-												},
-											},
-										},
-										"cluster_retract_choice": schema.SingleNestedAttribute{
-											Description: "Oneof for Cluster retraction Specifies whether retraction of cluster has to be enabled or disabled",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-											Attributes: map[string]schema.Attribute{
-												"retract_cluster": schema.BoolAttribute{
-													Description: "retract_cluster When this option is enabled, weighted cluster will not be considered for loadbalancing, if all its endpoints are unhealthy. Since the cluster with all unhealthy endpoints is removed, the traffic will be distributed among remaining clusters as per their weight. Also panic-threshold configuration is ignored for retracted cluster. This option is ignored when single destination cluster is configured for route",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"do_not_retract_cluster": schema.BoolAttribute{
-													Description: "do_not_retract_cluster When this option is configured, cluster with no healthy endpoints is not retracted from route having weighted cluster configuration.",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-											},
-										},
-										"query_params": schema.SingleNestedAttribute{
-											Description: "query_params Handling of incoming query parameters in simple route.",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-											Attributes: map[string]schema.Attribute{
-												"query_params_choice": schema.SingleNestedAttribute{
-													Description: "query_params Handling of incoming query parameters in simple route.",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-													Attributes: map[string]schema.Attribute{
-														"retain_all_params": schema.BoolAttribute{
-															Description: "Retain All Params",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-														"remove_all_params": schema.BoolAttribute{
-															Description: "Remove All Params",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-														"replace_params": schema.StringAttribute{
-															Description: "Replace All Params",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-													},
-												},
-											},
-										},
-										"route_destination_rewrite_choice": schema.SingleNestedAttribute{
-											Description: "RouteDestinationRewrite Specifies how the path can be modified during forwarding",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-											Attributes: map[string]schema.Attribute{
-												"prefix_rewrite": schema.StringAttribute{
-													Description: "prefix_rewrite prefix_rewrite indicates that during forwarding, the matched prefix (or path) should be swapped with its value. When using regex path matching, the entire path (not including the query string) will be swapped with this value. This option allows application URLs to be rooted at a different path from those exposed at the reverse proxy layer. Example : gcSpec: routes: - match: - headers: [] path: prefix : /register/ query_params: [] - headers: [] path: prefix: /register query_params: [] routeDestination: prefixRewrite: '/' destinations: - cluster: - kind: cluster.Object uid: cluster-1 Having above entries in the config, requests to /register will be stripped to /, while requests to /register/public will be stripped to /public",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"regex_rewrite": schema.SingleNestedAttribute{
-													Description: "regex_rewrite regex_rewrite indicates that during forwarding, the matched regex should be swapped with the substitution value. Example : gcSpec: routes: - match: - headers: [] path: regex : '^/service/([^/]+)(/.*)$' query_params: [] routeDestination: regexRewrite: pattern: '^/service/([^/]+)(/.*)$' substitution: '\\2/instance/\\1' destinations: - cluster: - kind: cluster.Object uid: cluster-1 The path pattern '^/service/([^/]+)(/.*)$' paired with a substitution string of '\\2/instance/\\1' would transform '/service/foo/v1/api' into '/v1/api/instance/foo'.",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-													Attributes: map[string]schema.Attribute{
-														"pattern": schema.StringAttribute{
-															Description: "Pattern The regular expression used to find portions of a string that should be replaced.",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-														"substitution": schema.StringAttribute{
-															Description: "Substitution The string that should be substituted into matching portions of the subject string during a substitution operation to produce a new string.",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-													},
-												},
-											},
-										},
-										"host_rewrite_params_choice": schema.SingleNestedAttribute{
-											Description: "HostRewriteParams Specifies how the host header can be modified during forwarding",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-											Attributes: map[string]schema.Attribute{
-												"host_rewrite": schema.StringAttribute{
-													Description: "HostRewrite Indicates that during forwarding, the host header will be swapped with this value",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"auto_host_rewrite": schema.BoolAttribute{
-													Description: "Auto Host Rewrite Indicates that during forwarding, the host header will be swapped with the hostname of the upstream host chosen by the cluster",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-											},
-										},
-										"timeout": schema.Int64Attribute{
-											Description: "timeout Specifies the timeout for the route in milliseconds. This timeout includes all retries. For server side streaming, configure this field with higher value or leave it un-configured for infinite timeout",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
-									},
-								},
-								"route_redirect": schema.SingleNestedAttribute{
-									Description: "route_redirect Send redirect response",
-									Required:    false,
-									Optional:    false,
-									Computed:    true,
-									Attributes: map[string]schema.Attribute{
-										"host_redirect": schema.StringAttribute{
-											Description: "host_redirect swap host part of incoming URL in redirect URL",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
-										"redirect_path_choice": schema.SingleNestedAttribute{
-											Description: "Redirect Path Path in the redirect response",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-											Attributes: map[string]schema.Attribute{
-												"path_redirect": schema.StringAttribute{
-													Description: "path_redirect swap path part of incoming URL in redirect URL",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"prefix_rewrite": schema.StringAttribute{
-													Description: "prefix_rewrite In Redirect response, the matched prefix (or path) should be swapped with this value. This option allows redirect URLs be dynamically created based on the request",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-											},
-										},
-										"proto_redirect": schema.StringAttribute{
-											Description: "proto_redirect swap protocol part of incoming URL in redirect URL The protocol can be swapped with either http or https When incoming-proto option is specified, swapping of protocol is not done.",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
-										"query_params_choice": schema.SingleNestedAttribute{
-											Description: "query_params handling of incoming query parameters in redirect request.",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-											Attributes: map[string]schema.Attribute{
-												"replace_params": schema.StringAttribute{
-													Description: "Replace All Params",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"retain_all_params": schema.BoolAttribute{
-													Description: "Retain All Params",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"remove_all_params": schema.BoolAttribute{
-													Description: "Remove All Params",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-											},
-										},
-										"response_code": schema.Int64Attribute{
-											Description: "response_code The HTTP status code to use in the redirect response.",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
-									},
-								},
-								"route_direct_response": schema.SingleNestedAttribute{
-									Description: "route_direct_response Send direct response",
-									Required:    false,
-									Optional:    false,
-									Computed:    true,
-									Attributes: map[string]schema.Attribute{
-										"response_code": schema.Int64Attribute{
-											Description: "response_code response code to send",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
-										"response_body_encoded": schema.StringAttribute{
-											Description: "response_body Response body to send. Currently supported URL schemes is string:/// for which message should be encoded in Base64 format. The message can be either plain text or html. E.g. '<p> Access Denied </p>'. Base64 encoded string url for this is string:///PHA+IEFjY2VzcyBEZW5pZWQgPC9wPg==",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
-									},
-								},
-							},
-						},
-						"response_cookies_to_add": schema.ListNestedAttribute{
-							Description: "Cookies to add in set-cookie header in response Cookies are name-value pairs along with optional attribute parameters to be added to HTTP response being sent towards downstream.",
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-							NestedObject: schema.NestedAttributeObject{
-								Attributes: map[string]schema.Attribute{
 									"value_choice": schema.SingleNestedAttribute{
 										Description: "value Enter Cookie value as string or blindfolded secret.",
 										Required:    false,
 										Optional:    false,
 										Computed:    true,
 										Attributes: map[string]schema.Attribute{
-											"ignore_value": schema.BoolAttribute{
-												Description: "ignore_value Ignore value of cookie",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-											"value": schema.StringAttribute{
-												Description: "value Value of the Cookie header.",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
 											"secret_value": schema.SingleNestedAttribute{
 												Description: "Secret Value Secret Value of the Cookie header",
 												Required:    false,
@@ -3020,134 +3260,8 @@ func (r *DataSourceF5XCRoute) Schema(ctx context.Context, request datasource.Sch
 													},
 												},
 											},
-										},
-									},
-									"samesite_choice": schema.SingleNestedAttribute{
-										Description: "samesite Controls whether or not a cookie is sent with cross-site requests",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-										Attributes: map[string]schema.Attribute{
-											"samesite_lax": schema.BoolAttribute{
-												Description: "lax Add Samesite attribute with Lax. Means that the cookie is not sent on cross-site requests",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-											"samesite_none": schema.BoolAttribute{
-												Description: "none Add Samesite attribute with None. Means that the browser sends the cookie with both cross-site and same-site requests",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-											"ignore_samesite": schema.BoolAttribute{
-												Description: "ignore_samesite Ignore Samesite attribute",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-											"samesite_strict": schema.BoolAttribute{
-												Description: "strict Add Samesite attribute with Strict. Means that the browser sends the cookie only for same-site requests",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-										},
-									},
-									"httponly_choice": schema.SingleNestedAttribute{
-										Description: "httponly A cookie with the HttpOnly attribute is inaccessible to the JavaScript.",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-										Attributes: map[string]schema.Attribute{
-											"ignore_httponly": schema.BoolAttribute{
-												Description: "ignore_httponly",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-											"add_httponly": schema.BoolAttribute{
-												Description: "add_httponly",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-										},
-									},
-									"partitioned_choice": schema.SingleNestedAttribute{
-										Description: "Partitioned A cookie with the Partitioned attribute is stored using partitioned storage.",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-										Attributes: map[string]schema.Attribute{
-											"ignore_partitioned": schema.BoolAttribute{
-												Description: "ignore_partitioned",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-											"add_partitioned": schema.BoolAttribute{
-												Description: "add_partitioned",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-										},
-									},
-									"max_age_choice": schema.SingleNestedAttribute{
-										Description: "max_age Enter the maximum age in minutes for session cookies after which cookies are automatically expired",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-										Attributes: map[string]schema.Attribute{
-											"ignore_max_age": schema.BoolAttribute{
-												Description: "ignore_max_age Ignore max age attribute",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-											"max_age_value": schema.Int32Attribute{
-												Description: "add_max_age Add max age attribute",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-										},
-									},
-									"domain_choice": schema.SingleNestedAttribute{
-										Description: "domain Domain to which cookie will be sent during request",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-										Attributes: map[string]schema.Attribute{
-											"ignore_domain": schema.BoolAttribute{
-												Description: "ignore_domain Ignore max age attribute",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-											"add_domain": schema.StringAttribute{
-												Description: "add_domain Add domain attribute",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-										},
-									},
-									"expiry_choice": schema.SingleNestedAttribute{
-										Description: "Expiry Indicates the maximum lifetime of the cookie as an HTTP-date timestamp. Eg. Mon, 01 Dec 2008 00:23:53 GMT",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-										Attributes: map[string]schema.Attribute{
-											"add_expiry": schema.StringAttribute{
-												Description: "add_expiry Add expiry attribute",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-											"ignore_expiry": schema.BoolAttribute{
-												Description: "ignore_expiry Ignore expiry attribute",
+											"value": schema.StringAttribute{
+												Description: "value Value of the Cookie header.",
 												Required:    false,
 												Optional:    false,
 												Computed:    true,
@@ -3159,120 +3273,6 @@ func (r *DataSourceF5XCRoute) Schema(ctx context.Context, request datasource.Sch
 										Required:    false,
 										Optional:    false,
 										Computed:    true,
-									},
-									"name": schema.StringAttribute{
-										Description: "name Name of the cookie in Cookie header.",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-									},
-									"secure_choice": schema.SingleNestedAttribute{
-										Description: "secure A cookie with the Secure attribute is only sent to the server with an encrypted request over the HTTPS protocol and therefore, is more resistant to man-in-the-middle attacks.",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-										Attributes: map[string]schema.Attribute{
-											"add_secure": schema.BoolAttribute{
-												Description: "add_secure",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-											"ignore_secure": schema.BoolAttribute{
-												Description: "ignore_secure",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-										},
-									},
-									"path_choice": schema.SingleNestedAttribute{
-										Description: "path The path that must exist in the requested URL for the browser to send the Cookie header.",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-										Attributes: map[string]schema.Attribute{
-											"ignore_path": schema.BoolAttribute{
-												Description: "ignore_domain Ignore path attribute",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-											"add_path": schema.StringAttribute{
-												Description: "add_path Add path attribute",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-										},
-									},
-								},
-							},
-						},
-						"bot_defense_javascript_injection_choice": schema.SingleNestedAttribute{
-							Description: "Oneof Bot Defense Javascript Injection Insert JavaScript Tags for Bot Defense Advance and Fraud Services",
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-							Attributes: map[string]schema.Attribute{
-								"inherited_bot_defense_javascript_injection": schema.BoolAttribute{
-									Description: "Inherited Bot Defense Javascript Injection Bot Defense Javascript Injection configuration is taken from Load Balancer. Hence no custom configuration is applied on the route",
-									Required:    false,
-									Optional:    false,
-									Computed:    true,
-								},
-								"bot_defense_javascript_injection": schema.SingleNestedAttribute{
-									Description: "Bot Defense Javascript Injection for inline bot defense deployments Configuration for Bot Defense Javascript Injection",
-									Required:    false,
-									Optional:    false,
-									Computed:    true,
-									Attributes: map[string]schema.Attribute{
-										"javascript_location": schema.ListAttribute{
-											Description: "javascript_location Select the location where you would like to insert the Javascript tag(s).",
-											ElementType: types.StringType,
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
-										"javascript_tags": schema.ListNestedAttribute{
-											Description: "javascript_tags Select Add item to configure your javascript tag. If adding both Bot Adv and Fraud, the Bot Javascript should be added first.",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-											NestedObject: schema.NestedAttributeObject{
-												Attributes: map[string]schema.Attribute{
-													"javascript_url": schema.StringAttribute{
-														Description: "JavaScriptURL Please enter the full URL (include domain and path), or relative path.",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
-													"tag_attributes": schema.ListNestedAttribute{
-														Description: "TagAttributes Add the tag attributes you want to include in your Javascript tag.",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-														NestedObject: schema.NestedAttributeObject{
-															Attributes: map[string]schema.Attribute{
-																"javascript_tag": schema.ListAttribute{
-																	Description: "JavaScriptTags Select from one of the predefined tag attibutes.",
-																	ElementType: types.StringType,
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"tag_value": schema.StringAttribute{
-																	Description: "TagValue Add the tag attribute value.",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-															},
-														},
-													},
-												},
-											},
-										},
 									},
 								},
 							},
@@ -3351,6 +3351,12 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
+	// data SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
+
+	// data SpecToModelRoot Meta RequiredStringField --> Namespace
+	data.Namespace = types.StringValue(metaData.GetNamespace())
+
 	// data SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
@@ -3393,225 +3399,22 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 	// data SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
 
-	// data SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
-
-	// data SpecToModelRoot Meta RequiredStringField --> Namespace
-	data.Namespace = types.StringValue(metaData.GetNamespace())
-
 	// data SpecToModelRoot RequiredArrayOfPointerField --> Routes
 	routesElementsSpectToModel := make([]RouteRouteRouteType, 0, len(specData.Routes))
 
 	for _, routesElement := range specData.Routes {
 		routeRouteRouteTypeModel := RouteRouteRouteType{}
 
-		// data specToModelNested ArrayOfPointerField --> ResponseHeadersToAdd
-		if len(routesElement.GetResponseHeadersToAdd()) > 0 {
-			// Step 1: Always create a slice of model structs from the spec data.
-			// This slice serves as an intermediate representation.
-			responseHeadersToAddElements := make([]RouteHeaderManipulationOptionType, 0, len(routesElement.GetResponseHeadersToAdd()))
-			for _, responseHeadersToAddElement := range routesElement.GetResponseHeadersToAdd() {
-				routeHeaderManipulationOptionTypeModel := RouteHeaderManipulationOptionType{}
-
-				// data specToModelNested RequiredStringField --> Name
-				if responseHeadersToAddElement.GetName() != "" {
-					routeHeaderManipulationOptionTypeModel.Name = types.StringValue(responseHeadersToAddElement.GetName())
-				} else {
-					// Empty string, set to null
-					routeHeaderManipulationOptionTypeModel.Name = types.StringNull()
-				}
-
-				// data specToModelNested RequiredOneOfField --> ValueChoice
-				// <no value>
-				if responseHeadersToAddElement.GetValueChoice() != nil {
-					// Create a temporary attribute map for the choices within this OneOf
-					responseHeadersToAddvalueChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-					// Define a variable for the spec choices to be passed down to nested templates.
-					// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-					responseHeadersToAddvalueChoiceChoices := responseHeadersToAddElement.GetValueChoice()
-
-					// Process nested choices, populating the temporary attribute map
-
-					// data specToModelNested StringOfOneOfField --> Value
-					valueItem, isValue := responseHeadersToAddvalueChoiceChoices.(*ves_io_schema.HeaderManipulationOptionType_Value)
-
-					if isValue {
-						responseHeadersToAddvalueChoiceChoicesAttributeMap["value"] = types.StringValue(string(valueItem.Value))
-					} else {
-						// Empty string, set to null
-						responseHeadersToAddvalueChoiceChoicesAttributeMap["value"] = types.StringNull()
-					}
-
-					// data specToModelNested PointerOfOneOfField --> SecretValue
-					// <no value>
-					// false
-					{
-						secretValueOptions, isSecretValue := responseHeadersToAddvalueChoiceChoices.(*ves_io_schema.HeaderManipulationOptionType_SecretValue)
-						secretValueAttributeMap := make(map[string]attr.Value)
-
-						if isSecretValue && secretValueOptions != nil {
-
-							// data specToModelNested RequiredOneOfField --> SecretInfoOneof
-							// <no value>
-							if secretValueOptions.SecretValue.GetSecretInfoOneof() != nil {
-								// Create a temporary attribute map for the choices within this OneOf
-								secretValuesecretInfoChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-								// Define a variable for the spec choices to be passed down to nested templates.
-								// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-								secretValuesecretInfoChoiceChoices := secretValueOptions.SecretValue.GetSecretInfoOneof()
-
-								// Process nested choices, populating the temporary attribute map
-
-								// data specToModelNested PointerOfOneOfField --> ClearSecretInfo
-								// <no value>
-								// false
-								{
-									clearSecretInfoOptions, isClearSecretInfo := secretValuesecretInfoChoiceChoices.(*ves_io_schema.SecretType_ClearSecretInfo)
-									clearSecretInfoAttributeMap := make(map[string]attr.Value)
-
-									if isClearSecretInfo && clearSecretInfoOptions != nil {
-
-										// data specToModelNested StringField --> Provider
-										if clearSecretInfoOptions.ClearSecretInfo.GetProvider() != "" {
-											clearSecretInfoAttributeMap["provider"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetProvider())
-										} else {
-											// Empty string, set to null
-											clearSecretInfoAttributeMap["provider"] = types.StringNull()
-										}
-
-										// data specToModelNested RequiredStringField --> Url
-										if clearSecretInfoOptions.ClearSecretInfo.GetUrl() != "" {
-											clearSecretInfoAttributeMap["url"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetUrl())
-										} else {
-											// Empty string, set to null
-											clearSecretInfoAttributeMap["url"] = types.StringNull()
-										}
-
-										clearSecretInfoObj, diags := types.ObjectValue(RouteRoutesResponseHeadersToAddValueChoiceSecretValueSecretInfoOneofClearSecretInfoModelAttributeMap, clearSecretInfoAttributeMap)
-										response.Diagnostics.Append(diags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										secretValuesecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = clearSecretInfoObj
-									} else {
-										secretValuesecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(RouteRoutesResponseHeadersToAddValueChoiceSecretValueSecretInfoOneofClearSecretInfoModelAttributeMap)
-									}
-								}
-
-								// data specToModelNested PointerOfOneOfField --> BlindfoldSecretInfo
-								// <no value>
-								// false
-								{
-									blindfoldSecretInfoOptions, isBlindfoldSecretInfo := secretValuesecretInfoChoiceChoices.(*ves_io_schema.SecretType_BlindfoldSecretInfo)
-									blindfoldSecretInfoAttributeMap := make(map[string]attr.Value)
-
-									if isBlindfoldSecretInfo && blindfoldSecretInfoOptions != nil {
-
-										// data specToModelNested RequiredStringField --> Location
-										if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation() != "" {
-											blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation())
-										} else {
-											// Empty string, set to null
-											blindfoldSecretInfoAttributeMap["location"] = types.StringNull()
-										}
-
-										// data specToModelNested StringField --> DecryptionProvider
-										if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider() != "" {
-											blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider())
-										} else {
-											// Empty string, set to null
-											blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringNull()
-										}
-
-										// data specToModelNested StringField --> StoreProvider
-										if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider() != "" {
-											blindfoldSecretInfoAttributeMap["store_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider())
-										} else {
-											// Empty string, set to null
-											blindfoldSecretInfoAttributeMap["store_provider"] = types.StringNull()
-										}
-
-										blindfoldSecretInfoObj, diags := types.ObjectValue(RouteRoutesResponseHeadersToAddValueChoiceSecretValueSecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
-										response.Diagnostics.Append(diags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										secretValuesecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = blindfoldSecretInfoObj
-									} else {
-										secretValuesecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = types.ObjectNull(RouteRoutesResponseHeadersToAddValueChoiceSecretValueSecretInfoOneofBlindfoldSecretInfoModelAttributeMap)
-									}
-								}
-
-								// --- End of Choices ---
-
-								// Create the final ObjectValue for this OneOf field
-								finalObj, secretValuesecretInfoChoiceChoicesObjDiags := types.ObjectValue(
-									RouteRoutesResponseHeadersToAddValueChoiceSecretValueSecretInfoOneofModelAttributeMap, // The attribute schema for the OneOf choices
-									secretValuesecretInfoChoiceChoicesAttributeMap,
-								)
-								response.Diagnostics.Append(secretValuesecretInfoChoiceChoicesObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-
-								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								secretValueAttributeMap["secret_info_choice"] = finalObj
-							} else {
-								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								secretValueAttributeMap["secret_info_choice"] = types.ObjectNull(RouteRoutesResponseHeadersToAddValueChoiceSecretValueSecretInfoOneofModelAttributeMap)
-							}
-
-							secretValueObj, diags := types.ObjectValue(RouteRoutesResponseHeadersToAddValueChoiceSecretValueModelAttributeMap, secretValueAttributeMap)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							responseHeadersToAddvalueChoiceChoicesAttributeMap["secret_value"] = secretValueObj
-						} else {
-							responseHeadersToAddvalueChoiceChoicesAttributeMap["secret_value"] = types.ObjectNull(RouteRoutesResponseHeadersToAddValueChoiceSecretValueModelAttributeMap)
-						}
-					}
-
-					// --- End of Choices ---
-
-					// Create the final ObjectValue for this OneOf field
-					finalObj, responseHeadersToAddvalueChoiceChoicesObjDiags := types.ObjectValue(
-						RouteRoutesResponseHeadersToAddValueChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-						responseHeadersToAddvalueChoiceChoicesAttributeMap,
-					)
-					response.Diagnostics.Append(responseHeadersToAddvalueChoiceChoicesObjDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-
-					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-					routeHeaderManipulationOptionTypeModel.ValueChoice = finalObj
-				} else {
-					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					routeHeaderManipulationOptionTypeModel.ValueChoice = types.ObjectNull(RouteRoutesResponseHeadersToAddValueChoiceModelAttributeMap)
-				}
-
-				// data specToModelNested BoolField --> Append
-				routeHeaderManipulationOptionTypeModel.Append = types.BoolValue(bool(responseHeadersToAddElement.GetAppend()))
-
-				responseHeadersToAddElements = append(responseHeadersToAddElements, routeHeaderManipulationOptionTypeModel)
-			}
-			// CASE 1: The target field is a `types.List` or an attribute map.
-			// The intermediate slice of structs must be converted to a `types.ListValue`.
-			responseHeadersToAddListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: RouteResponseHeadersToAddObjectRefModelAttributeMap}, responseHeadersToAddElements)
+		// data specToModelNested ArrayOfStringField --> ResponseCookiesToRemove
+		if len(routesElement.GetResponseCookiesToRemove()) > 0 {
+			listValue, diags := types.ListValueFrom(ctx, types.StringType, routesElement.GetResponseCookiesToRemove())
 			response.Diagnostics.Append(diags...)
 			if response.Diagnostics.HasError() {
 				return
 			}
-			routeRouteRouteTypeModel.ResponseHeadersToAdd = responseHeadersToAddListValue
-
+			routeRouteRouteTypeModel.ResponseCookiesToRemove = listValue
 		} else {
-			// The source list is empty or nil.
-			// CASE 1: The target field is a `types.List` or an attribute map.
-			// Assign a null `types.ListValue`.
-			routeRouteRouteTypeModel.ResponseHeadersToAdd = types.ListNull(types.ObjectType{AttrTypes: RouteResponseHeadersToAddObjectRefModelAttributeMap})
+			routeRouteRouteTypeModel.ResponseCookiesToRemove = types.ListNull(types.StringType)
 		}
 
 		// data specToModelNested OneOfField --> WafExclusionChoice
@@ -3708,16 +3511,627 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 			routeRouteRouteTypeModel.ResponseHeadersToRemove = types.ListNull(types.StringType)
 		}
 
-		// data specToModelNested ArrayOfStringField --> RequestCookiesToRemove
-		if len(routesElement.GetRequestCookiesToRemove()) > 0 {
-			listValue, diags := types.ListValueFrom(ctx, types.StringType, routesElement.GetRequestCookiesToRemove())
+		// data specToModelNested ArrayOfPointerField --> ResponseCookiesToAdd
+		if len(routesElement.GetResponseCookiesToAdd()) > 0 {
+			// Step 1: Always create a slice of model structs from the spec data.
+			// This slice serves as an intermediate representation.
+			responseCookiesToAddElements := make([]RouteSetCookieValueOption, 0, len(routesElement.GetResponseCookiesToAdd()))
+			for _, responseCookiesToAddElement := range routesElement.GetResponseCookiesToAdd() {
+				routeSetCookieValueOptionModel := RouteSetCookieValueOption{}
+
+				// data specToModelNested RequiredStringField --> Name
+				if responseCookiesToAddElement.GetName() != "" {
+					routeSetCookieValueOptionModel.Name = types.StringValue(responseCookiesToAddElement.GetName())
+				} else {
+					// Empty string, set to null
+					routeSetCookieValueOptionModel.Name = types.StringNull()
+				}
+
+				// data specToModelNested OneOfField --> SamesiteChoice
+				if responseCookiesToAddElement.GetSamesiteChoice() != nil {
+					// Create a temporary attribute map for the choices within this OneOf
+					responseCookiesToAddsamesiteChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+					// Define a variable for the spec choices to be passed down to nested templates.
+					// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+					responseCookiesToAddsamesiteChoiceChoices := responseCookiesToAddElement.GetSamesiteChoice()
+
+					// Process nested choices, populating the temporary attribute map
+
+					// data specToModelNested BoolOfOneOfPointerField --> SamesiteStrict
+					_, isSamesiteStrict := responseCookiesToAddsamesiteChoiceChoices.(*ves_io_schema.SetCookieValueOption_SamesiteStrict)
+
+					if isSamesiteStrict {
+						responseCookiesToAddsamesiteChoiceChoicesAttributeMap["samesite_strict"] = types.BoolValue(true)
+					} else {
+						responseCookiesToAddsamesiteChoiceChoicesAttributeMap["samesite_strict"] = types.BoolNull()
+					}
+
+					// data specToModelNested BoolOfOneOfPointerField --> SamesiteLax
+					_, isSamesiteLax := responseCookiesToAddsamesiteChoiceChoices.(*ves_io_schema.SetCookieValueOption_SamesiteLax)
+
+					if isSamesiteLax {
+						responseCookiesToAddsamesiteChoiceChoicesAttributeMap["samesite_lax"] = types.BoolValue(true)
+					} else {
+						responseCookiesToAddsamesiteChoiceChoicesAttributeMap["samesite_lax"] = types.BoolNull()
+					}
+
+					// data specToModelNested BoolOfOneOfPointerField --> SamesiteNone
+					_, isSamesiteNone := responseCookiesToAddsamesiteChoiceChoices.(*ves_io_schema.SetCookieValueOption_SamesiteNone)
+
+					if isSamesiteNone {
+						responseCookiesToAddsamesiteChoiceChoicesAttributeMap["samesite_none"] = types.BoolValue(true)
+					} else {
+						responseCookiesToAddsamesiteChoiceChoicesAttributeMap["samesite_none"] = types.BoolNull()
+					}
+
+					// data specToModelNested BoolOfOneOfPointerField --> IgnoreSamesite
+					_, isIgnoreSamesite := responseCookiesToAddsamesiteChoiceChoices.(*ves_io_schema.SetCookieValueOption_IgnoreSamesite)
+
+					if isIgnoreSamesite {
+						responseCookiesToAddsamesiteChoiceChoicesAttributeMap["ignore_samesite"] = types.BoolValue(true)
+					} else {
+						responseCookiesToAddsamesiteChoiceChoicesAttributeMap["ignore_samesite"] = types.BoolNull()
+					}
+
+					// --- End of Choices ---
+
+					// Create the final ObjectValue for this OneOf field
+					finalObj, responseCookiesToAddsamesiteChoiceChoicesObjDiags := types.ObjectValue(
+						RouteRoutesResponseCookiesToAddSamesiteChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+						responseCookiesToAddsamesiteChoiceChoicesAttributeMap,
+					)
+					response.Diagnostics.Append(responseCookiesToAddsamesiteChoiceChoicesObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					// Assign the final object to the correct place (either the root model or a parent's attribute map)
+					routeSetCookieValueOptionModel.SamesiteChoice = finalObj
+				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					routeSetCookieValueOptionModel.SamesiteChoice = types.ObjectNull(RouteRoutesResponseCookiesToAddSamesiteChoiceModelAttributeMap)
+				}
+
+				// data specToModelNested OneOfField --> PartitionedChoice
+				if responseCookiesToAddElement.GetPartitionedChoice() != nil {
+					// Create a temporary attribute map for the choices within this OneOf
+					responseCookiesToAddpartitionedChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+					// Define a variable for the spec choices to be passed down to nested templates.
+					// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+					responseCookiesToAddpartitionedChoiceChoices := responseCookiesToAddElement.GetPartitionedChoice()
+
+					// Process nested choices, populating the temporary attribute map
+
+					// data specToModelNested BoolOfOneOfPointerField --> IgnorePartitioned
+					_, isIgnorePartitioned := responseCookiesToAddpartitionedChoiceChoices.(*ves_io_schema.SetCookieValueOption_IgnorePartitioned)
+
+					if isIgnorePartitioned {
+						responseCookiesToAddpartitionedChoiceChoicesAttributeMap["ignore_partitioned"] = types.BoolValue(true)
+					} else {
+						responseCookiesToAddpartitionedChoiceChoicesAttributeMap["ignore_partitioned"] = types.BoolNull()
+					}
+
+					// data specToModelNested BoolOfOneOfPointerField --> AddPartitioned
+					_, isAddPartitioned := responseCookiesToAddpartitionedChoiceChoices.(*ves_io_schema.SetCookieValueOption_AddPartitioned)
+
+					if isAddPartitioned {
+						responseCookiesToAddpartitionedChoiceChoicesAttributeMap["add_partitioned"] = types.BoolValue(true)
+					} else {
+						responseCookiesToAddpartitionedChoiceChoicesAttributeMap["add_partitioned"] = types.BoolNull()
+					}
+
+					// --- End of Choices ---
+
+					// Create the final ObjectValue for this OneOf field
+					finalObj, responseCookiesToAddpartitionedChoiceChoicesObjDiags := types.ObjectValue(
+						RouteRoutesResponseCookiesToAddPartitionedChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+						responseCookiesToAddpartitionedChoiceChoicesAttributeMap,
+					)
+					response.Diagnostics.Append(responseCookiesToAddpartitionedChoiceChoicesObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					// Assign the final object to the correct place (either the root model or a parent's attribute map)
+					routeSetCookieValueOptionModel.PartitionedChoice = finalObj
+				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					routeSetCookieValueOptionModel.PartitionedChoice = types.ObjectNull(RouteRoutesResponseCookiesToAddPartitionedChoiceModelAttributeMap)
+				}
+
+				// data specToModelNested OneOfField --> MaxAgeChoice
+				if responseCookiesToAddElement.GetMaxAgeChoice() != nil {
+					// Create a temporary attribute map for the choices within this OneOf
+					responseCookiesToAddmaxAgeChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+					// Define a variable for the spec choices to be passed down to nested templates.
+					// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+					responseCookiesToAddmaxAgeChoiceChoices := responseCookiesToAddElement.GetMaxAgeChoice()
+
+					// Process nested choices, populating the temporary attribute map
+
+					// data specToModelNested IntOfOneOfField --> MaxAgeValue
+					maxAgeValueItem, isMaxAgeValue := responseCookiesToAddmaxAgeChoiceChoices.(*ves_io_schema.SetCookieValueOption_MaxAgeValue)
+
+					if isMaxAgeValue {
+						responseCookiesToAddmaxAgeChoiceChoicesAttributeMap["max_age_value"] = types.Int32Value(int32(maxAgeValueItem.MaxAgeValue))
+					} else {
+						// Empty int, set to null
+						responseCookiesToAddmaxAgeChoiceChoicesAttributeMap["max_age_value"] = types.Int32Null()
+					}
+
+					// data specToModelNested BoolOfOneOfPointerField --> IgnoreMaxAge
+					_, isIgnoreMaxAge := responseCookiesToAddmaxAgeChoiceChoices.(*ves_io_schema.SetCookieValueOption_IgnoreMaxAge)
+
+					if isIgnoreMaxAge {
+						responseCookiesToAddmaxAgeChoiceChoicesAttributeMap["ignore_max_age"] = types.BoolValue(true)
+					} else {
+						responseCookiesToAddmaxAgeChoiceChoicesAttributeMap["ignore_max_age"] = types.BoolNull()
+					}
+
+					// --- End of Choices ---
+
+					// Create the final ObjectValue for this OneOf field
+					finalObj, responseCookiesToAddmaxAgeChoiceChoicesObjDiags := types.ObjectValue(
+						RouteRoutesResponseCookiesToAddMaxAgeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+						responseCookiesToAddmaxAgeChoiceChoicesAttributeMap,
+					)
+					response.Diagnostics.Append(responseCookiesToAddmaxAgeChoiceChoicesObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					// Assign the final object to the correct place (either the root model or a parent's attribute map)
+					routeSetCookieValueOptionModel.MaxAgeChoice = finalObj
+				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					routeSetCookieValueOptionModel.MaxAgeChoice = types.ObjectNull(RouteRoutesResponseCookiesToAddMaxAgeChoiceModelAttributeMap)
+				}
+
+				// data specToModelNested OneOfField --> DomainChoice
+				if responseCookiesToAddElement.GetDomainChoice() != nil {
+					// Create a temporary attribute map for the choices within this OneOf
+					responseCookiesToAdddomainChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+					// Define a variable for the spec choices to be passed down to nested templates.
+					// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+					responseCookiesToAdddomainChoiceChoices := responseCookiesToAddElement.GetDomainChoice()
+
+					// Process nested choices, populating the temporary attribute map
+
+					// data specToModelNested BoolOfOneOfPointerField --> IgnoreDomain
+					_, isIgnoreDomain := responseCookiesToAdddomainChoiceChoices.(*ves_io_schema.SetCookieValueOption_IgnoreDomain)
+
+					if isIgnoreDomain {
+						responseCookiesToAdddomainChoiceChoicesAttributeMap["ignore_domain"] = types.BoolValue(true)
+					} else {
+						responseCookiesToAdddomainChoiceChoicesAttributeMap["ignore_domain"] = types.BoolNull()
+					}
+
+					// data specToModelNested StringOfOneOfField --> AddDomain
+					addDomainItem, isAddDomain := responseCookiesToAdddomainChoiceChoices.(*ves_io_schema.SetCookieValueOption_AddDomain)
+
+					if isAddDomain {
+						responseCookiesToAdddomainChoiceChoicesAttributeMap["add_domain"] = types.StringValue(string(addDomainItem.AddDomain))
+					} else {
+						// Empty string, set to null
+						responseCookiesToAdddomainChoiceChoicesAttributeMap["add_domain"] = types.StringNull()
+					}
+
+					// --- End of Choices ---
+
+					// Create the final ObjectValue for this OneOf field
+					finalObj, responseCookiesToAdddomainChoiceChoicesObjDiags := types.ObjectValue(
+						RouteRoutesResponseCookiesToAddDomainChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+						responseCookiesToAdddomainChoiceChoicesAttributeMap,
+					)
+					response.Diagnostics.Append(responseCookiesToAdddomainChoiceChoicesObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					// Assign the final object to the correct place (either the root model or a parent's attribute map)
+					routeSetCookieValueOptionModel.DomainChoice = finalObj
+				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					routeSetCookieValueOptionModel.DomainChoice = types.ObjectNull(RouteRoutesResponseCookiesToAddDomainChoiceModelAttributeMap)
+				}
+
+				// data specToModelNested OneOfField --> ValueChoice
+				if responseCookiesToAddElement.GetValueChoice() != nil {
+					// Create a temporary attribute map for the choices within this OneOf
+					responseCookiesToAddvalueChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+					// Define a variable for the spec choices to be passed down to nested templates.
+					// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+					responseCookiesToAddvalueChoiceChoices := responseCookiesToAddElement.GetValueChoice()
+
+					// Process nested choices, populating the temporary attribute map
+
+					// data specToModelNested BoolOfOneOfPointerField --> IgnoreValue
+					_, isIgnoreValue := responseCookiesToAddvalueChoiceChoices.(*ves_io_schema.SetCookieValueOption_IgnoreValue)
+
+					if isIgnoreValue {
+						responseCookiesToAddvalueChoiceChoicesAttributeMap["ignore_value"] = types.BoolValue(true)
+					} else {
+						responseCookiesToAddvalueChoiceChoicesAttributeMap["ignore_value"] = types.BoolNull()
+					}
+
+					// data specToModelNested StringOfOneOfField --> Value
+					valueItem, isValue := responseCookiesToAddvalueChoiceChoices.(*ves_io_schema.SetCookieValueOption_Value)
+
+					if isValue {
+						responseCookiesToAddvalueChoiceChoicesAttributeMap["value"] = types.StringValue(string(valueItem.Value))
+					} else {
+						// Empty string, set to null
+						responseCookiesToAddvalueChoiceChoicesAttributeMap["value"] = types.StringNull()
+					}
+
+					// data specToModelNested PointerOfOneOfField --> SecretValue
+					// <no value>
+					// false
+					{
+						secretValueOptions, isSecretValue := responseCookiesToAddvalueChoiceChoices.(*ves_io_schema.SetCookieValueOption_SecretValue)
+						secretValueAttributeMap := make(map[string]attr.Value)
+
+						if isSecretValue && secretValueOptions != nil {
+
+							// data specToModelNested RequiredOneOfField --> SecretInfoOneof
+							// <no value>
+							if secretValueOptions.SecretValue.GetSecretInfoOneof() != nil {
+								// Create a temporary attribute map for the choices within this OneOf
+								secretValuesecretInfoChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+								// Define a variable for the spec choices to be passed down to nested templates.
+								// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+								secretValuesecretInfoChoiceChoices := secretValueOptions.SecretValue.GetSecretInfoOneof()
+
+								// Process nested choices, populating the temporary attribute map
+
+								// data specToModelNested PointerOfOneOfField --> BlindfoldSecretInfo
+								// <no value>
+								// false
+								{
+									blindfoldSecretInfoOptions, isBlindfoldSecretInfo := secretValuesecretInfoChoiceChoices.(*ves_io_schema.SecretType_BlindfoldSecretInfo)
+									blindfoldSecretInfoAttributeMap := make(map[string]attr.Value)
+
+									if isBlindfoldSecretInfo && blindfoldSecretInfoOptions != nil {
+
+										// data specToModelNested StringField --> DecryptionProvider
+										if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider() != "" {
+											blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider())
+										} else {
+											// Empty string, set to null
+											blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringNull()
+										}
+
+										// data specToModelNested StringField --> StoreProvider
+										if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider() != "" {
+											blindfoldSecretInfoAttributeMap["store_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider())
+										} else {
+											// Empty string, set to null
+											blindfoldSecretInfoAttributeMap["store_provider"] = types.StringNull()
+										}
+
+										// data specToModelNested RequiredStringField --> Location
+										if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation() != "" {
+											blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation())
+										} else {
+											// Empty string, set to null
+											blindfoldSecretInfoAttributeMap["location"] = types.StringNull()
+										}
+
+										blindfoldSecretInfoObj, diags := types.ObjectValue(RouteRoutesResponseCookiesToAddValueChoiceSecretValueSecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
+										response.Diagnostics.Append(diags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										secretValuesecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = blindfoldSecretInfoObj
+									} else {
+										secretValuesecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = types.ObjectNull(RouteRoutesResponseCookiesToAddValueChoiceSecretValueSecretInfoOneofBlindfoldSecretInfoModelAttributeMap)
+									}
+								}
+
+								// data specToModelNested PointerOfOneOfField --> ClearSecretInfo
+								// <no value>
+								// false
+								{
+									clearSecretInfoOptions, isClearSecretInfo := secretValuesecretInfoChoiceChoices.(*ves_io_schema.SecretType_ClearSecretInfo)
+									clearSecretInfoAttributeMap := make(map[string]attr.Value)
+
+									if isClearSecretInfo && clearSecretInfoOptions != nil {
+
+										// data specToModelNested StringField --> Provider
+										if clearSecretInfoOptions.ClearSecretInfo.GetProvider() != "" {
+											clearSecretInfoAttributeMap["provider"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetProvider())
+										} else {
+											// Empty string, set to null
+											clearSecretInfoAttributeMap["provider"] = types.StringNull()
+										}
+
+										// data specToModelNested RequiredStringField --> Url
+										if clearSecretInfoOptions.ClearSecretInfo.GetUrl() != "" {
+											clearSecretInfoAttributeMap["url"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetUrl())
+										} else {
+											// Empty string, set to null
+											clearSecretInfoAttributeMap["url"] = types.StringNull()
+										}
+
+										clearSecretInfoObj, diags := types.ObjectValue(RouteRoutesResponseCookiesToAddValueChoiceSecretValueSecretInfoOneofClearSecretInfoModelAttributeMap, clearSecretInfoAttributeMap)
+										response.Diagnostics.Append(diags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										secretValuesecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = clearSecretInfoObj
+									} else {
+										secretValuesecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(RouteRoutesResponseCookiesToAddValueChoiceSecretValueSecretInfoOneofClearSecretInfoModelAttributeMap)
+									}
+								}
+
+								// --- End of Choices ---
+
+								// Create the final ObjectValue for this OneOf field
+								finalObj, secretValuesecretInfoChoiceChoicesObjDiags := types.ObjectValue(
+									RouteRoutesResponseCookiesToAddValueChoiceSecretValueSecretInfoOneofModelAttributeMap, // The attribute schema for the OneOf choices
+									secretValuesecretInfoChoiceChoicesAttributeMap,
+								)
+								response.Diagnostics.Append(secretValuesecretInfoChoiceChoicesObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+
+								// Assign the final object to the correct place (either the root model or a parent's attribute map)
+								secretValueAttributeMap["secret_info_choice"] = finalObj
+							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
+								secretValueAttributeMap["secret_info_choice"] = types.ObjectNull(RouteRoutesResponseCookiesToAddValueChoiceSecretValueSecretInfoOneofModelAttributeMap)
+							}
+
+							secretValueObj, diags := types.ObjectValue(RouteRoutesResponseCookiesToAddValueChoiceSecretValueModelAttributeMap, secretValueAttributeMap)
+							response.Diagnostics.Append(diags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							responseCookiesToAddvalueChoiceChoicesAttributeMap["secret_value"] = secretValueObj
+						} else {
+							responseCookiesToAddvalueChoiceChoicesAttributeMap["secret_value"] = types.ObjectNull(RouteRoutesResponseCookiesToAddValueChoiceSecretValueModelAttributeMap)
+						}
+					}
+
+					// --- End of Choices ---
+
+					// Create the final ObjectValue for this OneOf field
+					finalObj, responseCookiesToAddvalueChoiceChoicesObjDiags := types.ObjectValue(
+						RouteRoutesResponseCookiesToAddValueChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+						responseCookiesToAddvalueChoiceChoicesAttributeMap,
+					)
+					response.Diagnostics.Append(responseCookiesToAddvalueChoiceChoicesObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					// Assign the final object to the correct place (either the root model or a parent's attribute map)
+					routeSetCookieValueOptionModel.ValueChoice = finalObj
+				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					routeSetCookieValueOptionModel.ValueChoice = types.ObjectNull(RouteRoutesResponseCookiesToAddValueChoiceModelAttributeMap)
+				}
+
+				// data specToModelNested OneOfField --> SecureChoice
+				if responseCookiesToAddElement.GetSecureChoice() != nil {
+					// Create a temporary attribute map for the choices within this OneOf
+					responseCookiesToAddsecureChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+					// Define a variable for the spec choices to be passed down to nested templates.
+					// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+					responseCookiesToAddsecureChoiceChoices := responseCookiesToAddElement.GetSecureChoice()
+
+					// Process nested choices, populating the temporary attribute map
+
+					// data specToModelNested BoolOfOneOfPointerField --> IgnoreSecure
+					_, isIgnoreSecure := responseCookiesToAddsecureChoiceChoices.(*ves_io_schema.SetCookieValueOption_IgnoreSecure)
+
+					if isIgnoreSecure {
+						responseCookiesToAddsecureChoiceChoicesAttributeMap["ignore_secure"] = types.BoolValue(true)
+					} else {
+						responseCookiesToAddsecureChoiceChoicesAttributeMap["ignore_secure"] = types.BoolNull()
+					}
+
+					// data specToModelNested BoolOfOneOfPointerField --> AddSecure
+					_, isAddSecure := responseCookiesToAddsecureChoiceChoices.(*ves_io_schema.SetCookieValueOption_AddSecure)
+
+					if isAddSecure {
+						responseCookiesToAddsecureChoiceChoicesAttributeMap["add_secure"] = types.BoolValue(true)
+					} else {
+						responseCookiesToAddsecureChoiceChoicesAttributeMap["add_secure"] = types.BoolNull()
+					}
+
+					// --- End of Choices ---
+
+					// Create the final ObjectValue for this OneOf field
+					finalObj, responseCookiesToAddsecureChoiceChoicesObjDiags := types.ObjectValue(
+						RouteRoutesResponseCookiesToAddSecureChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+						responseCookiesToAddsecureChoiceChoicesAttributeMap,
+					)
+					response.Diagnostics.Append(responseCookiesToAddsecureChoiceChoicesObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					// Assign the final object to the correct place (either the root model or a parent's attribute map)
+					routeSetCookieValueOptionModel.SecureChoice = finalObj
+				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					routeSetCookieValueOptionModel.SecureChoice = types.ObjectNull(RouteRoutesResponseCookiesToAddSecureChoiceModelAttributeMap)
+				}
+
+				// data specToModelNested OneOfField --> HttponlyChoice
+				if responseCookiesToAddElement.GetHttponlyChoice() != nil {
+					// Create a temporary attribute map for the choices within this OneOf
+					responseCookiesToAddhttponlyChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+					// Define a variable for the spec choices to be passed down to nested templates.
+					// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+					responseCookiesToAddhttponlyChoiceChoices := responseCookiesToAddElement.GetHttponlyChoice()
+
+					// Process nested choices, populating the temporary attribute map
+
+					// data specToModelNested BoolOfOneOfPointerField --> IgnoreHttponly
+					_, isIgnoreHttponly := responseCookiesToAddhttponlyChoiceChoices.(*ves_io_schema.SetCookieValueOption_IgnoreHttponly)
+
+					if isIgnoreHttponly {
+						responseCookiesToAddhttponlyChoiceChoicesAttributeMap["ignore_httponly"] = types.BoolValue(true)
+					} else {
+						responseCookiesToAddhttponlyChoiceChoicesAttributeMap["ignore_httponly"] = types.BoolNull()
+					}
+
+					// data specToModelNested BoolOfOneOfPointerField --> AddHttponly
+					_, isAddHttponly := responseCookiesToAddhttponlyChoiceChoices.(*ves_io_schema.SetCookieValueOption_AddHttponly)
+
+					if isAddHttponly {
+						responseCookiesToAddhttponlyChoiceChoicesAttributeMap["add_httponly"] = types.BoolValue(true)
+					} else {
+						responseCookiesToAddhttponlyChoiceChoicesAttributeMap["add_httponly"] = types.BoolNull()
+					}
+
+					// --- End of Choices ---
+
+					// Create the final ObjectValue for this OneOf field
+					finalObj, responseCookiesToAddhttponlyChoiceChoicesObjDiags := types.ObjectValue(
+						RouteRoutesResponseCookiesToAddHttponlyChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+						responseCookiesToAddhttponlyChoiceChoicesAttributeMap,
+					)
+					response.Diagnostics.Append(responseCookiesToAddhttponlyChoiceChoicesObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					// Assign the final object to the correct place (either the root model or a parent's attribute map)
+					routeSetCookieValueOptionModel.HttponlyChoice = finalObj
+				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					routeSetCookieValueOptionModel.HttponlyChoice = types.ObjectNull(RouteRoutesResponseCookiesToAddHttponlyChoiceModelAttributeMap)
+				}
+
+				// data specToModelNested OneOfField --> PathChoice
+				if responseCookiesToAddElement.GetPathChoice() != nil {
+					// Create a temporary attribute map for the choices within this OneOf
+					responseCookiesToAddpathChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+					// Define a variable for the spec choices to be passed down to nested templates.
+					// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+					responseCookiesToAddpathChoiceChoices := responseCookiesToAddElement.GetPathChoice()
+
+					// Process nested choices, populating the temporary attribute map
+
+					// data specToModelNested StringOfOneOfField --> AddPath
+					addPathItem, isAddPath := responseCookiesToAddpathChoiceChoices.(*ves_io_schema.SetCookieValueOption_AddPath)
+
+					if isAddPath {
+						responseCookiesToAddpathChoiceChoicesAttributeMap["add_path"] = types.StringValue(string(addPathItem.AddPath))
+					} else {
+						// Empty string, set to null
+						responseCookiesToAddpathChoiceChoicesAttributeMap["add_path"] = types.StringNull()
+					}
+
+					// data specToModelNested BoolOfOneOfPointerField --> IgnorePath
+					_, isIgnorePath := responseCookiesToAddpathChoiceChoices.(*ves_io_schema.SetCookieValueOption_IgnorePath)
+
+					if isIgnorePath {
+						responseCookiesToAddpathChoiceChoicesAttributeMap["ignore_path"] = types.BoolValue(true)
+					} else {
+						responseCookiesToAddpathChoiceChoicesAttributeMap["ignore_path"] = types.BoolNull()
+					}
+
+					// --- End of Choices ---
+
+					// Create the final ObjectValue for this OneOf field
+					finalObj, responseCookiesToAddpathChoiceChoicesObjDiags := types.ObjectValue(
+						RouteRoutesResponseCookiesToAddPathChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+						responseCookiesToAddpathChoiceChoicesAttributeMap,
+					)
+					response.Diagnostics.Append(responseCookiesToAddpathChoiceChoicesObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					// Assign the final object to the correct place (either the root model or a parent's attribute map)
+					routeSetCookieValueOptionModel.PathChoice = finalObj
+				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					routeSetCookieValueOptionModel.PathChoice = types.ObjectNull(RouteRoutesResponseCookiesToAddPathChoiceModelAttributeMap)
+				}
+
+				// data specToModelNested OneOfField --> ExpiryChoice
+				if responseCookiesToAddElement.GetExpiryChoice() != nil {
+					// Create a temporary attribute map for the choices within this OneOf
+					responseCookiesToAddexpiryChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+					// Define a variable for the spec choices to be passed down to nested templates.
+					// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+					responseCookiesToAddexpiryChoiceChoices := responseCookiesToAddElement.GetExpiryChoice()
+
+					// Process nested choices, populating the temporary attribute map
+
+					// data specToModelNested BoolOfOneOfPointerField --> IgnoreExpiry
+					_, isIgnoreExpiry := responseCookiesToAddexpiryChoiceChoices.(*ves_io_schema.SetCookieValueOption_IgnoreExpiry)
+
+					if isIgnoreExpiry {
+						responseCookiesToAddexpiryChoiceChoicesAttributeMap["ignore_expiry"] = types.BoolValue(true)
+					} else {
+						responseCookiesToAddexpiryChoiceChoicesAttributeMap["ignore_expiry"] = types.BoolNull()
+					}
+
+					// data specToModelNested StringOfOneOfField --> AddExpiry
+					addExpiryItem, isAddExpiry := responseCookiesToAddexpiryChoiceChoices.(*ves_io_schema.SetCookieValueOption_AddExpiry)
+
+					if isAddExpiry {
+						responseCookiesToAddexpiryChoiceChoicesAttributeMap["add_expiry"] = types.StringValue(string(addExpiryItem.AddExpiry))
+					} else {
+						// Empty string, set to null
+						responseCookiesToAddexpiryChoiceChoicesAttributeMap["add_expiry"] = types.StringNull()
+					}
+
+					// --- End of Choices ---
+
+					// Create the final ObjectValue for this OneOf field
+					finalObj, responseCookiesToAddexpiryChoiceChoicesObjDiags := types.ObjectValue(
+						RouteRoutesResponseCookiesToAddExpiryChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+						responseCookiesToAddexpiryChoiceChoicesAttributeMap,
+					)
+					response.Diagnostics.Append(responseCookiesToAddexpiryChoiceChoicesObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					// Assign the final object to the correct place (either the root model or a parent's attribute map)
+					routeSetCookieValueOptionModel.ExpiryChoice = finalObj
+				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					routeSetCookieValueOptionModel.ExpiryChoice = types.ObjectNull(RouteRoutesResponseCookiesToAddExpiryChoiceModelAttributeMap)
+				}
+
+				// data specToModelNested BoolField --> Overwrite
+				routeSetCookieValueOptionModel.Overwrite = types.BoolValue(bool(responseCookiesToAddElement.GetOverwrite()))
+
+				responseCookiesToAddElements = append(responseCookiesToAddElements, routeSetCookieValueOptionModel)
+			}
+			// CASE 1: The target field is a `types.List` or an attribute map.
+			// The intermediate slice of structs must be converted to a `types.ListValue`.
+			responseCookiesToAddListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: RouteResponseCookiesToAddObjectRefModelAttributeMap}, responseCookiesToAddElements)
 			response.Diagnostics.Append(diags...)
 			if response.Diagnostics.HasError() {
 				return
 			}
-			routeRouteRouteTypeModel.RequestCookiesToRemove = listValue
+			routeRouteRouteTypeModel.ResponseCookiesToAdd = responseCookiesToAddListValue
+
 		} else {
-			routeRouteRouteTypeModel.RequestCookiesToRemove = types.ListNull(types.StringType)
+			// The source list is empty or nil.
+			// CASE 1: The target field is a `types.List` or an attribute map.
+			// Assign a null `types.ListValue`.
+			routeRouteRouteTypeModel.ResponseCookiesToAdd = types.ListNull(types.ObjectType{AttrTypes: RouteResponseCookiesToAddObjectRefModelAttributeMap})
 		}
 
 		// data specToModelNested PointerField --> WafType
@@ -3775,6 +4189,14 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 							for _, appFirewallElement := range appFirewallOptions.AppFirewall.GetAppFirewall() {
 								objectRefTypeModelModel := ObjectRefTypeModel{}
 
+								// data specToModelNested RequiredStringField --> Name
+								if appFirewallElement.GetName() != "" {
+									objectRefTypeModelModel.Name = types.StringValue(appFirewallElement.GetName())
+								} else {
+									// Empty string, set to null
+									objectRefTypeModelModel.Name = types.StringNull()
+								}
+
 								// data specToModelNested StringField --> Tenant
 								if appFirewallElement.GetTenant() != "" {
 									objectRefTypeModelModel.Tenant = types.StringValue(appFirewallElement.GetTenant())
@@ -3789,14 +4211,6 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 								} else {
 									// Empty string, set to null
 									objectRefTypeModelModel.Namespace = types.StringNull()
-								}
-
-								// data specToModelNested RequiredStringField --> Name
-								if appFirewallElement.GetName() != "" {
-									objectRefTypeModelModel.Name = types.StringValue(appFirewallElement.GetName())
-								} else {
-									// Empty string, set to null
-									objectRefTypeModelModel.Name = types.StringNull()
 								}
 
 								appFirewallElements = append(appFirewallElements, objectRefTypeModelModel)
@@ -3865,6 +4279,1819 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 			routeRouteRouteTypeModel.WafType = types.ObjectNull(RouteRoutesWafTypeModelAttributeMap)
 		}
 
+		// data specToModelNested RequiredOneOfField --> RouteAction
+		// <no value>
+		if routesElement.GetRouteAction() != nil {
+			// Create a temporary attribute map for the choices within this OneOf
+			routesrouteActionChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+			// Define a variable for the spec choices to be passed down to nested templates.
+			// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+			routesrouteActionChoiceChoices := routesElement.GetRouteAction()
+
+			// Process nested choices, populating the temporary attribute map
+
+			// data specToModelNested PointerOfOneOfField --> RouteDestination
+			// <no value>
+			// false
+			{
+				routeDestinationOptions, isRouteDestination := routesrouteActionChoiceChoices.(*ves_io_schema_route.RouteType_RouteDestination)
+				routeDestinationAttributeMap := make(map[string]attr.Value)
+
+				if isRouteDestination && routeDestinationOptions != nil {
+
+					// data specToModelNested PointerField --> QueryParams
+					if routeDestinationOptions.RouteDestination.GetQueryParams() != nil {
+						// Create the nested Go struct
+						routeRouteQueryParamsSimpleRouteModel := &RouteRouteQueryParamsSimpleRoute{}
+						queryParamsElement := routeDestinationOptions.RouteDestination.GetQueryParams()
+
+						// Recursively populate the nested struct
+
+						// data specToModelNested RequiredOneOfField --> QueryParams
+						// <no value>
+						if queryParamsElement.GetQueryParams() != nil {
+							// Create a temporary attribute map for the choices within this OneOf
+							queryParamsqueryParamsChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+							// Define a variable for the spec choices to be passed down to nested templates.
+							// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+							queryParamsqueryParamsChoiceChoices := queryParamsElement.GetQueryParams()
+
+							// Process nested choices, populating the temporary attribute map
+
+							// data specToModelNested BoolOfOneOfPointerField --> RetainAllParams
+							_, isRetainAllParams := queryParamsqueryParamsChoiceChoices.(*ves_io_schema_route.QueryParamsSimpleRoute_RetainAllParams)
+
+							if isRetainAllParams {
+								queryParamsqueryParamsChoiceChoicesAttributeMap["retain_all_params"] = types.BoolValue(true)
+							} else {
+								queryParamsqueryParamsChoiceChoicesAttributeMap["retain_all_params"] = types.BoolNull()
+							}
+
+							// data specToModelNested BoolOfOneOfPointerField --> RemoveAllParams
+							_, isRemoveAllParams := queryParamsqueryParamsChoiceChoices.(*ves_io_schema_route.QueryParamsSimpleRoute_RemoveAllParams)
+
+							if isRemoveAllParams {
+								queryParamsqueryParamsChoiceChoicesAttributeMap["remove_all_params"] = types.BoolValue(true)
+							} else {
+								queryParamsqueryParamsChoiceChoicesAttributeMap["remove_all_params"] = types.BoolNull()
+							}
+
+							// data specToModelNested StringOfOneOfField --> ReplaceParams
+							replaceParamsItem, isReplaceParams := queryParamsqueryParamsChoiceChoices.(*ves_io_schema_route.QueryParamsSimpleRoute_ReplaceParams)
+
+							if isReplaceParams {
+								queryParamsqueryParamsChoiceChoicesAttributeMap["replace_params"] = types.StringValue(string(replaceParamsItem.ReplaceParams))
+							} else {
+								// Empty string, set to null
+								queryParamsqueryParamsChoiceChoicesAttributeMap["replace_params"] = types.StringNull()
+							}
+
+							// --- End of Choices ---
+
+							// Create the final ObjectValue for this OneOf field
+							finalObj, queryParamsqueryParamsChoiceChoicesObjDiags := types.ObjectValue(
+								RouteRoutesRouteActionRouteDestinationQueryParamsQueryParamsModelAttributeMap, // The attribute schema for the OneOf choices
+								queryParamsqueryParamsChoiceChoicesAttributeMap,
+							)
+							response.Diagnostics.Append(queryParamsqueryParamsChoiceChoicesObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+
+							// Assign the final object to the correct place (either the root model or a parent's attribute map)
+							routeRouteQueryParamsSimpleRouteModel.QueryParamsChoice = finalObj
+						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
+							routeRouteQueryParamsSimpleRouteModel.QueryParamsChoice = types.ObjectNull(RouteRoutesRouteActionRouteDestinationQueryParamsQueryParamsModelAttributeMap)
+						}
+
+						// This field needs to be converted to a types.ObjectValue before assignment.
+						routeRouteQueryParamsSimpleRouteModelObj, diags := types.ObjectValueFrom(ctx, RouteRoutesRouteActionRouteDestinationQueryParamsModelAttributeMap, routeRouteQueryParamsSimpleRouteModel)
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						routeDestinationAttributeMap["query_params"] = routeRouteQueryParamsSimpleRouteModelObj
+
+					} else {
+						// The source field is nil (e.g. redacted by the API).
+						// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
+						// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
+						// because the API may always return a non-nil struct (with REDACTED values) for this field,
+						// making this else-branch unreachable. The child OneOf handles the actual healing.
+						// The target is a types.Object, so we use types.ObjectNull.
+						routeDestinationAttributeMap["query_params"] = types.ObjectNull(RouteRoutesRouteActionRouteDestinationQueryParamsModelAttributeMap)
+					}
+
+					// data specToModelNested OneOfField --> RouteDestinationRewrite
+					if routeDestinationOptions.RouteDestination.GetRouteDestinationRewrite() != nil {
+						// Create a temporary attribute map for the choices within this OneOf
+						routeDestinationrouteDestinationRewriteChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+						// Define a variable for the spec choices to be passed down to nested templates.
+						// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+						routeDestinationrouteDestinationRewriteChoiceChoices := routeDestinationOptions.RouteDestination.GetRouteDestinationRewrite()
+
+						// Process nested choices, populating the temporary attribute map
+
+						// data specToModelNested PointerOfOneOfField --> RegexRewrite
+						// <no value>
+						// false
+						{
+							regexRewriteOptions, isRegexRewrite := routeDestinationrouteDestinationRewriteChoiceChoices.(*ves_io_schema_route.RouteDestinationList_RegexRewrite)
+							regexRewriteAttributeMap := make(map[string]attr.Value)
+
+							if isRegexRewrite && regexRewriteOptions != nil {
+
+								// data specToModelNested StringField --> Pattern
+								if regexRewriteOptions.RegexRewrite.GetPattern() != "" {
+									regexRewriteAttributeMap["pattern"] = types.StringValue(regexRewriteOptions.RegexRewrite.GetPattern())
+								} else {
+									// Empty string, set to null
+									regexRewriteAttributeMap["pattern"] = types.StringNull()
+								}
+
+								// data specToModelNested StringField --> Substitution
+								if regexRewriteOptions.RegexRewrite.GetSubstitution() != "" {
+									regexRewriteAttributeMap["substitution"] = types.StringValue(regexRewriteOptions.RegexRewrite.GetSubstitution())
+								} else {
+									// Empty string, set to null
+									regexRewriteAttributeMap["substitution"] = types.StringNull()
+								}
+
+								regexRewriteObj, diags := types.ObjectValue(RouteRoutesRouteActionRouteDestinationRouteDestinationRewriteRegexRewriteModelAttributeMap, regexRewriteAttributeMap)
+								response.Diagnostics.Append(diags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								routeDestinationrouteDestinationRewriteChoiceChoicesAttributeMap["regex_rewrite"] = regexRewriteObj
+							} else {
+								routeDestinationrouteDestinationRewriteChoiceChoicesAttributeMap["regex_rewrite"] = types.ObjectNull(RouteRoutesRouteActionRouteDestinationRouteDestinationRewriteRegexRewriteModelAttributeMap)
+							}
+						}
+
+						// data specToModelNested StringOfOneOfField --> PrefixRewrite
+						prefixRewriteItem, isPrefixRewrite := routeDestinationrouteDestinationRewriteChoiceChoices.(*ves_io_schema_route.RouteDestinationList_PrefixRewrite)
+
+						if isPrefixRewrite {
+							routeDestinationrouteDestinationRewriteChoiceChoicesAttributeMap["prefix_rewrite"] = types.StringValue(string(prefixRewriteItem.PrefixRewrite))
+						} else {
+							// Empty string, set to null
+							routeDestinationrouteDestinationRewriteChoiceChoicesAttributeMap["prefix_rewrite"] = types.StringNull()
+						}
+
+						// --- End of Choices ---
+
+						// Create the final ObjectValue for this OneOf field
+						finalObj, routeDestinationrouteDestinationRewriteChoiceChoicesObjDiags := types.ObjectValue(
+							RouteRoutesRouteActionRouteDestinationRouteDestinationRewriteModelAttributeMap, // The attribute schema for the OneOf choices
+							routeDestinationrouteDestinationRewriteChoiceChoicesAttributeMap,
+						)
+						response.Diagnostics.Append(routeDestinationrouteDestinationRewriteChoiceChoicesObjDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						// Assign the final object to the correct place (either the root model or a parent's attribute map)
+						routeDestinationAttributeMap["route_destination_rewrite_choice"] = finalObj
+					} else {
+						// The OneOf field is nil in the source spec, so set the Terraform object to null.
+						routeDestinationAttributeMap["route_destination_rewrite_choice"] = types.ObjectNull(RouteRoutesRouteActionRouteDestinationRouteDestinationRewriteModelAttributeMap)
+					}
+
+					// data specToModelNested RequiredOneOfField --> HostRewriteParams
+					// <no value>
+					if routeDestinationOptions.RouteDestination.GetHostRewriteParams() != nil {
+						// Create a temporary attribute map for the choices within this OneOf
+						routeDestinationhostRewriteParamsChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+						// Define a variable for the spec choices to be passed down to nested templates.
+						// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+						routeDestinationhostRewriteParamsChoiceChoices := routeDestinationOptions.RouteDestination.GetHostRewriteParams()
+
+						// Process nested choices, populating the temporary attribute map
+
+						// data specToModelNested StringOfOneOfField --> HostRewrite
+						hostRewriteItem, isHostRewrite := routeDestinationhostRewriteParamsChoiceChoices.(*ves_io_schema_route.RouteDestinationList_HostRewrite)
+
+						if isHostRewrite {
+							routeDestinationhostRewriteParamsChoiceChoicesAttributeMap["host_rewrite"] = types.StringValue(string(hostRewriteItem.HostRewrite))
+						} else {
+							// Empty string, set to null
+							routeDestinationhostRewriteParamsChoiceChoicesAttributeMap["host_rewrite"] = types.StringNull()
+						}
+
+						// data specToModelNested BoolOfOneOfField --> AutoHostRewrite
+						autoHostRewriteItem, isAutoHostRewrite := routeDestinationhostRewriteParamsChoiceChoices.(*ves_io_schema_route.RouteDestinationList_AutoHostRewrite)
+
+						if isAutoHostRewrite {
+							routeDestinationhostRewriteParamsChoiceChoicesAttributeMap["auto_host_rewrite"] = types.BoolValue(bool(autoHostRewriteItem.AutoHostRewrite))
+						} else {
+							routeDestinationhostRewriteParamsChoiceChoicesAttributeMap["auto_host_rewrite"] = types.BoolNull()
+						}
+
+						// --- End of Choices ---
+
+						// Create the final ObjectValue for this OneOf field
+						finalObj, routeDestinationhostRewriteParamsChoiceChoicesObjDiags := types.ObjectValue(
+							RouteRoutesRouteActionRouteDestinationHostRewriteParamsModelAttributeMap, // The attribute schema for the OneOf choices
+							routeDestinationhostRewriteParamsChoiceChoicesAttributeMap,
+						)
+						response.Diagnostics.Append(routeDestinationhostRewriteParamsChoiceChoicesObjDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						// Assign the final object to the correct place (either the root model or a parent's attribute map)
+						routeDestinationAttributeMap["host_rewrite_params_choice"] = finalObj
+					} else {
+						// The OneOf field is nil in the source spec, so set the Terraform object to null.
+						routeDestinationAttributeMap["host_rewrite_params_choice"] = types.ObjectNull(RouteRoutesRouteActionRouteDestinationHostRewriteParamsModelAttributeMap)
+					}
+
+					// data specToModelNested UintField --> Timeout
+					routeDestinationAttributeMap["timeout"] = types.Int64Value(int64(routeDestinationOptions.RouteDestination.GetTimeout()))
+
+					// data specToModelNested PointerField --> RetryPolicy
+					if routeDestinationOptions.RouteDestination.GetRetryPolicy() != nil {
+						// Create the nested Go struct
+						routeRetryPolicyTypeModel := &RouteRetryPolicyType{}
+						retryPolicyElement := routeDestinationOptions.RouteDestination.GetRetryPolicy()
+
+						// Recursively populate the nested struct
+
+						// data specToModelNested PointerField --> BackOff
+						if retryPolicyElement.GetBackOff() != nil {
+							// Create the nested Go struct
+							routeRetryBackOffModel := &RouteRetryBackOff{}
+							backOffElement := retryPolicyElement.GetBackOff()
+
+							// Recursively populate the nested struct
+
+							// data specToModelNested UintField --> BaseInterval
+							routeRetryBackOffModel.BaseInterval = types.Int64Value(int64(backOffElement.GetBaseInterval()))
+
+							// data specToModelNested UintField --> MaxInterval
+							routeRetryBackOffModel.MaxInterval = types.Int64Value(int64(backOffElement.GetMaxInterval()))
+
+							// This field needs to be converted to a types.ObjectValue before assignment.
+							routeRetryBackOffModelObj, diags := types.ObjectValueFrom(ctx, RouteRoutesRouteActionRouteDestinationRetryPolicyBackOffModelAttributeMap, routeRetryBackOffModel)
+							response.Diagnostics.Append(diags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							routeRetryPolicyTypeModel.BackOff = routeRetryBackOffModelObj
+
+						} else {
+							// The source field is nil (e.g. redacted by the API).
+							// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
+							// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
+							// because the API may always return a non-nil struct (with REDACTED values) for this field,
+							// making this else-branch unreachable. The child OneOf handles the actual healing.
+							// The target is a types.Object, so we use types.ObjectNull.
+							routeRetryPolicyTypeModel.BackOff = types.ObjectNull(RouteRoutesRouteActionRouteDestinationRetryPolicyBackOffModelAttributeMap)
+						}
+
+						// data specToModelNested RequiredArrayOfStringField --> RetryCondition
+						if len(retryPolicyElement.GetRetryCondition()) > 0 {
+							listValue, diags := types.ListValueFrom(ctx, types.StringType, retryPolicyElement.GetRetryCondition())
+							response.Diagnostics.Append(diags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							routeRetryPolicyTypeModel.RetryCondition = listValue
+						} else {
+							routeRetryPolicyTypeModel.RetryCondition = types.ListNull(types.StringType)
+						}
+
+						// data specToModelNested UintField --> NumRetries
+						routeRetryPolicyTypeModel.NumRetries = types.Int64Value(int64(retryPolicyElement.GetNumRetries()))
+
+						// data specToModelNested UintField --> PerTryTimeout
+						routeRetryPolicyTypeModel.PerTryTimeout = types.Int64Value(int64(retryPolicyElement.GetPerTryTimeout()))
+
+						// This field needs to be converted to a types.ObjectValue before assignment.
+						routeRetryPolicyTypeModelObj, diags := types.ObjectValueFrom(ctx, RouteRoutesRouteActionRouteDestinationRetryPolicyModelAttributeMap, routeRetryPolicyTypeModel)
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						routeDestinationAttributeMap["retry_policy"] = routeRetryPolicyTypeModelObj
+
+					} else {
+						// The source field is nil (e.g. redacted by the API).
+						// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
+						// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
+						// because the API may always return a non-nil struct (with REDACTED values) for this field,
+						// making this else-branch unreachable. The child OneOf handles the actual healing.
+						// The target is a types.Object, so we use types.ObjectNull.
+						routeDestinationAttributeMap["retry_policy"] = types.ObjectNull(RouteRoutesRouteActionRouteDestinationRetryPolicyModelAttributeMap)
+					}
+
+					// data specToModelNested PointerField --> CsrfPolicy
+					if routeDestinationOptions.RouteDestination.GetCsrfPolicy() != nil {
+						// Create the nested Go struct
+						routeCsrfPolicyModel := &RouteCsrfPolicy{}
+						csrfPolicyElement := routeDestinationOptions.RouteDestination.GetCsrfPolicy()
+
+						// Recursively populate the nested struct
+
+						// data specToModelNested RequiredOneOfField --> AllowedDomains
+						// <no value>
+						if csrfPolicyElement.GetAllowedDomains() != nil {
+							// Create a temporary attribute map for the choices within this OneOf
+							csrfPolicyallowedDomainsChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+							// Define a variable for the spec choices to be passed down to nested templates.
+							// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+							csrfPolicyallowedDomainsChoiceChoices := csrfPolicyElement.GetAllowedDomains()
+
+							// Process nested choices, populating the temporary attribute map
+
+							// data specToModelNested BoolOfOneOfPointerField --> Disabled
+							_, isDisabled := csrfPolicyallowedDomainsChoiceChoices.(*ves_io_schema.CsrfPolicy_Disabled)
+
+							if isDisabled {
+								csrfPolicyallowedDomainsChoiceChoicesAttributeMap["disabled"] = types.BoolValue(true)
+							} else {
+								csrfPolicyallowedDomainsChoiceChoicesAttributeMap["disabled"] = types.BoolNull()
+							}
+
+							// data specToModelNested BoolOfOneOfPointerField --> AllLoadBalancerDomains
+							_, isAllLoadBalancerDomains := csrfPolicyallowedDomainsChoiceChoices.(*ves_io_schema.CsrfPolicy_AllLoadBalancerDomains)
+
+							if isAllLoadBalancerDomains {
+								csrfPolicyallowedDomainsChoiceChoicesAttributeMap["all_load_balancer_domains"] = types.BoolValue(true)
+							} else {
+								csrfPolicyallowedDomainsChoiceChoicesAttributeMap["all_load_balancer_domains"] = types.BoolNull()
+							}
+
+							// data specToModelNested PointerOfOneOfField --> CustomDomainList
+							// <no value>
+							// false
+							{
+								customDomainListOptions, isCustomDomainList := csrfPolicyallowedDomainsChoiceChoices.(*ves_io_schema.CsrfPolicy_CustomDomainList)
+								customDomainListAttributeMap := make(map[string]attr.Value)
+
+								if isCustomDomainList && customDomainListOptions != nil {
+
+									// data specToModelNested RequiredArrayOfStringField --> Domains
+									if len(customDomainListOptions.CustomDomainList.GetDomains()) > 0 {
+										listValue, diags := types.ListValueFrom(ctx, types.StringType, customDomainListOptions.CustomDomainList.GetDomains())
+										response.Diagnostics.Append(diags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										customDomainListAttributeMap["domains"] = listValue
+									} else {
+										customDomainListAttributeMap["domains"] = types.ListNull(types.StringType)
+									}
+
+									customDomainListObj, diags := types.ObjectValue(RouteRoutesRouteActionRouteDestinationCsrfPolicyAllowedDomainsCustomDomainListModelAttributeMap, customDomainListAttributeMap)
+									response.Diagnostics.Append(diags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									csrfPolicyallowedDomainsChoiceChoicesAttributeMap["custom_domain_list"] = customDomainListObj
+								} else {
+									csrfPolicyallowedDomainsChoiceChoicesAttributeMap["custom_domain_list"] = types.ObjectNull(RouteRoutesRouteActionRouteDestinationCsrfPolicyAllowedDomainsCustomDomainListModelAttributeMap)
+								}
+							}
+
+							// --- End of Choices ---
+
+							// Create the final ObjectValue for this OneOf field
+							finalObj, csrfPolicyallowedDomainsChoiceChoicesObjDiags := types.ObjectValue(
+								RouteRoutesRouteActionRouteDestinationCsrfPolicyAllowedDomainsModelAttributeMap, // The attribute schema for the OneOf choices
+								csrfPolicyallowedDomainsChoiceChoicesAttributeMap,
+							)
+							response.Diagnostics.Append(csrfPolicyallowedDomainsChoiceChoicesObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+
+							// Assign the final object to the correct place (either the root model or a parent's attribute map)
+							routeCsrfPolicyModel.AllowedDomainsChoice = finalObj
+						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
+							routeCsrfPolicyModel.AllowedDomainsChoice = types.ObjectNull(RouteRoutesRouteActionRouteDestinationCsrfPolicyAllowedDomainsModelAttributeMap)
+						}
+
+						// This field needs to be converted to a types.ObjectValue before assignment.
+						routeCsrfPolicyModelObj, diags := types.ObjectValueFrom(ctx, RouteRoutesRouteActionRouteDestinationCsrfPolicyModelAttributeMap, routeCsrfPolicyModel)
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						routeDestinationAttributeMap["csrf_policy"] = routeCsrfPolicyModelObj
+
+					} else {
+						// The source field is nil (e.g. redacted by the API).
+						// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
+						// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
+						// because the API may always return a non-nil struct (with REDACTED values) for this field,
+						// making this else-branch unreachable. The child OneOf handles the actual healing.
+						// The target is a types.Object, so we use types.ObjectNull.
+						routeDestinationAttributeMap["csrf_policy"] = types.ObjectNull(RouteRoutesRouteActionRouteDestinationCsrfPolicyModelAttributeMap)
+					}
+
+					// data specToModelNested OneOfField --> ClusterRetractChoice
+					if routeDestinationOptions.RouteDestination.GetClusterRetractChoice() != nil {
+						// Create a temporary attribute map for the choices within this OneOf
+						routeDestinationclusterRetractChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+						// Define a variable for the spec choices to be passed down to nested templates.
+						// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+						routeDestinationclusterRetractChoiceChoices := routeDestinationOptions.RouteDestination.GetClusterRetractChoice()
+
+						// Process nested choices, populating the temporary attribute map
+
+						// data specToModelNested BoolOfOneOfPointerField --> DoNotRetractCluster
+						_, isDoNotRetractCluster := routeDestinationclusterRetractChoiceChoices.(*ves_io_schema_route.RouteDestinationList_DoNotRetractCluster)
+
+						if isDoNotRetractCluster {
+							routeDestinationclusterRetractChoiceChoicesAttributeMap["do_not_retract_cluster"] = types.BoolValue(true)
+						} else {
+							routeDestinationclusterRetractChoiceChoicesAttributeMap["do_not_retract_cluster"] = types.BoolNull()
+						}
+
+						// data specToModelNested BoolOfOneOfPointerField --> RetractCluster
+						_, isRetractCluster := routeDestinationclusterRetractChoiceChoices.(*ves_io_schema_route.RouteDestinationList_RetractCluster)
+
+						if isRetractCluster {
+							routeDestinationclusterRetractChoiceChoicesAttributeMap["retract_cluster"] = types.BoolValue(true)
+						} else {
+							routeDestinationclusterRetractChoiceChoicesAttributeMap["retract_cluster"] = types.BoolNull()
+						}
+
+						// --- End of Choices ---
+
+						// Create the final ObjectValue for this OneOf field
+						finalObj, routeDestinationclusterRetractChoiceChoicesObjDiags := types.ObjectValue(
+							RouteRoutesRouteActionRouteDestinationClusterRetractChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+							routeDestinationclusterRetractChoiceChoicesAttributeMap,
+						)
+						response.Diagnostics.Append(routeDestinationclusterRetractChoiceChoicesObjDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						// Assign the final object to the correct place (either the root model or a parent's attribute map)
+						routeDestinationAttributeMap["cluster_retract_choice"] = finalObj
+					} else {
+						// The OneOf field is nil in the source spec, so set the Terraform object to null.
+						routeDestinationAttributeMap["cluster_retract_choice"] = types.ObjectNull(RouteRoutesRouteActionRouteDestinationClusterRetractChoiceModelAttributeMap)
+					}
+
+					// data specToModelNested MapOfStringField --> EndpointSubsets
+					if routeDestinationOptions.RouteDestination.GetEndpointSubsets() != nil {
+						// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
+						endpointSubsetsMap, endpointSubsetsDiags := utils.StringMapToTerraformMap(routeDestinationOptions.RouteDestination.GetEndpointSubsets())
+						response.Diagnostics.Append(endpointSubsetsDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						// Assign the typed map to the model
+						routeDestinationAttributeMap["endpoint_subsets"] = endpointSubsetsMap
+					} else {
+						// Ensure the state reflects a Null map with the correct element type to avoid DynamicPseudoType errors
+						routeDestinationAttributeMap["endpoint_subsets"] = types.MapNull(types.StringType)
+					}
+
+					// data specToModelNested PointerField --> WebSocketConfig
+					if routeDestinationOptions.RouteDestination.GetWebSocketConfig() != nil {
+						// Create the nested Go struct
+						routeRouteWebsocketConfigTypeModel := &RouteRouteWebsocketConfigType{}
+						webSocketConfigElement := routeDestinationOptions.RouteDestination.GetWebSocketConfig()
+
+						// Recursively populate the nested struct
+
+						// data specToModelNested BoolField --> UseWebsocket
+						routeRouteWebsocketConfigTypeModel.UseWebsocket = types.BoolValue(bool(webSocketConfigElement.GetUseWebsocket()))
+
+						// This field needs to be converted to a types.ObjectValue before assignment.
+						routeRouteWebsocketConfigTypeModelObj, diags := types.ObjectValueFrom(ctx, RouteRoutesRouteActionRouteDestinationWebSocketConfigModelAttributeMap, routeRouteWebsocketConfigTypeModel)
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						routeDestinationAttributeMap["web_socket_config"] = routeRouteWebsocketConfigTypeModelObj
+
+					} else {
+						// The source field is nil (e.g. redacted by the API).
+						// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
+						// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
+						// because the API may always return a non-nil struct (with REDACTED values) for this field,
+						// making this else-branch unreachable. The child OneOf handles the actual healing.
+						// The target is a types.Object, so we use types.ObjectNull.
+						routeDestinationAttributeMap["web_socket_config"] = types.ObjectNull(RouteRoutesRouteActionRouteDestinationWebSocketConfigModelAttributeMap)
+					}
+
+					// data specToModelNested EnumField --> Priority
+					if routeDestinationOptions.RouteDestination.GetPriority().String() != "" {
+						stringValue := types.StringValue(routeDestinationOptions.RouteDestination.GetPriority().String())
+						stringSlice := []types.String{stringValue}
+						listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						routeDestinationAttributeMap["priority"] = listValue
+					} else {
+						routeDestinationAttributeMap["priority"] = types.ListNull(types.StringType)
+					}
+
+					// data specToModelNested RequiredArrayOfPointerField --> Destinations
+					if len(routeDestinationOptions.RouteDestination.GetDestinations()) > 0 {
+						// Step 1: Always create a slice of model structs from the spec data.
+						// This slice serves as an intermediate representation.
+						destinationsElements := make([]RouteRouteRouteDestination, 0, len(routeDestinationOptions.RouteDestination.GetDestinations()))
+						for _, destinationsElement := range routeDestinationOptions.RouteDestination.GetDestinations() {
+							routeRouteRouteDestinationModel := RouteRouteRouteDestination{}
+
+							// data specToModelNested RequiredArrayOfPointerField --> Cluster
+							if len(destinationsElement.GetCluster()) > 0 {
+								// Step 1: Always create a slice of model structs from the spec data.
+								// This slice serves as an intermediate representation.
+								clusterElements := make([]ObjectRefTypeModel, 0, len(destinationsElement.GetCluster()))
+								for _, clusterElement := range destinationsElement.GetCluster() {
+									objectRefTypeModelModel := ObjectRefTypeModel{}
+
+									// data specToModelNested RequiredStringField --> Name
+									if clusterElement.GetName() != "" {
+										objectRefTypeModelModel.Name = types.StringValue(clusterElement.GetName())
+									} else {
+										// Empty string, set to null
+										objectRefTypeModelModel.Name = types.StringNull()
+									}
+
+									// data specToModelNested StringField --> Tenant
+									if clusterElement.GetTenant() != "" {
+										objectRefTypeModelModel.Tenant = types.StringValue(clusterElement.GetTenant())
+									} else {
+										// Empty string, set to null
+										objectRefTypeModelModel.Tenant = types.StringNull()
+									}
+
+									// data specToModelNested RequiredStringField --> Namespace
+									if clusterElement.GetNamespace() != "" {
+										objectRefTypeModelModel.Namespace = types.StringValue(clusterElement.GetNamespace())
+									} else {
+										// Empty string, set to null
+										objectRefTypeModelModel.Namespace = types.StringNull()
+									}
+
+									clusterElements = append(clusterElements, objectRefTypeModelModel)
+								}
+								// CASE 1: The target field is a `types.List` or an attribute map.
+								// The intermediate slice of structs must be converted to a `types.ListValue`.
+								clusterListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: RouteClusterObjectRefModelAttributeMap}, clusterElements)
+								response.Diagnostics.Append(diags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								routeRouteRouteDestinationModel.Cluster = clusterListValue
+
+							} else {
+								// The source list is empty or nil.
+								// CASE 1: The target field is a `types.List` or an attribute map.
+								// Assign a null `types.ListValue`.
+								routeRouteRouteDestinationModel.Cluster = types.ListNull(types.ObjectType{AttrTypes: RouteClusterObjectRefModelAttributeMap})
+							}
+
+							// data specToModelNested UintField --> Weight
+							routeRouteRouteDestinationModel.Weight = types.Int64Value(int64(destinationsElement.GetWeight()))
+
+							// data specToModelNested UintField --> Priority
+							routeRouteRouteDestinationModel.Priority = types.Int64Value(int64(destinationsElement.GetPriority()))
+
+							// data specToModelNested MapOfStringField --> EndpointSubsets
+							if destinationsElement.GetEndpointSubsets() != nil {
+								// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
+								endpointSubsetsMap, endpointSubsetsDiags := utils.StringMapToTerraformMap(destinationsElement.GetEndpointSubsets())
+								response.Diagnostics.Append(endpointSubsetsDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								// Assign the typed map to the model
+								routeRouteRouteDestinationModel.EndpointSubsets = endpointSubsetsMap
+							} else {
+								// Ensure the state reflects a Null map with the correct element type to avoid DynamicPseudoType errors
+								routeRouteRouteDestinationModel.EndpointSubsets = types.MapNull(types.StringType)
+							}
+
+							destinationsElements = append(destinationsElements, routeRouteRouteDestinationModel)
+						}
+						// CASE 1: The target field is a `types.List` or an attribute map.
+						// The intermediate slice of structs must be converted to a `types.ListValue`.
+						destinationsListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: RouteRoutesRouteActionRouteDestinationDestinationsModelAttributeMap}, destinationsElements)
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						routeDestinationAttributeMap["destinations"] = destinationsListValue
+
+					} else {
+						// The source list is empty or nil.
+						// CASE 1: The target field is a `types.List` or an attribute map.
+						// Assign a null `types.ListValue`.
+						routeDestinationAttributeMap["destinations"] = types.ListNull(types.ObjectType{AttrTypes: RouteRoutesRouteActionRouteDestinationDestinationsModelAttributeMap})
+					}
+
+					// data specToModelNested PointerField --> MirrorPolicy
+					if routeDestinationOptions.RouteDestination.GetMirrorPolicy() != nil {
+						// Create the nested Go struct
+						routeRouteMirrorPolicyTypeModel := &RouteRouteMirrorPolicyType{}
+						mirrorPolicyElement := routeDestinationOptions.RouteDestination.GetMirrorPolicy()
+
+						// Recursively populate the nested struct
+
+						// data specToModelNested RequiredArrayOfPointerField --> Cluster
+						if len(mirrorPolicyElement.GetCluster()) > 0 {
+							// Step 1: Always create a slice of model structs from the spec data.
+							// This slice serves as an intermediate representation.
+							clusterElements := make([]ObjectRefTypeModel, 0, len(mirrorPolicyElement.GetCluster()))
+							for _, clusterElement := range mirrorPolicyElement.GetCluster() {
+								objectRefTypeModelModel := ObjectRefTypeModel{}
+
+								// data specToModelNested RequiredStringField --> Name
+								if clusterElement.GetName() != "" {
+									objectRefTypeModelModel.Name = types.StringValue(clusterElement.GetName())
+								} else {
+									// Empty string, set to null
+									objectRefTypeModelModel.Name = types.StringNull()
+								}
+
+								// data specToModelNested StringField --> Tenant
+								if clusterElement.GetTenant() != "" {
+									objectRefTypeModelModel.Tenant = types.StringValue(clusterElement.GetTenant())
+								} else {
+									// Empty string, set to null
+									objectRefTypeModelModel.Tenant = types.StringNull()
+								}
+
+								// data specToModelNested RequiredStringField --> Namespace
+								if clusterElement.GetNamespace() != "" {
+									objectRefTypeModelModel.Namespace = types.StringValue(clusterElement.GetNamespace())
+								} else {
+									// Empty string, set to null
+									objectRefTypeModelModel.Namespace = types.StringNull()
+								}
+
+								clusterElements = append(clusterElements, objectRefTypeModelModel)
+							}
+							// CASE 1: The target field is a `types.List` or an attribute map.
+							// The intermediate slice of structs must be converted to a `types.ListValue`.
+							clusterListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: RouteClusterObjectRefModelAttributeMap}, clusterElements)
+							response.Diagnostics.Append(diags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							routeRouteMirrorPolicyTypeModel.Cluster = clusterListValue
+
+						} else {
+							// The source list is empty or nil.
+							// CASE 1: The target field is a `types.List` or an attribute map.
+							// Assign a null `types.ListValue`.
+							routeRouteMirrorPolicyTypeModel.Cluster = types.ListNull(types.ObjectType{AttrTypes: RouteClusterObjectRefModelAttributeMap})
+						}
+
+						// data specToModelNested PointerField --> Percent
+						if mirrorPolicyElement.GetPercent() != nil {
+							// Create the nested Go struct
+							routeFractionalPercentModel := &RouteFractionalPercent{}
+							percentElement := mirrorPolicyElement.GetPercent()
+
+							// Recursively populate the nested struct
+
+							// data specToModelNested RequiredUintField --> Numerator
+							routeFractionalPercentModel.Numerator = types.Int64Value(int64(percentElement.GetNumerator()))
+
+							// data specToModelNested RequiredEnumField --> Denominator
+							if percentElement.GetDenominator().String() != "" {
+								stringValue := types.StringValue(percentElement.GetDenominator().String())
+								stringSlice := []types.String{stringValue}
+								listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+								response.Diagnostics.Append(diags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								routeFractionalPercentModel.Denominator = listValue
+							} else {
+								routeFractionalPercentModel.Denominator = types.ListNull(types.StringType)
+							}
+
+							// This field needs to be converted to a types.ObjectValue before assignment.
+							routeFractionalPercentModelObj, diags := types.ObjectValueFrom(ctx, RouteRoutesRouteActionRouteDestinationMirrorPolicyPercentModelAttributeMap, routeFractionalPercentModel)
+							response.Diagnostics.Append(diags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							routeRouteMirrorPolicyTypeModel.Percent = routeFractionalPercentModelObj
+
+						} else {
+							// The source field is nil (e.g. redacted by the API).
+							// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
+							// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
+							// because the API may always return a non-nil struct (with REDACTED values) for this field,
+							// making this else-branch unreachable. The child OneOf handles the actual healing.
+							// The target is a types.Object, so we use types.ObjectNull.
+							routeRouteMirrorPolicyTypeModel.Percent = types.ObjectNull(RouteRoutesRouteActionRouteDestinationMirrorPolicyPercentModelAttributeMap)
+						}
+
+						// This field needs to be converted to a types.ObjectValue before assignment.
+						routeRouteMirrorPolicyTypeModelObj, diags := types.ObjectValueFrom(ctx, RouteRoutesRouteActionRouteDestinationMirrorPolicyModelAttributeMap, routeRouteMirrorPolicyTypeModel)
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						routeDestinationAttributeMap["mirror_policy"] = routeRouteMirrorPolicyTypeModelObj
+
+					} else {
+						// The source field is nil (e.g. redacted by the API).
+						// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
+						// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
+						// because the API may always return a non-nil struct (with REDACTED values) for this field,
+						// making this else-branch unreachable. The child OneOf handles the actual healing.
+						// The target is a types.Object, so we use types.ObjectNull.
+						routeDestinationAttributeMap["mirror_policy"] = types.ObjectNull(RouteRoutesRouteActionRouteDestinationMirrorPolicyModelAttributeMap)
+					}
+
+					// data specToModelNested PointerField --> BufferPolicy
+					if routeDestinationOptions.RouteDestination.GetBufferPolicy() != nil {
+						// Create the nested Go struct
+						routeBufferConfigTypeModel := &RouteBufferConfigType{}
+						bufferPolicyElement := routeDestinationOptions.RouteDestination.GetBufferPolicy()
+
+						// Recursively populate the nested struct
+
+						// data specToModelNested BoolField --> Disabled
+						routeBufferConfigTypeModel.Disabled = types.BoolValue(bool(bufferPolicyElement.GetDisabled()))
+
+						// data specToModelNested UintField --> MaxRequestBytes
+						routeBufferConfigTypeModel.MaxRequestBytes = types.Int64Value(int64(bufferPolicyElement.GetMaxRequestBytes()))
+
+						// This field needs to be converted to a types.ObjectValue before assignment.
+						routeBufferConfigTypeModelObj, diags := types.ObjectValueFrom(ctx, RouteRoutesRouteActionRouteDestinationBufferPolicyModelAttributeMap, routeBufferConfigTypeModel)
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						routeDestinationAttributeMap["buffer_policy"] = routeBufferConfigTypeModelObj
+
+					} else {
+						// The source field is nil (e.g. redacted by the API).
+						// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
+						// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
+						// because the API may always return a non-nil struct (with REDACTED values) for this field,
+						// making this else-branch unreachable. The child OneOf handles the actual healing.
+						// The target is a types.Object, so we use types.ObjectNull.
+						routeDestinationAttributeMap["buffer_policy"] = types.ObjectNull(RouteRoutesRouteActionRouteDestinationBufferPolicyModelAttributeMap)
+					}
+
+					// data specToModelNested PointerField --> CorsPolicy
+					if routeDestinationOptions.RouteDestination.GetCorsPolicy() != nil {
+						// Create the nested Go struct
+						routeCorsPolicyModel := &RouteCorsPolicy{}
+						corsPolicyElement := routeDestinationOptions.RouteDestination.GetCorsPolicy()
+
+						// Recursively populate the nested struct
+
+						// data specToModelNested BoolField --> Disabled
+						routeCorsPolicyModel.Disabled = types.BoolValue(bool(corsPolicyElement.GetDisabled()))
+
+						// data specToModelNested ArrayOfStringField --> AllowOrigin
+						if len(corsPolicyElement.GetAllowOrigin()) > 0 {
+							listValue, diags := types.ListValueFrom(ctx, types.StringType, corsPolicyElement.GetAllowOrigin())
+							response.Diagnostics.Append(diags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							routeCorsPolicyModel.AllowOrigin = listValue
+						} else {
+							routeCorsPolicyModel.AllowOrigin = types.ListNull(types.StringType)
+						}
+
+						// data specToModelNested StringField --> AllowMethods
+						if corsPolicyElement.GetAllowMethods() != "" {
+							routeCorsPolicyModel.AllowMethods = types.StringValue(corsPolicyElement.GetAllowMethods())
+						} else {
+							// Empty string, set to null
+							routeCorsPolicyModel.AllowMethods = types.StringNull()
+						}
+
+						// data specToModelNested StringField --> AllowHeaders
+						if corsPolicyElement.GetAllowHeaders() != "" {
+							routeCorsPolicyModel.AllowHeaders = types.StringValue(corsPolicyElement.GetAllowHeaders())
+						} else {
+							// Empty string, set to null
+							routeCorsPolicyModel.AllowHeaders = types.StringNull()
+						}
+
+						// data specToModelNested StringField --> ExposeHeaders
+						if corsPolicyElement.GetExposeHeaders() != "" {
+							routeCorsPolicyModel.ExposeHeaders = types.StringValue(corsPolicyElement.GetExposeHeaders())
+						} else {
+							// Empty string, set to null
+							routeCorsPolicyModel.ExposeHeaders = types.StringNull()
+						}
+
+						// data specToModelNested BoolField --> AllowCredentials
+						routeCorsPolicyModel.AllowCredentials = types.BoolValue(bool(corsPolicyElement.GetAllowCredentials()))
+
+						// data specToModelNested ArrayOfStringField --> AllowOriginRegex
+						if len(corsPolicyElement.GetAllowOriginRegex()) > 0 {
+							listValue, diags := types.ListValueFrom(ctx, types.StringType, corsPolicyElement.GetAllowOriginRegex())
+							response.Diagnostics.Append(diags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							routeCorsPolicyModel.AllowOriginRegex = listValue
+						} else {
+							routeCorsPolicyModel.AllowOriginRegex = types.ListNull(types.StringType)
+						}
+
+						// data specToModelNested IntField --> MaximumAge
+						routeCorsPolicyModel.MaximumAge = types.Int32Value(corsPolicyElement.GetMaximumAge())
+
+						// This field needs to be converted to a types.ObjectValue before assignment.
+						routeCorsPolicyModelObj, diags := types.ObjectValueFrom(ctx, RouteRoutesRouteActionRouteDestinationCorsPolicyModelAttributeMap, routeCorsPolicyModel)
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						routeDestinationAttributeMap["cors_policy"] = routeCorsPolicyModelObj
+
+					} else {
+						// The source field is nil (e.g. redacted by the API).
+						// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
+						// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
+						// because the API may always return a non-nil struct (with REDACTED values) for this field,
+						// making this else-branch unreachable. The child OneOf handles the actual healing.
+						// The target is a types.Object, so we use types.ObjectNull.
+						routeDestinationAttributeMap["cors_policy"] = types.ObjectNull(RouteRoutesRouteActionRouteDestinationCorsPolicyModelAttributeMap)
+					}
+
+					// data specToModelNested ArrayOfPointerField --> HashPolicy
+					if len(routeDestinationOptions.RouteDestination.GetHashPolicy()) > 0 {
+						// Step 1: Always create a slice of model structs from the spec data.
+						// This slice serves as an intermediate representation.
+						hashPolicyElements := make([]RouteRouteHashPolicyType, 0, len(routeDestinationOptions.RouteDestination.GetHashPolicy()))
+						for _, hashPolicyElement := range routeDestinationOptions.RouteDestination.GetHashPolicy() {
+							routeRouteHashPolicyTypeModel := RouteRouteHashPolicyType{}
+
+							// data specToModelNested RequiredOneOfField --> PolicySpecifier
+							// <no value>
+							if hashPolicyElement.GetPolicySpecifier() != nil {
+								// Create a temporary attribute map for the choices within this OneOf
+								hashPolicypolicySpecifierChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+								// Define a variable for the spec choices to be passed down to nested templates.
+								// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+								hashPolicypolicySpecifierChoiceChoices := hashPolicyElement.GetPolicySpecifier()
+
+								// Process nested choices, populating the temporary attribute map
+
+								// data specToModelNested PointerOfOneOfField --> Cookie
+								// <no value>
+								// false
+								{
+									cookieOptions, isCookie := hashPolicypolicySpecifierChoiceChoices.(*ves_io_schema_route.HashPolicyType_Cookie)
+									cookieAttributeMap := make(map[string]attr.Value)
+
+									if isCookie && cookieOptions != nil {
+
+										// data specToModelNested StringField --> Path
+										if cookieOptions.Cookie.GetPath() != "" {
+											cookieAttributeMap["path"] = types.StringValue(cookieOptions.Cookie.GetPath())
+										} else {
+											// Empty string, set to null
+											cookieAttributeMap["path"] = types.StringNull()
+										}
+
+										// data specToModelNested OneOfField --> Samesite
+										if cookieOptions.Cookie.GetSamesite() != nil {
+											// Create a temporary attribute map for the choices within this OneOf
+											cookiesamesiteChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+											// Define a variable for the spec choices to be passed down to nested templates.
+											// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+											cookiesamesiteChoiceChoices := cookieOptions.Cookie.GetSamesite()
+
+											// Process nested choices, populating the temporary attribute map
+
+											// data specToModelNested BoolOfOneOfPointerField --> SamesiteStrict
+											_, isSamesiteStrict := cookiesamesiteChoiceChoices.(*ves_io_schema_route.CookieForHashing_SamesiteStrict)
+
+											if isSamesiteStrict {
+												cookiesamesiteChoiceChoicesAttributeMap["samesite_strict"] = types.BoolValue(true)
+											} else {
+												cookiesamesiteChoiceChoicesAttributeMap["samesite_strict"] = types.BoolNull()
+											}
+
+											// data specToModelNested BoolOfOneOfPointerField --> SamesiteLax
+											_, isSamesiteLax := cookiesamesiteChoiceChoices.(*ves_io_schema_route.CookieForHashing_SamesiteLax)
+
+											if isSamesiteLax {
+												cookiesamesiteChoiceChoicesAttributeMap["samesite_lax"] = types.BoolValue(true)
+											} else {
+												cookiesamesiteChoiceChoicesAttributeMap["samesite_lax"] = types.BoolNull()
+											}
+
+											// data specToModelNested BoolOfOneOfPointerField --> SamesiteNone
+											_, isSamesiteNone := cookiesamesiteChoiceChoices.(*ves_io_schema_route.CookieForHashing_SamesiteNone)
+
+											if isSamesiteNone {
+												cookiesamesiteChoiceChoicesAttributeMap["samesite_none"] = types.BoolValue(true)
+											} else {
+												cookiesamesiteChoiceChoicesAttributeMap["samesite_none"] = types.BoolNull()
+											}
+
+											// data specToModelNested BoolOfOneOfPointerField --> IgnoreSamesite
+											_, isIgnoreSamesite := cookiesamesiteChoiceChoices.(*ves_io_schema_route.CookieForHashing_IgnoreSamesite)
+
+											if isIgnoreSamesite {
+												cookiesamesiteChoiceChoicesAttributeMap["ignore_samesite"] = types.BoolValue(true)
+											} else {
+												cookiesamesiteChoiceChoicesAttributeMap["ignore_samesite"] = types.BoolNull()
+											}
+
+											// --- End of Choices ---
+
+											// Create the final ObjectValue for this OneOf field
+											finalObj, cookiesamesiteChoiceChoicesObjDiags := types.ObjectValue(
+												RouteRoutesRouteActionRouteDestinationHashPolicyPolicySpecifierCookieSamesiteModelAttributeMap, // The attribute schema for the OneOf choices
+												cookiesamesiteChoiceChoicesAttributeMap,
+											)
+											response.Diagnostics.Append(cookiesamesiteChoiceChoicesObjDiags...)
+											if response.Diagnostics.HasError() {
+												return
+											}
+
+											// Assign the final object to the correct place (either the root model or a parent's attribute map)
+											cookieAttributeMap["samesite_choice"] = finalObj
+										} else {
+											// The OneOf field is nil in the source spec, so set the Terraform object to null.
+											cookieAttributeMap["samesite_choice"] = types.ObjectNull(RouteRoutesRouteActionRouteDestinationHashPolicyPolicySpecifierCookieSamesiteModelAttributeMap)
+										}
+
+										// data specToModelNested OneOfField --> Secure
+										if cookieOptions.Cookie.GetSecure() != nil {
+											// Create a temporary attribute map for the choices within this OneOf
+											cookiesecureChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+											// Define a variable for the spec choices to be passed down to nested templates.
+											// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+											cookiesecureChoiceChoices := cookieOptions.Cookie.GetSecure()
+
+											// Process nested choices, populating the temporary attribute map
+
+											// data specToModelNested BoolOfOneOfPointerField --> IgnoreSecure
+											_, isIgnoreSecure := cookiesecureChoiceChoices.(*ves_io_schema_route.CookieForHashing_IgnoreSecure)
+
+											if isIgnoreSecure {
+												cookiesecureChoiceChoicesAttributeMap["ignore_secure"] = types.BoolValue(true)
+											} else {
+												cookiesecureChoiceChoicesAttributeMap["ignore_secure"] = types.BoolNull()
+											}
+
+											// data specToModelNested BoolOfOneOfPointerField --> AddSecure
+											_, isAddSecure := cookiesecureChoiceChoices.(*ves_io_schema_route.CookieForHashing_AddSecure)
+
+											if isAddSecure {
+												cookiesecureChoiceChoicesAttributeMap["add_secure"] = types.BoolValue(true)
+											} else {
+												cookiesecureChoiceChoicesAttributeMap["add_secure"] = types.BoolNull()
+											}
+
+											// --- End of Choices ---
+
+											// Create the final ObjectValue for this OneOf field
+											finalObj, cookiesecureChoiceChoicesObjDiags := types.ObjectValue(
+												RouteRoutesRouteActionRouteDestinationHashPolicyPolicySpecifierCookieSecureModelAttributeMap, // The attribute schema for the OneOf choices
+												cookiesecureChoiceChoicesAttributeMap,
+											)
+											response.Diagnostics.Append(cookiesecureChoiceChoicesObjDiags...)
+											if response.Diagnostics.HasError() {
+												return
+											}
+
+											// Assign the final object to the correct place (either the root model or a parent's attribute map)
+											cookieAttributeMap["secure_choice"] = finalObj
+										} else {
+											// The OneOf field is nil in the source spec, so set the Terraform object to null.
+											cookieAttributeMap["secure_choice"] = types.ObjectNull(RouteRoutesRouteActionRouteDestinationHashPolicyPolicySpecifierCookieSecureModelAttributeMap)
+										}
+
+										// data specToModelNested OneOfField --> Httponly
+										if cookieOptions.Cookie.GetHttponly() != nil {
+											// Create a temporary attribute map for the choices within this OneOf
+											cookiehttponlyChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+											// Define a variable for the spec choices to be passed down to nested templates.
+											// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+											cookiehttponlyChoiceChoices := cookieOptions.Cookie.GetHttponly()
+
+											// Process nested choices, populating the temporary attribute map
+
+											// data specToModelNested BoolOfOneOfPointerField --> IgnoreHttponly
+											_, isIgnoreHttponly := cookiehttponlyChoiceChoices.(*ves_io_schema_route.CookieForHashing_IgnoreHttponly)
+
+											if isIgnoreHttponly {
+												cookiehttponlyChoiceChoicesAttributeMap["ignore_httponly"] = types.BoolValue(true)
+											} else {
+												cookiehttponlyChoiceChoicesAttributeMap["ignore_httponly"] = types.BoolNull()
+											}
+
+											// data specToModelNested BoolOfOneOfPointerField --> AddHttponly
+											_, isAddHttponly := cookiehttponlyChoiceChoices.(*ves_io_schema_route.CookieForHashing_AddHttponly)
+
+											if isAddHttponly {
+												cookiehttponlyChoiceChoicesAttributeMap["add_httponly"] = types.BoolValue(true)
+											} else {
+												cookiehttponlyChoiceChoicesAttributeMap["add_httponly"] = types.BoolNull()
+											}
+
+											// --- End of Choices ---
+
+											// Create the final ObjectValue for this OneOf field
+											finalObj, cookiehttponlyChoiceChoicesObjDiags := types.ObjectValue(
+												RouteRoutesRouteActionRouteDestinationHashPolicyPolicySpecifierCookieHttponlyModelAttributeMap, // The attribute schema for the OneOf choices
+												cookiehttponlyChoiceChoicesAttributeMap,
+											)
+											response.Diagnostics.Append(cookiehttponlyChoiceChoicesObjDiags...)
+											if response.Diagnostics.HasError() {
+												return
+											}
+
+											// Assign the final object to the correct place (either the root model or a parent's attribute map)
+											cookieAttributeMap["httponly_choice"] = finalObj
+										} else {
+											// The OneOf field is nil in the source spec, so set the Terraform object to null.
+											cookieAttributeMap["httponly_choice"] = types.ObjectNull(RouteRoutesRouteActionRouteDestinationHashPolicyPolicySpecifierCookieHttponlyModelAttributeMap)
+										}
+
+										// data specToModelNested RequiredStringField --> Name
+										if cookieOptions.Cookie.GetName() != "" {
+											cookieAttributeMap["name"] = types.StringValue(cookieOptions.Cookie.GetName())
+										} else {
+											// Empty string, set to null
+											cookieAttributeMap["name"] = types.StringNull()
+										}
+
+										// data specToModelNested UintField --> Ttl
+										cookieAttributeMap["ttl"] = types.Int64Value(int64(cookieOptions.Cookie.GetTtl()))
+
+										cookieObj, diags := types.ObjectValue(RouteRoutesRouteActionRouteDestinationHashPolicyPolicySpecifierCookieModelAttributeMap, cookieAttributeMap)
+										response.Diagnostics.Append(diags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										hashPolicypolicySpecifierChoiceChoicesAttributeMap["cookie"] = cookieObj
+									} else {
+										hashPolicypolicySpecifierChoiceChoicesAttributeMap["cookie"] = types.ObjectNull(RouteRoutesRouteActionRouteDestinationHashPolicyPolicySpecifierCookieModelAttributeMap)
+									}
+								}
+
+								// data specToModelNested BoolOfOneOfField --> SourceIp
+								sourceIpItem, isSourceIp := hashPolicypolicySpecifierChoiceChoices.(*ves_io_schema_route.HashPolicyType_SourceIp)
+
+								if isSourceIp {
+									hashPolicypolicySpecifierChoiceChoicesAttributeMap["source_ip"] = types.BoolValue(bool(sourceIpItem.SourceIp))
+								} else {
+									hashPolicypolicySpecifierChoiceChoicesAttributeMap["source_ip"] = types.BoolNull()
+								}
+
+								// data specToModelNested StringOfOneOfField --> HeaderName
+								headerNameItem, isHeaderName := hashPolicypolicySpecifierChoiceChoices.(*ves_io_schema_route.HashPolicyType_HeaderName)
+
+								if isHeaderName {
+									hashPolicypolicySpecifierChoiceChoicesAttributeMap["header_name"] = types.StringValue(string(headerNameItem.HeaderName))
+								} else {
+									// Empty string, set to null
+									hashPolicypolicySpecifierChoiceChoicesAttributeMap["header_name"] = types.StringNull()
+								}
+
+								// --- End of Choices ---
+
+								// Create the final ObjectValue for this OneOf field
+								finalObj, hashPolicypolicySpecifierChoiceChoicesObjDiags := types.ObjectValue(
+									RouteRoutesRouteActionRouteDestinationHashPolicyPolicySpecifierModelAttributeMap, // The attribute schema for the OneOf choices
+									hashPolicypolicySpecifierChoiceChoicesAttributeMap,
+								)
+								response.Diagnostics.Append(hashPolicypolicySpecifierChoiceChoicesObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+
+								// Assign the final object to the correct place (either the root model or a parent's attribute map)
+								routeRouteHashPolicyTypeModel.PolicySpecifierChoice = finalObj
+							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
+								routeRouteHashPolicyTypeModel.PolicySpecifierChoice = types.ObjectNull(RouteRoutesRouteActionRouteDestinationHashPolicyPolicySpecifierModelAttributeMap)
+							}
+
+							// data specToModelNested BoolField --> Terminal
+							routeRouteHashPolicyTypeModel.Terminal = types.BoolValue(bool(hashPolicyElement.GetTerminal()))
+
+							hashPolicyElements = append(hashPolicyElements, routeRouteHashPolicyTypeModel)
+						}
+						// CASE 1: The target field is a `types.List` or an attribute map.
+						// The intermediate slice of structs must be converted to a `types.ListValue`.
+						hashPolicyListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: RouteRoutesRouteActionRouteDestinationHashPolicyModelAttributeMap}, hashPolicyElements)
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						routeDestinationAttributeMap["hash_policy"] = hashPolicyListValue
+
+					} else {
+						// The source list is empty or nil.
+						// CASE 1: The target field is a `types.List` or an attribute map.
+						// Assign a null `types.ListValue`.
+						routeDestinationAttributeMap["hash_policy"] = types.ListNull(types.ObjectType{AttrTypes: RouteRoutesRouteActionRouteDestinationHashPolicyModelAttributeMap})
+					}
+
+					// data specToModelNested PointerField --> SpdyConfig
+					if routeDestinationOptions.RouteDestination.GetSpdyConfig() != nil {
+						// Create the nested Go struct
+						routeRouteSpdyConfigTypeModel := &RouteRouteSpdyConfigType{}
+						spdyConfigElement := routeDestinationOptions.RouteDestination.GetSpdyConfig()
+
+						// Recursively populate the nested struct
+
+						// data specToModelNested BoolField --> UseSpdy
+						routeRouteSpdyConfigTypeModel.UseSpdy = types.BoolValue(bool(spdyConfigElement.GetUseSpdy()))
+
+						// This field needs to be converted to a types.ObjectValue before assignment.
+						routeRouteSpdyConfigTypeModelObj, diags := types.ObjectValueFrom(ctx, RouteRoutesRouteActionRouteDestinationSpdyConfigModelAttributeMap, routeRouteSpdyConfigTypeModel)
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						routeDestinationAttributeMap["spdy_config"] = routeRouteSpdyConfigTypeModelObj
+
+					} else {
+						// The source field is nil (e.g. redacted by the API).
+						// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
+						// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
+						// because the API may always return a non-nil struct (with REDACTED values) for this field,
+						// making this else-branch unreachable. The child OneOf handles the actual healing.
+						// The target is a types.Object, so we use types.ObjectNull.
+						routeDestinationAttributeMap["spdy_config"] = types.ObjectNull(RouteRoutesRouteActionRouteDestinationSpdyConfigModelAttributeMap)
+					}
+
+					routeDestinationObj, diags := types.ObjectValue(RouteRoutesRouteActionRouteDestinationModelAttributeMap, routeDestinationAttributeMap)
+					response.Diagnostics.Append(diags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					routesrouteActionChoiceChoicesAttributeMap["route_destination"] = routeDestinationObj
+				} else {
+					routesrouteActionChoiceChoicesAttributeMap["route_destination"] = types.ObjectNull(RouteRoutesRouteActionRouteDestinationModelAttributeMap)
+				}
+			}
+
+			// data specToModelNested PointerOfOneOfField --> RouteRedirect
+			// <no value>
+			// false
+			{
+				routeRedirectOptions, isRouteRedirect := routesrouteActionChoiceChoices.(*ves_io_schema_route.RouteType_RouteRedirect)
+				routeRedirectAttributeMap := make(map[string]attr.Value)
+
+				if isRouteRedirect && routeRedirectOptions != nil {
+
+					// data specToModelNested StringField --> HostRedirect
+					if routeRedirectOptions.RouteRedirect.GetHostRedirect() != "" {
+						routeRedirectAttributeMap["host_redirect"] = types.StringValue(routeRedirectOptions.RouteRedirect.GetHostRedirect())
+					} else {
+						// Empty string, set to null
+						routeRedirectAttributeMap["host_redirect"] = types.StringNull()
+					}
+
+					// data specToModelNested OneOfField --> RedirectPathChoice
+					if routeRedirectOptions.RouteRedirect.GetRedirectPathChoice() != nil {
+						// Create a temporary attribute map for the choices within this OneOf
+						routeRedirectredirectPathChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+						// Define a variable for the spec choices to be passed down to nested templates.
+						// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+						routeRedirectredirectPathChoiceChoices := routeRedirectOptions.RouteRedirect.GetRedirectPathChoice()
+
+						// Process nested choices, populating the temporary attribute map
+
+						// data specToModelNested StringOfOneOfField --> PathRedirect
+						pathRedirectItem, isPathRedirect := routeRedirectredirectPathChoiceChoices.(*ves_io_schema_route.RouteRedirect_PathRedirect)
+
+						if isPathRedirect {
+							routeRedirectredirectPathChoiceChoicesAttributeMap["path_redirect"] = types.StringValue(string(pathRedirectItem.PathRedirect))
+						} else {
+							// Empty string, set to null
+							routeRedirectredirectPathChoiceChoicesAttributeMap["path_redirect"] = types.StringNull()
+						}
+
+						// data specToModelNested StringOfOneOfField --> PrefixRewrite
+						prefixRewriteItem, isPrefixRewrite := routeRedirectredirectPathChoiceChoices.(*ves_io_schema_route.RouteRedirect_PrefixRewrite)
+
+						if isPrefixRewrite {
+							routeRedirectredirectPathChoiceChoicesAttributeMap["prefix_rewrite"] = types.StringValue(string(prefixRewriteItem.PrefixRewrite))
+						} else {
+							// Empty string, set to null
+							routeRedirectredirectPathChoiceChoicesAttributeMap["prefix_rewrite"] = types.StringNull()
+						}
+
+						// --- End of Choices ---
+
+						// Create the final ObjectValue for this OneOf field
+						finalObj, routeRedirectredirectPathChoiceChoicesObjDiags := types.ObjectValue(
+							RouteRoutesRouteActionRouteRedirectRedirectPathChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+							routeRedirectredirectPathChoiceChoicesAttributeMap,
+						)
+						response.Diagnostics.Append(routeRedirectredirectPathChoiceChoicesObjDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						// Assign the final object to the correct place (either the root model or a parent's attribute map)
+						routeRedirectAttributeMap["redirect_path_choice"] = finalObj
+					} else {
+						// The OneOf field is nil in the source spec, so set the Terraform object to null.
+						routeRedirectAttributeMap["redirect_path_choice"] = types.ObjectNull(RouteRoutesRouteActionRouteRedirectRedirectPathChoiceModelAttributeMap)
+					}
+
+					// data specToModelNested StringField --> ProtoRedirect
+					if routeRedirectOptions.RouteRedirect.GetProtoRedirect() != "" {
+						routeRedirectAttributeMap["proto_redirect"] = types.StringValue(routeRedirectOptions.RouteRedirect.GetProtoRedirect())
+					} else {
+						// Empty string, set to null
+						routeRedirectAttributeMap["proto_redirect"] = types.StringNull()
+					}
+
+					// data specToModelNested OneOfField --> QueryParams
+					if routeRedirectOptions.RouteRedirect.GetQueryParams() != nil {
+						// Create a temporary attribute map for the choices within this OneOf
+						routeRedirectqueryParamsChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+						// Define a variable for the spec choices to be passed down to nested templates.
+						// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+						routeRedirectqueryParamsChoiceChoices := routeRedirectOptions.RouteRedirect.GetQueryParams()
+
+						// Process nested choices, populating the temporary attribute map
+
+						// data specToModelNested BoolOfOneOfPointerField --> RetainAllParams
+						_, isRetainAllParams := routeRedirectqueryParamsChoiceChoices.(*ves_io_schema_route.RouteRedirect_RetainAllParams)
+
+						if isRetainAllParams {
+							routeRedirectqueryParamsChoiceChoicesAttributeMap["retain_all_params"] = types.BoolValue(true)
+						} else {
+							routeRedirectqueryParamsChoiceChoicesAttributeMap["retain_all_params"] = types.BoolNull()
+						}
+
+						// data specToModelNested BoolOfOneOfPointerField --> RemoveAllParams
+						_, isRemoveAllParams := routeRedirectqueryParamsChoiceChoices.(*ves_io_schema_route.RouteRedirect_RemoveAllParams)
+
+						if isRemoveAllParams {
+							routeRedirectqueryParamsChoiceChoicesAttributeMap["remove_all_params"] = types.BoolValue(true)
+						} else {
+							routeRedirectqueryParamsChoiceChoicesAttributeMap["remove_all_params"] = types.BoolNull()
+						}
+
+						// data specToModelNested StringOfOneOfField --> ReplaceParams
+						replaceParamsItem, isReplaceParams := routeRedirectqueryParamsChoiceChoices.(*ves_io_schema_route.RouteRedirect_ReplaceParams)
+
+						if isReplaceParams {
+							routeRedirectqueryParamsChoiceChoicesAttributeMap["replace_params"] = types.StringValue(string(replaceParamsItem.ReplaceParams))
+						} else {
+							// Empty string, set to null
+							routeRedirectqueryParamsChoiceChoicesAttributeMap["replace_params"] = types.StringNull()
+						}
+
+						// --- End of Choices ---
+
+						// Create the final ObjectValue for this OneOf field
+						finalObj, routeRedirectqueryParamsChoiceChoicesObjDiags := types.ObjectValue(
+							RouteRoutesRouteActionRouteRedirectQueryParamsModelAttributeMap, // The attribute schema for the OneOf choices
+							routeRedirectqueryParamsChoiceChoicesAttributeMap,
+						)
+						response.Diagnostics.Append(routeRedirectqueryParamsChoiceChoicesObjDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						// Assign the final object to the correct place (either the root model or a parent's attribute map)
+						routeRedirectAttributeMap["query_params_choice"] = finalObj
+					} else {
+						// The OneOf field is nil in the source spec, so set the Terraform object to null.
+						routeRedirectAttributeMap["query_params_choice"] = types.ObjectNull(RouteRoutesRouteActionRouteRedirectQueryParamsModelAttributeMap)
+					}
+
+					// data specToModelNested UintField --> ResponseCode
+					routeRedirectAttributeMap["response_code"] = types.Int64Value(int64(routeRedirectOptions.RouteRedirect.GetResponseCode()))
+
+					routeRedirectObj, diags := types.ObjectValue(RouteRoutesRouteActionRouteRedirectModelAttributeMap, routeRedirectAttributeMap)
+					response.Diagnostics.Append(diags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					routesrouteActionChoiceChoicesAttributeMap["route_redirect"] = routeRedirectObj
+				} else {
+					routesrouteActionChoiceChoicesAttributeMap["route_redirect"] = types.ObjectNull(RouteRoutesRouteActionRouteRedirectModelAttributeMap)
+				}
+			}
+
+			// data specToModelNested PointerOfOneOfField --> RouteDirectResponse
+			// <no value>
+			// false
+			{
+				routeDirectResponseOptions, isRouteDirectResponse := routesrouteActionChoiceChoices.(*ves_io_schema_route.RouteType_RouteDirectResponse)
+				routeDirectResponseAttributeMap := make(map[string]attr.Value)
+
+				if isRouteDirectResponse && routeDirectResponseOptions != nil {
+
+					// data specToModelNested UintField --> ResponseCode
+					routeDirectResponseAttributeMap["response_code"] = types.Int64Value(int64(routeDirectResponseOptions.RouteDirectResponse.GetResponseCode()))
+
+					// data specToModelNested StringField --> ResponseBodyEncoded
+					if routeDirectResponseOptions.RouteDirectResponse.GetResponseBodyEncoded() != "" {
+						routeDirectResponseAttributeMap["response_body_encoded"] = types.StringValue(routeDirectResponseOptions.RouteDirectResponse.GetResponseBodyEncoded())
+					} else {
+						// Empty string, set to null
+						routeDirectResponseAttributeMap["response_body_encoded"] = types.StringNull()
+					}
+
+					routeDirectResponseObj, diags := types.ObjectValue(RouteRoutesRouteActionRouteDirectResponseModelAttributeMap, routeDirectResponseAttributeMap)
+					response.Diagnostics.Append(diags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					routesrouteActionChoiceChoicesAttributeMap["route_direct_response"] = routeDirectResponseObj
+				} else {
+					routesrouteActionChoiceChoicesAttributeMap["route_direct_response"] = types.ObjectNull(RouteRoutesRouteActionRouteDirectResponseModelAttributeMap)
+				}
+			}
+
+			// --- End of Choices ---
+
+			// Create the final ObjectValue for this OneOf field
+			finalObj, routesrouteActionChoiceChoicesObjDiags := types.ObjectValue(
+				RouteRoutesRouteActionModelAttributeMap, // The attribute schema for the OneOf choices
+				routesrouteActionChoiceChoicesAttributeMap,
+			)
+			response.Diagnostics.Append(routesrouteActionChoiceChoicesObjDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			// Assign the final object to the correct place (either the root model or a parent's attribute map)
+			routeRouteRouteTypeModel.RouteActionChoice = finalObj
+		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			routeRouteRouteTypeModel.RouteActionChoice = types.ObjectNull(RouteRoutesRouteActionModelAttributeMap)
+		}
+
+		// data specToModelNested OneOfField --> BotDefenseJavascriptInjectionChoice
+		if routesElement.GetBotDefenseJavascriptInjectionChoice() != nil {
+			// Create a temporary attribute map for the choices within this OneOf
+			routesbotDefenseJavascriptInjectionChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+			// Define a variable for the spec choices to be passed down to nested templates.
+			// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+			routesbotDefenseJavascriptInjectionChoiceChoices := routesElement.GetBotDefenseJavascriptInjectionChoice()
+
+			// Process nested choices, populating the temporary attribute map
+
+			// data specToModelNested BoolOfOneOfPointerField --> InheritedBotDefenseJavascriptInjection
+			_, isInheritedBotDefenseJavascriptInjection := routesbotDefenseJavascriptInjectionChoiceChoices.(*ves_io_schema_route.RouteType_InheritedBotDefenseJavascriptInjection)
+
+			if isInheritedBotDefenseJavascriptInjection {
+				routesbotDefenseJavascriptInjectionChoiceChoicesAttributeMap["inherited_bot_defense_javascript_injection"] = types.BoolValue(true)
+			} else {
+				routesbotDefenseJavascriptInjectionChoiceChoicesAttributeMap["inherited_bot_defense_javascript_injection"] = types.BoolNull()
+			}
+
+			// data specToModelNested PointerOfOneOfField --> BotDefenseJavascriptInjection
+			// <no value>
+			// false
+			{
+				botDefenseJavascriptInjectionOptions, isBotDefenseJavascriptInjection := routesbotDefenseJavascriptInjectionChoiceChoices.(*ves_io_schema_route.RouteType_BotDefenseJavascriptInjection)
+				botDefenseJavascriptInjectionAttributeMap := make(map[string]attr.Value)
+
+				if isBotDefenseJavascriptInjection && botDefenseJavascriptInjectionOptions != nil {
+
+					// data specToModelNested EnumField --> JavascriptLocation
+					if botDefenseJavascriptInjectionOptions.BotDefenseJavascriptInjection.GetJavascriptLocation().String() != "" {
+						stringValue := types.StringValue(botDefenseJavascriptInjectionOptions.BotDefenseJavascriptInjection.GetJavascriptLocation().String())
+						stringSlice := []types.String{stringValue}
+						listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						botDefenseJavascriptInjectionAttributeMap["javascript_location"] = listValue
+					} else {
+						botDefenseJavascriptInjectionAttributeMap["javascript_location"] = types.ListNull(types.StringType)
+					}
+
+					// data specToModelNested RequiredArrayOfPointerField --> JavascriptTags
+					if len(botDefenseJavascriptInjectionOptions.BotDefenseJavascriptInjection.GetJavascriptTags()) > 0 {
+						// Step 1: Always create a slice of model structs from the spec data.
+						// This slice serves as an intermediate representation.
+						javascriptTagsElements := make([]RouteRouteJavaScriptTag, 0, len(botDefenseJavascriptInjectionOptions.BotDefenseJavascriptInjection.GetJavascriptTags()))
+						for _, javascriptTagsElement := range botDefenseJavascriptInjectionOptions.BotDefenseJavascriptInjection.GetJavascriptTags() {
+							routeRouteJavaScriptTagModel := RouteRouteJavaScriptTag{}
+
+							// data specToModelNested RequiredStringField --> JavascriptUrl
+							if javascriptTagsElement.GetJavascriptUrl() != "" {
+								routeRouteJavaScriptTagModel.JavascriptUrl = types.StringValue(javascriptTagsElement.GetJavascriptUrl())
+							} else {
+								// Empty string, set to null
+								routeRouteJavaScriptTagModel.JavascriptUrl = types.StringNull()
+							}
+
+							// data specToModelNested ArrayOfPointerField --> TagAttributes
+							if len(javascriptTagsElement.GetTagAttributes()) > 0 {
+								// Step 1: Always create a slice of model structs from the spec data.
+								// This slice serves as an intermediate representation.
+								tagAttributesElements := make([]RouteRouteTagAttribute, 0, len(javascriptTagsElement.GetTagAttributes()))
+								for _, tagAttributesElement := range javascriptTagsElement.GetTagAttributes() {
+									routeRouteTagAttributeModel := RouteRouteTagAttribute{}
+
+									// data specToModelNested EnumField --> JavascriptTag
+									if tagAttributesElement.GetJavascriptTag().String() != "" {
+										stringValue := types.StringValue(tagAttributesElement.GetJavascriptTag().String())
+										stringSlice := []types.String{stringValue}
+										listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+										response.Diagnostics.Append(diags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										routeRouteTagAttributeModel.JavascriptTag = listValue
+									} else {
+										routeRouteTagAttributeModel.JavascriptTag = types.ListNull(types.StringType)
+									}
+
+									// data specToModelNested StringField --> TagValue
+									if tagAttributesElement.GetTagValue() != "" {
+										routeRouteTagAttributeModel.TagValue = types.StringValue(tagAttributesElement.GetTagValue())
+									} else {
+										// Empty string, set to null
+										routeRouteTagAttributeModel.TagValue = types.StringNull()
+									}
+
+									tagAttributesElements = append(tagAttributesElements, routeRouteTagAttributeModel)
+								}
+								// CASE 1: The target field is a `types.List` or an attribute map.
+								// The intermediate slice of structs must be converted to a `types.ListValue`.
+								tagAttributesListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: RouteRoutesBotDefenseJavascriptInjectionChoiceBotDefenseJavascriptInjectionJavascriptTagsTagAttributesModelAttributeMap}, tagAttributesElements)
+								response.Diagnostics.Append(diags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								routeRouteJavaScriptTagModel.TagAttributes = tagAttributesListValue
+
+							} else {
+								// The source list is empty or nil.
+								// CASE 1: The target field is a `types.List` or an attribute map.
+								// Assign a null `types.ListValue`.
+								routeRouteJavaScriptTagModel.TagAttributes = types.ListNull(types.ObjectType{AttrTypes: RouteRoutesBotDefenseJavascriptInjectionChoiceBotDefenseJavascriptInjectionJavascriptTagsTagAttributesModelAttributeMap})
+							}
+
+							javascriptTagsElements = append(javascriptTagsElements, routeRouteJavaScriptTagModel)
+						}
+						// CASE 1: The target field is a `types.List` or an attribute map.
+						// The intermediate slice of structs must be converted to a `types.ListValue`.
+						javascriptTagsListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: RouteRoutesBotDefenseJavascriptInjectionChoiceBotDefenseJavascriptInjectionJavascriptTagsModelAttributeMap}, javascriptTagsElements)
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						botDefenseJavascriptInjectionAttributeMap["javascript_tags"] = javascriptTagsListValue
+
+					} else {
+						// The source list is empty or nil.
+						// CASE 1: The target field is a `types.List` or an attribute map.
+						// Assign a null `types.ListValue`.
+						botDefenseJavascriptInjectionAttributeMap["javascript_tags"] = types.ListNull(types.ObjectType{AttrTypes: RouteRoutesBotDefenseJavascriptInjectionChoiceBotDefenseJavascriptInjectionJavascriptTagsModelAttributeMap})
+					}
+
+					botDefenseJavascriptInjectionObj, diags := types.ObjectValue(RouteRoutesBotDefenseJavascriptInjectionChoiceBotDefenseJavascriptInjectionModelAttributeMap, botDefenseJavascriptInjectionAttributeMap)
+					response.Diagnostics.Append(diags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					routesbotDefenseJavascriptInjectionChoiceChoicesAttributeMap["bot_defense_javascript_injection"] = botDefenseJavascriptInjectionObj
+				} else {
+					routesbotDefenseJavascriptInjectionChoiceChoicesAttributeMap["bot_defense_javascript_injection"] = types.ObjectNull(RouteRoutesBotDefenseJavascriptInjectionChoiceBotDefenseJavascriptInjectionModelAttributeMap)
+				}
+			}
+
+			// --- End of Choices ---
+
+			// Create the final ObjectValue for this OneOf field
+			finalObj, routesbotDefenseJavascriptInjectionChoiceChoicesObjDiags := types.ObjectValue(
+				RouteRoutesBotDefenseJavascriptInjectionChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+				routesbotDefenseJavascriptInjectionChoiceChoicesAttributeMap,
+			)
+			response.Diagnostics.Append(routesbotDefenseJavascriptInjectionChoiceChoicesObjDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			// Assign the final object to the correct place (either the root model or a parent's attribute map)
+			routeRouteRouteTypeModel.BotDefenseJavascriptInjectionChoice = finalObj
+		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			routeRouteRouteTypeModel.BotDefenseJavascriptInjectionChoice = types.ObjectNull(RouteRoutesBotDefenseJavascriptInjectionChoiceModelAttributeMap)
+		}
+
+		// data specToModelNested PointerField --> ServicePolicy
+		if routesElement.GetServicePolicy() != nil {
+			// Create the nested Go struct
+			routeRouteServicePolicyInfoModel := &RouteRouteServicePolicyInfo{}
+			servicePolicyElement := routesElement.GetServicePolicy()
+
+			// Recursively populate the nested struct
+
+			// data specToModelNested OneOfField --> ServicePolicyChoice
+			if servicePolicyElement.GetServicePolicyChoice() != nil {
+				// Create a temporary attribute map for the choices within this OneOf
+				servicePolicyservicePolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+				// Define a variable for the spec choices to be passed down to nested templates.
+				// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+				servicePolicyservicePolicyChoiceChoices := servicePolicyElement.GetServicePolicyChoice()
+
+				// Process nested choices, populating the temporary attribute map
+
+				// data specToModelNested BoolOfOneOfField --> Disable
+				disableItem, isDisable := servicePolicyservicePolicyChoiceChoices.(*ves_io_schema_route.ServicePolicyInfo_Disable)
+
+				if isDisable {
+					servicePolicyservicePolicyChoiceChoicesAttributeMap["disable"] = types.BoolValue(bool(disableItem.Disable))
+				} else {
+					servicePolicyservicePolicyChoiceChoicesAttributeMap["disable"] = types.BoolNull()
+				}
+
+				// --- End of Choices ---
+
+				// Create the final ObjectValue for this OneOf field
+				finalObj, servicePolicyservicePolicyChoiceChoicesObjDiags := types.ObjectValue(
+					RouteRoutesServicePolicyServicePolicyChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+					servicePolicyservicePolicyChoiceChoicesAttributeMap,
+				)
+				response.Diagnostics.Append(servicePolicyservicePolicyChoiceChoicesObjDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				// Assign the final object to the correct place (either the root model or a parent's attribute map)
+				routeRouteServicePolicyInfoModel.ServicePolicyChoice = finalObj
+			} else {
+				// The OneOf field is nil in the source spec, so set the Terraform object to null.
+				routeRouteServicePolicyInfoModel.ServicePolicyChoice = types.ObjectNull(RouteRoutesServicePolicyServicePolicyChoiceModelAttributeMap)
+			}
+
+			// This field needs to be converted to a types.ObjectValue before assignment.
+			routeRouteServicePolicyInfoModelObj, diags := types.ObjectValueFrom(ctx, RouteRoutesServicePolicyModelAttributeMap, routeRouteServicePolicyInfoModel)
+			response.Diagnostics.Append(diags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			routeRouteRouteTypeModel.ServicePolicy = routeRouteServicePolicyInfoModelObj
+
+		} else {
+			// The source field is nil (e.g. redacted by the API).
+			// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
+			// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
+			// because the API may always return a non-nil struct (with REDACTED values) for this field,
+			// making this else-branch unreachable. The child OneOf handles the actual healing.
+			// The target is a types.Object, so we use types.ObjectNull.
+			routeRouteRouteTypeModel.ServicePolicy = types.ObjectNull(RouteRoutesServicePolicyModelAttributeMap)
+		}
+
+		// data specToModelNested ArrayOfPointerField --> RequestHeadersToAdd
+		if len(routesElement.GetRequestHeadersToAdd()) > 0 {
+			// Step 1: Always create a slice of model structs from the spec data.
+			// This slice serves as an intermediate representation.
+			requestHeadersToAddElements := make([]RouteHeaderManipulationOptionType, 0, len(routesElement.GetRequestHeadersToAdd()))
+			for _, requestHeadersToAddElement := range routesElement.GetRequestHeadersToAdd() {
+				routeHeaderManipulationOptionTypeModel := RouteHeaderManipulationOptionType{}
+
+				// data specToModelNested RequiredStringField --> Name
+				if requestHeadersToAddElement.GetName() != "" {
+					routeHeaderManipulationOptionTypeModel.Name = types.StringValue(requestHeadersToAddElement.GetName())
+				} else {
+					// Empty string, set to null
+					routeHeaderManipulationOptionTypeModel.Name = types.StringNull()
+				}
+
+				// data specToModelNested RequiredOneOfField --> ValueChoice
+				// <no value>
+				if requestHeadersToAddElement.GetValueChoice() != nil {
+					// Create a temporary attribute map for the choices within this OneOf
+					requestHeadersToAddvalueChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+					// Define a variable for the spec choices to be passed down to nested templates.
+					// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+					requestHeadersToAddvalueChoiceChoices := requestHeadersToAddElement.GetValueChoice()
+
+					// Process nested choices, populating the temporary attribute map
+
+					// data specToModelNested StringOfOneOfField --> Value
+					valueItem, isValue := requestHeadersToAddvalueChoiceChoices.(*ves_io_schema.HeaderManipulationOptionType_Value)
+
+					if isValue {
+						requestHeadersToAddvalueChoiceChoicesAttributeMap["value"] = types.StringValue(string(valueItem.Value))
+					} else {
+						// Empty string, set to null
+						requestHeadersToAddvalueChoiceChoicesAttributeMap["value"] = types.StringNull()
+					}
+
+					// data specToModelNested PointerOfOneOfField --> SecretValue
+					// <no value>
+					// false
+					{
+						secretValueOptions, isSecretValue := requestHeadersToAddvalueChoiceChoices.(*ves_io_schema.HeaderManipulationOptionType_SecretValue)
+						secretValueAttributeMap := make(map[string]attr.Value)
+
+						if isSecretValue && secretValueOptions != nil {
+
+							// data specToModelNested RequiredOneOfField --> SecretInfoOneof
+							// <no value>
+							if secretValueOptions.SecretValue.GetSecretInfoOneof() != nil {
+								// Create a temporary attribute map for the choices within this OneOf
+								secretValuesecretInfoChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+								// Define a variable for the spec choices to be passed down to nested templates.
+								// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+								secretValuesecretInfoChoiceChoices := secretValueOptions.SecretValue.GetSecretInfoOneof()
+
+								// Process nested choices, populating the temporary attribute map
+
+								// data specToModelNested PointerOfOneOfField --> BlindfoldSecretInfo
+								// <no value>
+								// false
+								{
+									blindfoldSecretInfoOptions, isBlindfoldSecretInfo := secretValuesecretInfoChoiceChoices.(*ves_io_schema.SecretType_BlindfoldSecretInfo)
+									blindfoldSecretInfoAttributeMap := make(map[string]attr.Value)
+
+									if isBlindfoldSecretInfo && blindfoldSecretInfoOptions != nil {
+
+										// data specToModelNested StringField --> DecryptionProvider
+										if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider() != "" {
+											blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider())
+										} else {
+											// Empty string, set to null
+											blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringNull()
+										}
+
+										// data specToModelNested StringField --> StoreProvider
+										if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider() != "" {
+											blindfoldSecretInfoAttributeMap["store_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider())
+										} else {
+											// Empty string, set to null
+											blindfoldSecretInfoAttributeMap["store_provider"] = types.StringNull()
+										}
+
+										// data specToModelNested RequiredStringField --> Location
+										if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation() != "" {
+											blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation())
+										} else {
+											// Empty string, set to null
+											blindfoldSecretInfoAttributeMap["location"] = types.StringNull()
+										}
+
+										blindfoldSecretInfoObj, diags := types.ObjectValue(RouteRoutesRequestHeadersToAddValueChoiceSecretValueSecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
+										response.Diagnostics.Append(diags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										secretValuesecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = blindfoldSecretInfoObj
+									} else {
+										secretValuesecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = types.ObjectNull(RouteRoutesRequestHeadersToAddValueChoiceSecretValueSecretInfoOneofBlindfoldSecretInfoModelAttributeMap)
+									}
+								}
+
+								// data specToModelNested PointerOfOneOfField --> ClearSecretInfo
+								// <no value>
+								// false
+								{
+									clearSecretInfoOptions, isClearSecretInfo := secretValuesecretInfoChoiceChoices.(*ves_io_schema.SecretType_ClearSecretInfo)
+									clearSecretInfoAttributeMap := make(map[string]attr.Value)
+
+									if isClearSecretInfo && clearSecretInfoOptions != nil {
+
+										// data specToModelNested StringField --> Provider
+										if clearSecretInfoOptions.ClearSecretInfo.GetProvider() != "" {
+											clearSecretInfoAttributeMap["provider"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetProvider())
+										} else {
+											// Empty string, set to null
+											clearSecretInfoAttributeMap["provider"] = types.StringNull()
+										}
+
+										// data specToModelNested RequiredStringField --> Url
+										if clearSecretInfoOptions.ClearSecretInfo.GetUrl() != "" {
+											clearSecretInfoAttributeMap["url"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetUrl())
+										} else {
+											// Empty string, set to null
+											clearSecretInfoAttributeMap["url"] = types.StringNull()
+										}
+
+										clearSecretInfoObj, diags := types.ObjectValue(RouteRoutesRequestHeadersToAddValueChoiceSecretValueSecretInfoOneofClearSecretInfoModelAttributeMap, clearSecretInfoAttributeMap)
+										response.Diagnostics.Append(diags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										secretValuesecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = clearSecretInfoObj
+									} else {
+										secretValuesecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(RouteRoutesRequestHeadersToAddValueChoiceSecretValueSecretInfoOneofClearSecretInfoModelAttributeMap)
+									}
+								}
+
+								// --- End of Choices ---
+
+								// Create the final ObjectValue for this OneOf field
+								finalObj, secretValuesecretInfoChoiceChoicesObjDiags := types.ObjectValue(
+									RouteRoutesRequestHeadersToAddValueChoiceSecretValueSecretInfoOneofModelAttributeMap, // The attribute schema for the OneOf choices
+									secretValuesecretInfoChoiceChoicesAttributeMap,
+								)
+								response.Diagnostics.Append(secretValuesecretInfoChoiceChoicesObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+
+								// Assign the final object to the correct place (either the root model or a parent's attribute map)
+								secretValueAttributeMap["secret_info_choice"] = finalObj
+							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
+								secretValueAttributeMap["secret_info_choice"] = types.ObjectNull(RouteRoutesRequestHeadersToAddValueChoiceSecretValueSecretInfoOneofModelAttributeMap)
+							}
+
+							secretValueObj, diags := types.ObjectValue(RouteRoutesRequestHeadersToAddValueChoiceSecretValueModelAttributeMap, secretValueAttributeMap)
+							response.Diagnostics.Append(diags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							requestHeadersToAddvalueChoiceChoicesAttributeMap["secret_value"] = secretValueObj
+						} else {
+							requestHeadersToAddvalueChoiceChoicesAttributeMap["secret_value"] = types.ObjectNull(RouteRoutesRequestHeadersToAddValueChoiceSecretValueModelAttributeMap)
+						}
+					}
+
+					// --- End of Choices ---
+
+					// Create the final ObjectValue for this OneOf field
+					finalObj, requestHeadersToAddvalueChoiceChoicesObjDiags := types.ObjectValue(
+						RouteRoutesRequestHeadersToAddValueChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+						requestHeadersToAddvalueChoiceChoicesAttributeMap,
+					)
+					response.Diagnostics.Append(requestHeadersToAddvalueChoiceChoicesObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					// Assign the final object to the correct place (either the root model or a parent's attribute map)
+					routeHeaderManipulationOptionTypeModel.ValueChoice = finalObj
+				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					routeHeaderManipulationOptionTypeModel.ValueChoice = types.ObjectNull(RouteRoutesRequestHeadersToAddValueChoiceModelAttributeMap)
+				}
+
+				// data specToModelNested BoolField --> Append
+				routeHeaderManipulationOptionTypeModel.Append = types.BoolValue(bool(requestHeadersToAddElement.GetAppend()))
+
+				requestHeadersToAddElements = append(requestHeadersToAddElements, routeHeaderManipulationOptionTypeModel)
+			}
+			// CASE 1: The target field is a `types.List` or an attribute map.
+			// The intermediate slice of structs must be converted to a `types.ListValue`.
+			requestHeadersToAddListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: RouteRequestHeadersToAddObjectRefModelAttributeMap}, requestHeadersToAddElements)
+			response.Diagnostics.Append(diags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			routeRouteRouteTypeModel.RequestHeadersToAdd = requestHeadersToAddListValue
+
+		} else {
+			// The source list is empty or nil.
+			// CASE 1: The target field is a `types.List` or an attribute map.
+			// Assign a null `types.ListValue`.
+			routeRouteRouteTypeModel.RequestHeadersToAdd = types.ListNull(types.ObjectType{AttrTypes: RouteRequestHeadersToAddObjectRefModelAttributeMap})
+		}
+
+		// data specToModelNested ArrayOfStringField --> RequestCookiesToRemove
+		if len(routesElement.GetRequestCookiesToRemove()) > 0 {
+			listValue, diags := types.ListValueFrom(ctx, types.StringType, routesElement.GetRequestCookiesToRemove())
+			response.Diagnostics.Append(diags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			routeRouteRouteTypeModel.RequestCookiesToRemove = listValue
+		} else {
+			routeRouteRouteTypeModel.RequestCookiesToRemove = types.ListNull(types.StringType)
+		}
+
 		// data specToModelNested BoolField --> DisableLocationAdd
 		routeRouteRouteTypeModel.DisableLocationAdd = types.BoolValue(bool(routesElement.GetDisableLocationAdd()))
 
@@ -3875,6 +6102,93 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 			matchElements := make([]RouteRouteMatch, 0, len(routesElement.GetMatch()))
 			for _, matchElement := range routesElement.GetMatch() {
 				routeRouteMatchModel := RouteRouteMatch{}
+
+				// data specToModelNested PointerField --> Path
+				if matchElement.GetPath() != nil {
+					// Create the nested Go struct
+					routePathMatcherTypeModel := &RoutePathMatcherType{}
+					pathElement := matchElement.GetPath()
+
+					// Recursively populate the nested struct
+
+					// data specToModelNested RequiredOneOfField --> PathMatch
+					// <no value>
+					if pathElement.GetPathMatch() != nil {
+						// Create a temporary attribute map for the choices within this OneOf
+						pathpathMatchChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+						// Define a variable for the spec choices to be passed down to nested templates.
+						// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+						pathpathMatchChoiceChoices := pathElement.GetPathMatch()
+
+						// Process nested choices, populating the temporary attribute map
+
+						// data specToModelNested StringOfOneOfField --> Prefix
+						prefixItem, isPrefix := pathpathMatchChoiceChoices.(*ves_io_schema.PathMatcherType_Prefix)
+
+						if isPrefix {
+							pathpathMatchChoiceChoicesAttributeMap["prefix"] = types.StringValue(string(prefixItem.Prefix))
+						} else {
+							// Empty string, set to null
+							pathpathMatchChoiceChoicesAttributeMap["prefix"] = types.StringNull()
+						}
+
+						// data specToModelNested StringOfOneOfField --> Path
+						pathItem, isPath := pathpathMatchChoiceChoices.(*ves_io_schema.PathMatcherType_Path)
+
+						if isPath {
+							pathpathMatchChoiceChoicesAttributeMap["path"] = types.StringValue(string(pathItem.Path))
+						} else {
+							// Empty string, set to null
+							pathpathMatchChoiceChoicesAttributeMap["path"] = types.StringNull()
+						}
+
+						// data specToModelNested StringOfOneOfField --> Regex
+						regexItem, isRegex := pathpathMatchChoiceChoices.(*ves_io_schema.PathMatcherType_Regex)
+
+						if isRegex {
+							pathpathMatchChoiceChoicesAttributeMap["regex"] = types.StringValue(string(regexItem.Regex))
+						} else {
+							// Empty string, set to null
+							pathpathMatchChoiceChoicesAttributeMap["regex"] = types.StringNull()
+						}
+
+						// --- End of Choices ---
+
+						// Create the final ObjectValue for this OneOf field
+						finalObj, pathpathMatchChoiceChoicesObjDiags := types.ObjectValue(
+							RouteRoutesMatchPathPathMatchModelAttributeMap, // The attribute schema for the OneOf choices
+							pathpathMatchChoiceChoicesAttributeMap,
+						)
+						response.Diagnostics.Append(pathpathMatchChoiceChoicesObjDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						// Assign the final object to the correct place (either the root model or a parent's attribute map)
+						routePathMatcherTypeModel.PathMatchChoice = finalObj
+					} else {
+						// The OneOf field is nil in the source spec, so set the Terraform object to null.
+						routePathMatcherTypeModel.PathMatchChoice = types.ObjectNull(RouteRoutesMatchPathPathMatchModelAttributeMap)
+					}
+
+					// This field needs to be converted to a types.ObjectValue before assignment.
+					routePathMatcherTypeModelObj, diags := types.ObjectValueFrom(ctx, RouteRoutesMatchPathModelAttributeMap, routePathMatcherTypeModel)
+					response.Diagnostics.Append(diags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					routeRouteMatchModel.Path = routePathMatcherTypeModelObj
+
+				} else {
+					// The source field is nil (e.g. redacted by the API).
+					// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
+					// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
+					// because the API may always return a non-nil struct (with REDACTED values) for this field,
+					// making this else-branch unreachable. The child OneOf handles the actual healing.
+					// The target is a types.Object, so we use types.ObjectNull.
+					routeRouteMatchModel.Path = types.ObjectNull(RouteRoutesMatchPathModelAttributeMap)
+				}
 
 				// data specToModelNested ArrayOfPointerField --> Headers
 				if len(matchElement.GetHeaders()) > 0 {
@@ -4155,93 +6469,6 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 					routeRouteMatchModel.IncomingPort = types.ObjectNull(RouteRoutesMatchIncomingPortModelAttributeMap)
 				}
 
-				// data specToModelNested PointerField --> Path
-				if matchElement.GetPath() != nil {
-					// Create the nested Go struct
-					routePathMatcherTypeModel := &RoutePathMatcherType{}
-					pathElement := matchElement.GetPath()
-
-					// Recursively populate the nested struct
-
-					// data specToModelNested RequiredOneOfField --> PathMatch
-					// <no value>
-					if pathElement.GetPathMatch() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						pathpathMatchChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates.
-						// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-						pathpathMatchChoiceChoices := pathElement.GetPathMatch()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// data specToModelNested StringOfOneOfField --> Prefix
-						prefixItem, isPrefix := pathpathMatchChoiceChoices.(*ves_io_schema.PathMatcherType_Prefix)
-
-						if isPrefix {
-							pathpathMatchChoiceChoicesAttributeMap["prefix"] = types.StringValue(string(prefixItem.Prefix))
-						} else {
-							// Empty string, set to null
-							pathpathMatchChoiceChoicesAttributeMap["prefix"] = types.StringNull()
-						}
-
-						// data specToModelNested StringOfOneOfField --> Path
-						pathItem, isPath := pathpathMatchChoiceChoices.(*ves_io_schema.PathMatcherType_Path)
-
-						if isPath {
-							pathpathMatchChoiceChoicesAttributeMap["path"] = types.StringValue(string(pathItem.Path))
-						} else {
-							// Empty string, set to null
-							pathpathMatchChoiceChoicesAttributeMap["path"] = types.StringNull()
-						}
-
-						// data specToModelNested StringOfOneOfField --> Regex
-						regexItem, isRegex := pathpathMatchChoiceChoices.(*ves_io_schema.PathMatcherType_Regex)
-
-						if isRegex {
-							pathpathMatchChoiceChoicesAttributeMap["regex"] = types.StringValue(string(regexItem.Regex))
-						} else {
-							// Empty string, set to null
-							pathpathMatchChoiceChoicesAttributeMap["regex"] = types.StringNull()
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, pathpathMatchChoiceChoicesObjDiags := types.ObjectValue(
-							RouteRoutesMatchPathPathMatchModelAttributeMap, // The attribute schema for the OneOf choices
-							pathpathMatchChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(pathpathMatchChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						routePathMatcherTypeModel.PathMatchChoice = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						routePathMatcherTypeModel.PathMatchChoice = types.ObjectNull(RouteRoutesMatchPathPathMatchModelAttributeMap)
-					}
-
-					// This field needs to be converted to a types.ObjectValue before assignment.
-					routePathMatcherTypeModelObj, diags := types.ObjectValueFrom(ctx, RouteRoutesMatchPathModelAttributeMap, routePathMatcherTypeModel)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					routeRouteMatchModel.Path = routePathMatcherTypeModelObj
-
-				} else {
-					// The source field is nil (e.g. redacted by the API).
-					// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-					// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-					// because the API may always return a non-nil struct (with REDACTED values) for this field,
-					// making this else-branch unreachable. The child OneOf handles the actual healing.
-					// The target is a types.Object, so we use types.ObjectNull.
-					routeRouteMatchModel.Path = types.ObjectNull(RouteRoutesMatchPathModelAttributeMap)
-				}
-
 				matchElements = append(matchElements, routeRouteMatchModel)
 			}
 			// CASE 1: The target field is a `types.List` or an attribute map.
@@ -4260,82 +6487,17 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 			routeRouteRouteTypeModel.Match = types.ListNull(types.ObjectType{AttrTypes: RouteMatchObjectRefModelAttributeMap})
 		}
 
-		// data specToModelNested PointerField --> ServicePolicy
-		if routesElement.GetServicePolicy() != nil {
-			// Create the nested Go struct
-			routeRouteServicePolicyInfoModel := &RouteRouteServicePolicyInfo{}
-			servicePolicyElement := routesElement.GetServicePolicy()
-
-			// Recursively populate the nested struct
-
-			// data specToModelNested OneOfField --> ServicePolicyChoice
-			if servicePolicyElement.GetServicePolicyChoice() != nil {
-				// Create a temporary attribute map for the choices within this OneOf
-				servicePolicyservicePolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-				// Define a variable for the spec choices to be passed down to nested templates.
-				// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-				servicePolicyservicePolicyChoiceChoices := servicePolicyElement.GetServicePolicyChoice()
-
-				// Process nested choices, populating the temporary attribute map
-
-				// data specToModelNested BoolOfOneOfField --> Disable
-				disableItem, isDisable := servicePolicyservicePolicyChoiceChoices.(*ves_io_schema_route.ServicePolicyInfo_Disable)
-
-				if isDisable {
-					servicePolicyservicePolicyChoiceChoicesAttributeMap["disable"] = types.BoolValue(bool(disableItem.Disable))
-				} else {
-					servicePolicyservicePolicyChoiceChoicesAttributeMap["disable"] = types.BoolNull()
-				}
-
-				// --- End of Choices ---
-
-				// Create the final ObjectValue for this OneOf field
-				finalObj, servicePolicyservicePolicyChoiceChoicesObjDiags := types.ObjectValue(
-					RouteRoutesServicePolicyServicePolicyChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-					servicePolicyservicePolicyChoiceChoicesAttributeMap,
-				)
-				response.Diagnostics.Append(servicePolicyservicePolicyChoiceChoicesObjDiags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// Assign the final object to the correct place (either the root model or a parent's attribute map)
-				routeRouteServicePolicyInfoModel.ServicePolicyChoice = finalObj
-			} else {
-				// The OneOf field is nil in the source spec, so set the Terraform object to null.
-				routeRouteServicePolicyInfoModel.ServicePolicyChoice = types.ObjectNull(RouteRoutesServicePolicyServicePolicyChoiceModelAttributeMap)
-			}
-
-			// This field needs to be converted to a types.ObjectValue before assignment.
-			routeRouteServicePolicyInfoModelObj, diags := types.ObjectValueFrom(ctx, RouteRoutesServicePolicyModelAttributeMap, routeRouteServicePolicyInfoModel)
-			response.Diagnostics.Append(diags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			routeRouteRouteTypeModel.ServicePolicy = routeRouteServicePolicyInfoModelObj
-
-		} else {
-			// The source field is nil (e.g. redacted by the API).
-			// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-			// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-			// because the API may always return a non-nil struct (with REDACTED values) for this field,
-			// making this else-branch unreachable. The child OneOf handles the actual healing.
-			// The target is a types.Object, so we use types.ObjectNull.
-			routeRouteRouteTypeModel.ServicePolicy = types.ObjectNull(RouteRoutesServicePolicyModelAttributeMap)
-		}
-
-		// data specToModelNested ArrayOfPointerField --> RequestHeadersToAdd
-		if len(routesElement.GetRequestHeadersToAdd()) > 0 {
+		// data specToModelNested ArrayOfPointerField --> ResponseHeadersToAdd
+		if len(routesElement.GetResponseHeadersToAdd()) > 0 {
 			// Step 1: Always create a slice of model structs from the spec data.
 			// This slice serves as an intermediate representation.
-			requestHeadersToAddElements := make([]RouteHeaderManipulationOptionType, 0, len(routesElement.GetRequestHeadersToAdd()))
-			for _, requestHeadersToAddElement := range routesElement.GetRequestHeadersToAdd() {
+			responseHeadersToAddElements := make([]RouteHeaderManipulationOptionType, 0, len(routesElement.GetResponseHeadersToAdd()))
+			for _, responseHeadersToAddElement := range routesElement.GetResponseHeadersToAdd() {
 				routeHeaderManipulationOptionTypeModel := RouteHeaderManipulationOptionType{}
 
 				// data specToModelNested RequiredStringField --> Name
-				if requestHeadersToAddElement.GetName() != "" {
-					routeHeaderManipulationOptionTypeModel.Name = types.StringValue(requestHeadersToAddElement.GetName())
+				if responseHeadersToAddElement.GetName() != "" {
+					routeHeaderManipulationOptionTypeModel.Name = types.StringValue(responseHeadersToAddElement.GetName())
 				} else {
 					// Empty string, set to null
 					routeHeaderManipulationOptionTypeModel.Name = types.StringNull()
@@ -4343,31 +6505,21 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 
 				// data specToModelNested RequiredOneOfField --> ValueChoice
 				// <no value>
-				if requestHeadersToAddElement.GetValueChoice() != nil {
+				if responseHeadersToAddElement.GetValueChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
-					requestHeadersToAddvalueChoiceChoicesAttributeMap := make(map[string]attr.Value)
+					responseHeadersToAddvalueChoiceChoicesAttributeMap := make(map[string]attr.Value)
 
 					// Define a variable for the spec choices to be passed down to nested templates.
 					// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-					requestHeadersToAddvalueChoiceChoices := requestHeadersToAddElement.GetValueChoice()
+					responseHeadersToAddvalueChoiceChoices := responseHeadersToAddElement.GetValueChoice()
 
 					// Process nested choices, populating the temporary attribute map
-
-					// data specToModelNested StringOfOneOfField --> Value
-					valueItem, isValue := requestHeadersToAddvalueChoiceChoices.(*ves_io_schema.HeaderManipulationOptionType_Value)
-
-					if isValue {
-						requestHeadersToAddvalueChoiceChoicesAttributeMap["value"] = types.StringValue(string(valueItem.Value))
-					} else {
-						// Empty string, set to null
-						requestHeadersToAddvalueChoiceChoicesAttributeMap["value"] = types.StringNull()
-					}
 
 					// data specToModelNested PointerOfOneOfField --> SecretValue
 					// <no value>
 					// false
 					{
-						secretValueOptions, isSecretValue := requestHeadersToAddvalueChoiceChoices.(*ves_io_schema.HeaderManipulationOptionType_SecretValue)
+						secretValueOptions, isSecretValue := responseHeadersToAddvalueChoiceChoices.(*ves_io_schema.HeaderManipulationOptionType_SecretValue)
 						secretValueAttributeMap := make(map[string]attr.Value)
 
 						if isSecretValue && secretValueOptions != nil {
@@ -4393,14 +6545,6 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 
 									if isBlindfoldSecretInfo && blindfoldSecretInfoOptions != nil {
 
-										// data specToModelNested StringField --> DecryptionProvider
-										if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider() != "" {
-											blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider())
-										} else {
-											// Empty string, set to null
-											blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringNull()
-										}
-
 										// data specToModelNested StringField --> StoreProvider
 										if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider() != "" {
 											blindfoldSecretInfoAttributeMap["store_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider())
@@ -4417,14 +6561,22 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 											blindfoldSecretInfoAttributeMap["location"] = types.StringNull()
 										}
 
-										blindfoldSecretInfoObj, diags := types.ObjectValue(RouteRoutesRequestHeadersToAddValueChoiceSecretValueSecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
+										// data specToModelNested StringField --> DecryptionProvider
+										if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider() != "" {
+											blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider())
+										} else {
+											// Empty string, set to null
+											blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringNull()
+										}
+
+										blindfoldSecretInfoObj, diags := types.ObjectValue(RouteRoutesResponseHeadersToAddValueChoiceSecretValueSecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
 										response.Diagnostics.Append(diags...)
 										if response.Diagnostics.HasError() {
 											return
 										}
 										secretValuesecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = blindfoldSecretInfoObj
 									} else {
-										secretValuesecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = types.ObjectNull(RouteRoutesRequestHeadersToAddValueChoiceSecretValueSecretInfoOneofBlindfoldSecretInfoModelAttributeMap)
+										secretValuesecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = types.ObjectNull(RouteRoutesResponseHeadersToAddValueChoiceSecretValueSecretInfoOneofBlindfoldSecretInfoModelAttributeMap)
 									}
 								}
 
@@ -4453,14 +6605,14 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 											clearSecretInfoAttributeMap["url"] = types.StringNull()
 										}
 
-										clearSecretInfoObj, diags := types.ObjectValue(RouteRoutesRequestHeadersToAddValueChoiceSecretValueSecretInfoOneofClearSecretInfoModelAttributeMap, clearSecretInfoAttributeMap)
+										clearSecretInfoObj, diags := types.ObjectValue(RouteRoutesResponseHeadersToAddValueChoiceSecretValueSecretInfoOneofClearSecretInfoModelAttributeMap, clearSecretInfoAttributeMap)
 										response.Diagnostics.Append(diags...)
 										if response.Diagnostics.HasError() {
 											return
 										}
 										secretValuesecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = clearSecretInfoObj
 									} else {
-										secretValuesecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(RouteRoutesRequestHeadersToAddValueChoiceSecretValueSecretInfoOneofClearSecretInfoModelAttributeMap)
+										secretValuesecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(RouteRoutesResponseHeadersToAddValueChoiceSecretValueSecretInfoOneofClearSecretInfoModelAttributeMap)
 									}
 								}
 
@@ -4468,7 +6620,7 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 
 								// Create the final ObjectValue for this OneOf field
 								finalObj, secretValuesecretInfoChoiceChoicesObjDiags := types.ObjectValue(
-									RouteRoutesRequestHeadersToAddValueChoiceSecretValueSecretInfoOneofModelAttributeMap, // The attribute schema for the OneOf choices
+									RouteRoutesResponseHeadersToAddValueChoiceSecretValueSecretInfoOneofModelAttributeMap, // The attribute schema for the OneOf choices
 									secretValuesecretInfoChoiceChoicesAttributeMap,
 								)
 								response.Diagnostics.Append(secretValuesecretInfoChoiceChoicesObjDiags...)
@@ -4480,28 +6632,38 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 								secretValueAttributeMap["secret_info_choice"] = finalObj
 							} else {
 								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								secretValueAttributeMap["secret_info_choice"] = types.ObjectNull(RouteRoutesRequestHeadersToAddValueChoiceSecretValueSecretInfoOneofModelAttributeMap)
+								secretValueAttributeMap["secret_info_choice"] = types.ObjectNull(RouteRoutesResponseHeadersToAddValueChoiceSecretValueSecretInfoOneofModelAttributeMap)
 							}
 
-							secretValueObj, diags := types.ObjectValue(RouteRoutesRequestHeadersToAddValueChoiceSecretValueModelAttributeMap, secretValueAttributeMap)
+							secretValueObj, diags := types.ObjectValue(RouteRoutesResponseHeadersToAddValueChoiceSecretValueModelAttributeMap, secretValueAttributeMap)
 							response.Diagnostics.Append(diags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
-							requestHeadersToAddvalueChoiceChoicesAttributeMap["secret_value"] = secretValueObj
+							responseHeadersToAddvalueChoiceChoicesAttributeMap["secret_value"] = secretValueObj
 						} else {
-							requestHeadersToAddvalueChoiceChoicesAttributeMap["secret_value"] = types.ObjectNull(RouteRoutesRequestHeadersToAddValueChoiceSecretValueModelAttributeMap)
+							responseHeadersToAddvalueChoiceChoicesAttributeMap["secret_value"] = types.ObjectNull(RouteRoutesResponseHeadersToAddValueChoiceSecretValueModelAttributeMap)
 						}
+					}
+
+					// data specToModelNested StringOfOneOfField --> Value
+					valueItem, isValue := responseHeadersToAddvalueChoiceChoices.(*ves_io_schema.HeaderManipulationOptionType_Value)
+
+					if isValue {
+						responseHeadersToAddvalueChoiceChoicesAttributeMap["value"] = types.StringValue(string(valueItem.Value))
+					} else {
+						// Empty string, set to null
+						responseHeadersToAddvalueChoiceChoicesAttributeMap["value"] = types.StringNull()
 					}
 
 					// --- End of Choices ---
 
 					// Create the final ObjectValue for this OneOf field
-					finalObj, requestHeadersToAddvalueChoiceChoicesObjDiags := types.ObjectValue(
-						RouteRoutesRequestHeadersToAddValueChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-						requestHeadersToAddvalueChoiceChoicesAttributeMap,
+					finalObj, responseHeadersToAddvalueChoiceChoicesObjDiags := types.ObjectValue(
+						RouteRoutesResponseHeadersToAddValueChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+						responseHeadersToAddvalueChoiceChoicesAttributeMap,
 					)
-					response.Diagnostics.Append(requestHeadersToAddvalueChoiceChoicesObjDiags...)
+					response.Diagnostics.Append(responseHeadersToAddvalueChoiceChoicesObjDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
@@ -4510,28 +6672,28 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 					routeHeaderManipulationOptionTypeModel.ValueChoice = finalObj
 				} else {
 					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					routeHeaderManipulationOptionTypeModel.ValueChoice = types.ObjectNull(RouteRoutesRequestHeadersToAddValueChoiceModelAttributeMap)
+					routeHeaderManipulationOptionTypeModel.ValueChoice = types.ObjectNull(RouteRoutesResponseHeadersToAddValueChoiceModelAttributeMap)
 				}
 
 				// data specToModelNested BoolField --> Append
-				routeHeaderManipulationOptionTypeModel.Append = types.BoolValue(bool(requestHeadersToAddElement.GetAppend()))
+				routeHeaderManipulationOptionTypeModel.Append = types.BoolValue(bool(responseHeadersToAddElement.GetAppend()))
 
-				requestHeadersToAddElements = append(requestHeadersToAddElements, routeHeaderManipulationOptionTypeModel)
+				responseHeadersToAddElements = append(responseHeadersToAddElements, routeHeaderManipulationOptionTypeModel)
 			}
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// The intermediate slice of structs must be converted to a `types.ListValue`.
-			requestHeadersToAddListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: RouteRequestHeadersToAddObjectRefModelAttributeMap}, requestHeadersToAddElements)
+			responseHeadersToAddListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: RouteResponseHeadersToAddObjectRefModelAttributeMap}, responseHeadersToAddElements)
 			response.Diagnostics.Append(diags...)
 			if response.Diagnostics.HasError() {
 				return
 			}
-			routeRouteRouteTypeModel.RequestHeadersToAdd = requestHeadersToAddListValue
+			routeRouteRouteTypeModel.ResponseHeadersToAdd = responseHeadersToAddListValue
 
 		} else {
 			// The source list is empty or nil.
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// Assign a null `types.ListValue`.
-			routeRouteRouteTypeModel.RequestHeadersToAdd = types.ListNull(types.ObjectType{AttrTypes: RouteRequestHeadersToAddObjectRefModelAttributeMap})
+			routeRouteRouteTypeModel.ResponseHeadersToAdd = types.ListNull(types.ObjectType{AttrTypes: RouteResponseHeadersToAddObjectRefModelAttributeMap})
 		}
 
 		// data specToModelNested ArrayOfStringField --> RequestHeadersToRemove
@@ -4553,6 +6715,14 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 			requestCookiesToAddElements := make([]RouteCookieValueOption, 0, len(routesElement.GetRequestCookiesToAdd()))
 			for _, requestCookiesToAddElement := range routesElement.GetRequestCookiesToAdd() {
 				routeCookieValueOptionModel := RouteCookieValueOption{}
+
+				// data specToModelNested RequiredStringField --> Name
+				if requestCookiesToAddElement.GetName() != "" {
+					routeCookieValueOptionModel.Name = types.StringValue(requestCookiesToAddElement.GetName())
+				} else {
+					// Empty string, set to null
+					routeCookieValueOptionModel.Name = types.StringNull()
+				}
 
 				// data specToModelNested RequiredOneOfField --> ValueChoice
 				// <no value>
@@ -4596,14 +6766,6 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 
 									if isBlindfoldSecretInfo && blindfoldSecretInfoOptions != nil {
 
-										// data specToModelNested RequiredStringField --> Location
-										if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation() != "" {
-											blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation())
-										} else {
-											// Empty string, set to null
-											blindfoldSecretInfoAttributeMap["location"] = types.StringNull()
-										}
-
 										// data specToModelNested StringField --> DecryptionProvider
 										if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider() != "" {
 											blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider())
@@ -4618,6 +6780,14 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 										} else {
 											// Empty string, set to null
 											blindfoldSecretInfoAttributeMap["store_provider"] = types.StringNull()
+										}
+
+										// data specToModelNested RequiredStringField --> Location
+										if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation() != "" {
+											blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation())
+										} else {
+											// Empty string, set to null
+											blindfoldSecretInfoAttributeMap["location"] = types.StringNull()
 										}
 
 										blindfoldSecretInfoObj, diags := types.ObjectValue(RouteRoutesRequestCookiesToAddValueChoiceSecretValueSecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
@@ -4729,14 +6899,6 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 				// data specToModelNested BoolField --> Overwrite
 				routeCookieValueOptionModel.Overwrite = types.BoolValue(bool(requestCookiesToAddElement.GetOverwrite()))
 
-				// data specToModelNested RequiredStringField --> Name
-				if requestCookiesToAddElement.GetName() != "" {
-					routeCookieValueOptionModel.Name = types.StringValue(requestCookiesToAddElement.GetName())
-				} else {
-					// Empty string, set to null
-					routeCookieValueOptionModel.Name = types.StringNull()
-				}
-
 				requestCookiesToAddElements = append(requestCookiesToAddElements, routeCookieValueOptionModel)
 			}
 			// CASE 1: The target field is a `types.List` or an attribute map.
@@ -4753,2168 +6915,6 @@ func (d *DataSourceF5XCRoute) Read(ctx context.Context, request datasource.ReadR
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// Assign a null `types.ListValue`.
 			routeRouteRouteTypeModel.RequestCookiesToAdd = types.ListNull(types.ObjectType{AttrTypes: RouteRequestCookiesToAddObjectRefModelAttributeMap})
-		}
-
-		// data specToModelNested ArrayOfStringField --> ResponseCookiesToRemove
-		if len(routesElement.GetResponseCookiesToRemove()) > 0 {
-			listValue, diags := types.ListValueFrom(ctx, types.StringType, routesElement.GetResponseCookiesToRemove())
-			response.Diagnostics.Append(diags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			routeRouteRouteTypeModel.ResponseCookiesToRemove = listValue
-		} else {
-			routeRouteRouteTypeModel.ResponseCookiesToRemove = types.ListNull(types.StringType)
-		}
-
-		// data specToModelNested RequiredOneOfField --> RouteAction
-		// <no value>
-		if routesElement.GetRouteAction() != nil {
-			// Create a temporary attribute map for the choices within this OneOf
-			routesrouteActionChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-			// Define a variable for the spec choices to be passed down to nested templates.
-			// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-			routesrouteActionChoiceChoices := routesElement.GetRouteAction()
-
-			// Process nested choices, populating the temporary attribute map
-
-			// data specToModelNested PointerOfOneOfField --> RouteDestination
-			// <no value>
-			// false
-			{
-				routeDestinationOptions, isRouteDestination := routesrouteActionChoiceChoices.(*ves_io_schema_route.RouteType_RouteDestination)
-				routeDestinationAttributeMap := make(map[string]attr.Value)
-
-				if isRouteDestination && routeDestinationOptions != nil {
-
-					// data specToModelNested PointerField --> RetryPolicy
-					if routeDestinationOptions.RouteDestination.GetRetryPolicy() != nil {
-						// Create the nested Go struct
-						routeRetryPolicyTypeModel := &RouteRetryPolicyType{}
-						retryPolicyElement := routeDestinationOptions.RouteDestination.GetRetryPolicy()
-
-						// Recursively populate the nested struct
-
-						// data specToModelNested UintField --> NumRetries
-						routeRetryPolicyTypeModel.NumRetries = types.Int64Value(int64(retryPolicyElement.GetNumRetries()))
-
-						// data specToModelNested UintField --> PerTryTimeout
-						routeRetryPolicyTypeModel.PerTryTimeout = types.Int64Value(int64(retryPolicyElement.GetPerTryTimeout()))
-
-						// data specToModelNested PointerField --> BackOff
-						if retryPolicyElement.GetBackOff() != nil {
-							// Create the nested Go struct
-							routeRetryBackOffModel := &RouteRetryBackOff{}
-							backOffElement := retryPolicyElement.GetBackOff()
-
-							// Recursively populate the nested struct
-
-							// data specToModelNested UintField --> BaseInterval
-							routeRetryBackOffModel.BaseInterval = types.Int64Value(int64(backOffElement.GetBaseInterval()))
-
-							// data specToModelNested UintField --> MaxInterval
-							routeRetryBackOffModel.MaxInterval = types.Int64Value(int64(backOffElement.GetMaxInterval()))
-
-							// This field needs to be converted to a types.ObjectValue before assignment.
-							routeRetryBackOffModelObj, diags := types.ObjectValueFrom(ctx, RouteRoutesRouteActionRouteDestinationRetryPolicyBackOffModelAttributeMap, routeRetryBackOffModel)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							routeRetryPolicyTypeModel.BackOff = routeRetryBackOffModelObj
-
-						} else {
-							// The source field is nil (e.g. redacted by the API).
-							// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-							// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-							// because the API may always return a non-nil struct (with REDACTED values) for this field,
-							// making this else-branch unreachable. The child OneOf handles the actual healing.
-							// The target is a types.Object, so we use types.ObjectNull.
-							routeRetryPolicyTypeModel.BackOff = types.ObjectNull(RouteRoutesRouteActionRouteDestinationRetryPolicyBackOffModelAttributeMap)
-						}
-
-						// data specToModelNested RequiredArrayOfStringField --> RetryCondition
-						if len(retryPolicyElement.GetRetryCondition()) > 0 {
-							listValue, diags := types.ListValueFrom(ctx, types.StringType, retryPolicyElement.GetRetryCondition())
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							routeRetryPolicyTypeModel.RetryCondition = listValue
-						} else {
-							routeRetryPolicyTypeModel.RetryCondition = types.ListNull(types.StringType)
-						}
-
-						// This field needs to be converted to a types.ObjectValue before assignment.
-						routeRetryPolicyTypeModelObj, diags := types.ObjectValueFrom(ctx, RouteRoutesRouteActionRouteDestinationRetryPolicyModelAttributeMap, routeRetryPolicyTypeModel)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						routeDestinationAttributeMap["retry_policy"] = routeRetryPolicyTypeModelObj
-
-					} else {
-						// The source field is nil (e.g. redacted by the API).
-						// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-						// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-						// because the API may always return a non-nil struct (with REDACTED values) for this field,
-						// making this else-branch unreachable. The child OneOf handles the actual healing.
-						// The target is a types.Object, so we use types.ObjectNull.
-						routeDestinationAttributeMap["retry_policy"] = types.ObjectNull(RouteRoutesRouteActionRouteDestinationRetryPolicyModelAttributeMap)
-					}
-
-					// data specToModelNested PointerField --> MirrorPolicy
-					if routeDestinationOptions.RouteDestination.GetMirrorPolicy() != nil {
-						// Create the nested Go struct
-						routeRouteMirrorPolicyTypeModel := &RouteRouteMirrorPolicyType{}
-						mirrorPolicyElement := routeDestinationOptions.RouteDestination.GetMirrorPolicy()
-
-						// Recursively populate the nested struct
-
-						// data specToModelNested RequiredArrayOfPointerField --> Cluster
-						if len(mirrorPolicyElement.GetCluster()) > 0 {
-							// Step 1: Always create a slice of model structs from the spec data.
-							// This slice serves as an intermediate representation.
-							clusterElements := make([]ObjectRefTypeModel, 0, len(mirrorPolicyElement.GetCluster()))
-							for _, clusterElement := range mirrorPolicyElement.GetCluster() {
-								objectRefTypeModelModel := ObjectRefTypeModel{}
-
-								// data specToModelNested StringField --> Tenant
-								if clusterElement.GetTenant() != "" {
-									objectRefTypeModelModel.Tenant = types.StringValue(clusterElement.GetTenant())
-								} else {
-									// Empty string, set to null
-									objectRefTypeModelModel.Tenant = types.StringNull()
-								}
-
-								// data specToModelNested RequiredStringField --> Namespace
-								if clusterElement.GetNamespace() != "" {
-									objectRefTypeModelModel.Namespace = types.StringValue(clusterElement.GetNamespace())
-								} else {
-									// Empty string, set to null
-									objectRefTypeModelModel.Namespace = types.StringNull()
-								}
-
-								// data specToModelNested RequiredStringField --> Name
-								if clusterElement.GetName() != "" {
-									objectRefTypeModelModel.Name = types.StringValue(clusterElement.GetName())
-								} else {
-									// Empty string, set to null
-									objectRefTypeModelModel.Name = types.StringNull()
-								}
-
-								clusterElements = append(clusterElements, objectRefTypeModelModel)
-							}
-							// CASE 1: The target field is a `types.List` or an attribute map.
-							// The intermediate slice of structs must be converted to a `types.ListValue`.
-							clusterListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: RouteClusterObjectRefModelAttributeMap}, clusterElements)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							routeRouteMirrorPolicyTypeModel.Cluster = clusterListValue
-
-						} else {
-							// The source list is empty or nil.
-							// CASE 1: The target field is a `types.List` or an attribute map.
-							// Assign a null `types.ListValue`.
-							routeRouteMirrorPolicyTypeModel.Cluster = types.ListNull(types.ObjectType{AttrTypes: RouteClusterObjectRefModelAttributeMap})
-						}
-
-						// data specToModelNested PointerField --> Percent
-						if mirrorPolicyElement.GetPercent() != nil {
-							// Create the nested Go struct
-							routeFractionalPercentModel := &RouteFractionalPercent{}
-							percentElement := mirrorPolicyElement.GetPercent()
-
-							// Recursively populate the nested struct
-
-							// data specToModelNested RequiredEnumField --> Denominator
-							if percentElement.GetDenominator().String() != "" {
-								stringValue := types.StringValue(percentElement.GetDenominator().String())
-								stringSlice := []types.String{stringValue}
-								listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								routeFractionalPercentModel.Denominator = listValue
-							} else {
-								routeFractionalPercentModel.Denominator = types.ListNull(types.StringType)
-							}
-
-							// data specToModelNested RequiredUintField --> Numerator
-							routeFractionalPercentModel.Numerator = types.Int64Value(int64(percentElement.GetNumerator()))
-
-							// This field needs to be converted to a types.ObjectValue before assignment.
-							routeFractionalPercentModelObj, diags := types.ObjectValueFrom(ctx, RouteRoutesRouteActionRouteDestinationMirrorPolicyPercentModelAttributeMap, routeFractionalPercentModel)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							routeRouteMirrorPolicyTypeModel.Percent = routeFractionalPercentModelObj
-
-						} else {
-							// The source field is nil (e.g. redacted by the API).
-							// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-							// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-							// because the API may always return a non-nil struct (with REDACTED values) for this field,
-							// making this else-branch unreachable. The child OneOf handles the actual healing.
-							// The target is a types.Object, so we use types.ObjectNull.
-							routeRouteMirrorPolicyTypeModel.Percent = types.ObjectNull(RouteRoutesRouteActionRouteDestinationMirrorPolicyPercentModelAttributeMap)
-						}
-
-						// This field needs to be converted to a types.ObjectValue before assignment.
-						routeRouteMirrorPolicyTypeModelObj, diags := types.ObjectValueFrom(ctx, RouteRoutesRouteActionRouteDestinationMirrorPolicyModelAttributeMap, routeRouteMirrorPolicyTypeModel)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						routeDestinationAttributeMap["mirror_policy"] = routeRouteMirrorPolicyTypeModelObj
-
-					} else {
-						// The source field is nil (e.g. redacted by the API).
-						// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-						// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-						// because the API may always return a non-nil struct (with REDACTED values) for this field,
-						// making this else-branch unreachable. The child OneOf handles the actual healing.
-						// The target is a types.Object, so we use types.ObjectNull.
-						routeDestinationAttributeMap["mirror_policy"] = types.ObjectNull(RouteRoutesRouteActionRouteDestinationMirrorPolicyModelAttributeMap)
-					}
-
-					// data specToModelNested PointerField --> WebSocketConfig
-					if routeDestinationOptions.RouteDestination.GetWebSocketConfig() != nil {
-						// Create the nested Go struct
-						routeRouteWebsocketConfigTypeModel := &RouteRouteWebsocketConfigType{}
-						webSocketConfigElement := routeDestinationOptions.RouteDestination.GetWebSocketConfig()
-
-						// Recursively populate the nested struct
-
-						// data specToModelNested BoolField --> UseWebsocket
-						routeRouteWebsocketConfigTypeModel.UseWebsocket = types.BoolValue(bool(webSocketConfigElement.GetUseWebsocket()))
-
-						// This field needs to be converted to a types.ObjectValue before assignment.
-						routeRouteWebsocketConfigTypeModelObj, diags := types.ObjectValueFrom(ctx, RouteRoutesRouteActionRouteDestinationWebSocketConfigModelAttributeMap, routeRouteWebsocketConfigTypeModel)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						routeDestinationAttributeMap["web_socket_config"] = routeRouteWebsocketConfigTypeModelObj
-
-					} else {
-						// The source field is nil (e.g. redacted by the API).
-						// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-						// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-						// because the API may always return a non-nil struct (with REDACTED values) for this field,
-						// making this else-branch unreachable. The child OneOf handles the actual healing.
-						// The target is a types.Object, so we use types.ObjectNull.
-						routeDestinationAttributeMap["web_socket_config"] = types.ObjectNull(RouteRoutesRouteActionRouteDestinationWebSocketConfigModelAttributeMap)
-					}
-
-					// data specToModelNested PointerField --> BufferPolicy
-					if routeDestinationOptions.RouteDestination.GetBufferPolicy() != nil {
-						// Create the nested Go struct
-						routeBufferConfigTypeModel := &RouteBufferConfigType{}
-						bufferPolicyElement := routeDestinationOptions.RouteDestination.GetBufferPolicy()
-
-						// Recursively populate the nested struct
-
-						// data specToModelNested BoolField --> Disabled
-						routeBufferConfigTypeModel.Disabled = types.BoolValue(bool(bufferPolicyElement.GetDisabled()))
-
-						// data specToModelNested UintField --> MaxRequestBytes
-						routeBufferConfigTypeModel.MaxRequestBytes = types.Int64Value(int64(bufferPolicyElement.GetMaxRequestBytes()))
-
-						// This field needs to be converted to a types.ObjectValue before assignment.
-						routeBufferConfigTypeModelObj, diags := types.ObjectValueFrom(ctx, RouteRoutesRouteActionRouteDestinationBufferPolicyModelAttributeMap, routeBufferConfigTypeModel)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						routeDestinationAttributeMap["buffer_policy"] = routeBufferConfigTypeModelObj
-
-					} else {
-						// The source field is nil (e.g. redacted by the API).
-						// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-						// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-						// because the API may always return a non-nil struct (with REDACTED values) for this field,
-						// making this else-branch unreachable. The child OneOf handles the actual healing.
-						// The target is a types.Object, so we use types.ObjectNull.
-						routeDestinationAttributeMap["buffer_policy"] = types.ObjectNull(RouteRoutesRouteActionRouteDestinationBufferPolicyModelAttributeMap)
-					}
-
-					// data specToModelNested EnumField --> Priority
-					if routeDestinationOptions.RouteDestination.GetPriority().String() != "" {
-						stringValue := types.StringValue(routeDestinationOptions.RouteDestination.GetPriority().String())
-						stringSlice := []types.String{stringValue}
-						listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						routeDestinationAttributeMap["priority"] = listValue
-					} else {
-						routeDestinationAttributeMap["priority"] = types.ListNull(types.StringType)
-					}
-
-					// data specToModelNested RequiredArrayOfPointerField --> Destinations
-					if len(routeDestinationOptions.RouteDestination.GetDestinations()) > 0 {
-						// Step 1: Always create a slice of model structs from the spec data.
-						// This slice serves as an intermediate representation.
-						destinationsElements := make([]RouteRouteRouteDestination, 0, len(routeDestinationOptions.RouteDestination.GetDestinations()))
-						for _, destinationsElement := range routeDestinationOptions.RouteDestination.GetDestinations() {
-							routeRouteRouteDestinationModel := RouteRouteRouteDestination{}
-
-							// data specToModelNested RequiredArrayOfPointerField --> Cluster
-							if len(destinationsElement.GetCluster()) > 0 {
-								// Step 1: Always create a slice of model structs from the spec data.
-								// This slice serves as an intermediate representation.
-								clusterElements := make([]ObjectRefTypeModel, 0, len(destinationsElement.GetCluster()))
-								for _, clusterElement := range destinationsElement.GetCluster() {
-									objectRefTypeModelModel := ObjectRefTypeModel{}
-
-									// data specToModelNested RequiredStringField --> Name
-									if clusterElement.GetName() != "" {
-										objectRefTypeModelModel.Name = types.StringValue(clusterElement.GetName())
-									} else {
-										// Empty string, set to null
-										objectRefTypeModelModel.Name = types.StringNull()
-									}
-
-									// data specToModelNested StringField --> Tenant
-									if clusterElement.GetTenant() != "" {
-										objectRefTypeModelModel.Tenant = types.StringValue(clusterElement.GetTenant())
-									} else {
-										// Empty string, set to null
-										objectRefTypeModelModel.Tenant = types.StringNull()
-									}
-
-									// data specToModelNested RequiredStringField --> Namespace
-									if clusterElement.GetNamespace() != "" {
-										objectRefTypeModelModel.Namespace = types.StringValue(clusterElement.GetNamespace())
-									} else {
-										// Empty string, set to null
-										objectRefTypeModelModel.Namespace = types.StringNull()
-									}
-
-									clusterElements = append(clusterElements, objectRefTypeModelModel)
-								}
-								// CASE 1: The target field is a `types.List` or an attribute map.
-								// The intermediate slice of structs must be converted to a `types.ListValue`.
-								clusterListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: RouteClusterObjectRefModelAttributeMap}, clusterElements)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								routeRouteRouteDestinationModel.Cluster = clusterListValue
-
-							} else {
-								// The source list is empty or nil.
-								// CASE 1: The target field is a `types.List` or an attribute map.
-								// Assign a null `types.ListValue`.
-								routeRouteRouteDestinationModel.Cluster = types.ListNull(types.ObjectType{AttrTypes: RouteClusterObjectRefModelAttributeMap})
-							}
-
-							// data specToModelNested UintField --> Weight
-							routeRouteRouteDestinationModel.Weight = types.Int64Value(int64(destinationsElement.GetWeight()))
-
-							// data specToModelNested UintField --> Priority
-							routeRouteRouteDestinationModel.Priority = types.Int64Value(int64(destinationsElement.GetPriority()))
-
-							// data specToModelNested MapOfStringField --> EndpointSubsets
-							if destinationsElement.GetEndpointSubsets() != nil {
-								// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-								endpointSubsetsMap, endpointSubsetsDiags := utils.StringMapToTerraformMap(destinationsElement.GetEndpointSubsets())
-								response.Diagnostics.Append(endpointSubsetsDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								// Assign the typed map to the model
-								routeRouteRouteDestinationModel.EndpointSubsets = endpointSubsetsMap
-							} else {
-								// Ensure the state reflects a Null map with the correct element type to avoid DynamicPseudoType errors
-								routeRouteRouteDestinationModel.EndpointSubsets = types.MapNull(types.StringType)
-							}
-
-							destinationsElements = append(destinationsElements, routeRouteRouteDestinationModel)
-						}
-						// CASE 1: The target field is a `types.List` or an attribute map.
-						// The intermediate slice of structs must be converted to a `types.ListValue`.
-						destinationsListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: RouteRoutesRouteActionRouteDestinationDestinationsModelAttributeMap}, destinationsElements)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						routeDestinationAttributeMap["destinations"] = destinationsListValue
-
-					} else {
-						// The source list is empty or nil.
-						// CASE 1: The target field is a `types.List` or an attribute map.
-						// Assign a null `types.ListValue`.
-						routeDestinationAttributeMap["destinations"] = types.ListNull(types.ObjectType{AttrTypes: RouteRoutesRouteActionRouteDestinationDestinationsModelAttributeMap})
-					}
-
-					// data specToModelNested MapOfStringField --> EndpointSubsets
-					if routeDestinationOptions.RouteDestination.GetEndpointSubsets() != nil {
-						// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-						endpointSubsetsMap, endpointSubsetsDiags := utils.StringMapToTerraformMap(routeDestinationOptions.RouteDestination.GetEndpointSubsets())
-						response.Diagnostics.Append(endpointSubsetsDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						// Assign the typed map to the model
-						routeDestinationAttributeMap["endpoint_subsets"] = endpointSubsetsMap
-					} else {
-						// Ensure the state reflects a Null map with the correct element type to avoid DynamicPseudoType errors
-						routeDestinationAttributeMap["endpoint_subsets"] = types.MapNull(types.StringType)
-					}
-
-					// data specToModelNested ArrayOfPointerField --> HashPolicy
-					if len(routeDestinationOptions.RouteDestination.GetHashPolicy()) > 0 {
-						// Step 1: Always create a slice of model structs from the spec data.
-						// This slice serves as an intermediate representation.
-						hashPolicyElements := make([]RouteRouteHashPolicyType, 0, len(routeDestinationOptions.RouteDestination.GetHashPolicy()))
-						for _, hashPolicyElement := range routeDestinationOptions.RouteDestination.GetHashPolicy() {
-							routeRouteHashPolicyTypeModel := RouteRouteHashPolicyType{}
-
-							// data specToModelNested RequiredOneOfField --> PolicySpecifier
-							// <no value>
-							if hashPolicyElement.GetPolicySpecifier() != nil {
-								// Create a temporary attribute map for the choices within this OneOf
-								hashPolicypolicySpecifierChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-								// Define a variable for the spec choices to be passed down to nested templates.
-								// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-								hashPolicypolicySpecifierChoiceChoices := hashPolicyElement.GetPolicySpecifier()
-
-								// Process nested choices, populating the temporary attribute map
-
-								// data specToModelNested StringOfOneOfField --> HeaderName
-								headerNameItem, isHeaderName := hashPolicypolicySpecifierChoiceChoices.(*ves_io_schema_route.HashPolicyType_HeaderName)
-
-								if isHeaderName {
-									hashPolicypolicySpecifierChoiceChoicesAttributeMap["header_name"] = types.StringValue(string(headerNameItem.HeaderName))
-								} else {
-									// Empty string, set to null
-									hashPolicypolicySpecifierChoiceChoicesAttributeMap["header_name"] = types.StringNull()
-								}
-
-								// data specToModelNested PointerOfOneOfField --> Cookie
-								// <no value>
-								// false
-								{
-									cookieOptions, isCookie := hashPolicypolicySpecifierChoiceChoices.(*ves_io_schema_route.HashPolicyType_Cookie)
-									cookieAttributeMap := make(map[string]attr.Value)
-
-									if isCookie && cookieOptions != nil {
-
-										// data specToModelNested OneOfField --> Samesite
-										if cookieOptions.Cookie.GetSamesite() != nil {
-											// Create a temporary attribute map for the choices within this OneOf
-											cookiesamesiteChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-											// Define a variable for the spec choices to be passed down to nested templates.
-											// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-											cookiesamesiteChoiceChoices := cookieOptions.Cookie.GetSamesite()
-
-											// Process nested choices, populating the temporary attribute map
-
-											// data specToModelNested BoolOfOneOfPointerField --> SamesiteLax
-											_, isSamesiteLax := cookiesamesiteChoiceChoices.(*ves_io_schema_route.CookieForHashing_SamesiteLax)
-
-											if isSamesiteLax {
-												cookiesamesiteChoiceChoicesAttributeMap["samesite_lax"] = types.BoolValue(true)
-											} else {
-												cookiesamesiteChoiceChoicesAttributeMap["samesite_lax"] = types.BoolNull()
-											}
-
-											// data specToModelNested BoolOfOneOfPointerField --> SamesiteNone
-											_, isSamesiteNone := cookiesamesiteChoiceChoices.(*ves_io_schema_route.CookieForHashing_SamesiteNone)
-
-											if isSamesiteNone {
-												cookiesamesiteChoiceChoicesAttributeMap["samesite_none"] = types.BoolValue(true)
-											} else {
-												cookiesamesiteChoiceChoicesAttributeMap["samesite_none"] = types.BoolNull()
-											}
-
-											// data specToModelNested BoolOfOneOfPointerField --> IgnoreSamesite
-											_, isIgnoreSamesite := cookiesamesiteChoiceChoices.(*ves_io_schema_route.CookieForHashing_IgnoreSamesite)
-
-											if isIgnoreSamesite {
-												cookiesamesiteChoiceChoicesAttributeMap["ignore_samesite"] = types.BoolValue(true)
-											} else {
-												cookiesamesiteChoiceChoicesAttributeMap["ignore_samesite"] = types.BoolNull()
-											}
-
-											// data specToModelNested BoolOfOneOfPointerField --> SamesiteStrict
-											_, isSamesiteStrict := cookiesamesiteChoiceChoices.(*ves_io_schema_route.CookieForHashing_SamesiteStrict)
-
-											if isSamesiteStrict {
-												cookiesamesiteChoiceChoicesAttributeMap["samesite_strict"] = types.BoolValue(true)
-											} else {
-												cookiesamesiteChoiceChoicesAttributeMap["samesite_strict"] = types.BoolNull()
-											}
-
-											// --- End of Choices ---
-
-											// Create the final ObjectValue for this OneOf field
-											finalObj, cookiesamesiteChoiceChoicesObjDiags := types.ObjectValue(
-												RouteRoutesRouteActionRouteDestinationHashPolicyPolicySpecifierCookieSamesiteModelAttributeMap, // The attribute schema for the OneOf choices
-												cookiesamesiteChoiceChoicesAttributeMap,
-											)
-											response.Diagnostics.Append(cookiesamesiteChoiceChoicesObjDiags...)
-											if response.Diagnostics.HasError() {
-												return
-											}
-
-											// Assign the final object to the correct place (either the root model or a parent's attribute map)
-											cookieAttributeMap["samesite_choice"] = finalObj
-										} else {
-											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											cookieAttributeMap["samesite_choice"] = types.ObjectNull(RouteRoutesRouteActionRouteDestinationHashPolicyPolicySpecifierCookieSamesiteModelAttributeMap)
-										}
-
-										// data specToModelNested OneOfField --> Secure
-										if cookieOptions.Cookie.GetSecure() != nil {
-											// Create a temporary attribute map for the choices within this OneOf
-											cookiesecureChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-											// Define a variable for the spec choices to be passed down to nested templates.
-											// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-											cookiesecureChoiceChoices := cookieOptions.Cookie.GetSecure()
-
-											// Process nested choices, populating the temporary attribute map
-
-											// data specToModelNested BoolOfOneOfPointerField --> IgnoreSecure
-											_, isIgnoreSecure := cookiesecureChoiceChoices.(*ves_io_schema_route.CookieForHashing_IgnoreSecure)
-
-											if isIgnoreSecure {
-												cookiesecureChoiceChoicesAttributeMap["ignore_secure"] = types.BoolValue(true)
-											} else {
-												cookiesecureChoiceChoicesAttributeMap["ignore_secure"] = types.BoolNull()
-											}
-
-											// data specToModelNested BoolOfOneOfPointerField --> AddSecure
-											_, isAddSecure := cookiesecureChoiceChoices.(*ves_io_schema_route.CookieForHashing_AddSecure)
-
-											if isAddSecure {
-												cookiesecureChoiceChoicesAttributeMap["add_secure"] = types.BoolValue(true)
-											} else {
-												cookiesecureChoiceChoicesAttributeMap["add_secure"] = types.BoolNull()
-											}
-
-											// --- End of Choices ---
-
-											// Create the final ObjectValue for this OneOf field
-											finalObj, cookiesecureChoiceChoicesObjDiags := types.ObjectValue(
-												RouteRoutesRouteActionRouteDestinationHashPolicyPolicySpecifierCookieSecureModelAttributeMap, // The attribute schema for the OneOf choices
-												cookiesecureChoiceChoicesAttributeMap,
-											)
-											response.Diagnostics.Append(cookiesecureChoiceChoicesObjDiags...)
-											if response.Diagnostics.HasError() {
-												return
-											}
-
-											// Assign the final object to the correct place (either the root model or a parent's attribute map)
-											cookieAttributeMap["secure_choice"] = finalObj
-										} else {
-											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											cookieAttributeMap["secure_choice"] = types.ObjectNull(RouteRoutesRouteActionRouteDestinationHashPolicyPolicySpecifierCookieSecureModelAttributeMap)
-										}
-
-										// data specToModelNested OneOfField --> Httponly
-										if cookieOptions.Cookie.GetHttponly() != nil {
-											// Create a temporary attribute map for the choices within this OneOf
-											cookiehttponlyChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-											// Define a variable for the spec choices to be passed down to nested templates.
-											// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-											cookiehttponlyChoiceChoices := cookieOptions.Cookie.GetHttponly()
-
-											// Process nested choices, populating the temporary attribute map
-
-											// data specToModelNested BoolOfOneOfPointerField --> IgnoreHttponly
-											_, isIgnoreHttponly := cookiehttponlyChoiceChoices.(*ves_io_schema_route.CookieForHashing_IgnoreHttponly)
-
-											if isIgnoreHttponly {
-												cookiehttponlyChoiceChoicesAttributeMap["ignore_httponly"] = types.BoolValue(true)
-											} else {
-												cookiehttponlyChoiceChoicesAttributeMap["ignore_httponly"] = types.BoolNull()
-											}
-
-											// data specToModelNested BoolOfOneOfPointerField --> AddHttponly
-											_, isAddHttponly := cookiehttponlyChoiceChoices.(*ves_io_schema_route.CookieForHashing_AddHttponly)
-
-											if isAddHttponly {
-												cookiehttponlyChoiceChoicesAttributeMap["add_httponly"] = types.BoolValue(true)
-											} else {
-												cookiehttponlyChoiceChoicesAttributeMap["add_httponly"] = types.BoolNull()
-											}
-
-											// --- End of Choices ---
-
-											// Create the final ObjectValue for this OneOf field
-											finalObj, cookiehttponlyChoiceChoicesObjDiags := types.ObjectValue(
-												RouteRoutesRouteActionRouteDestinationHashPolicyPolicySpecifierCookieHttponlyModelAttributeMap, // The attribute schema for the OneOf choices
-												cookiehttponlyChoiceChoicesAttributeMap,
-											)
-											response.Diagnostics.Append(cookiehttponlyChoiceChoicesObjDiags...)
-											if response.Diagnostics.HasError() {
-												return
-											}
-
-											// Assign the final object to the correct place (either the root model or a parent's attribute map)
-											cookieAttributeMap["httponly_choice"] = finalObj
-										} else {
-											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											cookieAttributeMap["httponly_choice"] = types.ObjectNull(RouteRoutesRouteActionRouteDestinationHashPolicyPolicySpecifierCookieHttponlyModelAttributeMap)
-										}
-
-										// data specToModelNested RequiredStringField --> Name
-										if cookieOptions.Cookie.GetName() != "" {
-											cookieAttributeMap["name"] = types.StringValue(cookieOptions.Cookie.GetName())
-										} else {
-											// Empty string, set to null
-											cookieAttributeMap["name"] = types.StringNull()
-										}
-
-										// data specToModelNested UintField --> Ttl
-										cookieAttributeMap["ttl"] = types.Int64Value(int64(cookieOptions.Cookie.GetTtl()))
-
-										// data specToModelNested StringField --> Path
-										if cookieOptions.Cookie.GetPath() != "" {
-											cookieAttributeMap["path"] = types.StringValue(cookieOptions.Cookie.GetPath())
-										} else {
-											// Empty string, set to null
-											cookieAttributeMap["path"] = types.StringNull()
-										}
-
-										cookieObj, diags := types.ObjectValue(RouteRoutesRouteActionRouteDestinationHashPolicyPolicySpecifierCookieModelAttributeMap, cookieAttributeMap)
-										response.Diagnostics.Append(diags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										hashPolicypolicySpecifierChoiceChoicesAttributeMap["cookie"] = cookieObj
-									} else {
-										hashPolicypolicySpecifierChoiceChoicesAttributeMap["cookie"] = types.ObjectNull(RouteRoutesRouteActionRouteDestinationHashPolicyPolicySpecifierCookieModelAttributeMap)
-									}
-								}
-
-								// data specToModelNested BoolOfOneOfField --> SourceIp
-								sourceIpItem, isSourceIp := hashPolicypolicySpecifierChoiceChoices.(*ves_io_schema_route.HashPolicyType_SourceIp)
-
-								if isSourceIp {
-									hashPolicypolicySpecifierChoiceChoicesAttributeMap["source_ip"] = types.BoolValue(bool(sourceIpItem.SourceIp))
-								} else {
-									hashPolicypolicySpecifierChoiceChoicesAttributeMap["source_ip"] = types.BoolNull()
-								}
-
-								// --- End of Choices ---
-
-								// Create the final ObjectValue for this OneOf field
-								finalObj, hashPolicypolicySpecifierChoiceChoicesObjDiags := types.ObjectValue(
-									RouteRoutesRouteActionRouteDestinationHashPolicyPolicySpecifierModelAttributeMap, // The attribute schema for the OneOf choices
-									hashPolicypolicySpecifierChoiceChoicesAttributeMap,
-								)
-								response.Diagnostics.Append(hashPolicypolicySpecifierChoiceChoicesObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-
-								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								routeRouteHashPolicyTypeModel.PolicySpecifierChoice = finalObj
-							} else {
-								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								routeRouteHashPolicyTypeModel.PolicySpecifierChoice = types.ObjectNull(RouteRoutesRouteActionRouteDestinationHashPolicyPolicySpecifierModelAttributeMap)
-							}
-
-							// data specToModelNested BoolField --> Terminal
-							routeRouteHashPolicyTypeModel.Terminal = types.BoolValue(bool(hashPolicyElement.GetTerminal()))
-
-							hashPolicyElements = append(hashPolicyElements, routeRouteHashPolicyTypeModel)
-						}
-						// CASE 1: The target field is a `types.List` or an attribute map.
-						// The intermediate slice of structs must be converted to a `types.ListValue`.
-						hashPolicyListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: RouteRoutesRouteActionRouteDestinationHashPolicyModelAttributeMap}, hashPolicyElements)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						routeDestinationAttributeMap["hash_policy"] = hashPolicyListValue
-
-					} else {
-						// The source list is empty or nil.
-						// CASE 1: The target field is a `types.List` or an attribute map.
-						// Assign a null `types.ListValue`.
-						routeDestinationAttributeMap["hash_policy"] = types.ListNull(types.ObjectType{AttrTypes: RouteRoutesRouteActionRouteDestinationHashPolicyModelAttributeMap})
-					}
-
-					// data specToModelNested PointerField --> SpdyConfig
-					if routeDestinationOptions.RouteDestination.GetSpdyConfig() != nil {
-						// Create the nested Go struct
-						routeRouteSpdyConfigTypeModel := &RouteRouteSpdyConfigType{}
-						spdyConfigElement := routeDestinationOptions.RouteDestination.GetSpdyConfig()
-
-						// Recursively populate the nested struct
-
-						// data specToModelNested BoolField --> UseSpdy
-						routeRouteSpdyConfigTypeModel.UseSpdy = types.BoolValue(bool(spdyConfigElement.GetUseSpdy()))
-
-						// This field needs to be converted to a types.ObjectValue before assignment.
-						routeRouteSpdyConfigTypeModelObj, diags := types.ObjectValueFrom(ctx, RouteRoutesRouteActionRouteDestinationSpdyConfigModelAttributeMap, routeRouteSpdyConfigTypeModel)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						routeDestinationAttributeMap["spdy_config"] = routeRouteSpdyConfigTypeModelObj
-
-					} else {
-						// The source field is nil (e.g. redacted by the API).
-						// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-						// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-						// because the API may always return a non-nil struct (with REDACTED values) for this field,
-						// making this else-branch unreachable. The child OneOf handles the actual healing.
-						// The target is a types.Object, so we use types.ObjectNull.
-						routeDestinationAttributeMap["spdy_config"] = types.ObjectNull(RouteRoutesRouteActionRouteDestinationSpdyConfigModelAttributeMap)
-					}
-
-					// data specToModelNested PointerField --> CorsPolicy
-					if routeDestinationOptions.RouteDestination.GetCorsPolicy() != nil {
-						// Create the nested Go struct
-						routeCorsPolicyModel := &RouteCorsPolicy{}
-						corsPolicyElement := routeDestinationOptions.RouteDestination.GetCorsPolicy()
-
-						// Recursively populate the nested struct
-
-						// data specToModelNested StringField --> AllowMethods
-						if corsPolicyElement.GetAllowMethods() != "" {
-							routeCorsPolicyModel.AllowMethods = types.StringValue(corsPolicyElement.GetAllowMethods())
-						} else {
-							// Empty string, set to null
-							routeCorsPolicyModel.AllowMethods = types.StringNull()
-						}
-
-						// data specToModelNested StringField --> ExposeHeaders
-						if corsPolicyElement.GetExposeHeaders() != "" {
-							routeCorsPolicyModel.ExposeHeaders = types.StringValue(corsPolicyElement.GetExposeHeaders())
-						} else {
-							// Empty string, set to null
-							routeCorsPolicyModel.ExposeHeaders = types.StringNull()
-						}
-
-						// data specToModelNested BoolField --> AllowCredentials
-						routeCorsPolicyModel.AllowCredentials = types.BoolValue(bool(corsPolicyElement.GetAllowCredentials()))
-
-						// data specToModelNested ArrayOfStringField --> AllowOrigin
-						if len(corsPolicyElement.GetAllowOrigin()) > 0 {
-							listValue, diags := types.ListValueFrom(ctx, types.StringType, corsPolicyElement.GetAllowOrigin())
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							routeCorsPolicyModel.AllowOrigin = listValue
-						} else {
-							routeCorsPolicyModel.AllowOrigin = types.ListNull(types.StringType)
-						}
-
-						// data specToModelNested StringField --> AllowHeaders
-						if corsPolicyElement.GetAllowHeaders() != "" {
-							routeCorsPolicyModel.AllowHeaders = types.StringValue(corsPolicyElement.GetAllowHeaders())
-						} else {
-							// Empty string, set to null
-							routeCorsPolicyModel.AllowHeaders = types.StringNull()
-						}
-
-						// data specToModelNested IntField --> MaximumAge
-						routeCorsPolicyModel.MaximumAge = types.Int32Value(corsPolicyElement.GetMaximumAge())
-
-						// data specToModelNested BoolField --> Disabled
-						routeCorsPolicyModel.Disabled = types.BoolValue(bool(corsPolicyElement.GetDisabled()))
-
-						// data specToModelNested ArrayOfStringField --> AllowOriginRegex
-						if len(corsPolicyElement.GetAllowOriginRegex()) > 0 {
-							listValue, diags := types.ListValueFrom(ctx, types.StringType, corsPolicyElement.GetAllowOriginRegex())
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							routeCorsPolicyModel.AllowOriginRegex = listValue
-						} else {
-							routeCorsPolicyModel.AllowOriginRegex = types.ListNull(types.StringType)
-						}
-
-						// This field needs to be converted to a types.ObjectValue before assignment.
-						routeCorsPolicyModelObj, diags := types.ObjectValueFrom(ctx, RouteRoutesRouteActionRouteDestinationCorsPolicyModelAttributeMap, routeCorsPolicyModel)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						routeDestinationAttributeMap["cors_policy"] = routeCorsPolicyModelObj
-
-					} else {
-						// The source field is nil (e.g. redacted by the API).
-						// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-						// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-						// because the API may always return a non-nil struct (with REDACTED values) for this field,
-						// making this else-branch unreachable. The child OneOf handles the actual healing.
-						// The target is a types.Object, so we use types.ObjectNull.
-						routeDestinationAttributeMap["cors_policy"] = types.ObjectNull(RouteRoutesRouteActionRouteDestinationCorsPolicyModelAttributeMap)
-					}
-
-					// data specToModelNested PointerField --> CsrfPolicy
-					if routeDestinationOptions.RouteDestination.GetCsrfPolicy() != nil {
-						// Create the nested Go struct
-						routeCsrfPolicyModel := &RouteCsrfPolicy{}
-						csrfPolicyElement := routeDestinationOptions.RouteDestination.GetCsrfPolicy()
-
-						// Recursively populate the nested struct
-
-						// data specToModelNested RequiredOneOfField --> AllowedDomains
-						// <no value>
-						if csrfPolicyElement.GetAllowedDomains() != nil {
-							// Create a temporary attribute map for the choices within this OneOf
-							csrfPolicyallowedDomainsChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-							// Define a variable for the spec choices to be passed down to nested templates.
-							// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-							csrfPolicyallowedDomainsChoiceChoices := csrfPolicyElement.GetAllowedDomains()
-
-							// Process nested choices, populating the temporary attribute map
-
-							// data specToModelNested BoolOfOneOfPointerField --> Disabled
-							_, isDisabled := csrfPolicyallowedDomainsChoiceChoices.(*ves_io_schema.CsrfPolicy_Disabled)
-
-							if isDisabled {
-								csrfPolicyallowedDomainsChoiceChoicesAttributeMap["disabled"] = types.BoolValue(true)
-							} else {
-								csrfPolicyallowedDomainsChoiceChoicesAttributeMap["disabled"] = types.BoolNull()
-							}
-
-							// data specToModelNested BoolOfOneOfPointerField --> AllLoadBalancerDomains
-							_, isAllLoadBalancerDomains := csrfPolicyallowedDomainsChoiceChoices.(*ves_io_schema.CsrfPolicy_AllLoadBalancerDomains)
-
-							if isAllLoadBalancerDomains {
-								csrfPolicyallowedDomainsChoiceChoicesAttributeMap["all_load_balancer_domains"] = types.BoolValue(true)
-							} else {
-								csrfPolicyallowedDomainsChoiceChoicesAttributeMap["all_load_balancer_domains"] = types.BoolNull()
-							}
-
-							// data specToModelNested PointerOfOneOfField --> CustomDomainList
-							// <no value>
-							// false
-							{
-								customDomainListOptions, isCustomDomainList := csrfPolicyallowedDomainsChoiceChoices.(*ves_io_schema.CsrfPolicy_CustomDomainList)
-								customDomainListAttributeMap := make(map[string]attr.Value)
-
-								if isCustomDomainList && customDomainListOptions != nil {
-
-									// data specToModelNested RequiredArrayOfStringField --> Domains
-									if len(customDomainListOptions.CustomDomainList.GetDomains()) > 0 {
-										listValue, diags := types.ListValueFrom(ctx, types.StringType, customDomainListOptions.CustomDomainList.GetDomains())
-										response.Diagnostics.Append(diags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										customDomainListAttributeMap["domains"] = listValue
-									} else {
-										customDomainListAttributeMap["domains"] = types.ListNull(types.StringType)
-									}
-
-									customDomainListObj, diags := types.ObjectValue(RouteRoutesRouteActionRouteDestinationCsrfPolicyAllowedDomainsCustomDomainListModelAttributeMap, customDomainListAttributeMap)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									csrfPolicyallowedDomainsChoiceChoicesAttributeMap["custom_domain_list"] = customDomainListObj
-								} else {
-									csrfPolicyallowedDomainsChoiceChoicesAttributeMap["custom_domain_list"] = types.ObjectNull(RouteRoutesRouteActionRouteDestinationCsrfPolicyAllowedDomainsCustomDomainListModelAttributeMap)
-								}
-							}
-
-							// --- End of Choices ---
-
-							// Create the final ObjectValue for this OneOf field
-							finalObj, csrfPolicyallowedDomainsChoiceChoicesObjDiags := types.ObjectValue(
-								RouteRoutesRouteActionRouteDestinationCsrfPolicyAllowedDomainsModelAttributeMap, // The attribute schema for the OneOf choices
-								csrfPolicyallowedDomainsChoiceChoicesAttributeMap,
-							)
-							response.Diagnostics.Append(csrfPolicyallowedDomainsChoiceChoicesObjDiags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							routeCsrfPolicyModel.AllowedDomainsChoice = finalObj
-						} else {
-							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							routeCsrfPolicyModel.AllowedDomainsChoice = types.ObjectNull(RouteRoutesRouteActionRouteDestinationCsrfPolicyAllowedDomainsModelAttributeMap)
-						}
-
-						// This field needs to be converted to a types.ObjectValue before assignment.
-						routeCsrfPolicyModelObj, diags := types.ObjectValueFrom(ctx, RouteRoutesRouteActionRouteDestinationCsrfPolicyModelAttributeMap, routeCsrfPolicyModel)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						routeDestinationAttributeMap["csrf_policy"] = routeCsrfPolicyModelObj
-
-					} else {
-						// The source field is nil (e.g. redacted by the API).
-						// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-						// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-						// because the API may always return a non-nil struct (with REDACTED values) for this field,
-						// making this else-branch unreachable. The child OneOf handles the actual healing.
-						// The target is a types.Object, so we use types.ObjectNull.
-						routeDestinationAttributeMap["csrf_policy"] = types.ObjectNull(RouteRoutesRouteActionRouteDestinationCsrfPolicyModelAttributeMap)
-					}
-
-					// data specToModelNested OneOfField --> ClusterRetractChoice
-					if routeDestinationOptions.RouteDestination.GetClusterRetractChoice() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						routeDestinationclusterRetractChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates.
-						// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-						routeDestinationclusterRetractChoiceChoices := routeDestinationOptions.RouteDestination.GetClusterRetractChoice()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// data specToModelNested BoolOfOneOfPointerField --> RetractCluster
-						_, isRetractCluster := routeDestinationclusterRetractChoiceChoices.(*ves_io_schema_route.RouteDestinationList_RetractCluster)
-
-						if isRetractCluster {
-							routeDestinationclusterRetractChoiceChoicesAttributeMap["retract_cluster"] = types.BoolValue(true)
-						} else {
-							routeDestinationclusterRetractChoiceChoicesAttributeMap["retract_cluster"] = types.BoolNull()
-						}
-
-						// data specToModelNested BoolOfOneOfPointerField --> DoNotRetractCluster
-						_, isDoNotRetractCluster := routeDestinationclusterRetractChoiceChoices.(*ves_io_schema_route.RouteDestinationList_DoNotRetractCluster)
-
-						if isDoNotRetractCluster {
-							routeDestinationclusterRetractChoiceChoicesAttributeMap["do_not_retract_cluster"] = types.BoolValue(true)
-						} else {
-							routeDestinationclusterRetractChoiceChoicesAttributeMap["do_not_retract_cluster"] = types.BoolNull()
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, routeDestinationclusterRetractChoiceChoicesObjDiags := types.ObjectValue(
-							RouteRoutesRouteActionRouteDestinationClusterRetractChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-							routeDestinationclusterRetractChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(routeDestinationclusterRetractChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						routeDestinationAttributeMap["cluster_retract_choice"] = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						routeDestinationAttributeMap["cluster_retract_choice"] = types.ObjectNull(RouteRoutesRouteActionRouteDestinationClusterRetractChoiceModelAttributeMap)
-					}
-
-					// data specToModelNested PointerField --> QueryParams
-					if routeDestinationOptions.RouteDestination.GetQueryParams() != nil {
-						// Create the nested Go struct
-						routeRouteQueryParamsSimpleRouteModel := &RouteRouteQueryParamsSimpleRoute{}
-						queryParamsElement := routeDestinationOptions.RouteDestination.GetQueryParams()
-
-						// Recursively populate the nested struct
-
-						// data specToModelNested RequiredOneOfField --> QueryParams
-						// <no value>
-						if queryParamsElement.GetQueryParams() != nil {
-							// Create a temporary attribute map for the choices within this OneOf
-							queryParamsqueryParamsChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-							// Define a variable for the spec choices to be passed down to nested templates.
-							// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-							queryParamsqueryParamsChoiceChoices := queryParamsElement.GetQueryParams()
-
-							// Process nested choices, populating the temporary attribute map
-
-							// data specToModelNested BoolOfOneOfPointerField --> RetainAllParams
-							_, isRetainAllParams := queryParamsqueryParamsChoiceChoices.(*ves_io_schema_route.QueryParamsSimpleRoute_RetainAllParams)
-
-							if isRetainAllParams {
-								queryParamsqueryParamsChoiceChoicesAttributeMap["retain_all_params"] = types.BoolValue(true)
-							} else {
-								queryParamsqueryParamsChoiceChoicesAttributeMap["retain_all_params"] = types.BoolNull()
-							}
-
-							// data specToModelNested BoolOfOneOfPointerField --> RemoveAllParams
-							_, isRemoveAllParams := queryParamsqueryParamsChoiceChoices.(*ves_io_schema_route.QueryParamsSimpleRoute_RemoveAllParams)
-
-							if isRemoveAllParams {
-								queryParamsqueryParamsChoiceChoicesAttributeMap["remove_all_params"] = types.BoolValue(true)
-							} else {
-								queryParamsqueryParamsChoiceChoicesAttributeMap["remove_all_params"] = types.BoolNull()
-							}
-
-							// data specToModelNested StringOfOneOfField --> ReplaceParams
-							replaceParamsItem, isReplaceParams := queryParamsqueryParamsChoiceChoices.(*ves_io_schema_route.QueryParamsSimpleRoute_ReplaceParams)
-
-							if isReplaceParams {
-								queryParamsqueryParamsChoiceChoicesAttributeMap["replace_params"] = types.StringValue(string(replaceParamsItem.ReplaceParams))
-							} else {
-								// Empty string, set to null
-								queryParamsqueryParamsChoiceChoicesAttributeMap["replace_params"] = types.StringNull()
-							}
-
-							// --- End of Choices ---
-
-							// Create the final ObjectValue for this OneOf field
-							finalObj, queryParamsqueryParamsChoiceChoicesObjDiags := types.ObjectValue(
-								RouteRoutesRouteActionRouteDestinationQueryParamsQueryParamsModelAttributeMap, // The attribute schema for the OneOf choices
-								queryParamsqueryParamsChoiceChoicesAttributeMap,
-							)
-							response.Diagnostics.Append(queryParamsqueryParamsChoiceChoicesObjDiags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							routeRouteQueryParamsSimpleRouteModel.QueryParamsChoice = finalObj
-						} else {
-							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							routeRouteQueryParamsSimpleRouteModel.QueryParamsChoice = types.ObjectNull(RouteRoutesRouteActionRouteDestinationQueryParamsQueryParamsModelAttributeMap)
-						}
-
-						// This field needs to be converted to a types.ObjectValue before assignment.
-						routeRouteQueryParamsSimpleRouteModelObj, diags := types.ObjectValueFrom(ctx, RouteRoutesRouteActionRouteDestinationQueryParamsModelAttributeMap, routeRouteQueryParamsSimpleRouteModel)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						routeDestinationAttributeMap["query_params"] = routeRouteQueryParamsSimpleRouteModelObj
-
-					} else {
-						// The source field is nil (e.g. redacted by the API).
-						// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-						// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-						// because the API may always return a non-nil struct (with REDACTED values) for this field,
-						// making this else-branch unreachable. The child OneOf handles the actual healing.
-						// The target is a types.Object, so we use types.ObjectNull.
-						routeDestinationAttributeMap["query_params"] = types.ObjectNull(RouteRoutesRouteActionRouteDestinationQueryParamsModelAttributeMap)
-					}
-
-					// data specToModelNested OneOfField --> RouteDestinationRewrite
-					if routeDestinationOptions.RouteDestination.GetRouteDestinationRewrite() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						routeDestinationrouteDestinationRewriteChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates.
-						// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-						routeDestinationrouteDestinationRewriteChoiceChoices := routeDestinationOptions.RouteDestination.GetRouteDestinationRewrite()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// data specToModelNested StringOfOneOfField --> PrefixRewrite
-						prefixRewriteItem, isPrefixRewrite := routeDestinationrouteDestinationRewriteChoiceChoices.(*ves_io_schema_route.RouteDestinationList_PrefixRewrite)
-
-						if isPrefixRewrite {
-							routeDestinationrouteDestinationRewriteChoiceChoicesAttributeMap["prefix_rewrite"] = types.StringValue(string(prefixRewriteItem.PrefixRewrite))
-						} else {
-							// Empty string, set to null
-							routeDestinationrouteDestinationRewriteChoiceChoicesAttributeMap["prefix_rewrite"] = types.StringNull()
-						}
-
-						// data specToModelNested PointerOfOneOfField --> RegexRewrite
-						// <no value>
-						// false
-						{
-							regexRewriteOptions, isRegexRewrite := routeDestinationrouteDestinationRewriteChoiceChoices.(*ves_io_schema_route.RouteDestinationList_RegexRewrite)
-							regexRewriteAttributeMap := make(map[string]attr.Value)
-
-							if isRegexRewrite && regexRewriteOptions != nil {
-
-								// data specToModelNested StringField --> Pattern
-								if regexRewriteOptions.RegexRewrite.GetPattern() != "" {
-									regexRewriteAttributeMap["pattern"] = types.StringValue(regexRewriteOptions.RegexRewrite.GetPattern())
-								} else {
-									// Empty string, set to null
-									regexRewriteAttributeMap["pattern"] = types.StringNull()
-								}
-
-								// data specToModelNested StringField --> Substitution
-								if regexRewriteOptions.RegexRewrite.GetSubstitution() != "" {
-									regexRewriteAttributeMap["substitution"] = types.StringValue(regexRewriteOptions.RegexRewrite.GetSubstitution())
-								} else {
-									// Empty string, set to null
-									regexRewriteAttributeMap["substitution"] = types.StringNull()
-								}
-
-								regexRewriteObj, diags := types.ObjectValue(RouteRoutesRouteActionRouteDestinationRouteDestinationRewriteRegexRewriteModelAttributeMap, regexRewriteAttributeMap)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								routeDestinationrouteDestinationRewriteChoiceChoicesAttributeMap["regex_rewrite"] = regexRewriteObj
-							} else {
-								routeDestinationrouteDestinationRewriteChoiceChoicesAttributeMap["regex_rewrite"] = types.ObjectNull(RouteRoutesRouteActionRouteDestinationRouteDestinationRewriteRegexRewriteModelAttributeMap)
-							}
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, routeDestinationrouteDestinationRewriteChoiceChoicesObjDiags := types.ObjectValue(
-							RouteRoutesRouteActionRouteDestinationRouteDestinationRewriteModelAttributeMap, // The attribute schema for the OneOf choices
-							routeDestinationrouteDestinationRewriteChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(routeDestinationrouteDestinationRewriteChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						routeDestinationAttributeMap["route_destination_rewrite_choice"] = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						routeDestinationAttributeMap["route_destination_rewrite_choice"] = types.ObjectNull(RouteRoutesRouteActionRouteDestinationRouteDestinationRewriteModelAttributeMap)
-					}
-
-					// data specToModelNested RequiredOneOfField --> HostRewriteParams
-					// <no value>
-					if routeDestinationOptions.RouteDestination.GetHostRewriteParams() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						routeDestinationhostRewriteParamsChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates.
-						// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-						routeDestinationhostRewriteParamsChoiceChoices := routeDestinationOptions.RouteDestination.GetHostRewriteParams()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// data specToModelNested StringOfOneOfField --> HostRewrite
-						hostRewriteItem, isHostRewrite := routeDestinationhostRewriteParamsChoiceChoices.(*ves_io_schema_route.RouteDestinationList_HostRewrite)
-
-						if isHostRewrite {
-							routeDestinationhostRewriteParamsChoiceChoicesAttributeMap["host_rewrite"] = types.StringValue(string(hostRewriteItem.HostRewrite))
-						} else {
-							// Empty string, set to null
-							routeDestinationhostRewriteParamsChoiceChoicesAttributeMap["host_rewrite"] = types.StringNull()
-						}
-
-						// data specToModelNested BoolOfOneOfField --> AutoHostRewrite
-						autoHostRewriteItem, isAutoHostRewrite := routeDestinationhostRewriteParamsChoiceChoices.(*ves_io_schema_route.RouteDestinationList_AutoHostRewrite)
-
-						if isAutoHostRewrite {
-							routeDestinationhostRewriteParamsChoiceChoicesAttributeMap["auto_host_rewrite"] = types.BoolValue(bool(autoHostRewriteItem.AutoHostRewrite))
-						} else {
-							routeDestinationhostRewriteParamsChoiceChoicesAttributeMap["auto_host_rewrite"] = types.BoolNull()
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, routeDestinationhostRewriteParamsChoiceChoicesObjDiags := types.ObjectValue(
-							RouteRoutesRouteActionRouteDestinationHostRewriteParamsModelAttributeMap, // The attribute schema for the OneOf choices
-							routeDestinationhostRewriteParamsChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(routeDestinationhostRewriteParamsChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						routeDestinationAttributeMap["host_rewrite_params_choice"] = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						routeDestinationAttributeMap["host_rewrite_params_choice"] = types.ObjectNull(RouteRoutesRouteActionRouteDestinationHostRewriteParamsModelAttributeMap)
-					}
-
-					// data specToModelNested UintField --> Timeout
-					routeDestinationAttributeMap["timeout"] = types.Int64Value(int64(routeDestinationOptions.RouteDestination.GetTimeout()))
-
-					routeDestinationObj, diags := types.ObjectValue(RouteRoutesRouteActionRouteDestinationModelAttributeMap, routeDestinationAttributeMap)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					routesrouteActionChoiceChoicesAttributeMap["route_destination"] = routeDestinationObj
-				} else {
-					routesrouteActionChoiceChoicesAttributeMap["route_destination"] = types.ObjectNull(RouteRoutesRouteActionRouteDestinationModelAttributeMap)
-				}
-			}
-
-			// data specToModelNested PointerOfOneOfField --> RouteRedirect
-			// <no value>
-			// false
-			{
-				routeRedirectOptions, isRouteRedirect := routesrouteActionChoiceChoices.(*ves_io_schema_route.RouteType_RouteRedirect)
-				routeRedirectAttributeMap := make(map[string]attr.Value)
-
-				if isRouteRedirect && routeRedirectOptions != nil {
-
-					// data specToModelNested StringField --> HostRedirect
-					if routeRedirectOptions.RouteRedirect.GetHostRedirect() != "" {
-						routeRedirectAttributeMap["host_redirect"] = types.StringValue(routeRedirectOptions.RouteRedirect.GetHostRedirect())
-					} else {
-						// Empty string, set to null
-						routeRedirectAttributeMap["host_redirect"] = types.StringNull()
-					}
-
-					// data specToModelNested OneOfField --> RedirectPathChoice
-					if routeRedirectOptions.RouteRedirect.GetRedirectPathChoice() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						routeRedirectredirectPathChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates.
-						// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-						routeRedirectredirectPathChoiceChoices := routeRedirectOptions.RouteRedirect.GetRedirectPathChoice()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// data specToModelNested StringOfOneOfField --> PathRedirect
-						pathRedirectItem, isPathRedirect := routeRedirectredirectPathChoiceChoices.(*ves_io_schema_route.RouteRedirect_PathRedirect)
-
-						if isPathRedirect {
-							routeRedirectredirectPathChoiceChoicesAttributeMap["path_redirect"] = types.StringValue(string(pathRedirectItem.PathRedirect))
-						} else {
-							// Empty string, set to null
-							routeRedirectredirectPathChoiceChoicesAttributeMap["path_redirect"] = types.StringNull()
-						}
-
-						// data specToModelNested StringOfOneOfField --> PrefixRewrite
-						prefixRewriteItem, isPrefixRewrite := routeRedirectredirectPathChoiceChoices.(*ves_io_schema_route.RouteRedirect_PrefixRewrite)
-
-						if isPrefixRewrite {
-							routeRedirectredirectPathChoiceChoicesAttributeMap["prefix_rewrite"] = types.StringValue(string(prefixRewriteItem.PrefixRewrite))
-						} else {
-							// Empty string, set to null
-							routeRedirectredirectPathChoiceChoicesAttributeMap["prefix_rewrite"] = types.StringNull()
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, routeRedirectredirectPathChoiceChoicesObjDiags := types.ObjectValue(
-							RouteRoutesRouteActionRouteRedirectRedirectPathChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-							routeRedirectredirectPathChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(routeRedirectredirectPathChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						routeRedirectAttributeMap["redirect_path_choice"] = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						routeRedirectAttributeMap["redirect_path_choice"] = types.ObjectNull(RouteRoutesRouteActionRouteRedirectRedirectPathChoiceModelAttributeMap)
-					}
-
-					// data specToModelNested StringField --> ProtoRedirect
-					if routeRedirectOptions.RouteRedirect.GetProtoRedirect() != "" {
-						routeRedirectAttributeMap["proto_redirect"] = types.StringValue(routeRedirectOptions.RouteRedirect.GetProtoRedirect())
-					} else {
-						// Empty string, set to null
-						routeRedirectAttributeMap["proto_redirect"] = types.StringNull()
-					}
-
-					// data specToModelNested OneOfField --> QueryParams
-					if routeRedirectOptions.RouteRedirect.GetQueryParams() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						routeRedirectqueryParamsChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates.
-						// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-						routeRedirectqueryParamsChoiceChoices := routeRedirectOptions.RouteRedirect.GetQueryParams()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// data specToModelNested StringOfOneOfField --> ReplaceParams
-						replaceParamsItem, isReplaceParams := routeRedirectqueryParamsChoiceChoices.(*ves_io_schema_route.RouteRedirect_ReplaceParams)
-
-						if isReplaceParams {
-							routeRedirectqueryParamsChoiceChoicesAttributeMap["replace_params"] = types.StringValue(string(replaceParamsItem.ReplaceParams))
-						} else {
-							// Empty string, set to null
-							routeRedirectqueryParamsChoiceChoicesAttributeMap["replace_params"] = types.StringNull()
-						}
-
-						// data specToModelNested BoolOfOneOfPointerField --> RetainAllParams
-						_, isRetainAllParams := routeRedirectqueryParamsChoiceChoices.(*ves_io_schema_route.RouteRedirect_RetainAllParams)
-
-						if isRetainAllParams {
-							routeRedirectqueryParamsChoiceChoicesAttributeMap["retain_all_params"] = types.BoolValue(true)
-						} else {
-							routeRedirectqueryParamsChoiceChoicesAttributeMap["retain_all_params"] = types.BoolNull()
-						}
-
-						// data specToModelNested BoolOfOneOfPointerField --> RemoveAllParams
-						_, isRemoveAllParams := routeRedirectqueryParamsChoiceChoices.(*ves_io_schema_route.RouteRedirect_RemoveAllParams)
-
-						if isRemoveAllParams {
-							routeRedirectqueryParamsChoiceChoicesAttributeMap["remove_all_params"] = types.BoolValue(true)
-						} else {
-							routeRedirectqueryParamsChoiceChoicesAttributeMap["remove_all_params"] = types.BoolNull()
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, routeRedirectqueryParamsChoiceChoicesObjDiags := types.ObjectValue(
-							RouteRoutesRouteActionRouteRedirectQueryParamsModelAttributeMap, // The attribute schema for the OneOf choices
-							routeRedirectqueryParamsChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(routeRedirectqueryParamsChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						routeRedirectAttributeMap["query_params_choice"] = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						routeRedirectAttributeMap["query_params_choice"] = types.ObjectNull(RouteRoutesRouteActionRouteRedirectQueryParamsModelAttributeMap)
-					}
-
-					// data specToModelNested UintField --> ResponseCode
-					routeRedirectAttributeMap["response_code"] = types.Int64Value(int64(routeRedirectOptions.RouteRedirect.GetResponseCode()))
-
-					routeRedirectObj, diags := types.ObjectValue(RouteRoutesRouteActionRouteRedirectModelAttributeMap, routeRedirectAttributeMap)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					routesrouteActionChoiceChoicesAttributeMap["route_redirect"] = routeRedirectObj
-				} else {
-					routesrouteActionChoiceChoicesAttributeMap["route_redirect"] = types.ObjectNull(RouteRoutesRouteActionRouteRedirectModelAttributeMap)
-				}
-			}
-
-			// data specToModelNested PointerOfOneOfField --> RouteDirectResponse
-			// <no value>
-			// false
-			{
-				routeDirectResponseOptions, isRouteDirectResponse := routesrouteActionChoiceChoices.(*ves_io_schema_route.RouteType_RouteDirectResponse)
-				routeDirectResponseAttributeMap := make(map[string]attr.Value)
-
-				if isRouteDirectResponse && routeDirectResponseOptions != nil {
-
-					// data specToModelNested UintField --> ResponseCode
-					routeDirectResponseAttributeMap["response_code"] = types.Int64Value(int64(routeDirectResponseOptions.RouteDirectResponse.GetResponseCode()))
-
-					// data specToModelNested StringField --> ResponseBodyEncoded
-					if routeDirectResponseOptions.RouteDirectResponse.GetResponseBodyEncoded() != "" {
-						routeDirectResponseAttributeMap["response_body_encoded"] = types.StringValue(routeDirectResponseOptions.RouteDirectResponse.GetResponseBodyEncoded())
-					} else {
-						// Empty string, set to null
-						routeDirectResponseAttributeMap["response_body_encoded"] = types.StringNull()
-					}
-
-					routeDirectResponseObj, diags := types.ObjectValue(RouteRoutesRouteActionRouteDirectResponseModelAttributeMap, routeDirectResponseAttributeMap)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					routesrouteActionChoiceChoicesAttributeMap["route_direct_response"] = routeDirectResponseObj
-				} else {
-					routesrouteActionChoiceChoicesAttributeMap["route_direct_response"] = types.ObjectNull(RouteRoutesRouteActionRouteDirectResponseModelAttributeMap)
-				}
-			}
-
-			// --- End of Choices ---
-
-			// Create the final ObjectValue for this OneOf field
-			finalObj, routesrouteActionChoiceChoicesObjDiags := types.ObjectValue(
-				RouteRoutesRouteActionModelAttributeMap, // The attribute schema for the OneOf choices
-				routesrouteActionChoiceChoicesAttributeMap,
-			)
-			response.Diagnostics.Append(routesrouteActionChoiceChoicesObjDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			routeRouteRouteTypeModel.RouteActionChoice = finalObj
-		} else {
-			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			routeRouteRouteTypeModel.RouteActionChoice = types.ObjectNull(RouteRoutesRouteActionModelAttributeMap)
-		}
-
-		// data specToModelNested ArrayOfPointerField --> ResponseCookiesToAdd
-		if len(routesElement.GetResponseCookiesToAdd()) > 0 {
-			// Step 1: Always create a slice of model structs from the spec data.
-			// This slice serves as an intermediate representation.
-			responseCookiesToAddElements := make([]RouteSetCookieValueOption, 0, len(routesElement.GetResponseCookiesToAdd()))
-			for _, responseCookiesToAddElement := range routesElement.GetResponseCookiesToAdd() {
-				routeSetCookieValueOptionModel := RouteSetCookieValueOption{}
-
-				// data specToModelNested OneOfField --> ValueChoice
-				if responseCookiesToAddElement.GetValueChoice() != nil {
-					// Create a temporary attribute map for the choices within this OneOf
-					responseCookiesToAddvalueChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-					// Define a variable for the spec choices to be passed down to nested templates.
-					// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-					responseCookiesToAddvalueChoiceChoices := responseCookiesToAddElement.GetValueChoice()
-
-					// Process nested choices, populating the temporary attribute map
-
-					// data specToModelNested BoolOfOneOfPointerField --> IgnoreValue
-					_, isIgnoreValue := responseCookiesToAddvalueChoiceChoices.(*ves_io_schema.SetCookieValueOption_IgnoreValue)
-
-					if isIgnoreValue {
-						responseCookiesToAddvalueChoiceChoicesAttributeMap["ignore_value"] = types.BoolValue(true)
-					} else {
-						responseCookiesToAddvalueChoiceChoicesAttributeMap["ignore_value"] = types.BoolNull()
-					}
-
-					// data specToModelNested StringOfOneOfField --> Value
-					valueItem, isValue := responseCookiesToAddvalueChoiceChoices.(*ves_io_schema.SetCookieValueOption_Value)
-
-					if isValue {
-						responseCookiesToAddvalueChoiceChoicesAttributeMap["value"] = types.StringValue(string(valueItem.Value))
-					} else {
-						// Empty string, set to null
-						responseCookiesToAddvalueChoiceChoicesAttributeMap["value"] = types.StringNull()
-					}
-
-					// data specToModelNested PointerOfOneOfField --> SecretValue
-					// <no value>
-					// false
-					{
-						secretValueOptions, isSecretValue := responseCookiesToAddvalueChoiceChoices.(*ves_io_schema.SetCookieValueOption_SecretValue)
-						secretValueAttributeMap := make(map[string]attr.Value)
-
-						if isSecretValue && secretValueOptions != nil {
-
-							// data specToModelNested RequiredOneOfField --> SecretInfoOneof
-							// <no value>
-							if secretValueOptions.SecretValue.GetSecretInfoOneof() != nil {
-								// Create a temporary attribute map for the choices within this OneOf
-								secretValuesecretInfoChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-								// Define a variable for the spec choices to be passed down to nested templates.
-								// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-								secretValuesecretInfoChoiceChoices := secretValueOptions.SecretValue.GetSecretInfoOneof()
-
-								// Process nested choices, populating the temporary attribute map
-
-								// data specToModelNested PointerOfOneOfField --> BlindfoldSecretInfo
-								// <no value>
-								// false
-								{
-									blindfoldSecretInfoOptions, isBlindfoldSecretInfo := secretValuesecretInfoChoiceChoices.(*ves_io_schema.SecretType_BlindfoldSecretInfo)
-									blindfoldSecretInfoAttributeMap := make(map[string]attr.Value)
-
-									if isBlindfoldSecretInfo && blindfoldSecretInfoOptions != nil {
-
-										// data specToModelNested StringField --> DecryptionProvider
-										if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider() != "" {
-											blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider())
-										} else {
-											// Empty string, set to null
-											blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringNull()
-										}
-
-										// data specToModelNested StringField --> StoreProvider
-										if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider() != "" {
-											blindfoldSecretInfoAttributeMap["store_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider())
-										} else {
-											// Empty string, set to null
-											blindfoldSecretInfoAttributeMap["store_provider"] = types.StringNull()
-										}
-
-										// data specToModelNested RequiredStringField --> Location
-										if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation() != "" {
-											blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation())
-										} else {
-											// Empty string, set to null
-											blindfoldSecretInfoAttributeMap["location"] = types.StringNull()
-										}
-
-										blindfoldSecretInfoObj, diags := types.ObjectValue(RouteRoutesResponseCookiesToAddValueChoiceSecretValueSecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
-										response.Diagnostics.Append(diags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										secretValuesecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = blindfoldSecretInfoObj
-									} else {
-										secretValuesecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = types.ObjectNull(RouteRoutesResponseCookiesToAddValueChoiceSecretValueSecretInfoOneofBlindfoldSecretInfoModelAttributeMap)
-									}
-								}
-
-								// data specToModelNested PointerOfOneOfField --> ClearSecretInfo
-								// <no value>
-								// false
-								{
-									clearSecretInfoOptions, isClearSecretInfo := secretValuesecretInfoChoiceChoices.(*ves_io_schema.SecretType_ClearSecretInfo)
-									clearSecretInfoAttributeMap := make(map[string]attr.Value)
-
-									if isClearSecretInfo && clearSecretInfoOptions != nil {
-
-										// data specToModelNested StringField --> Provider
-										if clearSecretInfoOptions.ClearSecretInfo.GetProvider() != "" {
-											clearSecretInfoAttributeMap["provider"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetProvider())
-										} else {
-											// Empty string, set to null
-											clearSecretInfoAttributeMap["provider"] = types.StringNull()
-										}
-
-										// data specToModelNested RequiredStringField --> Url
-										if clearSecretInfoOptions.ClearSecretInfo.GetUrl() != "" {
-											clearSecretInfoAttributeMap["url"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetUrl())
-										} else {
-											// Empty string, set to null
-											clearSecretInfoAttributeMap["url"] = types.StringNull()
-										}
-
-										clearSecretInfoObj, diags := types.ObjectValue(RouteRoutesResponseCookiesToAddValueChoiceSecretValueSecretInfoOneofClearSecretInfoModelAttributeMap, clearSecretInfoAttributeMap)
-										response.Diagnostics.Append(diags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										secretValuesecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = clearSecretInfoObj
-									} else {
-										secretValuesecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(RouteRoutesResponseCookiesToAddValueChoiceSecretValueSecretInfoOneofClearSecretInfoModelAttributeMap)
-									}
-								}
-
-								// --- End of Choices ---
-
-								// Create the final ObjectValue for this OneOf field
-								finalObj, secretValuesecretInfoChoiceChoicesObjDiags := types.ObjectValue(
-									RouteRoutesResponseCookiesToAddValueChoiceSecretValueSecretInfoOneofModelAttributeMap, // The attribute schema for the OneOf choices
-									secretValuesecretInfoChoiceChoicesAttributeMap,
-								)
-								response.Diagnostics.Append(secretValuesecretInfoChoiceChoicesObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-
-								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								secretValueAttributeMap["secret_info_choice"] = finalObj
-							} else {
-								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								secretValueAttributeMap["secret_info_choice"] = types.ObjectNull(RouteRoutesResponseCookiesToAddValueChoiceSecretValueSecretInfoOneofModelAttributeMap)
-							}
-
-							secretValueObj, diags := types.ObjectValue(RouteRoutesResponseCookiesToAddValueChoiceSecretValueModelAttributeMap, secretValueAttributeMap)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							responseCookiesToAddvalueChoiceChoicesAttributeMap["secret_value"] = secretValueObj
-						} else {
-							responseCookiesToAddvalueChoiceChoicesAttributeMap["secret_value"] = types.ObjectNull(RouteRoutesResponseCookiesToAddValueChoiceSecretValueModelAttributeMap)
-						}
-					}
-
-					// --- End of Choices ---
-
-					// Create the final ObjectValue for this OneOf field
-					finalObj, responseCookiesToAddvalueChoiceChoicesObjDiags := types.ObjectValue(
-						RouteRoutesResponseCookiesToAddValueChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-						responseCookiesToAddvalueChoiceChoicesAttributeMap,
-					)
-					response.Diagnostics.Append(responseCookiesToAddvalueChoiceChoicesObjDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-
-					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-					routeSetCookieValueOptionModel.ValueChoice = finalObj
-				} else {
-					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					routeSetCookieValueOptionModel.ValueChoice = types.ObjectNull(RouteRoutesResponseCookiesToAddValueChoiceModelAttributeMap)
-				}
-
-				// data specToModelNested OneOfField --> SamesiteChoice
-				if responseCookiesToAddElement.GetSamesiteChoice() != nil {
-					// Create a temporary attribute map for the choices within this OneOf
-					responseCookiesToAddsamesiteChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-					// Define a variable for the spec choices to be passed down to nested templates.
-					// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-					responseCookiesToAddsamesiteChoiceChoices := responseCookiesToAddElement.GetSamesiteChoice()
-
-					// Process nested choices, populating the temporary attribute map
-
-					// data specToModelNested BoolOfOneOfPointerField --> SamesiteLax
-					_, isSamesiteLax := responseCookiesToAddsamesiteChoiceChoices.(*ves_io_schema.SetCookieValueOption_SamesiteLax)
-
-					if isSamesiteLax {
-						responseCookiesToAddsamesiteChoiceChoicesAttributeMap["samesite_lax"] = types.BoolValue(true)
-					} else {
-						responseCookiesToAddsamesiteChoiceChoicesAttributeMap["samesite_lax"] = types.BoolNull()
-					}
-
-					// data specToModelNested BoolOfOneOfPointerField --> SamesiteNone
-					_, isSamesiteNone := responseCookiesToAddsamesiteChoiceChoices.(*ves_io_schema.SetCookieValueOption_SamesiteNone)
-
-					if isSamesiteNone {
-						responseCookiesToAddsamesiteChoiceChoicesAttributeMap["samesite_none"] = types.BoolValue(true)
-					} else {
-						responseCookiesToAddsamesiteChoiceChoicesAttributeMap["samesite_none"] = types.BoolNull()
-					}
-
-					// data specToModelNested BoolOfOneOfPointerField --> IgnoreSamesite
-					_, isIgnoreSamesite := responseCookiesToAddsamesiteChoiceChoices.(*ves_io_schema.SetCookieValueOption_IgnoreSamesite)
-
-					if isIgnoreSamesite {
-						responseCookiesToAddsamesiteChoiceChoicesAttributeMap["ignore_samesite"] = types.BoolValue(true)
-					} else {
-						responseCookiesToAddsamesiteChoiceChoicesAttributeMap["ignore_samesite"] = types.BoolNull()
-					}
-
-					// data specToModelNested BoolOfOneOfPointerField --> SamesiteStrict
-					_, isSamesiteStrict := responseCookiesToAddsamesiteChoiceChoices.(*ves_io_schema.SetCookieValueOption_SamesiteStrict)
-
-					if isSamesiteStrict {
-						responseCookiesToAddsamesiteChoiceChoicesAttributeMap["samesite_strict"] = types.BoolValue(true)
-					} else {
-						responseCookiesToAddsamesiteChoiceChoicesAttributeMap["samesite_strict"] = types.BoolNull()
-					}
-
-					// --- End of Choices ---
-
-					// Create the final ObjectValue for this OneOf field
-					finalObj, responseCookiesToAddsamesiteChoiceChoicesObjDiags := types.ObjectValue(
-						RouteRoutesResponseCookiesToAddSamesiteChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-						responseCookiesToAddsamesiteChoiceChoicesAttributeMap,
-					)
-					response.Diagnostics.Append(responseCookiesToAddsamesiteChoiceChoicesObjDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-
-					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-					routeSetCookieValueOptionModel.SamesiteChoice = finalObj
-				} else {
-					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					routeSetCookieValueOptionModel.SamesiteChoice = types.ObjectNull(RouteRoutesResponseCookiesToAddSamesiteChoiceModelAttributeMap)
-				}
-
-				// data specToModelNested OneOfField --> HttponlyChoice
-				if responseCookiesToAddElement.GetHttponlyChoice() != nil {
-					// Create a temporary attribute map for the choices within this OneOf
-					responseCookiesToAddhttponlyChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-					// Define a variable for the spec choices to be passed down to nested templates.
-					// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-					responseCookiesToAddhttponlyChoiceChoices := responseCookiesToAddElement.GetHttponlyChoice()
-
-					// Process nested choices, populating the temporary attribute map
-
-					// data specToModelNested BoolOfOneOfPointerField --> IgnoreHttponly
-					_, isIgnoreHttponly := responseCookiesToAddhttponlyChoiceChoices.(*ves_io_schema.SetCookieValueOption_IgnoreHttponly)
-
-					if isIgnoreHttponly {
-						responseCookiesToAddhttponlyChoiceChoicesAttributeMap["ignore_httponly"] = types.BoolValue(true)
-					} else {
-						responseCookiesToAddhttponlyChoiceChoicesAttributeMap["ignore_httponly"] = types.BoolNull()
-					}
-
-					// data specToModelNested BoolOfOneOfPointerField --> AddHttponly
-					_, isAddHttponly := responseCookiesToAddhttponlyChoiceChoices.(*ves_io_schema.SetCookieValueOption_AddHttponly)
-
-					if isAddHttponly {
-						responseCookiesToAddhttponlyChoiceChoicesAttributeMap["add_httponly"] = types.BoolValue(true)
-					} else {
-						responseCookiesToAddhttponlyChoiceChoicesAttributeMap["add_httponly"] = types.BoolNull()
-					}
-
-					// --- End of Choices ---
-
-					// Create the final ObjectValue for this OneOf field
-					finalObj, responseCookiesToAddhttponlyChoiceChoicesObjDiags := types.ObjectValue(
-						RouteRoutesResponseCookiesToAddHttponlyChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-						responseCookiesToAddhttponlyChoiceChoicesAttributeMap,
-					)
-					response.Diagnostics.Append(responseCookiesToAddhttponlyChoiceChoicesObjDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-
-					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-					routeSetCookieValueOptionModel.HttponlyChoice = finalObj
-				} else {
-					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					routeSetCookieValueOptionModel.HttponlyChoice = types.ObjectNull(RouteRoutesResponseCookiesToAddHttponlyChoiceModelAttributeMap)
-				}
-
-				// data specToModelNested OneOfField --> PartitionedChoice
-				if responseCookiesToAddElement.GetPartitionedChoice() != nil {
-					// Create a temporary attribute map for the choices within this OneOf
-					responseCookiesToAddpartitionedChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-					// Define a variable for the spec choices to be passed down to nested templates.
-					// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-					responseCookiesToAddpartitionedChoiceChoices := responseCookiesToAddElement.GetPartitionedChoice()
-
-					// Process nested choices, populating the temporary attribute map
-
-					// data specToModelNested BoolOfOneOfPointerField --> IgnorePartitioned
-					_, isIgnorePartitioned := responseCookiesToAddpartitionedChoiceChoices.(*ves_io_schema.SetCookieValueOption_IgnorePartitioned)
-
-					if isIgnorePartitioned {
-						responseCookiesToAddpartitionedChoiceChoicesAttributeMap["ignore_partitioned"] = types.BoolValue(true)
-					} else {
-						responseCookiesToAddpartitionedChoiceChoicesAttributeMap["ignore_partitioned"] = types.BoolNull()
-					}
-
-					// data specToModelNested BoolOfOneOfPointerField --> AddPartitioned
-					_, isAddPartitioned := responseCookiesToAddpartitionedChoiceChoices.(*ves_io_schema.SetCookieValueOption_AddPartitioned)
-
-					if isAddPartitioned {
-						responseCookiesToAddpartitionedChoiceChoicesAttributeMap["add_partitioned"] = types.BoolValue(true)
-					} else {
-						responseCookiesToAddpartitionedChoiceChoicesAttributeMap["add_partitioned"] = types.BoolNull()
-					}
-
-					// --- End of Choices ---
-
-					// Create the final ObjectValue for this OneOf field
-					finalObj, responseCookiesToAddpartitionedChoiceChoicesObjDiags := types.ObjectValue(
-						RouteRoutesResponseCookiesToAddPartitionedChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-						responseCookiesToAddpartitionedChoiceChoicesAttributeMap,
-					)
-					response.Diagnostics.Append(responseCookiesToAddpartitionedChoiceChoicesObjDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-
-					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-					routeSetCookieValueOptionModel.PartitionedChoice = finalObj
-				} else {
-					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					routeSetCookieValueOptionModel.PartitionedChoice = types.ObjectNull(RouteRoutesResponseCookiesToAddPartitionedChoiceModelAttributeMap)
-				}
-
-				// data specToModelNested OneOfField --> MaxAgeChoice
-				if responseCookiesToAddElement.GetMaxAgeChoice() != nil {
-					// Create a temporary attribute map for the choices within this OneOf
-					responseCookiesToAddmaxAgeChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-					// Define a variable for the spec choices to be passed down to nested templates.
-					// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-					responseCookiesToAddmaxAgeChoiceChoices := responseCookiesToAddElement.GetMaxAgeChoice()
-
-					// Process nested choices, populating the temporary attribute map
-
-					// data specToModelNested BoolOfOneOfPointerField --> IgnoreMaxAge
-					_, isIgnoreMaxAge := responseCookiesToAddmaxAgeChoiceChoices.(*ves_io_schema.SetCookieValueOption_IgnoreMaxAge)
-
-					if isIgnoreMaxAge {
-						responseCookiesToAddmaxAgeChoiceChoicesAttributeMap["ignore_max_age"] = types.BoolValue(true)
-					} else {
-						responseCookiesToAddmaxAgeChoiceChoicesAttributeMap["ignore_max_age"] = types.BoolNull()
-					}
-
-					// data specToModelNested IntOfOneOfField --> MaxAgeValue
-					maxAgeValueItem, isMaxAgeValue := responseCookiesToAddmaxAgeChoiceChoices.(*ves_io_schema.SetCookieValueOption_MaxAgeValue)
-
-					if isMaxAgeValue {
-						responseCookiesToAddmaxAgeChoiceChoicesAttributeMap["max_age_value"] = types.Int32Value(int32(maxAgeValueItem.MaxAgeValue))
-					} else {
-						// Empty int, set to null
-						responseCookiesToAddmaxAgeChoiceChoicesAttributeMap["max_age_value"] = types.Int32Null()
-					}
-
-					// --- End of Choices ---
-
-					// Create the final ObjectValue for this OneOf field
-					finalObj, responseCookiesToAddmaxAgeChoiceChoicesObjDiags := types.ObjectValue(
-						RouteRoutesResponseCookiesToAddMaxAgeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-						responseCookiesToAddmaxAgeChoiceChoicesAttributeMap,
-					)
-					response.Diagnostics.Append(responseCookiesToAddmaxAgeChoiceChoicesObjDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-
-					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-					routeSetCookieValueOptionModel.MaxAgeChoice = finalObj
-				} else {
-					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					routeSetCookieValueOptionModel.MaxAgeChoice = types.ObjectNull(RouteRoutesResponseCookiesToAddMaxAgeChoiceModelAttributeMap)
-				}
-
-				// data specToModelNested OneOfField --> DomainChoice
-				if responseCookiesToAddElement.GetDomainChoice() != nil {
-					// Create a temporary attribute map for the choices within this OneOf
-					responseCookiesToAdddomainChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-					// Define a variable for the spec choices to be passed down to nested templates.
-					// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-					responseCookiesToAdddomainChoiceChoices := responseCookiesToAddElement.GetDomainChoice()
-
-					// Process nested choices, populating the temporary attribute map
-
-					// data specToModelNested BoolOfOneOfPointerField --> IgnoreDomain
-					_, isIgnoreDomain := responseCookiesToAdddomainChoiceChoices.(*ves_io_schema.SetCookieValueOption_IgnoreDomain)
-
-					if isIgnoreDomain {
-						responseCookiesToAdddomainChoiceChoicesAttributeMap["ignore_domain"] = types.BoolValue(true)
-					} else {
-						responseCookiesToAdddomainChoiceChoicesAttributeMap["ignore_domain"] = types.BoolNull()
-					}
-
-					// data specToModelNested StringOfOneOfField --> AddDomain
-					addDomainItem, isAddDomain := responseCookiesToAdddomainChoiceChoices.(*ves_io_schema.SetCookieValueOption_AddDomain)
-
-					if isAddDomain {
-						responseCookiesToAdddomainChoiceChoicesAttributeMap["add_domain"] = types.StringValue(string(addDomainItem.AddDomain))
-					} else {
-						// Empty string, set to null
-						responseCookiesToAdddomainChoiceChoicesAttributeMap["add_domain"] = types.StringNull()
-					}
-
-					// --- End of Choices ---
-
-					// Create the final ObjectValue for this OneOf field
-					finalObj, responseCookiesToAdddomainChoiceChoicesObjDiags := types.ObjectValue(
-						RouteRoutesResponseCookiesToAddDomainChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-						responseCookiesToAdddomainChoiceChoicesAttributeMap,
-					)
-					response.Diagnostics.Append(responseCookiesToAdddomainChoiceChoicesObjDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-
-					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-					routeSetCookieValueOptionModel.DomainChoice = finalObj
-				} else {
-					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					routeSetCookieValueOptionModel.DomainChoice = types.ObjectNull(RouteRoutesResponseCookiesToAddDomainChoiceModelAttributeMap)
-				}
-
-				// data specToModelNested OneOfField --> ExpiryChoice
-				if responseCookiesToAddElement.GetExpiryChoice() != nil {
-					// Create a temporary attribute map for the choices within this OneOf
-					responseCookiesToAddexpiryChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-					// Define a variable for the spec choices to be passed down to nested templates.
-					// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-					responseCookiesToAddexpiryChoiceChoices := responseCookiesToAddElement.GetExpiryChoice()
-
-					// Process nested choices, populating the temporary attribute map
-
-					// data specToModelNested StringOfOneOfField --> AddExpiry
-					addExpiryItem, isAddExpiry := responseCookiesToAddexpiryChoiceChoices.(*ves_io_schema.SetCookieValueOption_AddExpiry)
-
-					if isAddExpiry {
-						responseCookiesToAddexpiryChoiceChoicesAttributeMap["add_expiry"] = types.StringValue(string(addExpiryItem.AddExpiry))
-					} else {
-						// Empty string, set to null
-						responseCookiesToAddexpiryChoiceChoicesAttributeMap["add_expiry"] = types.StringNull()
-					}
-
-					// data specToModelNested BoolOfOneOfPointerField --> IgnoreExpiry
-					_, isIgnoreExpiry := responseCookiesToAddexpiryChoiceChoices.(*ves_io_schema.SetCookieValueOption_IgnoreExpiry)
-
-					if isIgnoreExpiry {
-						responseCookiesToAddexpiryChoiceChoicesAttributeMap["ignore_expiry"] = types.BoolValue(true)
-					} else {
-						responseCookiesToAddexpiryChoiceChoicesAttributeMap["ignore_expiry"] = types.BoolNull()
-					}
-
-					// --- End of Choices ---
-
-					// Create the final ObjectValue for this OneOf field
-					finalObj, responseCookiesToAddexpiryChoiceChoicesObjDiags := types.ObjectValue(
-						RouteRoutesResponseCookiesToAddExpiryChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-						responseCookiesToAddexpiryChoiceChoicesAttributeMap,
-					)
-					response.Diagnostics.Append(responseCookiesToAddexpiryChoiceChoicesObjDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-
-					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-					routeSetCookieValueOptionModel.ExpiryChoice = finalObj
-				} else {
-					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					routeSetCookieValueOptionModel.ExpiryChoice = types.ObjectNull(RouteRoutesResponseCookiesToAddExpiryChoiceModelAttributeMap)
-				}
-
-				// data specToModelNested BoolField --> Overwrite
-				routeSetCookieValueOptionModel.Overwrite = types.BoolValue(bool(responseCookiesToAddElement.GetOverwrite()))
-
-				// data specToModelNested RequiredStringField --> Name
-				if responseCookiesToAddElement.GetName() != "" {
-					routeSetCookieValueOptionModel.Name = types.StringValue(responseCookiesToAddElement.GetName())
-				} else {
-					// Empty string, set to null
-					routeSetCookieValueOptionModel.Name = types.StringNull()
-				}
-
-				// data specToModelNested OneOfField --> SecureChoice
-				if responseCookiesToAddElement.GetSecureChoice() != nil {
-					// Create a temporary attribute map for the choices within this OneOf
-					responseCookiesToAddsecureChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-					// Define a variable for the spec choices to be passed down to nested templates.
-					// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-					responseCookiesToAddsecureChoiceChoices := responseCookiesToAddElement.GetSecureChoice()
-
-					// Process nested choices, populating the temporary attribute map
-
-					// data specToModelNested BoolOfOneOfPointerField --> AddSecure
-					_, isAddSecure := responseCookiesToAddsecureChoiceChoices.(*ves_io_schema.SetCookieValueOption_AddSecure)
-
-					if isAddSecure {
-						responseCookiesToAddsecureChoiceChoicesAttributeMap["add_secure"] = types.BoolValue(true)
-					} else {
-						responseCookiesToAddsecureChoiceChoicesAttributeMap["add_secure"] = types.BoolNull()
-					}
-
-					// data specToModelNested BoolOfOneOfPointerField --> IgnoreSecure
-					_, isIgnoreSecure := responseCookiesToAddsecureChoiceChoices.(*ves_io_schema.SetCookieValueOption_IgnoreSecure)
-
-					if isIgnoreSecure {
-						responseCookiesToAddsecureChoiceChoicesAttributeMap["ignore_secure"] = types.BoolValue(true)
-					} else {
-						responseCookiesToAddsecureChoiceChoicesAttributeMap["ignore_secure"] = types.BoolNull()
-					}
-
-					// --- End of Choices ---
-
-					// Create the final ObjectValue for this OneOf field
-					finalObj, responseCookiesToAddsecureChoiceChoicesObjDiags := types.ObjectValue(
-						RouteRoutesResponseCookiesToAddSecureChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-						responseCookiesToAddsecureChoiceChoicesAttributeMap,
-					)
-					response.Diagnostics.Append(responseCookiesToAddsecureChoiceChoicesObjDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-
-					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-					routeSetCookieValueOptionModel.SecureChoice = finalObj
-				} else {
-					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					routeSetCookieValueOptionModel.SecureChoice = types.ObjectNull(RouteRoutesResponseCookiesToAddSecureChoiceModelAttributeMap)
-				}
-
-				// data specToModelNested OneOfField --> PathChoice
-				if responseCookiesToAddElement.GetPathChoice() != nil {
-					// Create a temporary attribute map for the choices within this OneOf
-					responseCookiesToAddpathChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-					// Define a variable for the spec choices to be passed down to nested templates.
-					// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-					responseCookiesToAddpathChoiceChoices := responseCookiesToAddElement.GetPathChoice()
-
-					// Process nested choices, populating the temporary attribute map
-
-					// data specToModelNested BoolOfOneOfPointerField --> IgnorePath
-					_, isIgnorePath := responseCookiesToAddpathChoiceChoices.(*ves_io_schema.SetCookieValueOption_IgnorePath)
-
-					if isIgnorePath {
-						responseCookiesToAddpathChoiceChoicesAttributeMap["ignore_path"] = types.BoolValue(true)
-					} else {
-						responseCookiesToAddpathChoiceChoicesAttributeMap["ignore_path"] = types.BoolNull()
-					}
-
-					// data specToModelNested StringOfOneOfField --> AddPath
-					addPathItem, isAddPath := responseCookiesToAddpathChoiceChoices.(*ves_io_schema.SetCookieValueOption_AddPath)
-
-					if isAddPath {
-						responseCookiesToAddpathChoiceChoicesAttributeMap["add_path"] = types.StringValue(string(addPathItem.AddPath))
-					} else {
-						// Empty string, set to null
-						responseCookiesToAddpathChoiceChoicesAttributeMap["add_path"] = types.StringNull()
-					}
-
-					// --- End of Choices ---
-
-					// Create the final ObjectValue for this OneOf field
-					finalObj, responseCookiesToAddpathChoiceChoicesObjDiags := types.ObjectValue(
-						RouteRoutesResponseCookiesToAddPathChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-						responseCookiesToAddpathChoiceChoicesAttributeMap,
-					)
-					response.Diagnostics.Append(responseCookiesToAddpathChoiceChoicesObjDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-
-					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-					routeSetCookieValueOptionModel.PathChoice = finalObj
-				} else {
-					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					routeSetCookieValueOptionModel.PathChoice = types.ObjectNull(RouteRoutesResponseCookiesToAddPathChoiceModelAttributeMap)
-				}
-
-				responseCookiesToAddElements = append(responseCookiesToAddElements, routeSetCookieValueOptionModel)
-			}
-			// CASE 1: The target field is a `types.List` or an attribute map.
-			// The intermediate slice of structs must be converted to a `types.ListValue`.
-			responseCookiesToAddListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: RouteResponseCookiesToAddObjectRefModelAttributeMap}, responseCookiesToAddElements)
-			response.Diagnostics.Append(diags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			routeRouteRouteTypeModel.ResponseCookiesToAdd = responseCookiesToAddListValue
-
-		} else {
-			// The source list is empty or nil.
-			// CASE 1: The target field is a `types.List` or an attribute map.
-			// Assign a null `types.ListValue`.
-			routeRouteRouteTypeModel.ResponseCookiesToAdd = types.ListNull(types.ObjectType{AttrTypes: RouteResponseCookiesToAddObjectRefModelAttributeMap})
-		}
-
-		// data specToModelNested OneOfField --> BotDefenseJavascriptInjectionChoice
-		if routesElement.GetBotDefenseJavascriptInjectionChoice() != nil {
-			// Create a temporary attribute map for the choices within this OneOf
-			routesbotDefenseJavascriptInjectionChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-			// Define a variable for the spec choices to be passed down to nested templates.
-			// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-			routesbotDefenseJavascriptInjectionChoiceChoices := routesElement.GetBotDefenseJavascriptInjectionChoice()
-
-			// Process nested choices, populating the temporary attribute map
-
-			// data specToModelNested BoolOfOneOfPointerField --> InheritedBotDefenseJavascriptInjection
-			_, isInheritedBotDefenseJavascriptInjection := routesbotDefenseJavascriptInjectionChoiceChoices.(*ves_io_schema_route.RouteType_InheritedBotDefenseJavascriptInjection)
-
-			if isInheritedBotDefenseJavascriptInjection {
-				routesbotDefenseJavascriptInjectionChoiceChoicesAttributeMap["inherited_bot_defense_javascript_injection"] = types.BoolValue(true)
-			} else {
-				routesbotDefenseJavascriptInjectionChoiceChoicesAttributeMap["inherited_bot_defense_javascript_injection"] = types.BoolNull()
-			}
-
-			// data specToModelNested PointerOfOneOfField --> BotDefenseJavascriptInjection
-			// <no value>
-			// false
-			{
-				botDefenseJavascriptInjectionOptions, isBotDefenseJavascriptInjection := routesbotDefenseJavascriptInjectionChoiceChoices.(*ves_io_schema_route.RouteType_BotDefenseJavascriptInjection)
-				botDefenseJavascriptInjectionAttributeMap := make(map[string]attr.Value)
-
-				if isBotDefenseJavascriptInjection && botDefenseJavascriptInjectionOptions != nil {
-
-					// data specToModelNested EnumField --> JavascriptLocation
-					if botDefenseJavascriptInjectionOptions.BotDefenseJavascriptInjection.GetJavascriptLocation().String() != "" {
-						stringValue := types.StringValue(botDefenseJavascriptInjectionOptions.BotDefenseJavascriptInjection.GetJavascriptLocation().String())
-						stringSlice := []types.String{stringValue}
-						listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						botDefenseJavascriptInjectionAttributeMap["javascript_location"] = listValue
-					} else {
-						botDefenseJavascriptInjectionAttributeMap["javascript_location"] = types.ListNull(types.StringType)
-					}
-
-					// data specToModelNested RequiredArrayOfPointerField --> JavascriptTags
-					if len(botDefenseJavascriptInjectionOptions.BotDefenseJavascriptInjection.GetJavascriptTags()) > 0 {
-						// Step 1: Always create a slice of model structs from the spec data.
-						// This slice serves as an intermediate representation.
-						javascriptTagsElements := make([]RouteRouteJavaScriptTag, 0, len(botDefenseJavascriptInjectionOptions.BotDefenseJavascriptInjection.GetJavascriptTags()))
-						for _, javascriptTagsElement := range botDefenseJavascriptInjectionOptions.BotDefenseJavascriptInjection.GetJavascriptTags() {
-							routeRouteJavaScriptTagModel := RouteRouteJavaScriptTag{}
-
-							// data specToModelNested RequiredStringField --> JavascriptUrl
-							if javascriptTagsElement.GetJavascriptUrl() != "" {
-								routeRouteJavaScriptTagModel.JavascriptUrl = types.StringValue(javascriptTagsElement.GetJavascriptUrl())
-							} else {
-								// Empty string, set to null
-								routeRouteJavaScriptTagModel.JavascriptUrl = types.StringNull()
-							}
-
-							// data specToModelNested ArrayOfPointerField --> TagAttributes
-							if len(javascriptTagsElement.GetTagAttributes()) > 0 {
-								// Step 1: Always create a slice of model structs from the spec data.
-								// This slice serves as an intermediate representation.
-								tagAttributesElements := make([]RouteRouteTagAttribute, 0, len(javascriptTagsElement.GetTagAttributes()))
-								for _, tagAttributesElement := range javascriptTagsElement.GetTagAttributes() {
-									routeRouteTagAttributeModel := RouteRouteTagAttribute{}
-
-									// data specToModelNested EnumField --> JavascriptTag
-									if tagAttributesElement.GetJavascriptTag().String() != "" {
-										stringValue := types.StringValue(tagAttributesElement.GetJavascriptTag().String())
-										stringSlice := []types.String{stringValue}
-										listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-										response.Diagnostics.Append(diags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										routeRouteTagAttributeModel.JavascriptTag = listValue
-									} else {
-										routeRouteTagAttributeModel.JavascriptTag = types.ListNull(types.StringType)
-									}
-
-									// data specToModelNested StringField --> TagValue
-									if tagAttributesElement.GetTagValue() != "" {
-										routeRouteTagAttributeModel.TagValue = types.StringValue(tagAttributesElement.GetTagValue())
-									} else {
-										// Empty string, set to null
-										routeRouteTagAttributeModel.TagValue = types.StringNull()
-									}
-
-									tagAttributesElements = append(tagAttributesElements, routeRouteTagAttributeModel)
-								}
-								// CASE 1: The target field is a `types.List` or an attribute map.
-								// The intermediate slice of structs must be converted to a `types.ListValue`.
-								tagAttributesListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: RouteRoutesBotDefenseJavascriptInjectionChoiceBotDefenseJavascriptInjectionJavascriptTagsTagAttributesModelAttributeMap}, tagAttributesElements)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								routeRouteJavaScriptTagModel.TagAttributes = tagAttributesListValue
-
-							} else {
-								// The source list is empty or nil.
-								// CASE 1: The target field is a `types.List` or an attribute map.
-								// Assign a null `types.ListValue`.
-								routeRouteJavaScriptTagModel.TagAttributes = types.ListNull(types.ObjectType{AttrTypes: RouteRoutesBotDefenseJavascriptInjectionChoiceBotDefenseJavascriptInjectionJavascriptTagsTagAttributesModelAttributeMap})
-							}
-
-							javascriptTagsElements = append(javascriptTagsElements, routeRouteJavaScriptTagModel)
-						}
-						// CASE 1: The target field is a `types.List` or an attribute map.
-						// The intermediate slice of structs must be converted to a `types.ListValue`.
-						javascriptTagsListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: RouteRoutesBotDefenseJavascriptInjectionChoiceBotDefenseJavascriptInjectionJavascriptTagsModelAttributeMap}, javascriptTagsElements)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						botDefenseJavascriptInjectionAttributeMap["javascript_tags"] = javascriptTagsListValue
-
-					} else {
-						// The source list is empty or nil.
-						// CASE 1: The target field is a `types.List` or an attribute map.
-						// Assign a null `types.ListValue`.
-						botDefenseJavascriptInjectionAttributeMap["javascript_tags"] = types.ListNull(types.ObjectType{AttrTypes: RouteRoutesBotDefenseJavascriptInjectionChoiceBotDefenseJavascriptInjectionJavascriptTagsModelAttributeMap})
-					}
-
-					botDefenseJavascriptInjectionObj, diags := types.ObjectValue(RouteRoutesBotDefenseJavascriptInjectionChoiceBotDefenseJavascriptInjectionModelAttributeMap, botDefenseJavascriptInjectionAttributeMap)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					routesbotDefenseJavascriptInjectionChoiceChoicesAttributeMap["bot_defense_javascript_injection"] = botDefenseJavascriptInjectionObj
-				} else {
-					routesbotDefenseJavascriptInjectionChoiceChoicesAttributeMap["bot_defense_javascript_injection"] = types.ObjectNull(RouteRoutesBotDefenseJavascriptInjectionChoiceBotDefenseJavascriptInjectionModelAttributeMap)
-				}
-			}
-
-			// --- End of Choices ---
-
-			// Create the final ObjectValue for this OneOf field
-			finalObj, routesbotDefenseJavascriptInjectionChoiceChoicesObjDiags := types.ObjectValue(
-				RouteRoutesBotDefenseJavascriptInjectionChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-				routesbotDefenseJavascriptInjectionChoiceChoicesAttributeMap,
-			)
-			response.Diagnostics.Append(routesbotDefenseJavascriptInjectionChoiceChoicesObjDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			routeRouteRouteTypeModel.BotDefenseJavascriptInjectionChoice = finalObj
-		} else {
-			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			routeRouteRouteTypeModel.BotDefenseJavascriptInjectionChoice = types.ObjectNull(RouteRoutesBotDefenseJavascriptInjectionChoiceModelAttributeMap)
 		}
 
 		routesElementsSpectToModel = append(routesElementsSpectToModel, routeRouteRouteTypeModel)

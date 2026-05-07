@@ -49,12 +49,12 @@ type ResourceF5XCCloudElasticIp struct {
 
 // ResourceF5XCCloudElasticIpModel describes the resource data model.
 type ResourceF5XCCloudElasticIpModel struct {
-	Description types.String   `tfsdk:"description"`
-	Name        types.String   `tfsdk:"name"`
 	Namespace   types.String   `tfsdk:"namespace"`
 	Uid         types.String   `tfsdk:"uid"`
 	Labels      types.Map      `tfsdk:"labels"`
 	Annotations types.Map      `tfsdk:"annotations"`
+	Description types.String   `tfsdk:"description"`
+	Name        types.String   `tfsdk:"name"`
 	SiteRef     types.List     `tfsdk:"site_ref"`
 	Count       types.Int64    `tfsdk:"count_cloud_elastic_ip"`
 	Timeouts    timeouts.Value `tfsdk:"timeouts"`
@@ -73,9 +73,9 @@ var (
 // Attribute map for RequiredArrayOfPointerField --> SiteRef
 var CloudElasticIpSiteRefObjectRefModelAttributeMap = map[string]attr.Type{
 
-	"namespace": types.StringType,
 	"name":      types.StringType,
 	"tenant":    types.StringType,
+	"namespace": types.StringType,
 }
 
 func NewResourceF5XCCloudElasticIp() resource.Resource {
@@ -93,21 +93,6 @@ func (r *ResourceF5XCCloudElasticIp) Schema(ctx context.Context, request resourc
 		Description:         "CloudElasticIp resource",
 
 		Attributes: map[string]schema.Attribute{
-			"description": schema.StringAttribute{
-				Description:         "description Human readable description for the object",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            true,
-				Default:             stringdefault.StaticString(""),
-			},
-			"name": schema.StringAttribute{
-				Description:         "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
-				MarkdownDescription: "",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
-			},
 			"namespace": schema.StringAttribute{
 				Description:         "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
 				MarkdownDescription: "",
@@ -148,6 +133,21 @@ func (r *ResourceF5XCCloudElasticIp) Schema(ctx context.Context, request resourc
 					mapvalidator.ValueStringsAre(stringvalidator.LengthBetween(1, 1024)),
 				},
 			},
+			"description": schema.StringAttribute{
+				Description:         "description Human readable description for the object",
+				MarkdownDescription: "",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				Default:             stringdefault.StaticString(""),
+			},
+			"name": schema.StringAttribute{
+				Description:         "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
+				MarkdownDescription: "",
+				Required:            true,
+				Optional:            false,
+				Computed:            false,
+			},
 			"site_ref": schema.ListNestedAttribute{
 				Description:         "site reference Site to which this cloud elastic ip object is attached",
 				MarkdownDescription: "",
@@ -156,13 +156,6 @@ func (r *ResourceF5XCCloudElasticIp) Schema(ctx context.Context, request resourc
 				Computed:            false,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
-						"namespace": schema.StringAttribute{
-							Description:         "",
-							MarkdownDescription: "",
-							Required:            true,
-							Optional:            false,
-							Computed:            false,
-						},
 						"name": schema.StringAttribute{
 							Description:         "",
 							MarkdownDescription: "",
@@ -179,6 +172,13 @@ func (r *ResourceF5XCCloudElasticIp) Schema(ctx context.Context, request resourc
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
+						},
+						"namespace": schema.StringAttribute{
+							Description:         "",
+							MarkdownDescription: "",
+							Required:            true,
+							Optional:            false,
+							Computed:            false,
 						},
 					},
 				},
@@ -295,16 +295,6 @@ func (r *ResourceF5XCCloudElasticIp) Create(ctx context.Context, request resourc
 
 	// Populate createReq from data model
 
-	// resource modelToMetaRoot StringField --> Description
-	if !data.Description.IsNull() && !data.Description.IsUnknown() {
-		meta.Description = string(data.Description.ValueString())
-	}
-
-	// resource modelToMetaRoot RequiredStringField --> Name
-	if !data.Name.IsNull() && !data.Name.IsUnknown() {
-		meta.Name = string(data.Name.ValueString())
-	}
-
 	// resource modelToMetaRoot RequiredStringField --> Namespace
 	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
 		meta.Namespace = string(data.Namespace.ValueString())
@@ -324,6 +314,16 @@ func (r *ResourceF5XCCloudElasticIp) Create(ctx context.Context, request resourc
 		meta.Annotations = nil
 	}
 
+	// resource modelToMetaRoot StringField --> Description
+	if !data.Description.IsNull() && !data.Description.IsUnknown() {
+		meta.Description = string(data.Description.ValueString())
+	}
+
+	// resource modelToMetaRoot RequiredStringField --> Name
+	if !data.Name.IsNull() && !data.Name.IsUnknown() {
+		meta.Name = string(data.Name.ValueString())
+	}
+
 	{
 		// resource modelToSpecRoot RequiredArrayOfPointerField --> SiteRef
 		var siteRefElementsModelToSpec []ObjectRefTypeModel
@@ -337,14 +337,14 @@ func (r *ResourceF5XCCloudElasticIp) Create(ctx context.Context, request resourc
 		for i, siteRefElement := range siteRefElementsModelToSpec {
 			siteRefSpec[i] = &ves_io_schema.ObjectRefType{}
 
-			// resource modelToSpecNested RequiredStringField --> Namespace
-			if !siteRefElement.Namespace.IsNull() && !siteRefElement.Namespace.IsUnknown() {
-				siteRefSpec[i].Namespace = string(siteRefElement.Namespace.ValueString())
-			}
-
 			// resource modelToSpecNested RequiredStringField --> Name
 			if !siteRefElement.Name.IsNull() && !siteRefElement.Name.IsUnknown() {
 				siteRefSpec[i].Name = string(siteRefElement.Name.ValueString())
+			}
+
+			// resource modelToSpecNested RequiredStringField --> Namespace
+			if !siteRefElement.Namespace.IsNull() && !siteRefElement.Namespace.IsUnknown() {
+				siteRefSpec[i].Namespace = string(siteRefElement.Namespace.ValueString())
 			}
 
 		}
@@ -389,12 +389,6 @@ func (r *ResourceF5XCCloudElasticIp) Create(ctx context.Context, request resourc
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
-
-	// resource SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
-
-	// resource SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
 
 	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
 	data.Namespace = types.StringValue(metaData.GetNamespace())
@@ -480,19 +474,17 @@ func (r *ResourceF5XCCloudElasticIp) Create(ctx context.Context, request resourc
 		data.Annotations = types.MapNull(types.StringType)
 	}
 
+	// resource SpecToModelRoot Meta StringField --> Description
+	data.Description = types.StringValue(metaData.GetDescription())
+
+	// resource SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
+
 	// resource SpecToModelRoot RequiredArrayOfPointerField --> SiteRef
 	siteRefElementsSpectToModel := make([]ObjectRefTypeModel, 0, len(specData.SiteRef))
 
 	for _, siteRefElement := range specData.SiteRef {
 		objectRefTypeModelModel := ObjectRefTypeModel{}
-
-		// resource specToModelNested RequiredStringField --> Namespace
-		if siteRefElement.GetNamespace() != "" {
-			objectRefTypeModelModel.Namespace = types.StringValue(siteRefElement.GetNamespace())
-		} else {
-			// Empty string, set to null
-			objectRefTypeModelModel.Namespace = types.StringNull()
-		}
 
 		// resource specToModelNested RequiredStringField --> Name
 		if siteRefElement.GetName() != "" {
@@ -508,6 +500,14 @@ func (r *ResourceF5XCCloudElasticIp) Create(ctx context.Context, request resourc
 		} else {
 			// Empty string, set to null
 			objectRefTypeModelModel.Tenant = types.StringNull()
+		}
+
+		// resource specToModelNested RequiredStringField --> Namespace
+		if siteRefElement.GetNamespace() != "" {
+			objectRefTypeModelModel.Namespace = types.StringValue(siteRefElement.GetNamespace())
+		} else {
+			// Empty string, set to null
+			objectRefTypeModelModel.Namespace = types.StringNull()
 		}
 
 		siteRefElementsSpectToModel = append(siteRefElementsSpectToModel, objectRefTypeModelModel)
@@ -597,12 +597,6 @@ func (r *ResourceF5XCCloudElasticIp) Read(ctx context.Context, request resource.
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
-	// resource SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
-
-	// resource SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
-
 	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
 	data.Namespace = types.StringValue(metaData.GetNamespace())
 
@@ -703,19 +697,17 @@ func (r *ResourceF5XCCloudElasticIp) Read(ctx context.Context, request resource.
 		data.Annotations = types.MapNull(types.StringType)
 	}
 
+	// resource SpecToModelRoot Meta StringField --> Description
+	data.Description = types.StringValue(metaData.GetDescription())
+
+	// resource SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
+
 	// resource SpecToModelRoot RequiredArrayOfPointerField --> SiteRef
 	siteRefElementsSpectToModel := make([]ObjectRefTypeModel, 0, len(specData.SiteRef))
 
 	for _, siteRefElement := range specData.SiteRef {
 		objectRefTypeModelModel := ObjectRefTypeModel{}
-
-		// resource specToModelNested RequiredStringField --> Namespace
-		if siteRefElement.GetNamespace() != "" {
-			objectRefTypeModelModel.Namespace = types.StringValue(siteRefElement.GetNamespace())
-		} else {
-			// Empty string, set to null
-			objectRefTypeModelModel.Namespace = types.StringNull()
-		}
 
 		// resource specToModelNested RequiredStringField --> Name
 		if siteRefElement.GetName() != "" {
@@ -731,6 +723,14 @@ func (r *ResourceF5XCCloudElasticIp) Read(ctx context.Context, request resource.
 		} else {
 			// Empty string, set to null
 			objectRefTypeModelModel.Tenant = types.StringNull()
+		}
+
+		// resource specToModelNested RequiredStringField --> Namespace
+		if siteRefElement.GetNamespace() != "" {
+			objectRefTypeModelModel.Namespace = types.StringValue(siteRefElement.GetNamespace())
+		} else {
+			// Empty string, set to null
+			objectRefTypeModelModel.Namespace = types.StringNull()
 		}
 
 		siteRefElementsSpectToModel = append(siteRefElementsSpectToModel, objectRefTypeModelModel)
@@ -804,16 +804,6 @@ func (r *ResourceF5XCCloudElasticIp) Update(ctx context.Context, request resourc
 
 	// Populate updateReq from data model
 
-	// resource modelToMetaRoot StringField --> Description
-	if !data.Description.IsNull() && !data.Description.IsUnknown() {
-		meta.Description = string(data.Description.ValueString())
-	}
-
-	// resource modelToMetaRoot RequiredStringField --> Name
-	if !data.Name.IsNull() && !data.Name.IsUnknown() {
-		meta.Name = string(data.Name.ValueString())
-	}
-
 	// resource modelToMetaRoot RequiredStringField --> Namespace
 	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
 		meta.Namespace = string(data.Namespace.ValueString())
@@ -833,6 +823,16 @@ func (r *ResourceF5XCCloudElasticIp) Update(ctx context.Context, request resourc
 		meta.Annotations = nil
 	}
 
+	// resource modelToMetaRoot StringField --> Description
+	if !data.Description.IsNull() && !data.Description.IsUnknown() {
+		meta.Description = string(data.Description.ValueString())
+	}
+
+	// resource modelToMetaRoot RequiredStringField --> Name
+	if !data.Name.IsNull() && !data.Name.IsUnknown() {
+		meta.Name = string(data.Name.ValueString())
+	}
+
 	{
 		// resource modelToSpecRoot RequiredArrayOfPointerField --> SiteRef
 		var siteRefElementsModelToSpec []ObjectRefTypeModel
@@ -846,14 +846,14 @@ func (r *ResourceF5XCCloudElasticIp) Update(ctx context.Context, request resourc
 		for i, siteRefElement := range siteRefElementsModelToSpec {
 			siteRefSpec[i] = &ves_io_schema.ObjectRefType{}
 
-			// resource modelToSpecNested RequiredStringField --> Namespace
-			if !siteRefElement.Namespace.IsNull() && !siteRefElement.Namespace.IsUnknown() {
-				siteRefSpec[i].Namespace = string(siteRefElement.Namespace.ValueString())
-			}
-
 			// resource modelToSpecNested RequiredStringField --> Name
 			if !siteRefElement.Name.IsNull() && !siteRefElement.Name.IsUnknown() {
 				siteRefSpec[i].Name = string(siteRefElement.Name.ValueString())
+			}
+
+			// resource modelToSpecNested RequiredStringField --> Namespace
+			if !siteRefElement.Namespace.IsNull() && !siteRefElement.Namespace.IsUnknown() {
+				siteRefSpec[i].Namespace = string(siteRefElement.Namespace.ValueString())
 			}
 
 		}
@@ -899,12 +899,6 @@ func (r *ResourceF5XCCloudElasticIp) Update(ctx context.Context, request resourc
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
-
-	// resource SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
-
-	// resource SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
 
 	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
 	data.Namespace = types.StringValue(metaData.GetNamespace())
@@ -1006,19 +1000,17 @@ func (r *ResourceF5XCCloudElasticIp) Update(ctx context.Context, request resourc
 		data.Annotations = types.MapNull(types.StringType)
 	}
 
+	// resource SpecToModelRoot Meta StringField --> Description
+	data.Description = types.StringValue(metaData.GetDescription())
+
+	// resource SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
+
 	// resource SpecToModelRoot RequiredArrayOfPointerField --> SiteRef
 	siteRefElementsSpectToModel := make([]ObjectRefTypeModel, 0, len(specData.SiteRef))
 
 	for _, siteRefElement := range specData.SiteRef {
 		objectRefTypeModelModel := ObjectRefTypeModel{}
-
-		// resource specToModelNested RequiredStringField --> Namespace
-		if siteRefElement.GetNamespace() != "" {
-			objectRefTypeModelModel.Namespace = types.StringValue(siteRefElement.GetNamespace())
-		} else {
-			// Empty string, set to null
-			objectRefTypeModelModel.Namespace = types.StringNull()
-		}
 
 		// resource specToModelNested RequiredStringField --> Name
 		if siteRefElement.GetName() != "" {
@@ -1034,6 +1026,14 @@ func (r *ResourceF5XCCloudElasticIp) Update(ctx context.Context, request resourc
 		} else {
 			// Empty string, set to null
 			objectRefTypeModelModel.Tenant = types.StringNull()
+		}
+
+		// resource specToModelNested RequiredStringField --> Namespace
+		if siteRefElement.GetNamespace() != "" {
+			objectRefTypeModelModel.Namespace = types.StringValue(siteRefElement.GetNamespace())
+		} else {
+			// Empty string, set to null
+			objectRefTypeModelModel.Namespace = types.StringNull()
 		}
 
 		siteRefElementsSpectToModel = append(siteRefElementsSpectToModel, objectRefTypeModelModel)

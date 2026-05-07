@@ -50,6 +50,10 @@ type ResourceF5XCNetworkPolicyRule struct {
 	client *client.APIClient
 }
 
+type NetworkPolicyRuleNetworkPolicyRuleNetworkPolicyRuleAdvancedAction struct {
+	Action types.List `tfsdk:"action"`
+}
+
 type NetworkPolicyRuleGlobalSpecTypeRemoteEndpointChoice struct {
 	Prefix         types.Object `tfsdk:"prefix"`
 	PrefixSelector types.Object `tfsdk:"prefix_selector"`
@@ -73,24 +77,20 @@ type NetworkPolicyRuleLabelMatcherType struct {
 	Keys types.List `tfsdk:"keys"`
 }
 
-type NetworkPolicyRuleNetworkPolicyRuleNetworkPolicyRuleAdvancedAction struct {
-	Action types.List `tfsdk:"action"`
-}
-
 // ResourceF5XCNetworkPolicyRuleModel describes the resource data model.
 type ResourceF5XCNetworkPolicyRuleModel struct {
+	Labels               types.Map      `tfsdk:"labels"`
 	Annotations          types.Map      `tfsdk:"annotations"`
 	Description          types.String   `tfsdk:"description"`
 	Name                 types.String   `tfsdk:"name"`
 	Namespace            types.String   `tfsdk:"namespace"`
 	Uid                  types.String   `tfsdk:"uid"`
-	Labels               types.Map      `tfsdk:"labels"`
-	Protocol             types.String   `tfsdk:"protocol"`
-	RemoteEndpointChoice types.Object   `tfsdk:"remote_endpoint_choice"`
-	LabelMatcher         types.Object   `tfsdk:"label_matcher"`
 	AdvancedAction       types.Object   `tfsdk:"advanced_action"`
 	Action               types.List     `tfsdk:"action"`
 	Ports                types.List     `tfsdk:"ports"`
+	Protocol             types.String   `tfsdk:"protocol"`
+	RemoteEndpointChoice types.Object   `tfsdk:"remote_endpoint_choice"`
+	LabelMatcher         types.Object   `tfsdk:"label_matcher"`
 	Timeouts             timeouts.Value `tfsdk:"timeouts"`
 }
 
@@ -104,6 +104,14 @@ var (
 )
 
 // --- Attribute Maps for Nested Structs ---
+// Attribute map for PointerField --> AdvancedAction
+var NetworkPolicyRuleAdvancedActionModelAttributeMap = map[string]attr.Type{
+
+	"action": types.ListType{
+		ElemType: types.StringType,
+	},
+}
+
 // Attribute map for OneOfField --> RemoteEndpoint
 var NetworkPolicyRuleRemoteEndpointModelAttributeMap = map[string]attr.Type{
 
@@ -168,14 +176,6 @@ var NetworkPolicyRuleLabelMatcherModelAttributeMap = map[string]attr.Type{
 	},
 }
 
-// Attribute map for PointerField --> AdvancedAction
-var NetworkPolicyRuleAdvancedActionModelAttributeMap = map[string]attr.Type{
-
-	"action": types.ListType{
-		ElemType: types.StringType,
-	},
-}
-
 func NewResourceF5XCNetworkPolicyRule() resource.Resource {
 	return &ResourceF5XCNetworkPolicyRule{}
 }
@@ -191,6 +191,17 @@ func (r *ResourceF5XCNetworkPolicyRule) Schema(ctx context.Context, request reso
 		Description:         "NetworkPolicyRule resource",
 
 		Attributes: map[string]schema.Attribute{
+			"labels": schema.MapAttribute{
+				Description:         "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				MarkdownDescription: "",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				ElementType:         types.StringType,
+				PlanModifiers: []planmodifier.Map{
+					mapmergemodifier.New(),
+				},
+			},
 			"annotations": schema.MapAttribute{
 				Description:         "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
 				MarkdownDescription: "",
@@ -235,15 +246,50 @@ func (r *ResourceF5XCNetworkPolicyRule) Schema(ctx context.Context, request reso
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"labels": schema.MapAttribute{
-				Description:         "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+			"advanced_action": schema.SingleNestedAttribute{
+				Description:         "advanced_action Enable or disable logging.",
 				MarkdownDescription: "",
+				Required:            false,
+				Optional:            true,
+				Computed:            false,
+				Attributes: map[string]schema.Attribute{
+					"action": schema.ListAttribute{
+						Description:         "Action Enable or disable logging.",
+						MarkdownDescription: "<br>**Allowed Values (choose one):** `[\"NOLOG\", \"LOG\"]`<br>**Default:** `NOLOG`",
+						ElementType:         types.StringType,
+						Required:            false,
+						Optional:            true,
+						Computed:            true,
+						Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("NOLOG")),
+						Validators: []validator.List{
+							listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"NOLOG", "LOG"}...)),
+							listvalidator.SizeAtMost(1),
+						},
+					},
+				},
+			},
+			"action": schema.ListAttribute{
+				Description:         "Action Action to be taken at rule match. Currently supported actions are Allow and  Deny",
+				MarkdownDescription: "<br>**Allowed Values (choose one):** `[\"DENY\", \"ALLOW\"]`<br>**Default:** `DENY`",
 				Required:            false,
 				Optional:            true,
 				Computed:            true,
 				ElementType:         types.StringType,
-				PlanModifiers: []planmodifier.Map{
-					mapmergemodifier.New(),
+				Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("DENY")),
+				Validators: []validator.List{
+					listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"DENY", "ALLOW"}...)),
+					listvalidator.SizeAtMost(1),
+				},
+			},
+			"ports": schema.ListAttribute{
+				Description:         "ports List of port ranges. Each range is a single port or a pair of start and end ports e.g. 8080-8192",
+				MarkdownDescription: "",
+				Required:            false,
+				Optional:            true,
+				Computed:            false,
+				ElementType:         types.StringType,
+				Validators: []validator.List{
+					listvalidator.SizeAtMost(128),
 				},
 			},
 			"protocol": schema.StringAttribute{
@@ -383,52 +429,6 @@ func (r *ResourceF5XCNetworkPolicyRule) Schema(ctx context.Context, request reso
 					},
 				},
 			},
-			"advanced_action": schema.SingleNestedAttribute{
-				Description:         "advanced_action Enable or disable logging.",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            false,
-				Attributes: map[string]schema.Attribute{
-					"action": schema.ListAttribute{
-						Description:         "Action Enable or disable logging.",
-						MarkdownDescription: "<br>**Allowed Values (choose one):** `[\"NOLOG\", \"LOG\"]`<br>**Default:** `NOLOG`",
-						ElementType:         types.StringType,
-						Required:            false,
-						Optional:            true,
-						Computed:            true,
-						Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("NOLOG")),
-						Validators: []validator.List{
-							listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"NOLOG", "LOG"}...)),
-							listvalidator.SizeAtMost(1),
-						},
-					},
-				},
-			},
-			"action": schema.ListAttribute{
-				Description:         "Action Action to be taken at rule match. Currently supported actions are Allow and  Deny",
-				MarkdownDescription: "<br>**Allowed Values (choose one):** `[\"DENY\", \"ALLOW\"]`<br>**Default:** `DENY`",
-				Required:            false,
-				Optional:            true,
-				Computed:            true,
-				ElementType:         types.StringType,
-				Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("DENY")),
-				Validators: []validator.List{
-					listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"DENY", "ALLOW"}...)),
-					listvalidator.SizeAtMost(1),
-				},
-			},
-			"ports": schema.ListAttribute{
-				Description:         "ports List of port ranges. Each range is a single port or a pair of start and end ports e.g. 8080-8192",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            false,
-				ElementType:         types.StringType,
-				Validators: []validator.List{
-					listvalidator.SizeAtMost(128),
-				},
-			},
 			"timeouts": timeouts.Attributes(ctx, timeouts.Opts{
 				Create: true, // activate timeouts.create
 				Update: true, // activate timeouts.update
@@ -560,39 +560,6 @@ func (r *ResourceF5XCNetworkPolicyRule) Create(ctx context.Context, request reso
 		meta.Namespace = string(data.Namespace.ValueString())
 	}
 
-	// resource modelToSpecRoot StringField --> Protocol
-	if !data.Protocol.IsNull() && !data.Protocol.IsUnknown() {
-		spec.Protocol = string(data.Protocol.ValueString())
-	}
-
-	{
-		// resource modelToSpecRoot PointerField --> LabelMatcher
-		if !data.LabelMatcher.IsNull() && !data.LabelMatcher.IsUnknown() {
-			labelMatcherSpec := &ves_io_schema.LabelMatcherType{}
-			spec.LabelMatcher = labelMatcherSpec
-			var labelMatcherModel NetworkPolicyRuleLabelMatcherType
-
-			// Populate the nested model from the main data model
-			diags.Append(data.LabelMatcher.As(ctx, &labelMatcherModel, basetypes.ObjectAsOptions{})...)
-			response.Diagnostics.Append(diags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			// resource modelToSpecNested ArrayOfStringField --> Keys
-			if !labelMatcherModel.Keys.IsNull() && !labelMatcherModel.Keys.IsUnknown() {
-				elements := make([]string, 0, len(labelMatcherModel.Keys.Elements()))
-				diags := labelMatcherModel.Keys.ElementsAs(ctx, &elements, false)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				labelMatcherSpec.Keys = elements
-			}
-
-		}
-	}
-
 	{
 		// resource modelToSpecRoot PointerField --> AdvancedAction
 		if !data.AdvancedAction.IsNull() && !data.AdvancedAction.IsUnknown() {
@@ -665,6 +632,39 @@ func (r *ResourceF5XCNetworkPolicyRule) Create(ctx context.Context, request reso
 		}
 	}
 
+	// resource modelToSpecRoot StringField --> Protocol
+	if !data.Protocol.IsNull() && !data.Protocol.IsUnknown() {
+		spec.Protocol = string(data.Protocol.ValueString())
+	}
+
+	{
+		// resource modelToSpecRoot PointerField --> LabelMatcher
+		if !data.LabelMatcher.IsNull() && !data.LabelMatcher.IsUnknown() {
+			labelMatcherSpec := &ves_io_schema.LabelMatcherType{}
+			spec.LabelMatcher = labelMatcherSpec
+			var labelMatcherModel NetworkPolicyRuleLabelMatcherType
+
+			// Populate the nested model from the main data model
+			diags.Append(data.LabelMatcher.As(ctx, &labelMatcherModel, basetypes.ObjectAsOptions{})...)
+			response.Diagnostics.Append(diags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			// resource modelToSpecNested ArrayOfStringField --> Keys
+			if !labelMatcherModel.Keys.IsNull() && !labelMatcherModel.Keys.IsUnknown() {
+				elements := make([]string, 0, len(labelMatcherModel.Keys.Elements()))
+				diags := labelMatcherModel.Keys.ElementsAs(ctx, &elements, false)
+				response.Diagnostics.Append(diags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				labelMatcherSpec.Keys = elements
+			}
+
+		}
+	}
+
 	if response.Diagnostics.HasError() {
 		return
 	}
@@ -697,6 +697,45 @@ func (r *ResourceF5XCNetworkPolicyRule) Create(ctx context.Context, request reso
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
+	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
+	//
+	// Create/Update (called from Create/Update handlers):
+	//
+	//	The apply result must match the plan exactly. We store only what the plan
+	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
+	//	the plan are intentionally omitted here — they will be picked up by Read.
+	//
+	// Read (called from Read handler):
+	//
+	//	We merge the current state (user-configured labels) with the API response
+	//	(which may contain backend-injected labels). The merged result is stored in
+	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
+	//	Terraform sees no diff and no "inconsistent result" error occurs.
+	if metaData.GetLabels() != nil {
+		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
+		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+		response.Diagnostics.Append(labelsDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		// CREATE / UPDATE: Store the plan value as-is so the apply result matches the plan.
+		// The plan is either:
+		//   - Unknown (config=null): store the full API response.
+		//   - config value (first create with user labels): store only user labels.
+		//   - prior state (update with user+backend labels): store the merged labels.
+		// In all cases, data.Labels already holds the correct plan value
+		// except when it is Unknown — in that case we use the API response.
+		if data.Labels.IsUnknown() {
+			data.Labels = labelsMap
+		}
+		// When plan is a known map, leave data.Labels unchanged (= plan value).
+	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
+		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
+		data.Labels = types.MapNull(types.StringType)
+	}
 
 	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
 	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
@@ -749,43 +788,64 @@ func (r *ResourceF5XCNetworkPolicyRule) Create(ctx context.Context, request reso
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
+	// resource SpecToModelRoot PointerField --> AdvancedAction
+	if specData.GetAdvancedAction() != nil {
+		var networkPolicyRuleNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel = &NetworkPolicyRuleNetworkPolicyRuleNetworkPolicyRuleAdvancedAction{}
+		advancedActionElement := specData.GetAdvancedAction()
+
+		// resource specToModelNested EnumField --> Action
+		if advancedActionElement.GetAction().String() != "" {
+			stringValue := types.StringValue(advancedActionElement.GetAction().String())
+			stringSlice := []types.String{stringValue}
+			listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+			response.Diagnostics.Append(diags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			networkPolicyRuleNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel.Action = listValue
+		} else {
+			networkPolicyRuleNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel.Action = types.ListNull(types.StringType)
+		}
+
+		advancedActionObj, advancedActionDiags := utils.GoStructToObjectValue(
+			ctx,
+			NetworkPolicyRuleAdvancedActionModelAttributeMap,
+			networkPolicyRuleNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel,
+		)
+		response.Diagnostics.Append(advancedActionDiags...)
 		if response.Diagnostics.HasError() {
 			return
 		}
-		// CREATE / UPDATE: Store the plan value as-is so the apply result matches the plan.
-		// The plan is either:
-		//   - Unknown (config=null): store the full API response.
-		//   - config value (first create with user labels): store only user labels.
-		//   - prior state (update with user+backend labels): store the merged labels.
-		// In all cases, data.Labels already holds the correct plan value
-		// except when it is Unknown — in that case we use the API response.
-		if data.Labels.IsUnknown() {
-			data.Labels = labelsMap
+		data.AdvancedAction = advancedActionObj
+	} else {
+		data.AdvancedAction = types.ObjectNull(NetworkPolicyRuleAdvancedActionModelAttributeMap)
+	}
+
+	// resource SpecToModelRoot EnumField --> Action
+	if specData.GetAction().String() != "" {
+		stringValue := types.StringValue(specData.GetAction().String())
+		stringSlice := []types.String{stringValue}
+		listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			return
 		}
-		// When plan is a known map, leave data.Labels unchanged (= plan value).
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
+		data.Action = listValue
+	} else {
+		// Empty string, set to null
+		data.Action = types.ListNull(types.StringType)
+	}
+
+	// resource specToModelRoot ArrayOfStringField --> Ports
+	if len(specData.GetPorts()) > 0 {
+		listValue, diags := types.ListValueFrom(ctx, types.StringType, specData.GetPorts())
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.Ports = listValue
+	} else {
+		data.Ports = types.ListNull(types.StringType)
 	}
 
 	// resource SpecToModelRoot StringField --> Protocol
@@ -1002,66 +1062,6 @@ func (r *ResourceF5XCNetworkPolicyRule) Create(ctx context.Context, request reso
 		data.LabelMatcher = labelMatcherObj
 	} else {
 		data.LabelMatcher = types.ObjectNull(NetworkPolicyRuleLabelMatcherModelAttributeMap)
-	}
-
-	// resource SpecToModelRoot PointerField --> AdvancedAction
-	if specData.GetAdvancedAction() != nil {
-		var networkPolicyRuleNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel = &NetworkPolicyRuleNetworkPolicyRuleNetworkPolicyRuleAdvancedAction{}
-		advancedActionElement := specData.GetAdvancedAction()
-
-		// resource specToModelNested EnumField --> Action
-		if advancedActionElement.GetAction().String() != "" {
-			stringValue := types.StringValue(advancedActionElement.GetAction().String())
-			stringSlice := []types.String{stringValue}
-			listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-			response.Diagnostics.Append(diags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			networkPolicyRuleNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel.Action = listValue
-		} else {
-			networkPolicyRuleNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel.Action = types.ListNull(types.StringType)
-		}
-
-		advancedActionObj, advancedActionDiags := utils.GoStructToObjectValue(
-			ctx,
-			NetworkPolicyRuleAdvancedActionModelAttributeMap,
-			networkPolicyRuleNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel,
-		)
-		response.Diagnostics.Append(advancedActionDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.AdvancedAction = advancedActionObj
-	} else {
-		data.AdvancedAction = types.ObjectNull(NetworkPolicyRuleAdvancedActionModelAttributeMap)
-	}
-
-	// resource SpecToModelRoot EnumField --> Action
-	if specData.GetAction().String() != "" {
-		stringValue := types.StringValue(specData.GetAction().String())
-		stringSlice := []types.String{stringValue}
-		listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Action = listValue
-	} else {
-		// Empty string, set to null
-		data.Action = types.ListNull(types.StringType)
-	}
-
-	// resource specToModelRoot ArrayOfStringField --> Ports
-	if len(specData.GetPorts()) > 0 {
-		listValue, diags := types.ListValueFrom(ctx, types.StringType, specData.GetPorts())
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Ports = listValue
-	} else {
-		data.Ports = types.ListNull(types.StringType)
 	}
 
 	if response.Diagnostics.HasError() {
@@ -1127,6 +1127,53 @@ func (r *ResourceF5XCNetworkPolicyRule) Read(ctx context.Context, request resour
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
+	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
+	//
+	// Create/Update (called from Create/Update handlers):
+	//
+	//	The apply result must match the plan exactly. We store only what the plan
+	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
+	//	the plan are intentionally omitted here — they will be picked up by Read.
+	//
+	// Read (called from Read handler):
+	//
+	//	We merge the current state (user-configured labels) with the API response
+	//	(which may contain backend-injected labels). The merged result is stored in
+	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
+	//	Terraform sees no diff and no "inconsistent result" error occurs.
+	if metaData.GetLabels() != nil {
+		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
+		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+		response.Diagnostics.Append(labelsDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
+		// Start with the API response as the base (backend is authoritative for its own keys).
+		mergedLabels := make(map[string]attr.Value)
+		for k, v := range labelsMap.Elements() {
+			mergedLabels[k] = v
+		}
+		// Overlay with user-configured labels from the current state so that user labels
+		// are preserved even if the backend does not echo them back.
+		if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
+			for k, v := range data.Labels.Elements() {
+				mergedLabels[k] = v
+			}
+		}
+		mergedLabelsMap, mergedLabelsDiags := types.MapValue(types.StringType, mergedLabels)
+		response.Diagnostics.Append(mergedLabelsDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.Labels = mergedLabelsMap
+	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
+		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
+		data.Labels = types.MapNull(types.StringType)
+	}
+
 	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
 	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
 	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
@@ -1186,51 +1233,64 @@ func (r *ResourceF5XCNetworkPolicyRule) Read(ctx context.Context, request resour
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedLabels := make(map[string]attr.Value)
-		for k, v := range labelsMap.Elements() {
-			mergedLabels[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
-			for k, v := range data.Labels.Elements() {
-				mergedLabels[k] = v
+	// resource SpecToModelRoot PointerField --> AdvancedAction
+	if specData.GetAdvancedAction() != nil {
+		var networkPolicyRuleNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel = &NetworkPolicyRuleNetworkPolicyRuleNetworkPolicyRuleAdvancedAction{}
+		advancedActionElement := specData.GetAdvancedAction()
+
+		// resource specToModelNested EnumField --> Action
+		if advancedActionElement.GetAction().String() != "" {
+			stringValue := types.StringValue(advancedActionElement.GetAction().String())
+			stringSlice := []types.String{stringValue}
+			listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+			response.Diagnostics.Append(diags...)
+			if response.Diagnostics.HasError() {
+				return
 			}
+			networkPolicyRuleNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel.Action = listValue
+		} else {
+			networkPolicyRuleNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel.Action = types.ListNull(types.StringType)
 		}
-		mergedLabelsMap, mergedLabelsDiags := types.MapValue(types.StringType, mergedLabels)
-		response.Diagnostics.Append(mergedLabelsDiags...)
+
+		advancedActionObj, advancedActionDiags := utils.GoStructToObjectValue(
+			ctx,
+			NetworkPolicyRuleAdvancedActionModelAttributeMap,
+			networkPolicyRuleNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel,
+		)
+		response.Diagnostics.Append(advancedActionDiags...)
 		if response.Diagnostics.HasError() {
 			return
 		}
-		data.Labels = mergedLabelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
+		data.AdvancedAction = advancedActionObj
+	} else {
+		data.AdvancedAction = types.ObjectNull(NetworkPolicyRuleAdvancedActionModelAttributeMap)
+	}
+
+	// resource SpecToModelRoot EnumField --> Action
+	if specData.GetAction().String() != "" {
+		stringValue := types.StringValue(specData.GetAction().String())
+		stringSlice := []types.String{stringValue}
+		listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.Action = listValue
+	} else {
+		// Empty string, set to null
+		data.Action = types.ListNull(types.StringType)
+	}
+
+	// resource specToModelRoot ArrayOfStringField --> Ports
+	if len(specData.GetPorts()) > 0 {
+		listValue, diags := types.ListValueFrom(ctx, types.StringType, specData.GetPorts())
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.Ports = listValue
+	} else {
+		data.Ports = types.ListNull(types.StringType)
 	}
 
 	// resource SpecToModelRoot StringField --> Protocol
@@ -1447,66 +1507,6 @@ func (r *ResourceF5XCNetworkPolicyRule) Read(ctx context.Context, request resour
 		data.LabelMatcher = labelMatcherObj
 	} else {
 		data.LabelMatcher = types.ObjectNull(NetworkPolicyRuleLabelMatcherModelAttributeMap)
-	}
-
-	// resource SpecToModelRoot PointerField --> AdvancedAction
-	if specData.GetAdvancedAction() != nil {
-		var networkPolicyRuleNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel = &NetworkPolicyRuleNetworkPolicyRuleNetworkPolicyRuleAdvancedAction{}
-		advancedActionElement := specData.GetAdvancedAction()
-
-		// resource specToModelNested EnumField --> Action
-		if advancedActionElement.GetAction().String() != "" {
-			stringValue := types.StringValue(advancedActionElement.GetAction().String())
-			stringSlice := []types.String{stringValue}
-			listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-			response.Diagnostics.Append(diags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			networkPolicyRuleNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel.Action = listValue
-		} else {
-			networkPolicyRuleNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel.Action = types.ListNull(types.StringType)
-		}
-
-		advancedActionObj, advancedActionDiags := utils.GoStructToObjectValue(
-			ctx,
-			NetworkPolicyRuleAdvancedActionModelAttributeMap,
-			networkPolicyRuleNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel,
-		)
-		response.Diagnostics.Append(advancedActionDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.AdvancedAction = advancedActionObj
-	} else {
-		data.AdvancedAction = types.ObjectNull(NetworkPolicyRuleAdvancedActionModelAttributeMap)
-	}
-
-	// resource SpecToModelRoot EnumField --> Action
-	if specData.GetAction().String() != "" {
-		stringValue := types.StringValue(specData.GetAction().String())
-		stringSlice := []types.String{stringValue}
-		listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Action = listValue
-	} else {
-		// Empty string, set to null
-		data.Action = types.ListNull(types.StringType)
-	}
-
-	// resource specToModelRoot ArrayOfStringField --> Ports
-	if len(specData.GetPorts()) > 0 {
-		listValue, diags := types.ListValueFrom(ctx, types.StringType, specData.GetPorts())
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Ports = listValue
-	} else {
-		data.Ports = types.ListNull(types.StringType)
 	}
 
 	if response.Diagnostics.HasError() {
@@ -1585,39 +1585,6 @@ func (r *ResourceF5XCNetworkPolicyRule) Update(ctx context.Context, request reso
 		meta.Namespace = string(data.Namespace.ValueString())
 	}
 
-	// resource modelToSpecRoot StringField --> Protocol
-	if !data.Protocol.IsNull() && !data.Protocol.IsUnknown() {
-		spec.Protocol = string(data.Protocol.ValueString())
-	}
-
-	{
-		// resource modelToSpecRoot PointerField --> LabelMatcher
-		if !data.LabelMatcher.IsNull() && !data.LabelMatcher.IsUnknown() {
-			labelMatcherSpec := &ves_io_schema.LabelMatcherType{}
-			spec.LabelMatcher = labelMatcherSpec
-			var labelMatcherModel NetworkPolicyRuleLabelMatcherType
-
-			// Populate the nested model from the main data model
-			diags.Append(data.LabelMatcher.As(ctx, &labelMatcherModel, basetypes.ObjectAsOptions{})...)
-			response.Diagnostics.Append(diags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			// resource modelToSpecNested ArrayOfStringField --> Keys
-			if !labelMatcherModel.Keys.IsNull() && !labelMatcherModel.Keys.IsUnknown() {
-				elements := make([]string, 0, len(labelMatcherModel.Keys.Elements()))
-				diags := labelMatcherModel.Keys.ElementsAs(ctx, &elements, false)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				labelMatcherSpec.Keys = elements
-			}
-
-		}
-	}
-
 	{
 		// resource modelToSpecRoot PointerField --> AdvancedAction
 		if !data.AdvancedAction.IsNull() && !data.AdvancedAction.IsUnknown() {
@@ -1690,6 +1657,39 @@ func (r *ResourceF5XCNetworkPolicyRule) Update(ctx context.Context, request reso
 		}
 	}
 
+	// resource modelToSpecRoot StringField --> Protocol
+	if !data.Protocol.IsNull() && !data.Protocol.IsUnknown() {
+		spec.Protocol = string(data.Protocol.ValueString())
+	}
+
+	{
+		// resource modelToSpecRoot PointerField --> LabelMatcher
+		if !data.LabelMatcher.IsNull() && !data.LabelMatcher.IsUnknown() {
+			labelMatcherSpec := &ves_io_schema.LabelMatcherType{}
+			spec.LabelMatcher = labelMatcherSpec
+			var labelMatcherModel NetworkPolicyRuleLabelMatcherType
+
+			// Populate the nested model from the main data model
+			diags.Append(data.LabelMatcher.As(ctx, &labelMatcherModel, basetypes.ObjectAsOptions{})...)
+			response.Diagnostics.Append(diags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			// resource modelToSpecNested ArrayOfStringField --> Keys
+			if !labelMatcherModel.Keys.IsNull() && !labelMatcherModel.Keys.IsUnknown() {
+				elements := make([]string, 0, len(labelMatcherModel.Keys.Elements()))
+				diags := labelMatcherModel.Keys.ElementsAs(ctx, &elements, false)
+				response.Diagnostics.Append(diags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				labelMatcherSpec.Keys = elements
+			}
+
+		}
+	}
+
 	if response.Diagnostics.HasError() {
 		return
 	}
@@ -1723,6 +1723,53 @@ func (r *ResourceF5XCNetworkPolicyRule) Update(ctx context.Context, request reso
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
+	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
+	//
+	// Create/Update (called from Create/Update handlers):
+	//
+	//	The apply result must match the plan exactly. We store only what the plan
+	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
+	//	the plan are intentionally omitted here — they will be picked up by Read.
+	//
+	// Read (called from Read handler):
+	//
+	//	We merge the current state (user-configured labels) with the API response
+	//	(which may contain backend-injected labels). The merged result is stored in
+	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
+	//	Terraform sees no diff and no "inconsistent result" error occurs.
+	if metaData.GetLabels() != nil {
+		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
+		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+		response.Diagnostics.Append(labelsDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
+		// Start with the API response as the base (backend is authoritative for its own keys).
+		mergedLabels := make(map[string]attr.Value)
+		for k, v := range labelsMap.Elements() {
+			mergedLabels[k] = v
+		}
+		// Overlay with user-configured labels from the current state so that user labels
+		// are preserved even if the backend does not echo them back.
+		if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
+			for k, v := range data.Labels.Elements() {
+				mergedLabels[k] = v
+			}
+		}
+		mergedLabelsMap, mergedLabelsDiags := types.MapValue(types.StringType, mergedLabels)
+		response.Diagnostics.Append(mergedLabelsDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.Labels = mergedLabelsMap
+	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
+		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
+		data.Labels = types.MapNull(types.StringType)
+	}
 
 	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
 	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
@@ -1783,51 +1830,64 @@ func (r *ResourceF5XCNetworkPolicyRule) Update(ctx context.Context, request reso
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedLabels := make(map[string]attr.Value)
-		for k, v := range labelsMap.Elements() {
-			mergedLabels[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
-			for k, v := range data.Labels.Elements() {
-				mergedLabels[k] = v
+	// resource SpecToModelRoot PointerField --> AdvancedAction
+	if specData.GetAdvancedAction() != nil {
+		var networkPolicyRuleNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel = &NetworkPolicyRuleNetworkPolicyRuleNetworkPolicyRuleAdvancedAction{}
+		advancedActionElement := specData.GetAdvancedAction()
+
+		// resource specToModelNested EnumField --> Action
+		if advancedActionElement.GetAction().String() != "" {
+			stringValue := types.StringValue(advancedActionElement.GetAction().String())
+			stringSlice := []types.String{stringValue}
+			listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+			response.Diagnostics.Append(diags...)
+			if response.Diagnostics.HasError() {
+				return
 			}
+			networkPolicyRuleNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel.Action = listValue
+		} else {
+			networkPolicyRuleNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel.Action = types.ListNull(types.StringType)
 		}
-		mergedLabelsMap, mergedLabelsDiags := types.MapValue(types.StringType, mergedLabels)
-		response.Diagnostics.Append(mergedLabelsDiags...)
+
+		advancedActionObj, advancedActionDiags := utils.GoStructToObjectValue(
+			ctx,
+			NetworkPolicyRuleAdvancedActionModelAttributeMap,
+			networkPolicyRuleNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel,
+		)
+		response.Diagnostics.Append(advancedActionDiags...)
 		if response.Diagnostics.HasError() {
 			return
 		}
-		data.Labels = mergedLabelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
+		data.AdvancedAction = advancedActionObj
+	} else {
+		data.AdvancedAction = types.ObjectNull(NetworkPolicyRuleAdvancedActionModelAttributeMap)
+	}
+
+	// resource SpecToModelRoot EnumField --> Action
+	if specData.GetAction().String() != "" {
+		stringValue := types.StringValue(specData.GetAction().String())
+		stringSlice := []types.String{stringValue}
+		listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.Action = listValue
+	} else {
+		// Empty string, set to null
+		data.Action = types.ListNull(types.StringType)
+	}
+
+	// resource specToModelRoot ArrayOfStringField --> Ports
+	if len(specData.GetPorts()) > 0 {
+		listValue, diags := types.ListValueFrom(ctx, types.StringType, specData.GetPorts())
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.Ports = listValue
+	} else {
+		data.Ports = types.ListNull(types.StringType)
 	}
 
 	// resource SpecToModelRoot StringField --> Protocol
@@ -2044,66 +2104,6 @@ func (r *ResourceF5XCNetworkPolicyRule) Update(ctx context.Context, request reso
 		data.LabelMatcher = labelMatcherObj
 	} else {
 		data.LabelMatcher = types.ObjectNull(NetworkPolicyRuleLabelMatcherModelAttributeMap)
-	}
-
-	// resource SpecToModelRoot PointerField --> AdvancedAction
-	if specData.GetAdvancedAction() != nil {
-		var networkPolicyRuleNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel = &NetworkPolicyRuleNetworkPolicyRuleNetworkPolicyRuleAdvancedAction{}
-		advancedActionElement := specData.GetAdvancedAction()
-
-		// resource specToModelNested EnumField --> Action
-		if advancedActionElement.GetAction().String() != "" {
-			stringValue := types.StringValue(advancedActionElement.GetAction().String())
-			stringSlice := []types.String{stringValue}
-			listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-			response.Diagnostics.Append(diags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			networkPolicyRuleNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel.Action = listValue
-		} else {
-			networkPolicyRuleNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel.Action = types.ListNull(types.StringType)
-		}
-
-		advancedActionObj, advancedActionDiags := utils.GoStructToObjectValue(
-			ctx,
-			NetworkPolicyRuleAdvancedActionModelAttributeMap,
-			networkPolicyRuleNetworkPolicyRuleNetworkPolicyRuleAdvancedActionModel,
-		)
-		response.Diagnostics.Append(advancedActionDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.AdvancedAction = advancedActionObj
-	} else {
-		data.AdvancedAction = types.ObjectNull(NetworkPolicyRuleAdvancedActionModelAttributeMap)
-	}
-
-	// resource SpecToModelRoot EnumField --> Action
-	if specData.GetAction().String() != "" {
-		stringValue := types.StringValue(specData.GetAction().String())
-		stringSlice := []types.String{stringValue}
-		listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Action = listValue
-	} else {
-		// Empty string, set to null
-		data.Action = types.ListNull(types.StringType)
-	}
-
-	// resource specToModelRoot ArrayOfStringField --> Ports
-	if len(specData.GetPorts()) > 0 {
-		listValue, diags := types.ListValueFrom(ctx, types.StringType, specData.GetPorts())
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Ports = listValue
-	} else {
-		data.Ports = types.ListNull(types.StringType)
 	}
 
 	// Save updated data into Terraform state

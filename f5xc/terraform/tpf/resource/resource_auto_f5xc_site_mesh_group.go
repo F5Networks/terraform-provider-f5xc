@@ -52,17 +52,6 @@ type ResourceF5XCSiteMeshGroup struct {
 	client *client.APIClient
 }
 
-type SiteMeshGroupGlobalSpecTypeBfdChoice struct {
-	BfdEnabled  types.Object `tfsdk:"bfd_enabled"`
-	BfdDisabled types.Bool   `tfsdk:"bfd_disabled"`
-}
-
-type SiteMeshGroupGlobalSpecTypeBfdEnabled struct {
-	TransmitIntervalMilliseconds types.Int64 `tfsdk:"transmit_interval_milliseconds"`
-	ReceiveIntervalMilliseconds  types.Int64 `tfsdk:"receive_interval_milliseconds"`
-	Multiplier                   types.Int64 `tfsdk:"multiplier"`
-}
-
 type SiteMeshGroupGlobalSpecTypeMeshChoice struct {
 	SpokeMesh types.Object `tfsdk:"spoke_mesh"`
 	FullMesh  types.Object `tfsdk:"full_mesh"`
@@ -102,6 +91,17 @@ type SiteMeshGroupGlobalSpecTypeReFallbackChoice struct {
 	DisableReFallback types.Bool `tfsdk:"disable_re_fallback"`
 }
 
+type SiteMeshGroupGlobalSpecTypeBfdChoice struct {
+	BfdDisabled types.Bool   `tfsdk:"bfd_disabled"`
+	BfdEnabled  types.Object `tfsdk:"bfd_enabled"`
+}
+
+type SiteMeshGroupGlobalSpecTypeBfdEnabled struct {
+	TransmitIntervalMilliseconds types.Int64 `tfsdk:"transmit_interval_milliseconds"`
+	ReceiveIntervalMilliseconds  types.Int64 `tfsdk:"receive_interval_milliseconds"`
+	Multiplier                   types.Int64 `tfsdk:"multiplier"`
+}
+
 // ResourceF5XCSiteMeshGroupModel describes the resource data model.
 type ResourceF5XCSiteMeshGroupModel struct {
 	Name             types.String   `tfsdk:"name"`
@@ -110,10 +110,10 @@ type ResourceF5XCSiteMeshGroupModel struct {
 	Labels           types.Map      `tfsdk:"labels"`
 	Annotations      types.Map      `tfsdk:"annotations"`
 	Description      types.String   `tfsdk:"description"`
-	BfdChoice        types.Object   `tfsdk:"bfd_choice"`
 	VirtualSite      types.List     `tfsdk:"virtual_site"`
 	MeshChoice       types.Object   `tfsdk:"mesh_choice"`
 	ReFallbackChoice types.Object   `tfsdk:"re_fallback_choice"`
+	BfdChoice        types.Object   `tfsdk:"bfd_choice"`
 	Timeouts         timeouts.Value `tfsdk:"timeouts"`
 }
 
@@ -127,23 +127,6 @@ var (
 )
 
 // --- Attribute Maps for Nested Structs ---
-// Attribute map for RequiredOneOfField --> BfdChoice
-var SiteMeshGroupBfdChoiceModelAttributeMap = map[string]attr.Type{
-
-	"bfd_enabled": types.ObjectType{
-		AttrTypes: SiteMeshGroupBfdChoiceBfdEnabledModelAttributeMap,
-	},
-	"bfd_disabled": types.BoolType,
-}
-
-// Attribute map for PointerOfOneOfField --> BfdEnabled
-var SiteMeshGroupBfdChoiceBfdEnabledModelAttributeMap = map[string]attr.Type{
-
-	"transmit_interval_milliseconds": types.Int64Type,
-	"receive_interval_milliseconds":  types.Int64Type,
-	"multiplier":                     types.Int64Type,
-}
-
 // Attribute map for ArrayOfPointerField --> VirtualSite
 var SiteMeshGroupVirtualSiteObjectRefModelAttributeMap = map[string]attr.Type{
 
@@ -170,9 +153,9 @@ var SiteMeshGroupMeshChoiceModelAttributeMap = map[string]attr.Type{
 var SiteMeshGroupMeshChoiceSpokeMeshModelAttributeMap = map[string]attr.Type{
 	"hub_mesh_group": types.ObjectType{
 		AttrTypes: map[string]attr.Type{
-			"name":      types.StringType,
 			"tenant":    types.StringType,
-			"namespace": types.StringType},
+			"namespace": types.StringType,
+			"name":      types.StringType},
 	},
 	"spoke_hub_mesh_choice": types.ObjectType{
 		AttrTypes: SiteMeshGroupMeshChoiceSpokeMeshSpokeHubMeshChoiceModelAttributeMap,
@@ -182,9 +165,9 @@ var SiteMeshGroupMeshChoiceSpokeMeshModelAttributeMap = map[string]attr.Type{
 // Attribute map for RequiredPointerField --> HubMeshGroup
 var SiteMeshGroupMeshChoiceSpokeMeshHubMeshGroupModelAttributeMap = map[string]attr.Type{
 
-	"name":      types.StringType,
 	"tenant":    types.StringType,
 	"namespace": types.StringType,
+	"name":      types.StringType,
 }
 
 // Attribute map for OneOfField --> SpokeHubMeshChoice
@@ -229,6 +212,23 @@ var SiteMeshGroupReFallbackModelAttributeMap = map[string]attr.Type{
 
 	"enable_re_fallback":  types.BoolType,
 	"disable_re_fallback": types.BoolType,
+}
+
+// Attribute map for RequiredOneOfField --> BfdChoice
+var SiteMeshGroupBfdChoiceModelAttributeMap = map[string]attr.Type{
+
+	"bfd_disabled": types.BoolType,
+	"bfd_enabled": types.ObjectType{
+		AttrTypes: SiteMeshGroupBfdChoiceBfdEnabledModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> BfdEnabled
+var SiteMeshGroupBfdChoiceBfdEnabledModelAttributeMap = map[string]attr.Type{
+
+	"transmit_interval_milliseconds": types.Int64Type,
+	"receive_interval_milliseconds":  types.Int64Type,
+	"multiplier":                     types.Int64Type,
 }
 
 func NewResourceF5XCSiteMeshGroup() resource.Resource {
@@ -301,73 +301,6 @@ func (r *ResourceF5XCSiteMeshGroup) Schema(ctx context.Context, request resource
 				Computed:            true,
 				Default:             stringdefault.StaticString(""),
 			},
-			"bfd_choice": schema.SingleNestedAttribute{
-				Description:         "BFD Choice Options for enabling or disabling BFD for the Site Mesh Group. BFD is used for fast failure detection.",
-				MarkdownDescription: "",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
-				Validators: []validator.Object{
-					atmostoneofvalidator.AtMostOneOf(
-						"bfd_disabled",
-						"bfd_enabled",
-					),
-				},
-				Attributes: map[string]schema.Attribute{
-					"bfd_enabled": schema.SingleNestedAttribute{
-						Description:         "BFD Enabled Enable BFD (Bi-directional Forwarding Detection) for the Site Mesh Group.",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Attributes: map[string]schema.Attribute{
-							"transmit_interval_milliseconds": schema.Int64Attribute{
-								Description:         "Transmit Interval in milliseconds BFD transmit interval timer, in milliseconds",
-								MarkdownDescription: "<br>**Default:** `3333`",
-								Required:            false,
-								Optional:            true,
-								Computed:            true,
-								Default:             int64default.StaticInt64(3333),
-								Validators: []validator.Int64{
-									int64validator.Between(300, 60000),
-								},
-							},
-							"receive_interval_milliseconds": schema.Int64Attribute{
-								Description:         "Receive Interval in milliseconds BFD receive interval timer, in milliseconds",
-								MarkdownDescription: "<br>**Default:** `3333`",
-								Required:            false,
-								Optional:            true,
-								Computed:            true,
-								Default:             int64default.StaticInt64(3333),
-								Validators: []validator.Int64{
-									int64validator.Between(300, 60000),
-								},
-							},
-							"multiplier": schema.Int64Attribute{
-								Description:         "Multiplier Specify Number of missed packets to bring session down'",
-								MarkdownDescription: "<br>**Default:** `3`",
-								Required:            false,
-								Optional:            true,
-								Computed:            true,
-								Default:             int64default.StaticInt64(3),
-								Validators: []validator.Int64{
-									int64validator.Between(2, 255),
-								},
-							},
-						},
-					},
-					"bfd_disabled": schema.BoolAttribute{
-						Description:         "BFD Disabled Disable BFD (Bi-directional Forwarding Detection) for the Site Mesh Group.",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Validators: []validator.Bool{
-							boolvalidator.Equals(true),
-						},
-					},
-				},
-			},
 			"virtual_site": schema.ListNestedAttribute{
 				Description:         "virtual_site Set of sites for which this mesh group config is valid. If 'Type' is Spoke, then it gives set of spoke sites. If 'Type' is Hub, then it gives set of hub sites. If 'Type' is Full Mesh, then it gives set of sites that are connected in full mesh.",
 				MarkdownDescription: "",
@@ -411,9 +344,9 @@ func (r *ResourceF5XCSiteMeshGroup) Schema(ctx context.Context, request resource
 				Computed:            false,
 				Validators: []validator.Object{
 					atmostoneofvalidator.AtMostOneOf(
+						"full_mesh",
 						"hub_mesh",
 						"spoke_mesh",
-						"full_mesh",
 					),
 				},
 				Attributes: map[string]schema.Attribute{
@@ -431,13 +364,6 @@ func (r *ResourceF5XCSiteMeshGroup) Schema(ctx context.Context, request resource
 								Optional:            false,
 								Computed:            false,
 								Attributes: map[string]schema.Attribute{
-									"name": schema.StringAttribute{
-										Description:         "",
-										MarkdownDescription: "",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
-									},
 									"tenant": schema.StringAttribute{
 										Description:         "",
 										MarkdownDescription: "",
@@ -449,6 +375,13 @@ func (r *ResourceF5XCSiteMeshGroup) Schema(ctx context.Context, request resource
 										},
 									},
 									"namespace": schema.StringAttribute{
+										Description:         "",
+										MarkdownDescription: "",
+										Required:            true,
+										Optional:            false,
+										Computed:            false,
+									},
+									"name": schema.StringAttribute{
 										Description:         "",
 										MarkdownDescription: "",
 										Required:            true,
@@ -509,8 +442,8 @@ func (r *ResourceF5XCSiteMeshGroup) Schema(ctx context.Context, request resource
 								Computed:            false,
 								Validators: []validator.Object{
 									atmostoneofvalidator.AtMostOneOf(
-										"control_and_data_plane_mesh",
 										"data_plane_mesh",
+										"control_and_data_plane_mesh",
 									),
 								},
 								Attributes: map[string]schema.Attribute{
@@ -615,6 +548,73 @@ func (r *ResourceF5XCSiteMeshGroup) Schema(ctx context.Context, request resource
 						Computed:            false,
 						Validators: []validator.Bool{
 							boolvalidator.Equals(true),
+						},
+					},
+				},
+			},
+			"bfd_choice": schema.SingleNestedAttribute{
+				Description:         "BFD Choice Options for enabling or disabling BFD for the Site Mesh Group. BFD is used for fast failure detection.",
+				MarkdownDescription: "",
+				Required:            true,
+				Optional:            false,
+				Computed:            false,
+				Validators: []validator.Object{
+					atmostoneofvalidator.AtMostOneOf(
+						"bfd_disabled",
+						"bfd_enabled",
+					),
+				},
+				Attributes: map[string]schema.Attribute{
+					"bfd_disabled": schema.BoolAttribute{
+						Description:         "BFD Disabled Disable BFD (Bi-directional Forwarding Detection) for the Site Mesh Group.",
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Validators: []validator.Bool{
+							boolvalidator.Equals(true),
+						},
+					},
+					"bfd_enabled": schema.SingleNestedAttribute{
+						Description:         "BFD Enabled Enable BFD (Bi-directional Forwarding Detection) for the Site Mesh Group.",
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Attributes: map[string]schema.Attribute{
+							"transmit_interval_milliseconds": schema.Int64Attribute{
+								Description:         "Transmit Interval in milliseconds BFD transmit interval timer, in milliseconds",
+								MarkdownDescription: "<br>**Default:** `3333`",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
+								Default:             int64default.StaticInt64(3333),
+								Validators: []validator.Int64{
+									int64validator.Between(300, 60000),
+								},
+							},
+							"receive_interval_milliseconds": schema.Int64Attribute{
+								Description:         "Receive Interval in milliseconds BFD receive interval timer, in milliseconds",
+								MarkdownDescription: "<br>**Default:** `3333`",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
+								Default:             int64default.StaticInt64(3333),
+								Validators: []validator.Int64{
+									int64validator.Between(300, 60000),
+								},
+							},
+							"multiplier": schema.Int64Attribute{
+								Description:         "Multiplier Specify Number of missed packets to bring session down'",
+								MarkdownDescription: "<br>**Default:** `3`",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
+								Default:             int64default.StaticInt64(3),
+								Validators: []validator.Int64{
+									int64validator.Between(2, 255),
+								},
+							},
 						},
 					},
 				},
@@ -750,45 +750,6 @@ func (r *ResourceF5XCSiteMeshGroup) Create(ctx context.Context, request resource
 		meta.Description = string(data.Description.ValueString())
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> BfdChoice
-	if !data.BfdChoice.IsNull() && !data.BfdChoice.IsUnknown() {
-		bfdChoiceModel := SiteMeshGroupGlobalSpecTypeBfdChoice{}
-		response.Diagnostics.Append(data.BfdChoice.As(ctx, &bfdChoiceModel, basetypes.ObjectAsOptions{})...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-
-		// resource modelToSpecNested PointerOfOneOfField --> BfdEnabled
-		if !bfdChoiceModel.BfdEnabled.IsNull() && !bfdChoiceModel.BfdEnabled.IsUnknown() {
-			var siteMeshGroupGlobalSpecTypeBfdEnabledModel SiteMeshGroupGlobalSpecTypeBfdEnabled
-			response.Diagnostics.Append(bfdChoiceModel.BfdEnabled.As(ctx, &siteMeshGroupGlobalSpecTypeBfdEnabledModel, basetypes.ObjectAsOptions{})...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			bfdEnabledOneOfSpec := &ves_io_schema_site_mesh_group.CreateSpecType_BfdEnabled{}
-			bfdEnabledOneOfSpec.BfdEnabled = &ves_io_schema_site_mesh_group.BFD{}
-			spec.BfdChoice = bfdEnabledOneOfSpec
-
-			// resource modelToSpecNested RequiredUintField --> TransmitIntervalMilliseconds
-			bfdEnabledOneOfSpec.BfdEnabled.TransmitIntervalMilliseconds = uint32(uint32(siteMeshGroupGlobalSpecTypeBfdEnabledModel.TransmitIntervalMilliseconds.ValueInt64()))
-
-			// resource modelToSpecNested RequiredUintField --> ReceiveIntervalMilliseconds
-			bfdEnabledOneOfSpec.BfdEnabled.ReceiveIntervalMilliseconds = uint32(uint32(siteMeshGroupGlobalSpecTypeBfdEnabledModel.ReceiveIntervalMilliseconds.ValueInt64()))
-
-			// resource modelToSpecNested RequiredUintField --> Multiplier
-			bfdEnabledOneOfSpec.BfdEnabled.Multiplier = uint32(uint32(siteMeshGroupGlobalSpecTypeBfdEnabledModel.Multiplier.ValueInt64()))
-
-		}
-
-		// resource modelToSpecNested BoolOfOneOfPointerField --> BfdDisabled
-		if !bfdChoiceModel.BfdDisabled.IsNull() && !bfdChoiceModel.BfdDisabled.IsUnknown() {
-			bfdDisabledSpecBool := &ves_io_schema_site_mesh_group.CreateSpecType_BfdDisabled{}
-			bfdDisabledSpecBool.BfdDisabled = &ves_io_schema.Empty{}
-			spec.BfdChoice = bfdDisabledSpecBool
-		}
-
-	}
-
 	{
 		// resource modelToSpecRoot ArrayOfPointerField --> VirtualSite
 		if !data.VirtualSite.IsNull() && !data.VirtualSite.IsUnknown() {
@@ -850,14 +811,14 @@ func (r *ResourceF5XCSiteMeshGroup) Create(ctx context.Context, request resource
 				hubMeshGroupSpec := &ves_io_schema_views.ObjectRefType{}
 				spokeMeshOneOfSpec.SpokeMesh.HubMeshGroup = hubMeshGroupSpec
 
-				// resource modelToSpecNested RequiredStringField --> Name
-				if !hubMeshGroupModel.Name.IsNull() && !hubMeshGroupModel.Name.IsUnknown() {
-					hubMeshGroupSpec.Name = string(hubMeshGroupModel.Name.ValueString())
-				}
-
 				// resource modelToSpecNested RequiredStringField --> Namespace
 				if !hubMeshGroupModel.Namespace.IsNull() && !hubMeshGroupModel.Namespace.IsUnknown() {
 					hubMeshGroupSpec.Namespace = string(hubMeshGroupModel.Namespace.ValueString())
+				}
+
+				// resource modelToSpecNested RequiredStringField --> Name
+				if !hubMeshGroupModel.Name.IsNull() && !hubMeshGroupModel.Name.IsUnknown() {
+					hubMeshGroupSpec.Name = string(hubMeshGroupModel.Name.ValueString())
 				}
 
 			}
@@ -988,6 +949,45 @@ func (r *ResourceF5XCSiteMeshGroup) Create(ctx context.Context, request resource
 
 	}
 
+	// resource modelToSpecRoot RequiredOneOfField --> BfdChoice
+	if !data.BfdChoice.IsNull() && !data.BfdChoice.IsUnknown() {
+		bfdChoiceModel := SiteMeshGroupGlobalSpecTypeBfdChoice{}
+		response.Diagnostics.Append(data.BfdChoice.As(ctx, &bfdChoiceModel, basetypes.ObjectAsOptions{})...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> BfdDisabled
+		if !bfdChoiceModel.BfdDisabled.IsNull() && !bfdChoiceModel.BfdDisabled.IsUnknown() {
+			bfdDisabledSpecBool := &ves_io_schema_site_mesh_group.CreateSpecType_BfdDisabled{}
+			bfdDisabledSpecBool.BfdDisabled = &ves_io_schema.Empty{}
+			spec.BfdChoice = bfdDisabledSpecBool
+		}
+
+		// resource modelToSpecNested PointerOfOneOfField --> BfdEnabled
+		if !bfdChoiceModel.BfdEnabled.IsNull() && !bfdChoiceModel.BfdEnabled.IsUnknown() {
+			var siteMeshGroupGlobalSpecTypeBfdEnabledModel SiteMeshGroupGlobalSpecTypeBfdEnabled
+			response.Diagnostics.Append(bfdChoiceModel.BfdEnabled.As(ctx, &siteMeshGroupGlobalSpecTypeBfdEnabledModel, basetypes.ObjectAsOptions{})...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			bfdEnabledOneOfSpec := &ves_io_schema_site_mesh_group.CreateSpecType_BfdEnabled{}
+			bfdEnabledOneOfSpec.BfdEnabled = &ves_io_schema_site_mesh_group.BFD{}
+			spec.BfdChoice = bfdEnabledOneOfSpec
+
+			// resource modelToSpecNested RequiredUintField --> TransmitIntervalMilliseconds
+			bfdEnabledOneOfSpec.BfdEnabled.TransmitIntervalMilliseconds = uint32(uint32(siteMeshGroupGlobalSpecTypeBfdEnabledModel.TransmitIntervalMilliseconds.ValueInt64()))
+
+			// resource modelToSpecNested RequiredUintField --> ReceiveIntervalMilliseconds
+			bfdEnabledOneOfSpec.BfdEnabled.ReceiveIntervalMilliseconds = uint32(uint32(siteMeshGroupGlobalSpecTypeBfdEnabledModel.ReceiveIntervalMilliseconds.ValueInt64()))
+
+			// resource modelToSpecNested RequiredUintField --> Multiplier
+			bfdEnabledOneOfSpec.BfdEnabled.Multiplier = uint32(uint32(siteMeshGroupGlobalSpecTypeBfdEnabledModel.Multiplier.ValueInt64()))
+
+		}
+
+	}
+
 	if response.Diagnostics.HasError() {
 		return
 	}
@@ -1111,75 +1111,6 @@ func (r *ResourceF5XCSiteMeshGroup) Create(ctx context.Context, request resource
 	// resource SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
 
-	// resource SpecToModelRoot RequiredOneOfField --> BfdChoice
-	// false
-	// true
-	// This resource uses standard struct-based resolution.
-	if specData.GetBfdChoice() != nil {
-		// For standard resources, get the choice from the typed spec data.
-		bfdChoiceChoices := specData.GetBfdChoice()
-
-		// The model struct that will be populated by the nested template.
-		var bfdChoiceChoicesModel = &SiteMeshGroupGlobalSpecTypeBfdChoice{}
-
-		// Recursively call the nested template to process the oneof choices.
-
-		// resource specToModelNested PointerOfOneOfField --> BfdEnabled
-		// GlobalSpecType
-		// false
-		{
-			bfdEnabledOptions, isBfdEnabled := bfdChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_BfdEnabled)
-			bfdEnabledAttributeMap := make(map[string]attr.Value)
-
-			if isBfdEnabled && bfdEnabledOptions != nil {
-
-				// resource specToModelNested RequiredUintField --> TransmitIntervalMilliseconds
-				bfdEnabledAttributeMap["transmit_interval_milliseconds"] = types.Int64Value(int64(bfdEnabledOptions.BfdEnabled.GetTransmitIntervalMilliseconds()))
-
-				// resource specToModelNested RequiredUintField --> ReceiveIntervalMilliseconds
-				bfdEnabledAttributeMap["receive_interval_milliseconds"] = types.Int64Value(int64(bfdEnabledOptions.BfdEnabled.GetReceiveIntervalMilliseconds()))
-
-				// resource specToModelNested RequiredUintField --> Multiplier
-				bfdEnabledAttributeMap["multiplier"] = types.Int64Value(int64(bfdEnabledOptions.BfdEnabled.GetMultiplier()))
-
-				bfdEnabledObj, diags := types.ObjectValue(SiteMeshGroupBfdChoiceBfdEnabledModelAttributeMap, bfdEnabledAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				bfdChoiceChoicesModel.BfdEnabled = bfdEnabledObj
-			} else {
-				bfdChoiceChoicesModel.BfdEnabled = types.ObjectNull(SiteMeshGroupBfdChoiceBfdEnabledModelAttributeMap)
-			}
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> BfdDisabled
-		_, isBfdDisabled := bfdChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_BfdDisabled)
-
-		if isBfdDisabled {
-			bfdChoiceChoicesModel.BfdDisabled = types.BoolValue(true)
-		} else {
-			bfdChoiceChoicesModel.BfdDisabled = types.BoolNull()
-		}
-
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		bfdChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			SiteMeshGroupBfdChoiceModelAttributeMap,
-			bfdChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
-
-		// Assign the final object to the root data model.
-		data.BfdChoice = bfdChoiceObj
-	} else {
-		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		data.BfdChoice = types.ObjectNull(SiteMeshGroupBfdChoiceModelAttributeMap)
-	}
-
 	// resource SpecToModelRoot ArrayOfPointerField --> VirtualSite
 	if len(specData.VirtualSite) > 0 {
 		virtualSiteElements := make([]ObjectRefTypeModel, 0, len(specData.VirtualSite))
@@ -1264,14 +1195,6 @@ func (r *ResourceF5XCSiteMeshGroup) Create(ctx context.Context, request resource
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredStringField --> Name
-					if hubMeshGroupElement.GetName() != "" {
-						objectRefTypeModelModel.Name = types.StringValue(hubMeshGroupElement.GetName())
-					} else {
-						// Empty string, set to null
-						objectRefTypeModelModel.Name = types.StringNull()
-					}
-
 					// resource specToModelNested StringField --> Tenant
 					if hubMeshGroupElement.GetTenant() != "" {
 						objectRefTypeModelModel.Tenant = types.StringValue(hubMeshGroupElement.GetTenant())
@@ -1286,6 +1209,14 @@ func (r *ResourceF5XCSiteMeshGroup) Create(ctx context.Context, request resource
 					} else {
 						// Empty string, set to null
 						objectRefTypeModelModel.Namespace = types.StringNull()
+					}
+
+					// resource specToModelNested RequiredStringField --> Name
+					if hubMeshGroupElement.GetName() != "" {
+						objectRefTypeModelModel.Name = types.StringValue(hubMeshGroupElement.GetName())
+					} else {
+						// Empty string, set to null
+						objectRefTypeModelModel.Name = types.StringNull()
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
@@ -1563,6 +1494,75 @@ func (r *ResourceF5XCSiteMeshGroup) Create(ctx context.Context, request resource
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		data.ReFallbackChoice = types.ObjectNull(SiteMeshGroupReFallbackModelAttributeMap)
+	}
+
+	// resource SpecToModelRoot RequiredOneOfField --> BfdChoice
+	// false
+	// true
+	// This resource uses standard struct-based resolution.
+	if specData.GetBfdChoice() != nil {
+		// For standard resources, get the choice from the typed spec data.
+		bfdChoiceChoices := specData.GetBfdChoice()
+
+		// The model struct that will be populated by the nested template.
+		var bfdChoiceChoicesModel = &SiteMeshGroupGlobalSpecTypeBfdChoice{}
+
+		// Recursively call the nested template to process the oneof choices.
+
+		// resource specToModelNested BoolOfOneOfPointerField --> BfdDisabled
+		_, isBfdDisabled := bfdChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_BfdDisabled)
+
+		if isBfdDisabled {
+			bfdChoiceChoicesModel.BfdDisabled = types.BoolValue(true)
+		} else {
+			bfdChoiceChoicesModel.BfdDisabled = types.BoolNull()
+		}
+
+		// resource specToModelNested PointerOfOneOfField --> BfdEnabled
+		// GlobalSpecType
+		// false
+		{
+			bfdEnabledOptions, isBfdEnabled := bfdChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_BfdEnabled)
+			bfdEnabledAttributeMap := make(map[string]attr.Value)
+
+			if isBfdEnabled && bfdEnabledOptions != nil {
+
+				// resource specToModelNested RequiredUintField --> TransmitIntervalMilliseconds
+				bfdEnabledAttributeMap["transmit_interval_milliseconds"] = types.Int64Value(int64(bfdEnabledOptions.BfdEnabled.GetTransmitIntervalMilliseconds()))
+
+				// resource specToModelNested RequiredUintField --> ReceiveIntervalMilliseconds
+				bfdEnabledAttributeMap["receive_interval_milliseconds"] = types.Int64Value(int64(bfdEnabledOptions.BfdEnabled.GetReceiveIntervalMilliseconds()))
+
+				// resource specToModelNested RequiredUintField --> Multiplier
+				bfdEnabledAttributeMap["multiplier"] = types.Int64Value(int64(bfdEnabledOptions.BfdEnabled.GetMultiplier()))
+
+				bfdEnabledObj, diags := types.ObjectValue(SiteMeshGroupBfdChoiceBfdEnabledModelAttributeMap, bfdEnabledAttributeMap)
+				response.Diagnostics.Append(diags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				bfdChoiceChoicesModel.BfdEnabled = bfdEnabledObj
+			} else {
+				bfdChoiceChoicesModel.BfdEnabled = types.ObjectNull(SiteMeshGroupBfdChoiceBfdEnabledModelAttributeMap)
+			}
+		}
+
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		bfdChoiceObj, diags := utils.GoStructToObjectValue(
+			ctx,
+			SiteMeshGroupBfdChoiceModelAttributeMap,
+			bfdChoiceChoicesModel,
+		)
+		if diags.HasError() {
+			response.Diagnostics.Append(diags...)
+			return
+		}
+
+		// Assign the final object to the root data model.
+		data.BfdChoice = bfdChoiceObj
+	} else {
+		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		data.BfdChoice = types.ObjectNull(SiteMeshGroupBfdChoiceModelAttributeMap)
 	}
 
 	if response.Diagnostics.HasError() {
@@ -1734,75 +1734,6 @@ func (r *ResourceF5XCSiteMeshGroup) Read(ctx context.Context, request resource.R
 	// resource SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
 
-	// resource SpecToModelRoot RequiredOneOfField --> BfdChoice
-	// false
-	// true
-	// This resource uses standard struct-based resolution.
-	if specData.GetBfdChoice() != nil {
-		// For standard resources, get the choice from the typed spec data.
-		bfdChoiceChoices := specData.GetBfdChoice()
-
-		// The model struct that will be populated by the nested template.
-		var bfdChoiceChoicesModel = &SiteMeshGroupGlobalSpecTypeBfdChoice{}
-
-		// Recursively call the nested template to process the oneof choices.
-
-		// resource specToModelNested PointerOfOneOfField --> BfdEnabled
-		// <no value>
-		// false
-		{
-			bfdEnabledOptions, isBfdEnabled := bfdChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_BfdEnabled)
-			bfdEnabledAttributeMap := make(map[string]attr.Value)
-
-			if isBfdEnabled && bfdEnabledOptions != nil {
-
-				// resource specToModelNested RequiredUintField --> TransmitIntervalMilliseconds
-				bfdEnabledAttributeMap["transmit_interval_milliseconds"] = types.Int64Value(int64(bfdEnabledOptions.BfdEnabled.GetTransmitIntervalMilliseconds()))
-
-				// resource specToModelNested RequiredUintField --> ReceiveIntervalMilliseconds
-				bfdEnabledAttributeMap["receive_interval_milliseconds"] = types.Int64Value(int64(bfdEnabledOptions.BfdEnabled.GetReceiveIntervalMilliseconds()))
-
-				// resource specToModelNested RequiredUintField --> Multiplier
-				bfdEnabledAttributeMap["multiplier"] = types.Int64Value(int64(bfdEnabledOptions.BfdEnabled.GetMultiplier()))
-
-				bfdEnabledObj, diags := types.ObjectValue(SiteMeshGroupBfdChoiceBfdEnabledModelAttributeMap, bfdEnabledAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				bfdChoiceChoicesModel.BfdEnabled = bfdEnabledObj
-			} else {
-				bfdChoiceChoicesModel.BfdEnabled = types.ObjectNull(SiteMeshGroupBfdChoiceBfdEnabledModelAttributeMap)
-			}
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> BfdDisabled
-		_, isBfdDisabled := bfdChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_BfdDisabled)
-
-		if isBfdDisabled {
-			bfdChoiceChoicesModel.BfdDisabled = types.BoolValue(true)
-		} else {
-			bfdChoiceChoicesModel.BfdDisabled = types.BoolNull()
-		}
-
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		bfdChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			SiteMeshGroupBfdChoiceModelAttributeMap,
-			bfdChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
-
-		// Assign the final object to the root data model.
-		data.BfdChoice = bfdChoiceObj
-	} else {
-		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		data.BfdChoice = types.ObjectNull(SiteMeshGroupBfdChoiceModelAttributeMap)
-	}
-
 	// resource SpecToModelRoot ArrayOfPointerField --> VirtualSite
 	if len(specData.VirtualSite) > 0 {
 		virtualSiteElements := make([]ObjectRefTypeModel, 0, len(specData.VirtualSite))
@@ -1887,14 +1818,6 @@ func (r *ResourceF5XCSiteMeshGroup) Read(ctx context.Context, request resource.R
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredStringField --> Name
-					if hubMeshGroupElement.GetName() != "" {
-						objectRefTypeModelModel.Name = types.StringValue(hubMeshGroupElement.GetName())
-					} else {
-						// Empty string, set to null
-						objectRefTypeModelModel.Name = types.StringNull()
-					}
-
 					// resource specToModelNested StringField --> Tenant
 					if hubMeshGroupElement.GetTenant() != "" {
 						objectRefTypeModelModel.Tenant = types.StringValue(hubMeshGroupElement.GetTenant())
@@ -1909,6 +1832,14 @@ func (r *ResourceF5XCSiteMeshGroup) Read(ctx context.Context, request resource.R
 					} else {
 						// Empty string, set to null
 						objectRefTypeModelModel.Namespace = types.StringNull()
+					}
+
+					// resource specToModelNested RequiredStringField --> Name
+					if hubMeshGroupElement.GetName() != "" {
+						objectRefTypeModelModel.Name = types.StringValue(hubMeshGroupElement.GetName())
+					} else {
+						// Empty string, set to null
+						objectRefTypeModelModel.Name = types.StringNull()
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
@@ -2188,6 +2119,75 @@ func (r *ResourceF5XCSiteMeshGroup) Read(ctx context.Context, request resource.R
 		data.ReFallbackChoice = types.ObjectNull(SiteMeshGroupReFallbackModelAttributeMap)
 	}
 
+	// resource SpecToModelRoot RequiredOneOfField --> BfdChoice
+	// false
+	// true
+	// This resource uses standard struct-based resolution.
+	if specData.GetBfdChoice() != nil {
+		// For standard resources, get the choice from the typed spec data.
+		bfdChoiceChoices := specData.GetBfdChoice()
+
+		// The model struct that will be populated by the nested template.
+		var bfdChoiceChoicesModel = &SiteMeshGroupGlobalSpecTypeBfdChoice{}
+
+		// Recursively call the nested template to process the oneof choices.
+
+		// resource specToModelNested BoolOfOneOfPointerField --> BfdDisabled
+		_, isBfdDisabled := bfdChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_BfdDisabled)
+
+		if isBfdDisabled {
+			bfdChoiceChoicesModel.BfdDisabled = types.BoolValue(true)
+		} else {
+			bfdChoiceChoicesModel.BfdDisabled = types.BoolNull()
+		}
+
+		// resource specToModelNested PointerOfOneOfField --> BfdEnabled
+		// <no value>
+		// false
+		{
+			bfdEnabledOptions, isBfdEnabled := bfdChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_BfdEnabled)
+			bfdEnabledAttributeMap := make(map[string]attr.Value)
+
+			if isBfdEnabled && bfdEnabledOptions != nil {
+
+				// resource specToModelNested RequiredUintField --> TransmitIntervalMilliseconds
+				bfdEnabledAttributeMap["transmit_interval_milliseconds"] = types.Int64Value(int64(bfdEnabledOptions.BfdEnabled.GetTransmitIntervalMilliseconds()))
+
+				// resource specToModelNested RequiredUintField --> ReceiveIntervalMilliseconds
+				bfdEnabledAttributeMap["receive_interval_milliseconds"] = types.Int64Value(int64(bfdEnabledOptions.BfdEnabled.GetReceiveIntervalMilliseconds()))
+
+				// resource specToModelNested RequiredUintField --> Multiplier
+				bfdEnabledAttributeMap["multiplier"] = types.Int64Value(int64(bfdEnabledOptions.BfdEnabled.GetMultiplier()))
+
+				bfdEnabledObj, diags := types.ObjectValue(SiteMeshGroupBfdChoiceBfdEnabledModelAttributeMap, bfdEnabledAttributeMap)
+				response.Diagnostics.Append(diags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				bfdChoiceChoicesModel.BfdEnabled = bfdEnabledObj
+			} else {
+				bfdChoiceChoicesModel.BfdEnabled = types.ObjectNull(SiteMeshGroupBfdChoiceBfdEnabledModelAttributeMap)
+			}
+		}
+
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		bfdChoiceObj, diags := utils.GoStructToObjectValue(
+			ctx,
+			SiteMeshGroupBfdChoiceModelAttributeMap,
+			bfdChoiceChoicesModel,
+		)
+		if diags.HasError() {
+			response.Diagnostics.Append(diags...)
+			return
+		}
+
+		// Assign the final object to the root data model.
+		data.BfdChoice = bfdChoiceObj
+	} else {
+		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		data.BfdChoice = types.ObjectNull(SiteMeshGroupBfdChoiceModelAttributeMap)
+	}
+
 	if response.Diagnostics.HasError() {
 		return
 	}
@@ -2264,45 +2264,6 @@ func (r *ResourceF5XCSiteMeshGroup) Update(ctx context.Context, request resource
 		meta.Description = string(data.Description.ValueString())
 	}
 
-	// resource modelToSpecRoot RequiredOneOfField --> BfdChoice
-	if !data.BfdChoice.IsNull() && !data.BfdChoice.IsUnknown() {
-		bfdChoiceModel := SiteMeshGroupGlobalSpecTypeBfdChoice{}
-		response.Diagnostics.Append(data.BfdChoice.As(ctx, &bfdChoiceModel, basetypes.ObjectAsOptions{})...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-
-		// resource modelToSpecNested PointerOfOneOfField --> BfdEnabled
-		if !bfdChoiceModel.BfdEnabled.IsNull() && !bfdChoiceModel.BfdEnabled.IsUnknown() {
-			var siteMeshGroupGlobalSpecTypeBfdEnabledModel SiteMeshGroupGlobalSpecTypeBfdEnabled
-			response.Diagnostics.Append(bfdChoiceModel.BfdEnabled.As(ctx, &siteMeshGroupGlobalSpecTypeBfdEnabledModel, basetypes.ObjectAsOptions{})...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			bfdEnabledOneOfSpec := &ves_io_schema_site_mesh_group.ReplaceSpecType_BfdEnabled{}
-			bfdEnabledOneOfSpec.BfdEnabled = &ves_io_schema_site_mesh_group.BFD{}
-			spec.BfdChoice = bfdEnabledOneOfSpec
-
-			// resource modelToSpecNested RequiredUintField --> TransmitIntervalMilliseconds
-			bfdEnabledOneOfSpec.BfdEnabled.TransmitIntervalMilliseconds = uint32(uint32(siteMeshGroupGlobalSpecTypeBfdEnabledModel.TransmitIntervalMilliseconds.ValueInt64()))
-
-			// resource modelToSpecNested RequiredUintField --> ReceiveIntervalMilliseconds
-			bfdEnabledOneOfSpec.BfdEnabled.ReceiveIntervalMilliseconds = uint32(uint32(siteMeshGroupGlobalSpecTypeBfdEnabledModel.ReceiveIntervalMilliseconds.ValueInt64()))
-
-			// resource modelToSpecNested RequiredUintField --> Multiplier
-			bfdEnabledOneOfSpec.BfdEnabled.Multiplier = uint32(uint32(siteMeshGroupGlobalSpecTypeBfdEnabledModel.Multiplier.ValueInt64()))
-
-		}
-
-		// resource modelToSpecNested BoolOfOneOfPointerField --> BfdDisabled
-		if !bfdChoiceModel.BfdDisabled.IsNull() && !bfdChoiceModel.BfdDisabled.IsUnknown() {
-			bfdDisabledSpecBool := &ves_io_schema_site_mesh_group.ReplaceSpecType_BfdDisabled{}
-			bfdDisabledSpecBool.BfdDisabled = &ves_io_schema.Empty{}
-			spec.BfdChoice = bfdDisabledSpecBool
-		}
-
-	}
-
 	{
 		// resource modelToSpecRoot ArrayOfPointerField --> VirtualSite
 		if !data.VirtualSite.IsNull() && !data.VirtualSite.IsUnknown() {
@@ -2364,14 +2325,14 @@ func (r *ResourceF5XCSiteMeshGroup) Update(ctx context.Context, request resource
 				hubMeshGroupSpec := &ves_io_schema_views.ObjectRefType{}
 				spokeMeshOneOfSpec.SpokeMesh.HubMeshGroup = hubMeshGroupSpec
 
-				// resource modelToSpecNested RequiredStringField --> Name
-				if !hubMeshGroupModel.Name.IsNull() && !hubMeshGroupModel.Name.IsUnknown() {
-					hubMeshGroupSpec.Name = string(hubMeshGroupModel.Name.ValueString())
-				}
-
 				// resource modelToSpecNested RequiredStringField --> Namespace
 				if !hubMeshGroupModel.Namespace.IsNull() && !hubMeshGroupModel.Namespace.IsUnknown() {
 					hubMeshGroupSpec.Namespace = string(hubMeshGroupModel.Namespace.ValueString())
+				}
+
+				// resource modelToSpecNested RequiredStringField --> Name
+				if !hubMeshGroupModel.Name.IsNull() && !hubMeshGroupModel.Name.IsUnknown() {
+					hubMeshGroupSpec.Name = string(hubMeshGroupModel.Name.ValueString())
 				}
 
 			}
@@ -2498,6 +2459,45 @@ func (r *ResourceF5XCSiteMeshGroup) Update(ctx context.Context, request resource
 			disableReFallbackSpecBool := &ves_io_schema_site_mesh_group.ReplaceSpecType_DisableReFallback{}
 			disableReFallbackSpecBool.DisableReFallback = &ves_io_schema.Empty{}
 			spec.ReFallback = disableReFallbackSpecBool
+		}
+
+	}
+
+	// resource modelToSpecRoot RequiredOneOfField --> BfdChoice
+	if !data.BfdChoice.IsNull() && !data.BfdChoice.IsUnknown() {
+		bfdChoiceModel := SiteMeshGroupGlobalSpecTypeBfdChoice{}
+		response.Diagnostics.Append(data.BfdChoice.As(ctx, &bfdChoiceModel, basetypes.ObjectAsOptions{})...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> BfdDisabled
+		if !bfdChoiceModel.BfdDisabled.IsNull() && !bfdChoiceModel.BfdDisabled.IsUnknown() {
+			bfdDisabledSpecBool := &ves_io_schema_site_mesh_group.ReplaceSpecType_BfdDisabled{}
+			bfdDisabledSpecBool.BfdDisabled = &ves_io_schema.Empty{}
+			spec.BfdChoice = bfdDisabledSpecBool
+		}
+
+		// resource modelToSpecNested PointerOfOneOfField --> BfdEnabled
+		if !bfdChoiceModel.BfdEnabled.IsNull() && !bfdChoiceModel.BfdEnabled.IsUnknown() {
+			var siteMeshGroupGlobalSpecTypeBfdEnabledModel SiteMeshGroupGlobalSpecTypeBfdEnabled
+			response.Diagnostics.Append(bfdChoiceModel.BfdEnabled.As(ctx, &siteMeshGroupGlobalSpecTypeBfdEnabledModel, basetypes.ObjectAsOptions{})...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			bfdEnabledOneOfSpec := &ves_io_schema_site_mesh_group.ReplaceSpecType_BfdEnabled{}
+			bfdEnabledOneOfSpec.BfdEnabled = &ves_io_schema_site_mesh_group.BFD{}
+			spec.BfdChoice = bfdEnabledOneOfSpec
+
+			// resource modelToSpecNested RequiredUintField --> TransmitIntervalMilliseconds
+			bfdEnabledOneOfSpec.BfdEnabled.TransmitIntervalMilliseconds = uint32(uint32(siteMeshGroupGlobalSpecTypeBfdEnabledModel.TransmitIntervalMilliseconds.ValueInt64()))
+
+			// resource modelToSpecNested RequiredUintField --> ReceiveIntervalMilliseconds
+			bfdEnabledOneOfSpec.BfdEnabled.ReceiveIntervalMilliseconds = uint32(uint32(siteMeshGroupGlobalSpecTypeBfdEnabledModel.ReceiveIntervalMilliseconds.ValueInt64()))
+
+			// resource modelToSpecNested RequiredUintField --> Multiplier
+			bfdEnabledOneOfSpec.BfdEnabled.Multiplier = uint32(uint32(siteMeshGroupGlobalSpecTypeBfdEnabledModel.Multiplier.ValueInt64()))
+
 		}
 
 	}
@@ -2642,75 +2642,6 @@ func (r *ResourceF5XCSiteMeshGroup) Update(ctx context.Context, request resource
 	// resource SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
 
-	// resource SpecToModelRoot RequiredOneOfField --> BfdChoice
-	// false
-	// true
-	// This resource uses standard struct-based resolution.
-	if specData.GetBfdChoice() != nil {
-		// For standard resources, get the choice from the typed spec data.
-		bfdChoiceChoices := specData.GetBfdChoice()
-
-		// The model struct that will be populated by the nested template.
-		var bfdChoiceChoicesModel = &SiteMeshGroupGlobalSpecTypeBfdChoice{}
-
-		// Recursively call the nested template to process the oneof choices.
-
-		// resource specToModelNested PointerOfOneOfField --> BfdEnabled
-		// GlobalSpecType
-		// false
-		{
-			bfdEnabledOptions, isBfdEnabled := bfdChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_BfdEnabled)
-			bfdEnabledAttributeMap := make(map[string]attr.Value)
-
-			if isBfdEnabled && bfdEnabledOptions != nil {
-
-				// resource specToModelNested RequiredUintField --> TransmitIntervalMilliseconds
-				bfdEnabledAttributeMap["transmit_interval_milliseconds"] = types.Int64Value(int64(bfdEnabledOptions.BfdEnabled.GetTransmitIntervalMilliseconds()))
-
-				// resource specToModelNested RequiredUintField --> ReceiveIntervalMilliseconds
-				bfdEnabledAttributeMap["receive_interval_milliseconds"] = types.Int64Value(int64(bfdEnabledOptions.BfdEnabled.GetReceiveIntervalMilliseconds()))
-
-				// resource specToModelNested RequiredUintField --> Multiplier
-				bfdEnabledAttributeMap["multiplier"] = types.Int64Value(int64(bfdEnabledOptions.BfdEnabled.GetMultiplier()))
-
-				bfdEnabledObj, diags := types.ObjectValue(SiteMeshGroupBfdChoiceBfdEnabledModelAttributeMap, bfdEnabledAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				bfdChoiceChoicesModel.BfdEnabled = bfdEnabledObj
-			} else {
-				bfdChoiceChoicesModel.BfdEnabled = types.ObjectNull(SiteMeshGroupBfdChoiceBfdEnabledModelAttributeMap)
-			}
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> BfdDisabled
-		_, isBfdDisabled := bfdChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_BfdDisabled)
-
-		if isBfdDisabled {
-			bfdChoiceChoicesModel.BfdDisabled = types.BoolValue(true)
-		} else {
-			bfdChoiceChoicesModel.BfdDisabled = types.BoolNull()
-		}
-
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		bfdChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			SiteMeshGroupBfdChoiceModelAttributeMap,
-			bfdChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
-
-		// Assign the final object to the root data model.
-		data.BfdChoice = bfdChoiceObj
-	} else {
-		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		data.BfdChoice = types.ObjectNull(SiteMeshGroupBfdChoiceModelAttributeMap)
-	}
-
 	// resource SpecToModelRoot ArrayOfPointerField --> VirtualSite
 	if len(specData.VirtualSite) > 0 {
 		virtualSiteElements := make([]ObjectRefTypeModel, 0, len(specData.VirtualSite))
@@ -2795,14 +2726,6 @@ func (r *ResourceF5XCSiteMeshGroup) Update(ctx context.Context, request resource
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredStringField --> Name
-					if hubMeshGroupElement.GetName() != "" {
-						objectRefTypeModelModel.Name = types.StringValue(hubMeshGroupElement.GetName())
-					} else {
-						// Empty string, set to null
-						objectRefTypeModelModel.Name = types.StringNull()
-					}
-
 					// resource specToModelNested StringField --> Tenant
 					if hubMeshGroupElement.GetTenant() != "" {
 						objectRefTypeModelModel.Tenant = types.StringValue(hubMeshGroupElement.GetTenant())
@@ -2817,6 +2740,14 @@ func (r *ResourceF5XCSiteMeshGroup) Update(ctx context.Context, request resource
 					} else {
 						// Empty string, set to null
 						objectRefTypeModelModel.Namespace = types.StringNull()
+					}
+
+					// resource specToModelNested RequiredStringField --> Name
+					if hubMeshGroupElement.GetName() != "" {
+						objectRefTypeModelModel.Name = types.StringValue(hubMeshGroupElement.GetName())
+					} else {
+						// Empty string, set to null
+						objectRefTypeModelModel.Name = types.StringNull()
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
@@ -3094,6 +3025,75 @@ func (r *ResourceF5XCSiteMeshGroup) Update(ctx context.Context, request resource
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		data.ReFallbackChoice = types.ObjectNull(SiteMeshGroupReFallbackModelAttributeMap)
+	}
+
+	// resource SpecToModelRoot RequiredOneOfField --> BfdChoice
+	// false
+	// true
+	// This resource uses standard struct-based resolution.
+	if specData.GetBfdChoice() != nil {
+		// For standard resources, get the choice from the typed spec data.
+		bfdChoiceChoices := specData.GetBfdChoice()
+
+		// The model struct that will be populated by the nested template.
+		var bfdChoiceChoicesModel = &SiteMeshGroupGlobalSpecTypeBfdChoice{}
+
+		// Recursively call the nested template to process the oneof choices.
+
+		// resource specToModelNested BoolOfOneOfPointerField --> BfdDisabled
+		_, isBfdDisabled := bfdChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_BfdDisabled)
+
+		if isBfdDisabled {
+			bfdChoiceChoicesModel.BfdDisabled = types.BoolValue(true)
+		} else {
+			bfdChoiceChoicesModel.BfdDisabled = types.BoolNull()
+		}
+
+		// resource specToModelNested PointerOfOneOfField --> BfdEnabled
+		// GlobalSpecType
+		// false
+		{
+			bfdEnabledOptions, isBfdEnabled := bfdChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_BfdEnabled)
+			bfdEnabledAttributeMap := make(map[string]attr.Value)
+
+			if isBfdEnabled && bfdEnabledOptions != nil {
+
+				// resource specToModelNested RequiredUintField --> TransmitIntervalMilliseconds
+				bfdEnabledAttributeMap["transmit_interval_milliseconds"] = types.Int64Value(int64(bfdEnabledOptions.BfdEnabled.GetTransmitIntervalMilliseconds()))
+
+				// resource specToModelNested RequiredUintField --> ReceiveIntervalMilliseconds
+				bfdEnabledAttributeMap["receive_interval_milliseconds"] = types.Int64Value(int64(bfdEnabledOptions.BfdEnabled.GetReceiveIntervalMilliseconds()))
+
+				// resource specToModelNested RequiredUintField --> Multiplier
+				bfdEnabledAttributeMap["multiplier"] = types.Int64Value(int64(bfdEnabledOptions.BfdEnabled.GetMultiplier()))
+
+				bfdEnabledObj, diags := types.ObjectValue(SiteMeshGroupBfdChoiceBfdEnabledModelAttributeMap, bfdEnabledAttributeMap)
+				response.Diagnostics.Append(diags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				bfdChoiceChoicesModel.BfdEnabled = bfdEnabledObj
+			} else {
+				bfdChoiceChoicesModel.BfdEnabled = types.ObjectNull(SiteMeshGroupBfdChoiceBfdEnabledModelAttributeMap)
+			}
+		}
+
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		bfdChoiceObj, diags := utils.GoStructToObjectValue(
+			ctx,
+			SiteMeshGroupBfdChoiceModelAttributeMap,
+			bfdChoiceChoicesModel,
+		)
+		if diags.HasError() {
+			response.Diagnostics.Append(diags...)
+			return
+		}
+
+		// Assign the final object to the root data model.
+		data.BfdChoice = bfdChoiceObj
+	} else {
+		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		data.BfdChoice = types.ObjectNull(SiteMeshGroupBfdChoiceModelAttributeMap)
 	}
 
 	// Save updated data into Terraform state

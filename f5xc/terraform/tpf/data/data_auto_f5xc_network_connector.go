@@ -38,31 +38,39 @@ type NetworkConnectorForwardProxyConfigType struct {
 
 // DataSourceF5XCNetworkConnectorModel describes the resource data model.
 type DataSourceF5XCNetworkConnectorModel struct {
-	Annotations         types.Map      `tfsdk:"annotations"`
 	Description         types.String   `tfsdk:"description"`
 	Name                types.String   `tfsdk:"name"`
 	Namespace           types.String   `tfsdk:"namespace"`
 	Uid                 types.String   `tfsdk:"uid"`
 	Labels              types.Map      `tfsdk:"labels"`
+	Annotations         types.Map      `tfsdk:"annotations"`
+	OutsideNetwork      types.List     `tfsdk:"outside_network"`
+	SnatPoolType        types.List     `tfsdk:"snat_pool_type"`
 	DynamicReverseProxy types.List     `tfsdk:"dynamic_reverse_proxy"`
 	ForwardProxy        types.Object   `tfsdk:"forward_proxy"`
+	InsideNetworkType   types.List     `tfsdk:"inside_network_type"`
 	InsideNetwork       types.List     `tfsdk:"inside_network"`
-	SnatPoolType        types.List     `tfsdk:"snat_pool_type"`
 	ProxyType           types.List     `tfsdk:"proxy_type"`
 	ConnectorType       types.List     `tfsdk:"connector_type"`
 	OutsideNetworkType  types.List     `tfsdk:"outside_network_type"`
-	OutsideNetwork      types.List     `tfsdk:"outside_network"`
-	InsideNetworkType   types.List     `tfsdk:"inside_network_type"`
 	Timeouts            timeouts.Value `tfsdk:"timeouts"`
 }
 
 // --- Attribute Maps for Nested Structs ---
+// Attribute map for ArrayOfPointerField --> OutsideNetwork
+var NetworkConnectorOutsideNetworkObjectRefModelAttributeMap = map[string]attr.Type{
+
+	"name":      types.StringType,
+	"tenant":    types.StringType,
+	"namespace": types.StringType,
+}
+
 // Attribute map for ArrayOfPointerField --> DynamicReverseProxy
 var NetworkConnectorDynamicReverseProxyObjectRefModelAttributeMap = map[string]attr.Type{
 
+	"tenant":    types.StringType,
 	"namespace": types.StringType,
 	"name":      types.StringType,
-	"tenant":    types.StringType,
 }
 
 // Attribute map for PointerField --> ForwardProxy
@@ -81,17 +89,9 @@ var NetworkConnectorForwardProxyModelAttributeMap = map[string]attr.Type{
 // Attribute map for ArrayOfPointerField --> InsideNetwork
 var NetworkConnectorInsideNetworkObjectRefModelAttributeMap = map[string]attr.Type{
 
-	"name":      types.StringType,
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
-}
-
-// Attribute map for ArrayOfPointerField --> OutsideNetwork
-var NetworkConnectorOutsideNetworkObjectRefModelAttributeMap = map[string]attr.Type{
-
-	"tenant":    types.StringType,
 	"namespace": types.StringType,
 	"name":      types.StringType,
+	"tenant":    types.StringType,
 }
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -112,13 +112,6 @@ func (r *DataSourceF5XCNetworkConnector) Schema(ctx context.Context, request dat
 		Description:         "NetworkConnector data source",
 
 		Attributes: map[string]schema.Attribute{
-			"annotations": schema.MapAttribute{
-				Description: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
 			"description": schema.StringAttribute{
 				Description: "description Human readable description for the object",
 				Required:    false,
@@ -150,19 +143,20 @@ func (r *DataSourceF5XCNetworkConnector) Schema(ctx context.Context, request dat
 				Computed:    true,
 				ElementType: types.StringType,
 			},
-			"dynamic_reverse_proxy": schema.ListNestedAttribute{
-				Description: "Dynamic Reverse Proxy Vhost to be used for dynamic reverse proxy configuration",
+			"annotations": schema.MapAttribute{
+				Description: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				ElementType: types.StringType,
+			},
+			"outside_network": schema.ListNestedAttribute{
+				Description: "Outside VN Reference to outside network. Reference is valid only when the network type is per site virtual network or global virtual network. It is ignored for all other network types",
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
-						"namespace": schema.StringAttribute{
-							Description: "",
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-						},
 						"name": schema.StringAttribute{
 							Description: "",
 							Required:    false,
@@ -170,6 +164,47 @@ func (r *DataSourceF5XCNetworkConnector) Schema(ctx context.Context, request dat
 							Computed:    true,
 						},
 						"tenant": schema.StringAttribute{
+							Description: "",
+							Required:    false,
+							Optional:    false,
+							Computed:    true,
+						},
+						"namespace": schema.StringAttribute{
+							Description: "",
+							Required:    false,
+							Optional:    false,
+							Computed:    true,
+						},
+					},
+				},
+			},
+			"snat_pool_type": schema.ListAttribute{
+				Description: "Snat Pool Type SNAT setting not valid when  network connector type is Dynamic Gateway without SNAT. Type of Snat configuration to be used.",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				ElementType: types.StringType,
+			},
+			"dynamic_reverse_proxy": schema.ListNestedAttribute{
+				Description: "Dynamic Reverse Proxy Vhost to be used for dynamic reverse proxy configuration",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"tenant": schema.StringAttribute{
+							Description: "",
+							Required:    false,
+							Optional:    false,
+							Computed:    true,
+						},
+						"namespace": schema.StringAttribute{
+							Description: "",
+							Required:    false,
+							Optional:    false,
+							Computed:    true,
+						},
+						"name": schema.StringAttribute{
 							Description: "",
 							Required:    false,
 							Optional:    false,
@@ -212,6 +247,13 @@ func (r *DataSourceF5XCNetworkConnector) Schema(ctx context.Context, request dat
 					},
 				},
 			},
+			"inside_network_type": schema.ListAttribute{
+				Description: "Inside VN Type Type of the inside network. The network can be well known virtual network like site local inside / site local. If the virtual network is well known virtual network, the inside_network ref need not be present and will be auto derived. If virtual network is not well known like per site virtual network inside_network reference need to be specified inside_network_type can be one of type VIRTUAL_NETWORK_SITE_LOCAL, VIRTUAL_NETWORK_SITE_LOCAL_INSIDE or VIRTUAL_NETWORK_PER_SITE When inside_network_type is VIRTUAL_NETWORK_SITE_LOCAL outside_network_type can only be VIRTUAL_NETWORK_GLOBAL",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				ElementType: types.StringType,
+			},
 			"inside_network": schema.ListNestedAttribute{
 				Description: "Inside VN Reference to inside network. Reference is valid only when the network type is per site virtual network or global virtual network. It is ignored for all other network types. public virtual network is not allowed as inside network",
 				Required:    false,
@@ -219,6 +261,12 @@ func (r *DataSourceF5XCNetworkConnector) Schema(ctx context.Context, request dat
 				Computed:    true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
+						"namespace": schema.StringAttribute{
+							Description: "",
+							Required:    false,
+							Optional:    false,
+							Computed:    true,
+						},
 						"name": schema.StringAttribute{
 							Description: "",
 							Required:    false,
@@ -231,21 +279,8 @@ func (r *DataSourceF5XCNetworkConnector) Schema(ctx context.Context, request dat
 							Optional:    false,
 							Computed:    true,
 						},
-						"namespace": schema.StringAttribute{
-							Description: "",
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-						},
 					},
 				},
-			},
-			"snat_pool_type": schema.ListAttribute{
-				Description: "Snat Pool Type SNAT setting not valid when  network connector type is Dynamic Gateway without SNAT. Type of Snat configuration to be used.",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				ElementType: types.StringType,
 			},
 			"proxy_type": schema.ListAttribute{
 				Description: "Proxy Type Forward proxy or dynamic reverse proxy for this connector If network-connector type is NETWORK_CONNECTOR_TYPE_DEFAULT_GATEWAY_SNAT, then proxy-type can be - NETWORK_CONNECTOR_NO_PROXY - NETWORK_CONNECTOR_DYNAMIC_REVERSE_PROXY - NETWORK_CONNECTOR_FORWARD_PROXY If network-connector type is NETWORK_CONNECTOR_TYPE_DYNAMIC_GATEWAY, then proxy-type must be NETWORK_CONNECTOR_NO_PROXY",
@@ -263,41 +298,6 @@ func (r *DataSourceF5XCNetworkConnector) Schema(ctx context.Context, request dat
 			},
 			"outside_network_type": schema.ListAttribute{
 				Description: "Outside VN type Type of the outside network. The network can be well known virtual network like site local inside / site local/ public etc. If the  virtual network is well known virtual network, the outside_network ref need not be present and will be auto derived. If virtual network is not well known like per site virtual network outside_network reference need to be specified outside_network_type can be one of type VIRTUAL_NETWORK_SITE_LOCAL, VIRTUAL_NETWORK_SITE_LOCAL_INSIDE, VIRTUAL_NETWORK_PER_SITE, VIRTUAL_NETWORK_PUBLIC or VIRTUAL_NETWORK_GLOBAL",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
-			"outside_network": schema.ListNestedAttribute{
-				Description: "Outside VN Reference to outside network. Reference is valid only when the network type is per site virtual network or global virtual network. It is ignored for all other network types",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-						"tenant": schema.StringAttribute{
-							Description: "",
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-						},
-						"namespace": schema.StringAttribute{
-							Description: "",
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-						},
-						"name": schema.StringAttribute{
-							Description: "",
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-						},
-					},
-				},
-			},
-			"inside_network_type": schema.ListAttribute{
-				Description: "Inside VN Type Type of the inside network. The network can be well known virtual network like site local inside / site local. If the virtual network is well known virtual network, the inside_network ref need not be present and will be auto derived. If virtual network is not well known like per site virtual network inside_network reference need to be specified inside_network_type can be one of type VIRTUAL_NETWORK_SITE_LOCAL, VIRTUAL_NETWORK_SITE_LOCAL_INSIDE or VIRTUAL_NETWORK_PER_SITE When inside_network_type is VIRTUAL_NETWORK_SITE_LOCAL outside_network_type can only be VIRTUAL_NETWORK_GLOBAL",
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
@@ -374,24 +374,6 @@ func (d *DataSourceF5XCNetworkConnector) Read(ctx context.Context, request datas
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
-	// data SpecToModelRoot Meta MapOfStringField --> Annotations
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// Assign the typed map to the model
-		data.Annotations = annotationsMap
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil and the model has no value: set an explicit Null map to avoid
-		// DynamicPseudoType errors. If the model already contains a value (e.g. labels were set
-		// but the API did not echo them back in the response), preserve the existing value to prevent
-		// "Provider produced inconsistent result after apply" errors.
-		data.Annotations = types.MapNull(types.StringType)
-	}
-
 	// data SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
 
@@ -422,12 +404,107 @@ func (d *DataSourceF5XCNetworkConnector) Read(ctx context.Context, request datas
 		data.Labels = types.MapNull(types.StringType)
 	}
 
+	// data SpecToModelRoot Meta MapOfStringField --> Annotations
+	if metaData.GetAnnotations() != nil {
+		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
+		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+		response.Diagnostics.Append(annotationsDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		// Assign the typed map to the model
+		data.Annotations = annotationsMap
+	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
+		// API returned nil and the model has no value: set an explicit Null map to avoid
+		// DynamicPseudoType errors. If the model already contains a value (e.g. labels were set
+		// but the API did not echo them back in the response), preserve the existing value to prevent
+		// "Provider produced inconsistent result after apply" errors.
+		data.Annotations = types.MapNull(types.StringType)
+	}
+
+	// data SpecToModelRoot ArrayOfPointerField --> OutsideNetwork
+	if len(specData.OutsideNetwork) > 0 {
+		outsideNetworkElements := make([]ObjectRefTypeModel, 0, len(specData.OutsideNetwork))
+
+		for _, outsideNetworkElement := range specData.OutsideNetwork {
+			objectRefTypeModelModel := ObjectRefTypeModel{}
+
+			// data specToModelNested RequiredStringField --> Name
+			if outsideNetworkElement.GetName() != "" {
+				objectRefTypeModelModel.Name = types.StringValue(outsideNetworkElement.GetName())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Name = types.StringNull()
+			}
+
+			// data specToModelNested StringField --> Tenant
+			if outsideNetworkElement.GetTenant() != "" {
+				objectRefTypeModelModel.Tenant = types.StringValue(outsideNetworkElement.GetTenant())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Tenant = types.StringNull()
+			}
+
+			// data specToModelNested RequiredStringField --> Namespace
+			if outsideNetworkElement.GetNamespace() != "" {
+				objectRefTypeModelModel.Namespace = types.StringValue(outsideNetworkElement.GetNamespace())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Namespace = types.StringNull()
+			}
+
+			outsideNetworkElements = append(outsideNetworkElements, objectRefTypeModelModel)
+		}
+
+		outsideNetworkList, diags := utils.GoStructSliceToListValue(
+			ctx,
+			NetworkConnectorOutsideNetworkObjectRefModelAttributeMap,
+			outsideNetworkElements,
+		)
+
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+
+		data.OutsideNetwork = outsideNetworkList
+	} else {
+		var outsideNetworkObjectType = basetypes.ObjectType{
+			AttrTypes: NetworkConnectorOutsideNetworkObjectRefModelAttributeMap,
+		}
+		nullOutsideNetworkList := basetypes.NewListNull(outsideNetworkObjectType)
+		data.OutsideNetwork = nullOutsideNetworkList
+	}
+
+	// data SpecToModelRoot EnumField --> SnatPoolType
+	if specData.GetSnatPoolType().String() != "" {
+		stringValue := types.StringValue(specData.GetSnatPoolType().String())
+		stringSlice := []types.String{stringValue}
+		listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.SnatPoolType = listValue
+	} else {
+		// Empty string, set to null
+		data.SnatPoolType = types.ListNull(types.StringType)
+	}
+
 	// data SpecToModelRoot ArrayOfPointerField --> DynamicReverseProxy
 	if len(specData.DynamicReverseProxy) > 0 {
 		dynamicReverseProxyElements := make([]ObjectRefTypeModel, 0, len(specData.DynamicReverseProxy))
 
 		for _, dynamicReverseProxyElement := range specData.DynamicReverseProxy {
 			objectRefTypeModelModel := ObjectRefTypeModel{}
+
+			// data specToModelNested StringField --> Tenant
+			if dynamicReverseProxyElement.GetTenant() != "" {
+				objectRefTypeModelModel.Tenant = types.StringValue(dynamicReverseProxyElement.GetTenant())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Tenant = types.StringNull()
+			}
 
 			// data specToModelNested RequiredStringField --> Namespace
 			if dynamicReverseProxyElement.GetNamespace() != "" {
@@ -443,14 +520,6 @@ func (d *DataSourceF5XCNetworkConnector) Read(ctx context.Context, request datas
 			} else {
 				// Empty string, set to null
 				objectRefTypeModelModel.Name = types.StringNull()
-			}
-
-			// data specToModelNested StringField --> Tenant
-			if dynamicReverseProxyElement.GetTenant() != "" {
-				objectRefTypeModelModel.Tenant = types.StringValue(dynamicReverseProxyElement.GetTenant())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Tenant = types.StringNull()
 			}
 
 			dynamicReverseProxyElements = append(dynamicReverseProxyElements, objectRefTypeModelModel)
@@ -513,12 +582,35 @@ func (d *DataSourceF5XCNetworkConnector) Read(ctx context.Context, request datas
 		data.ForwardProxy = types.ObjectNull(NetworkConnectorForwardProxyModelAttributeMap)
 	}
 
+	// data SpecToModelRoot RequiredEnumField --> InsideNetworkType
+	if specData.GetInsideNetworkType().String() != "" {
+		stringValue := types.StringValue(specData.GetInsideNetworkType().String())
+		stringSlice := []types.String{stringValue}
+		listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.InsideNetworkType = listValue
+	} else {
+		// Empty string, set to null
+		data.InsideNetworkType = types.ListNull(types.StringType)
+	}
+
 	// data SpecToModelRoot ArrayOfPointerField --> InsideNetwork
 	if len(specData.InsideNetwork) > 0 {
 		insideNetworkElements := make([]ObjectRefTypeModel, 0, len(specData.InsideNetwork))
 
 		for _, insideNetworkElement := range specData.InsideNetwork {
 			objectRefTypeModelModel := ObjectRefTypeModel{}
+
+			// data specToModelNested RequiredStringField --> Namespace
+			if insideNetworkElement.GetNamespace() != "" {
+				objectRefTypeModelModel.Namespace = types.StringValue(insideNetworkElement.GetNamespace())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Namespace = types.StringNull()
+			}
 
 			// data specToModelNested RequiredStringField --> Name
 			if insideNetworkElement.GetName() != "" {
@@ -534,14 +626,6 @@ func (d *DataSourceF5XCNetworkConnector) Read(ctx context.Context, request datas
 			} else {
 				// Empty string, set to null
 				objectRefTypeModelModel.Tenant = types.StringNull()
-			}
-
-			// data specToModelNested RequiredStringField --> Namespace
-			if insideNetworkElement.GetNamespace() != "" {
-				objectRefTypeModelModel.Namespace = types.StringValue(insideNetworkElement.GetNamespace())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Namespace = types.StringNull()
 			}
 
 			insideNetworkElements = append(insideNetworkElements, objectRefTypeModelModel)
@@ -565,21 +649,6 @@ func (d *DataSourceF5XCNetworkConnector) Read(ctx context.Context, request datas
 		}
 		nullInsideNetworkList := basetypes.NewListNull(insideNetworkObjectType)
 		data.InsideNetwork = nullInsideNetworkList
-	}
-
-	// data SpecToModelRoot EnumField --> SnatPoolType
-	if specData.GetSnatPoolType().String() != "" {
-		stringValue := types.StringValue(specData.GetSnatPoolType().String())
-		stringSlice := []types.String{stringValue}
-		listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.SnatPoolType = listValue
-	} else {
-		// Empty string, set to null
-		data.SnatPoolType = types.ListNull(types.StringType)
 	}
 
 	// data SpecToModelRoot EnumField --> ProxyType
@@ -625,75 +694,6 @@ func (d *DataSourceF5XCNetworkConnector) Read(ctx context.Context, request datas
 	} else {
 		// Empty string, set to null
 		data.OutsideNetworkType = types.ListNull(types.StringType)
-	}
-
-	// data SpecToModelRoot ArrayOfPointerField --> OutsideNetwork
-	if len(specData.OutsideNetwork) > 0 {
-		outsideNetworkElements := make([]ObjectRefTypeModel, 0, len(specData.OutsideNetwork))
-
-		for _, outsideNetworkElement := range specData.OutsideNetwork {
-			objectRefTypeModelModel := ObjectRefTypeModel{}
-
-			// data specToModelNested StringField --> Tenant
-			if outsideNetworkElement.GetTenant() != "" {
-				objectRefTypeModelModel.Tenant = types.StringValue(outsideNetworkElement.GetTenant())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Tenant = types.StringNull()
-			}
-
-			// data specToModelNested RequiredStringField --> Namespace
-			if outsideNetworkElement.GetNamespace() != "" {
-				objectRefTypeModelModel.Namespace = types.StringValue(outsideNetworkElement.GetNamespace())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Namespace = types.StringNull()
-			}
-
-			// data specToModelNested RequiredStringField --> Name
-			if outsideNetworkElement.GetName() != "" {
-				objectRefTypeModelModel.Name = types.StringValue(outsideNetworkElement.GetName())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Name = types.StringNull()
-			}
-
-			outsideNetworkElements = append(outsideNetworkElements, objectRefTypeModelModel)
-		}
-
-		outsideNetworkList, diags := utils.GoStructSliceToListValue(
-			ctx,
-			NetworkConnectorOutsideNetworkObjectRefModelAttributeMap,
-			outsideNetworkElements,
-		)
-
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-
-		data.OutsideNetwork = outsideNetworkList
-	} else {
-		var outsideNetworkObjectType = basetypes.ObjectType{
-			AttrTypes: NetworkConnectorOutsideNetworkObjectRefModelAttributeMap,
-		}
-		nullOutsideNetworkList := basetypes.NewListNull(outsideNetworkObjectType)
-		data.OutsideNetwork = nullOutsideNetworkList
-	}
-
-	// data SpecToModelRoot RequiredEnumField --> InsideNetworkType
-	if specData.GetInsideNetworkType().String() != "" {
-		stringValue := types.StringValue(specData.GetInsideNetworkType().String())
-		stringSlice := []types.String{stringValue}
-		listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.InsideNetworkType = listValue
-	} else {
-		// Empty string, set to null
-		data.InsideNetworkType = types.ListNull(types.StringType)
 	}
 
 	// Set state to fully populated data

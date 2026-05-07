@@ -1,46 +1,76 @@
 name: Go Unit Tests
+
 on:
-  push:
-    branches:
-      - main
-    paths-ignore:
-      - 'docs/**'
-      - 'examples/**'
-      - '.github/workflows/**'
-      - '.goreleaser.yml'
-      - 'README.md'
   pull_request:
     branches:
       - "*"
     paths-ignore:
-      - 'docs/**'
-      - 'examples/**'
       - '.github/workflows/**'
       - '.goreleaser.yml'
-      - 'README.md'
+  workflow_dispatch:
+
 jobs:
   tests:
     name: Go Tests
-    runs-on: self-hosted
+    runs-on: [self-hosted, linux, x64]
     timeout-minutes: 60
+    
+    # Global environment variables for the job
+    env:
+      GOPRIVATE: "gopkg.volterra.us,gitlab.com/f5/*"
+      GOTOOLCHAIN: "local"
+      # Set terminal prompt to 0 to prevent Git from hanging on authentication
+      GIT_TERMINAL_PROMPT: "0"
+
     steps:
-      - name: Configure git for private modules
-        env:
-          TOKEN: ${{ secrets.GITLAB_PERSONAL_ACCESS_TOKEN }}
-          USER: ${{ secrets.GITLAB_USERNAME }}
-        run: git config --global url."https://${USER}:${TOKEN}@gitlab.com".insteadOf "https://gitlab.com"
-      - name: Install Go 1.23
-        uses: actions/setup-go@v1
+      # 1. Reset permissions if the previous run left root-owned files
+      - name: Cleanup workspace permissions
+        run: sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+        continue-on-error: true
+      
+      # 2. Install tools
+      - name: Install unzip
+        run: |
+          if command -v unzip > /dev/null; then
+            echo "unzip already installed"
+          else
+            sudo yum install -y unzip || sudo dnf install -y unzip || sudo apt-get install -y unzip
+          fi
+    
+      # 3. Checkout the repository
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # 4. Install Go environment (Updated to Go 1.25)
+      - name: Install Go
+        uses: actions/setup-go@v5
         with:
-          go-version: '1.23'
+          go-version: '1.25'
+          cache: true
         id: go
 
-      - uses: actions/checkout@master
+      # 5. Configure Git for Private Modules
+      - name: Configure Git for Private Modules
+        run: |
+          # Rewrite GitLab URLs to include the OAuth2 token for authentication
+          git config --global url."https://oauth2:${{ secrets.GITLAB_PAT }}@gitlab.com/".insteadOf "https://gitlab.com/"
 
-      - run: make cmd-go-mod-tidy
+      # 6. Install a specific Terraform version
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "v1.14.8"
+          terraform_wrapper: false
 
-      #- run: make cmd-go-mod-vendor
+      # 7. Run custom make command for tidying
+      - name: Make Tidy (Verify)
+        run: make cmd-go-mod-tidy
 
+      # 8. Run the actual test suite
       - name: Run tests
         run: |
-          TF_ACC=1 go test -v ./... -timeout=30m
+          TF_BINARY=$(which terraform)
+          echo "Using Terraform from: $TF_BINARY"
+          TF_ACC=1 \
+          TF_ACC_TERRAFORM_PATH=$TF_BINARY \
+          go test -v ./... -timeout=30m

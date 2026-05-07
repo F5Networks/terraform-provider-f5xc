@@ -32,47 +32,156 @@ type DataSourceF5XCOriginPool struct {
 	client *client.APIClient
 }
 
-type OriginPoolGlobalSpecTypeHealthCheckPortChoice struct {
-	HealthCheckPort    types.Int64 `tfsdk:"health_check_port"`
-	SameAsEndpointPort types.Bool  `tfsdk:"same_as_endpoint_port"`
+type OriginPoolOriginPoolOriginPoolAdvancedOptions struct {
+	LbSourceIpPersistanceChoice    types.Object `tfsdk:"lb_source_ip_persistance_choice"`
+	ProxyProtocolChoice            types.Object `tfsdk:"proxy_protocol_choice"`
+	CircuitBreakerChoice           types.Object `tfsdk:"circuit_breaker_choice"`
+	OutlierDetectionChoice         types.Object `tfsdk:"outlier_detection_choice"`
+	PanicThresholdTypeChoice       types.Object `tfsdk:"panic_threshold_type_choice"`
+	HttpProtocolTypeChoice         types.Object `tfsdk:"http_protocol_type_choice"`
+	MaxRequestsPerConnectionChoice types.Object `tfsdk:"max_requests_per_connection_choice"`
+	ConnectionTimeout              types.Int64  `tfsdk:"connection_timeout"`
+	HttpIdleTimeout                types.Int64  `tfsdk:"http_idle_timeout"`
+	SubsetChoice                   types.Object `tfsdk:"subset_choice"`
+}
+
+type OriginPoolOriginPoolAdvancedOptionsLbSourceIpPersistanceChoice struct {
+	DisableLbSourceIpPersistance types.Bool `tfsdk:"disable_lb_source_ip_persistance"`
+	EnableLbSourceIpPersistance  types.Bool `tfsdk:"enable_lb_source_ip_persistance"`
+}
+
+type OriginPoolOriginPoolAdvancedOptionsProxyProtocolChoice struct {
+	DisableProxyProtocol types.Bool `tfsdk:"disable_proxy_protocol"`
+	ProxyProtocolV1      types.Bool `tfsdk:"proxy_protocol_v1"`
+	ProxyProtocolV2      types.Bool `tfsdk:"proxy_protocol_v2"`
+}
+
+type OriginPoolOriginPoolAdvancedOptionsCircuitBreakerChoice struct {
+	DefaultCircuitBreaker types.Bool   `tfsdk:"default_circuit_breaker"`
+	DisableCircuitBreaker types.Bool   `tfsdk:"disable_circuit_breaker"`
+	CircuitBreaker        types.Object `tfsdk:"circuit_breaker"`
+}
+
+type OriginPoolOriginPoolAdvancedOptionsCircuitBreaker struct {
+	Priority        types.List  `tfsdk:"priority"`
+	ConnectionLimit types.Int64 `tfsdk:"connection_limit"`
+	PendingRequests types.Int64 `tfsdk:"pending_requests"`
+	Retries         types.Int64 `tfsdk:"retries"`
+	MaxRequests     types.Int64 `tfsdk:"max_requests"`
+}
+
+type OriginPoolOriginPoolAdvancedOptionsOutlierDetectionChoice struct {
+	DisableOutlierDetection types.Bool   `tfsdk:"disable_outlier_detection"`
+	OutlierDetection        types.Object `tfsdk:"outlier_detection"`
+}
+
+type OriginPoolOriginPoolAdvancedOptionsOutlierDetection struct {
+	Consecutive_5Xx           types.Int64 `tfsdk:"consecutive_5xx"`
+	Interval                  types.Int64 `tfsdk:"interval"`
+	BaseEjectionTime          types.Int64 `tfsdk:"base_ejection_time"`
+	MaxEjectionPercent        types.Int64 `tfsdk:"max_ejection_percent"`
+	ConsecutiveGatewayFailure types.Int64 `tfsdk:"consecutive_gateway_failure"`
+}
+
+type OriginPoolOriginPoolAdvancedOptionsPanicThresholdTypeChoice struct {
+	NoPanicThreshold types.Bool  `tfsdk:"no_panic_threshold"`
+	PanicThreshold   types.Int64 `tfsdk:"panic_threshold"`
+}
+
+type OriginPoolOriginPoolAdvancedOptionsHttpProtocolTypeChoice struct {
+	Http1Config    types.Object `tfsdk:"http1_config"`
+	Http2Options   types.Object `tfsdk:"http2_options"`
+	AutoHttpConfig types.Bool   `tfsdk:"auto_http_config"`
+}
+
+type OriginPoolOriginPoolAdvancedOptionsHttp1Config struct {
+	HeaderTransformation types.Object `tfsdk:"header_transformation"`
+}
+
+type OriginPoolHeaderTransformationType struct {
+	HeaderTransformationChoice types.Object `tfsdk:"header_transformation_choice"`
+}
+
+type OriginPoolHeaderTransformationTypeHeaderTransformationChoice struct {
+	LegacyHeaderTransformation       types.Bool `tfsdk:"legacy_header_transformation"`
+	DefaultHeaderTransformation      types.Bool `tfsdk:"default_header_transformation"`
+	ProperCaseHeaderTransformation   types.Bool `tfsdk:"proper_case_header_transformation"`
+	PreserveCaseHeaderTransformation types.Bool `tfsdk:"preserve_case_header_transformation"`
+}
+
+type OriginPoolOriginPoolAdvancedOptionsHttp2Options struct {
+	Enabled types.Bool `tfsdk:"enabled"`
+}
+
+type OriginPoolOriginPoolAdvancedOptionsMaxRequestsPerConnectionChoice struct {
+	NoRequestLimitPerConnection types.Bool  `tfsdk:"no_request_limit_per_connection"`
+	MaxRequestsPerConnection    types.Int64 `tfsdk:"max_requests_per_connection"`
+}
+
+type OriginPoolOriginPoolAdvancedOptionsSubsetChoice struct {
+	DisableSubsets types.Bool   `tfsdk:"disable_subsets"`
+	EnableSubsets  types.Object `tfsdk:"enable_subsets"`
+}
+
+type OriginPoolOriginPoolAdvancedOptionsEnableSubsets struct {
+	EndpointSubsets      types.List   `tfsdk:"endpoint_subsets"`
+	FallbackPolicyChoice types.Object `tfsdk:"fallback_policy_choice"`
+}
+
+type OriginPoolClusterEndpointSubsetSelectorType struct {
+	Keys types.List `tfsdk:"keys"`
+}
+
+type OriginPoolOriginPoolSubsetsFallbackPolicyChoice struct {
+	AnyEndpoint   types.Bool   `tfsdk:"any_endpoint"`
+	DefaultSubset types.Object `tfsdk:"default_subset"`
+	FailRequest   types.Bool   `tfsdk:"fail_request"`
+}
+
+type OriginPoolOriginPoolSubsetsDefaultSubset struct {
+	DefaultSubset types.Map `tfsdk:"default_subset"`
+}
+
+type OriginPoolUpstreamConnPoolReuseType struct {
+	MapDownstreamToUpstreamConnPoolTypeChoice types.Object `tfsdk:"map_downstream_to_upstream_conn_pool_type_choice"`
+}
+
+type OriginPoolUpstreamConnPoolReuseTypeMapDownstreamToUpstreamConnPoolTypeChoice struct {
+	EnableConnPoolReuse  types.Bool `tfsdk:"enable_conn_pool_reuse"`
+	DisableConnPoolReuse types.Bool `tfsdk:"disable_conn_pool_reuse"`
 }
 
 type OriginPoolOriginPoolOriginServerType struct {
-	Labels types.Map    `tfsdk:"labels"`
 	Choice types.Object `tfsdk:"choice"`
+	Labels types.Map    `tfsdk:"labels"`
 }
 
 type OriginPoolOriginServerTypeChoice struct {
-	PrivateName          types.Object `tfsdk:"private_name"`
-	VnPrivateIp          types.Object `tfsdk:"vn_private_ip"`
-	VnPrivateName        types.Object `tfsdk:"vn_private_name"`
-	CbipService          types.Object `tfsdk:"cbip_service"`
-	PublicIp             types.Object `tfsdk:"public_ip"`
-	CustomEndpointObject types.Object `tfsdk:"custom_endpoint_object"`
 	PublicName           types.Object `tfsdk:"public_name"`
 	PrivateIp            types.Object `tfsdk:"private_ip"`
+	PrivateName          types.Object `tfsdk:"private_name"`
 	K8SService           types.Object `tfsdk:"k8s_service"`
 	ConsulService        types.Object `tfsdk:"consul_service"`
+	CbipService          types.Object `tfsdk:"cbip_service"`
+	CustomEndpointObject types.Object `tfsdk:"custom_endpoint_object"`
+	PublicIp             types.Object `tfsdk:"public_ip"`
+	VnPrivateName        types.Object `tfsdk:"vn_private_name"`
+	VnPrivateIp          types.Object `tfsdk:"vn_private_ip"`
 }
 
-type OriginPoolOriginServerTypePrivateName struct {
+type OriginPoolOriginServerTypePublicName struct {
+	DnsName         types.String `tfsdk:"dns_name"`
 	RefreshInterval types.Int64  `tfsdk:"refresh_interval"`
-	SiteLocator     types.Object `tfsdk:"site_locator"`
+}
+
+type OriginPoolOriginServerTypePrivateIp struct {
 	NetworkChoice   types.Object `tfsdk:"network_choice"`
 	SnatPool        types.Object `tfsdk:"snat_pool"`
-	DnsName         types.String `tfsdk:"dns_name"`
+	PrivateIpChoice types.Object `tfsdk:"private_ip_choice"`
+	SiteLocator     types.Object `tfsdk:"site_locator"`
 }
 
-type OriginPoolViewsSiteLocator struct {
-	Choice types.Object `tfsdk:"choice"`
-}
-
-type OriginPoolSiteLocatorChoice struct {
-	Site        types.Object `tfsdk:"site"`
-	VirtualSite types.Object `tfsdk:"virtual_site"`
-}
-
-type OriginPoolOriginServerPrivateNameNetworkChoice struct {
+type OriginPoolOriginServerPrivateIPNetworkChoice struct {
 	InsideNetwork  types.Bool   `tfsdk:"inside_network"`
 	OutsideNetwork types.Bool   `tfsdk:"outside_network"`
 	Segment        types.Object `tfsdk:"segment"`
@@ -92,56 +201,29 @@ type OriginPoolSnatPoolConfigurationSnatPool struct {
 	Ipv6Prefixes types.List `tfsdk:"ipv6_prefixes"`
 }
 
-type OriginPoolOriginServerTypeVnPrivateIp struct {
-	VirtualNetworkIpChoice types.Object `tfsdk:"virtual_network_ip_choice"`
-	VirtualNetwork         types.Object `tfsdk:"virtual_network"`
-}
-
-type OriginPoolOriginServerVirtualNetworkIPVirtualNetworkIpChoice struct {
-	Ip   types.String `tfsdk:"ip"`
-	Ipv6 types.String `tfsdk:"ipv6"`
-}
-
-type OriginPoolOriginServerTypeVnPrivateName struct {
-	DnsName        types.String `tfsdk:"dns_name"`
-	PrivateNetwork types.Object `tfsdk:"private_network"`
-}
-
-type OriginPoolOriginServerTypeCbipService struct {
-	ServiceName types.String `tfsdk:"service_name"`
-}
-
-type OriginPoolOriginServerTypePublicIp struct {
-	PublicIpChoice types.Object `tfsdk:"public_ip_choice"`
-}
-
-type OriginPoolOriginServerPublicIPPublicIpChoice struct {
-	Ipv6 types.String `tfsdk:"ipv6"`
-	Ip   types.String `tfsdk:"ip"`
-}
-
-type OriginPoolOriginServerTypeCustomEndpointObject struct {
-	Endpoint types.Object `tfsdk:"endpoint"`
-}
-
-type OriginPoolOriginServerTypePublicName struct {
-	DnsName         types.String `tfsdk:"dns_name"`
-	RefreshInterval types.Int64  `tfsdk:"refresh_interval"`
-}
-
-type OriginPoolOriginServerTypePrivateIp struct {
-	SnatPool        types.Object `tfsdk:"snat_pool"`
-	PrivateIpChoice types.Object `tfsdk:"private_ip_choice"`
-	SiteLocator     types.Object `tfsdk:"site_locator"`
-	NetworkChoice   types.Object `tfsdk:"network_choice"`
-}
-
 type OriginPoolOriginServerPrivateIPPrivateIpChoice struct {
 	Ipv6 types.String `tfsdk:"ipv6"`
 	Ip   types.String `tfsdk:"ip"`
 }
 
-type OriginPoolOriginServerPrivateIPNetworkChoice struct {
+type OriginPoolViewsSiteLocator struct {
+	Choice types.Object `tfsdk:"choice"`
+}
+
+type OriginPoolSiteLocatorChoice struct {
+	Site        types.Object `tfsdk:"site"`
+	VirtualSite types.Object `tfsdk:"virtual_site"`
+}
+
+type OriginPoolOriginServerTypePrivateName struct {
+	DnsName         types.String `tfsdk:"dns_name"`
+	RefreshInterval types.Int64  `tfsdk:"refresh_interval"`
+	SiteLocator     types.Object `tfsdk:"site_locator"`
+	NetworkChoice   types.Object `tfsdk:"network_choice"`
+	SnatPool        types.Object `tfsdk:"snat_pool"`
+}
+
+type OriginPoolOriginServerPrivateNameNetworkChoice struct {
 	InsideNetwork  types.Bool   `tfsdk:"inside_network"`
 	OutsideNetwork types.Bool   `tfsdk:"outside_network"`
 	Segment        types.Object `tfsdk:"segment"`
@@ -160,21 +242,53 @@ type OriginPoolOriginServerK8SServiceServiceInfoChoice struct {
 }
 
 type OriginPoolOriginServerK8SServiceNetworkChoice struct {
-	InsideNetwork  types.Bool `tfsdk:"inside_network"`
 	OutsideNetwork types.Bool `tfsdk:"outside_network"`
 	Vk8SNetworks   types.Bool `tfsdk:"vk8s_networks"`
+	InsideNetwork  types.Bool `tfsdk:"inside_network"`
 }
 
 type OriginPoolOriginServerTypeConsulService struct {
+	SiteLocator   types.Object `tfsdk:"site_locator"`
 	NetworkChoice types.Object `tfsdk:"network_choice"`
 	SnatPool      types.Object `tfsdk:"snat_pool"`
 	ServiceName   types.String `tfsdk:"service_name"`
-	SiteLocator   types.Object `tfsdk:"site_locator"`
 }
 
 type OriginPoolOriginServerConsulServiceNetworkChoice struct {
 	InsideNetwork  types.Bool `tfsdk:"inside_network"`
 	OutsideNetwork types.Bool `tfsdk:"outside_network"`
+}
+
+type OriginPoolOriginServerTypeCbipService struct {
+	ServiceName types.String `tfsdk:"service_name"`
+}
+
+type OriginPoolOriginServerTypeCustomEndpointObject struct {
+	Endpoint types.Object `tfsdk:"endpoint"`
+}
+
+type OriginPoolOriginServerTypePublicIp struct {
+	PublicIpChoice types.Object `tfsdk:"public_ip_choice"`
+}
+
+type OriginPoolOriginServerPublicIPPublicIpChoice struct {
+	Ip   types.String `tfsdk:"ip"`
+	Ipv6 types.String `tfsdk:"ipv6"`
+}
+
+type OriginPoolOriginServerTypeVnPrivateName struct {
+	DnsName        types.String `tfsdk:"dns_name"`
+	PrivateNetwork types.Object `tfsdk:"private_network"`
+}
+
+type OriginPoolOriginServerTypeVnPrivateIp struct {
+	VirtualNetworkIpChoice types.Object `tfsdk:"virtual_network_ip_choice"`
+	VirtualNetwork         types.Object `tfsdk:"virtual_network"`
+}
+
+type OriginPoolOriginServerVirtualNetworkIPVirtualNetworkIpChoice struct {
+	Ipv6 types.String `tfsdk:"ipv6"`
+	Ip   types.String `tfsdk:"ip"`
 }
 
 type OriginPoolGlobalSpecTypeTlsChoice struct {
@@ -201,16 +315,16 @@ type OriginPoolViewsTlsConfig struct {
 }
 
 type OriginPoolTlsConfigChoice struct {
-	CustomSecurity  types.Object `tfsdk:"custom_security"`
 	DefaultSecurity types.Bool   `tfsdk:"default_security"`
 	MediumSecurity  types.Bool   `tfsdk:"medium_security"`
 	LowSecurity     types.Bool   `tfsdk:"low_security"`
+	CustomSecurity  types.Object `tfsdk:"custom_security"`
 }
 
 type OriginPoolTlsConfigCustomSecurity struct {
-	CipherSuites types.List `tfsdk:"cipher_suites"`
 	MinVersion   types.List `tfsdk:"min_version"`
 	MaxVersion   types.List `tfsdk:"max_version"`
+	CipherSuites types.List `tfsdk:"cipher_suites"`
 }
 
 type OriginPoolUpstreamTlsParametersServerValidationChoice struct {
@@ -239,30 +353,10 @@ type OriginPoolUpstreamTlsParametersUseMtls struct {
 }
 
 type OriginPoolTlsCertificateType struct {
-	CertificateUrl     types.String `tfsdk:"certificate_url"`
-	PrivateKey         types.Object `tfsdk:"private_key"`
 	Description        types.String `tfsdk:"description"`
 	OcspStaplingChoice types.Object `tfsdk:"ocsp_stapling_choice"`
-}
-
-type OriginPoolSecretType struct {
-	SecretInfoChoice types.Object `tfsdk:"secret_info_choice"`
-}
-
-type OriginPoolSecretTypeSecretInfoChoice struct {
-	ClearSecretInfo     types.Object `tfsdk:"clear_secret_info"`
-	BlindfoldSecretInfo types.Object `tfsdk:"blindfold_secret_info"`
-}
-
-type OriginPoolSecretTypeClearSecretInfo struct {
-	Url      types.String `tfsdk:"url"`
-	Provider types.String `tfsdk:"provider"`
-}
-
-type OriginPoolSecretTypeBlindfoldSecretInfo struct {
-	StoreProvider      types.String `tfsdk:"store_provider"`
-	Location           types.String `tfsdk:"location"`
-	DecryptionProvider types.String `tfsdk:"decryption_provider"`
+	CertificateUrl     types.String `tfsdk:"certificate_url"`
+	PrivateKey         types.Object `tfsdk:"private_key"`
 }
 
 type OriginPoolTlsCertificateTypeOcspStaplingChoice struct {
@@ -275,202 +369,300 @@ type OriginPoolTlsCertificateTypeCustomHashAlgorithms struct {
 	HashAlgorithms types.List `tfsdk:"hash_algorithms"`
 }
 
+type OriginPoolSecretType struct {
+	SecretInfoChoice types.Object `tfsdk:"secret_info_choice"`
+}
+
+type OriginPoolSecretTypeSecretInfoChoice struct {
+	BlindfoldSecretInfo types.Object `tfsdk:"blindfold_secret_info"`
+	ClearSecretInfo     types.Object `tfsdk:"clear_secret_info"`
+}
+
+type OriginPoolSecretTypeBlindfoldSecretInfo struct {
+	DecryptionProvider types.String `tfsdk:"decryption_provider"`
+	StoreProvider      types.String `tfsdk:"store_provider"`
+	Location           types.String `tfsdk:"location"`
+}
+
+type OriginPoolSecretTypeClearSecretInfo struct {
+	Provider types.String `tfsdk:"provider"`
+	Url      types.String `tfsdk:"url"`
+}
+
 type OriginPoolUpstreamTlsParametersMaxSessionKeysTypeChoice struct {
 	DefaultSessionKeyCaching types.Bool  `tfsdk:"default_session_key_caching"`
 	DisableSessionKeyCaching types.Bool  `tfsdk:"disable_session_key_caching"`
 	MaxSessionKeys           types.Int64 `tfsdk:"max_session_keys"`
 }
 
-type OriginPoolOriginPoolOriginPoolAdvancedOptions struct {
-	LbSourceIpPersistanceChoice    types.Object `tfsdk:"lb_source_ip_persistance_choice"`
-	ConnectionTimeout              types.Int64  `tfsdk:"connection_timeout"`
-	CircuitBreakerChoice           types.Object `tfsdk:"circuit_breaker_choice"`
-	PanicThresholdTypeChoice       types.Object `tfsdk:"panic_threshold_type_choice"`
-	ProxyProtocolChoice            types.Object `tfsdk:"proxy_protocol_choice"`
-	MaxRequestsPerConnectionChoice types.Object `tfsdk:"max_requests_per_connection_choice"`
-	HttpIdleTimeout                types.Int64  `tfsdk:"http_idle_timeout"`
-	OutlierDetectionChoice         types.Object `tfsdk:"outlier_detection_choice"`
-	SubsetChoice                   types.Object `tfsdk:"subset_choice"`
-	HttpProtocolTypeChoice         types.Object `tfsdk:"http_protocol_type_choice"`
-}
-
-type OriginPoolOriginPoolAdvancedOptionsLbSourceIpPersistanceChoice struct {
-	EnableLbSourceIpPersistance  types.Bool `tfsdk:"enable_lb_source_ip_persistance"`
-	DisableLbSourceIpPersistance types.Bool `tfsdk:"disable_lb_source_ip_persistance"`
-}
-
-type OriginPoolOriginPoolAdvancedOptionsCircuitBreakerChoice struct {
-	DefaultCircuitBreaker types.Bool   `tfsdk:"default_circuit_breaker"`
-	DisableCircuitBreaker types.Bool   `tfsdk:"disable_circuit_breaker"`
-	CircuitBreaker        types.Object `tfsdk:"circuit_breaker"`
-}
-
-type OriginPoolOriginPoolAdvancedOptionsCircuitBreaker struct {
-	PendingRequests types.Int64 `tfsdk:"pending_requests"`
-	Retries         types.Int64 `tfsdk:"retries"`
-	MaxRequests     types.Int64 `tfsdk:"max_requests"`
-	Priority        types.List  `tfsdk:"priority"`
-	ConnectionLimit types.Int64 `tfsdk:"connection_limit"`
-}
-
-type OriginPoolOriginPoolAdvancedOptionsPanicThresholdTypeChoice struct {
-	NoPanicThreshold types.Bool  `tfsdk:"no_panic_threshold"`
-	PanicThreshold   types.Int64 `tfsdk:"panic_threshold"`
-}
-
-type OriginPoolOriginPoolAdvancedOptionsProxyProtocolChoice struct {
-	DisableProxyProtocol types.Bool `tfsdk:"disable_proxy_protocol"`
-	ProxyProtocolV1      types.Bool `tfsdk:"proxy_protocol_v1"`
-	ProxyProtocolV2      types.Bool `tfsdk:"proxy_protocol_v2"`
-}
-
-type OriginPoolOriginPoolAdvancedOptionsMaxRequestsPerConnectionChoice struct {
-	NoRequestLimitPerConnection types.Bool  `tfsdk:"no_request_limit_per_connection"`
-	MaxRequestsPerConnection    types.Int64 `tfsdk:"max_requests_per_connection"`
-}
-
-type OriginPoolOriginPoolAdvancedOptionsOutlierDetectionChoice struct {
-	DisableOutlierDetection types.Bool   `tfsdk:"disable_outlier_detection"`
-	OutlierDetection        types.Object `tfsdk:"outlier_detection"`
-}
-
-type OriginPoolOriginPoolAdvancedOptionsOutlierDetection struct {
-	Consecutive_5Xx           types.Int64 `tfsdk:"consecutive_5xx"`
-	Interval                  types.Int64 `tfsdk:"interval"`
-	BaseEjectionTime          types.Int64 `tfsdk:"base_ejection_time"`
-	MaxEjectionPercent        types.Int64 `tfsdk:"max_ejection_percent"`
-	ConsecutiveGatewayFailure types.Int64 `tfsdk:"consecutive_gateway_failure"`
-}
-
-type OriginPoolOriginPoolAdvancedOptionsSubsetChoice struct {
-	DisableSubsets types.Bool   `tfsdk:"disable_subsets"`
-	EnableSubsets  types.Object `tfsdk:"enable_subsets"`
-}
-
-type OriginPoolOriginPoolAdvancedOptionsEnableSubsets struct {
-	EndpointSubsets      types.List   `tfsdk:"endpoint_subsets"`
-	FallbackPolicyChoice types.Object `tfsdk:"fallback_policy_choice"`
-}
-
-type OriginPoolClusterEndpointSubsetSelectorType struct {
-	Keys types.List `tfsdk:"keys"`
-}
-
-type OriginPoolOriginPoolSubsetsFallbackPolicyChoice struct {
-	AnyEndpoint   types.Bool   `tfsdk:"any_endpoint"`
-	DefaultSubset types.Object `tfsdk:"default_subset"`
-	FailRequest   types.Bool   `tfsdk:"fail_request"`
-}
-
-type OriginPoolOriginPoolSubsetsDefaultSubset struct {
-	DefaultSubset types.Map `tfsdk:"default_subset"`
-}
-
-type OriginPoolOriginPoolAdvancedOptionsHttpProtocolTypeChoice struct {
-	Http1Config    types.Object `tfsdk:"http1_config"`
-	Http2Options   types.Object `tfsdk:"http2_options"`
-	AutoHttpConfig types.Bool   `tfsdk:"auto_http_config"`
-}
-
-type OriginPoolOriginPoolAdvancedOptionsHttp1Config struct {
-	HeaderTransformation types.Object `tfsdk:"header_transformation"`
-}
-
-type OriginPoolHeaderTransformationType struct {
-	HeaderTransformationChoice types.Object `tfsdk:"header_transformation_choice"`
-}
-
-type OriginPoolHeaderTransformationTypeHeaderTransformationChoice struct {
-	LegacyHeaderTransformation       types.Bool `tfsdk:"legacy_header_transformation"`
-	DefaultHeaderTransformation      types.Bool `tfsdk:"default_header_transformation"`
-	ProperCaseHeaderTransformation   types.Bool `tfsdk:"proper_case_header_transformation"`
-	PreserveCaseHeaderTransformation types.Bool `tfsdk:"preserve_case_header_transformation"`
-}
-
-type OriginPoolOriginPoolAdvancedOptionsHttp2Options struct {
-	Enabled types.Bool `tfsdk:"enabled"`
-}
-
-type OriginPoolUpstreamConnPoolReuseType struct {
-	MapDownstreamToUpstreamConnPoolTypeChoice types.Object `tfsdk:"map_downstream_to_upstream_conn_pool_type_choice"`
-}
-
-type OriginPoolUpstreamConnPoolReuseTypeMapDownstreamToUpstreamConnPoolTypeChoice struct {
-	EnableConnPoolReuse  types.Bool `tfsdk:"enable_conn_pool_reuse"`
-	DisableConnPoolReuse types.Bool `tfsdk:"disable_conn_pool_reuse"`
-}
-
 type OriginPoolGlobalSpecTypePortChoice struct {
-	Port          types.Int64 `tfsdk:"port"`
 	AutomaticPort types.Bool  `tfsdk:"automatic_port"`
 	LbPort        types.Bool  `tfsdk:"lb_port"`
+	Port          types.Int64 `tfsdk:"port"`
+}
+
+type OriginPoolGlobalSpecTypeHealthCheckPortChoice struct {
+	SameAsEndpointPort types.Bool  `tfsdk:"same_as_endpoint_port"`
+	HealthCheckPort    types.Int64 `tfsdk:"health_check_port"`
 }
 
 // DataSourceF5XCOriginPoolModel describes the resource data model.
 type DataSourceF5XCOriginPoolModel struct {
+	Labels                    types.Map      `tfsdk:"labels"`
+	Annotations               types.Map      `tfsdk:"annotations"`
 	Description               types.String   `tfsdk:"description"`
 	Name                      types.String   `tfsdk:"name"`
 	Namespace                 types.String   `tfsdk:"namespace"`
 	Uid                       types.String   `tfsdk:"uid"`
-	Labels                    types.Map      `tfsdk:"labels"`
-	Annotations               types.Map      `tfsdk:"annotations"`
-	HealthCheckPortChoice     types.Object   `tfsdk:"health_check_port_choice"`
-	OriginServers             types.List     `tfsdk:"origin_servers"`
-	TlsChoice                 types.Object   `tfsdk:"tls_choice"`
-	Healthcheck               types.List     `tfsdk:"healthcheck"`
 	LoadbalancerAlgorithm     types.List     `tfsdk:"loadbalancer_algorithm"`
-	EndpointSelection         types.List     `tfsdk:"endpoint_selection"`
 	AdvancedOptions           types.Object   `tfsdk:"advanced_options"`
 	UpstreamConnPoolReuseType types.Object   `tfsdk:"upstream_conn_pool_reuse_type"`
+	OriginServers             types.List     `tfsdk:"origin_servers"`
+	TlsChoice                 types.Object   `tfsdk:"tls_choice"`
 	PortChoice                types.Object   `tfsdk:"port_choice"`
+	Healthcheck               types.List     `tfsdk:"healthcheck"`
+	EndpointSelection         types.List     `tfsdk:"endpoint_selection"`
+	HealthCheckPortChoice     types.Object   `tfsdk:"health_check_port_choice"`
 	Timeouts                  timeouts.Value `tfsdk:"timeouts"`
 }
 
 // --- Attribute Maps for Nested Structs ---
-// Attribute map for OneOfField --> HealthCheckPortChoice
-var OriginPoolHealthCheckPortChoiceModelAttributeMap = map[string]attr.Type{
+// Attribute map for PointerField --> AdvancedOptions
+var OriginPoolAdvancedOptionsModelAttributeMap = map[string]attr.Type{
 
-	"health_check_port":     types.Int64Type,
-	"same_as_endpoint_port": types.BoolType,
+	"lb_source_ip_persistance_choice": types.ObjectType{
+		AttrTypes: OriginPoolAdvancedOptionsLbSourceIpPersistanceChoiceModelAttributeMap,
+	},
+	"proxy_protocol_choice": types.ObjectType{
+		AttrTypes: OriginPoolAdvancedOptionsProxyProtocolChoiceModelAttributeMap,
+	},
+	"circuit_breaker_choice": types.ObjectType{
+		AttrTypes: OriginPoolAdvancedOptionsCircuitBreakerChoiceModelAttributeMap,
+	},
+	"outlier_detection_choice": types.ObjectType{
+		AttrTypes: OriginPoolAdvancedOptionsOutlierDetectionChoiceModelAttributeMap,
+	},
+	"panic_threshold_type_choice": types.ObjectType{
+		AttrTypes: OriginPoolAdvancedOptionsPanicThresholdTypeModelAttributeMap,
+	},
+	"http_protocol_type_choice": types.ObjectType{
+		AttrTypes: OriginPoolAdvancedOptionsHttpProtocolTypeModelAttributeMap,
+	},
+	"max_requests_per_connection_choice": types.ObjectType{
+		AttrTypes: OriginPoolAdvancedOptionsMaxRequestsPerConnectionChoiceModelAttributeMap,
+	},
+	"connection_timeout": types.Int64Type,
+	"http_idle_timeout":  types.Int64Type,
+	"subset_choice": types.ObjectType{
+		AttrTypes: OriginPoolAdvancedOptionsSubsetChoiceModelAttributeMap,
+	},
+}
+
+// Attribute map for OneOfField --> LbSourceIpPersistanceChoice
+var OriginPoolAdvancedOptionsLbSourceIpPersistanceChoiceModelAttributeMap = map[string]attr.Type{
+
+	"disable_lb_source_ip_persistance": types.BoolType,
+	"enable_lb_source_ip_persistance":  types.BoolType,
+}
+
+// Attribute map for OneOfField --> ProxyProtocolChoice
+var OriginPoolAdvancedOptionsProxyProtocolChoiceModelAttributeMap = map[string]attr.Type{
+
+	"disable_proxy_protocol": types.BoolType,
+	"proxy_protocol_v1":      types.BoolType,
+	"proxy_protocol_v2":      types.BoolType,
+}
+
+// Attribute map for RequiredOneOfField --> CircuitBreakerChoice
+var OriginPoolAdvancedOptionsCircuitBreakerChoiceModelAttributeMap = map[string]attr.Type{
+
+	"default_circuit_breaker": types.BoolType,
+	"disable_circuit_breaker": types.BoolType,
+	"circuit_breaker": types.ObjectType{
+		AttrTypes: OriginPoolAdvancedOptionsCircuitBreakerChoiceCircuitBreakerModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> CircuitBreaker
+var OriginPoolAdvancedOptionsCircuitBreakerChoiceCircuitBreakerModelAttributeMap = map[string]attr.Type{
+
+	"priority": types.ListType{
+		ElemType: types.StringType,
+	},
+	"connection_limit": types.Int64Type,
+	"pending_requests": types.Int64Type,
+	"retries":          types.Int64Type,
+	"max_requests":     types.Int64Type,
+}
+
+// Attribute map for RequiredOneOfField --> OutlierDetectionChoice
+var OriginPoolAdvancedOptionsOutlierDetectionChoiceModelAttributeMap = map[string]attr.Type{
+
+	"disable_outlier_detection": types.BoolType,
+	"outlier_detection": types.ObjectType{
+		AttrTypes: OriginPoolAdvancedOptionsOutlierDetectionChoiceOutlierDetectionModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> OutlierDetection
+var OriginPoolAdvancedOptionsOutlierDetectionChoiceOutlierDetectionModelAttributeMap = map[string]attr.Type{
+
+	"consecutive_5xx":             types.Int64Type,
+	"interval":                    types.Int64Type,
+	"base_ejection_time":          types.Int64Type,
+	"max_ejection_percent":        types.Int64Type,
+	"consecutive_gateway_failure": types.Int64Type,
+}
+
+// Attribute map for RequiredOneOfField --> PanicThresholdType
+var OriginPoolAdvancedOptionsPanicThresholdTypeModelAttributeMap = map[string]attr.Type{
+
+	"no_panic_threshold": types.BoolType,
+	"panic_threshold":    types.Int64Type,
+}
+
+// Attribute map for RequiredOneOfField --> HttpProtocolType
+var OriginPoolAdvancedOptionsHttpProtocolTypeModelAttributeMap = map[string]attr.Type{
+
+	"http1_config": types.ObjectType{
+		AttrTypes: OriginPoolAdvancedOptionsHttpProtocolTypeHttp1ConfigModelAttributeMap,
+	},
+	"http2_options": types.ObjectType{
+		AttrTypes: OriginPoolAdvancedOptionsHttpProtocolTypeHttp2OptionsModelAttributeMap,
+	},
+	"auto_http_config": types.BoolType,
+}
+
+// Attribute map for PointerOfOneOfField --> Http1Config
+var OriginPoolAdvancedOptionsHttpProtocolTypeHttp1ConfigModelAttributeMap = map[string]attr.Type{
+	"header_transformation": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"header_transformation_choice": types.ObjectType{
+				AttrTypes: OriginPoolAdvancedOptionsHttpProtocolTypeHttp1ConfigHeaderTransformationHeaderTransformationChoiceModelAttributeMap,
+			}},
+	},
+}
+
+// Attribute map for PointerField --> HeaderTransformation
+var OriginPoolAdvancedOptionsHttpProtocolTypeHttp1ConfigHeaderTransformationModelAttributeMap = map[string]attr.Type{
+
+	"header_transformation_choice": types.ObjectType{
+		AttrTypes: OriginPoolAdvancedOptionsHttpProtocolTypeHttp1ConfigHeaderTransformationHeaderTransformationChoiceModelAttributeMap,
+	},
+}
+
+// Attribute map for RequiredOneOfField --> HeaderTransformationChoice
+var OriginPoolAdvancedOptionsHttpProtocolTypeHttp1ConfigHeaderTransformationHeaderTransformationChoiceModelAttributeMap = map[string]attr.Type{
+
+	"legacy_header_transformation":        types.BoolType,
+	"default_header_transformation":       types.BoolType,
+	"proper_case_header_transformation":   types.BoolType,
+	"preserve_case_header_transformation": types.BoolType,
+}
+
+// Attribute map for PointerOfOneOfField --> Http2Options
+var OriginPoolAdvancedOptionsHttpProtocolTypeHttp2OptionsModelAttributeMap = map[string]attr.Type{
+
+	"enabled": types.BoolType,
+}
+
+// Attribute map for RequiredOneOfField --> MaxRequestsPerConnectionChoice
+var OriginPoolAdvancedOptionsMaxRequestsPerConnectionChoiceModelAttributeMap = map[string]attr.Type{
+
+	"no_request_limit_per_connection": types.BoolType,
+	"max_requests_per_connection":     types.Int64Type,
+}
+
+// Attribute map for RequiredOneOfField --> SubsetChoice
+var OriginPoolAdvancedOptionsSubsetChoiceModelAttributeMap = map[string]attr.Type{
+
+	"disable_subsets": types.BoolType,
+	"enable_subsets": types.ObjectType{
+		AttrTypes: OriginPoolAdvancedOptionsSubsetChoiceEnableSubsetsModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> EnableSubsets
+var OriginPoolAdvancedOptionsSubsetChoiceEnableSubsetsModelAttributeMap = map[string]attr.Type{
+
+	"endpoint_subsets": types.ListType{
+		ElemType: types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+
+				"keys": types.ListType{
+					ElemType: types.StringType,
+				},
+			},
+		},
+	},
+	"fallback_policy_choice": types.ObjectType{
+		AttrTypes: OriginPoolAdvancedOptionsSubsetChoiceEnableSubsetsFallbackPolicyChoiceModelAttributeMap,
+	},
+}
+
+// Attribute map for RequiredArrayOfPointerField --> EndpointSubsets
+var OriginPoolAdvancedOptionsSubsetChoiceEnableSubsetsEndpointSubsetsModelAttributeMap = map[string]attr.Type{
+
+	"keys": types.ListType{
+		ElemType: types.StringType,
+	},
+}
+
+// Attribute map for RequiredOneOfField --> FallbackPolicyChoice
+var OriginPoolAdvancedOptionsSubsetChoiceEnableSubsetsFallbackPolicyChoiceModelAttributeMap = map[string]attr.Type{
+
+	"any_endpoint": types.BoolType,
+	"default_subset": types.ObjectType{
+		AttrTypes: OriginPoolAdvancedOptionsSubsetChoiceEnableSubsetsFallbackPolicyChoiceDefaultSubsetModelAttributeMap,
+	},
+	"fail_request": types.BoolType,
+}
+
+// Attribute map for PointerOfOneOfField --> DefaultSubset
+var OriginPoolAdvancedOptionsSubsetChoiceEnableSubsetsFallbackPolicyChoiceDefaultSubsetModelAttributeMap = map[string]attr.Type{
+
+	"default_subset": types.MapType{
+		ElemType: types.StringType,
+	},
+}
+
+// Attribute map for PointerField --> UpstreamConnPoolReuseType
+var OriginPoolUpstreamConnPoolReuseTypeModelAttributeMap = map[string]attr.Type{
+
+	"map_downstream_to_upstream_conn_pool_type_choice": types.ObjectType{
+		AttrTypes: OriginPoolUpstreamConnPoolReuseTypeMapDownstreamToUpstreamConnPoolTypeModelAttributeMap,
+	},
+}
+
+// Attribute map for RequiredOneOfField --> MapDownstreamToUpstreamConnPoolType
+var OriginPoolUpstreamConnPoolReuseTypeMapDownstreamToUpstreamConnPoolTypeModelAttributeMap = map[string]attr.Type{
+
+	"enable_conn_pool_reuse":  types.BoolType,
+	"disable_conn_pool_reuse": types.BoolType,
 }
 
 // Attribute map for RequiredArrayOfPointerField --> OriginServers
 var OriginPoolOriginServersModelAttributeMap = map[string]attr.Type{
 
-	"labels": types.MapType{
-		ElemType: types.StringType,
-	},
 	"choice": types.ObjectType{
 		AttrTypes: OriginPoolOriginServersChoiceModelAttributeMap,
+	},
+	"labels": types.MapType{
+		ElemType: types.StringType,
 	},
 }
 
 // Attribute map for RequiredOneOfField --> Choice
 var OriginPoolOriginServersChoiceModelAttributeMap = map[string]attr.Type{
 
-	"private_name": types.ObjectType{
-		AttrTypes: OriginPoolOriginServersChoicePrivateNameModelAttributeMap,
-	},
-	"vn_private_ip": types.ObjectType{
-		AttrTypes: OriginPoolOriginServersChoiceVnPrivateIpModelAttributeMap,
-	},
-	"vn_private_name": types.ObjectType{
-		AttrTypes: OriginPoolOriginServersChoiceVnPrivateNameModelAttributeMap,
-	},
-	"cbip_service": types.ObjectType{
-		AttrTypes: OriginPoolOriginServersChoiceCbipServiceModelAttributeMap,
-	},
-	"public_ip": types.ObjectType{
-		AttrTypes: OriginPoolOriginServersChoicePublicIpModelAttributeMap,
-	},
-	"custom_endpoint_object": types.ObjectType{
-		AttrTypes: OriginPoolOriginServersChoiceCustomEndpointObjectModelAttributeMap,
-	},
 	"public_name": types.ObjectType{
 		AttrTypes: OriginPoolOriginServersChoicePublicNameModelAttributeMap,
 	},
 	"private_ip": types.ObjectType{
 		AttrTypes: OriginPoolOriginServersChoicePrivateIpModelAttributeMap,
+	},
+	"private_name": types.ObjectType{
+		AttrTypes: OriginPoolOriginServersChoicePrivateNameModelAttributeMap,
 	},
 	"k8s_service": types.ObjectType{
 		AttrTypes: OriginPoolOriginServersChoiceK8SServiceModelAttributeMap,
@@ -478,193 +670,21 @@ var OriginPoolOriginServersChoiceModelAttributeMap = map[string]attr.Type{
 	"consul_service": types.ObjectType{
 		AttrTypes: OriginPoolOriginServersChoiceConsulServiceModelAttributeMap,
 	},
-}
-
-// Attribute map for PointerOfOneOfField --> PrivateName
-var OriginPoolOriginServersChoicePrivateNameModelAttributeMap = map[string]attr.Type{
-
-	"refresh_interval": types.Int64Type, "site_locator": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"choice": types.ObjectType{
-				AttrTypes: OriginPoolOriginServersChoicePrivateNameSiteLocatorChoiceModelAttributeMap,
-			}},
+	"cbip_service": types.ObjectType{
+		AttrTypes: OriginPoolOriginServersChoiceCbipServiceModelAttributeMap,
 	},
-	"network_choice": types.ObjectType{
-		AttrTypes: OriginPoolOriginServersChoicePrivateNameNetworkChoiceModelAttributeMap,
-	}, "snat_pool": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"snat_pool_choice": types.ObjectType{
-				AttrTypes: OriginPoolOriginServersChoicePrivateNameSnatPoolSnatPoolChoiceModelAttributeMap,
-			}},
+	"custom_endpoint_object": types.ObjectType{
+		AttrTypes: OriginPoolOriginServersChoiceCustomEndpointObjectModelAttributeMap,
 	},
-	"dns_name": types.StringType,
-}
-
-// Attribute map for RequiredPointerField --> SiteLocator
-var OriginPoolOriginServersChoicePrivateNameSiteLocatorModelAttributeMap = map[string]attr.Type{
-
-	"choice": types.ObjectType{
-		AttrTypes: OriginPoolOriginServersChoicePrivateNameSiteLocatorChoiceModelAttributeMap,
+	"public_ip": types.ObjectType{
+		AttrTypes: OriginPoolOriginServersChoicePublicIpModelAttributeMap,
 	},
-}
-
-// Attribute map for RequiredOneOfField --> Choice
-var OriginPoolOriginServersChoicePrivateNameSiteLocatorChoiceModelAttributeMap = map[string]attr.Type{
-
-	"site": types.ObjectType{
-		AttrTypes: OriginPoolOriginServersChoicePrivateNameSiteLocatorChoiceSiteModelAttributeMap,
+	"vn_private_name": types.ObjectType{
+		AttrTypes: OriginPoolOriginServersChoiceVnPrivateNameModelAttributeMap,
 	},
-	"virtual_site": types.ObjectType{
-		AttrTypes: OriginPoolOriginServersChoicePrivateNameSiteLocatorChoiceVirtualSiteModelAttributeMap,
+	"vn_private_ip": types.ObjectType{
+		AttrTypes: OriginPoolOriginServersChoiceVnPrivateIpModelAttributeMap,
 	},
-}
-
-// Attribute map for PointerOfOneOfField --> Site
-var OriginPoolOriginServersChoicePrivateNameSiteLocatorChoiceSiteModelAttributeMap = map[string]attr.Type{
-
-	"name":      types.StringType,
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> VirtualSite
-var OriginPoolOriginServersChoicePrivateNameSiteLocatorChoiceVirtualSiteModelAttributeMap = map[string]attr.Type{
-
-	"name":      types.StringType,
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
-}
-
-// Attribute map for RequiredOneOfField --> NetworkChoice
-var OriginPoolOriginServersChoicePrivateNameNetworkChoiceModelAttributeMap = map[string]attr.Type{
-
-	"inside_network":  types.BoolType,
-	"outside_network": types.BoolType,
-	"segment": types.ObjectType{
-		AttrTypes: OriginPoolOriginServersChoicePrivateNameNetworkChoiceSegmentModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredPointerOfOneOfField --> Segment
-var OriginPoolOriginServersChoicePrivateNameNetworkChoiceSegmentModelAttributeMap = map[string]attr.Type{
-
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
-	"name":      types.StringType,
-}
-
-// Attribute map for PointerField --> SnatPool
-var OriginPoolOriginServersChoicePrivateNameSnatPoolModelAttributeMap = map[string]attr.Type{
-
-	"snat_pool_choice": types.ObjectType{
-		AttrTypes: OriginPoolOriginServersChoicePrivateNameSnatPoolSnatPoolChoiceModelAttributeMap,
-	},
-}
-
-// Attribute map for OneOfField --> SnatPoolChoice
-var OriginPoolOriginServersChoicePrivateNameSnatPoolSnatPoolChoiceModelAttributeMap = map[string]attr.Type{
-
-	"no_snat_pool": types.BoolType,
-	"snat_pool": types.ObjectType{
-		AttrTypes: OriginPoolOriginServersChoicePrivateNameSnatPoolSnatPoolChoiceSnatPoolModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> SnatPool
-var OriginPoolOriginServersChoicePrivateNameSnatPoolSnatPoolChoiceSnatPoolModelAttributeMap = map[string]attr.Type{
-
-	"prefixes": types.ListType{
-		ElemType: types.StringType,
-	},
-	"ipv6_prefixes": types.ListType{
-		ElemType: types.StringType,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> VnPrivateIp
-var OriginPoolOriginServersChoiceVnPrivateIpModelAttributeMap = map[string]attr.Type{
-
-	"virtual_network_ip_choice": types.ObjectType{
-		AttrTypes: OriginPoolOriginServersChoiceVnPrivateIpVirtualNetworkIpChoiceModelAttributeMap,
-	}, "virtual_network": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"name":      types.StringType,
-			"tenant":    types.StringType,
-			"namespace": types.StringType},
-	},
-}
-
-// Attribute map for RequiredOneOfField --> VirtualNetworkIpChoice
-var OriginPoolOriginServersChoiceVnPrivateIpVirtualNetworkIpChoiceModelAttributeMap = map[string]attr.Type{
-
-	"ip":   types.StringType,
-	"ipv6": types.StringType,
-}
-
-// Attribute map for RequiredPointerField --> VirtualNetwork
-var OriginPoolOriginServersChoiceVnPrivateIpVirtualNetworkModelAttributeMap = map[string]attr.Type{
-
-	"name":      types.StringType,
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> VnPrivateName
-var OriginPoolOriginServersChoiceVnPrivateNameModelAttributeMap = map[string]attr.Type{
-
-	"dns_name": types.StringType, "private_network": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"namespace": types.StringType,
-			"name":      types.StringType,
-			"tenant":    types.StringType},
-	},
-}
-
-// Attribute map for RequiredPointerField --> PrivateNetwork
-var OriginPoolOriginServersChoiceVnPrivateNamePrivateNetworkModelAttributeMap = map[string]attr.Type{
-
-	"namespace": types.StringType,
-	"name":      types.StringType,
-	"tenant":    types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> CbipService
-var OriginPoolOriginServersChoiceCbipServiceModelAttributeMap = map[string]attr.Type{
-
-	"service_name": types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> PublicIp
-var OriginPoolOriginServersChoicePublicIpModelAttributeMap = map[string]attr.Type{
-
-	"public_ip_choice": types.ObjectType{
-		AttrTypes: OriginPoolOriginServersChoicePublicIpPublicIpChoiceModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> PublicIpChoice
-var OriginPoolOriginServersChoicePublicIpPublicIpChoiceModelAttributeMap = map[string]attr.Type{
-
-	"ipv6": types.StringType,
-	"ip":   types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> CustomEndpointObject
-var OriginPoolOriginServersChoiceCustomEndpointObjectModelAttributeMap = map[string]attr.Type{
-	"endpoint": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"name":      types.StringType,
-			"tenant":    types.StringType,
-			"namespace": types.StringType},
-	},
-}
-
-// Attribute map for RequiredPointerField --> Endpoint
-var OriginPoolOriginServersChoiceCustomEndpointObjectEndpointModelAttributeMap = map[string]attr.Type{
-
-	"name":      types.StringType,
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
 }
 
 // Attribute map for PointerOfOneOfField --> PublicName
@@ -676,7 +696,10 @@ var OriginPoolOriginServersChoicePublicNameModelAttributeMap = map[string]attr.T
 
 // Attribute map for PointerOfOneOfField --> PrivateIp
 var OriginPoolOriginServersChoicePrivateIpModelAttributeMap = map[string]attr.Type{
-	"snat_pool": types.ObjectType{
+
+	"network_choice": types.ObjectType{
+		AttrTypes: OriginPoolOriginServersChoicePrivateIpNetworkChoiceModelAttributeMap,
+	}, "snat_pool": types.ObjectType{
 		AttrTypes: map[string]attr.Type{
 			"snat_pool_choice": types.ObjectType{
 				AttrTypes: OriginPoolOriginServersChoicePrivateIpSnatPoolSnatPoolChoiceModelAttributeMap,
@@ -690,9 +713,24 @@ var OriginPoolOriginServersChoicePrivateIpModelAttributeMap = map[string]attr.Ty
 				AttrTypes: OriginPoolOriginServersChoicePrivateIpSiteLocatorChoiceModelAttributeMap,
 			}},
 	},
-	"network_choice": types.ObjectType{
-		AttrTypes: OriginPoolOriginServersChoicePrivateIpNetworkChoiceModelAttributeMap,
+}
+
+// Attribute map for RequiredOneOfField --> NetworkChoice
+var OriginPoolOriginServersChoicePrivateIpNetworkChoiceModelAttributeMap = map[string]attr.Type{
+
+	"inside_network":  types.BoolType,
+	"outside_network": types.BoolType,
+	"segment": types.ObjectType{
+		AttrTypes: OriginPoolOriginServersChoicePrivateIpNetworkChoiceSegmentModelAttributeMap,
 	},
+}
+
+// Attribute map for RequiredPointerOfOneOfField --> Segment
+var OriginPoolOriginServersChoicePrivateIpNetworkChoiceSegmentModelAttributeMap = map[string]attr.Type{
+
+	"name":      types.StringType,
+	"tenant":    types.StringType,
+	"namespace": types.StringType,
 }
 
 // Attribute map for PointerField --> SnatPool
@@ -765,22 +803,105 @@ var OriginPoolOriginServersChoicePrivateIpSiteLocatorChoiceVirtualSiteModelAttri
 	"namespace": types.StringType,
 }
 
-// Attribute map for RequiredOneOfField --> NetworkChoice
-var OriginPoolOriginServersChoicePrivateIpNetworkChoiceModelAttributeMap = map[string]attr.Type{
+// Attribute map for PointerOfOneOfField --> PrivateName
+var OriginPoolOriginServersChoicePrivateNameModelAttributeMap = map[string]attr.Type{
 
-	"inside_network":  types.BoolType,
-	"outside_network": types.BoolType,
-	"segment": types.ObjectType{
-		AttrTypes: OriginPoolOriginServersChoicePrivateIpNetworkChoiceSegmentModelAttributeMap,
+	"dns_name":         types.StringType,
+	"refresh_interval": types.Int64Type, "site_locator": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"choice": types.ObjectType{
+				AttrTypes: OriginPoolOriginServersChoicePrivateNameSiteLocatorChoiceModelAttributeMap,
+			}},
+	},
+	"network_choice": types.ObjectType{
+		AttrTypes: OriginPoolOriginServersChoicePrivateNameNetworkChoiceModelAttributeMap,
+	}, "snat_pool": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"snat_pool_choice": types.ObjectType{
+				AttrTypes: OriginPoolOriginServersChoicePrivateNameSnatPoolSnatPoolChoiceModelAttributeMap,
+			}},
 	},
 }
 
-// Attribute map for RequiredPointerOfOneOfField --> Segment
-var OriginPoolOriginServersChoicePrivateIpNetworkChoiceSegmentModelAttributeMap = map[string]attr.Type{
+// Attribute map for RequiredPointerField --> SiteLocator
+var OriginPoolOriginServersChoicePrivateNameSiteLocatorModelAttributeMap = map[string]attr.Type{
+
+	"choice": types.ObjectType{
+		AttrTypes: OriginPoolOriginServersChoicePrivateNameSiteLocatorChoiceModelAttributeMap,
+	},
+}
+
+// Attribute map for RequiredOneOfField --> Choice
+var OriginPoolOriginServersChoicePrivateNameSiteLocatorChoiceModelAttributeMap = map[string]attr.Type{
+
+	"site": types.ObjectType{
+		AttrTypes: OriginPoolOriginServersChoicePrivateNameSiteLocatorChoiceSiteModelAttributeMap,
+	},
+	"virtual_site": types.ObjectType{
+		AttrTypes: OriginPoolOriginServersChoicePrivateNameSiteLocatorChoiceVirtualSiteModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> Site
+var OriginPoolOriginServersChoicePrivateNameSiteLocatorChoiceSiteModelAttributeMap = map[string]attr.Type{
+
+	"tenant":    types.StringType,
+	"namespace": types.StringType,
+	"name":      types.StringType,
+}
+
+// Attribute map for PointerOfOneOfField --> VirtualSite
+var OriginPoolOriginServersChoicePrivateNameSiteLocatorChoiceVirtualSiteModelAttributeMap = map[string]attr.Type{
 
 	"name":      types.StringType,
 	"tenant":    types.StringType,
 	"namespace": types.StringType,
+}
+
+// Attribute map for RequiredOneOfField --> NetworkChoice
+var OriginPoolOriginServersChoicePrivateNameNetworkChoiceModelAttributeMap = map[string]attr.Type{
+
+	"inside_network":  types.BoolType,
+	"outside_network": types.BoolType,
+	"segment": types.ObjectType{
+		AttrTypes: OriginPoolOriginServersChoicePrivateNameNetworkChoiceSegmentModelAttributeMap,
+	},
+}
+
+// Attribute map for RequiredPointerOfOneOfField --> Segment
+var OriginPoolOriginServersChoicePrivateNameNetworkChoiceSegmentModelAttributeMap = map[string]attr.Type{
+
+	"tenant":    types.StringType,
+	"namespace": types.StringType,
+	"name":      types.StringType,
+}
+
+// Attribute map for PointerField --> SnatPool
+var OriginPoolOriginServersChoicePrivateNameSnatPoolModelAttributeMap = map[string]attr.Type{
+
+	"snat_pool_choice": types.ObjectType{
+		AttrTypes: OriginPoolOriginServersChoicePrivateNameSnatPoolSnatPoolChoiceModelAttributeMap,
+	},
+}
+
+// Attribute map for OneOfField --> SnatPoolChoice
+var OriginPoolOriginServersChoicePrivateNameSnatPoolSnatPoolChoiceModelAttributeMap = map[string]attr.Type{
+
+	"no_snat_pool": types.BoolType,
+	"snat_pool": types.ObjectType{
+		AttrTypes: OriginPoolOriginServersChoicePrivateNameSnatPoolSnatPoolChoiceSnatPoolModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> SnatPool
+var OriginPoolOriginServersChoicePrivateNameSnatPoolSnatPoolChoiceSnatPoolModelAttributeMap = map[string]attr.Type{
+
+	"prefixes": types.ListType{
+		ElemType: types.StringType,
+	},
+	"ipv6_prefixes": types.ListType{
+		ElemType: types.StringType,
+	},
 }
 
 // Attribute map for PointerOfOneOfField --> K8SService
@@ -824,20 +945,12 @@ var OriginPoolOriginServersChoiceK8SServiceSiteLocatorModelAttributeMap = map[st
 // Attribute map for RequiredOneOfField --> Choice
 var OriginPoolOriginServersChoiceK8SServiceSiteLocatorChoiceModelAttributeMap = map[string]attr.Type{
 
-	"virtual_site": types.ObjectType{
-		AttrTypes: OriginPoolOriginServersChoiceK8SServiceSiteLocatorChoiceVirtualSiteModelAttributeMap,
-	},
 	"site": types.ObjectType{
 		AttrTypes: OriginPoolOriginServersChoiceK8SServiceSiteLocatorChoiceSiteModelAttributeMap,
 	},
-}
-
-// Attribute map for PointerOfOneOfField --> VirtualSite
-var OriginPoolOriginServersChoiceK8SServiceSiteLocatorChoiceVirtualSiteModelAttributeMap = map[string]attr.Type{
-
-	"namespace": types.StringType,
-	"name":      types.StringType,
-	"tenant":    types.StringType,
+	"virtual_site": types.ObjectType{
+		AttrTypes: OriginPoolOriginServersChoiceK8SServiceSiteLocatorChoiceVirtualSiteModelAttributeMap,
+	},
 }
 
 // Attribute map for PointerOfOneOfField --> Site
@@ -848,12 +961,20 @@ var OriginPoolOriginServersChoiceK8SServiceSiteLocatorChoiceSiteModelAttributeMa
 	"namespace": types.StringType,
 }
 
+// Attribute map for PointerOfOneOfField --> VirtualSite
+var OriginPoolOriginServersChoiceK8SServiceSiteLocatorChoiceVirtualSiteModelAttributeMap = map[string]attr.Type{
+
+	"tenant":    types.StringType,
+	"namespace": types.StringType,
+	"name":      types.StringType,
+}
+
 // Attribute map for RequiredOneOfField --> NetworkChoice
 var OriginPoolOriginServersChoiceK8SServiceNetworkChoiceModelAttributeMap = map[string]attr.Type{
 
-	"inside_network":  types.BoolType,
 	"outside_network": types.BoolType,
 	"vk8s_networks":   types.BoolType,
+	"inside_network":  types.BoolType,
 }
 
 // Attribute map for PointerField --> SnatPool
@@ -886,7 +1007,12 @@ var OriginPoolOriginServersChoiceK8SServiceSnatPoolSnatPoolChoiceSnatPoolModelAt
 
 // Attribute map for PointerOfOneOfField --> ConsulService
 var OriginPoolOriginServersChoiceConsulServiceModelAttributeMap = map[string]attr.Type{
-
+	"site_locator": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"choice": types.ObjectType{
+				AttrTypes: OriginPoolOriginServersChoiceConsulServiceSiteLocatorChoiceModelAttributeMap,
+			}},
+	},
 	"network_choice": types.ObjectType{
 		AttrTypes: OriginPoolOriginServersChoiceConsulServiceNetworkChoiceModelAttributeMap,
 	}, "snat_pool": types.ObjectType{
@@ -895,12 +1021,42 @@ var OriginPoolOriginServersChoiceConsulServiceModelAttributeMap = map[string]att
 				AttrTypes: OriginPoolOriginServersChoiceConsulServiceSnatPoolSnatPoolChoiceModelAttributeMap,
 			}},
 	},
-	"service_name": types.StringType, "site_locator": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"choice": types.ObjectType{
-				AttrTypes: OriginPoolOriginServersChoiceConsulServiceSiteLocatorChoiceModelAttributeMap,
-			}},
+	"service_name": types.StringType,
+}
+
+// Attribute map for RequiredPointerField --> SiteLocator
+var OriginPoolOriginServersChoiceConsulServiceSiteLocatorModelAttributeMap = map[string]attr.Type{
+
+	"choice": types.ObjectType{
+		AttrTypes: OriginPoolOriginServersChoiceConsulServiceSiteLocatorChoiceModelAttributeMap,
 	},
+}
+
+// Attribute map for RequiredOneOfField --> Choice
+var OriginPoolOriginServersChoiceConsulServiceSiteLocatorChoiceModelAttributeMap = map[string]attr.Type{
+
+	"site": types.ObjectType{
+		AttrTypes: OriginPoolOriginServersChoiceConsulServiceSiteLocatorChoiceSiteModelAttributeMap,
+	},
+	"virtual_site": types.ObjectType{
+		AttrTypes: OriginPoolOriginServersChoiceConsulServiceSiteLocatorChoiceVirtualSiteModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> Site
+var OriginPoolOriginServersChoiceConsulServiceSiteLocatorChoiceSiteModelAttributeMap = map[string]attr.Type{
+
+	"name":      types.StringType,
+	"tenant":    types.StringType,
+	"namespace": types.StringType,
+}
+
+// Attribute map for PointerOfOneOfField --> VirtualSite
+var OriginPoolOriginServersChoiceConsulServiceSiteLocatorChoiceVirtualSiteModelAttributeMap = map[string]attr.Type{
+
+	"name":      types.StringType,
+	"tenant":    types.StringType,
+	"namespace": types.StringType,
 }
 
 // Attribute map for RequiredOneOfField --> NetworkChoice
@@ -921,10 +1077,10 @@ var OriginPoolOriginServersChoiceConsulServiceSnatPoolModelAttributeMap = map[st
 // Attribute map for OneOfField --> SnatPoolChoice
 var OriginPoolOriginServersChoiceConsulServiceSnatPoolSnatPoolChoiceModelAttributeMap = map[string]attr.Type{
 
-	"no_snat_pool": types.BoolType,
 	"snat_pool": types.ObjectType{
 		AttrTypes: OriginPoolOriginServersChoiceConsulServiceSnatPoolSnatPoolChoiceSnatPoolModelAttributeMap,
 	},
+	"no_snat_pool": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> SnatPool
@@ -938,39 +1094,90 @@ var OriginPoolOriginServersChoiceConsulServiceSnatPoolSnatPoolChoiceSnatPoolMode
 	},
 }
 
-// Attribute map for RequiredPointerField --> SiteLocator
-var OriginPoolOriginServersChoiceConsulServiceSiteLocatorModelAttributeMap = map[string]attr.Type{
+// Attribute map for PointerOfOneOfField --> CbipService
+var OriginPoolOriginServersChoiceCbipServiceModelAttributeMap = map[string]attr.Type{
 
-	"choice": types.ObjectType{
-		AttrTypes: OriginPoolOriginServersChoiceConsulServiceSiteLocatorChoiceModelAttributeMap,
+	"service_name": types.StringType,
+}
+
+// Attribute map for PointerOfOneOfField --> CustomEndpointObject
+var OriginPoolOriginServersChoiceCustomEndpointObjectModelAttributeMap = map[string]attr.Type{
+	"endpoint": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"namespace": types.StringType,
+			"name":      types.StringType,
+			"tenant":    types.StringType},
 	},
 }
 
-// Attribute map for RequiredOneOfField --> Choice
-var OriginPoolOriginServersChoiceConsulServiceSiteLocatorChoiceModelAttributeMap = map[string]attr.Type{
-
-	"virtual_site": types.ObjectType{
-		AttrTypes: OriginPoolOriginServersChoiceConsulServiceSiteLocatorChoiceVirtualSiteModelAttributeMap,
-	},
-	"site": types.ObjectType{
-		AttrTypes: OriginPoolOriginServersChoiceConsulServiceSiteLocatorChoiceSiteModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> VirtualSite
-var OriginPoolOriginServersChoiceConsulServiceSiteLocatorChoiceVirtualSiteModelAttributeMap = map[string]attr.Type{
+// Attribute map for RequiredPointerField --> Endpoint
+var OriginPoolOriginServersChoiceCustomEndpointObjectEndpointModelAttributeMap = map[string]attr.Type{
 
 	"namespace": types.StringType,
 	"name":      types.StringType,
 	"tenant":    types.StringType,
 }
 
-// Attribute map for PointerOfOneOfField --> Site
-var OriginPoolOriginServersChoiceConsulServiceSiteLocatorChoiceSiteModelAttributeMap = map[string]attr.Type{
+// Attribute map for PointerOfOneOfField --> PublicIp
+var OriginPoolOriginServersChoicePublicIpModelAttributeMap = map[string]attr.Type{
+
+	"public_ip_choice": types.ObjectType{
+		AttrTypes: OriginPoolOriginServersChoicePublicIpPublicIpChoiceModelAttributeMap,
+	},
+}
+
+// Attribute map for RequiredOneOfField --> PublicIpChoice
+var OriginPoolOriginServersChoicePublicIpPublicIpChoiceModelAttributeMap = map[string]attr.Type{
+
+	"ip":   types.StringType,
+	"ipv6": types.StringType,
+}
+
+// Attribute map for PointerOfOneOfField --> VnPrivateName
+var OriginPoolOriginServersChoiceVnPrivateNameModelAttributeMap = map[string]attr.Type{
+
+	"dns_name": types.StringType, "private_network": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"name":      types.StringType,
+			"tenant":    types.StringType,
+			"namespace": types.StringType},
+	},
+}
+
+// Attribute map for RequiredPointerField --> PrivateNetwork
+var OriginPoolOriginServersChoiceVnPrivateNamePrivateNetworkModelAttributeMap = map[string]attr.Type{
 
 	"name":      types.StringType,
 	"tenant":    types.StringType,
 	"namespace": types.StringType,
+}
+
+// Attribute map for PointerOfOneOfField --> VnPrivateIp
+var OriginPoolOriginServersChoiceVnPrivateIpModelAttributeMap = map[string]attr.Type{
+
+	"virtual_network_ip_choice": types.ObjectType{
+		AttrTypes: OriginPoolOriginServersChoiceVnPrivateIpVirtualNetworkIpChoiceModelAttributeMap,
+	}, "virtual_network": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"tenant":    types.StringType,
+			"namespace": types.StringType,
+			"name":      types.StringType},
+	},
+}
+
+// Attribute map for RequiredOneOfField --> VirtualNetworkIpChoice
+var OriginPoolOriginServersChoiceVnPrivateIpVirtualNetworkIpChoiceModelAttributeMap = map[string]attr.Type{
+
+	"ipv6": types.StringType,
+	"ip":   types.StringType,
+}
+
+// Attribute map for RequiredPointerField --> VirtualNetwork
+var OriginPoolOriginServersChoiceVnPrivateIpVirtualNetworkModelAttributeMap = map[string]attr.Type{
+
+	"tenant":    types.StringType,
+	"namespace": types.StringType,
+	"name":      types.StringType,
 }
 
 // Attribute map for RequiredOneOfField --> TlsChoice
@@ -1023,24 +1230,24 @@ var OriginPoolTlsChoiceUseTlsTlsConfigModelAttributeMap = map[string]attr.Type{
 // Attribute map for RequiredOneOfField --> Choice
 var OriginPoolTlsChoiceUseTlsTlsConfigChoiceModelAttributeMap = map[string]attr.Type{
 
-	"custom_security": types.ObjectType{
-		AttrTypes: OriginPoolTlsChoiceUseTlsTlsConfigChoiceCustomSecurityModelAttributeMap,
-	},
 	"default_security": types.BoolType,
 	"medium_security":  types.BoolType,
 	"low_security":     types.BoolType,
+	"custom_security": types.ObjectType{
+		AttrTypes: OriginPoolTlsChoiceUseTlsTlsConfigChoiceCustomSecurityModelAttributeMap,
+	},
 }
 
 // Attribute map for PointerOfOneOfField --> CustomSecurity
 var OriginPoolTlsChoiceUseTlsTlsConfigChoiceCustomSecurityModelAttributeMap = map[string]attr.Type{
 
-	"cipher_suites": types.ListType{
-		ElemType: types.StringType,
-	},
 	"min_version": types.ListType{
 		ElemType: types.StringType,
 	},
 	"max_version": types.ListType{
+		ElemType: types.StringType,
+	},
+	"cipher_suites": types.ListType{
 		ElemType: types.StringType,
 	},
 }
@@ -1099,15 +1306,15 @@ var OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsModelAttributeMap = map[string]att
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
 
+				"description": types.StringType,
+				"ocsp_stapling_choice": types.ObjectType{
+					AttrTypes: OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesOcspStaplingChoiceModelAttributeMap,
+				},
 				"certificate_url": types.StringType, "private_key": types.ObjectType{
 					AttrTypes: map[string]attr.Type{
 						"secret_info_choice": types.ObjectType{
 							AttrTypes: OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeySecretInfoOneofModelAttributeMap,
 						}},
-				},
-				"description": types.StringType,
-				"ocsp_stapling_choice": types.ObjectType{
-					AttrTypes: OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesOcspStaplingChoiceModelAttributeMap,
 				},
 			},
 		},
@@ -1117,50 +1324,16 @@ var OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsModelAttributeMap = map[string]att
 // Attribute map for RequiredArrayOfPointerField --> TlsCertificates
 var OriginPoolTlsCertificatesObjectRefModelAttributeMap = map[string]attr.Type{
 
+	"description": types.StringType,
+	"ocsp_stapling_choice": types.ObjectType{
+		AttrTypes: OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesOcspStaplingChoiceModelAttributeMap,
+	},
 	"certificate_url": types.StringType, "private_key": types.ObjectType{
 		AttrTypes: map[string]attr.Type{
 			"secret_info_choice": types.ObjectType{
 				AttrTypes: OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeySecretInfoOneofModelAttributeMap,
 			}},
 	},
-	"description": types.StringType,
-	"ocsp_stapling_choice": types.ObjectType{
-		AttrTypes: OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesOcspStaplingChoiceModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredPointerField --> PrivateKey
-var OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeyModelAttributeMap = map[string]attr.Type{
-
-	"secret_info_choice": types.ObjectType{
-		AttrTypes: OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeySecretInfoOneofModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> SecretInfoOneof
-var OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeySecretInfoOneofModelAttributeMap = map[string]attr.Type{
-
-	"clear_secret_info": types.ObjectType{
-		AttrTypes: OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap,
-	},
-	"blindfold_secret_info": types.ObjectType{
-		AttrTypes: OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeySecretInfoOneofBlindfoldSecretInfoModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> ClearSecretInfo
-var OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap = map[string]attr.Type{
-
-	"url":      types.StringType,
-	"provider": types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
-var OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeySecretInfoOneofBlindfoldSecretInfoModelAttributeMap = map[string]attr.Type{
-
-	"store_provider":      types.StringType,
-	"location":            types.StringType,
-	"decryption_provider": types.StringType,
 }
 
 // Attribute map for OneOfField --> OcspStaplingChoice
@@ -1181,6 +1354,40 @@ var OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesOcspStaplingChoiceC
 	},
 }
 
+// Attribute map for RequiredPointerField --> PrivateKey
+var OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeyModelAttributeMap = map[string]attr.Type{
+
+	"secret_info_choice": types.ObjectType{
+		AttrTypes: OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeySecretInfoOneofModelAttributeMap,
+	},
+}
+
+// Attribute map for RequiredOneOfField --> SecretInfoOneof
+var OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeySecretInfoOneofModelAttributeMap = map[string]attr.Type{
+
+	"blindfold_secret_info": types.ObjectType{
+		AttrTypes: OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeySecretInfoOneofBlindfoldSecretInfoModelAttributeMap,
+	},
+	"clear_secret_info": types.ObjectType{
+		AttrTypes: OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
+var OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeySecretInfoOneofBlindfoldSecretInfoModelAttributeMap = map[string]attr.Type{
+
+	"decryption_provider": types.StringType,
+	"store_provider":      types.StringType,
+	"location":            types.StringType,
+}
+
+// Attribute map for PointerOfOneOfField --> ClearSecretInfo
+var OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap = map[string]attr.Type{
+
+	"provider": types.StringType,
+	"url":      types.StringType,
+}
+
 // Attribute map for PointerOfOneOfField --> UseMtlsObj
 var OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsObjModelAttributeMap = map[string]attr.Type{
 
@@ -1197,6 +1404,14 @@ var OriginPoolTlsChoiceUseTlsMaxSessionKeysTypeModelAttributeMap = map[string]at
 	"max_session_keys":            types.Int64Type,
 }
 
+// Attribute map for RequiredOneOfField --> PortChoice
+var OriginPoolPortChoiceModelAttributeMap = map[string]attr.Type{
+
+	"automatic_port": types.BoolType,
+	"lb_port":        types.BoolType,
+	"port":           types.Int64Type,
+}
+
 // Attribute map for ArrayOfPointerField --> Healthcheck
 var OriginPoolHealthcheckObjectRefModelAttributeMap = map[string]attr.Type{
 
@@ -1205,226 +1420,11 @@ var OriginPoolHealthcheckObjectRefModelAttributeMap = map[string]attr.Type{
 	"namespace": types.StringType,
 }
 
-// Attribute map for PointerField --> AdvancedOptions
-var OriginPoolAdvancedOptionsModelAttributeMap = map[string]attr.Type{
+// Attribute map for OneOfField --> HealthCheckPortChoice
+var OriginPoolHealthCheckPortChoiceModelAttributeMap = map[string]attr.Type{
 
-	"lb_source_ip_persistance_choice": types.ObjectType{
-		AttrTypes: OriginPoolAdvancedOptionsLbSourceIpPersistanceChoiceModelAttributeMap,
-	},
-	"connection_timeout": types.Int64Type,
-	"circuit_breaker_choice": types.ObjectType{
-		AttrTypes: OriginPoolAdvancedOptionsCircuitBreakerChoiceModelAttributeMap,
-	},
-	"panic_threshold_type_choice": types.ObjectType{
-		AttrTypes: OriginPoolAdvancedOptionsPanicThresholdTypeModelAttributeMap,
-	},
-	"proxy_protocol_choice": types.ObjectType{
-		AttrTypes: OriginPoolAdvancedOptionsProxyProtocolChoiceModelAttributeMap,
-	},
-	"max_requests_per_connection_choice": types.ObjectType{
-		AttrTypes: OriginPoolAdvancedOptionsMaxRequestsPerConnectionChoiceModelAttributeMap,
-	},
-	"http_idle_timeout": types.Int64Type,
-	"outlier_detection_choice": types.ObjectType{
-		AttrTypes: OriginPoolAdvancedOptionsOutlierDetectionChoiceModelAttributeMap,
-	},
-	"subset_choice": types.ObjectType{
-		AttrTypes: OriginPoolAdvancedOptionsSubsetChoiceModelAttributeMap,
-	},
-	"http_protocol_type_choice": types.ObjectType{
-		AttrTypes: OriginPoolAdvancedOptionsHttpProtocolTypeModelAttributeMap,
-	},
-}
-
-// Attribute map for OneOfField --> LbSourceIpPersistanceChoice
-var OriginPoolAdvancedOptionsLbSourceIpPersistanceChoiceModelAttributeMap = map[string]attr.Type{
-
-	"enable_lb_source_ip_persistance":  types.BoolType,
-	"disable_lb_source_ip_persistance": types.BoolType,
-}
-
-// Attribute map for RequiredOneOfField --> CircuitBreakerChoice
-var OriginPoolAdvancedOptionsCircuitBreakerChoiceModelAttributeMap = map[string]attr.Type{
-
-	"default_circuit_breaker": types.BoolType,
-	"disable_circuit_breaker": types.BoolType,
-	"circuit_breaker": types.ObjectType{
-		AttrTypes: OriginPoolAdvancedOptionsCircuitBreakerChoiceCircuitBreakerModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> CircuitBreaker
-var OriginPoolAdvancedOptionsCircuitBreakerChoiceCircuitBreakerModelAttributeMap = map[string]attr.Type{
-
-	"pending_requests": types.Int64Type,
-	"retries":          types.Int64Type,
-	"max_requests":     types.Int64Type,
-	"priority": types.ListType{
-		ElemType: types.StringType,
-	},
-	"connection_limit": types.Int64Type,
-}
-
-// Attribute map for RequiredOneOfField --> PanicThresholdType
-var OriginPoolAdvancedOptionsPanicThresholdTypeModelAttributeMap = map[string]attr.Type{
-
-	"no_panic_threshold": types.BoolType,
-	"panic_threshold":    types.Int64Type,
-}
-
-// Attribute map for OneOfField --> ProxyProtocolChoice
-var OriginPoolAdvancedOptionsProxyProtocolChoiceModelAttributeMap = map[string]attr.Type{
-
-	"disable_proxy_protocol": types.BoolType,
-	"proxy_protocol_v1":      types.BoolType,
-	"proxy_protocol_v2":      types.BoolType,
-}
-
-// Attribute map for RequiredOneOfField --> MaxRequestsPerConnectionChoice
-var OriginPoolAdvancedOptionsMaxRequestsPerConnectionChoiceModelAttributeMap = map[string]attr.Type{
-
-	"no_request_limit_per_connection": types.BoolType,
-	"max_requests_per_connection":     types.Int64Type,
-}
-
-// Attribute map for RequiredOneOfField --> OutlierDetectionChoice
-var OriginPoolAdvancedOptionsOutlierDetectionChoiceModelAttributeMap = map[string]attr.Type{
-
-	"disable_outlier_detection": types.BoolType,
-	"outlier_detection": types.ObjectType{
-		AttrTypes: OriginPoolAdvancedOptionsOutlierDetectionChoiceOutlierDetectionModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> OutlierDetection
-var OriginPoolAdvancedOptionsOutlierDetectionChoiceOutlierDetectionModelAttributeMap = map[string]attr.Type{
-
-	"consecutive_5xx":             types.Int64Type,
-	"interval":                    types.Int64Type,
-	"base_ejection_time":          types.Int64Type,
-	"max_ejection_percent":        types.Int64Type,
-	"consecutive_gateway_failure": types.Int64Type,
-}
-
-// Attribute map for RequiredOneOfField --> SubsetChoice
-var OriginPoolAdvancedOptionsSubsetChoiceModelAttributeMap = map[string]attr.Type{
-
-	"disable_subsets": types.BoolType,
-	"enable_subsets": types.ObjectType{
-		AttrTypes: OriginPoolAdvancedOptionsSubsetChoiceEnableSubsetsModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> EnableSubsets
-var OriginPoolAdvancedOptionsSubsetChoiceEnableSubsetsModelAttributeMap = map[string]attr.Type{
-
-	"endpoint_subsets": types.ListType{
-		ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-
-				"keys": types.ListType{
-					ElemType: types.StringType,
-				},
-			},
-		},
-	},
-	"fallback_policy_choice": types.ObjectType{
-		AttrTypes: OriginPoolAdvancedOptionsSubsetChoiceEnableSubsetsFallbackPolicyChoiceModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredArrayOfPointerField --> EndpointSubsets
-var OriginPoolAdvancedOptionsSubsetChoiceEnableSubsetsEndpointSubsetsModelAttributeMap = map[string]attr.Type{
-
-	"keys": types.ListType{
-		ElemType: types.StringType,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> FallbackPolicyChoice
-var OriginPoolAdvancedOptionsSubsetChoiceEnableSubsetsFallbackPolicyChoiceModelAttributeMap = map[string]attr.Type{
-
-	"any_endpoint": types.BoolType,
-	"default_subset": types.ObjectType{
-		AttrTypes: OriginPoolAdvancedOptionsSubsetChoiceEnableSubsetsFallbackPolicyChoiceDefaultSubsetModelAttributeMap,
-	},
-	"fail_request": types.BoolType,
-}
-
-// Attribute map for PointerOfOneOfField --> DefaultSubset
-var OriginPoolAdvancedOptionsSubsetChoiceEnableSubsetsFallbackPolicyChoiceDefaultSubsetModelAttributeMap = map[string]attr.Type{
-
-	"default_subset": types.MapType{
-		ElemType: types.StringType,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> HttpProtocolType
-var OriginPoolAdvancedOptionsHttpProtocolTypeModelAttributeMap = map[string]attr.Type{
-
-	"http1_config": types.ObjectType{
-		AttrTypes: OriginPoolAdvancedOptionsHttpProtocolTypeHttp1ConfigModelAttributeMap,
-	},
-	"http2_options": types.ObjectType{
-		AttrTypes: OriginPoolAdvancedOptionsHttpProtocolTypeHttp2OptionsModelAttributeMap,
-	},
-	"auto_http_config": types.BoolType,
-}
-
-// Attribute map for PointerOfOneOfField --> Http1Config
-var OriginPoolAdvancedOptionsHttpProtocolTypeHttp1ConfigModelAttributeMap = map[string]attr.Type{
-	"header_transformation": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"header_transformation_choice": types.ObjectType{
-				AttrTypes: OriginPoolAdvancedOptionsHttpProtocolTypeHttp1ConfigHeaderTransformationHeaderTransformationChoiceModelAttributeMap,
-			}},
-	},
-}
-
-// Attribute map for PointerField --> HeaderTransformation
-var OriginPoolAdvancedOptionsHttpProtocolTypeHttp1ConfigHeaderTransformationModelAttributeMap = map[string]attr.Type{
-
-	"header_transformation_choice": types.ObjectType{
-		AttrTypes: OriginPoolAdvancedOptionsHttpProtocolTypeHttp1ConfigHeaderTransformationHeaderTransformationChoiceModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> HeaderTransformationChoice
-var OriginPoolAdvancedOptionsHttpProtocolTypeHttp1ConfigHeaderTransformationHeaderTransformationChoiceModelAttributeMap = map[string]attr.Type{
-
-	"legacy_header_transformation":        types.BoolType,
-	"default_header_transformation":       types.BoolType,
-	"proper_case_header_transformation":   types.BoolType,
-	"preserve_case_header_transformation": types.BoolType,
-}
-
-// Attribute map for PointerOfOneOfField --> Http2Options
-var OriginPoolAdvancedOptionsHttpProtocolTypeHttp2OptionsModelAttributeMap = map[string]attr.Type{
-
-	"enabled": types.BoolType,
-}
-
-// Attribute map for PointerField --> UpstreamConnPoolReuseType
-var OriginPoolUpstreamConnPoolReuseTypeModelAttributeMap = map[string]attr.Type{
-
-	"map_downstream_to_upstream_conn_pool_type_choice": types.ObjectType{
-		AttrTypes: OriginPoolUpstreamConnPoolReuseTypeMapDownstreamToUpstreamConnPoolTypeModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> MapDownstreamToUpstreamConnPoolType
-var OriginPoolUpstreamConnPoolReuseTypeMapDownstreamToUpstreamConnPoolTypeModelAttributeMap = map[string]attr.Type{
-
-	"enable_conn_pool_reuse":  types.BoolType,
-	"disable_conn_pool_reuse": types.BoolType,
-}
-
-// Attribute map for RequiredOneOfField --> PortChoice
-var OriginPoolPortChoiceModelAttributeMap = map[string]attr.Type{
-
-	"port":           types.Int64Type,
-	"automatic_port": types.BoolType,
-	"lb_port":        types.BoolType,
+	"same_as_endpoint_port": types.BoolType,
+	"health_check_port":     types.Int64Type,
 }
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -1445,6 +1445,20 @@ func (r *DataSourceF5XCOriginPool) Schema(ctx context.Context, request datasourc
 		Description:         "OriginPool data source",
 
 		Attributes: map[string]schema.Attribute{
+			"labels": schema.MapAttribute{
+				Description: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				ElementType: types.StringType,
+			},
+			"annotations": schema.MapAttribute{
+				Description: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				ElementType: types.StringType,
+			},
 			"description": schema.StringAttribute{
 				Description: "description Human readable description for the object",
 				Required:    false,
@@ -1469,37 +1483,405 @@ func (r *DataSourceF5XCOriginPool) Schema(ctx context.Context, request datasourc
 				Optional:    false,
 				Computed:    true,
 			},
-			"labels": schema.MapAttribute{
-				Description: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+			"loadbalancer_algorithm": schema.ListAttribute{
+				Description: "loadbalancer_algorithm When a connection to a endpoint in an upstream cluster is required, the loadbalancer uses loadbalancer_algorithm to determine which host is selected.",
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
 				ElementType: types.StringType,
 			},
-			"annotations": schema.MapAttribute{
-				Description: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
-			"health_check_port_choice": schema.SingleNestedAttribute{
-				Description: "Health check Port By default the health check port of an endpoint is the same as the endpoint’s port. This option provides an alternative health check port. Setting this with a non-zero value allows an endpoint to have different health check port.",
+			"advanced_options": schema.SingleNestedAttribute{
+				Description: "advanced_options Advanced options configuration like timeouts, circuit breaker, subset load balancing",
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
 				Attributes: map[string]schema.Attribute{
-					"health_check_port": schema.Int64Attribute{
-						Description: "Health check port Port used for performing health check",
+					"lb_source_ip_persistance_choice": schema.SingleNestedAttribute{
+						Description: "Loadbalancer source IP persistence Enable/Disable stickiness of source IP used by LB while connecting to origin server",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+						Attributes: map[string]schema.Attribute{
+							"disable_lb_source_ip_persistance": schema.BoolAttribute{
+								Description: "disable_lb_source_ip_persistence Disable LB source IP persistence",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
+							"enable_lb_source_ip_persistance": schema.BoolAttribute{
+								Description: "enable_lb_source_ip_persistence Enable LB source IP persistence",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
+						},
+					},
+					"proxy_protocol_choice": schema.SingleNestedAttribute{
+						Description: "Proxy Protocol Configuration Choose Proxy Protocol configuration options for upstream connections",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+						Attributes: map[string]schema.Attribute{
+							"disable_proxy_protocol": schema.BoolAttribute{
+								Description: "Disable Proxy Protocol Disable Proxy Protocol for upstream connections",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
+							"proxy_protocol_v1": schema.BoolAttribute{
+								Description: "Proxy Protocol V1 Enable Proxy Protocol Version 1 for upstream connections",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
+							"proxy_protocol_v2": schema.BoolAttribute{
+								Description: "Proxy Protocol V2 Enable Proxy Protocol Version 2 for upstream connections",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
+						},
+					},
+					"circuit_breaker_choice": schema.SingleNestedAttribute{
+						Description: "Enable Circuit Breaker Select to enable or disable circuit breaker configuration",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+						Attributes: map[string]schema.Attribute{
+							"default_circuit_breaker": schema.BoolAttribute{
+								Description: "Default Circuit Breaker Circuit Breaker is enabled with default values The default values used for connections and requests are 1024 and the default value for retries is 3",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
+							"disable_circuit_breaker": schema.BoolAttribute{
+								Description: "Disable Circuit Breaker Circuit Breaker is disabled",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
+							"circuit_breaker": schema.SingleNestedAttribute{
+								Description: "circuit_breaker CircuitBreaker provides a mechanism for watching failures in upstream connections or requests and if the failures reach a certain threshold, automatically fail subsequent requests which allows to apply back pressure on downstream quickly.",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+								Attributes: map[string]schema.Attribute{
+									"priority": schema.ListAttribute{
+										Description: "priority Priority for the CircuitBreaker which can be either DEFAULT or HIGH. This implies that we can have maximum of two CircuitBreakers per cluster. The priority of the route is matched with priority of CircuitBreaker to select the CircuitBreaker",
+										ElementType: types.StringType,
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+									},
+									"connection_limit": schema.Int64Attribute{
+										Description: "connection_limit The maximum number of connections that loadbalancer will establish to all hosts in an upstream cluster. In practice this is only applicable to TCP and HTTP/1.1 clusters since HTTP/2 uses a single connection to each host. Remove endpoint out of load balancing decision, if number of connections reach connection limit.",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+									},
+									"pending_requests": schema.Int64Attribute{
+										Description: "pending_requests The maximum number of requests that will be queued while waiting for a ready connection pool connection. Since HTTP/2 requests are sent over a single connection, this circuit breaker only comes into play as the initial connection is created, as requests will be multiplexed immediately afterwards. For HTTP/1.1, requests are added to the list of pending requests whenever there aren’t enough upstream connections available to immediately dispatch the request, so this circuit breaker will remain in play for the lifetime of the process. Remove endpoint out of load balancing decision, if pending request reach  pending_request.",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+									},
+									"retries": schema.Int64Attribute{
+										Description: "retries The maximum number of retries that can be outstanding to all hosts in a cluster at any given time. Remove endpoint out of load balancing decision, if retries for request exceed this count.",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+									},
+									"max_requests": schema.Int64Attribute{
+										Description: "max_requests The maximum number of requests that can be outstanding to all hosts in a cluster at any given time. In practice this is applicable to HTTP/2 clusters since HTTP/1.1 clusters are governed by the maximum connections (connection_limit). Remove endpoint out of load balancing decision, if requests exceed this count.",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+									},
+								},
+							},
+						},
+					},
+					"outlier_detection_choice": schema.SingleNestedAttribute{
+						Description: "Enable Outlier Detection Select to enable or disable circuit breaker configuration",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+						Attributes: map[string]schema.Attribute{
+							"disable_outlier_detection": schema.BoolAttribute{
+								Description: "Disable Outlier Detection Outlier detection is disabled",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
+							"outlier_detection": schema.SingleNestedAttribute{
+								Description: "Enable Outlier Detection Outlier detection and ejection is the process of dynamically determining whether some number of hosts in an upstream cluster are performing unlike the others and removing them from the healthy load balancing set. Outlier detection is a form of passive health checking.",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+								Attributes: map[string]schema.Attribute{
+									"consecutive_5xx": schema.Int64Attribute{
+										Description: "consecutive_5xx If an upstream endpoint returns some number of consecutive 5xx, it will be ejected. Note that in this case a 5xx means an actual 5xx respond code, or an event that would cause the HTTP router to return one on the upstream’s behalf(reset, connection failure, etc.) consecutive_5xx indicates the number of consecutive 5xx responses required before a consecutive 5xx ejection occurs. Defaults to 5.",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+									},
+									"interval": schema.Int64Attribute{
+										Description: "interval The time interval between ejection analysis sweeps. This can result in both new ejections as well as endpoints being returned to service. Defaults to 10000ms or 10s. Specified in milliseconds.",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+									},
+									"base_ejection_time": schema.Int64Attribute{
+										Description: "base_ejection_time The base time that a host is ejected for. The real time is equal to the base time multiplied by the number of times the host has been ejected. This causes hosts to get ejected for longer periods if they continue to fail. Defaults to 30000ms or 30s. Specified in milliseconds.",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+									},
+									"max_ejection_percent": schema.Int64Attribute{
+										Description: "max_ejection_percent The maximum % of an upstream cluster that can be ejected due to outlier detection. Defaults to 10% but will eject at least one host regardless of the value.",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+									},
+									"consecutive_gateway_failure": schema.Int64Attribute{
+										Description: "consecutive_gateway_failure If an upstream endpoint returns some number of consecutive “gateway errors” (502, 503 or 504 status code), it will be ejected. Note that this includes events that would cause the HTTP router to return one of these status codes on the upstream’s behalf (reset, connection failure, etc.). consecutive_gateway_failure indicates the number of consecutive gateway failures before a consecutive gateway failure ejection occurs. Defaults to 5.",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+									},
+								},
+							},
+						},
+					},
+					"panic_threshold_type_choice": schema.SingleNestedAttribute{
+						Description: "Panic threshold During load balancing, ADC will only consider healthy endpoints in an upstream cluster. However, if the percentage of healthy endpoints in the cluster becomes too low, ADC can disregard health status and load balance either amongst all endpoints or no endpoints. This is known as the panic threshold.",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+						Attributes: map[string]schema.Attribute{
+							"no_panic_threshold": schema.BoolAttribute{
+								Description: "Disable panic threshold Disable panic threshold. Only healthy endpoints are considered for load balancing.",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
+							"panic_threshold": schema.Int64Attribute{
+								Description: "Panic threshold Configure a threshold (percentage of unhealthy endpoints) below which all endpoints will be considered for load balancing ignoring its health status.",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
+						},
+					},
+					"http_protocol_type_choice": schema.SingleNestedAttribute{
+						Description: "HTTP Protocol Configuration HTTP protocol configuration options for upstream connections",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+						Attributes: map[string]schema.Attribute{
+							"http1_config": schema.SingleNestedAttribute{
+								Description: "http1_config Enable HTTP/1.1 for upstream connections",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+								Attributes: map[string]schema.Attribute{
+									"header_transformation": schema.SingleNestedAttribute{
+										Description: "Header transformation Two mutually exclusive types of header key formatters are supported: Stateless (Default and Proper Case) and Stateful (Preserve Case) formatters. When a Stateless formatter is selected, it applies to the upstream request headers and when a Stateful formatter is selected, it applies to response headers sent to the client. It's essential to ensure that the same formatter type (either stateless or stateful) is applied on http load balancer. If different formatter types are applied, only the stateful formatter will take effect, and the stateless formatter will be disregarded.",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+										Attributes: map[string]schema.Attribute{
+											"header_transformation_choice": schema.SingleNestedAttribute{
+												Description: "Header transformation Select header transformation options for HTTP/1.1",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+												Attributes: map[string]schema.Attribute{
+													"legacy_header_transformation": schema.BoolAttribute{
+														Description: "Legacy header transformations Use old header transformation if configured earlier",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+													},
+													"default_header_transformation": schema.BoolAttribute{
+														Description: "Default header transformation Normalize the headers to lower case",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+													},
+													"proper_case_header_transformation": schema.BoolAttribute{
+														Description: "Proper case header transformation Normalize the headers to proper case words. The fist character and any character following a special character will be capitalized if it’s an alpha character. For example, “content-type” becomes “Content-Type”, and “foo$b#$are” becomes “Foo$B#$Are”",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+													},
+													"preserve_case_header_transformation": schema.BoolAttribute{
+														Description: "Preserve case header transformation Preserves the original case of headers without any modifications.",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+							"http2_options": schema.SingleNestedAttribute{
+								Description: "http2_options Enable HTTP/2 for upstream connections.",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+								Attributes: map[string]schema.Attribute{
+									"enabled": schema.BoolAttribute{
+										Description: "enabled Enable/disable HTTP2 Protocol for upstream connections",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+									},
+								},
+							},
+							"auto_http_config": schema.BoolAttribute{
+								Description: "auto_http_config This allows switching on protocol based on ALPN. It can use either HTTP/1.1 or HTTP/2, and will use whichever protocol is negotiated by ALPN with the upstream.",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
+						},
+					},
+					"max_requests_per_connection_choice": schema.SingleNestedAttribute{
+						Description: "max_requests_per_connection Sets the maximum number of requests allowed per connection to the origin server.",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+						Attributes: map[string]schema.Attribute{
+							"no_request_limit_per_connection": schema.BoolAttribute{
+								Description: "Disable the max requests per connection option This option disables the maximum requests per connection limit. When selected, no limit is enforced, and connections can handle unlimited requests.",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
+							"max_requests_per_connection": schema.Int64Attribute{
+								Description: "Maximum Requests Per Connection Sets the maximum number of requests allowed per connection to the origin server. Enter a value >=1 to define the request limit per connection.",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
+						},
+					},
+					"connection_timeout": schema.Int64Attribute{
+						Description: "connection_timeout The timeout for new network connections to endpoints in the cluster. This is specified in milliseconds. The default value is 2 seconds",
 						Required:    false,
 						Optional:    false,
 						Computed:    true,
 					},
-					"same_as_endpoint_port": schema.BoolAttribute{
-						Description: "Same as endpoint port Health check is performed on endpoint port itself",
+					"http_idle_timeout": schema.Int64Attribute{
+						Description: "http_idle_timeout The idle timeout for upstream connection pool connections. The idle timeout is defined as the period in which there are no active requests. When the idle timeout is reached the connection will be closed. Note that request based timeouts mean that HTTP/2 PINGs will not keep the connection alive. This is specified in milliseconds. The default value is 5 minutes.",
 						Required:    false,
 						Optional:    false,
 						Computed:    true,
+					},
+					"subset_choice": schema.SingleNestedAttribute{
+						Description: "Enable Subset Load Balancing Select enable or disable subset load balancing. origin servers could be divided into subsets and chosen from routes.",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+						Attributes: map[string]schema.Attribute{
+							"disable_subsets": schema.BoolAttribute{
+								Description: "Subset Load Balancing is Disabled Subset load balancing is disabled. All eligible origin servers will be considered for load balancing.",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
+							"enable_subsets": schema.SingleNestedAttribute{
+								Description: "Subset Load Balancing is Enable Subset load balancing is enabled. Based on route, subset of origin servers will be considered for load balancing.",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+								Attributes: map[string]schema.Attribute{
+									"endpoint_subsets": schema.ListNestedAttribute{
+										Description: "Origin Server Subsets Classes List of subset class. Subsets class is defined using list of keys. Every unique combination of values of these keys form a subset withing the class.",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+										NestedObject: schema.NestedAttributeObject{
+											Attributes: map[string]schema.Attribute{
+												"keys": schema.ListAttribute{
+													Description: "keys List of keys that define a cluster subset class.",
+													ElementType: types.StringType,
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+											},
+										},
+									},
+									"fallback_policy_choice": schema.SingleNestedAttribute{
+										Description: "Fallback Policy Choice Select subset fallback policy if no subset could be determined based on route.",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+										Attributes: map[string]schema.Attribute{
+											"any_endpoint": schema.BoolAttribute{
+												Description: "Select Any Origin Server Select any origin server from available healthy origin servers in this pool",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+											},
+											"default_subset": schema.SingleNestedAttribute{
+												Description: "Use Default Subset Use the default subset provided here. Select endpoints matching default subset.",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+												Attributes: map[string]schema.Attribute{
+													"default_subset": schema.MapAttribute{
+														Description: "default_subset List of key-value pairs that define default subset. which gets used when route specifies no metadata or no subset matching the metadata exists.",
+														ElementType: types.StringType,
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+													},
+												},
+											},
+											"fail_request": schema.BoolAttribute{
+												Description: "Fail the Request Request will be failed and error returned, as if cluster has no origin servers.",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			"upstream_conn_pool_reuse_type": schema.SingleNestedAttribute{
+				Description: "Select upstream connection pool reuse state Select upstream connection pool reuse state for every downstream connection This configuration choice is for HTTP(S) LB only.",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				Attributes: map[string]schema.Attribute{
+					"map_downstream_to_upstream_conn_pool_type_choice": schema.SingleNestedAttribute{
+						Description: "Select upstream connection pool reuse state Select upstream connection pool reuse state for every downstream connection This configuration choice is for HTTP(S) LB only.",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+						Attributes: map[string]schema.Attribute{
+							"enable_conn_pool_reuse": schema.BoolAttribute{
+								Description: "enable_conn_pool_reuse Reuse upstream connection pool for multiple downstream connections",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
+							"disable_conn_pool_reuse": schema.BoolAttribute{
+								Description: "disable_conn_pool_reuse Open new upstream connection pool for every new downstream connection",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
+						},
 					},
 				},
 			},
@@ -1510,367 +1892,12 @@ func (r *DataSourceF5XCOriginPool) Schema(ctx context.Context, request datasourc
 				Computed:    true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
-						"labels": schema.MapAttribute{
-							Description: "Origin Server Labels Add Labels for this origin server, these labels can be used to form subset.",
-							ElementType: types.StringType,
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-						},
 						"choice": schema.SingleNestedAttribute{
 							Description: "Origin Server Type Various options to specify origin server",
 							Required:    false,
 							Optional:    false,
 							Computed:    true,
 							Attributes: map[string]schema.Attribute{
-								"private_name": schema.SingleNestedAttribute{
-									Description: "OriginServerPrivateName Specify origin server with private or public DNS name and site information",
-									Required:    false,
-									Optional:    false,
-									Computed:    true,
-									Attributes: map[string]schema.Attribute{
-										"refresh_interval": schema.Int64Attribute{
-											Description: "refresh_interval Interval for DNS refresh in seconds. Max value is 7 days as per https://datatracker.ietf.org/doc/html/rfc8767",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
-										"site_locator": schema.SingleNestedAttribute{
-											Description: "Site Locator Site or Virtual site where this origin server is located",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-											Attributes: map[string]schema.Attribute{
-												"choice": schema.SingleNestedAttribute{
-													Description: "SiteLocator",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-													Attributes: map[string]schema.Attribute{
-														"site": schema.SingleNestedAttribute{
-															Description: "site Reference to site object",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-															Attributes: map[string]schema.Attribute{
-																"name": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"tenant": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"namespace": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-															},
-														},
-														"virtual_site": schema.SingleNestedAttribute{
-															Description: "Virtual Site Reference to virtual site object",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-															Attributes: map[string]schema.Attribute{
-																"name": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"tenant": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"namespace": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-															},
-														},
-													},
-												},
-											},
-										},
-										"network_choice": schema.SingleNestedAttribute{
-											Description: "Site Network Inside or Outside Network",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-											Attributes: map[string]schema.Attribute{
-												"inside_network": schema.BoolAttribute{
-													Description: "Inside Network Inside network on the site",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"outside_network": schema.BoolAttribute{
-													Description: "Outside Network Outside network on the site",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"segment": schema.SingleNestedAttribute{
-													Description: "Segment Segment where this origin server is located",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-													Attributes: map[string]schema.Attribute{
-														"tenant": schema.StringAttribute{
-															Description: "",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-														"namespace": schema.StringAttribute{
-															Description: "",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-														"name": schema.StringAttribute{
-															Description: "",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-													},
-												},
-											},
-										},
-										"snat_pool": schema.SingleNestedAttribute{
-											Description: "SNAT Pool Configuration",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-											Attributes: map[string]schema.Attribute{
-												"snat_pool_choice": schema.SingleNestedAttribute{
-													Description: "Snat Pool Choice Snat Pool for the origin server",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-													Attributes: map[string]schema.Attribute{
-														"no_snat_pool": schema.BoolAttribute{
-															Description: "No SNAT Pool No configured SNAT Pool to reach Origin Server",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-														"snat_pool": schema.SingleNestedAttribute{
-															Description: "SNAT Pool Configure SNAT Pool to reach Origin Server",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-															Attributes: map[string]schema.Attribute{
-																"prefixes": schema.ListAttribute{
-																	Description: "ipv4 prefix list List of IPv4 prefixes that represent an endpoint",
-																	ElementType: types.StringType,
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"ipv6_prefixes": schema.ListAttribute{
-																	Description: "ipv6 prefixes List of IPv6 prefix strings.",
-																	ElementType: types.StringType,
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-															},
-														},
-													},
-												},
-											},
-										},
-										"dns_name": schema.StringAttribute{
-											Description: "DNS name DNS Name",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
-									},
-								},
-								"vn_private_ip": schema.SingleNestedAttribute{
-									Description: "OriginServerVirtualNetworkIP Specify origin server IP address on virtual network other than inside or outside network",
-									Required:    false,
-									Optional:    false,
-									Computed:    true,
-									Attributes: map[string]schema.Attribute{
-										"virtual_network_ip_choice": schema.SingleNestedAttribute{
-											Description: "Virtual Network IP Choice Origin server Virtual Network IP - either V4 or V6",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-											Attributes: map[string]schema.Attribute{
-												"ip": schema.StringAttribute{
-													Description: "IPV4 IPV4 address",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"ipv6": schema.StringAttribute{
-													Description: "IPV6 IPV6 address",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-											},
-										},
-										"virtual_network": schema.SingleNestedAttribute{
-											Description: "Virtual Network Virtual Network where this IP will be present",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-											Attributes: map[string]schema.Attribute{
-												"name": schema.StringAttribute{
-													Description: "",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"tenant": schema.StringAttribute{
-													Description: "",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"namespace": schema.StringAttribute{
-													Description: "",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-											},
-										},
-									},
-								},
-								"vn_private_name": schema.SingleNestedAttribute{
-									Description: "OriginServerVirtualNetworkName Specify origin server name on virtual network other than inside or outside network",
-									Required:    false,
-									Optional:    false,
-									Computed:    true,
-									Attributes: map[string]schema.Attribute{
-										"dns_name": schema.StringAttribute{
-											Description: "DNS name DNS Name",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
-										"private_network": schema.SingleNestedAttribute{
-											Description: "Virtual Network Virtual Network where this Name will be present",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-											Attributes: map[string]schema.Attribute{
-												"namespace": schema.StringAttribute{
-													Description: "",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"name": schema.StringAttribute{
-													Description: "",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"tenant": schema.StringAttribute{
-													Description: "",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-											},
-										},
-									},
-								},
-								"cbip_service": schema.SingleNestedAttribute{
-									Description: "OriginServerCBIPService Specify origin server with BIG-IP service name",
-									Required:    false,
-									Optional:    false,
-									Computed:    true,
-									Attributes: map[string]schema.Attribute{
-										"service_name": schema.StringAttribute{
-											Description: "Service Name Name of the discovered Classic BIG-IP virtual server to be used as origin.",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
-									},
-								},
-								"public_ip": schema.SingleNestedAttribute{
-									Description: "OriginServerPublicIP Specify origin server with public IP",
-									Required:    false,
-									Optional:    false,
-									Computed:    true,
-									Attributes: map[string]schema.Attribute{
-										"public_ip_choice": schema.SingleNestedAttribute{
-											Description: "Public IP Choice Origin server public IP - either V4 or V6",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-											Attributes: map[string]schema.Attribute{
-												"ipv6": schema.StringAttribute{
-													Description: "IPV6 Public IPV6 address",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"ip": schema.StringAttribute{
-													Description: "IP Public IPV4 address",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-											},
-										},
-									},
-								},
-								"custom_endpoint_object": schema.SingleNestedAttribute{
-									Description: "OriginServerCustomEndpoint Specify origin server with a reference to endpoint object",
-									Required:    false,
-									Optional:    false,
-									Computed:    true,
-									Attributes: map[string]schema.Attribute{
-										"endpoint": schema.SingleNestedAttribute{
-											Description: "Endpoint Reference to an endpoint object",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-											Attributes: map[string]schema.Attribute{
-												"name": schema.StringAttribute{
-													Description: "",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"tenant": schema.StringAttribute{
-													Description: "",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-												"namespace": schema.StringAttribute{
-													Description: "",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-											},
-										},
-									},
-								},
 								"public_name": schema.SingleNestedAttribute{
 									Description: "OriginServerPublicName Specify origin server with public DNS name",
 									Required:    false,
@@ -1897,6 +1924,52 @@ func (r *DataSourceF5XCOriginPool) Schema(ctx context.Context, request datasourc
 									Optional:    false,
 									Computed:    true,
 									Attributes: map[string]schema.Attribute{
+										"network_choice": schema.SingleNestedAttribute{
+											Description: "Site Network Inside or Outside Network",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+											Attributes: map[string]schema.Attribute{
+												"inside_network": schema.BoolAttribute{
+													Description: "Inside Network Inside network on the site",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"outside_network": schema.BoolAttribute{
+													Description: "Outside Network Outside network on the site",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"segment": schema.SingleNestedAttribute{
+													Description: "Segment Segment where this origin server is located",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+													Attributes: map[string]schema.Attribute{
+														"name": schema.StringAttribute{
+															Description: "",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+														"tenant": schema.StringAttribute{
+															Description: "",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+														"namespace": schema.StringAttribute{
+															Description: "",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+													},
+												},
+											},
+										},
 										"snat_pool": schema.SingleNestedAttribute{
 											Description: "SNAT Pool Configuration",
 											Required:    false,
@@ -2029,6 +2102,94 @@ func (r *DataSourceF5XCOriginPool) Schema(ctx context.Context, request datasourc
 												},
 											},
 										},
+									},
+								},
+								"private_name": schema.SingleNestedAttribute{
+									Description: "OriginServerPrivateName Specify origin server with private or public DNS name and site information",
+									Required:    false,
+									Optional:    false,
+									Computed:    true,
+									Attributes: map[string]schema.Attribute{
+										"dns_name": schema.StringAttribute{
+											Description: "DNS name DNS Name",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+										},
+										"refresh_interval": schema.Int64Attribute{
+											Description: "refresh_interval Interval for DNS refresh in seconds. Max value is 7 days as per https://datatracker.ietf.org/doc/html/rfc8767",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+										},
+										"site_locator": schema.SingleNestedAttribute{
+											Description: "Site Locator Site or Virtual site where this origin server is located",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+											Attributes: map[string]schema.Attribute{
+												"choice": schema.SingleNestedAttribute{
+													Description: "SiteLocator",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+													Attributes: map[string]schema.Attribute{
+														"site": schema.SingleNestedAttribute{
+															Description: "site Reference to site object",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+															Attributes: map[string]schema.Attribute{
+																"tenant": schema.StringAttribute{
+																	Description: "",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
+																"namespace": schema.StringAttribute{
+																	Description: "",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
+																"name": schema.StringAttribute{
+																	Description: "",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
+															},
+														},
+														"virtual_site": schema.SingleNestedAttribute{
+															Description: "Virtual Site Reference to virtual site object",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+															Attributes: map[string]schema.Attribute{
+																"name": schema.StringAttribute{
+																	Description: "",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
+																"tenant": schema.StringAttribute{
+																	Description: "",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
+																"namespace": schema.StringAttribute{
+																	Description: "",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
+															},
+														},
+													},
+												},
+											},
+										},
 										"network_choice": schema.SingleNestedAttribute{
 											Description: "Site Network Inside or Outside Network",
 											Required:    false,
@@ -2053,12 +2214,6 @@ func (r *DataSourceF5XCOriginPool) Schema(ctx context.Context, request datasourc
 													Optional:    false,
 													Computed:    true,
 													Attributes: map[string]schema.Attribute{
-														"name": schema.StringAttribute{
-															Description: "",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
 														"tenant": schema.StringAttribute{
 															Description: "",
 															Required:    false,
@@ -2070,6 +2225,56 @@ func (r *DataSourceF5XCOriginPool) Schema(ctx context.Context, request datasourc
 															Required:    false,
 															Optional:    false,
 															Computed:    true,
+														},
+														"name": schema.StringAttribute{
+															Description: "",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+													},
+												},
+											},
+										},
+										"snat_pool": schema.SingleNestedAttribute{
+											Description: "SNAT Pool Configuration",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+											Attributes: map[string]schema.Attribute{
+												"snat_pool_choice": schema.SingleNestedAttribute{
+													Description: "Snat Pool Choice Snat Pool for the origin server",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+													Attributes: map[string]schema.Attribute{
+														"no_snat_pool": schema.BoolAttribute{
+															Description: "No SNAT Pool No configured SNAT Pool to reach Origin Server",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+														"snat_pool": schema.SingleNestedAttribute{
+															Description: "SNAT Pool Configure SNAT Pool to reach Origin Server",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+															Attributes: map[string]schema.Attribute{
+																"prefixes": schema.ListAttribute{
+																	Description: "ipv4 prefix list List of IPv4 prefixes that represent an endpoint",
+																	ElementType: types.StringType,
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
+																"ipv6_prefixes": schema.ListAttribute{
+																	Description: "ipv6 prefixes List of IPv6 prefix strings.",
+																	ElementType: types.StringType,
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
+															},
 														},
 													},
 												},
@@ -2116,32 +2321,6 @@ func (r *DataSourceF5XCOriginPool) Schema(ctx context.Context, request datasourc
 													Optional:    false,
 													Computed:    true,
 													Attributes: map[string]schema.Attribute{
-														"virtual_site": schema.SingleNestedAttribute{
-															Description: "Virtual Site Reference to virtual site object",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-															Attributes: map[string]schema.Attribute{
-																"namespace": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"name": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"tenant": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-															},
-														},
 														"site": schema.SingleNestedAttribute{
 															Description: "site Reference to site object",
 															Required:    false,
@@ -2168,6 +2347,32 @@ func (r *DataSourceF5XCOriginPool) Schema(ctx context.Context, request datasourc
 																},
 															},
 														},
+														"virtual_site": schema.SingleNestedAttribute{
+															Description: "Virtual Site Reference to virtual site object",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+															Attributes: map[string]schema.Attribute{
+																"tenant": schema.StringAttribute{
+																	Description: "",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
+																"namespace": schema.StringAttribute{
+																	Description: "",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
+																"name": schema.StringAttribute{
+																	Description: "",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
+															},
+														},
 													},
 												},
 											},
@@ -2178,12 +2383,6 @@ func (r *DataSourceF5XCOriginPool) Schema(ctx context.Context, request datasourc
 											Optional:    false,
 											Computed:    true,
 											Attributes: map[string]schema.Attribute{
-												"inside_network": schema.BoolAttribute{
-													Description: "Inside Network Inside network on the site",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
 												"outside_network": schema.BoolAttribute{
 													Description: "Outside Network Outside network on the site",
 													Required:    false,
@@ -2192,6 +2391,12 @@ func (r *DataSourceF5XCOriginPool) Schema(ctx context.Context, request datasourc
 												},
 												"vk8s_networks": schema.BoolAttribute{
 													Description: "vK8s Networks on site origin server are on vK8s network on the site",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"inside_network": schema.BoolAttribute{
+													Description: "Inside Network Inside network on the site",
 													Required:    false,
 													Optional:    false,
 													Computed:    true,
@@ -2250,6 +2455,74 @@ func (r *DataSourceF5XCOriginPool) Schema(ctx context.Context, request datasourc
 									Optional:    false,
 									Computed:    true,
 									Attributes: map[string]schema.Attribute{
+										"site_locator": schema.SingleNestedAttribute{
+											Description: "Site Locator Site or Virtual site where this origin server is located",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+											Attributes: map[string]schema.Attribute{
+												"choice": schema.SingleNestedAttribute{
+													Description: "SiteLocator",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+													Attributes: map[string]schema.Attribute{
+														"site": schema.SingleNestedAttribute{
+															Description: "site Reference to site object",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+															Attributes: map[string]schema.Attribute{
+																"name": schema.StringAttribute{
+																	Description: "",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
+																"tenant": schema.StringAttribute{
+																	Description: "",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
+																"namespace": schema.StringAttribute{
+																	Description: "",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
+															},
+														},
+														"virtual_site": schema.SingleNestedAttribute{
+															Description: "Virtual Site Reference to virtual site object",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+															Attributes: map[string]schema.Attribute{
+																"name": schema.StringAttribute{
+																	Description: "",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
+																"tenant": schema.StringAttribute{
+																	Description: "",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
+																"namespace": schema.StringAttribute{
+																	Description: "",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
+															},
+														},
+													},
+												},
+											},
+										},
 										"network_choice": schema.SingleNestedAttribute{
 											Description: "Site Network Inside or Outside Network",
 											Required:    false,
@@ -2282,12 +2555,6 @@ func (r *DataSourceF5XCOriginPool) Schema(ctx context.Context, request datasourc
 													Optional:    false,
 													Computed:    true,
 													Attributes: map[string]schema.Attribute{
-														"no_snat_pool": schema.BoolAttribute{
-															Description: "No SNAT Pool No configured SNAT Pool to reach Origin Server",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
 														"snat_pool": schema.SingleNestedAttribute{
 															Description: "SNAT Pool Configure SNAT Pool to reach Origin Server",
 															Required:    false,
@@ -2310,6 +2577,12 @@ func (r *DataSourceF5XCOriginPool) Schema(ctx context.Context, request datasourc
 																},
 															},
 														},
+														"no_snat_pool": schema.BoolAttribute{
+															Description: "No SNAT Pool No configured SNAT Pool to reach Origin Server",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
 													},
 												},
 											},
@@ -2320,77 +2593,186 @@ func (r *DataSourceF5XCOriginPool) Schema(ctx context.Context, request datasourc
 											Optional:    false,
 											Computed:    true,
 										},
-										"site_locator": schema.SingleNestedAttribute{
-											Description: "Site Locator Site or Virtual site where this origin server is located",
+									},
+								},
+								"cbip_service": schema.SingleNestedAttribute{
+									Description: "OriginServerCBIPService Specify origin server with BIG-IP service name",
+									Required:    false,
+									Optional:    false,
+									Computed:    true,
+									Attributes: map[string]schema.Attribute{
+										"service_name": schema.StringAttribute{
+											Description: "Service Name Name of the discovered Classic BIG-IP virtual server to be used as origin.",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+										},
+									},
+								},
+								"custom_endpoint_object": schema.SingleNestedAttribute{
+									Description: "OriginServerCustomEndpoint Specify origin server with a reference to endpoint object",
+									Required:    false,
+									Optional:    false,
+									Computed:    true,
+									Attributes: map[string]schema.Attribute{
+										"endpoint": schema.SingleNestedAttribute{
+											Description: "Endpoint Reference to an endpoint object",
 											Required:    false,
 											Optional:    false,
 											Computed:    true,
 											Attributes: map[string]schema.Attribute{
-												"choice": schema.SingleNestedAttribute{
-													Description: "SiteLocator",
+												"namespace": schema.StringAttribute{
+													Description: "",
 													Required:    false,
 													Optional:    false,
 													Computed:    true,
-													Attributes: map[string]schema.Attribute{
-														"virtual_site": schema.SingleNestedAttribute{
-															Description: "Virtual Site Reference to virtual site object",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-															Attributes: map[string]schema.Attribute{
-																"namespace": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"name": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"tenant": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-															},
-														},
-														"site": schema.SingleNestedAttribute{
-															Description: "site Reference to site object",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-															Attributes: map[string]schema.Attribute{
-																"name": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"tenant": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"namespace": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-															},
-														},
-													},
+												},
+												"name": schema.StringAttribute{
+													Description: "",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"tenant": schema.StringAttribute{
+													Description: "",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+											},
+										},
+									},
+								},
+								"public_ip": schema.SingleNestedAttribute{
+									Description: "OriginServerPublicIP Specify origin server with public IP",
+									Required:    false,
+									Optional:    false,
+									Computed:    true,
+									Attributes: map[string]schema.Attribute{
+										"public_ip_choice": schema.SingleNestedAttribute{
+											Description: "Public IP Choice Origin server public IP - either V4 or V6",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+											Attributes: map[string]schema.Attribute{
+												"ip": schema.StringAttribute{
+													Description: "IP Public IPV4 address",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"ipv6": schema.StringAttribute{
+													Description: "IPV6 Public IPV6 address",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+											},
+										},
+									},
+								},
+								"vn_private_name": schema.SingleNestedAttribute{
+									Description: "OriginServerVirtualNetworkName Specify origin server name on virtual network other than inside or outside network",
+									Required:    false,
+									Optional:    false,
+									Computed:    true,
+									Attributes: map[string]schema.Attribute{
+										"dns_name": schema.StringAttribute{
+											Description: "DNS name DNS Name",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+										},
+										"private_network": schema.SingleNestedAttribute{
+											Description: "Virtual Network Virtual Network where this Name will be present",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+											Attributes: map[string]schema.Attribute{
+												"name": schema.StringAttribute{
+													Description: "",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"tenant": schema.StringAttribute{
+													Description: "",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"namespace": schema.StringAttribute{
+													Description: "",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+											},
+										},
+									},
+								},
+								"vn_private_ip": schema.SingleNestedAttribute{
+									Description: "OriginServerVirtualNetworkIP Specify origin server IP address on virtual network other than inside or outside network",
+									Required:    false,
+									Optional:    false,
+									Computed:    true,
+									Attributes: map[string]schema.Attribute{
+										"virtual_network_ip_choice": schema.SingleNestedAttribute{
+											Description: "Virtual Network IP Choice Origin server Virtual Network IP - either V4 or V6",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+											Attributes: map[string]schema.Attribute{
+												"ipv6": schema.StringAttribute{
+													Description: "IPV6 IPV6 address",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"ip": schema.StringAttribute{
+													Description: "IPV4 IPV4 address",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+											},
+										},
+										"virtual_network": schema.SingleNestedAttribute{
+											Description: "Virtual Network Virtual Network where this IP will be present",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+											Attributes: map[string]schema.Attribute{
+												"tenant": schema.StringAttribute{
+													Description: "",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"namespace": schema.StringAttribute{
+													Description: "",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+												},
+												"name": schema.StringAttribute{
+													Description: "",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
 												},
 											},
 										},
 									},
 								},
 							},
+						},
+						"labels": schema.MapAttribute{
+							Description: "Origin Server Labels Add Labels for this origin server, these labels can be used to form subset.",
+							ElementType: types.StringType,
+							Required:    false,
+							Optional:    false,
+							Computed:    true,
 						},
 					},
 				},
@@ -2451,35 +2833,6 @@ func (r *DataSourceF5XCOriginPool) Schema(ctx context.Context, request datasourc
 										Optional:    false,
 										Computed:    true,
 										Attributes: map[string]schema.Attribute{
-											"custom_security": schema.SingleNestedAttribute{
-												Description: "Custom Security Custom selection of TLS versions and cipher suites",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-												Attributes: map[string]schema.Attribute{
-													"cipher_suites": schema.ListAttribute{
-														Description: "cipher_suites The TLS listener will only support the specified cipher list.",
-														ElementType: types.StringType,
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
-													"min_version": schema.ListAttribute{
-														Description: "minimum_protocol_version Minimum TLS protocol version.",
-														ElementType: types.StringType,
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
-													"max_version": schema.ListAttribute{
-														Description: "maximum_protocol_version Maximum TLS protocol version.",
-														ElementType: types.StringType,
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
-												},
-											},
 											"default_security": schema.BoolAttribute{
 												Description: "Default Security TLS v1.2+ with PFS ciphers and strong crypto algorithms.",
 												Required:    false,
@@ -2497,6 +2850,35 @@ func (r *DataSourceF5XCOriginPool) Schema(ctx context.Context, request datasourc
 												Required:    false,
 												Optional:    false,
 												Computed:    true,
+											},
+											"custom_security": schema.SingleNestedAttribute{
+												Description: "Custom Security Custom selection of TLS versions and cipher suites",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+												Attributes: map[string]schema.Attribute{
+													"min_version": schema.ListAttribute{
+														Description: "minimum_protocol_version Minimum TLS protocol version.",
+														ElementType: types.StringType,
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+													},
+													"max_version": schema.ListAttribute{
+														Description: "maximum_protocol_version Maximum TLS protocol version.",
+														ElementType: types.StringType,
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+													},
+													"cipher_suites": schema.ListAttribute{
+														Description: "cipher_suites The TLS listener will only support the specified cipher list.",
+														ElementType: types.StringType,
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+													},
+												},
 											},
 										},
 									},
@@ -2595,74 +2977,6 @@ func (r *DataSourceF5XCOriginPool) Schema(ctx context.Context, request datasourc
 												Computed:    true,
 												NestedObject: schema.NestedAttributeObject{
 													Attributes: map[string]schema.Attribute{
-														"certificate_url": schema.StringAttribute{
-															Description: "certificate_url TLS certificate. Certificate or certificate chain in PEM format including the PEM headers.",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
-														"private_key": schema.SingleNestedAttribute{
-															Description: "private_key TLS Private Key data in unencrypted PEM format including the PEM headers. The data may be optionally secured using BlindFold. TLS key has to match the accompanying certificate.",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-															Attributes: map[string]schema.Attribute{
-																"secret_info_choice": schema.SingleNestedAttribute{
-																	Description: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																	Attributes: map[string]schema.Attribute{
-																		"clear_secret_info": schema.SingleNestedAttribute{
-																			Description: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																			Required:    false,
-																			Optional:    false,
-																			Computed:    true,
-																			Attributes: map[string]schema.Attribute{
-																				"url": schema.StringAttribute{
-																					Description: "URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.",
-																					Required:    false,
-																					Optional:    false,
-																					Computed:    true,
-																				},
-																				"provider": schema.StringAttribute{
-																					Description: "Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
-																					Required:    false,
-																					Optional:    false,
-																					Computed:    true,
-																				},
-																			},
-																		},
-																		"blindfold_secret_info": schema.SingleNestedAttribute{
-																			Description: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																			Required:    false,
-																			Optional:    false,
-																			Computed:    true,
-																			Attributes: map[string]schema.Attribute{
-																				"store_provider": schema.StringAttribute{
-																					Description: "Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
-																					Required:    false,
-																					Optional:    false,
-																					Computed:    true,
-																				},
-																				"location": schema.StringAttribute{
-																					Description: "Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location",
-																					Required:    false,
-																					Optional:    false,
-																					Computed:    true,
-																				},
-																				"decryption_provider": schema.StringAttribute{
-																					Description: "Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.",
-																					Required:    false,
-																					Optional:    false,
-																					Computed:    true,
-																				},
-																			},
-																		},
-																	},
-																},
-															},
-														},
 														"description": schema.StringAttribute{
 															Description: "description Description for the certificate",
 															Required:    false,
@@ -2699,6 +3013,74 @@ func (r *DataSourceF5XCOriginPool) Schema(ctx context.Context, request datasourc
 																			Required:    false,
 																			Optional:    false,
 																			Computed:    true,
+																		},
+																	},
+																},
+															},
+														},
+														"certificate_url": schema.StringAttribute{
+															Description: "certificate_url TLS certificate. Certificate or certificate chain in PEM format including the PEM headers.",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
+														"private_key": schema.SingleNestedAttribute{
+															Description: "private_key TLS Private Key data in unencrypted PEM format including the PEM headers. The data may be optionally secured using BlindFold. TLS key has to match the accompanying certificate.",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+															Attributes: map[string]schema.Attribute{
+																"secret_info_choice": schema.SingleNestedAttribute{
+																	Description: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																	Attributes: map[string]schema.Attribute{
+																		"blindfold_secret_info": schema.SingleNestedAttribute{
+																			Description: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																			Required:    false,
+																			Optional:    false,
+																			Computed:    true,
+																			Attributes: map[string]schema.Attribute{
+																				"decryption_provider": schema.StringAttribute{
+																					Description: "Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.",
+																					Required:    false,
+																					Optional:    false,
+																					Computed:    true,
+																				},
+																				"store_provider": schema.StringAttribute{
+																					Description: "Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
+																					Required:    false,
+																					Optional:    false,
+																					Computed:    true,
+																				},
+																				"location": schema.StringAttribute{
+																					Description: "Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location",
+																					Required:    false,
+																					Optional:    false,
+																					Computed:    true,
+																				},
+																			},
+																		},
+																		"clear_secret_info": schema.SingleNestedAttribute{
+																			Description: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																			Required:    false,
+																			Optional:    false,
+																			Computed:    true,
+																			Attributes: map[string]schema.Attribute{
+																				"provider": schema.StringAttribute{
+																					Description: "Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
+																					Required:    false,
+																					Optional:    false,
+																					Computed:    true,
+																				},
+																				"url": schema.StringAttribute{
+																					Description: "URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.",
+																					Required:    false,
+																					Optional:    false,
+																					Computed:    true,
+																				},
+																			},
 																		},
 																	},
 																},
@@ -2767,6 +3149,32 @@ func (r *DataSourceF5XCOriginPool) Schema(ctx context.Context, request datasourc
 					},
 				},
 			},
+			"port_choice": schema.SingleNestedAttribute{
+				Description: "Port Specify the port where origin server service is hosted.",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				Attributes: map[string]schema.Attribute{
+					"automatic_port": schema.BoolAttribute{
+						Description: "Automatic selection of endpoint port Automatic selection of port for endpoint For Consul and Classic BIG-IP service discovery, port will be discovered as part of service discovery. For other origin server types, port will be automatically set as 443 if TLS is enabled at Origin Pool and 80 if TLS is disabled",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
+					"lb_port": schema.BoolAttribute{
+						Description: "Same as Loadbalancer port Endpoint port is selected based on loadbalancer port",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
+					"port": schema.Int64Attribute{
+						Description: "Port Endpoint service is available on this port",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
+				},
+			},
 			"healthcheck": schema.ListNestedAttribute{
 				Description: "Health Check Reference to healthcheck configuration objects",
 				Required:    false,
@@ -2795,13 +3203,6 @@ func (r *DataSourceF5XCOriginPool) Schema(ctx context.Context, request datasourc
 					},
 				},
 			},
-			"loadbalancer_algorithm": schema.ListAttribute{
-				Description: "loadbalancer_algorithm When a connection to a endpoint in an upstream cluster is required, the loadbalancer uses loadbalancer_algorithm to determine which host is selected.",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
 			"endpoint_selection": schema.ListAttribute{
 				Description: "endpoint_selection Policy for selection of endpoints from local site or remote site or both",
 				Required:    false,
@@ -2809,421 +3210,20 @@ func (r *DataSourceF5XCOriginPool) Schema(ctx context.Context, request datasourc
 				Computed:    true,
 				ElementType: types.StringType,
 			},
-			"advanced_options": schema.SingleNestedAttribute{
-				Description: "advanced_options Advanced options configuration like timeouts, circuit breaker, subset load balancing",
+			"health_check_port_choice": schema.SingleNestedAttribute{
+				Description: "Health check Port By default the health check port of an endpoint is the same as the endpoint’s port. This option provides an alternative health check port. Setting this with a non-zero value allows an endpoint to have different health check port.",
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
 				Attributes: map[string]schema.Attribute{
-					"lb_source_ip_persistance_choice": schema.SingleNestedAttribute{
-						Description: "Loadbalancer source IP persistence Enable/Disable stickiness of source IP used by LB while connecting to origin server",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-						Attributes: map[string]schema.Attribute{
-							"enable_lb_source_ip_persistance": schema.BoolAttribute{
-								Description: "enable_lb_source_ip_persistence Enable LB source IP persistence",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-							},
-							"disable_lb_source_ip_persistance": schema.BoolAttribute{
-								Description: "disable_lb_source_ip_persistence Disable LB source IP persistence",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-							},
-						},
-					},
-					"connection_timeout": schema.Int64Attribute{
-						Description: "connection_timeout The timeout for new network connections to endpoints in the cluster. This is specified in milliseconds. The default value is 2 seconds",
+					"same_as_endpoint_port": schema.BoolAttribute{
+						Description: "Same as endpoint port Health check is performed on endpoint port itself",
 						Required:    false,
 						Optional:    false,
 						Computed:    true,
 					},
-					"circuit_breaker_choice": schema.SingleNestedAttribute{
-						Description: "Enable Circuit Breaker Select to enable or disable circuit breaker configuration",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-						Attributes: map[string]schema.Attribute{
-							"default_circuit_breaker": schema.BoolAttribute{
-								Description: "Default Circuit Breaker Circuit Breaker is enabled with default values The default values used for connections and requests are 1024 and the default value for retries is 3",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-							},
-							"disable_circuit_breaker": schema.BoolAttribute{
-								Description: "Disable Circuit Breaker Circuit Breaker is disabled",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-							},
-							"circuit_breaker": schema.SingleNestedAttribute{
-								Description: "circuit_breaker CircuitBreaker provides a mechanism for watching failures in upstream connections or requests and if the failures reach a certain threshold, automatically fail subsequent requests which allows to apply back pressure on downstream quickly.",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-								Attributes: map[string]schema.Attribute{
-									"pending_requests": schema.Int64Attribute{
-										Description: "pending_requests The maximum number of requests that will be queued while waiting for a ready connection pool connection. Since HTTP/2 requests are sent over a single connection, this circuit breaker only comes into play as the initial connection is created, as requests will be multiplexed immediately afterwards. For HTTP/1.1, requests are added to the list of pending requests whenever there aren’t enough upstream connections available to immediately dispatch the request, so this circuit breaker will remain in play for the lifetime of the process. Remove endpoint out of load balancing decision, if pending request reach  pending_request.",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-									},
-									"retries": schema.Int64Attribute{
-										Description: "retries The maximum number of retries that can be outstanding to all hosts in a cluster at any given time. Remove endpoint out of load balancing decision, if retries for request exceed this count.",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-									},
-									"max_requests": schema.Int64Attribute{
-										Description: "max_requests The maximum number of requests that can be outstanding to all hosts in a cluster at any given time. In practice this is applicable to HTTP/2 clusters since HTTP/1.1 clusters are governed by the maximum connections (connection_limit). Remove endpoint out of load balancing decision, if requests exceed this count.",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-									},
-									"priority": schema.ListAttribute{
-										Description: "priority Priority for the CircuitBreaker which can be either DEFAULT or HIGH. This implies that we can have maximum of two CircuitBreakers per cluster. The priority of the route is matched with priority of CircuitBreaker to select the CircuitBreaker",
-										ElementType: types.StringType,
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-									},
-									"connection_limit": schema.Int64Attribute{
-										Description: "connection_limit The maximum number of connections that loadbalancer will establish to all hosts in an upstream cluster. In practice this is only applicable to TCP and HTTP/1.1 clusters since HTTP/2 uses a single connection to each host. Remove endpoint out of load balancing decision, if number of connections reach connection limit.",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-									},
-								},
-							},
-						},
-					},
-					"panic_threshold_type_choice": schema.SingleNestedAttribute{
-						Description: "Panic threshold During load balancing, ADC will only consider healthy endpoints in an upstream cluster. However, if the percentage of healthy endpoints in the cluster becomes too low, ADC can disregard health status and load balance either amongst all endpoints or no endpoints. This is known as the panic threshold.",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-						Attributes: map[string]schema.Attribute{
-							"no_panic_threshold": schema.BoolAttribute{
-								Description: "Disable panic threshold Disable panic threshold. Only healthy endpoints are considered for load balancing.",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-							},
-							"panic_threshold": schema.Int64Attribute{
-								Description: "Panic threshold Configure a threshold (percentage of unhealthy endpoints) below which all endpoints will be considered for load balancing ignoring its health status.",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-							},
-						},
-					},
-					"proxy_protocol_choice": schema.SingleNestedAttribute{
-						Description: "Proxy Protocol Configuration Choose Proxy Protocol configuration options for upstream connections",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-						Attributes: map[string]schema.Attribute{
-							"disable_proxy_protocol": schema.BoolAttribute{
-								Description: "Disable Proxy Protocol Disable Proxy Protocol for upstream connections",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-							},
-							"proxy_protocol_v1": schema.BoolAttribute{
-								Description: "Proxy Protocol V1 Enable Proxy Protocol Version 1 for upstream connections",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-							},
-							"proxy_protocol_v2": schema.BoolAttribute{
-								Description: "Proxy Protocol V2 Enable Proxy Protocol Version 2 for upstream connections",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-							},
-						},
-					},
-					"max_requests_per_connection_choice": schema.SingleNestedAttribute{
-						Description: "max_requests_per_connection Sets the maximum number of requests allowed per connection to the origin server.",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-						Attributes: map[string]schema.Attribute{
-							"no_request_limit_per_connection": schema.BoolAttribute{
-								Description: "Disable the max requests per connection option This option disables the maximum requests per connection limit. When selected, no limit is enforced, and connections can handle unlimited requests.",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-							},
-							"max_requests_per_connection": schema.Int64Attribute{
-								Description: "Maximum Requests Per Connection Sets the maximum number of requests allowed per connection to the origin server. Enter a value >=1 to define the request limit per connection.",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-							},
-						},
-					},
-					"http_idle_timeout": schema.Int64Attribute{
-						Description: "http_idle_timeout The idle timeout for upstream connection pool connections. The idle timeout is defined as the period in which there are no active requests. When the idle timeout is reached the connection will be closed. Note that request based timeouts mean that HTTP/2 PINGs will not keep the connection alive. This is specified in milliseconds. The default value is 5 minutes.",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-					},
-					"outlier_detection_choice": schema.SingleNestedAttribute{
-						Description: "Enable Outlier Detection Select to enable or disable circuit breaker configuration",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-						Attributes: map[string]schema.Attribute{
-							"disable_outlier_detection": schema.BoolAttribute{
-								Description: "Disable Outlier Detection Outlier detection is disabled",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-							},
-							"outlier_detection": schema.SingleNestedAttribute{
-								Description: "Enable Outlier Detection Outlier detection and ejection is the process of dynamically determining whether some number of hosts in an upstream cluster are performing unlike the others and removing them from the healthy load balancing set. Outlier detection is a form of passive health checking.",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-								Attributes: map[string]schema.Attribute{
-									"consecutive_5xx": schema.Int64Attribute{
-										Description: "consecutive_5xx If an upstream endpoint returns some number of consecutive 5xx, it will be ejected. Note that in this case a 5xx means an actual 5xx respond code, or an event that would cause the HTTP router to return one on the upstream’s behalf(reset, connection failure, etc.) consecutive_5xx indicates the number of consecutive 5xx responses required before a consecutive 5xx ejection occurs. Defaults to 5.",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-									},
-									"interval": schema.Int64Attribute{
-										Description: "interval The time interval between ejection analysis sweeps. This can result in both new ejections as well as endpoints being returned to service. Defaults to 10000ms or 10s. Specified in milliseconds.",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-									},
-									"base_ejection_time": schema.Int64Attribute{
-										Description: "base_ejection_time The base time that a host is ejected for. The real time is equal to the base time multiplied by the number of times the host has been ejected. This causes hosts to get ejected for longer periods if they continue to fail. Defaults to 30000ms or 30s. Specified in milliseconds.",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-									},
-									"max_ejection_percent": schema.Int64Attribute{
-										Description: "max_ejection_percent The maximum % of an upstream cluster that can be ejected due to outlier detection. Defaults to 10% but will eject at least one host regardless of the value.",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-									},
-									"consecutive_gateway_failure": schema.Int64Attribute{
-										Description: "consecutive_gateway_failure If an upstream endpoint returns some number of consecutive “gateway errors” (502, 503 or 504 status code), it will be ejected. Note that this includes events that would cause the HTTP router to return one of these status codes on the upstream’s behalf (reset, connection failure, etc.). consecutive_gateway_failure indicates the number of consecutive gateway failures before a consecutive gateway failure ejection occurs. Defaults to 5.",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-									},
-								},
-							},
-						},
-					},
-					"subset_choice": schema.SingleNestedAttribute{
-						Description: "Enable Subset Load Balancing Select enable or disable subset load balancing. origin servers could be divided into subsets and chosen from routes.",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-						Attributes: map[string]schema.Attribute{
-							"disable_subsets": schema.BoolAttribute{
-								Description: "Subset Load Balancing is Disabled Subset load balancing is disabled. All eligible origin servers will be considered for load balancing.",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-							},
-							"enable_subsets": schema.SingleNestedAttribute{
-								Description: "Subset Load Balancing is Enable Subset load balancing is enabled. Based on route, subset of origin servers will be considered for load balancing.",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-								Attributes: map[string]schema.Attribute{
-									"endpoint_subsets": schema.ListNestedAttribute{
-										Description: "Origin Server Subsets Classes List of subset class. Subsets class is defined using list of keys. Every unique combination of values of these keys form a subset withing the class.",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-										NestedObject: schema.NestedAttributeObject{
-											Attributes: map[string]schema.Attribute{
-												"keys": schema.ListAttribute{
-													Description: "keys List of keys that define a cluster subset class.",
-													ElementType: types.StringType,
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-												},
-											},
-										},
-									},
-									"fallback_policy_choice": schema.SingleNestedAttribute{
-										Description: "Fallback Policy Choice Select subset fallback policy if no subset could be determined based on route.",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-										Attributes: map[string]schema.Attribute{
-											"any_endpoint": schema.BoolAttribute{
-												Description: "Select Any Origin Server Select any origin server from available healthy origin servers in this pool",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-											"default_subset": schema.SingleNestedAttribute{
-												Description: "Use Default Subset Use the default subset provided here. Select endpoints matching default subset.",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-												Attributes: map[string]schema.Attribute{
-													"default_subset": schema.MapAttribute{
-														Description: "default_subset List of key-value pairs that define default subset. which gets used when route specifies no metadata or no subset matching the metadata exists.",
-														ElementType: types.StringType,
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
-												},
-											},
-											"fail_request": schema.BoolAttribute{
-												Description: "Fail the Request Request will be failed and error returned, as if cluster has no origin servers.",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-										},
-									},
-								},
-							},
-						},
-					},
-					"http_protocol_type_choice": schema.SingleNestedAttribute{
-						Description: "HTTP Protocol Configuration HTTP protocol configuration options for upstream connections",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-						Attributes: map[string]schema.Attribute{
-							"http1_config": schema.SingleNestedAttribute{
-								Description: "http1_config Enable HTTP/1.1 for upstream connections",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-								Attributes: map[string]schema.Attribute{
-									"header_transformation": schema.SingleNestedAttribute{
-										Description: "Header transformation Two mutually exclusive types of header key formatters are supported: Stateless (Default and Proper Case) and Stateful (Preserve Case) formatters. When a Stateless formatter is selected, it applies to the upstream request headers and when a Stateful formatter is selected, it applies to response headers sent to the client. It's essential to ensure that the same formatter type (either stateless or stateful) is applied on http load balancer. If different formatter types are applied, only the stateful formatter will take effect, and the stateless formatter will be disregarded.",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-										Attributes: map[string]schema.Attribute{
-											"header_transformation_choice": schema.SingleNestedAttribute{
-												Description: "Header transformation Select header transformation options for HTTP/1.1",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-												Attributes: map[string]schema.Attribute{
-													"legacy_header_transformation": schema.BoolAttribute{
-														Description: "Legacy header transformations Use old header transformation if configured earlier",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
-													"default_header_transformation": schema.BoolAttribute{
-														Description: "Default header transformation Normalize the headers to lower case",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
-													"proper_case_header_transformation": schema.BoolAttribute{
-														Description: "Proper case header transformation Normalize the headers to proper case words. The fist character and any character following a special character will be capitalized if it’s an alpha character. For example, “content-type” becomes “Content-Type”, and “foo$b#$are” becomes “Foo$B#$Are”",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
-													"preserve_case_header_transformation": schema.BoolAttribute{
-														Description: "Preserve case header transformation Preserves the original case of headers without any modifications.",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
-												},
-											},
-										},
-									},
-								},
-							},
-							"http2_options": schema.SingleNestedAttribute{
-								Description: "http2_options Enable HTTP/2 for upstream connections.",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-								Attributes: map[string]schema.Attribute{
-									"enabled": schema.BoolAttribute{
-										Description: "enabled Enable/disable HTTP2 Protocol for upstream connections",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-									},
-								},
-							},
-							"auto_http_config": schema.BoolAttribute{
-								Description: "auto_http_config This allows switching on protocol based on ALPN. It can use either HTTP/1.1 or HTTP/2, and will use whichever protocol is negotiated by ALPN with the upstream.",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-							},
-						},
-					},
-				},
-			},
-			"upstream_conn_pool_reuse_type": schema.SingleNestedAttribute{
-				Description: "Select upstream connection pool reuse state Select upstream connection pool reuse state for every downstream connection This configuration choice is for HTTP(S) LB only.",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				Attributes: map[string]schema.Attribute{
-					"map_downstream_to_upstream_conn_pool_type_choice": schema.SingleNestedAttribute{
-						Description: "Select upstream connection pool reuse state Select upstream connection pool reuse state for every downstream connection This configuration choice is for HTTP(S) LB only.",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-						Attributes: map[string]schema.Attribute{
-							"enable_conn_pool_reuse": schema.BoolAttribute{
-								Description: "enable_conn_pool_reuse Reuse upstream connection pool for multiple downstream connections",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-							},
-							"disable_conn_pool_reuse": schema.BoolAttribute{
-								Description: "disable_conn_pool_reuse Open new upstream connection pool for every new downstream connection",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-							},
-						},
-					},
-				},
-			},
-			"port_choice": schema.SingleNestedAttribute{
-				Description: "Port Specify the port where origin server service is hosted.",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				Attributes: map[string]schema.Attribute{
-					"port": schema.Int64Attribute{
-						Description: "Port Endpoint service is available on this port",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-					},
-					"automatic_port": schema.BoolAttribute{
-						Description: "Automatic selection of endpoint port Automatic selection of port for endpoint For Consul and Classic BIG-IP service discovery, port will be discovered as part of service discovery. For other origin server types, port will be automatically set as 443 if TLS is enabled at Origin Pool and 80 if TLS is disabled",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-					},
-					"lb_port": schema.BoolAttribute{
-						Description: "Same as Loadbalancer port Endpoint port is selected based on loadbalancer port",
+					"health_check_port": schema.Int64Attribute{
+						Description: "Health check port Port used for performing health check",
 						Required:    false,
 						Optional:    false,
 						Computed:    true,
@@ -3301,18 +3301,6 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
-	// data SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
-
-	// data SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
-
-	// data SpecToModelRoot Meta RequiredStringField --> Namespace
-	data.Namespace = types.StringValue(metaData.GetNamespace())
-
-	// data SpecToModelRoot Meta StringField --> Uid
-	data.Uid = types.StringValue(systemMetaData.GetUid())
-
 	// data SpecToModelRoot Meta MapOfStringField --> Labels
 	if metaData.GetLabels() != nil {
 		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
@@ -3349,55 +3337,857 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 		data.Annotations = types.MapNull(types.StringType)
 	}
 
-	// data SpecToModelRoot OneOfField --> HealthCheckPortChoice
-	// false
-	// false
-	// This resource uses standard struct-based resolution.
-	if specData.GetHealthCheckPortChoice() != nil {
-		// Define a variable for the spec choices to be passed down to nested templates.
-		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-		healthCheckPortChoiceChoices := specData.GetHealthCheckPortChoice()
+	// data SpecToModelRoot Meta StringField --> Description
+	data.Description = types.StringValue(metaData.GetDescription())
 
-		// The model struct that will be populated by the nested template.
-		var healthCheckPortChoiceChoicesModel = &OriginPoolGlobalSpecTypeHealthCheckPortChoice{}
+	// data SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
 
-		// Recursively call the nested template to process the oneof choices.
+	// data SpecToModelRoot Meta RequiredStringField --> Namespace
+	data.Namespace = types.StringValue(metaData.GetNamespace())
 
-		// data specToModelNested UintOfOneOfField --> HealthCheckPort
-		healthCheckPortItem, isHealthCheckPort := healthCheckPortChoiceChoices.(*ves_io_schema_views_origin_pool.GlobalSpecType_HealthCheckPort)
+	// data SpecToModelRoot Meta StringField --> Uid
+	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-		if isHealthCheckPort {
-			healthCheckPortChoiceChoicesModel.HealthCheckPort = types.Int64Value(int64(healthCheckPortItem.HealthCheckPort))
-		} else {
-			// Empty uint, set to null
-			healthCheckPortChoiceChoicesModel.HealthCheckPort = types.Int64Null()
-		}
-
-		// data specToModelNested BoolOfOneOfPointerField --> SameAsEndpointPort
-		_, isSameAsEndpointPort := healthCheckPortChoiceChoices.(*ves_io_schema_views_origin_pool.GlobalSpecType_SameAsEndpointPort)
-
-		if isSameAsEndpointPort {
-			healthCheckPortChoiceChoicesModel.SameAsEndpointPort = types.BoolValue(true)
-		} else {
-			healthCheckPortChoiceChoicesModel.SameAsEndpointPort = types.BoolNull()
-		}
-
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		healthCheckPortChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			OriginPoolHealthCheckPortChoiceModelAttributeMap,
-			healthCheckPortChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
+	// data SpecToModelRoot RequiredEnumField --> LoadbalancerAlgorithm
+	if specData.GetLoadbalancerAlgorithm().String() != "" {
+		stringValue := types.StringValue(specData.GetLoadbalancerAlgorithm().String())
+		stringSlice := []types.String{stringValue}
+		listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
 			return
 		}
-
-		// Assign the final object to the root data model.
-		data.HealthCheckPortChoice = healthCheckPortChoiceObj
+		data.LoadbalancerAlgorithm = listValue
 	} else {
-		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		data.HealthCheckPortChoice = types.ObjectNull(OriginPoolHealthCheckPortChoiceModelAttributeMap)
+		// Empty string, set to null
+		data.LoadbalancerAlgorithm = types.ListNull(types.StringType)
+	}
+
+	// data SpecToModelRoot PointerField --> AdvancedOptions
+	if specData.GetAdvancedOptions() != nil {
+		var originPoolOriginPoolOriginPoolAdvancedOptionsModel = &OriginPoolOriginPoolOriginPoolAdvancedOptions{}
+		advancedOptionsElement := specData.GetAdvancedOptions()
+
+		// data specToModelNested OneOfField --> LbSourceIpPersistanceChoice
+		if advancedOptionsElement.GetLbSourceIpPersistanceChoice() != nil {
+			// Create a temporary attribute map for the choices within this OneOf
+			advancedOptionslbSourceIpPersistanceChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+			// Define a variable for the spec choices to be passed down to nested templates.
+			// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+			advancedOptionslbSourceIpPersistanceChoiceChoices := advancedOptionsElement.GetLbSourceIpPersistanceChoice()
+
+			// Process nested choices, populating the temporary attribute map
+
+			// data specToModelNested BoolOfOneOfPointerField --> DisableLbSourceIpPersistance
+			_, isDisableLbSourceIpPersistance := advancedOptionslbSourceIpPersistanceChoiceChoices.(*ves_io_schema_views_origin_pool.OriginPoolAdvancedOptions_DisableLbSourceIpPersistance)
+
+			if isDisableLbSourceIpPersistance {
+				advancedOptionslbSourceIpPersistanceChoiceChoicesAttributeMap["disable_lb_source_ip_persistance"] = types.BoolValue(true)
+			} else {
+				advancedOptionslbSourceIpPersistanceChoiceChoicesAttributeMap["disable_lb_source_ip_persistance"] = types.BoolNull()
+			}
+
+			// data specToModelNested BoolOfOneOfPointerField --> EnableLbSourceIpPersistance
+			_, isEnableLbSourceIpPersistance := advancedOptionslbSourceIpPersistanceChoiceChoices.(*ves_io_schema_views_origin_pool.OriginPoolAdvancedOptions_EnableLbSourceIpPersistance)
+
+			if isEnableLbSourceIpPersistance {
+				advancedOptionslbSourceIpPersistanceChoiceChoicesAttributeMap["enable_lb_source_ip_persistance"] = types.BoolValue(true)
+			} else {
+				advancedOptionslbSourceIpPersistanceChoiceChoicesAttributeMap["enable_lb_source_ip_persistance"] = types.BoolNull()
+			}
+
+			// --- End of Choices ---
+
+			// Create the final ObjectValue for this OneOf field
+			finalObj, advancedOptionslbSourceIpPersistanceChoiceChoicesObjDiags := types.ObjectValue(
+				OriginPoolAdvancedOptionsLbSourceIpPersistanceChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+				advancedOptionslbSourceIpPersistanceChoiceChoicesAttributeMap,
+			)
+			response.Diagnostics.Append(advancedOptionslbSourceIpPersistanceChoiceChoicesObjDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			// Assign the final object to the correct place (either the root model or a parent's attribute map)
+			originPoolOriginPoolOriginPoolAdvancedOptionsModel.LbSourceIpPersistanceChoice = finalObj
+		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			originPoolOriginPoolOriginPoolAdvancedOptionsModel.LbSourceIpPersistanceChoice = types.ObjectNull(OriginPoolAdvancedOptionsLbSourceIpPersistanceChoiceModelAttributeMap)
+		}
+
+		// data specToModelNested OneOfField --> ProxyProtocolChoice
+		if advancedOptionsElement.GetProxyProtocolChoice() != nil {
+			// Create a temporary attribute map for the choices within this OneOf
+			advancedOptionsproxyProtocolChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+			// Define a variable for the spec choices to be passed down to nested templates.
+			// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+			advancedOptionsproxyProtocolChoiceChoices := advancedOptionsElement.GetProxyProtocolChoice()
+
+			// Process nested choices, populating the temporary attribute map
+
+			// data specToModelNested BoolOfOneOfPointerField --> DisableProxyProtocol
+			_, isDisableProxyProtocol := advancedOptionsproxyProtocolChoiceChoices.(*ves_io_schema_views_origin_pool.OriginPoolAdvancedOptions_DisableProxyProtocol)
+
+			if isDisableProxyProtocol {
+				advancedOptionsproxyProtocolChoiceChoicesAttributeMap["disable_proxy_protocol"] = types.BoolValue(true)
+			} else {
+				advancedOptionsproxyProtocolChoiceChoicesAttributeMap["disable_proxy_protocol"] = types.BoolNull()
+			}
+
+			// data specToModelNested BoolOfOneOfPointerField --> ProxyProtocolV1
+			_, isProxyProtocolV1 := advancedOptionsproxyProtocolChoiceChoices.(*ves_io_schema_views_origin_pool.OriginPoolAdvancedOptions_ProxyProtocolV1)
+
+			if isProxyProtocolV1 {
+				advancedOptionsproxyProtocolChoiceChoicesAttributeMap["proxy_protocol_v1"] = types.BoolValue(true)
+			} else {
+				advancedOptionsproxyProtocolChoiceChoicesAttributeMap["proxy_protocol_v1"] = types.BoolNull()
+			}
+
+			// data specToModelNested BoolOfOneOfPointerField --> ProxyProtocolV2
+			_, isProxyProtocolV2 := advancedOptionsproxyProtocolChoiceChoices.(*ves_io_schema_views_origin_pool.OriginPoolAdvancedOptions_ProxyProtocolV2)
+
+			if isProxyProtocolV2 {
+				advancedOptionsproxyProtocolChoiceChoicesAttributeMap["proxy_protocol_v2"] = types.BoolValue(true)
+			} else {
+				advancedOptionsproxyProtocolChoiceChoicesAttributeMap["proxy_protocol_v2"] = types.BoolNull()
+			}
+
+			// --- End of Choices ---
+
+			// Create the final ObjectValue for this OneOf field
+			finalObj, advancedOptionsproxyProtocolChoiceChoicesObjDiags := types.ObjectValue(
+				OriginPoolAdvancedOptionsProxyProtocolChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+				advancedOptionsproxyProtocolChoiceChoicesAttributeMap,
+			)
+			response.Diagnostics.Append(advancedOptionsproxyProtocolChoiceChoicesObjDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			// Assign the final object to the correct place (either the root model or a parent's attribute map)
+			originPoolOriginPoolOriginPoolAdvancedOptionsModel.ProxyProtocolChoice = finalObj
+		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			originPoolOriginPoolOriginPoolAdvancedOptionsModel.ProxyProtocolChoice = types.ObjectNull(OriginPoolAdvancedOptionsProxyProtocolChoiceModelAttributeMap)
+		}
+
+		// data specToModelNested RequiredOneOfField --> CircuitBreakerChoice
+		// <no value>
+		if advancedOptionsElement.GetCircuitBreakerChoice() != nil {
+			// Create a temporary attribute map for the choices within this OneOf
+			advancedOptionscircuitBreakerChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+			// Define a variable for the spec choices to be passed down to nested templates.
+			// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+			advancedOptionscircuitBreakerChoiceChoices := advancedOptionsElement.GetCircuitBreakerChoice()
+
+			// Process nested choices, populating the temporary attribute map
+
+			// data specToModelNested BoolOfOneOfPointerField --> DefaultCircuitBreaker
+			_, isDefaultCircuitBreaker := advancedOptionscircuitBreakerChoiceChoices.(*ves_io_schema_views_origin_pool.OriginPoolAdvancedOptions_DefaultCircuitBreaker)
+
+			if isDefaultCircuitBreaker {
+				advancedOptionscircuitBreakerChoiceChoicesAttributeMap["default_circuit_breaker"] = types.BoolValue(true)
+			} else {
+				advancedOptionscircuitBreakerChoiceChoicesAttributeMap["default_circuit_breaker"] = types.BoolNull()
+			}
+
+			// data specToModelNested BoolOfOneOfPointerField --> DisableCircuitBreaker
+			_, isDisableCircuitBreaker := advancedOptionscircuitBreakerChoiceChoices.(*ves_io_schema_views_origin_pool.OriginPoolAdvancedOptions_DisableCircuitBreaker)
+
+			if isDisableCircuitBreaker {
+				advancedOptionscircuitBreakerChoiceChoicesAttributeMap["disable_circuit_breaker"] = types.BoolValue(true)
+			} else {
+				advancedOptionscircuitBreakerChoiceChoicesAttributeMap["disable_circuit_breaker"] = types.BoolNull()
+			}
+
+			// data specToModelNested PointerOfOneOfField --> CircuitBreaker
+			// <no value>
+			// false
+			{
+				circuitBreakerOptions, isCircuitBreaker := advancedOptionscircuitBreakerChoiceChoices.(*ves_io_schema_views_origin_pool.OriginPoolAdvancedOptions_CircuitBreaker)
+				circuitBreakerAttributeMap := make(map[string]attr.Value)
+
+				if isCircuitBreaker && circuitBreakerOptions != nil {
+
+					// data specToModelNested EnumField --> Priority
+					if circuitBreakerOptions.CircuitBreaker.GetPriority().String() != "" {
+						stringValue := types.StringValue(circuitBreakerOptions.CircuitBreaker.GetPriority().String())
+						stringSlice := []types.String{stringValue}
+						listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						circuitBreakerAttributeMap["priority"] = listValue
+					} else {
+						circuitBreakerAttributeMap["priority"] = types.ListNull(types.StringType)
+					}
+
+					// data specToModelNested UintField --> ConnectionLimit
+					circuitBreakerAttributeMap["connection_limit"] = types.Int64Value(int64(circuitBreakerOptions.CircuitBreaker.GetConnectionLimit()))
+
+					// data specToModelNested UintField --> PendingRequests
+					circuitBreakerAttributeMap["pending_requests"] = types.Int64Value(int64(circuitBreakerOptions.CircuitBreaker.GetPendingRequests()))
+
+					// data specToModelNested UintField --> Retries
+					circuitBreakerAttributeMap["retries"] = types.Int64Value(int64(circuitBreakerOptions.CircuitBreaker.GetRetries()))
+
+					// data specToModelNested UintField --> MaxRequests
+					circuitBreakerAttributeMap["max_requests"] = types.Int64Value(int64(circuitBreakerOptions.CircuitBreaker.GetMaxRequests()))
+
+					circuitBreakerObj, diags := types.ObjectValue(OriginPoolAdvancedOptionsCircuitBreakerChoiceCircuitBreakerModelAttributeMap, circuitBreakerAttributeMap)
+					response.Diagnostics.Append(diags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					advancedOptionscircuitBreakerChoiceChoicesAttributeMap["circuit_breaker"] = circuitBreakerObj
+				} else {
+					advancedOptionscircuitBreakerChoiceChoicesAttributeMap["circuit_breaker"] = types.ObjectNull(OriginPoolAdvancedOptionsCircuitBreakerChoiceCircuitBreakerModelAttributeMap)
+				}
+			}
+
+			// --- End of Choices ---
+
+			// Create the final ObjectValue for this OneOf field
+			finalObj, advancedOptionscircuitBreakerChoiceChoicesObjDiags := types.ObjectValue(
+				OriginPoolAdvancedOptionsCircuitBreakerChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+				advancedOptionscircuitBreakerChoiceChoicesAttributeMap,
+			)
+			response.Diagnostics.Append(advancedOptionscircuitBreakerChoiceChoicesObjDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			// Assign the final object to the correct place (either the root model or a parent's attribute map)
+			originPoolOriginPoolOriginPoolAdvancedOptionsModel.CircuitBreakerChoice = finalObj
+		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			originPoolOriginPoolOriginPoolAdvancedOptionsModel.CircuitBreakerChoice = types.ObjectNull(OriginPoolAdvancedOptionsCircuitBreakerChoiceModelAttributeMap)
+		}
+
+		// data specToModelNested RequiredOneOfField --> OutlierDetectionChoice
+		// <no value>
+		if advancedOptionsElement.GetOutlierDetectionChoice() != nil {
+			// Create a temporary attribute map for the choices within this OneOf
+			advancedOptionsoutlierDetectionChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+			// Define a variable for the spec choices to be passed down to nested templates.
+			// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+			advancedOptionsoutlierDetectionChoiceChoices := advancedOptionsElement.GetOutlierDetectionChoice()
+
+			// Process nested choices, populating the temporary attribute map
+
+			// data specToModelNested BoolOfOneOfPointerField --> DisableOutlierDetection
+			_, isDisableOutlierDetection := advancedOptionsoutlierDetectionChoiceChoices.(*ves_io_schema_views_origin_pool.OriginPoolAdvancedOptions_DisableOutlierDetection)
+
+			if isDisableOutlierDetection {
+				advancedOptionsoutlierDetectionChoiceChoicesAttributeMap["disable_outlier_detection"] = types.BoolValue(true)
+			} else {
+				advancedOptionsoutlierDetectionChoiceChoicesAttributeMap["disable_outlier_detection"] = types.BoolNull()
+			}
+
+			// data specToModelNested PointerOfOneOfField --> OutlierDetection
+			// <no value>
+			// false
+			{
+				outlierDetectionOptions, isOutlierDetection := advancedOptionsoutlierDetectionChoiceChoices.(*ves_io_schema_views_origin_pool.OriginPoolAdvancedOptions_OutlierDetection)
+				outlierDetectionAttributeMap := make(map[string]attr.Value)
+
+				if isOutlierDetection && outlierDetectionOptions != nil {
+
+					// data specToModelNested UintField --> Consecutive_5Xx
+					outlierDetectionAttributeMap["consecutive_5xx"] = types.Int64Value(int64(outlierDetectionOptions.OutlierDetection.GetConsecutive_5Xx()))
+
+					// data specToModelNested UintField --> Interval
+					outlierDetectionAttributeMap["interval"] = types.Int64Value(int64(outlierDetectionOptions.OutlierDetection.GetInterval()))
+
+					// data specToModelNested UintField --> BaseEjectionTime
+					outlierDetectionAttributeMap["base_ejection_time"] = types.Int64Value(int64(outlierDetectionOptions.OutlierDetection.GetBaseEjectionTime()))
+
+					// data specToModelNested UintField --> MaxEjectionPercent
+					outlierDetectionAttributeMap["max_ejection_percent"] = types.Int64Value(int64(outlierDetectionOptions.OutlierDetection.GetMaxEjectionPercent()))
+
+					// data specToModelNested UintField --> ConsecutiveGatewayFailure
+					outlierDetectionAttributeMap["consecutive_gateway_failure"] = types.Int64Value(int64(outlierDetectionOptions.OutlierDetection.GetConsecutiveGatewayFailure()))
+
+					outlierDetectionObj, diags := types.ObjectValue(OriginPoolAdvancedOptionsOutlierDetectionChoiceOutlierDetectionModelAttributeMap, outlierDetectionAttributeMap)
+					response.Diagnostics.Append(diags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					advancedOptionsoutlierDetectionChoiceChoicesAttributeMap["outlier_detection"] = outlierDetectionObj
+				} else {
+					advancedOptionsoutlierDetectionChoiceChoicesAttributeMap["outlier_detection"] = types.ObjectNull(OriginPoolAdvancedOptionsOutlierDetectionChoiceOutlierDetectionModelAttributeMap)
+				}
+			}
+
+			// --- End of Choices ---
+
+			// Create the final ObjectValue for this OneOf field
+			finalObj, advancedOptionsoutlierDetectionChoiceChoicesObjDiags := types.ObjectValue(
+				OriginPoolAdvancedOptionsOutlierDetectionChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+				advancedOptionsoutlierDetectionChoiceChoicesAttributeMap,
+			)
+			response.Diagnostics.Append(advancedOptionsoutlierDetectionChoiceChoicesObjDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			// Assign the final object to the correct place (either the root model or a parent's attribute map)
+			originPoolOriginPoolOriginPoolAdvancedOptionsModel.OutlierDetectionChoice = finalObj
+		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			originPoolOriginPoolOriginPoolAdvancedOptionsModel.OutlierDetectionChoice = types.ObjectNull(OriginPoolAdvancedOptionsOutlierDetectionChoiceModelAttributeMap)
+		}
+
+		// data specToModelNested RequiredOneOfField --> PanicThresholdType
+		// <no value>
+		if advancedOptionsElement.GetPanicThresholdType() != nil {
+			// Create a temporary attribute map for the choices within this OneOf
+			advancedOptionspanicThresholdTypeChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+			// Define a variable for the spec choices to be passed down to nested templates.
+			// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+			advancedOptionspanicThresholdTypeChoiceChoices := advancedOptionsElement.GetPanicThresholdType()
+
+			// Process nested choices, populating the temporary attribute map
+
+			// data specToModelNested BoolOfOneOfPointerField --> NoPanicThreshold
+			_, isNoPanicThreshold := advancedOptionspanicThresholdTypeChoiceChoices.(*ves_io_schema_views_origin_pool.OriginPoolAdvancedOptions_NoPanicThreshold)
+
+			if isNoPanicThreshold {
+				advancedOptionspanicThresholdTypeChoiceChoicesAttributeMap["no_panic_threshold"] = types.BoolValue(true)
+			} else {
+				advancedOptionspanicThresholdTypeChoiceChoicesAttributeMap["no_panic_threshold"] = types.BoolNull()
+			}
+
+			// data specToModelNested UintOfOneOfField --> PanicThreshold
+			panicThresholdItem, isPanicThreshold := advancedOptionspanicThresholdTypeChoiceChoices.(*ves_io_schema_views_origin_pool.OriginPoolAdvancedOptions_PanicThreshold)
+
+			if isPanicThreshold {
+				advancedOptionspanicThresholdTypeChoiceChoicesAttributeMap["panic_threshold"] = types.Int64Value(int64(panicThresholdItem.PanicThreshold))
+			} else {
+				// Empty uint, set to null
+				advancedOptionspanicThresholdTypeChoiceChoicesAttributeMap["panic_threshold"] = types.Int64Null()
+			}
+
+			// --- End of Choices ---
+
+			// Create the final ObjectValue for this OneOf field
+			finalObj, advancedOptionspanicThresholdTypeChoiceChoicesObjDiags := types.ObjectValue(
+				OriginPoolAdvancedOptionsPanicThresholdTypeModelAttributeMap, // The attribute schema for the OneOf choices
+				advancedOptionspanicThresholdTypeChoiceChoicesAttributeMap,
+			)
+			response.Diagnostics.Append(advancedOptionspanicThresholdTypeChoiceChoicesObjDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			// Assign the final object to the correct place (either the root model or a parent's attribute map)
+			originPoolOriginPoolOriginPoolAdvancedOptionsModel.PanicThresholdTypeChoice = finalObj
+		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			originPoolOriginPoolOriginPoolAdvancedOptionsModel.PanicThresholdTypeChoice = types.ObjectNull(OriginPoolAdvancedOptionsPanicThresholdTypeModelAttributeMap)
+		}
+
+		// data specToModelNested RequiredOneOfField --> HttpProtocolType
+		// <no value>
+		if advancedOptionsElement.GetHttpProtocolType() != nil {
+			// Create a temporary attribute map for the choices within this OneOf
+			advancedOptionshttpProtocolTypeChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+			// Define a variable for the spec choices to be passed down to nested templates.
+			// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+			advancedOptionshttpProtocolTypeChoiceChoices := advancedOptionsElement.GetHttpProtocolType()
+
+			// Process nested choices, populating the temporary attribute map
+
+			// data specToModelNested PointerOfOneOfField --> Http1Config
+			// <no value>
+			// false
+			{
+				http1ConfigOptions, isHttp1Config := advancedOptionshttpProtocolTypeChoiceChoices.(*ves_io_schema_views_origin_pool.OriginPoolAdvancedOptions_Http1Config)
+				http1ConfigAttributeMap := make(map[string]attr.Value)
+
+				if isHttp1Config && http1ConfigOptions != nil {
+
+					// data specToModelNested PointerField --> HeaderTransformation
+					if http1ConfigOptions.Http1Config.GetHeaderTransformation() != nil {
+						// Create the nested Go struct
+						originPoolHeaderTransformationTypeModel := &OriginPoolHeaderTransformationType{}
+						headerTransformationElement := http1ConfigOptions.Http1Config.GetHeaderTransformation()
+
+						// Recursively populate the nested struct
+
+						// data specToModelNested RequiredOneOfField --> HeaderTransformationChoice
+						// <no value>
+						if headerTransformationElement.GetHeaderTransformationChoice() != nil {
+							// Create a temporary attribute map for the choices within this OneOf
+							headerTransformationheaderTransformationChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+							// Define a variable for the spec choices to be passed down to nested templates.
+							// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+							headerTransformationheaderTransformationChoiceChoices := headerTransformationElement.GetHeaderTransformationChoice()
+
+							// Process nested choices, populating the temporary attribute map
+
+							// data specToModelNested BoolOfOneOfPointerField --> LegacyHeaderTransformation
+							_, isLegacyHeaderTransformation := headerTransformationheaderTransformationChoiceChoices.(*ves_io_schema.HeaderTransformationType_LegacyHeaderTransformation)
+
+							if isLegacyHeaderTransformation {
+								headerTransformationheaderTransformationChoiceChoicesAttributeMap["legacy_header_transformation"] = types.BoolValue(true)
+							} else {
+								headerTransformationheaderTransformationChoiceChoicesAttributeMap["legacy_header_transformation"] = types.BoolNull()
+							}
+
+							// data specToModelNested BoolOfOneOfPointerField --> DefaultHeaderTransformation
+							_, isDefaultHeaderTransformation := headerTransformationheaderTransformationChoiceChoices.(*ves_io_schema.HeaderTransformationType_DefaultHeaderTransformation)
+
+							if isDefaultHeaderTransformation {
+								headerTransformationheaderTransformationChoiceChoicesAttributeMap["default_header_transformation"] = types.BoolValue(true)
+							} else {
+								headerTransformationheaderTransformationChoiceChoicesAttributeMap["default_header_transformation"] = types.BoolNull()
+							}
+
+							// data specToModelNested BoolOfOneOfPointerField --> ProperCaseHeaderTransformation
+							_, isProperCaseHeaderTransformation := headerTransformationheaderTransformationChoiceChoices.(*ves_io_schema.HeaderTransformationType_ProperCaseHeaderTransformation)
+
+							if isProperCaseHeaderTransformation {
+								headerTransformationheaderTransformationChoiceChoicesAttributeMap["proper_case_header_transformation"] = types.BoolValue(true)
+							} else {
+								headerTransformationheaderTransformationChoiceChoicesAttributeMap["proper_case_header_transformation"] = types.BoolNull()
+							}
+
+							// data specToModelNested BoolOfOneOfPointerField --> PreserveCaseHeaderTransformation
+							_, isPreserveCaseHeaderTransformation := headerTransformationheaderTransformationChoiceChoices.(*ves_io_schema.HeaderTransformationType_PreserveCaseHeaderTransformation)
+
+							if isPreserveCaseHeaderTransformation {
+								headerTransformationheaderTransformationChoiceChoicesAttributeMap["preserve_case_header_transformation"] = types.BoolValue(true)
+							} else {
+								headerTransformationheaderTransformationChoiceChoicesAttributeMap["preserve_case_header_transformation"] = types.BoolNull()
+							}
+
+							// --- End of Choices ---
+
+							// Create the final ObjectValue for this OneOf field
+							finalObj, headerTransformationheaderTransformationChoiceChoicesObjDiags := types.ObjectValue(
+								OriginPoolAdvancedOptionsHttpProtocolTypeHttp1ConfigHeaderTransformationHeaderTransformationChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+								headerTransformationheaderTransformationChoiceChoicesAttributeMap,
+							)
+							response.Diagnostics.Append(headerTransformationheaderTransformationChoiceChoicesObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+
+							// Assign the final object to the correct place (either the root model or a parent's attribute map)
+							originPoolHeaderTransformationTypeModel.HeaderTransformationChoice = finalObj
+						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
+							originPoolHeaderTransformationTypeModel.HeaderTransformationChoice = types.ObjectNull(OriginPoolAdvancedOptionsHttpProtocolTypeHttp1ConfigHeaderTransformationHeaderTransformationChoiceModelAttributeMap)
+						}
+
+						// This field needs to be converted to a types.ObjectValue before assignment.
+						originPoolHeaderTransformationTypeModelObj, diags := types.ObjectValueFrom(ctx, OriginPoolAdvancedOptionsHttpProtocolTypeHttp1ConfigHeaderTransformationModelAttributeMap, originPoolHeaderTransformationTypeModel)
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						http1ConfigAttributeMap["header_transformation"] = originPoolHeaderTransformationTypeModelObj
+
+					} else {
+						// The source field is nil (e.g. redacted by the API).
+						// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
+						// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
+						// because the API may always return a non-nil struct (with REDACTED values) for this field,
+						// making this else-branch unreachable. The child OneOf handles the actual healing.
+						// The target is a types.Object, so we use types.ObjectNull.
+						http1ConfigAttributeMap["header_transformation"] = types.ObjectNull(OriginPoolAdvancedOptionsHttpProtocolTypeHttp1ConfigHeaderTransformationModelAttributeMap)
+					}
+
+					http1ConfigObj, diags := types.ObjectValue(OriginPoolAdvancedOptionsHttpProtocolTypeHttp1ConfigModelAttributeMap, http1ConfigAttributeMap)
+					response.Diagnostics.Append(diags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					advancedOptionshttpProtocolTypeChoiceChoicesAttributeMap["http1_config"] = http1ConfigObj
+				} else {
+					advancedOptionshttpProtocolTypeChoiceChoicesAttributeMap["http1_config"] = types.ObjectNull(OriginPoolAdvancedOptionsHttpProtocolTypeHttp1ConfigModelAttributeMap)
+				}
+			}
+
+			// data specToModelNested PointerOfOneOfField --> Http2Options
+			// <no value>
+			// false
+			{
+				http2OptionsOptions, isHttp2Options := advancedOptionshttpProtocolTypeChoiceChoices.(*ves_io_schema_views_origin_pool.OriginPoolAdvancedOptions_Http2Options)
+				http2OptionsAttributeMap := make(map[string]attr.Value)
+
+				if isHttp2Options && http2OptionsOptions != nil {
+
+					// data specToModelNested BoolField --> Enabled
+					http2OptionsAttributeMap["enabled"] = types.BoolValue(bool(http2OptionsOptions.Http2Options.GetEnabled()))
+
+					http2OptionsObj, diags := types.ObjectValue(OriginPoolAdvancedOptionsHttpProtocolTypeHttp2OptionsModelAttributeMap, http2OptionsAttributeMap)
+					response.Diagnostics.Append(diags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					advancedOptionshttpProtocolTypeChoiceChoicesAttributeMap["http2_options"] = http2OptionsObj
+				} else {
+					advancedOptionshttpProtocolTypeChoiceChoicesAttributeMap["http2_options"] = types.ObjectNull(OriginPoolAdvancedOptionsHttpProtocolTypeHttp2OptionsModelAttributeMap)
+				}
+			}
+
+			// data specToModelNested BoolOfOneOfPointerField --> AutoHttpConfig
+			_, isAutoHttpConfig := advancedOptionshttpProtocolTypeChoiceChoices.(*ves_io_schema_views_origin_pool.OriginPoolAdvancedOptions_AutoHttpConfig)
+
+			if isAutoHttpConfig {
+				advancedOptionshttpProtocolTypeChoiceChoicesAttributeMap["auto_http_config"] = types.BoolValue(true)
+			} else {
+				advancedOptionshttpProtocolTypeChoiceChoicesAttributeMap["auto_http_config"] = types.BoolNull()
+			}
+
+			// --- End of Choices ---
+
+			// Create the final ObjectValue for this OneOf field
+			finalObj, advancedOptionshttpProtocolTypeChoiceChoicesObjDiags := types.ObjectValue(
+				OriginPoolAdvancedOptionsHttpProtocolTypeModelAttributeMap, // The attribute schema for the OneOf choices
+				advancedOptionshttpProtocolTypeChoiceChoicesAttributeMap,
+			)
+			response.Diagnostics.Append(advancedOptionshttpProtocolTypeChoiceChoicesObjDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			// Assign the final object to the correct place (either the root model or a parent's attribute map)
+			originPoolOriginPoolOriginPoolAdvancedOptionsModel.HttpProtocolTypeChoice = finalObj
+		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			originPoolOriginPoolOriginPoolAdvancedOptionsModel.HttpProtocolTypeChoice = types.ObjectNull(OriginPoolAdvancedOptionsHttpProtocolTypeModelAttributeMap)
+		}
+
+		// data specToModelNested RequiredOneOfField --> MaxRequestsPerConnectionChoice
+		// <no value>
+		if advancedOptionsElement.GetMaxRequestsPerConnectionChoice() != nil {
+			// Create a temporary attribute map for the choices within this OneOf
+			advancedOptionsmaxRequestsPerConnectionChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+			// Define a variable for the spec choices to be passed down to nested templates.
+			// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+			advancedOptionsmaxRequestsPerConnectionChoiceChoices := advancedOptionsElement.GetMaxRequestsPerConnectionChoice()
+
+			// Process nested choices, populating the temporary attribute map
+
+			// data specToModelNested BoolOfOneOfPointerField --> NoRequestLimitPerConnection
+			_, isNoRequestLimitPerConnection := advancedOptionsmaxRequestsPerConnectionChoiceChoices.(*ves_io_schema_views_origin_pool.OriginPoolAdvancedOptions_NoRequestLimitPerConnection)
+
+			if isNoRequestLimitPerConnection {
+				advancedOptionsmaxRequestsPerConnectionChoiceChoicesAttributeMap["no_request_limit_per_connection"] = types.BoolValue(true)
+			} else {
+				advancedOptionsmaxRequestsPerConnectionChoiceChoicesAttributeMap["no_request_limit_per_connection"] = types.BoolNull()
+			}
+
+			// data specToModelNested UintOfOneOfField --> MaxRequestsPerConnection
+			maxRequestsPerConnectionItem, isMaxRequestsPerConnection := advancedOptionsmaxRequestsPerConnectionChoiceChoices.(*ves_io_schema_views_origin_pool.OriginPoolAdvancedOptions_MaxRequestsPerConnection)
+
+			if isMaxRequestsPerConnection {
+				advancedOptionsmaxRequestsPerConnectionChoiceChoicesAttributeMap["max_requests_per_connection"] = types.Int64Value(int64(maxRequestsPerConnectionItem.MaxRequestsPerConnection))
+			} else {
+				// Empty uint, set to null
+				advancedOptionsmaxRequestsPerConnectionChoiceChoicesAttributeMap["max_requests_per_connection"] = types.Int64Null()
+			}
+
+			// --- End of Choices ---
+
+			// Create the final ObjectValue for this OneOf field
+			finalObj, advancedOptionsmaxRequestsPerConnectionChoiceChoicesObjDiags := types.ObjectValue(
+				OriginPoolAdvancedOptionsMaxRequestsPerConnectionChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+				advancedOptionsmaxRequestsPerConnectionChoiceChoicesAttributeMap,
+			)
+			response.Diagnostics.Append(advancedOptionsmaxRequestsPerConnectionChoiceChoicesObjDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			// Assign the final object to the correct place (either the root model or a parent's attribute map)
+			originPoolOriginPoolOriginPoolAdvancedOptionsModel.MaxRequestsPerConnectionChoice = finalObj
+		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			originPoolOriginPoolOriginPoolAdvancedOptionsModel.MaxRequestsPerConnectionChoice = types.ObjectNull(OriginPoolAdvancedOptionsMaxRequestsPerConnectionChoiceModelAttributeMap)
+		}
+
+		// data specToModelNested UintField --> ConnectionTimeout
+		originPoolOriginPoolOriginPoolAdvancedOptionsModel.ConnectionTimeout = types.Int64Value(int64(advancedOptionsElement.GetConnectionTimeout()))
+
+		// data specToModelNested UintField --> HttpIdleTimeout
+		originPoolOriginPoolOriginPoolAdvancedOptionsModel.HttpIdleTimeout = types.Int64Value(int64(advancedOptionsElement.GetHttpIdleTimeout()))
+
+		// data specToModelNested RequiredOneOfField --> SubsetChoice
+		// <no value>
+		if advancedOptionsElement.GetSubsetChoice() != nil {
+			// Create a temporary attribute map for the choices within this OneOf
+			advancedOptionssubsetChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+			// Define a variable for the spec choices to be passed down to nested templates.
+			// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+			advancedOptionssubsetChoiceChoices := advancedOptionsElement.GetSubsetChoice()
+
+			// Process nested choices, populating the temporary attribute map
+
+			// data specToModelNested BoolOfOneOfPointerField --> DisableSubsets
+			_, isDisableSubsets := advancedOptionssubsetChoiceChoices.(*ves_io_schema_views_origin_pool.OriginPoolAdvancedOptions_DisableSubsets)
+
+			if isDisableSubsets {
+				advancedOptionssubsetChoiceChoicesAttributeMap["disable_subsets"] = types.BoolValue(true)
+			} else {
+				advancedOptionssubsetChoiceChoicesAttributeMap["disable_subsets"] = types.BoolNull()
+			}
+
+			// data specToModelNested PointerOfOneOfField --> EnableSubsets
+			// <no value>
+			// false
+			{
+				enableSubsetsOptions, isEnableSubsets := advancedOptionssubsetChoiceChoices.(*ves_io_schema_views_origin_pool.OriginPoolAdvancedOptions_EnableSubsets)
+				enableSubsetsAttributeMap := make(map[string]attr.Value)
+
+				if isEnableSubsets && enableSubsetsOptions != nil {
+
+					// data specToModelNested RequiredArrayOfPointerField --> EndpointSubsets
+					if len(enableSubsetsOptions.EnableSubsets.GetEndpointSubsets()) > 0 {
+						// Step 1: Always create a slice of model structs from the spec data.
+						// This slice serves as an intermediate representation.
+						endpointSubsetsElements := make([]OriginPoolClusterEndpointSubsetSelectorType, 0, len(enableSubsetsOptions.EnableSubsets.GetEndpointSubsets()))
+						for _, endpointSubsetsElement := range enableSubsetsOptions.EnableSubsets.GetEndpointSubsets() {
+							originPoolClusterEndpointSubsetSelectorTypeModel := OriginPoolClusterEndpointSubsetSelectorType{}
+
+							// data specToModelNested RequiredArrayOfStringField --> Keys
+							if len(endpointSubsetsElement.GetKeys()) > 0 {
+								listValue, diags := types.ListValueFrom(ctx, types.StringType, endpointSubsetsElement.GetKeys())
+								response.Diagnostics.Append(diags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								originPoolClusterEndpointSubsetSelectorTypeModel.Keys = listValue
+							} else {
+								originPoolClusterEndpointSubsetSelectorTypeModel.Keys = types.ListNull(types.StringType)
+							}
+
+							endpointSubsetsElements = append(endpointSubsetsElements, originPoolClusterEndpointSubsetSelectorTypeModel)
+						}
+						// CASE 1: The target field is a `types.List` or an attribute map.
+						// The intermediate slice of structs must be converted to a `types.ListValue`.
+						endpointSubsetsListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: OriginPoolAdvancedOptionsSubsetChoiceEnableSubsetsEndpointSubsetsModelAttributeMap}, endpointSubsetsElements)
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						enableSubsetsAttributeMap["endpoint_subsets"] = endpointSubsetsListValue
+
+					} else {
+						// The source list is empty or nil.
+						// CASE 1: The target field is a `types.List` or an attribute map.
+						// Assign a null `types.ListValue`.
+						enableSubsetsAttributeMap["endpoint_subsets"] = types.ListNull(types.ObjectType{AttrTypes: OriginPoolAdvancedOptionsSubsetChoiceEnableSubsetsEndpointSubsetsModelAttributeMap})
+					}
+
+					// data specToModelNested RequiredOneOfField --> FallbackPolicyChoice
+					// <no value>
+					if enableSubsetsOptions.EnableSubsets.GetFallbackPolicyChoice() != nil {
+						// Create a temporary attribute map for the choices within this OneOf
+						enableSubsetsfallbackPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+						// Define a variable for the spec choices to be passed down to nested templates.
+						// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+						enableSubsetsfallbackPolicyChoiceChoices := enableSubsetsOptions.EnableSubsets.GetFallbackPolicyChoice()
+
+						// Process nested choices, populating the temporary attribute map
+
+						// data specToModelNested BoolOfOneOfPointerField --> AnyEndpoint
+						_, isAnyEndpoint := enableSubsetsfallbackPolicyChoiceChoices.(*ves_io_schema_views_origin_pool.OriginPoolSubsets_AnyEndpoint)
+
+						if isAnyEndpoint {
+							enableSubsetsfallbackPolicyChoiceChoicesAttributeMap["any_endpoint"] = types.BoolValue(true)
+						} else {
+							enableSubsetsfallbackPolicyChoiceChoicesAttributeMap["any_endpoint"] = types.BoolNull()
+						}
+
+						// data specToModelNested PointerOfOneOfField --> DefaultSubset
+						// <no value>
+						// false
+						{
+							defaultSubsetOptions, isDefaultSubset := enableSubsetsfallbackPolicyChoiceChoices.(*ves_io_schema_views_origin_pool.OriginPoolSubsets_DefaultSubset)
+							defaultSubsetAttributeMap := make(map[string]attr.Value)
+
+							if isDefaultSubset && defaultSubsetOptions != nil {
+
+								// data specToModelNested MapOfStringField --> DefaultSubset
+								if defaultSubsetOptions.DefaultSubset.GetDefaultSubset() != nil {
+									// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
+									defaultSubsetMap, defaultSubsetDiags := utils.StringMapToTerraformMap(defaultSubsetOptions.DefaultSubset.GetDefaultSubset())
+									response.Diagnostics.Append(defaultSubsetDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									// Assign the typed map to the model
+									defaultSubsetAttributeMap["default_subset"] = defaultSubsetMap
+								} else {
+									// Ensure the state reflects a Null map with the correct element type to avoid DynamicPseudoType errors
+									defaultSubsetAttributeMap["default_subset"] = types.MapNull(types.StringType)
+								}
+
+								defaultSubsetObj, diags := types.ObjectValue(OriginPoolAdvancedOptionsSubsetChoiceEnableSubsetsFallbackPolicyChoiceDefaultSubsetModelAttributeMap, defaultSubsetAttributeMap)
+								response.Diagnostics.Append(diags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								enableSubsetsfallbackPolicyChoiceChoicesAttributeMap["default_subset"] = defaultSubsetObj
+							} else {
+								enableSubsetsfallbackPolicyChoiceChoicesAttributeMap["default_subset"] = types.ObjectNull(OriginPoolAdvancedOptionsSubsetChoiceEnableSubsetsFallbackPolicyChoiceDefaultSubsetModelAttributeMap)
+							}
+						}
+
+						// data specToModelNested BoolOfOneOfPointerField --> FailRequest
+						_, isFailRequest := enableSubsetsfallbackPolicyChoiceChoices.(*ves_io_schema_views_origin_pool.OriginPoolSubsets_FailRequest)
+
+						if isFailRequest {
+							enableSubsetsfallbackPolicyChoiceChoicesAttributeMap["fail_request"] = types.BoolValue(true)
+						} else {
+							enableSubsetsfallbackPolicyChoiceChoicesAttributeMap["fail_request"] = types.BoolNull()
+						}
+
+						// --- End of Choices ---
+
+						// Create the final ObjectValue for this OneOf field
+						finalObj, enableSubsetsfallbackPolicyChoiceChoicesObjDiags := types.ObjectValue(
+							OriginPoolAdvancedOptionsSubsetChoiceEnableSubsetsFallbackPolicyChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+							enableSubsetsfallbackPolicyChoiceChoicesAttributeMap,
+						)
+						response.Diagnostics.Append(enableSubsetsfallbackPolicyChoiceChoicesObjDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						// Assign the final object to the correct place (either the root model or a parent's attribute map)
+						enableSubsetsAttributeMap["fallback_policy_choice"] = finalObj
+					} else {
+						// The OneOf field is nil in the source spec, so set the Terraform object to null.
+						enableSubsetsAttributeMap["fallback_policy_choice"] = types.ObjectNull(OriginPoolAdvancedOptionsSubsetChoiceEnableSubsetsFallbackPolicyChoiceModelAttributeMap)
+					}
+
+					enableSubsetsObj, diags := types.ObjectValue(OriginPoolAdvancedOptionsSubsetChoiceEnableSubsetsModelAttributeMap, enableSubsetsAttributeMap)
+					response.Diagnostics.Append(diags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					advancedOptionssubsetChoiceChoicesAttributeMap["enable_subsets"] = enableSubsetsObj
+				} else {
+					advancedOptionssubsetChoiceChoicesAttributeMap["enable_subsets"] = types.ObjectNull(OriginPoolAdvancedOptionsSubsetChoiceEnableSubsetsModelAttributeMap)
+				}
+			}
+
+			// --- End of Choices ---
+
+			// Create the final ObjectValue for this OneOf field
+			finalObj, advancedOptionssubsetChoiceChoicesObjDiags := types.ObjectValue(
+				OriginPoolAdvancedOptionsSubsetChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+				advancedOptionssubsetChoiceChoicesAttributeMap,
+			)
+			response.Diagnostics.Append(advancedOptionssubsetChoiceChoicesObjDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			// Assign the final object to the correct place (either the root model or a parent's attribute map)
+			originPoolOriginPoolOriginPoolAdvancedOptionsModel.SubsetChoice = finalObj
+		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			originPoolOriginPoolOriginPoolAdvancedOptionsModel.SubsetChoice = types.ObjectNull(OriginPoolAdvancedOptionsSubsetChoiceModelAttributeMap)
+		}
+
+		advancedOptionsObj, advancedOptionsDiags := utils.GoStructToObjectValue(
+			ctx,
+			OriginPoolAdvancedOptionsModelAttributeMap,
+			originPoolOriginPoolOriginPoolAdvancedOptionsModel,
+		)
+		response.Diagnostics.Append(advancedOptionsDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.AdvancedOptions = advancedOptionsObj
+	} else {
+		data.AdvancedOptions = types.ObjectNull(OriginPoolAdvancedOptionsModelAttributeMap)
+	}
+
+	// data SpecToModelRoot PointerField --> UpstreamConnPoolReuseType
+	if specData.GetUpstreamConnPoolReuseType() != nil {
+		var originPoolUpstreamConnPoolReuseTypeModel = &OriginPoolUpstreamConnPoolReuseType{}
+		upstreamConnPoolReuseTypeElement := specData.GetUpstreamConnPoolReuseType()
+
+		// data specToModelNested RequiredOneOfField --> MapDownstreamToUpstreamConnPoolType
+		// <no value>
+		if upstreamConnPoolReuseTypeElement.GetMapDownstreamToUpstreamConnPoolType() != nil {
+			// Create a temporary attribute map for the choices within this OneOf
+			upstreamConnPoolReuseTypemapDownstreamToUpstreamConnPoolTypeChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+			// Define a variable for the spec choices to be passed down to nested templates.
+			// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+			upstreamConnPoolReuseTypemapDownstreamToUpstreamConnPoolTypeChoiceChoices := upstreamConnPoolReuseTypeElement.GetMapDownstreamToUpstreamConnPoolType()
+
+			// Process nested choices, populating the temporary attribute map
+
+			// data specToModelNested BoolOfOneOfPointerField --> EnableConnPoolReuse
+			_, isEnableConnPoolReuse := upstreamConnPoolReuseTypemapDownstreamToUpstreamConnPoolTypeChoiceChoices.(*ves_io_schema.UpstreamConnPoolReuseType_EnableConnPoolReuse)
+
+			if isEnableConnPoolReuse {
+				upstreamConnPoolReuseTypemapDownstreamToUpstreamConnPoolTypeChoiceChoicesAttributeMap["enable_conn_pool_reuse"] = types.BoolValue(true)
+			} else {
+				upstreamConnPoolReuseTypemapDownstreamToUpstreamConnPoolTypeChoiceChoicesAttributeMap["enable_conn_pool_reuse"] = types.BoolNull()
+			}
+
+			// data specToModelNested BoolOfOneOfPointerField --> DisableConnPoolReuse
+			_, isDisableConnPoolReuse := upstreamConnPoolReuseTypemapDownstreamToUpstreamConnPoolTypeChoiceChoices.(*ves_io_schema.UpstreamConnPoolReuseType_DisableConnPoolReuse)
+
+			if isDisableConnPoolReuse {
+				upstreamConnPoolReuseTypemapDownstreamToUpstreamConnPoolTypeChoiceChoicesAttributeMap["disable_conn_pool_reuse"] = types.BoolValue(true)
+			} else {
+				upstreamConnPoolReuseTypemapDownstreamToUpstreamConnPoolTypeChoiceChoicesAttributeMap["disable_conn_pool_reuse"] = types.BoolNull()
+			}
+
+			// --- End of Choices ---
+
+			// Create the final ObjectValue for this OneOf field
+			finalObj, upstreamConnPoolReuseTypemapDownstreamToUpstreamConnPoolTypeChoiceChoicesObjDiags := types.ObjectValue(
+				OriginPoolUpstreamConnPoolReuseTypeMapDownstreamToUpstreamConnPoolTypeModelAttributeMap, // The attribute schema for the OneOf choices
+				upstreamConnPoolReuseTypemapDownstreamToUpstreamConnPoolTypeChoiceChoicesAttributeMap,
+			)
+			response.Diagnostics.Append(upstreamConnPoolReuseTypemapDownstreamToUpstreamConnPoolTypeChoiceChoicesObjDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			// Assign the final object to the correct place (either the root model or a parent's attribute map)
+			originPoolUpstreamConnPoolReuseTypeModel.MapDownstreamToUpstreamConnPoolTypeChoice = finalObj
+		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			originPoolUpstreamConnPoolReuseTypeModel.MapDownstreamToUpstreamConnPoolTypeChoice = types.ObjectNull(OriginPoolUpstreamConnPoolReuseTypeMapDownstreamToUpstreamConnPoolTypeModelAttributeMap)
+		}
+
+		upstreamConnPoolReuseTypeObj, upstreamConnPoolReuseTypeDiags := utils.GoStructToObjectValue(
+			ctx,
+			OriginPoolUpstreamConnPoolReuseTypeModelAttributeMap,
+			originPoolUpstreamConnPoolReuseTypeModel,
+		)
+		response.Diagnostics.Append(upstreamConnPoolReuseTypeDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.UpstreamConnPoolReuseType = upstreamConnPoolReuseTypeObj
+	} else {
+		data.UpstreamConnPoolReuseType = types.ObjectNull(OriginPoolUpstreamConnPoolReuseTypeModelAttributeMap)
 	}
 
 	// data SpecToModelRoot RequiredArrayOfPointerField --> OriginServers
@@ -3405,21 +4195,6 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 
 	for _, originServersElement := range specData.OriginServers {
 		originPoolOriginPoolOriginServerTypeModel := OriginPoolOriginPoolOriginServerType{}
-
-		// data specToModelNested MapOfStringField --> Labels
-		if originServersElement.GetLabels() != nil {
-			// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-			labelsMap, labelsDiags := utils.StringMapToTerraformMap(originServersElement.GetLabels())
-			response.Diagnostics.Append(labelsDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			// Assign the typed map to the model
-			originPoolOriginPoolOriginServerTypeModel.Labels = labelsMap
-		} else {
-			// Ensure the state reflects a Null map with the correct element type to avoid DynamicPseudoType errors
-			originPoolOriginPoolOriginServerTypeModel.Labels = types.MapNull(types.StringType)
-		}
 
 		// data specToModelNested RequiredOneOfField --> Choice
 		// <no value>
@@ -3432,751 +4207,6 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 			originServerschoiceChoices := originServersElement.GetChoice()
 
 			// Process nested choices, populating the temporary attribute map
-
-			// data specToModelNested PointerOfOneOfField --> PrivateName
-			// <no value>
-			// false
-			{
-				privateNameOptions, isPrivateName := originServerschoiceChoices.(*ves_io_schema_views_origin_pool.OriginServerType_PrivateName)
-				privateNameAttributeMap := make(map[string]attr.Value)
-
-				if isPrivateName && privateNameOptions != nil {
-
-					// data specToModelNested UintField --> RefreshInterval
-					privateNameAttributeMap["refresh_interval"] = types.Int64Value(int64(privateNameOptions.PrivateName.GetRefreshInterval()))
-
-					// data specToModelNested RequiredPointerField --> SiteLocator
-					if privateNameOptions.PrivateName.GetSiteLocator() != nil {
-						// Create the nested Go struct
-						originPoolViewsSiteLocatorModel := &OriginPoolViewsSiteLocator{}
-						siteLocatorElement := privateNameOptions.PrivateName.GetSiteLocator()
-
-						// Recursively populate the nested struct
-
-						// data specToModelNested RequiredOneOfField --> Choice
-						// <no value>
-						if siteLocatorElement.GetChoice() != nil {
-							// Create a temporary attribute map for the choices within this OneOf
-							siteLocatorchoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-							// Define a variable for the spec choices to be passed down to nested templates.
-							// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-							siteLocatorchoiceChoices := siteLocatorElement.GetChoice()
-
-							// Process nested choices, populating the temporary attribute map
-
-							// data specToModelNested PointerOfOneOfField --> Site
-							// <no value>
-							// false
-							{
-								siteOptions, isSite := siteLocatorchoiceChoices.(*ves_io_schema_views.SiteLocator_Site)
-								siteAttributeMap := make(map[string]attr.Value)
-
-								if isSite && siteOptions != nil {
-
-									// data specToModelNested RequiredStringField --> Name
-									if siteOptions.Site.GetName() != "" {
-										siteAttributeMap["name"] = types.StringValue(siteOptions.Site.GetName())
-									} else {
-										// Empty string, set to null
-										siteAttributeMap["name"] = types.StringNull()
-									}
-
-									// data specToModelNested StringField --> Tenant
-									if siteOptions.Site.GetTenant() != "" {
-										siteAttributeMap["tenant"] = types.StringValue(siteOptions.Site.GetTenant())
-									} else {
-										// Empty string, set to null
-										siteAttributeMap["tenant"] = types.StringNull()
-									}
-
-									// data specToModelNested RequiredStringField --> Namespace
-									if siteOptions.Site.GetNamespace() != "" {
-										siteAttributeMap["namespace"] = types.StringValue(siteOptions.Site.GetNamespace())
-									} else {
-										// Empty string, set to null
-										siteAttributeMap["namespace"] = types.StringNull()
-									}
-
-									siteObj, diags := types.ObjectValue(OriginPoolOriginServersChoicePrivateNameSiteLocatorChoiceSiteModelAttributeMap, siteAttributeMap)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									siteLocatorchoiceChoicesAttributeMap["site"] = siteObj
-								} else {
-									siteLocatorchoiceChoicesAttributeMap["site"] = types.ObjectNull(OriginPoolOriginServersChoicePrivateNameSiteLocatorChoiceSiteModelAttributeMap)
-								}
-							}
-
-							// data specToModelNested PointerOfOneOfField --> VirtualSite
-							// <no value>
-							// false
-							{
-								virtualSiteOptions, isVirtualSite := siteLocatorchoiceChoices.(*ves_io_schema_views.SiteLocator_VirtualSite)
-								virtualSiteAttributeMap := make(map[string]attr.Value)
-
-								if isVirtualSite && virtualSiteOptions != nil {
-
-									// data specToModelNested RequiredStringField --> Name
-									if virtualSiteOptions.VirtualSite.GetName() != "" {
-										virtualSiteAttributeMap["name"] = types.StringValue(virtualSiteOptions.VirtualSite.GetName())
-									} else {
-										// Empty string, set to null
-										virtualSiteAttributeMap["name"] = types.StringNull()
-									}
-
-									// data specToModelNested StringField --> Tenant
-									if virtualSiteOptions.VirtualSite.GetTenant() != "" {
-										virtualSiteAttributeMap["tenant"] = types.StringValue(virtualSiteOptions.VirtualSite.GetTenant())
-									} else {
-										// Empty string, set to null
-										virtualSiteAttributeMap["tenant"] = types.StringNull()
-									}
-
-									// data specToModelNested RequiredStringField --> Namespace
-									if virtualSiteOptions.VirtualSite.GetNamespace() != "" {
-										virtualSiteAttributeMap["namespace"] = types.StringValue(virtualSiteOptions.VirtualSite.GetNamespace())
-									} else {
-										// Empty string, set to null
-										virtualSiteAttributeMap["namespace"] = types.StringNull()
-									}
-
-									virtualSiteObj, diags := types.ObjectValue(OriginPoolOriginServersChoicePrivateNameSiteLocatorChoiceVirtualSiteModelAttributeMap, virtualSiteAttributeMap)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									siteLocatorchoiceChoicesAttributeMap["virtual_site"] = virtualSiteObj
-								} else {
-									siteLocatorchoiceChoicesAttributeMap["virtual_site"] = types.ObjectNull(OriginPoolOriginServersChoicePrivateNameSiteLocatorChoiceVirtualSiteModelAttributeMap)
-								}
-							}
-
-							// --- End of Choices ---
-
-							// Create the final ObjectValue for this OneOf field
-							finalObj, siteLocatorchoiceChoicesObjDiags := types.ObjectValue(
-								OriginPoolOriginServersChoicePrivateNameSiteLocatorChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-								siteLocatorchoiceChoicesAttributeMap,
-							)
-							response.Diagnostics.Append(siteLocatorchoiceChoicesObjDiags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							originPoolViewsSiteLocatorModel.Choice = finalObj
-						} else {
-							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							originPoolViewsSiteLocatorModel.Choice = types.ObjectNull(OriginPoolOriginServersChoicePrivateNameSiteLocatorChoiceModelAttributeMap)
-						}
-
-						// This field needs to be converted to a types.ObjectValue before assignment.
-						originPoolViewsSiteLocatorModelObj, diags := types.ObjectValueFrom(ctx, OriginPoolOriginServersChoicePrivateNameSiteLocatorModelAttributeMap, originPoolViewsSiteLocatorModel)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						privateNameAttributeMap["site_locator"] = originPoolViewsSiteLocatorModelObj
-
-					} else {
-						// The source field is nil (e.g. redacted by the API).
-						// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
-						// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
-						// here because the API may always return a non-nil struct (with REDACTED values) for this
-						// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-						// The target is a types.Object, so we use types.ObjectNull.
-						privateNameAttributeMap["site_locator"] = types.ObjectNull(OriginPoolOriginServersChoicePrivateNameSiteLocatorModelAttributeMap)
-					}
-
-					// data specToModelNested RequiredOneOfField --> NetworkChoice
-					// <no value>
-					if privateNameOptions.PrivateName.GetNetworkChoice() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						privateNamenetworkChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates.
-						// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-						privateNamenetworkChoiceChoices := privateNameOptions.PrivateName.GetNetworkChoice()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// data specToModelNested BoolOfOneOfPointerField --> InsideNetwork
-						_, isInsideNetwork := privateNamenetworkChoiceChoices.(*ves_io_schema_views_origin_pool.OriginServerPrivateName_InsideNetwork)
-
-						if isInsideNetwork {
-							privateNamenetworkChoiceChoicesAttributeMap["inside_network"] = types.BoolValue(true)
-						} else {
-							privateNamenetworkChoiceChoicesAttributeMap["inside_network"] = types.BoolNull()
-						}
-
-						// data specToModelNested BoolOfOneOfPointerField --> OutsideNetwork
-						_, isOutsideNetwork := privateNamenetworkChoiceChoices.(*ves_io_schema_views_origin_pool.OriginServerPrivateName_OutsideNetwork)
-
-						if isOutsideNetwork {
-							privateNamenetworkChoiceChoicesAttributeMap["outside_network"] = types.BoolValue(true)
-						} else {
-							privateNamenetworkChoiceChoicesAttributeMap["outside_network"] = types.BoolNull()
-						}
-
-						// data specToModelNested RequiredPointerOfOneOfField --> Segment
-						// <no value>
-						{
-							segmentOptions, isSegment := privateNamenetworkChoiceChoices.(*ves_io_schema_views_origin_pool.OriginServerPrivateName_Segment)
-							segmentAttributeMap := make(map[string]attr.Value)
-
-							if isSegment && segmentOptions != nil {
-
-								// data specToModelNested StringField --> Tenant
-								if segmentOptions.Segment.GetTenant() != "" {
-									segmentAttributeMap["tenant"] = types.StringValue(segmentOptions.Segment.GetTenant())
-								} else {
-									// Empty string, set to null
-									segmentAttributeMap["tenant"] = types.StringNull()
-								}
-
-								// data specToModelNested RequiredStringField --> Namespace
-								if segmentOptions.Segment.GetNamespace() != "" {
-									segmentAttributeMap["namespace"] = types.StringValue(segmentOptions.Segment.GetNamespace())
-								} else {
-									// Empty string, set to null
-									segmentAttributeMap["namespace"] = types.StringNull()
-								}
-
-								// data specToModelNested RequiredStringField --> Name
-								if segmentOptions.Segment.GetName() != "" {
-									segmentAttributeMap["name"] = types.StringValue(segmentOptions.Segment.GetName())
-								} else {
-									// Empty string, set to null
-									segmentAttributeMap["name"] = types.StringNull()
-								}
-
-								segmentObj, diags := types.ObjectValue(OriginPoolOriginServersChoicePrivateNameNetworkChoiceSegmentModelAttributeMap, segmentAttributeMap)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								privateNamenetworkChoiceChoicesAttributeMap["segment"] = segmentObj
-							} else {
-								privateNamenetworkChoiceChoicesAttributeMap["segment"] = types.ObjectNull(OriginPoolOriginServersChoicePrivateNameNetworkChoiceSegmentModelAttributeMap)
-							}
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, privateNamenetworkChoiceChoicesObjDiags := types.ObjectValue(
-							OriginPoolOriginServersChoicePrivateNameNetworkChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-							privateNamenetworkChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(privateNamenetworkChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						privateNameAttributeMap["network_choice"] = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						privateNameAttributeMap["network_choice"] = types.ObjectNull(OriginPoolOriginServersChoicePrivateNameNetworkChoiceModelAttributeMap)
-					}
-
-					// data specToModelNested PointerField --> SnatPool
-					if privateNameOptions.PrivateName.GetSnatPool() != nil {
-						// Create the nested Go struct
-						originPoolViewsSnatPoolConfigurationModel := &OriginPoolViewsSnatPoolConfiguration{}
-						snatPoolElement := privateNameOptions.PrivateName.GetSnatPool()
-
-						// Recursively populate the nested struct
-
-						// data specToModelNested OneOfField --> SnatPoolChoice
-						if snatPoolElement.GetSnatPoolChoice() != nil {
-							// Create a temporary attribute map for the choices within this OneOf
-							snatPoolsnatPoolChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-							// Define a variable for the spec choices to be passed down to nested templates.
-							// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-							snatPoolsnatPoolChoiceChoices := snatPoolElement.GetSnatPoolChoice()
-
-							// Process nested choices, populating the temporary attribute map
-
-							// data specToModelNested BoolOfOneOfPointerField --> NoSnatPool
-							_, isNoSnatPool := snatPoolsnatPoolChoiceChoices.(*ves_io_schema_views.SnatPoolConfiguration_NoSnatPool)
-
-							if isNoSnatPool {
-								snatPoolsnatPoolChoiceChoicesAttributeMap["no_snat_pool"] = types.BoolValue(true)
-							} else {
-								snatPoolsnatPoolChoiceChoicesAttributeMap["no_snat_pool"] = types.BoolNull()
-							}
-
-							// data specToModelNested PointerOfOneOfField --> SnatPool
-							// <no value>
-							// false
-							{
-								snatPoolOptions, isSnatPool := snatPoolsnatPoolChoiceChoices.(*ves_io_schema_views.SnatPoolConfiguration_SnatPool)
-								snatPoolAttributeMap := make(map[string]attr.Value)
-
-								if isSnatPool && snatPoolOptions != nil {
-
-									// data specToModelNested ArrayOfStringField --> Prefixes
-									if len(snatPoolOptions.SnatPool.GetPrefixes()) > 0 {
-										listValue, diags := types.ListValueFrom(ctx, types.StringType, snatPoolOptions.SnatPool.GetPrefixes())
-										response.Diagnostics.Append(diags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										snatPoolAttributeMap["prefixes"] = listValue
-									} else {
-										snatPoolAttributeMap["prefixes"] = types.ListNull(types.StringType)
-									}
-
-									// data specToModelNested ArrayOfStringField --> Ipv6Prefixes
-									if len(snatPoolOptions.SnatPool.GetIpv6Prefixes()) > 0 {
-										listValue, diags := types.ListValueFrom(ctx, types.StringType, snatPoolOptions.SnatPool.GetIpv6Prefixes())
-										response.Diagnostics.Append(diags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										snatPoolAttributeMap["ipv6_prefixes"] = listValue
-									} else {
-										snatPoolAttributeMap["ipv6_prefixes"] = types.ListNull(types.StringType)
-									}
-
-									snatPoolObj, diags := types.ObjectValue(OriginPoolOriginServersChoicePrivateNameSnatPoolSnatPoolChoiceSnatPoolModelAttributeMap, snatPoolAttributeMap)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									snatPoolsnatPoolChoiceChoicesAttributeMap["snat_pool"] = snatPoolObj
-								} else {
-									snatPoolsnatPoolChoiceChoicesAttributeMap["snat_pool"] = types.ObjectNull(OriginPoolOriginServersChoicePrivateNameSnatPoolSnatPoolChoiceSnatPoolModelAttributeMap)
-								}
-							}
-
-							// --- End of Choices ---
-
-							// Create the final ObjectValue for this OneOf field
-							finalObj, snatPoolsnatPoolChoiceChoicesObjDiags := types.ObjectValue(
-								OriginPoolOriginServersChoicePrivateNameSnatPoolSnatPoolChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-								snatPoolsnatPoolChoiceChoicesAttributeMap,
-							)
-							response.Diagnostics.Append(snatPoolsnatPoolChoiceChoicesObjDiags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							originPoolViewsSnatPoolConfigurationModel.SnatPoolChoice = finalObj
-						} else {
-							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							originPoolViewsSnatPoolConfigurationModel.SnatPoolChoice = types.ObjectNull(OriginPoolOriginServersChoicePrivateNameSnatPoolSnatPoolChoiceModelAttributeMap)
-						}
-
-						// This field needs to be converted to a types.ObjectValue before assignment.
-						originPoolViewsSnatPoolConfigurationModelObj, diags := types.ObjectValueFrom(ctx, OriginPoolOriginServersChoicePrivateNameSnatPoolModelAttributeMap, originPoolViewsSnatPoolConfigurationModel)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						privateNameAttributeMap["snat_pool"] = originPoolViewsSnatPoolConfigurationModelObj
-
-					} else {
-						// The source field is nil (e.g. redacted by the API).
-						// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-						// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-						// because the API may always return a non-nil struct (with REDACTED values) for this field,
-						// making this else-branch unreachable. The child OneOf handles the actual healing.
-						// The target is a types.Object, so we use types.ObjectNull.
-						privateNameAttributeMap["snat_pool"] = types.ObjectNull(OriginPoolOriginServersChoicePrivateNameSnatPoolModelAttributeMap)
-					}
-
-					// data specToModelNested RequiredStringField --> DnsName
-					if privateNameOptions.PrivateName.GetDnsName() != "" {
-						privateNameAttributeMap["dns_name"] = types.StringValue(privateNameOptions.PrivateName.GetDnsName())
-					} else {
-						// Empty string, set to null
-						privateNameAttributeMap["dns_name"] = types.StringNull()
-					}
-
-					privateNameObj, diags := types.ObjectValue(OriginPoolOriginServersChoicePrivateNameModelAttributeMap, privateNameAttributeMap)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					originServerschoiceChoicesAttributeMap["private_name"] = privateNameObj
-				} else {
-					originServerschoiceChoicesAttributeMap["private_name"] = types.ObjectNull(OriginPoolOriginServersChoicePrivateNameModelAttributeMap)
-				}
-			}
-
-			// data specToModelNested PointerOfOneOfField --> VnPrivateIp
-			// <no value>
-			// false
-			{
-				vnPrivateIpOptions, isVnPrivateIp := originServerschoiceChoices.(*ves_io_schema_views_origin_pool.OriginServerType_VnPrivateIp)
-				vnPrivateIpAttributeMap := make(map[string]attr.Value)
-
-				if isVnPrivateIp && vnPrivateIpOptions != nil {
-
-					// data specToModelNested RequiredOneOfField --> VirtualNetworkIpChoice
-					// <no value>
-					if vnPrivateIpOptions.VnPrivateIp.GetVirtualNetworkIpChoice() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						vnPrivateIpvirtualNetworkIpChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates.
-						// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-						vnPrivateIpvirtualNetworkIpChoiceChoices := vnPrivateIpOptions.VnPrivateIp.GetVirtualNetworkIpChoice()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// data specToModelNested StringOfOneOfField --> Ip
-						ipItem, isIp := vnPrivateIpvirtualNetworkIpChoiceChoices.(*ves_io_schema_views_origin_pool.OriginServerVirtualNetworkIP_Ip)
-
-						if isIp {
-							vnPrivateIpvirtualNetworkIpChoiceChoicesAttributeMap["ip"] = types.StringValue(string(ipItem.Ip))
-						} else {
-							// Empty string, set to null
-							vnPrivateIpvirtualNetworkIpChoiceChoicesAttributeMap["ip"] = types.StringNull()
-						}
-
-						// data specToModelNested StringOfOneOfField --> Ipv6
-						ipv6Item, isIpv6 := vnPrivateIpvirtualNetworkIpChoiceChoices.(*ves_io_schema_views_origin_pool.OriginServerVirtualNetworkIP_Ipv6)
-
-						if isIpv6 {
-							vnPrivateIpvirtualNetworkIpChoiceChoicesAttributeMap["ipv6"] = types.StringValue(string(ipv6Item.Ipv6))
-						} else {
-							// Empty string, set to null
-							vnPrivateIpvirtualNetworkIpChoiceChoicesAttributeMap["ipv6"] = types.StringNull()
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, vnPrivateIpvirtualNetworkIpChoiceChoicesObjDiags := types.ObjectValue(
-							OriginPoolOriginServersChoiceVnPrivateIpVirtualNetworkIpChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-							vnPrivateIpvirtualNetworkIpChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(vnPrivateIpvirtualNetworkIpChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						vnPrivateIpAttributeMap["virtual_network_ip_choice"] = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						vnPrivateIpAttributeMap["virtual_network_ip_choice"] = types.ObjectNull(OriginPoolOriginServersChoiceVnPrivateIpVirtualNetworkIpChoiceModelAttributeMap)
-					}
-
-					// data specToModelNested RequiredPointerField --> VirtualNetwork
-					if vnPrivateIpOptions.VnPrivateIp.GetVirtualNetwork() != nil {
-						// Create the nested Go struct
-						objectRefTypeModelModel := &ObjectRefTypeModel{}
-						virtualNetworkElement := vnPrivateIpOptions.VnPrivateIp.GetVirtualNetwork()
-
-						// Recursively populate the nested struct
-
-						// data specToModelNested RequiredStringField --> Name
-						if virtualNetworkElement.GetName() != "" {
-							objectRefTypeModelModel.Name = types.StringValue(virtualNetworkElement.GetName())
-						} else {
-							// Empty string, set to null
-							objectRefTypeModelModel.Name = types.StringNull()
-						}
-
-						// data specToModelNested StringField --> Tenant
-						if virtualNetworkElement.GetTenant() != "" {
-							objectRefTypeModelModel.Tenant = types.StringValue(virtualNetworkElement.GetTenant())
-						} else {
-							// Empty string, set to null
-							objectRefTypeModelModel.Tenant = types.StringNull()
-						}
-
-						// data specToModelNested RequiredStringField --> Namespace
-						if virtualNetworkElement.GetNamespace() != "" {
-							objectRefTypeModelModel.Namespace = types.StringValue(virtualNetworkElement.GetNamespace())
-						} else {
-							// Empty string, set to null
-							objectRefTypeModelModel.Namespace = types.StringNull()
-						}
-
-						// This field needs to be converted to a types.ObjectValue before assignment.
-						objectRefTypeModelModelObj, diags := types.ObjectValueFrom(ctx, OriginPoolOriginServersChoiceVnPrivateIpVirtualNetworkModelAttributeMap, objectRefTypeModelModel)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						vnPrivateIpAttributeMap["virtual_network"] = objectRefTypeModelModelObj
-
-					} else {
-						// The source field is nil (e.g. redacted by the API).
-						// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
-						// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
-						// here because the API may always return a non-nil struct (with REDACTED values) for this
-						// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-						// The target is a types.Object, so we use types.ObjectNull.
-						vnPrivateIpAttributeMap["virtual_network"] = types.ObjectNull(OriginPoolOriginServersChoiceVnPrivateIpVirtualNetworkModelAttributeMap)
-					}
-
-					vnPrivateIpObj, diags := types.ObjectValue(OriginPoolOriginServersChoiceVnPrivateIpModelAttributeMap, vnPrivateIpAttributeMap)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					originServerschoiceChoicesAttributeMap["vn_private_ip"] = vnPrivateIpObj
-				} else {
-					originServerschoiceChoicesAttributeMap["vn_private_ip"] = types.ObjectNull(OriginPoolOriginServersChoiceVnPrivateIpModelAttributeMap)
-				}
-			}
-
-			// data specToModelNested PointerOfOneOfField --> VnPrivateName
-			// <no value>
-			// false
-			{
-				vnPrivateNameOptions, isVnPrivateName := originServerschoiceChoices.(*ves_io_schema_views_origin_pool.OriginServerType_VnPrivateName)
-				vnPrivateNameAttributeMap := make(map[string]attr.Value)
-
-				if isVnPrivateName && vnPrivateNameOptions != nil {
-
-					// data specToModelNested RequiredStringField --> DnsName
-					if vnPrivateNameOptions.VnPrivateName.GetDnsName() != "" {
-						vnPrivateNameAttributeMap["dns_name"] = types.StringValue(vnPrivateNameOptions.VnPrivateName.GetDnsName())
-					} else {
-						// Empty string, set to null
-						vnPrivateNameAttributeMap["dns_name"] = types.StringNull()
-					}
-
-					// data specToModelNested RequiredPointerField --> PrivateNetwork
-					if vnPrivateNameOptions.VnPrivateName.GetPrivateNetwork() != nil {
-						// Create the nested Go struct
-						objectRefTypeModelModel := &ObjectRefTypeModel{}
-						privateNetworkElement := vnPrivateNameOptions.VnPrivateName.GetPrivateNetwork()
-
-						// Recursively populate the nested struct
-
-						// data specToModelNested RequiredStringField --> Namespace
-						if privateNetworkElement.GetNamespace() != "" {
-							objectRefTypeModelModel.Namespace = types.StringValue(privateNetworkElement.GetNamespace())
-						} else {
-							// Empty string, set to null
-							objectRefTypeModelModel.Namespace = types.StringNull()
-						}
-
-						// data specToModelNested RequiredStringField --> Name
-						if privateNetworkElement.GetName() != "" {
-							objectRefTypeModelModel.Name = types.StringValue(privateNetworkElement.GetName())
-						} else {
-							// Empty string, set to null
-							objectRefTypeModelModel.Name = types.StringNull()
-						}
-
-						// data specToModelNested StringField --> Tenant
-						if privateNetworkElement.GetTenant() != "" {
-							objectRefTypeModelModel.Tenant = types.StringValue(privateNetworkElement.GetTenant())
-						} else {
-							// Empty string, set to null
-							objectRefTypeModelModel.Tenant = types.StringNull()
-						}
-
-						// This field needs to be converted to a types.ObjectValue before assignment.
-						objectRefTypeModelModelObj, diags := types.ObjectValueFrom(ctx, OriginPoolOriginServersChoiceVnPrivateNamePrivateNetworkModelAttributeMap, objectRefTypeModelModel)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						vnPrivateNameAttributeMap["private_network"] = objectRefTypeModelModelObj
-
-					} else {
-						// The source field is nil (e.g. redacted by the API).
-						// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
-						// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
-						// here because the API may always return a non-nil struct (with REDACTED values) for this
-						// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-						// The target is a types.Object, so we use types.ObjectNull.
-						vnPrivateNameAttributeMap["private_network"] = types.ObjectNull(OriginPoolOriginServersChoiceVnPrivateNamePrivateNetworkModelAttributeMap)
-					}
-
-					vnPrivateNameObj, diags := types.ObjectValue(OriginPoolOriginServersChoiceVnPrivateNameModelAttributeMap, vnPrivateNameAttributeMap)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					originServerschoiceChoicesAttributeMap["vn_private_name"] = vnPrivateNameObj
-				} else {
-					originServerschoiceChoicesAttributeMap["vn_private_name"] = types.ObjectNull(OriginPoolOriginServersChoiceVnPrivateNameModelAttributeMap)
-				}
-			}
-
-			// data specToModelNested PointerOfOneOfField --> CbipService
-			// <no value>
-			// false
-			{
-				cbipServiceOptions, isCbipService := originServerschoiceChoices.(*ves_io_schema_views_origin_pool.OriginServerType_CbipService)
-				cbipServiceAttributeMap := make(map[string]attr.Value)
-
-				if isCbipService && cbipServiceOptions != nil {
-
-					// data specToModelNested RequiredStringField --> ServiceName
-					if cbipServiceOptions.CbipService.GetServiceName() != "" {
-						cbipServiceAttributeMap["service_name"] = types.StringValue(cbipServiceOptions.CbipService.GetServiceName())
-					} else {
-						// Empty string, set to null
-						cbipServiceAttributeMap["service_name"] = types.StringNull()
-					}
-
-					cbipServiceObj, diags := types.ObjectValue(OriginPoolOriginServersChoiceCbipServiceModelAttributeMap, cbipServiceAttributeMap)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					originServerschoiceChoicesAttributeMap["cbip_service"] = cbipServiceObj
-				} else {
-					originServerschoiceChoicesAttributeMap["cbip_service"] = types.ObjectNull(OriginPoolOriginServersChoiceCbipServiceModelAttributeMap)
-				}
-			}
-
-			// data specToModelNested PointerOfOneOfField --> PublicIp
-			// <no value>
-			// false
-			{
-				publicIpOptions, isPublicIp := originServerschoiceChoices.(*ves_io_schema_views_origin_pool.OriginServerType_PublicIp)
-				publicIpAttributeMap := make(map[string]attr.Value)
-
-				if isPublicIp && publicIpOptions != nil {
-
-					// data specToModelNested RequiredOneOfField --> PublicIpChoice
-					// <no value>
-					if publicIpOptions.PublicIp.GetPublicIpChoice() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						publicIppublicIpChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates.
-						// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-						publicIppublicIpChoiceChoices := publicIpOptions.PublicIp.GetPublicIpChoice()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// data specToModelNested StringOfOneOfField --> Ipv6
-						ipv6Item, isIpv6 := publicIppublicIpChoiceChoices.(*ves_io_schema_views_origin_pool.OriginServerPublicIP_Ipv6)
-
-						if isIpv6 {
-							publicIppublicIpChoiceChoicesAttributeMap["ipv6"] = types.StringValue(string(ipv6Item.Ipv6))
-						} else {
-							// Empty string, set to null
-							publicIppublicIpChoiceChoicesAttributeMap["ipv6"] = types.StringNull()
-						}
-
-						// data specToModelNested StringOfOneOfField --> Ip
-						ipItem, isIp := publicIppublicIpChoiceChoices.(*ves_io_schema_views_origin_pool.OriginServerPublicIP_Ip)
-
-						if isIp {
-							publicIppublicIpChoiceChoicesAttributeMap["ip"] = types.StringValue(string(ipItem.Ip))
-						} else {
-							// Empty string, set to null
-							publicIppublicIpChoiceChoicesAttributeMap["ip"] = types.StringNull()
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, publicIppublicIpChoiceChoicesObjDiags := types.ObjectValue(
-							OriginPoolOriginServersChoicePublicIpPublicIpChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-							publicIppublicIpChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(publicIppublicIpChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						publicIpAttributeMap["public_ip_choice"] = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						publicIpAttributeMap["public_ip_choice"] = types.ObjectNull(OriginPoolOriginServersChoicePublicIpPublicIpChoiceModelAttributeMap)
-					}
-
-					publicIpObj, diags := types.ObjectValue(OriginPoolOriginServersChoicePublicIpModelAttributeMap, publicIpAttributeMap)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					originServerschoiceChoicesAttributeMap["public_ip"] = publicIpObj
-				} else {
-					originServerschoiceChoicesAttributeMap["public_ip"] = types.ObjectNull(OriginPoolOriginServersChoicePublicIpModelAttributeMap)
-				}
-			}
-
-			// data specToModelNested PointerOfOneOfField --> CustomEndpointObject
-			// <no value>
-			// false
-			{
-				customEndpointObjectOptions, isCustomEndpointObject := originServerschoiceChoices.(*ves_io_schema_views_origin_pool.OriginServerType_CustomEndpointObject)
-				customEndpointObjectAttributeMap := make(map[string]attr.Value)
-
-				if isCustomEndpointObject && customEndpointObjectOptions != nil {
-
-					// data specToModelNested RequiredPointerField --> Endpoint
-					if customEndpointObjectOptions.CustomEndpointObject.GetEndpoint() != nil {
-						// Create the nested Go struct
-						objectRefTypeModelModel := &ObjectRefTypeModel{}
-						endpointElement := customEndpointObjectOptions.CustomEndpointObject.GetEndpoint()
-
-						// Recursively populate the nested struct
-
-						// data specToModelNested RequiredStringField --> Name
-						if endpointElement.GetName() != "" {
-							objectRefTypeModelModel.Name = types.StringValue(endpointElement.GetName())
-						} else {
-							// Empty string, set to null
-							objectRefTypeModelModel.Name = types.StringNull()
-						}
-
-						// data specToModelNested StringField --> Tenant
-						if endpointElement.GetTenant() != "" {
-							objectRefTypeModelModel.Tenant = types.StringValue(endpointElement.GetTenant())
-						} else {
-							// Empty string, set to null
-							objectRefTypeModelModel.Tenant = types.StringNull()
-						}
-
-						// data specToModelNested RequiredStringField --> Namespace
-						if endpointElement.GetNamespace() != "" {
-							objectRefTypeModelModel.Namespace = types.StringValue(endpointElement.GetNamespace())
-						} else {
-							// Empty string, set to null
-							objectRefTypeModelModel.Namespace = types.StringNull()
-						}
-
-						// This field needs to be converted to a types.ObjectValue before assignment.
-						objectRefTypeModelModelObj, diags := types.ObjectValueFrom(ctx, OriginPoolOriginServersChoiceCustomEndpointObjectEndpointModelAttributeMap, objectRefTypeModelModel)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						customEndpointObjectAttributeMap["endpoint"] = objectRefTypeModelModelObj
-
-					} else {
-						// The source field is nil (e.g. redacted by the API).
-						// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
-						// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
-						// here because the API may always return a non-nil struct (with REDACTED values) for this
-						// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-						// The target is a types.Object, so we use types.ObjectNull.
-						customEndpointObjectAttributeMap["endpoint"] = types.ObjectNull(OriginPoolOriginServersChoiceCustomEndpointObjectEndpointModelAttributeMap)
-					}
-
-					customEndpointObjectObj, diags := types.ObjectValue(OriginPoolOriginServersChoiceCustomEndpointObjectModelAttributeMap, customEndpointObjectAttributeMap)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					originServerschoiceChoicesAttributeMap["custom_endpoint_object"] = customEndpointObjectObj
-				} else {
-					originServerschoiceChoicesAttributeMap["custom_endpoint_object"] = types.ObjectNull(OriginPoolOriginServersChoiceCustomEndpointObjectModelAttributeMap)
-				}
-			}
 
 			// data specToModelNested PointerOfOneOfField --> PublicName
 			// <no value>
@@ -4217,6 +4247,98 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 				privateIpAttributeMap := make(map[string]attr.Value)
 
 				if isPrivateIp && privateIpOptions != nil {
+
+					// data specToModelNested RequiredOneOfField --> NetworkChoice
+					// <no value>
+					if privateIpOptions.PrivateIp.GetNetworkChoice() != nil {
+						// Create a temporary attribute map for the choices within this OneOf
+						privateIpnetworkChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+						// Define a variable for the spec choices to be passed down to nested templates.
+						// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+						privateIpnetworkChoiceChoices := privateIpOptions.PrivateIp.GetNetworkChoice()
+
+						// Process nested choices, populating the temporary attribute map
+
+						// data specToModelNested BoolOfOneOfPointerField --> InsideNetwork
+						_, isInsideNetwork := privateIpnetworkChoiceChoices.(*ves_io_schema_views_origin_pool.OriginServerPrivateIP_InsideNetwork)
+
+						if isInsideNetwork {
+							privateIpnetworkChoiceChoicesAttributeMap["inside_network"] = types.BoolValue(true)
+						} else {
+							privateIpnetworkChoiceChoicesAttributeMap["inside_network"] = types.BoolNull()
+						}
+
+						// data specToModelNested BoolOfOneOfPointerField --> OutsideNetwork
+						_, isOutsideNetwork := privateIpnetworkChoiceChoices.(*ves_io_schema_views_origin_pool.OriginServerPrivateIP_OutsideNetwork)
+
+						if isOutsideNetwork {
+							privateIpnetworkChoiceChoicesAttributeMap["outside_network"] = types.BoolValue(true)
+						} else {
+							privateIpnetworkChoiceChoicesAttributeMap["outside_network"] = types.BoolNull()
+						}
+
+						// data specToModelNested RequiredPointerOfOneOfField --> Segment
+						// <no value>
+						{
+							segmentOptions, isSegment := privateIpnetworkChoiceChoices.(*ves_io_schema_views_origin_pool.OriginServerPrivateIP_Segment)
+							segmentAttributeMap := make(map[string]attr.Value)
+
+							if isSegment && segmentOptions != nil {
+
+								// data specToModelNested RequiredStringField --> Name
+								if segmentOptions.Segment.GetName() != "" {
+									segmentAttributeMap["name"] = types.StringValue(segmentOptions.Segment.GetName())
+								} else {
+									// Empty string, set to null
+									segmentAttributeMap["name"] = types.StringNull()
+								}
+
+								// data specToModelNested StringField --> Tenant
+								if segmentOptions.Segment.GetTenant() != "" {
+									segmentAttributeMap["tenant"] = types.StringValue(segmentOptions.Segment.GetTenant())
+								} else {
+									// Empty string, set to null
+									segmentAttributeMap["tenant"] = types.StringNull()
+								}
+
+								// data specToModelNested RequiredStringField --> Namespace
+								if segmentOptions.Segment.GetNamespace() != "" {
+									segmentAttributeMap["namespace"] = types.StringValue(segmentOptions.Segment.GetNamespace())
+								} else {
+									// Empty string, set to null
+									segmentAttributeMap["namespace"] = types.StringNull()
+								}
+
+								segmentObj, diags := types.ObjectValue(OriginPoolOriginServersChoicePrivateIpNetworkChoiceSegmentModelAttributeMap, segmentAttributeMap)
+								response.Diagnostics.Append(diags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								privateIpnetworkChoiceChoicesAttributeMap["segment"] = segmentObj
+							} else {
+								privateIpnetworkChoiceChoicesAttributeMap["segment"] = types.ObjectNull(OriginPoolOriginServersChoicePrivateIpNetworkChoiceSegmentModelAttributeMap)
+							}
+						}
+
+						// --- End of Choices ---
+
+						// Create the final ObjectValue for this OneOf field
+						finalObj, privateIpnetworkChoiceChoicesObjDiags := types.ObjectValue(
+							OriginPoolOriginServersChoicePrivateIpNetworkChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+							privateIpnetworkChoiceChoicesAttributeMap,
+						)
+						response.Diagnostics.Append(privateIpnetworkChoiceChoicesObjDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						// Assign the final object to the correct place (either the root model or a parent's attribute map)
+						privateIpAttributeMap["network_choice"] = finalObj
+					} else {
+						// The OneOf field is nil in the source spec, so set the Terraform object to null.
+						privateIpAttributeMap["network_choice"] = types.ObjectNull(OriginPoolOriginServersChoicePrivateIpNetworkChoiceModelAttributeMap)
+					}
 
 					// data specToModelNested PointerField --> SnatPool
 					if privateIpOptions.PrivateIp.GetSnatPool() != nil {
@@ -4523,51 +4645,219 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 						privateIpAttributeMap["site_locator"] = types.ObjectNull(OriginPoolOriginServersChoicePrivateIpSiteLocatorModelAttributeMap)
 					}
 
+					privateIpObj, diags := types.ObjectValue(OriginPoolOriginServersChoicePrivateIpModelAttributeMap, privateIpAttributeMap)
+					response.Diagnostics.Append(diags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					originServerschoiceChoicesAttributeMap["private_ip"] = privateIpObj
+				} else {
+					originServerschoiceChoicesAttributeMap["private_ip"] = types.ObjectNull(OriginPoolOriginServersChoicePrivateIpModelAttributeMap)
+				}
+			}
+
+			// data specToModelNested PointerOfOneOfField --> PrivateName
+			// <no value>
+			// false
+			{
+				privateNameOptions, isPrivateName := originServerschoiceChoices.(*ves_io_schema_views_origin_pool.OriginServerType_PrivateName)
+				privateNameAttributeMap := make(map[string]attr.Value)
+
+				if isPrivateName && privateNameOptions != nil {
+
+					// data specToModelNested RequiredStringField --> DnsName
+					if privateNameOptions.PrivateName.GetDnsName() != "" {
+						privateNameAttributeMap["dns_name"] = types.StringValue(privateNameOptions.PrivateName.GetDnsName())
+					} else {
+						// Empty string, set to null
+						privateNameAttributeMap["dns_name"] = types.StringNull()
+					}
+
+					// data specToModelNested UintField --> RefreshInterval
+					privateNameAttributeMap["refresh_interval"] = types.Int64Value(int64(privateNameOptions.PrivateName.GetRefreshInterval()))
+
+					// data specToModelNested RequiredPointerField --> SiteLocator
+					if privateNameOptions.PrivateName.GetSiteLocator() != nil {
+						// Create the nested Go struct
+						originPoolViewsSiteLocatorModel := &OriginPoolViewsSiteLocator{}
+						siteLocatorElement := privateNameOptions.PrivateName.GetSiteLocator()
+
+						// Recursively populate the nested struct
+
+						// data specToModelNested RequiredOneOfField --> Choice
+						// <no value>
+						if siteLocatorElement.GetChoice() != nil {
+							// Create a temporary attribute map for the choices within this OneOf
+							siteLocatorchoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+							// Define a variable for the spec choices to be passed down to nested templates.
+							// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+							siteLocatorchoiceChoices := siteLocatorElement.GetChoice()
+
+							// Process nested choices, populating the temporary attribute map
+
+							// data specToModelNested PointerOfOneOfField --> Site
+							// <no value>
+							// false
+							{
+								siteOptions, isSite := siteLocatorchoiceChoices.(*ves_io_schema_views.SiteLocator_Site)
+								siteAttributeMap := make(map[string]attr.Value)
+
+								if isSite && siteOptions != nil {
+
+									// data specToModelNested StringField --> Tenant
+									if siteOptions.Site.GetTenant() != "" {
+										siteAttributeMap["tenant"] = types.StringValue(siteOptions.Site.GetTenant())
+									} else {
+										// Empty string, set to null
+										siteAttributeMap["tenant"] = types.StringNull()
+									}
+
+									// data specToModelNested RequiredStringField --> Namespace
+									if siteOptions.Site.GetNamespace() != "" {
+										siteAttributeMap["namespace"] = types.StringValue(siteOptions.Site.GetNamespace())
+									} else {
+										// Empty string, set to null
+										siteAttributeMap["namespace"] = types.StringNull()
+									}
+
+									// data specToModelNested RequiredStringField --> Name
+									if siteOptions.Site.GetName() != "" {
+										siteAttributeMap["name"] = types.StringValue(siteOptions.Site.GetName())
+									} else {
+										// Empty string, set to null
+										siteAttributeMap["name"] = types.StringNull()
+									}
+
+									siteObj, diags := types.ObjectValue(OriginPoolOriginServersChoicePrivateNameSiteLocatorChoiceSiteModelAttributeMap, siteAttributeMap)
+									response.Diagnostics.Append(diags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									siteLocatorchoiceChoicesAttributeMap["site"] = siteObj
+								} else {
+									siteLocatorchoiceChoicesAttributeMap["site"] = types.ObjectNull(OriginPoolOriginServersChoicePrivateNameSiteLocatorChoiceSiteModelAttributeMap)
+								}
+							}
+
+							// data specToModelNested PointerOfOneOfField --> VirtualSite
+							// <no value>
+							// false
+							{
+								virtualSiteOptions, isVirtualSite := siteLocatorchoiceChoices.(*ves_io_schema_views.SiteLocator_VirtualSite)
+								virtualSiteAttributeMap := make(map[string]attr.Value)
+
+								if isVirtualSite && virtualSiteOptions != nil {
+
+									// data specToModelNested RequiredStringField --> Name
+									if virtualSiteOptions.VirtualSite.GetName() != "" {
+										virtualSiteAttributeMap["name"] = types.StringValue(virtualSiteOptions.VirtualSite.GetName())
+									} else {
+										// Empty string, set to null
+										virtualSiteAttributeMap["name"] = types.StringNull()
+									}
+
+									// data specToModelNested StringField --> Tenant
+									if virtualSiteOptions.VirtualSite.GetTenant() != "" {
+										virtualSiteAttributeMap["tenant"] = types.StringValue(virtualSiteOptions.VirtualSite.GetTenant())
+									} else {
+										// Empty string, set to null
+										virtualSiteAttributeMap["tenant"] = types.StringNull()
+									}
+
+									// data specToModelNested RequiredStringField --> Namespace
+									if virtualSiteOptions.VirtualSite.GetNamespace() != "" {
+										virtualSiteAttributeMap["namespace"] = types.StringValue(virtualSiteOptions.VirtualSite.GetNamespace())
+									} else {
+										// Empty string, set to null
+										virtualSiteAttributeMap["namespace"] = types.StringNull()
+									}
+
+									virtualSiteObj, diags := types.ObjectValue(OriginPoolOriginServersChoicePrivateNameSiteLocatorChoiceVirtualSiteModelAttributeMap, virtualSiteAttributeMap)
+									response.Diagnostics.Append(diags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									siteLocatorchoiceChoicesAttributeMap["virtual_site"] = virtualSiteObj
+								} else {
+									siteLocatorchoiceChoicesAttributeMap["virtual_site"] = types.ObjectNull(OriginPoolOriginServersChoicePrivateNameSiteLocatorChoiceVirtualSiteModelAttributeMap)
+								}
+							}
+
+							// --- End of Choices ---
+
+							// Create the final ObjectValue for this OneOf field
+							finalObj, siteLocatorchoiceChoicesObjDiags := types.ObjectValue(
+								OriginPoolOriginServersChoicePrivateNameSiteLocatorChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+								siteLocatorchoiceChoicesAttributeMap,
+							)
+							response.Diagnostics.Append(siteLocatorchoiceChoicesObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+
+							// Assign the final object to the correct place (either the root model or a parent's attribute map)
+							originPoolViewsSiteLocatorModel.Choice = finalObj
+						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
+							originPoolViewsSiteLocatorModel.Choice = types.ObjectNull(OriginPoolOriginServersChoicePrivateNameSiteLocatorChoiceModelAttributeMap)
+						}
+
+						// This field needs to be converted to a types.ObjectValue before assignment.
+						originPoolViewsSiteLocatorModelObj, diags := types.ObjectValueFrom(ctx, OriginPoolOriginServersChoicePrivateNameSiteLocatorModelAttributeMap, originPoolViewsSiteLocatorModel)
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						privateNameAttributeMap["site_locator"] = originPoolViewsSiteLocatorModelObj
+
+					} else {
+						// The source field is nil (e.g. redacted by the API).
+						// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
+						// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
+						// here because the API may always return a non-nil struct (with REDACTED values) for this
+						// field, making this else-branch unreachable. The child OneOf handles the actual healing.
+						// The target is a types.Object, so we use types.ObjectNull.
+						privateNameAttributeMap["site_locator"] = types.ObjectNull(OriginPoolOriginServersChoicePrivateNameSiteLocatorModelAttributeMap)
+					}
+
 					// data specToModelNested RequiredOneOfField --> NetworkChoice
 					// <no value>
-					if privateIpOptions.PrivateIp.GetNetworkChoice() != nil {
+					if privateNameOptions.PrivateName.GetNetworkChoice() != nil {
 						// Create a temporary attribute map for the choices within this OneOf
-						privateIpnetworkChoiceChoicesAttributeMap := make(map[string]attr.Value)
+						privateNamenetworkChoiceChoicesAttributeMap := make(map[string]attr.Value)
 
 						// Define a variable for the spec choices to be passed down to nested templates.
 						// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-						privateIpnetworkChoiceChoices := privateIpOptions.PrivateIp.GetNetworkChoice()
+						privateNamenetworkChoiceChoices := privateNameOptions.PrivateName.GetNetworkChoice()
 
 						// Process nested choices, populating the temporary attribute map
 
 						// data specToModelNested BoolOfOneOfPointerField --> InsideNetwork
-						_, isInsideNetwork := privateIpnetworkChoiceChoices.(*ves_io_schema_views_origin_pool.OriginServerPrivateIP_InsideNetwork)
+						_, isInsideNetwork := privateNamenetworkChoiceChoices.(*ves_io_schema_views_origin_pool.OriginServerPrivateName_InsideNetwork)
 
 						if isInsideNetwork {
-							privateIpnetworkChoiceChoicesAttributeMap["inside_network"] = types.BoolValue(true)
+							privateNamenetworkChoiceChoicesAttributeMap["inside_network"] = types.BoolValue(true)
 						} else {
-							privateIpnetworkChoiceChoicesAttributeMap["inside_network"] = types.BoolNull()
+							privateNamenetworkChoiceChoicesAttributeMap["inside_network"] = types.BoolNull()
 						}
 
 						// data specToModelNested BoolOfOneOfPointerField --> OutsideNetwork
-						_, isOutsideNetwork := privateIpnetworkChoiceChoices.(*ves_io_schema_views_origin_pool.OriginServerPrivateIP_OutsideNetwork)
+						_, isOutsideNetwork := privateNamenetworkChoiceChoices.(*ves_io_schema_views_origin_pool.OriginServerPrivateName_OutsideNetwork)
 
 						if isOutsideNetwork {
-							privateIpnetworkChoiceChoicesAttributeMap["outside_network"] = types.BoolValue(true)
+							privateNamenetworkChoiceChoicesAttributeMap["outside_network"] = types.BoolValue(true)
 						} else {
-							privateIpnetworkChoiceChoicesAttributeMap["outside_network"] = types.BoolNull()
+							privateNamenetworkChoiceChoicesAttributeMap["outside_network"] = types.BoolNull()
 						}
 
 						// data specToModelNested RequiredPointerOfOneOfField --> Segment
 						// <no value>
 						{
-							segmentOptions, isSegment := privateIpnetworkChoiceChoices.(*ves_io_schema_views_origin_pool.OriginServerPrivateIP_Segment)
+							segmentOptions, isSegment := privateNamenetworkChoiceChoices.(*ves_io_schema_views_origin_pool.OriginServerPrivateName_Segment)
 							segmentAttributeMap := make(map[string]attr.Value)
 
 							if isSegment && segmentOptions != nil {
-
-								// data specToModelNested RequiredStringField --> Name
-								if segmentOptions.Segment.GetName() != "" {
-									segmentAttributeMap["name"] = types.StringValue(segmentOptions.Segment.GetName())
-								} else {
-									// Empty string, set to null
-									segmentAttributeMap["name"] = types.StringNull()
-								}
 
 								// data specToModelNested StringField --> Tenant
 								if segmentOptions.Segment.GetTenant() != "" {
@@ -4585,44 +4875,161 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 									segmentAttributeMap["namespace"] = types.StringNull()
 								}
 
-								segmentObj, diags := types.ObjectValue(OriginPoolOriginServersChoicePrivateIpNetworkChoiceSegmentModelAttributeMap, segmentAttributeMap)
+								// data specToModelNested RequiredStringField --> Name
+								if segmentOptions.Segment.GetName() != "" {
+									segmentAttributeMap["name"] = types.StringValue(segmentOptions.Segment.GetName())
+								} else {
+									// Empty string, set to null
+									segmentAttributeMap["name"] = types.StringNull()
+								}
+
+								segmentObj, diags := types.ObjectValue(OriginPoolOriginServersChoicePrivateNameNetworkChoiceSegmentModelAttributeMap, segmentAttributeMap)
 								response.Diagnostics.Append(diags...)
 								if response.Diagnostics.HasError() {
 									return
 								}
-								privateIpnetworkChoiceChoicesAttributeMap["segment"] = segmentObj
+								privateNamenetworkChoiceChoicesAttributeMap["segment"] = segmentObj
 							} else {
-								privateIpnetworkChoiceChoicesAttributeMap["segment"] = types.ObjectNull(OriginPoolOriginServersChoicePrivateIpNetworkChoiceSegmentModelAttributeMap)
+								privateNamenetworkChoiceChoicesAttributeMap["segment"] = types.ObjectNull(OriginPoolOriginServersChoicePrivateNameNetworkChoiceSegmentModelAttributeMap)
 							}
 						}
 
 						// --- End of Choices ---
 
 						// Create the final ObjectValue for this OneOf field
-						finalObj, privateIpnetworkChoiceChoicesObjDiags := types.ObjectValue(
-							OriginPoolOriginServersChoicePrivateIpNetworkChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-							privateIpnetworkChoiceChoicesAttributeMap,
+						finalObj, privateNamenetworkChoiceChoicesObjDiags := types.ObjectValue(
+							OriginPoolOriginServersChoicePrivateNameNetworkChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+							privateNamenetworkChoiceChoicesAttributeMap,
 						)
-						response.Diagnostics.Append(privateIpnetworkChoiceChoicesObjDiags...)
+						response.Diagnostics.Append(privateNamenetworkChoiceChoicesObjDiags...)
 						if response.Diagnostics.HasError() {
 							return
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						privateIpAttributeMap["network_choice"] = finalObj
+						privateNameAttributeMap["network_choice"] = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						privateIpAttributeMap["network_choice"] = types.ObjectNull(OriginPoolOriginServersChoicePrivateIpNetworkChoiceModelAttributeMap)
+						privateNameAttributeMap["network_choice"] = types.ObjectNull(OriginPoolOriginServersChoicePrivateNameNetworkChoiceModelAttributeMap)
 					}
 
-					privateIpObj, diags := types.ObjectValue(OriginPoolOriginServersChoicePrivateIpModelAttributeMap, privateIpAttributeMap)
+					// data specToModelNested PointerField --> SnatPool
+					if privateNameOptions.PrivateName.GetSnatPool() != nil {
+						// Create the nested Go struct
+						originPoolViewsSnatPoolConfigurationModel := &OriginPoolViewsSnatPoolConfiguration{}
+						snatPoolElement := privateNameOptions.PrivateName.GetSnatPool()
+
+						// Recursively populate the nested struct
+
+						// data specToModelNested OneOfField --> SnatPoolChoice
+						if snatPoolElement.GetSnatPoolChoice() != nil {
+							// Create a temporary attribute map for the choices within this OneOf
+							snatPoolsnatPoolChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+							// Define a variable for the spec choices to be passed down to nested templates.
+							// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+							snatPoolsnatPoolChoiceChoices := snatPoolElement.GetSnatPoolChoice()
+
+							// Process nested choices, populating the temporary attribute map
+
+							// data specToModelNested BoolOfOneOfPointerField --> NoSnatPool
+							_, isNoSnatPool := snatPoolsnatPoolChoiceChoices.(*ves_io_schema_views.SnatPoolConfiguration_NoSnatPool)
+
+							if isNoSnatPool {
+								snatPoolsnatPoolChoiceChoicesAttributeMap["no_snat_pool"] = types.BoolValue(true)
+							} else {
+								snatPoolsnatPoolChoiceChoicesAttributeMap["no_snat_pool"] = types.BoolNull()
+							}
+
+							// data specToModelNested PointerOfOneOfField --> SnatPool
+							// <no value>
+							// false
+							{
+								snatPoolOptions, isSnatPool := snatPoolsnatPoolChoiceChoices.(*ves_io_schema_views.SnatPoolConfiguration_SnatPool)
+								snatPoolAttributeMap := make(map[string]attr.Value)
+
+								if isSnatPool && snatPoolOptions != nil {
+
+									// data specToModelNested ArrayOfStringField --> Prefixes
+									if len(snatPoolOptions.SnatPool.GetPrefixes()) > 0 {
+										listValue, diags := types.ListValueFrom(ctx, types.StringType, snatPoolOptions.SnatPool.GetPrefixes())
+										response.Diagnostics.Append(diags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										snatPoolAttributeMap["prefixes"] = listValue
+									} else {
+										snatPoolAttributeMap["prefixes"] = types.ListNull(types.StringType)
+									}
+
+									// data specToModelNested ArrayOfStringField --> Ipv6Prefixes
+									if len(snatPoolOptions.SnatPool.GetIpv6Prefixes()) > 0 {
+										listValue, diags := types.ListValueFrom(ctx, types.StringType, snatPoolOptions.SnatPool.GetIpv6Prefixes())
+										response.Diagnostics.Append(diags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										snatPoolAttributeMap["ipv6_prefixes"] = listValue
+									} else {
+										snatPoolAttributeMap["ipv6_prefixes"] = types.ListNull(types.StringType)
+									}
+
+									snatPoolObj, diags := types.ObjectValue(OriginPoolOriginServersChoicePrivateNameSnatPoolSnatPoolChoiceSnatPoolModelAttributeMap, snatPoolAttributeMap)
+									response.Diagnostics.Append(diags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									snatPoolsnatPoolChoiceChoicesAttributeMap["snat_pool"] = snatPoolObj
+								} else {
+									snatPoolsnatPoolChoiceChoicesAttributeMap["snat_pool"] = types.ObjectNull(OriginPoolOriginServersChoicePrivateNameSnatPoolSnatPoolChoiceSnatPoolModelAttributeMap)
+								}
+							}
+
+							// --- End of Choices ---
+
+							// Create the final ObjectValue for this OneOf field
+							finalObj, snatPoolsnatPoolChoiceChoicesObjDiags := types.ObjectValue(
+								OriginPoolOriginServersChoicePrivateNameSnatPoolSnatPoolChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+								snatPoolsnatPoolChoiceChoicesAttributeMap,
+							)
+							response.Diagnostics.Append(snatPoolsnatPoolChoiceChoicesObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+
+							// Assign the final object to the correct place (either the root model or a parent's attribute map)
+							originPoolViewsSnatPoolConfigurationModel.SnatPoolChoice = finalObj
+						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
+							originPoolViewsSnatPoolConfigurationModel.SnatPoolChoice = types.ObjectNull(OriginPoolOriginServersChoicePrivateNameSnatPoolSnatPoolChoiceModelAttributeMap)
+						}
+
+						// This field needs to be converted to a types.ObjectValue before assignment.
+						originPoolViewsSnatPoolConfigurationModelObj, diags := types.ObjectValueFrom(ctx, OriginPoolOriginServersChoicePrivateNameSnatPoolModelAttributeMap, originPoolViewsSnatPoolConfigurationModel)
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						privateNameAttributeMap["snat_pool"] = originPoolViewsSnatPoolConfigurationModelObj
+
+					} else {
+						// The source field is nil (e.g. redacted by the API).
+						// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
+						// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
+						// because the API may always return a non-nil struct (with REDACTED values) for this field,
+						// making this else-branch unreachable. The child OneOf handles the actual healing.
+						// The target is a types.Object, so we use types.ObjectNull.
+						privateNameAttributeMap["snat_pool"] = types.ObjectNull(OriginPoolOriginServersChoicePrivateNameSnatPoolModelAttributeMap)
+					}
+
+					privateNameObj, diags := types.ObjectValue(OriginPoolOriginServersChoicePrivateNameModelAttributeMap, privateNameAttributeMap)
 					response.Diagnostics.Append(diags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					originServerschoiceChoicesAttributeMap["private_ip"] = privateIpObj
+					originServerschoiceChoicesAttributeMap["private_name"] = privateNameObj
 				} else {
-					originServerschoiceChoicesAttributeMap["private_ip"] = types.ObjectNull(OriginPoolOriginServersChoicePrivateIpModelAttributeMap)
+					originServerschoiceChoicesAttributeMap["private_name"] = types.ObjectNull(OriginPoolOriginServersChoicePrivateNameModelAttributeMap)
 				}
 			}
 
@@ -4710,50 +5117,6 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 
 							// Process nested choices, populating the temporary attribute map
 
-							// data specToModelNested PointerOfOneOfField --> VirtualSite
-							// <no value>
-							// false
-							{
-								virtualSiteOptions, isVirtualSite := siteLocatorchoiceChoices.(*ves_io_schema_views.SiteLocator_VirtualSite)
-								virtualSiteAttributeMap := make(map[string]attr.Value)
-
-								if isVirtualSite && virtualSiteOptions != nil {
-
-									// data specToModelNested RequiredStringField --> Namespace
-									if virtualSiteOptions.VirtualSite.GetNamespace() != "" {
-										virtualSiteAttributeMap["namespace"] = types.StringValue(virtualSiteOptions.VirtualSite.GetNamespace())
-									} else {
-										// Empty string, set to null
-										virtualSiteAttributeMap["namespace"] = types.StringNull()
-									}
-
-									// data specToModelNested RequiredStringField --> Name
-									if virtualSiteOptions.VirtualSite.GetName() != "" {
-										virtualSiteAttributeMap["name"] = types.StringValue(virtualSiteOptions.VirtualSite.GetName())
-									} else {
-										// Empty string, set to null
-										virtualSiteAttributeMap["name"] = types.StringNull()
-									}
-
-									// data specToModelNested StringField --> Tenant
-									if virtualSiteOptions.VirtualSite.GetTenant() != "" {
-										virtualSiteAttributeMap["tenant"] = types.StringValue(virtualSiteOptions.VirtualSite.GetTenant())
-									} else {
-										// Empty string, set to null
-										virtualSiteAttributeMap["tenant"] = types.StringNull()
-									}
-
-									virtualSiteObj, diags := types.ObjectValue(OriginPoolOriginServersChoiceK8SServiceSiteLocatorChoiceVirtualSiteModelAttributeMap, virtualSiteAttributeMap)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									siteLocatorchoiceChoicesAttributeMap["virtual_site"] = virtualSiteObj
-								} else {
-									siteLocatorchoiceChoicesAttributeMap["virtual_site"] = types.ObjectNull(OriginPoolOriginServersChoiceK8SServiceSiteLocatorChoiceVirtualSiteModelAttributeMap)
-								}
-							}
-
 							// data specToModelNested PointerOfOneOfField --> Site
 							// <no value>
 							// false
@@ -4795,6 +5158,50 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 									siteLocatorchoiceChoicesAttributeMap["site"] = siteObj
 								} else {
 									siteLocatorchoiceChoicesAttributeMap["site"] = types.ObjectNull(OriginPoolOriginServersChoiceK8SServiceSiteLocatorChoiceSiteModelAttributeMap)
+								}
+							}
+
+							// data specToModelNested PointerOfOneOfField --> VirtualSite
+							// <no value>
+							// false
+							{
+								virtualSiteOptions, isVirtualSite := siteLocatorchoiceChoices.(*ves_io_schema_views.SiteLocator_VirtualSite)
+								virtualSiteAttributeMap := make(map[string]attr.Value)
+
+								if isVirtualSite && virtualSiteOptions != nil {
+
+									// data specToModelNested StringField --> Tenant
+									if virtualSiteOptions.VirtualSite.GetTenant() != "" {
+										virtualSiteAttributeMap["tenant"] = types.StringValue(virtualSiteOptions.VirtualSite.GetTenant())
+									} else {
+										// Empty string, set to null
+										virtualSiteAttributeMap["tenant"] = types.StringNull()
+									}
+
+									// data specToModelNested RequiredStringField --> Namespace
+									if virtualSiteOptions.VirtualSite.GetNamespace() != "" {
+										virtualSiteAttributeMap["namespace"] = types.StringValue(virtualSiteOptions.VirtualSite.GetNamespace())
+									} else {
+										// Empty string, set to null
+										virtualSiteAttributeMap["namespace"] = types.StringNull()
+									}
+
+									// data specToModelNested RequiredStringField --> Name
+									if virtualSiteOptions.VirtualSite.GetName() != "" {
+										virtualSiteAttributeMap["name"] = types.StringValue(virtualSiteOptions.VirtualSite.GetName())
+									} else {
+										// Empty string, set to null
+										virtualSiteAttributeMap["name"] = types.StringNull()
+									}
+
+									virtualSiteObj, diags := types.ObjectValue(OriginPoolOriginServersChoiceK8SServiceSiteLocatorChoiceVirtualSiteModelAttributeMap, virtualSiteAttributeMap)
+									response.Diagnostics.Append(diags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									siteLocatorchoiceChoicesAttributeMap["virtual_site"] = virtualSiteObj
+								} else {
+									siteLocatorchoiceChoicesAttributeMap["virtual_site"] = types.ObjectNull(OriginPoolOriginServersChoiceK8SServiceSiteLocatorChoiceVirtualSiteModelAttributeMap)
 								}
 							}
 
@@ -4847,15 +5254,6 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 
 						// Process nested choices, populating the temporary attribute map
 
-						// data specToModelNested BoolOfOneOfPointerField --> InsideNetwork
-						_, isInsideNetwork := k8sServicenetworkChoiceChoices.(*ves_io_schema_views_origin_pool.OriginServerK8SService_InsideNetwork)
-
-						if isInsideNetwork {
-							k8sServicenetworkChoiceChoicesAttributeMap["inside_network"] = types.BoolValue(true)
-						} else {
-							k8sServicenetworkChoiceChoicesAttributeMap["inside_network"] = types.BoolNull()
-						}
-
 						// data specToModelNested BoolOfOneOfPointerField --> OutsideNetwork
 						_, isOutsideNetwork := k8sServicenetworkChoiceChoices.(*ves_io_schema_views_origin_pool.OriginServerK8SService_OutsideNetwork)
 
@@ -4872,6 +5270,15 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 							k8sServicenetworkChoiceChoicesAttributeMap["vk8s_networks"] = types.BoolValue(true)
 						} else {
 							k8sServicenetworkChoiceChoicesAttributeMap["vk8s_networks"] = types.BoolNull()
+						}
+
+						// data specToModelNested BoolOfOneOfPointerField --> InsideNetwork
+						_, isInsideNetwork := k8sServicenetworkChoiceChoices.(*ves_io_schema_views_origin_pool.OriginServerK8SService_InsideNetwork)
+
+						if isInsideNetwork {
+							k8sServicenetworkChoiceChoicesAttributeMap["inside_network"] = types.BoolValue(true)
+						} else {
+							k8sServicenetworkChoiceChoicesAttributeMap["inside_network"] = types.BoolNull()
 						}
 
 						// --- End of Choices ---
@@ -5022,6 +5429,151 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 
 				if isConsulService && consulServiceOptions != nil {
 
+					// data specToModelNested RequiredPointerField --> SiteLocator
+					if consulServiceOptions.ConsulService.GetSiteLocator() != nil {
+						// Create the nested Go struct
+						originPoolViewsSiteLocatorModel := &OriginPoolViewsSiteLocator{}
+						siteLocatorElement := consulServiceOptions.ConsulService.GetSiteLocator()
+
+						// Recursively populate the nested struct
+
+						// data specToModelNested RequiredOneOfField --> Choice
+						// <no value>
+						if siteLocatorElement.GetChoice() != nil {
+							// Create a temporary attribute map for the choices within this OneOf
+							siteLocatorchoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+							// Define a variable for the spec choices to be passed down to nested templates.
+							// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+							siteLocatorchoiceChoices := siteLocatorElement.GetChoice()
+
+							// Process nested choices, populating the temporary attribute map
+
+							// data specToModelNested PointerOfOneOfField --> Site
+							// <no value>
+							// false
+							{
+								siteOptions, isSite := siteLocatorchoiceChoices.(*ves_io_schema_views.SiteLocator_Site)
+								siteAttributeMap := make(map[string]attr.Value)
+
+								if isSite && siteOptions != nil {
+
+									// data specToModelNested RequiredStringField --> Name
+									if siteOptions.Site.GetName() != "" {
+										siteAttributeMap["name"] = types.StringValue(siteOptions.Site.GetName())
+									} else {
+										// Empty string, set to null
+										siteAttributeMap["name"] = types.StringNull()
+									}
+
+									// data specToModelNested StringField --> Tenant
+									if siteOptions.Site.GetTenant() != "" {
+										siteAttributeMap["tenant"] = types.StringValue(siteOptions.Site.GetTenant())
+									} else {
+										// Empty string, set to null
+										siteAttributeMap["tenant"] = types.StringNull()
+									}
+
+									// data specToModelNested RequiredStringField --> Namespace
+									if siteOptions.Site.GetNamespace() != "" {
+										siteAttributeMap["namespace"] = types.StringValue(siteOptions.Site.GetNamespace())
+									} else {
+										// Empty string, set to null
+										siteAttributeMap["namespace"] = types.StringNull()
+									}
+
+									siteObj, diags := types.ObjectValue(OriginPoolOriginServersChoiceConsulServiceSiteLocatorChoiceSiteModelAttributeMap, siteAttributeMap)
+									response.Diagnostics.Append(diags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									siteLocatorchoiceChoicesAttributeMap["site"] = siteObj
+								} else {
+									siteLocatorchoiceChoicesAttributeMap["site"] = types.ObjectNull(OriginPoolOriginServersChoiceConsulServiceSiteLocatorChoiceSiteModelAttributeMap)
+								}
+							}
+
+							// data specToModelNested PointerOfOneOfField --> VirtualSite
+							// <no value>
+							// false
+							{
+								virtualSiteOptions, isVirtualSite := siteLocatorchoiceChoices.(*ves_io_schema_views.SiteLocator_VirtualSite)
+								virtualSiteAttributeMap := make(map[string]attr.Value)
+
+								if isVirtualSite && virtualSiteOptions != nil {
+
+									// data specToModelNested RequiredStringField --> Name
+									if virtualSiteOptions.VirtualSite.GetName() != "" {
+										virtualSiteAttributeMap["name"] = types.StringValue(virtualSiteOptions.VirtualSite.GetName())
+									} else {
+										// Empty string, set to null
+										virtualSiteAttributeMap["name"] = types.StringNull()
+									}
+
+									// data specToModelNested StringField --> Tenant
+									if virtualSiteOptions.VirtualSite.GetTenant() != "" {
+										virtualSiteAttributeMap["tenant"] = types.StringValue(virtualSiteOptions.VirtualSite.GetTenant())
+									} else {
+										// Empty string, set to null
+										virtualSiteAttributeMap["tenant"] = types.StringNull()
+									}
+
+									// data specToModelNested RequiredStringField --> Namespace
+									if virtualSiteOptions.VirtualSite.GetNamespace() != "" {
+										virtualSiteAttributeMap["namespace"] = types.StringValue(virtualSiteOptions.VirtualSite.GetNamespace())
+									} else {
+										// Empty string, set to null
+										virtualSiteAttributeMap["namespace"] = types.StringNull()
+									}
+
+									virtualSiteObj, diags := types.ObjectValue(OriginPoolOriginServersChoiceConsulServiceSiteLocatorChoiceVirtualSiteModelAttributeMap, virtualSiteAttributeMap)
+									response.Diagnostics.Append(diags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									siteLocatorchoiceChoicesAttributeMap["virtual_site"] = virtualSiteObj
+								} else {
+									siteLocatorchoiceChoicesAttributeMap["virtual_site"] = types.ObjectNull(OriginPoolOriginServersChoiceConsulServiceSiteLocatorChoiceVirtualSiteModelAttributeMap)
+								}
+							}
+
+							// --- End of Choices ---
+
+							// Create the final ObjectValue for this OneOf field
+							finalObj, siteLocatorchoiceChoicesObjDiags := types.ObjectValue(
+								OriginPoolOriginServersChoiceConsulServiceSiteLocatorChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+								siteLocatorchoiceChoicesAttributeMap,
+							)
+							response.Diagnostics.Append(siteLocatorchoiceChoicesObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+
+							// Assign the final object to the correct place (either the root model or a parent's attribute map)
+							originPoolViewsSiteLocatorModel.Choice = finalObj
+						} else {
+							// The OneOf field is nil in the source spec, so set the Terraform object to null.
+							originPoolViewsSiteLocatorModel.Choice = types.ObjectNull(OriginPoolOriginServersChoiceConsulServiceSiteLocatorChoiceModelAttributeMap)
+						}
+
+						// This field needs to be converted to a types.ObjectValue before assignment.
+						originPoolViewsSiteLocatorModelObj, diags := types.ObjectValueFrom(ctx, OriginPoolOriginServersChoiceConsulServiceSiteLocatorModelAttributeMap, originPoolViewsSiteLocatorModel)
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						consulServiceAttributeMap["site_locator"] = originPoolViewsSiteLocatorModelObj
+
+					} else {
+						// The source field is nil (e.g. redacted by the API).
+						// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
+						// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
+						// here because the API may always return a non-nil struct (with REDACTED values) for this
+						// field, making this else-branch unreachable. The child OneOf handles the actual healing.
+						// The target is a types.Object, so we use types.ObjectNull.
+						consulServiceAttributeMap["site_locator"] = types.ObjectNull(OriginPoolOriginServersChoiceConsulServiceSiteLocatorModelAttributeMap)
+					}
+
 					// data specToModelNested RequiredOneOfField --> NetworkChoice
 					// <no value>
 					if consulServiceOptions.ConsulService.GetNetworkChoice() != nil {
@@ -5090,15 +5642,6 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 
 							// Process nested choices, populating the temporary attribute map
 
-							// data specToModelNested BoolOfOneOfPointerField --> NoSnatPool
-							_, isNoSnatPool := snatPoolsnatPoolChoiceChoices.(*ves_io_schema_views.SnatPoolConfiguration_NoSnatPool)
-
-							if isNoSnatPool {
-								snatPoolsnatPoolChoiceChoicesAttributeMap["no_snat_pool"] = types.BoolValue(true)
-							} else {
-								snatPoolsnatPoolChoiceChoicesAttributeMap["no_snat_pool"] = types.BoolNull()
-							}
-
 							// data specToModelNested PointerOfOneOfField --> SnatPool
 							// <no value>
 							// false
@@ -5141,6 +5684,15 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 								} else {
 									snatPoolsnatPoolChoiceChoicesAttributeMap["snat_pool"] = types.ObjectNull(OriginPoolOriginServersChoiceConsulServiceSnatPoolSnatPoolChoiceSnatPoolModelAttributeMap)
 								}
+							}
+
+							// data specToModelNested BoolOfOneOfPointerField --> NoSnatPool
+							_, isNoSnatPool := snatPoolsnatPoolChoiceChoices.(*ves_io_schema_views.SnatPoolConfiguration_NoSnatPool)
+
+							if isNoSnatPool {
+								snatPoolsnatPoolChoiceChoicesAttributeMap["no_snat_pool"] = types.BoolValue(true)
+							} else {
+								snatPoolsnatPoolChoiceChoicesAttributeMap["no_snat_pool"] = types.BoolNull()
 							}
 
 							// --- End of Choices ---
@@ -5188,151 +5740,6 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 						consulServiceAttributeMap["service_name"] = types.StringNull()
 					}
 
-					// data specToModelNested RequiredPointerField --> SiteLocator
-					if consulServiceOptions.ConsulService.GetSiteLocator() != nil {
-						// Create the nested Go struct
-						originPoolViewsSiteLocatorModel := &OriginPoolViewsSiteLocator{}
-						siteLocatorElement := consulServiceOptions.ConsulService.GetSiteLocator()
-
-						// Recursively populate the nested struct
-
-						// data specToModelNested RequiredOneOfField --> Choice
-						// <no value>
-						if siteLocatorElement.GetChoice() != nil {
-							// Create a temporary attribute map for the choices within this OneOf
-							siteLocatorchoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-							// Define a variable for the spec choices to be passed down to nested templates.
-							// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-							siteLocatorchoiceChoices := siteLocatorElement.GetChoice()
-
-							// Process nested choices, populating the temporary attribute map
-
-							// data specToModelNested PointerOfOneOfField --> VirtualSite
-							// <no value>
-							// false
-							{
-								virtualSiteOptions, isVirtualSite := siteLocatorchoiceChoices.(*ves_io_schema_views.SiteLocator_VirtualSite)
-								virtualSiteAttributeMap := make(map[string]attr.Value)
-
-								if isVirtualSite && virtualSiteOptions != nil {
-
-									// data specToModelNested RequiredStringField --> Namespace
-									if virtualSiteOptions.VirtualSite.GetNamespace() != "" {
-										virtualSiteAttributeMap["namespace"] = types.StringValue(virtualSiteOptions.VirtualSite.GetNamespace())
-									} else {
-										// Empty string, set to null
-										virtualSiteAttributeMap["namespace"] = types.StringNull()
-									}
-
-									// data specToModelNested RequiredStringField --> Name
-									if virtualSiteOptions.VirtualSite.GetName() != "" {
-										virtualSiteAttributeMap["name"] = types.StringValue(virtualSiteOptions.VirtualSite.GetName())
-									} else {
-										// Empty string, set to null
-										virtualSiteAttributeMap["name"] = types.StringNull()
-									}
-
-									// data specToModelNested StringField --> Tenant
-									if virtualSiteOptions.VirtualSite.GetTenant() != "" {
-										virtualSiteAttributeMap["tenant"] = types.StringValue(virtualSiteOptions.VirtualSite.GetTenant())
-									} else {
-										// Empty string, set to null
-										virtualSiteAttributeMap["tenant"] = types.StringNull()
-									}
-
-									virtualSiteObj, diags := types.ObjectValue(OriginPoolOriginServersChoiceConsulServiceSiteLocatorChoiceVirtualSiteModelAttributeMap, virtualSiteAttributeMap)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									siteLocatorchoiceChoicesAttributeMap["virtual_site"] = virtualSiteObj
-								} else {
-									siteLocatorchoiceChoicesAttributeMap["virtual_site"] = types.ObjectNull(OriginPoolOriginServersChoiceConsulServiceSiteLocatorChoiceVirtualSiteModelAttributeMap)
-								}
-							}
-
-							// data specToModelNested PointerOfOneOfField --> Site
-							// <no value>
-							// false
-							{
-								siteOptions, isSite := siteLocatorchoiceChoices.(*ves_io_schema_views.SiteLocator_Site)
-								siteAttributeMap := make(map[string]attr.Value)
-
-								if isSite && siteOptions != nil {
-
-									// data specToModelNested RequiredStringField --> Name
-									if siteOptions.Site.GetName() != "" {
-										siteAttributeMap["name"] = types.StringValue(siteOptions.Site.GetName())
-									} else {
-										// Empty string, set to null
-										siteAttributeMap["name"] = types.StringNull()
-									}
-
-									// data specToModelNested StringField --> Tenant
-									if siteOptions.Site.GetTenant() != "" {
-										siteAttributeMap["tenant"] = types.StringValue(siteOptions.Site.GetTenant())
-									} else {
-										// Empty string, set to null
-										siteAttributeMap["tenant"] = types.StringNull()
-									}
-
-									// data specToModelNested RequiredStringField --> Namespace
-									if siteOptions.Site.GetNamespace() != "" {
-										siteAttributeMap["namespace"] = types.StringValue(siteOptions.Site.GetNamespace())
-									} else {
-										// Empty string, set to null
-										siteAttributeMap["namespace"] = types.StringNull()
-									}
-
-									siteObj, diags := types.ObjectValue(OriginPoolOriginServersChoiceConsulServiceSiteLocatorChoiceSiteModelAttributeMap, siteAttributeMap)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									siteLocatorchoiceChoicesAttributeMap["site"] = siteObj
-								} else {
-									siteLocatorchoiceChoicesAttributeMap["site"] = types.ObjectNull(OriginPoolOriginServersChoiceConsulServiceSiteLocatorChoiceSiteModelAttributeMap)
-								}
-							}
-
-							// --- End of Choices ---
-
-							// Create the final ObjectValue for this OneOf field
-							finalObj, siteLocatorchoiceChoicesObjDiags := types.ObjectValue(
-								OriginPoolOriginServersChoiceConsulServiceSiteLocatorChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-								siteLocatorchoiceChoicesAttributeMap,
-							)
-							response.Diagnostics.Append(siteLocatorchoiceChoicesObjDiags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							originPoolViewsSiteLocatorModel.Choice = finalObj
-						} else {
-							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							originPoolViewsSiteLocatorModel.Choice = types.ObjectNull(OriginPoolOriginServersChoiceConsulServiceSiteLocatorChoiceModelAttributeMap)
-						}
-
-						// This field needs to be converted to a types.ObjectValue before assignment.
-						originPoolViewsSiteLocatorModelObj, diags := types.ObjectValueFrom(ctx, OriginPoolOriginServersChoiceConsulServiceSiteLocatorModelAttributeMap, originPoolViewsSiteLocatorModel)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						consulServiceAttributeMap["site_locator"] = originPoolViewsSiteLocatorModelObj
-
-					} else {
-						// The source field is nil (e.g. redacted by the API).
-						// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
-						// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
-						// here because the API may always return a non-nil struct (with REDACTED values) for this
-						// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-						// The target is a types.Object, so we use types.ObjectNull.
-						consulServiceAttributeMap["site_locator"] = types.ObjectNull(OriginPoolOriginServersChoiceConsulServiceSiteLocatorModelAttributeMap)
-					}
-
 					consulServiceObj, diags := types.ObjectValue(OriginPoolOriginServersChoiceConsulServiceModelAttributeMap, consulServiceAttributeMap)
 					response.Diagnostics.Append(diags...)
 					if response.Diagnostics.HasError() {
@@ -5341,6 +5748,374 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 					originServerschoiceChoicesAttributeMap["consul_service"] = consulServiceObj
 				} else {
 					originServerschoiceChoicesAttributeMap["consul_service"] = types.ObjectNull(OriginPoolOriginServersChoiceConsulServiceModelAttributeMap)
+				}
+			}
+
+			// data specToModelNested PointerOfOneOfField --> CbipService
+			// <no value>
+			// false
+			{
+				cbipServiceOptions, isCbipService := originServerschoiceChoices.(*ves_io_schema_views_origin_pool.OriginServerType_CbipService)
+				cbipServiceAttributeMap := make(map[string]attr.Value)
+
+				if isCbipService && cbipServiceOptions != nil {
+
+					// data specToModelNested RequiredStringField --> ServiceName
+					if cbipServiceOptions.CbipService.GetServiceName() != "" {
+						cbipServiceAttributeMap["service_name"] = types.StringValue(cbipServiceOptions.CbipService.GetServiceName())
+					} else {
+						// Empty string, set to null
+						cbipServiceAttributeMap["service_name"] = types.StringNull()
+					}
+
+					cbipServiceObj, diags := types.ObjectValue(OriginPoolOriginServersChoiceCbipServiceModelAttributeMap, cbipServiceAttributeMap)
+					response.Diagnostics.Append(diags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					originServerschoiceChoicesAttributeMap["cbip_service"] = cbipServiceObj
+				} else {
+					originServerschoiceChoicesAttributeMap["cbip_service"] = types.ObjectNull(OriginPoolOriginServersChoiceCbipServiceModelAttributeMap)
+				}
+			}
+
+			// data specToModelNested PointerOfOneOfField --> CustomEndpointObject
+			// <no value>
+			// false
+			{
+				customEndpointObjectOptions, isCustomEndpointObject := originServerschoiceChoices.(*ves_io_schema_views_origin_pool.OriginServerType_CustomEndpointObject)
+				customEndpointObjectAttributeMap := make(map[string]attr.Value)
+
+				if isCustomEndpointObject && customEndpointObjectOptions != nil {
+
+					// data specToModelNested RequiredPointerField --> Endpoint
+					if customEndpointObjectOptions.CustomEndpointObject.GetEndpoint() != nil {
+						// Create the nested Go struct
+						objectRefTypeModelModel := &ObjectRefTypeModel{}
+						endpointElement := customEndpointObjectOptions.CustomEndpointObject.GetEndpoint()
+
+						// Recursively populate the nested struct
+
+						// data specToModelNested RequiredStringField --> Namespace
+						if endpointElement.GetNamespace() != "" {
+							objectRefTypeModelModel.Namespace = types.StringValue(endpointElement.GetNamespace())
+						} else {
+							// Empty string, set to null
+							objectRefTypeModelModel.Namespace = types.StringNull()
+						}
+
+						// data specToModelNested RequiredStringField --> Name
+						if endpointElement.GetName() != "" {
+							objectRefTypeModelModel.Name = types.StringValue(endpointElement.GetName())
+						} else {
+							// Empty string, set to null
+							objectRefTypeModelModel.Name = types.StringNull()
+						}
+
+						// data specToModelNested StringField --> Tenant
+						if endpointElement.GetTenant() != "" {
+							objectRefTypeModelModel.Tenant = types.StringValue(endpointElement.GetTenant())
+						} else {
+							// Empty string, set to null
+							objectRefTypeModelModel.Tenant = types.StringNull()
+						}
+
+						// This field needs to be converted to a types.ObjectValue before assignment.
+						objectRefTypeModelModelObj, diags := types.ObjectValueFrom(ctx, OriginPoolOriginServersChoiceCustomEndpointObjectEndpointModelAttributeMap, objectRefTypeModelModel)
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						customEndpointObjectAttributeMap["endpoint"] = objectRefTypeModelModelObj
+
+					} else {
+						// The source field is nil (e.g. redacted by the API).
+						// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
+						// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
+						// here because the API may always return a non-nil struct (with REDACTED values) for this
+						// field, making this else-branch unreachable. The child OneOf handles the actual healing.
+						// The target is a types.Object, so we use types.ObjectNull.
+						customEndpointObjectAttributeMap["endpoint"] = types.ObjectNull(OriginPoolOriginServersChoiceCustomEndpointObjectEndpointModelAttributeMap)
+					}
+
+					customEndpointObjectObj, diags := types.ObjectValue(OriginPoolOriginServersChoiceCustomEndpointObjectModelAttributeMap, customEndpointObjectAttributeMap)
+					response.Diagnostics.Append(diags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					originServerschoiceChoicesAttributeMap["custom_endpoint_object"] = customEndpointObjectObj
+				} else {
+					originServerschoiceChoicesAttributeMap["custom_endpoint_object"] = types.ObjectNull(OriginPoolOriginServersChoiceCustomEndpointObjectModelAttributeMap)
+				}
+			}
+
+			// data specToModelNested PointerOfOneOfField --> PublicIp
+			// <no value>
+			// false
+			{
+				publicIpOptions, isPublicIp := originServerschoiceChoices.(*ves_io_schema_views_origin_pool.OriginServerType_PublicIp)
+				publicIpAttributeMap := make(map[string]attr.Value)
+
+				if isPublicIp && publicIpOptions != nil {
+
+					// data specToModelNested RequiredOneOfField --> PublicIpChoice
+					// <no value>
+					if publicIpOptions.PublicIp.GetPublicIpChoice() != nil {
+						// Create a temporary attribute map for the choices within this OneOf
+						publicIppublicIpChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+						// Define a variable for the spec choices to be passed down to nested templates.
+						// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+						publicIppublicIpChoiceChoices := publicIpOptions.PublicIp.GetPublicIpChoice()
+
+						// Process nested choices, populating the temporary attribute map
+
+						// data specToModelNested StringOfOneOfField --> Ip
+						ipItem, isIp := publicIppublicIpChoiceChoices.(*ves_io_schema_views_origin_pool.OriginServerPublicIP_Ip)
+
+						if isIp {
+							publicIppublicIpChoiceChoicesAttributeMap["ip"] = types.StringValue(string(ipItem.Ip))
+						} else {
+							// Empty string, set to null
+							publicIppublicIpChoiceChoicesAttributeMap["ip"] = types.StringNull()
+						}
+
+						// data specToModelNested StringOfOneOfField --> Ipv6
+						ipv6Item, isIpv6 := publicIppublicIpChoiceChoices.(*ves_io_schema_views_origin_pool.OriginServerPublicIP_Ipv6)
+
+						if isIpv6 {
+							publicIppublicIpChoiceChoicesAttributeMap["ipv6"] = types.StringValue(string(ipv6Item.Ipv6))
+						} else {
+							// Empty string, set to null
+							publicIppublicIpChoiceChoicesAttributeMap["ipv6"] = types.StringNull()
+						}
+
+						// --- End of Choices ---
+
+						// Create the final ObjectValue for this OneOf field
+						finalObj, publicIppublicIpChoiceChoicesObjDiags := types.ObjectValue(
+							OriginPoolOriginServersChoicePublicIpPublicIpChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+							publicIppublicIpChoiceChoicesAttributeMap,
+						)
+						response.Diagnostics.Append(publicIppublicIpChoiceChoicesObjDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						// Assign the final object to the correct place (either the root model or a parent's attribute map)
+						publicIpAttributeMap["public_ip_choice"] = finalObj
+					} else {
+						// The OneOf field is nil in the source spec, so set the Terraform object to null.
+						publicIpAttributeMap["public_ip_choice"] = types.ObjectNull(OriginPoolOriginServersChoicePublicIpPublicIpChoiceModelAttributeMap)
+					}
+
+					publicIpObj, diags := types.ObjectValue(OriginPoolOriginServersChoicePublicIpModelAttributeMap, publicIpAttributeMap)
+					response.Diagnostics.Append(diags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					originServerschoiceChoicesAttributeMap["public_ip"] = publicIpObj
+				} else {
+					originServerschoiceChoicesAttributeMap["public_ip"] = types.ObjectNull(OriginPoolOriginServersChoicePublicIpModelAttributeMap)
+				}
+			}
+
+			// data specToModelNested PointerOfOneOfField --> VnPrivateName
+			// <no value>
+			// false
+			{
+				vnPrivateNameOptions, isVnPrivateName := originServerschoiceChoices.(*ves_io_schema_views_origin_pool.OriginServerType_VnPrivateName)
+				vnPrivateNameAttributeMap := make(map[string]attr.Value)
+
+				if isVnPrivateName && vnPrivateNameOptions != nil {
+
+					// data specToModelNested RequiredStringField --> DnsName
+					if vnPrivateNameOptions.VnPrivateName.GetDnsName() != "" {
+						vnPrivateNameAttributeMap["dns_name"] = types.StringValue(vnPrivateNameOptions.VnPrivateName.GetDnsName())
+					} else {
+						// Empty string, set to null
+						vnPrivateNameAttributeMap["dns_name"] = types.StringNull()
+					}
+
+					// data specToModelNested RequiredPointerField --> PrivateNetwork
+					if vnPrivateNameOptions.VnPrivateName.GetPrivateNetwork() != nil {
+						// Create the nested Go struct
+						objectRefTypeModelModel := &ObjectRefTypeModel{}
+						privateNetworkElement := vnPrivateNameOptions.VnPrivateName.GetPrivateNetwork()
+
+						// Recursively populate the nested struct
+
+						// data specToModelNested RequiredStringField --> Name
+						if privateNetworkElement.GetName() != "" {
+							objectRefTypeModelModel.Name = types.StringValue(privateNetworkElement.GetName())
+						} else {
+							// Empty string, set to null
+							objectRefTypeModelModel.Name = types.StringNull()
+						}
+
+						// data specToModelNested StringField --> Tenant
+						if privateNetworkElement.GetTenant() != "" {
+							objectRefTypeModelModel.Tenant = types.StringValue(privateNetworkElement.GetTenant())
+						} else {
+							// Empty string, set to null
+							objectRefTypeModelModel.Tenant = types.StringNull()
+						}
+
+						// data specToModelNested RequiredStringField --> Namespace
+						if privateNetworkElement.GetNamespace() != "" {
+							objectRefTypeModelModel.Namespace = types.StringValue(privateNetworkElement.GetNamespace())
+						} else {
+							// Empty string, set to null
+							objectRefTypeModelModel.Namespace = types.StringNull()
+						}
+
+						// This field needs to be converted to a types.ObjectValue before assignment.
+						objectRefTypeModelModelObj, diags := types.ObjectValueFrom(ctx, OriginPoolOriginServersChoiceVnPrivateNamePrivateNetworkModelAttributeMap, objectRefTypeModelModel)
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						vnPrivateNameAttributeMap["private_network"] = objectRefTypeModelModelObj
+
+					} else {
+						// The source field is nil (e.g. redacted by the API).
+						// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
+						// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
+						// here because the API may always return a non-nil struct (with REDACTED values) for this
+						// field, making this else-branch unreachable. The child OneOf handles the actual healing.
+						// The target is a types.Object, so we use types.ObjectNull.
+						vnPrivateNameAttributeMap["private_network"] = types.ObjectNull(OriginPoolOriginServersChoiceVnPrivateNamePrivateNetworkModelAttributeMap)
+					}
+
+					vnPrivateNameObj, diags := types.ObjectValue(OriginPoolOriginServersChoiceVnPrivateNameModelAttributeMap, vnPrivateNameAttributeMap)
+					response.Diagnostics.Append(diags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					originServerschoiceChoicesAttributeMap["vn_private_name"] = vnPrivateNameObj
+				} else {
+					originServerschoiceChoicesAttributeMap["vn_private_name"] = types.ObjectNull(OriginPoolOriginServersChoiceVnPrivateNameModelAttributeMap)
+				}
+			}
+
+			// data specToModelNested PointerOfOneOfField --> VnPrivateIp
+			// <no value>
+			// false
+			{
+				vnPrivateIpOptions, isVnPrivateIp := originServerschoiceChoices.(*ves_io_schema_views_origin_pool.OriginServerType_VnPrivateIp)
+				vnPrivateIpAttributeMap := make(map[string]attr.Value)
+
+				if isVnPrivateIp && vnPrivateIpOptions != nil {
+
+					// data specToModelNested RequiredOneOfField --> VirtualNetworkIpChoice
+					// <no value>
+					if vnPrivateIpOptions.VnPrivateIp.GetVirtualNetworkIpChoice() != nil {
+						// Create a temporary attribute map for the choices within this OneOf
+						vnPrivateIpvirtualNetworkIpChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+						// Define a variable for the spec choices to be passed down to nested templates.
+						// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+						vnPrivateIpvirtualNetworkIpChoiceChoices := vnPrivateIpOptions.VnPrivateIp.GetVirtualNetworkIpChoice()
+
+						// Process nested choices, populating the temporary attribute map
+
+						// data specToModelNested StringOfOneOfField --> Ipv6
+						ipv6Item, isIpv6 := vnPrivateIpvirtualNetworkIpChoiceChoices.(*ves_io_schema_views_origin_pool.OriginServerVirtualNetworkIP_Ipv6)
+
+						if isIpv6 {
+							vnPrivateIpvirtualNetworkIpChoiceChoicesAttributeMap["ipv6"] = types.StringValue(string(ipv6Item.Ipv6))
+						} else {
+							// Empty string, set to null
+							vnPrivateIpvirtualNetworkIpChoiceChoicesAttributeMap["ipv6"] = types.StringNull()
+						}
+
+						// data specToModelNested StringOfOneOfField --> Ip
+						ipItem, isIp := vnPrivateIpvirtualNetworkIpChoiceChoices.(*ves_io_schema_views_origin_pool.OriginServerVirtualNetworkIP_Ip)
+
+						if isIp {
+							vnPrivateIpvirtualNetworkIpChoiceChoicesAttributeMap["ip"] = types.StringValue(string(ipItem.Ip))
+						} else {
+							// Empty string, set to null
+							vnPrivateIpvirtualNetworkIpChoiceChoicesAttributeMap["ip"] = types.StringNull()
+						}
+
+						// --- End of Choices ---
+
+						// Create the final ObjectValue for this OneOf field
+						finalObj, vnPrivateIpvirtualNetworkIpChoiceChoicesObjDiags := types.ObjectValue(
+							OriginPoolOriginServersChoiceVnPrivateIpVirtualNetworkIpChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+							vnPrivateIpvirtualNetworkIpChoiceChoicesAttributeMap,
+						)
+						response.Diagnostics.Append(vnPrivateIpvirtualNetworkIpChoiceChoicesObjDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						// Assign the final object to the correct place (either the root model or a parent's attribute map)
+						vnPrivateIpAttributeMap["virtual_network_ip_choice"] = finalObj
+					} else {
+						// The OneOf field is nil in the source spec, so set the Terraform object to null.
+						vnPrivateIpAttributeMap["virtual_network_ip_choice"] = types.ObjectNull(OriginPoolOriginServersChoiceVnPrivateIpVirtualNetworkIpChoiceModelAttributeMap)
+					}
+
+					// data specToModelNested RequiredPointerField --> VirtualNetwork
+					if vnPrivateIpOptions.VnPrivateIp.GetVirtualNetwork() != nil {
+						// Create the nested Go struct
+						objectRefTypeModelModel := &ObjectRefTypeModel{}
+						virtualNetworkElement := vnPrivateIpOptions.VnPrivateIp.GetVirtualNetwork()
+
+						// Recursively populate the nested struct
+
+						// data specToModelNested StringField --> Tenant
+						if virtualNetworkElement.GetTenant() != "" {
+							objectRefTypeModelModel.Tenant = types.StringValue(virtualNetworkElement.GetTenant())
+						} else {
+							// Empty string, set to null
+							objectRefTypeModelModel.Tenant = types.StringNull()
+						}
+
+						// data specToModelNested RequiredStringField --> Namespace
+						if virtualNetworkElement.GetNamespace() != "" {
+							objectRefTypeModelModel.Namespace = types.StringValue(virtualNetworkElement.GetNamespace())
+						} else {
+							// Empty string, set to null
+							objectRefTypeModelModel.Namespace = types.StringNull()
+						}
+
+						// data specToModelNested RequiredStringField --> Name
+						if virtualNetworkElement.GetName() != "" {
+							objectRefTypeModelModel.Name = types.StringValue(virtualNetworkElement.GetName())
+						} else {
+							// Empty string, set to null
+							objectRefTypeModelModel.Name = types.StringNull()
+						}
+
+						// This field needs to be converted to a types.ObjectValue before assignment.
+						objectRefTypeModelModelObj, diags := types.ObjectValueFrom(ctx, OriginPoolOriginServersChoiceVnPrivateIpVirtualNetworkModelAttributeMap, objectRefTypeModelModel)
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						vnPrivateIpAttributeMap["virtual_network"] = objectRefTypeModelModelObj
+
+					} else {
+						// The source field is nil (e.g. redacted by the API).
+						// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
+						// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
+						// here because the API may always return a non-nil struct (with REDACTED values) for this
+						// field, making this else-branch unreachable. The child OneOf handles the actual healing.
+						// The target is a types.Object, so we use types.ObjectNull.
+						vnPrivateIpAttributeMap["virtual_network"] = types.ObjectNull(OriginPoolOriginServersChoiceVnPrivateIpVirtualNetworkModelAttributeMap)
+					}
+
+					vnPrivateIpObj, diags := types.ObjectValue(OriginPoolOriginServersChoiceVnPrivateIpModelAttributeMap, vnPrivateIpAttributeMap)
+					response.Diagnostics.Append(diags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					originServerschoiceChoicesAttributeMap["vn_private_ip"] = vnPrivateIpObj
+				} else {
+					originServerschoiceChoicesAttributeMap["vn_private_ip"] = types.ObjectNull(OriginPoolOriginServersChoiceVnPrivateIpModelAttributeMap)
 				}
 			}
 
@@ -5361,6 +6136,21 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			originPoolOriginPoolOriginServerTypeModel.Choice = types.ObjectNull(OriginPoolOriginServersChoiceModelAttributeMap)
+		}
+
+		// data specToModelNested MapOfStringField --> Labels
+		if originServersElement.GetLabels() != nil {
+			// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
+			labelsMap, labelsDiags := utils.StringMapToTerraformMap(originServersElement.GetLabels())
+			response.Diagnostics.Append(labelsDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			// Assign the typed map to the model
+			originPoolOriginPoolOriginServerTypeModel.Labels = labelsMap
+		} else {
+			// Ensure the state reflects a Null map with the correct element type to avoid DynamicPseudoType errors
+			originPoolOriginPoolOriginServerTypeModel.Labels = types.MapNull(types.StringType)
 		}
 
 		originServersElementsSpectToModel = append(originServersElementsSpectToModel, originPoolOriginPoolOriginServerTypeModel)
@@ -5490,6 +6280,33 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 
 						// Process nested choices, populating the temporary attribute map
 
+						// data specToModelNested BoolOfOneOfPointerField --> DefaultSecurity
+						_, isDefaultSecurity := tlsConfigchoiceChoices.(*ves_io_schema_views.TlsConfig_DefaultSecurity)
+
+						if isDefaultSecurity {
+							tlsConfigchoiceChoicesAttributeMap["default_security"] = types.BoolValue(true)
+						} else {
+							tlsConfigchoiceChoicesAttributeMap["default_security"] = types.BoolNull()
+						}
+
+						// data specToModelNested BoolOfOneOfPointerField --> MediumSecurity
+						_, isMediumSecurity := tlsConfigchoiceChoices.(*ves_io_schema_views.TlsConfig_MediumSecurity)
+
+						if isMediumSecurity {
+							tlsConfigchoiceChoicesAttributeMap["medium_security"] = types.BoolValue(true)
+						} else {
+							tlsConfigchoiceChoicesAttributeMap["medium_security"] = types.BoolNull()
+						}
+
+						// data specToModelNested BoolOfOneOfPointerField --> LowSecurity
+						_, isLowSecurity := tlsConfigchoiceChoices.(*ves_io_schema_views.TlsConfig_LowSecurity)
+
+						if isLowSecurity {
+							tlsConfigchoiceChoicesAttributeMap["low_security"] = types.BoolValue(true)
+						} else {
+							tlsConfigchoiceChoicesAttributeMap["low_security"] = types.BoolNull()
+						}
+
 						// data specToModelNested PointerOfOneOfField --> CustomSecurity
 						// <no value>
 						// false
@@ -5498,18 +6315,6 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 							customSecurityAttributeMap := make(map[string]attr.Value)
 
 							if isCustomSecurity && customSecurityOptions != nil {
-
-								// data specToModelNested RequiredArrayOfStringField --> CipherSuites
-								if len(customSecurityOptions.CustomSecurity.GetCipherSuites()) > 0 {
-									listValue, diags := types.ListValueFrom(ctx, types.StringType, customSecurityOptions.CustomSecurity.GetCipherSuites())
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									customSecurityAttributeMap["cipher_suites"] = listValue
-								} else {
-									customSecurityAttributeMap["cipher_suites"] = types.ListNull(types.StringType)
-								}
 
 								// data specToModelNested EnumField --> MinVersion
 								if customSecurityOptions.CustomSecurity.GetMinVersion().String() != "" {
@@ -5539,6 +6344,18 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 									customSecurityAttributeMap["max_version"] = types.ListNull(types.StringType)
 								}
 
+								// data specToModelNested RequiredArrayOfStringField --> CipherSuites
+								if len(customSecurityOptions.CustomSecurity.GetCipherSuites()) > 0 {
+									listValue, diags := types.ListValueFrom(ctx, types.StringType, customSecurityOptions.CustomSecurity.GetCipherSuites())
+									response.Diagnostics.Append(diags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									customSecurityAttributeMap["cipher_suites"] = listValue
+								} else {
+									customSecurityAttributeMap["cipher_suites"] = types.ListNull(types.StringType)
+								}
+
 								customSecurityObj, diags := types.ObjectValue(OriginPoolTlsChoiceUseTlsTlsConfigChoiceCustomSecurityModelAttributeMap, customSecurityAttributeMap)
 								response.Diagnostics.Append(diags...)
 								if response.Diagnostics.HasError() {
@@ -5548,33 +6365,6 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 							} else {
 								tlsConfigchoiceChoicesAttributeMap["custom_security"] = types.ObjectNull(OriginPoolTlsChoiceUseTlsTlsConfigChoiceCustomSecurityModelAttributeMap)
 							}
-						}
-
-						// data specToModelNested BoolOfOneOfPointerField --> DefaultSecurity
-						_, isDefaultSecurity := tlsConfigchoiceChoices.(*ves_io_schema_views.TlsConfig_DefaultSecurity)
-
-						if isDefaultSecurity {
-							tlsConfigchoiceChoicesAttributeMap["default_security"] = types.BoolValue(true)
-						} else {
-							tlsConfigchoiceChoicesAttributeMap["default_security"] = types.BoolNull()
-						}
-
-						// data specToModelNested BoolOfOneOfPointerField --> MediumSecurity
-						_, isMediumSecurity := tlsConfigchoiceChoices.(*ves_io_schema_views.TlsConfig_MediumSecurity)
-
-						if isMediumSecurity {
-							tlsConfigchoiceChoicesAttributeMap["medium_security"] = types.BoolValue(true)
-						} else {
-							tlsConfigchoiceChoicesAttributeMap["medium_security"] = types.BoolNull()
-						}
-
-						// data specToModelNested BoolOfOneOfPointerField --> LowSecurity
-						_, isLowSecurity := tlsConfigchoiceChoices.(*ves_io_schema_views.TlsConfig_LowSecurity)
-
-						if isLowSecurity {
-							tlsConfigchoiceChoicesAttributeMap["low_security"] = types.BoolValue(true)
-						} else {
-							tlsConfigchoiceChoicesAttributeMap["low_security"] = types.BoolNull()
 						}
 
 						// --- End of Choices ---
@@ -5806,163 +6596,6 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 								for _, tlsCertificatesElement := range useMtlsOptions.UseMtls.GetTlsCertificates() {
 									originPoolTlsCertificateTypeModel := OriginPoolTlsCertificateType{}
 
-									// data specToModelNested RequiredStringField --> CertificateUrl
-									if tlsCertificatesElement.GetCertificateUrl() != "" {
-										originPoolTlsCertificateTypeModel.CertificateUrl = types.StringValue(tlsCertificatesElement.GetCertificateUrl())
-									} else {
-										// Empty string, set to null
-										originPoolTlsCertificateTypeModel.CertificateUrl = types.StringNull()
-									}
-
-									// data specToModelNested RequiredPointerField --> PrivateKey
-									if tlsCertificatesElement.GetPrivateKey() != nil {
-										// Create the nested Go struct
-										originPoolSecretTypeModel := &OriginPoolSecretType{}
-										privateKeyElement := tlsCertificatesElement.GetPrivateKey()
-
-										// Recursively populate the nested struct
-
-										// data specToModelNested RequiredOneOfField --> SecretInfoOneof
-										// <no value>
-										if privateKeyElement.GetSecretInfoOneof() != nil {
-											// Create a temporary attribute map for the choices within this OneOf
-											privateKeysecretInfoChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-											// Define a variable for the spec choices to be passed down to nested templates.
-											// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-											privateKeysecretInfoChoiceChoices := privateKeyElement.GetSecretInfoOneof()
-
-											// Process nested choices, populating the temporary attribute map
-
-											// data specToModelNested PointerOfOneOfField --> ClearSecretInfo
-											// <no value>
-											// false
-											{
-												clearSecretInfoOptions, isClearSecretInfo := privateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_ClearSecretInfo)
-												clearSecretInfoAttributeMap := make(map[string]attr.Value)
-
-												if isClearSecretInfo && clearSecretInfoOptions != nil {
-
-													// data specToModelNested RequiredStringField --> Url
-													if clearSecretInfoOptions.ClearSecretInfo.GetUrl() != "" {
-														clearSecretInfoAttributeMap["url"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetUrl())
-													} else {
-														// Empty string, set to null
-														clearSecretInfoAttributeMap["url"] = types.StringNull()
-													}
-
-													// data specToModelNested StringField --> Provider
-													if clearSecretInfoOptions.ClearSecretInfo.GetProvider() != "" {
-														clearSecretInfoAttributeMap["provider"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetProvider())
-													} else {
-														// Empty string, set to null
-														clearSecretInfoAttributeMap["provider"] = types.StringNull()
-													}
-
-													clearSecretInfoObj, diags := types.ObjectValue(OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap, clearSecretInfoAttributeMap)
-													response.Diagnostics.Append(diags...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													privateKeysecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = clearSecretInfoObj
-												} else {
-													privateKeysecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap)
-												}
-											}
-
-											// data specToModelNested PointerOfOneOfField --> BlindfoldSecretInfo
-											// <no value>
-											// false
-											{
-												blindfoldSecretInfoOptions, isBlindfoldSecretInfo := privateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_BlindfoldSecretInfo)
-												blindfoldSecretInfoAttributeMap := make(map[string]attr.Value)
-
-												if isBlindfoldSecretInfo && blindfoldSecretInfoOptions != nil {
-
-													// data specToModelNested StringField --> StoreProvider
-													if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider() != "" {
-														blindfoldSecretInfoAttributeMap["store_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider())
-													} else {
-														// Empty string, set to null
-														blindfoldSecretInfoAttributeMap["store_provider"] = types.StringNull()
-													}
-
-													// data specToModelNested RequiredStringField --> Location
-													if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation() != "" {
-														blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation())
-													} else {
-														// Empty string, set to null
-														blindfoldSecretInfoAttributeMap["location"] = types.StringNull()
-													}
-
-													// data specToModelNested StringField --> DecryptionProvider
-													if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider() != "" {
-														blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider())
-													} else {
-														// Empty string, set to null
-														blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringNull()
-													}
-
-													blindfoldSecretInfoObj, diags := types.ObjectValue(OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeySecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
-													response.Diagnostics.Append(diags...)
-													if response.Diagnostics.HasError() {
-														return
-													}
-													privateKeysecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = blindfoldSecretInfoObj
-												} else {
-													privateKeysecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = types.ObjectNull(OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeySecretInfoOneofBlindfoldSecretInfoModelAttributeMap)
-												}
-											}
-
-											// --- End of Choices ---
-
-											// Create the final ObjectValue for this OneOf field
-											finalObj, privateKeysecretInfoChoiceChoicesObjDiags := types.ObjectValue(
-												OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeySecretInfoOneofModelAttributeMap, // The attribute schema for the OneOf choices
-												privateKeysecretInfoChoiceChoicesAttributeMap,
-											)
-											response.Diagnostics.Append(privateKeysecretInfoChoiceChoicesObjDiags...)
-											if response.Diagnostics.HasError() {
-												return
-											}
-
-											// Assign the final object to the correct place (either the root model or a parent's attribute map)
-											originPoolSecretTypeModel.SecretInfoChoice = finalObj
-										} else {
-											// The OneOf field is nil in the source spec, so set the Terraform object to null.
-											// State Healing: The API redacted the OneOf secret field (returned nil). Restore the entire
-											// secret_info_choice object from prior Terraform state so that the model reflects what the
-											// user originally configured and Terraform does not detect a false drift.
-											{
-												savedSecretInfoChoicePath := path.Root("tls_choice").AtName("use_tls").AtName("mtls_choice").AtName("use_mtls").AtName("tls_certificates").AtListIndex(0).AtName("private_key").AtName("secret_info_choice")
-												var savedSecretInfoChoice types.Object
-												stateHealDiags := request.Config.GetAttribute(ctx, savedSecretInfoChoicePath, &savedSecretInfoChoice)
-												if !stateHealDiags.HasError() && !savedSecretInfoChoice.IsNull() && !savedSecretInfoChoice.IsUnknown() {
-													originPoolSecretTypeModel.SecretInfoChoice = savedSecretInfoChoice
-												} else {
-													originPoolSecretTypeModel.SecretInfoChoice = types.ObjectNull(OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeySecretInfoOneofModelAttributeMap)
-												}
-											}
-										}
-
-										// This field needs to be converted to a types.ObjectValue before assignment.
-										originPoolSecretTypeModelObj, diags := types.ObjectValueFrom(ctx, OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeyModelAttributeMap, originPoolSecretTypeModel)
-										response.Diagnostics.Append(diags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										originPoolTlsCertificateTypeModel.PrivateKey = originPoolSecretTypeModelObj
-
-									} else {
-										// The source field is nil (e.g. redacted by the API).
-										// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
-										// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
-										// here because the API may always return a non-nil struct (with REDACTED values) for this
-										// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-										// The target is a types.Object, so we use types.ObjectNull.
-										originPoolTlsCertificateTypeModel.PrivateKey = types.ObjectNull(OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeyModelAttributeMap)
-									}
-
 									// data specToModelNested StringField --> Description
 									if tlsCertificatesElement.GetDescription() != "" {
 										originPoolTlsCertificateTypeModel.Description = types.StringValue(tlsCertificatesElement.GetDescription())
@@ -6055,6 +6688,163 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 									} else {
 										// The OneOf field is nil in the source spec, so set the Terraform object to null.
 										originPoolTlsCertificateTypeModel.OcspStaplingChoice = types.ObjectNull(OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesOcspStaplingChoiceModelAttributeMap)
+									}
+
+									// data specToModelNested RequiredStringField --> CertificateUrl
+									if tlsCertificatesElement.GetCertificateUrl() != "" {
+										originPoolTlsCertificateTypeModel.CertificateUrl = types.StringValue(tlsCertificatesElement.GetCertificateUrl())
+									} else {
+										// Empty string, set to null
+										originPoolTlsCertificateTypeModel.CertificateUrl = types.StringNull()
+									}
+
+									// data specToModelNested RequiredPointerField --> PrivateKey
+									if tlsCertificatesElement.GetPrivateKey() != nil {
+										// Create the nested Go struct
+										originPoolSecretTypeModel := &OriginPoolSecretType{}
+										privateKeyElement := tlsCertificatesElement.GetPrivateKey()
+
+										// Recursively populate the nested struct
+
+										// data specToModelNested RequiredOneOfField --> SecretInfoOneof
+										// <no value>
+										if privateKeyElement.GetSecretInfoOneof() != nil {
+											// Create a temporary attribute map for the choices within this OneOf
+											privateKeysecretInfoChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+											// Define a variable for the spec choices to be passed down to nested templates.
+											// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+											privateKeysecretInfoChoiceChoices := privateKeyElement.GetSecretInfoOneof()
+
+											// Process nested choices, populating the temporary attribute map
+
+											// data specToModelNested PointerOfOneOfField --> BlindfoldSecretInfo
+											// <no value>
+											// false
+											{
+												blindfoldSecretInfoOptions, isBlindfoldSecretInfo := privateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_BlindfoldSecretInfo)
+												blindfoldSecretInfoAttributeMap := make(map[string]attr.Value)
+
+												if isBlindfoldSecretInfo && blindfoldSecretInfoOptions != nil {
+
+													// data specToModelNested StringField --> DecryptionProvider
+													if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider() != "" {
+														blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider())
+													} else {
+														// Empty string, set to null
+														blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringNull()
+													}
+
+													// data specToModelNested StringField --> StoreProvider
+													if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider() != "" {
+														blindfoldSecretInfoAttributeMap["store_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider())
+													} else {
+														// Empty string, set to null
+														blindfoldSecretInfoAttributeMap["store_provider"] = types.StringNull()
+													}
+
+													// data specToModelNested RequiredStringField --> Location
+													if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation() != "" {
+														blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation())
+													} else {
+														// Empty string, set to null
+														blindfoldSecretInfoAttributeMap["location"] = types.StringNull()
+													}
+
+													blindfoldSecretInfoObj, diags := types.ObjectValue(OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeySecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
+													response.Diagnostics.Append(diags...)
+													if response.Diagnostics.HasError() {
+														return
+													}
+													privateKeysecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = blindfoldSecretInfoObj
+												} else {
+													privateKeysecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = types.ObjectNull(OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeySecretInfoOneofBlindfoldSecretInfoModelAttributeMap)
+												}
+											}
+
+											// data specToModelNested PointerOfOneOfField --> ClearSecretInfo
+											// <no value>
+											// false
+											{
+												clearSecretInfoOptions, isClearSecretInfo := privateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_ClearSecretInfo)
+												clearSecretInfoAttributeMap := make(map[string]attr.Value)
+
+												if isClearSecretInfo && clearSecretInfoOptions != nil {
+
+													// data specToModelNested StringField --> Provider
+													if clearSecretInfoOptions.ClearSecretInfo.GetProvider() != "" {
+														clearSecretInfoAttributeMap["provider"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetProvider())
+													} else {
+														// Empty string, set to null
+														clearSecretInfoAttributeMap["provider"] = types.StringNull()
+													}
+
+													// data specToModelNested RequiredStringField --> Url
+													if clearSecretInfoOptions.ClearSecretInfo.GetUrl() != "" {
+														clearSecretInfoAttributeMap["url"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetUrl())
+													} else {
+														// Empty string, set to null
+														clearSecretInfoAttributeMap["url"] = types.StringNull()
+													}
+
+													clearSecretInfoObj, diags := types.ObjectValue(OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap, clearSecretInfoAttributeMap)
+													response.Diagnostics.Append(diags...)
+													if response.Diagnostics.HasError() {
+														return
+													}
+													privateKeysecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = clearSecretInfoObj
+												} else {
+													privateKeysecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap)
+												}
+											}
+
+											// --- End of Choices ---
+
+											// Create the final ObjectValue for this OneOf field
+											finalObj, privateKeysecretInfoChoiceChoicesObjDiags := types.ObjectValue(
+												OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeySecretInfoOneofModelAttributeMap, // The attribute schema for the OneOf choices
+												privateKeysecretInfoChoiceChoicesAttributeMap,
+											)
+											response.Diagnostics.Append(privateKeysecretInfoChoiceChoicesObjDiags...)
+											if response.Diagnostics.HasError() {
+												return
+											}
+
+											// Assign the final object to the correct place (either the root model or a parent's attribute map)
+											originPoolSecretTypeModel.SecretInfoChoice = finalObj
+										} else {
+											// The OneOf field is nil in the source spec, so set the Terraform object to null.
+											// State Healing: The API redacted the OneOf secret field (returned nil). Restore the entire
+											// secret_info_choice object from prior Terraform state so that the model reflects what the
+											// user originally configured and Terraform does not detect a false drift.
+											{
+												savedSecretInfoChoicePath := path.Root("tls_choice").AtName("use_tls").AtName("mtls_choice").AtName("use_mtls").AtName("tls_certificates").AtListIndex(0).AtName("private_key").AtName("secret_info_choice")
+												var savedSecretInfoChoice types.Object
+												stateHealDiags := request.Config.GetAttribute(ctx, savedSecretInfoChoicePath, &savedSecretInfoChoice)
+												if !stateHealDiags.HasError() && !savedSecretInfoChoice.IsNull() && !savedSecretInfoChoice.IsUnknown() {
+													originPoolSecretTypeModel.SecretInfoChoice = savedSecretInfoChoice
+												} else {
+													originPoolSecretTypeModel.SecretInfoChoice = types.ObjectNull(OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeySecretInfoOneofModelAttributeMap)
+												}
+											}
+										}
+
+										// This field needs to be converted to a types.ObjectValue before assignment.
+										originPoolSecretTypeModelObj, diags := types.ObjectValueFrom(ctx, OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeyModelAttributeMap, originPoolSecretTypeModel)
+										response.Diagnostics.Append(diags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										originPoolTlsCertificateTypeModel.PrivateKey = originPoolSecretTypeModelObj
+
+									} else {
+										// The source field is nil (e.g. redacted by the API).
+										// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
+										// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
+										// here because the API may always return a non-nil struct (with REDACTED values) for this
+										// field, making this else-branch unreachable. The child OneOf handles the actual healing.
+										// The target is a types.Object, so we use types.ObjectNull.
+										originPoolTlsCertificateTypeModel.PrivateKey = types.ObjectNull(OriginPoolTlsChoiceUseTlsMtlsChoiceUseMtlsTlsCertificatesPrivateKeyModelAttributeMap)
 									}
 
 									tlsCertificatesElements = append(tlsCertificatesElements, originPoolTlsCertificateTypeModel)
@@ -6237,6 +7027,66 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 		data.TlsChoice = types.ObjectNull(OriginPoolTlsChoiceModelAttributeMap)
 	}
 
+	// data SpecToModelRoot RequiredOneOfField --> PortChoice
+	// false
+	// false
+	// This resource uses standard struct-based resolution.
+	if specData.GetPortChoice() != nil {
+		// Define a variable for the spec choices to be passed down to nested templates.
+		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+		portChoiceChoices := specData.GetPortChoice()
+
+		// The model struct that will be populated by the nested template.
+		var portChoiceChoicesModel = &OriginPoolGlobalSpecTypePortChoice{}
+
+		// Recursively call the nested template to process the oneof choices.
+
+		// data specToModelNested BoolOfOneOfPointerField --> AutomaticPort
+		_, isAutomaticPort := portChoiceChoices.(*ves_io_schema_views_origin_pool.GlobalSpecType_AutomaticPort)
+
+		if isAutomaticPort {
+			portChoiceChoicesModel.AutomaticPort = types.BoolValue(true)
+		} else {
+			portChoiceChoicesModel.AutomaticPort = types.BoolNull()
+		}
+
+		// data specToModelNested BoolOfOneOfPointerField --> LbPort
+		_, isLbPort := portChoiceChoices.(*ves_io_schema_views_origin_pool.GlobalSpecType_LbPort)
+
+		if isLbPort {
+			portChoiceChoicesModel.LbPort = types.BoolValue(true)
+		} else {
+			portChoiceChoicesModel.LbPort = types.BoolNull()
+		}
+
+		// data specToModelNested UintOfOneOfField --> Port
+		portItem, isPort := portChoiceChoices.(*ves_io_schema_views_origin_pool.GlobalSpecType_Port)
+
+		if isPort {
+			portChoiceChoicesModel.Port = types.Int64Value(int64(portItem.Port))
+		} else {
+			// Empty uint, set to null
+			portChoiceChoicesModel.Port = types.Int64Null()
+		}
+
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		portChoiceObj, diags := utils.GoStructToObjectValue(
+			ctx,
+			OriginPoolPortChoiceModelAttributeMap,
+			portChoiceChoicesModel,
+		)
+		if diags.HasError() {
+			response.Diagnostics.Append(diags...)
+			return
+		}
+
+		// Assign the final object to the root data model.
+		data.PortChoice = portChoiceObj
+	} else {
+		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		data.PortChoice = types.ObjectNull(OriginPoolPortChoiceModelAttributeMap)
+	}
+
 	// data SpecToModelRoot ArrayOfPointerField --> Healthcheck
 	if len(specData.Healthcheck) > 0 {
 		healthcheckElements := make([]ObjectRefTypeModel, 0, len(specData.Healthcheck))
@@ -6291,21 +7141,6 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 		data.Healthcheck = nullHealthcheckList
 	}
 
-	// data SpecToModelRoot RequiredEnumField --> LoadbalancerAlgorithm
-	if specData.GetLoadbalancerAlgorithm().String() != "" {
-		stringValue := types.StringValue(specData.GetLoadbalancerAlgorithm().String())
-		stringSlice := []types.String{stringValue}
-		listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.LoadbalancerAlgorithm = listValue
-	} else {
-		// Empty string, set to null
-		data.LoadbalancerAlgorithm = types.ListNull(types.StringType)
-	}
-
 	// data SpecToModelRoot RequiredEnumField --> EndpointSelection
 	if specData.GetEndpointSelection().String() != "" {
 		stringValue := types.StringValue(specData.GetEndpointSelection().String())
@@ -6321,879 +7156,44 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 		data.EndpointSelection = types.ListNull(types.StringType)
 	}
 
-	// data SpecToModelRoot PointerField --> AdvancedOptions
-	if specData.GetAdvancedOptions() != nil {
-		var originPoolOriginPoolOriginPoolAdvancedOptionsModel = &OriginPoolOriginPoolOriginPoolAdvancedOptions{}
-		advancedOptionsElement := specData.GetAdvancedOptions()
-
-		// data specToModelNested OneOfField --> LbSourceIpPersistanceChoice
-		if advancedOptionsElement.GetLbSourceIpPersistanceChoice() != nil {
-			// Create a temporary attribute map for the choices within this OneOf
-			advancedOptionslbSourceIpPersistanceChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-			// Define a variable for the spec choices to be passed down to nested templates.
-			// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-			advancedOptionslbSourceIpPersistanceChoiceChoices := advancedOptionsElement.GetLbSourceIpPersistanceChoice()
-
-			// Process nested choices, populating the temporary attribute map
-
-			// data specToModelNested BoolOfOneOfPointerField --> EnableLbSourceIpPersistance
-			_, isEnableLbSourceIpPersistance := advancedOptionslbSourceIpPersistanceChoiceChoices.(*ves_io_schema_views_origin_pool.OriginPoolAdvancedOptions_EnableLbSourceIpPersistance)
-
-			if isEnableLbSourceIpPersistance {
-				advancedOptionslbSourceIpPersistanceChoiceChoicesAttributeMap["enable_lb_source_ip_persistance"] = types.BoolValue(true)
-			} else {
-				advancedOptionslbSourceIpPersistanceChoiceChoicesAttributeMap["enable_lb_source_ip_persistance"] = types.BoolNull()
-			}
-
-			// data specToModelNested BoolOfOneOfPointerField --> DisableLbSourceIpPersistance
-			_, isDisableLbSourceIpPersistance := advancedOptionslbSourceIpPersistanceChoiceChoices.(*ves_io_schema_views_origin_pool.OriginPoolAdvancedOptions_DisableLbSourceIpPersistance)
-
-			if isDisableLbSourceIpPersistance {
-				advancedOptionslbSourceIpPersistanceChoiceChoicesAttributeMap["disable_lb_source_ip_persistance"] = types.BoolValue(true)
-			} else {
-				advancedOptionslbSourceIpPersistanceChoiceChoicesAttributeMap["disable_lb_source_ip_persistance"] = types.BoolNull()
-			}
-
-			// --- End of Choices ---
-
-			// Create the final ObjectValue for this OneOf field
-			finalObj, advancedOptionslbSourceIpPersistanceChoiceChoicesObjDiags := types.ObjectValue(
-				OriginPoolAdvancedOptionsLbSourceIpPersistanceChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-				advancedOptionslbSourceIpPersistanceChoiceChoicesAttributeMap,
-			)
-			response.Diagnostics.Append(advancedOptionslbSourceIpPersistanceChoiceChoicesObjDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			originPoolOriginPoolOriginPoolAdvancedOptionsModel.LbSourceIpPersistanceChoice = finalObj
-		} else {
-			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			originPoolOriginPoolOriginPoolAdvancedOptionsModel.LbSourceIpPersistanceChoice = types.ObjectNull(OriginPoolAdvancedOptionsLbSourceIpPersistanceChoiceModelAttributeMap)
-		}
-
-		// data specToModelNested UintField --> ConnectionTimeout
-		originPoolOriginPoolOriginPoolAdvancedOptionsModel.ConnectionTimeout = types.Int64Value(int64(advancedOptionsElement.GetConnectionTimeout()))
-
-		// data specToModelNested RequiredOneOfField --> CircuitBreakerChoice
-		// <no value>
-		if advancedOptionsElement.GetCircuitBreakerChoice() != nil {
-			// Create a temporary attribute map for the choices within this OneOf
-			advancedOptionscircuitBreakerChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-			// Define a variable for the spec choices to be passed down to nested templates.
-			// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-			advancedOptionscircuitBreakerChoiceChoices := advancedOptionsElement.GetCircuitBreakerChoice()
-
-			// Process nested choices, populating the temporary attribute map
-
-			// data specToModelNested BoolOfOneOfPointerField --> DefaultCircuitBreaker
-			_, isDefaultCircuitBreaker := advancedOptionscircuitBreakerChoiceChoices.(*ves_io_schema_views_origin_pool.OriginPoolAdvancedOptions_DefaultCircuitBreaker)
-
-			if isDefaultCircuitBreaker {
-				advancedOptionscircuitBreakerChoiceChoicesAttributeMap["default_circuit_breaker"] = types.BoolValue(true)
-			} else {
-				advancedOptionscircuitBreakerChoiceChoicesAttributeMap["default_circuit_breaker"] = types.BoolNull()
-			}
-
-			// data specToModelNested BoolOfOneOfPointerField --> DisableCircuitBreaker
-			_, isDisableCircuitBreaker := advancedOptionscircuitBreakerChoiceChoices.(*ves_io_schema_views_origin_pool.OriginPoolAdvancedOptions_DisableCircuitBreaker)
-
-			if isDisableCircuitBreaker {
-				advancedOptionscircuitBreakerChoiceChoicesAttributeMap["disable_circuit_breaker"] = types.BoolValue(true)
-			} else {
-				advancedOptionscircuitBreakerChoiceChoicesAttributeMap["disable_circuit_breaker"] = types.BoolNull()
-			}
-
-			// data specToModelNested PointerOfOneOfField --> CircuitBreaker
-			// <no value>
-			// false
-			{
-				circuitBreakerOptions, isCircuitBreaker := advancedOptionscircuitBreakerChoiceChoices.(*ves_io_schema_views_origin_pool.OriginPoolAdvancedOptions_CircuitBreaker)
-				circuitBreakerAttributeMap := make(map[string]attr.Value)
-
-				if isCircuitBreaker && circuitBreakerOptions != nil {
-
-					// data specToModelNested UintField --> PendingRequests
-					circuitBreakerAttributeMap["pending_requests"] = types.Int64Value(int64(circuitBreakerOptions.CircuitBreaker.GetPendingRequests()))
-
-					// data specToModelNested UintField --> Retries
-					circuitBreakerAttributeMap["retries"] = types.Int64Value(int64(circuitBreakerOptions.CircuitBreaker.GetRetries()))
-
-					// data specToModelNested UintField --> MaxRequests
-					circuitBreakerAttributeMap["max_requests"] = types.Int64Value(int64(circuitBreakerOptions.CircuitBreaker.GetMaxRequests()))
-
-					// data specToModelNested EnumField --> Priority
-					if circuitBreakerOptions.CircuitBreaker.GetPriority().String() != "" {
-						stringValue := types.StringValue(circuitBreakerOptions.CircuitBreaker.GetPriority().String())
-						stringSlice := []types.String{stringValue}
-						listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						circuitBreakerAttributeMap["priority"] = listValue
-					} else {
-						circuitBreakerAttributeMap["priority"] = types.ListNull(types.StringType)
-					}
-
-					// data specToModelNested UintField --> ConnectionLimit
-					circuitBreakerAttributeMap["connection_limit"] = types.Int64Value(int64(circuitBreakerOptions.CircuitBreaker.GetConnectionLimit()))
-
-					circuitBreakerObj, diags := types.ObjectValue(OriginPoolAdvancedOptionsCircuitBreakerChoiceCircuitBreakerModelAttributeMap, circuitBreakerAttributeMap)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					advancedOptionscircuitBreakerChoiceChoicesAttributeMap["circuit_breaker"] = circuitBreakerObj
-				} else {
-					advancedOptionscircuitBreakerChoiceChoicesAttributeMap["circuit_breaker"] = types.ObjectNull(OriginPoolAdvancedOptionsCircuitBreakerChoiceCircuitBreakerModelAttributeMap)
-				}
-			}
-
-			// --- End of Choices ---
-
-			// Create the final ObjectValue for this OneOf field
-			finalObj, advancedOptionscircuitBreakerChoiceChoicesObjDiags := types.ObjectValue(
-				OriginPoolAdvancedOptionsCircuitBreakerChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-				advancedOptionscircuitBreakerChoiceChoicesAttributeMap,
-			)
-			response.Diagnostics.Append(advancedOptionscircuitBreakerChoiceChoicesObjDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			originPoolOriginPoolOriginPoolAdvancedOptionsModel.CircuitBreakerChoice = finalObj
-		} else {
-			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			originPoolOriginPoolOriginPoolAdvancedOptionsModel.CircuitBreakerChoice = types.ObjectNull(OriginPoolAdvancedOptionsCircuitBreakerChoiceModelAttributeMap)
-		}
-
-		// data specToModelNested RequiredOneOfField --> PanicThresholdType
-		// <no value>
-		if advancedOptionsElement.GetPanicThresholdType() != nil {
-			// Create a temporary attribute map for the choices within this OneOf
-			advancedOptionspanicThresholdTypeChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-			// Define a variable for the spec choices to be passed down to nested templates.
-			// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-			advancedOptionspanicThresholdTypeChoiceChoices := advancedOptionsElement.GetPanicThresholdType()
-
-			// Process nested choices, populating the temporary attribute map
-
-			// data specToModelNested BoolOfOneOfPointerField --> NoPanicThreshold
-			_, isNoPanicThreshold := advancedOptionspanicThresholdTypeChoiceChoices.(*ves_io_schema_views_origin_pool.OriginPoolAdvancedOptions_NoPanicThreshold)
-
-			if isNoPanicThreshold {
-				advancedOptionspanicThresholdTypeChoiceChoicesAttributeMap["no_panic_threshold"] = types.BoolValue(true)
-			} else {
-				advancedOptionspanicThresholdTypeChoiceChoicesAttributeMap["no_panic_threshold"] = types.BoolNull()
-			}
-
-			// data specToModelNested UintOfOneOfField --> PanicThreshold
-			panicThresholdItem, isPanicThreshold := advancedOptionspanicThresholdTypeChoiceChoices.(*ves_io_schema_views_origin_pool.OriginPoolAdvancedOptions_PanicThreshold)
-
-			if isPanicThreshold {
-				advancedOptionspanicThresholdTypeChoiceChoicesAttributeMap["panic_threshold"] = types.Int64Value(int64(panicThresholdItem.PanicThreshold))
-			} else {
-				// Empty uint, set to null
-				advancedOptionspanicThresholdTypeChoiceChoicesAttributeMap["panic_threshold"] = types.Int64Null()
-			}
-
-			// --- End of Choices ---
-
-			// Create the final ObjectValue for this OneOf field
-			finalObj, advancedOptionspanicThresholdTypeChoiceChoicesObjDiags := types.ObjectValue(
-				OriginPoolAdvancedOptionsPanicThresholdTypeModelAttributeMap, // The attribute schema for the OneOf choices
-				advancedOptionspanicThresholdTypeChoiceChoicesAttributeMap,
-			)
-			response.Diagnostics.Append(advancedOptionspanicThresholdTypeChoiceChoicesObjDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			originPoolOriginPoolOriginPoolAdvancedOptionsModel.PanicThresholdTypeChoice = finalObj
-		} else {
-			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			originPoolOriginPoolOriginPoolAdvancedOptionsModel.PanicThresholdTypeChoice = types.ObjectNull(OriginPoolAdvancedOptionsPanicThresholdTypeModelAttributeMap)
-		}
-
-		// data specToModelNested OneOfField --> ProxyProtocolChoice
-		if advancedOptionsElement.GetProxyProtocolChoice() != nil {
-			// Create a temporary attribute map for the choices within this OneOf
-			advancedOptionsproxyProtocolChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-			// Define a variable for the spec choices to be passed down to nested templates.
-			// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-			advancedOptionsproxyProtocolChoiceChoices := advancedOptionsElement.GetProxyProtocolChoice()
-
-			// Process nested choices, populating the temporary attribute map
-
-			// data specToModelNested BoolOfOneOfPointerField --> DisableProxyProtocol
-			_, isDisableProxyProtocol := advancedOptionsproxyProtocolChoiceChoices.(*ves_io_schema_views_origin_pool.OriginPoolAdvancedOptions_DisableProxyProtocol)
-
-			if isDisableProxyProtocol {
-				advancedOptionsproxyProtocolChoiceChoicesAttributeMap["disable_proxy_protocol"] = types.BoolValue(true)
-			} else {
-				advancedOptionsproxyProtocolChoiceChoicesAttributeMap["disable_proxy_protocol"] = types.BoolNull()
-			}
-
-			// data specToModelNested BoolOfOneOfPointerField --> ProxyProtocolV1
-			_, isProxyProtocolV1 := advancedOptionsproxyProtocolChoiceChoices.(*ves_io_schema_views_origin_pool.OriginPoolAdvancedOptions_ProxyProtocolV1)
-
-			if isProxyProtocolV1 {
-				advancedOptionsproxyProtocolChoiceChoicesAttributeMap["proxy_protocol_v1"] = types.BoolValue(true)
-			} else {
-				advancedOptionsproxyProtocolChoiceChoicesAttributeMap["proxy_protocol_v1"] = types.BoolNull()
-			}
-
-			// data specToModelNested BoolOfOneOfPointerField --> ProxyProtocolV2
-			_, isProxyProtocolV2 := advancedOptionsproxyProtocolChoiceChoices.(*ves_io_schema_views_origin_pool.OriginPoolAdvancedOptions_ProxyProtocolV2)
-
-			if isProxyProtocolV2 {
-				advancedOptionsproxyProtocolChoiceChoicesAttributeMap["proxy_protocol_v2"] = types.BoolValue(true)
-			} else {
-				advancedOptionsproxyProtocolChoiceChoicesAttributeMap["proxy_protocol_v2"] = types.BoolNull()
-			}
-
-			// --- End of Choices ---
-
-			// Create the final ObjectValue for this OneOf field
-			finalObj, advancedOptionsproxyProtocolChoiceChoicesObjDiags := types.ObjectValue(
-				OriginPoolAdvancedOptionsProxyProtocolChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-				advancedOptionsproxyProtocolChoiceChoicesAttributeMap,
-			)
-			response.Diagnostics.Append(advancedOptionsproxyProtocolChoiceChoicesObjDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			originPoolOriginPoolOriginPoolAdvancedOptionsModel.ProxyProtocolChoice = finalObj
-		} else {
-			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			originPoolOriginPoolOriginPoolAdvancedOptionsModel.ProxyProtocolChoice = types.ObjectNull(OriginPoolAdvancedOptionsProxyProtocolChoiceModelAttributeMap)
-		}
-
-		// data specToModelNested RequiredOneOfField --> MaxRequestsPerConnectionChoice
-		// <no value>
-		if advancedOptionsElement.GetMaxRequestsPerConnectionChoice() != nil {
-			// Create a temporary attribute map for the choices within this OneOf
-			advancedOptionsmaxRequestsPerConnectionChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-			// Define a variable for the spec choices to be passed down to nested templates.
-			// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-			advancedOptionsmaxRequestsPerConnectionChoiceChoices := advancedOptionsElement.GetMaxRequestsPerConnectionChoice()
-
-			// Process nested choices, populating the temporary attribute map
-
-			// data specToModelNested BoolOfOneOfPointerField --> NoRequestLimitPerConnection
-			_, isNoRequestLimitPerConnection := advancedOptionsmaxRequestsPerConnectionChoiceChoices.(*ves_io_schema_views_origin_pool.OriginPoolAdvancedOptions_NoRequestLimitPerConnection)
-
-			if isNoRequestLimitPerConnection {
-				advancedOptionsmaxRequestsPerConnectionChoiceChoicesAttributeMap["no_request_limit_per_connection"] = types.BoolValue(true)
-			} else {
-				advancedOptionsmaxRequestsPerConnectionChoiceChoicesAttributeMap["no_request_limit_per_connection"] = types.BoolNull()
-			}
-
-			// data specToModelNested UintOfOneOfField --> MaxRequestsPerConnection
-			maxRequestsPerConnectionItem, isMaxRequestsPerConnection := advancedOptionsmaxRequestsPerConnectionChoiceChoices.(*ves_io_schema_views_origin_pool.OriginPoolAdvancedOptions_MaxRequestsPerConnection)
-
-			if isMaxRequestsPerConnection {
-				advancedOptionsmaxRequestsPerConnectionChoiceChoicesAttributeMap["max_requests_per_connection"] = types.Int64Value(int64(maxRequestsPerConnectionItem.MaxRequestsPerConnection))
-			} else {
-				// Empty uint, set to null
-				advancedOptionsmaxRequestsPerConnectionChoiceChoicesAttributeMap["max_requests_per_connection"] = types.Int64Null()
-			}
-
-			// --- End of Choices ---
-
-			// Create the final ObjectValue for this OneOf field
-			finalObj, advancedOptionsmaxRequestsPerConnectionChoiceChoicesObjDiags := types.ObjectValue(
-				OriginPoolAdvancedOptionsMaxRequestsPerConnectionChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-				advancedOptionsmaxRequestsPerConnectionChoiceChoicesAttributeMap,
-			)
-			response.Diagnostics.Append(advancedOptionsmaxRequestsPerConnectionChoiceChoicesObjDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			originPoolOriginPoolOriginPoolAdvancedOptionsModel.MaxRequestsPerConnectionChoice = finalObj
-		} else {
-			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			originPoolOriginPoolOriginPoolAdvancedOptionsModel.MaxRequestsPerConnectionChoice = types.ObjectNull(OriginPoolAdvancedOptionsMaxRequestsPerConnectionChoiceModelAttributeMap)
-		}
-
-		// data specToModelNested UintField --> HttpIdleTimeout
-		originPoolOriginPoolOriginPoolAdvancedOptionsModel.HttpIdleTimeout = types.Int64Value(int64(advancedOptionsElement.GetHttpIdleTimeout()))
-
-		// data specToModelNested RequiredOneOfField --> OutlierDetectionChoice
-		// <no value>
-		if advancedOptionsElement.GetOutlierDetectionChoice() != nil {
-			// Create a temporary attribute map for the choices within this OneOf
-			advancedOptionsoutlierDetectionChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-			// Define a variable for the spec choices to be passed down to nested templates.
-			// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-			advancedOptionsoutlierDetectionChoiceChoices := advancedOptionsElement.GetOutlierDetectionChoice()
-
-			// Process nested choices, populating the temporary attribute map
-
-			// data specToModelNested BoolOfOneOfPointerField --> DisableOutlierDetection
-			_, isDisableOutlierDetection := advancedOptionsoutlierDetectionChoiceChoices.(*ves_io_schema_views_origin_pool.OriginPoolAdvancedOptions_DisableOutlierDetection)
-
-			if isDisableOutlierDetection {
-				advancedOptionsoutlierDetectionChoiceChoicesAttributeMap["disable_outlier_detection"] = types.BoolValue(true)
-			} else {
-				advancedOptionsoutlierDetectionChoiceChoicesAttributeMap["disable_outlier_detection"] = types.BoolNull()
-			}
-
-			// data specToModelNested PointerOfOneOfField --> OutlierDetection
-			// <no value>
-			// false
-			{
-				outlierDetectionOptions, isOutlierDetection := advancedOptionsoutlierDetectionChoiceChoices.(*ves_io_schema_views_origin_pool.OriginPoolAdvancedOptions_OutlierDetection)
-				outlierDetectionAttributeMap := make(map[string]attr.Value)
-
-				if isOutlierDetection && outlierDetectionOptions != nil {
-
-					// data specToModelNested UintField --> Consecutive_5Xx
-					outlierDetectionAttributeMap["consecutive_5xx"] = types.Int64Value(int64(outlierDetectionOptions.OutlierDetection.GetConsecutive_5Xx()))
-
-					// data specToModelNested UintField --> Interval
-					outlierDetectionAttributeMap["interval"] = types.Int64Value(int64(outlierDetectionOptions.OutlierDetection.GetInterval()))
-
-					// data specToModelNested UintField --> BaseEjectionTime
-					outlierDetectionAttributeMap["base_ejection_time"] = types.Int64Value(int64(outlierDetectionOptions.OutlierDetection.GetBaseEjectionTime()))
-
-					// data specToModelNested UintField --> MaxEjectionPercent
-					outlierDetectionAttributeMap["max_ejection_percent"] = types.Int64Value(int64(outlierDetectionOptions.OutlierDetection.GetMaxEjectionPercent()))
-
-					// data specToModelNested UintField --> ConsecutiveGatewayFailure
-					outlierDetectionAttributeMap["consecutive_gateway_failure"] = types.Int64Value(int64(outlierDetectionOptions.OutlierDetection.GetConsecutiveGatewayFailure()))
-
-					outlierDetectionObj, diags := types.ObjectValue(OriginPoolAdvancedOptionsOutlierDetectionChoiceOutlierDetectionModelAttributeMap, outlierDetectionAttributeMap)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					advancedOptionsoutlierDetectionChoiceChoicesAttributeMap["outlier_detection"] = outlierDetectionObj
-				} else {
-					advancedOptionsoutlierDetectionChoiceChoicesAttributeMap["outlier_detection"] = types.ObjectNull(OriginPoolAdvancedOptionsOutlierDetectionChoiceOutlierDetectionModelAttributeMap)
-				}
-			}
-
-			// --- End of Choices ---
-
-			// Create the final ObjectValue for this OneOf field
-			finalObj, advancedOptionsoutlierDetectionChoiceChoicesObjDiags := types.ObjectValue(
-				OriginPoolAdvancedOptionsOutlierDetectionChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-				advancedOptionsoutlierDetectionChoiceChoicesAttributeMap,
-			)
-			response.Diagnostics.Append(advancedOptionsoutlierDetectionChoiceChoicesObjDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			originPoolOriginPoolOriginPoolAdvancedOptionsModel.OutlierDetectionChoice = finalObj
-		} else {
-			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			originPoolOriginPoolOriginPoolAdvancedOptionsModel.OutlierDetectionChoice = types.ObjectNull(OriginPoolAdvancedOptionsOutlierDetectionChoiceModelAttributeMap)
-		}
-
-		// data specToModelNested RequiredOneOfField --> SubsetChoice
-		// <no value>
-		if advancedOptionsElement.GetSubsetChoice() != nil {
-			// Create a temporary attribute map for the choices within this OneOf
-			advancedOptionssubsetChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-			// Define a variable for the spec choices to be passed down to nested templates.
-			// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-			advancedOptionssubsetChoiceChoices := advancedOptionsElement.GetSubsetChoice()
-
-			// Process nested choices, populating the temporary attribute map
-
-			// data specToModelNested BoolOfOneOfPointerField --> DisableSubsets
-			_, isDisableSubsets := advancedOptionssubsetChoiceChoices.(*ves_io_schema_views_origin_pool.OriginPoolAdvancedOptions_DisableSubsets)
-
-			if isDisableSubsets {
-				advancedOptionssubsetChoiceChoicesAttributeMap["disable_subsets"] = types.BoolValue(true)
-			} else {
-				advancedOptionssubsetChoiceChoicesAttributeMap["disable_subsets"] = types.BoolNull()
-			}
-
-			// data specToModelNested PointerOfOneOfField --> EnableSubsets
-			// <no value>
-			// false
-			{
-				enableSubsetsOptions, isEnableSubsets := advancedOptionssubsetChoiceChoices.(*ves_io_schema_views_origin_pool.OriginPoolAdvancedOptions_EnableSubsets)
-				enableSubsetsAttributeMap := make(map[string]attr.Value)
-
-				if isEnableSubsets && enableSubsetsOptions != nil {
-
-					// data specToModelNested RequiredArrayOfPointerField --> EndpointSubsets
-					if len(enableSubsetsOptions.EnableSubsets.GetEndpointSubsets()) > 0 {
-						// Step 1: Always create a slice of model structs from the spec data.
-						// This slice serves as an intermediate representation.
-						endpointSubsetsElements := make([]OriginPoolClusterEndpointSubsetSelectorType, 0, len(enableSubsetsOptions.EnableSubsets.GetEndpointSubsets()))
-						for _, endpointSubsetsElement := range enableSubsetsOptions.EnableSubsets.GetEndpointSubsets() {
-							originPoolClusterEndpointSubsetSelectorTypeModel := OriginPoolClusterEndpointSubsetSelectorType{}
-
-							// data specToModelNested RequiredArrayOfStringField --> Keys
-							if len(endpointSubsetsElement.GetKeys()) > 0 {
-								listValue, diags := types.ListValueFrom(ctx, types.StringType, endpointSubsetsElement.GetKeys())
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								originPoolClusterEndpointSubsetSelectorTypeModel.Keys = listValue
-							} else {
-								originPoolClusterEndpointSubsetSelectorTypeModel.Keys = types.ListNull(types.StringType)
-							}
-
-							endpointSubsetsElements = append(endpointSubsetsElements, originPoolClusterEndpointSubsetSelectorTypeModel)
-						}
-						// CASE 1: The target field is a `types.List` or an attribute map.
-						// The intermediate slice of structs must be converted to a `types.ListValue`.
-						endpointSubsetsListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: OriginPoolAdvancedOptionsSubsetChoiceEnableSubsetsEndpointSubsetsModelAttributeMap}, endpointSubsetsElements)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						enableSubsetsAttributeMap["endpoint_subsets"] = endpointSubsetsListValue
-
-					} else {
-						// The source list is empty or nil.
-						// CASE 1: The target field is a `types.List` or an attribute map.
-						// Assign a null `types.ListValue`.
-						enableSubsetsAttributeMap["endpoint_subsets"] = types.ListNull(types.ObjectType{AttrTypes: OriginPoolAdvancedOptionsSubsetChoiceEnableSubsetsEndpointSubsetsModelAttributeMap})
-					}
-
-					// data specToModelNested RequiredOneOfField --> FallbackPolicyChoice
-					// <no value>
-					if enableSubsetsOptions.EnableSubsets.GetFallbackPolicyChoice() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						enableSubsetsfallbackPolicyChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates.
-						// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-						enableSubsetsfallbackPolicyChoiceChoices := enableSubsetsOptions.EnableSubsets.GetFallbackPolicyChoice()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// data specToModelNested BoolOfOneOfPointerField --> AnyEndpoint
-						_, isAnyEndpoint := enableSubsetsfallbackPolicyChoiceChoices.(*ves_io_schema_views_origin_pool.OriginPoolSubsets_AnyEndpoint)
-
-						if isAnyEndpoint {
-							enableSubsetsfallbackPolicyChoiceChoicesAttributeMap["any_endpoint"] = types.BoolValue(true)
-						} else {
-							enableSubsetsfallbackPolicyChoiceChoicesAttributeMap["any_endpoint"] = types.BoolNull()
-						}
-
-						// data specToModelNested PointerOfOneOfField --> DefaultSubset
-						// <no value>
-						// false
-						{
-							defaultSubsetOptions, isDefaultSubset := enableSubsetsfallbackPolicyChoiceChoices.(*ves_io_schema_views_origin_pool.OriginPoolSubsets_DefaultSubset)
-							defaultSubsetAttributeMap := make(map[string]attr.Value)
-
-							if isDefaultSubset && defaultSubsetOptions != nil {
-
-								// data specToModelNested MapOfStringField --> DefaultSubset
-								if defaultSubsetOptions.DefaultSubset.GetDefaultSubset() != nil {
-									// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-									defaultSubsetMap, defaultSubsetDiags := utils.StringMapToTerraformMap(defaultSubsetOptions.DefaultSubset.GetDefaultSubset())
-									response.Diagnostics.Append(defaultSubsetDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									// Assign the typed map to the model
-									defaultSubsetAttributeMap["default_subset"] = defaultSubsetMap
-								} else {
-									// Ensure the state reflects a Null map with the correct element type to avoid DynamicPseudoType errors
-									defaultSubsetAttributeMap["default_subset"] = types.MapNull(types.StringType)
-								}
-
-								defaultSubsetObj, diags := types.ObjectValue(OriginPoolAdvancedOptionsSubsetChoiceEnableSubsetsFallbackPolicyChoiceDefaultSubsetModelAttributeMap, defaultSubsetAttributeMap)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								enableSubsetsfallbackPolicyChoiceChoicesAttributeMap["default_subset"] = defaultSubsetObj
-							} else {
-								enableSubsetsfallbackPolicyChoiceChoicesAttributeMap["default_subset"] = types.ObjectNull(OriginPoolAdvancedOptionsSubsetChoiceEnableSubsetsFallbackPolicyChoiceDefaultSubsetModelAttributeMap)
-							}
-						}
-
-						// data specToModelNested BoolOfOneOfPointerField --> FailRequest
-						_, isFailRequest := enableSubsetsfallbackPolicyChoiceChoices.(*ves_io_schema_views_origin_pool.OriginPoolSubsets_FailRequest)
-
-						if isFailRequest {
-							enableSubsetsfallbackPolicyChoiceChoicesAttributeMap["fail_request"] = types.BoolValue(true)
-						} else {
-							enableSubsetsfallbackPolicyChoiceChoicesAttributeMap["fail_request"] = types.BoolNull()
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, enableSubsetsfallbackPolicyChoiceChoicesObjDiags := types.ObjectValue(
-							OriginPoolAdvancedOptionsSubsetChoiceEnableSubsetsFallbackPolicyChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-							enableSubsetsfallbackPolicyChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(enableSubsetsfallbackPolicyChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						enableSubsetsAttributeMap["fallback_policy_choice"] = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						enableSubsetsAttributeMap["fallback_policy_choice"] = types.ObjectNull(OriginPoolAdvancedOptionsSubsetChoiceEnableSubsetsFallbackPolicyChoiceModelAttributeMap)
-					}
-
-					enableSubsetsObj, diags := types.ObjectValue(OriginPoolAdvancedOptionsSubsetChoiceEnableSubsetsModelAttributeMap, enableSubsetsAttributeMap)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					advancedOptionssubsetChoiceChoicesAttributeMap["enable_subsets"] = enableSubsetsObj
-				} else {
-					advancedOptionssubsetChoiceChoicesAttributeMap["enable_subsets"] = types.ObjectNull(OriginPoolAdvancedOptionsSubsetChoiceEnableSubsetsModelAttributeMap)
-				}
-			}
-
-			// --- End of Choices ---
-
-			// Create the final ObjectValue for this OneOf field
-			finalObj, advancedOptionssubsetChoiceChoicesObjDiags := types.ObjectValue(
-				OriginPoolAdvancedOptionsSubsetChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-				advancedOptionssubsetChoiceChoicesAttributeMap,
-			)
-			response.Diagnostics.Append(advancedOptionssubsetChoiceChoicesObjDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			originPoolOriginPoolOriginPoolAdvancedOptionsModel.SubsetChoice = finalObj
-		} else {
-			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			originPoolOriginPoolOriginPoolAdvancedOptionsModel.SubsetChoice = types.ObjectNull(OriginPoolAdvancedOptionsSubsetChoiceModelAttributeMap)
-		}
-
-		// data specToModelNested RequiredOneOfField --> HttpProtocolType
-		// <no value>
-		if advancedOptionsElement.GetHttpProtocolType() != nil {
-			// Create a temporary attribute map for the choices within this OneOf
-			advancedOptionshttpProtocolTypeChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-			// Define a variable for the spec choices to be passed down to nested templates.
-			// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-			advancedOptionshttpProtocolTypeChoiceChoices := advancedOptionsElement.GetHttpProtocolType()
-
-			// Process nested choices, populating the temporary attribute map
-
-			// data specToModelNested PointerOfOneOfField --> Http1Config
-			// <no value>
-			// false
-			{
-				http1ConfigOptions, isHttp1Config := advancedOptionshttpProtocolTypeChoiceChoices.(*ves_io_schema_views_origin_pool.OriginPoolAdvancedOptions_Http1Config)
-				http1ConfigAttributeMap := make(map[string]attr.Value)
-
-				if isHttp1Config && http1ConfigOptions != nil {
-
-					// data specToModelNested PointerField --> HeaderTransformation
-					if http1ConfigOptions.Http1Config.GetHeaderTransformation() != nil {
-						// Create the nested Go struct
-						originPoolHeaderTransformationTypeModel := &OriginPoolHeaderTransformationType{}
-						headerTransformationElement := http1ConfigOptions.Http1Config.GetHeaderTransformation()
-
-						// Recursively populate the nested struct
-
-						// data specToModelNested RequiredOneOfField --> HeaderTransformationChoice
-						// <no value>
-						if headerTransformationElement.GetHeaderTransformationChoice() != nil {
-							// Create a temporary attribute map for the choices within this OneOf
-							headerTransformationheaderTransformationChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-							// Define a variable for the spec choices to be passed down to nested templates.
-							// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-							headerTransformationheaderTransformationChoiceChoices := headerTransformationElement.GetHeaderTransformationChoice()
-
-							// Process nested choices, populating the temporary attribute map
-
-							// data specToModelNested BoolOfOneOfPointerField --> LegacyHeaderTransformation
-							_, isLegacyHeaderTransformation := headerTransformationheaderTransformationChoiceChoices.(*ves_io_schema.HeaderTransformationType_LegacyHeaderTransformation)
-
-							if isLegacyHeaderTransformation {
-								headerTransformationheaderTransformationChoiceChoicesAttributeMap["legacy_header_transformation"] = types.BoolValue(true)
-							} else {
-								headerTransformationheaderTransformationChoiceChoicesAttributeMap["legacy_header_transformation"] = types.BoolNull()
-							}
-
-							// data specToModelNested BoolOfOneOfPointerField --> DefaultHeaderTransformation
-							_, isDefaultHeaderTransformation := headerTransformationheaderTransformationChoiceChoices.(*ves_io_schema.HeaderTransformationType_DefaultHeaderTransformation)
-
-							if isDefaultHeaderTransformation {
-								headerTransformationheaderTransformationChoiceChoicesAttributeMap["default_header_transformation"] = types.BoolValue(true)
-							} else {
-								headerTransformationheaderTransformationChoiceChoicesAttributeMap["default_header_transformation"] = types.BoolNull()
-							}
-
-							// data specToModelNested BoolOfOneOfPointerField --> ProperCaseHeaderTransformation
-							_, isProperCaseHeaderTransformation := headerTransformationheaderTransformationChoiceChoices.(*ves_io_schema.HeaderTransformationType_ProperCaseHeaderTransformation)
-
-							if isProperCaseHeaderTransformation {
-								headerTransformationheaderTransformationChoiceChoicesAttributeMap["proper_case_header_transformation"] = types.BoolValue(true)
-							} else {
-								headerTransformationheaderTransformationChoiceChoicesAttributeMap["proper_case_header_transformation"] = types.BoolNull()
-							}
-
-							// data specToModelNested BoolOfOneOfPointerField --> PreserveCaseHeaderTransformation
-							_, isPreserveCaseHeaderTransformation := headerTransformationheaderTransformationChoiceChoices.(*ves_io_schema.HeaderTransformationType_PreserveCaseHeaderTransformation)
-
-							if isPreserveCaseHeaderTransformation {
-								headerTransformationheaderTransformationChoiceChoicesAttributeMap["preserve_case_header_transformation"] = types.BoolValue(true)
-							} else {
-								headerTransformationheaderTransformationChoiceChoicesAttributeMap["preserve_case_header_transformation"] = types.BoolNull()
-							}
-
-							// --- End of Choices ---
-
-							// Create the final ObjectValue for this OneOf field
-							finalObj, headerTransformationheaderTransformationChoiceChoicesObjDiags := types.ObjectValue(
-								OriginPoolAdvancedOptionsHttpProtocolTypeHttp1ConfigHeaderTransformationHeaderTransformationChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-								headerTransformationheaderTransformationChoiceChoicesAttributeMap,
-							)
-							response.Diagnostics.Append(headerTransformationheaderTransformationChoiceChoicesObjDiags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// Assign the final object to the correct place (either the root model or a parent's attribute map)
-							originPoolHeaderTransformationTypeModel.HeaderTransformationChoice = finalObj
-						} else {
-							// The OneOf field is nil in the source spec, so set the Terraform object to null.
-							originPoolHeaderTransformationTypeModel.HeaderTransformationChoice = types.ObjectNull(OriginPoolAdvancedOptionsHttpProtocolTypeHttp1ConfigHeaderTransformationHeaderTransformationChoiceModelAttributeMap)
-						}
-
-						// This field needs to be converted to a types.ObjectValue before assignment.
-						originPoolHeaderTransformationTypeModelObj, diags := types.ObjectValueFrom(ctx, OriginPoolAdvancedOptionsHttpProtocolTypeHttp1ConfigHeaderTransformationModelAttributeMap, originPoolHeaderTransformationTypeModel)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						http1ConfigAttributeMap["header_transformation"] = originPoolHeaderTransformationTypeModelObj
-
-					} else {
-						// The source field is nil (e.g. redacted by the API).
-						// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-						// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-						// because the API may always return a non-nil struct (with REDACTED values) for this field,
-						// making this else-branch unreachable. The child OneOf handles the actual healing.
-						// The target is a types.Object, so we use types.ObjectNull.
-						http1ConfigAttributeMap["header_transformation"] = types.ObjectNull(OriginPoolAdvancedOptionsHttpProtocolTypeHttp1ConfigHeaderTransformationModelAttributeMap)
-					}
-
-					http1ConfigObj, diags := types.ObjectValue(OriginPoolAdvancedOptionsHttpProtocolTypeHttp1ConfigModelAttributeMap, http1ConfigAttributeMap)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					advancedOptionshttpProtocolTypeChoiceChoicesAttributeMap["http1_config"] = http1ConfigObj
-				} else {
-					advancedOptionshttpProtocolTypeChoiceChoicesAttributeMap["http1_config"] = types.ObjectNull(OriginPoolAdvancedOptionsHttpProtocolTypeHttp1ConfigModelAttributeMap)
-				}
-			}
-
-			// data specToModelNested PointerOfOneOfField --> Http2Options
-			// <no value>
-			// false
-			{
-				http2OptionsOptions, isHttp2Options := advancedOptionshttpProtocolTypeChoiceChoices.(*ves_io_schema_views_origin_pool.OriginPoolAdvancedOptions_Http2Options)
-				http2OptionsAttributeMap := make(map[string]attr.Value)
-
-				if isHttp2Options && http2OptionsOptions != nil {
-
-					// data specToModelNested BoolField --> Enabled
-					http2OptionsAttributeMap["enabled"] = types.BoolValue(bool(http2OptionsOptions.Http2Options.GetEnabled()))
-
-					http2OptionsObj, diags := types.ObjectValue(OriginPoolAdvancedOptionsHttpProtocolTypeHttp2OptionsModelAttributeMap, http2OptionsAttributeMap)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					advancedOptionshttpProtocolTypeChoiceChoicesAttributeMap["http2_options"] = http2OptionsObj
-				} else {
-					advancedOptionshttpProtocolTypeChoiceChoicesAttributeMap["http2_options"] = types.ObjectNull(OriginPoolAdvancedOptionsHttpProtocolTypeHttp2OptionsModelAttributeMap)
-				}
-			}
-
-			// data specToModelNested BoolOfOneOfPointerField --> AutoHttpConfig
-			_, isAutoHttpConfig := advancedOptionshttpProtocolTypeChoiceChoices.(*ves_io_schema_views_origin_pool.OriginPoolAdvancedOptions_AutoHttpConfig)
-
-			if isAutoHttpConfig {
-				advancedOptionshttpProtocolTypeChoiceChoicesAttributeMap["auto_http_config"] = types.BoolValue(true)
-			} else {
-				advancedOptionshttpProtocolTypeChoiceChoicesAttributeMap["auto_http_config"] = types.BoolNull()
-			}
-
-			// --- End of Choices ---
-
-			// Create the final ObjectValue for this OneOf field
-			finalObj, advancedOptionshttpProtocolTypeChoiceChoicesObjDiags := types.ObjectValue(
-				OriginPoolAdvancedOptionsHttpProtocolTypeModelAttributeMap, // The attribute schema for the OneOf choices
-				advancedOptionshttpProtocolTypeChoiceChoicesAttributeMap,
-			)
-			response.Diagnostics.Append(advancedOptionshttpProtocolTypeChoiceChoicesObjDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			originPoolOriginPoolOriginPoolAdvancedOptionsModel.HttpProtocolTypeChoice = finalObj
-		} else {
-			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			originPoolOriginPoolOriginPoolAdvancedOptionsModel.HttpProtocolTypeChoice = types.ObjectNull(OriginPoolAdvancedOptionsHttpProtocolTypeModelAttributeMap)
-		}
-
-		advancedOptionsObj, advancedOptionsDiags := utils.GoStructToObjectValue(
-			ctx,
-			OriginPoolAdvancedOptionsModelAttributeMap,
-			originPoolOriginPoolOriginPoolAdvancedOptionsModel,
-		)
-		response.Diagnostics.Append(advancedOptionsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.AdvancedOptions = advancedOptionsObj
-	} else {
-		data.AdvancedOptions = types.ObjectNull(OriginPoolAdvancedOptionsModelAttributeMap)
-	}
-
-	// data SpecToModelRoot PointerField --> UpstreamConnPoolReuseType
-	if specData.GetUpstreamConnPoolReuseType() != nil {
-		var originPoolUpstreamConnPoolReuseTypeModel = &OriginPoolUpstreamConnPoolReuseType{}
-		upstreamConnPoolReuseTypeElement := specData.GetUpstreamConnPoolReuseType()
-
-		// data specToModelNested RequiredOneOfField --> MapDownstreamToUpstreamConnPoolType
-		// <no value>
-		if upstreamConnPoolReuseTypeElement.GetMapDownstreamToUpstreamConnPoolType() != nil {
-			// Create a temporary attribute map for the choices within this OneOf
-			upstreamConnPoolReuseTypemapDownstreamToUpstreamConnPoolTypeChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-			// Define a variable for the spec choices to be passed down to nested templates.
-			// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-			upstreamConnPoolReuseTypemapDownstreamToUpstreamConnPoolTypeChoiceChoices := upstreamConnPoolReuseTypeElement.GetMapDownstreamToUpstreamConnPoolType()
-
-			// Process nested choices, populating the temporary attribute map
-
-			// data specToModelNested BoolOfOneOfPointerField --> EnableConnPoolReuse
-			_, isEnableConnPoolReuse := upstreamConnPoolReuseTypemapDownstreamToUpstreamConnPoolTypeChoiceChoices.(*ves_io_schema.UpstreamConnPoolReuseType_EnableConnPoolReuse)
-
-			if isEnableConnPoolReuse {
-				upstreamConnPoolReuseTypemapDownstreamToUpstreamConnPoolTypeChoiceChoicesAttributeMap["enable_conn_pool_reuse"] = types.BoolValue(true)
-			} else {
-				upstreamConnPoolReuseTypemapDownstreamToUpstreamConnPoolTypeChoiceChoicesAttributeMap["enable_conn_pool_reuse"] = types.BoolNull()
-			}
-
-			// data specToModelNested BoolOfOneOfPointerField --> DisableConnPoolReuse
-			_, isDisableConnPoolReuse := upstreamConnPoolReuseTypemapDownstreamToUpstreamConnPoolTypeChoiceChoices.(*ves_io_schema.UpstreamConnPoolReuseType_DisableConnPoolReuse)
-
-			if isDisableConnPoolReuse {
-				upstreamConnPoolReuseTypemapDownstreamToUpstreamConnPoolTypeChoiceChoicesAttributeMap["disable_conn_pool_reuse"] = types.BoolValue(true)
-			} else {
-				upstreamConnPoolReuseTypemapDownstreamToUpstreamConnPoolTypeChoiceChoicesAttributeMap["disable_conn_pool_reuse"] = types.BoolNull()
-			}
-
-			// --- End of Choices ---
-
-			// Create the final ObjectValue for this OneOf field
-			finalObj, upstreamConnPoolReuseTypemapDownstreamToUpstreamConnPoolTypeChoiceChoicesObjDiags := types.ObjectValue(
-				OriginPoolUpstreamConnPoolReuseTypeMapDownstreamToUpstreamConnPoolTypeModelAttributeMap, // The attribute schema for the OneOf choices
-				upstreamConnPoolReuseTypemapDownstreamToUpstreamConnPoolTypeChoiceChoicesAttributeMap,
-			)
-			response.Diagnostics.Append(upstreamConnPoolReuseTypemapDownstreamToUpstreamConnPoolTypeChoiceChoicesObjDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			originPoolUpstreamConnPoolReuseTypeModel.MapDownstreamToUpstreamConnPoolTypeChoice = finalObj
-		} else {
-			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			originPoolUpstreamConnPoolReuseTypeModel.MapDownstreamToUpstreamConnPoolTypeChoice = types.ObjectNull(OriginPoolUpstreamConnPoolReuseTypeMapDownstreamToUpstreamConnPoolTypeModelAttributeMap)
-		}
-
-		upstreamConnPoolReuseTypeObj, upstreamConnPoolReuseTypeDiags := utils.GoStructToObjectValue(
-			ctx,
-			OriginPoolUpstreamConnPoolReuseTypeModelAttributeMap,
-			originPoolUpstreamConnPoolReuseTypeModel,
-		)
-		response.Diagnostics.Append(upstreamConnPoolReuseTypeDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.UpstreamConnPoolReuseType = upstreamConnPoolReuseTypeObj
-	} else {
-		data.UpstreamConnPoolReuseType = types.ObjectNull(OriginPoolUpstreamConnPoolReuseTypeModelAttributeMap)
-	}
-
-	// data SpecToModelRoot RequiredOneOfField --> PortChoice
+	// data SpecToModelRoot OneOfField --> HealthCheckPortChoice
 	// false
 	// false
 	// This resource uses standard struct-based resolution.
-	if specData.GetPortChoice() != nil {
+	if specData.GetHealthCheckPortChoice() != nil {
 		// Define a variable for the spec choices to be passed down to nested templates.
 		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-		portChoiceChoices := specData.GetPortChoice()
+		healthCheckPortChoiceChoices := specData.GetHealthCheckPortChoice()
 
 		// The model struct that will be populated by the nested template.
-		var portChoiceChoicesModel = &OriginPoolGlobalSpecTypePortChoice{}
+		var healthCheckPortChoiceChoicesModel = &OriginPoolGlobalSpecTypeHealthCheckPortChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
-		// data specToModelNested UintOfOneOfField --> Port
-		portItem, isPort := portChoiceChoices.(*ves_io_schema_views_origin_pool.GlobalSpecType_Port)
+		// data specToModelNested BoolOfOneOfPointerField --> SameAsEndpointPort
+		_, isSameAsEndpointPort := healthCheckPortChoiceChoices.(*ves_io_schema_views_origin_pool.GlobalSpecType_SameAsEndpointPort)
 
-		if isPort {
-			portChoiceChoicesModel.Port = types.Int64Value(int64(portItem.Port))
+		if isSameAsEndpointPort {
+			healthCheckPortChoiceChoicesModel.SameAsEndpointPort = types.BoolValue(true)
+		} else {
+			healthCheckPortChoiceChoicesModel.SameAsEndpointPort = types.BoolNull()
+		}
+
+		// data specToModelNested UintOfOneOfField --> HealthCheckPort
+		healthCheckPortItem, isHealthCheckPort := healthCheckPortChoiceChoices.(*ves_io_schema_views_origin_pool.GlobalSpecType_HealthCheckPort)
+
+		if isHealthCheckPort {
+			healthCheckPortChoiceChoicesModel.HealthCheckPort = types.Int64Value(int64(healthCheckPortItem.HealthCheckPort))
 		} else {
 			// Empty uint, set to null
-			portChoiceChoicesModel.Port = types.Int64Null()
-		}
-
-		// data specToModelNested BoolOfOneOfPointerField --> AutomaticPort
-		_, isAutomaticPort := portChoiceChoices.(*ves_io_schema_views_origin_pool.GlobalSpecType_AutomaticPort)
-
-		if isAutomaticPort {
-			portChoiceChoicesModel.AutomaticPort = types.BoolValue(true)
-		} else {
-			portChoiceChoicesModel.AutomaticPort = types.BoolNull()
-		}
-
-		// data specToModelNested BoolOfOneOfPointerField --> LbPort
-		_, isLbPort := portChoiceChoices.(*ves_io_schema_views_origin_pool.GlobalSpecType_LbPort)
-
-		if isLbPort {
-			portChoiceChoicesModel.LbPort = types.BoolValue(true)
-		} else {
-			portChoiceChoicesModel.LbPort = types.BoolNull()
+			healthCheckPortChoiceChoicesModel.HealthCheckPort = types.Int64Null()
 		}
 
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		portChoiceObj, diags := utils.GoStructToObjectValue(
+		healthCheckPortChoiceObj, diags := utils.GoStructToObjectValue(
 			ctx,
-			OriginPoolPortChoiceModelAttributeMap,
-			portChoiceChoicesModel,
+			OriginPoolHealthCheckPortChoiceModelAttributeMap,
+			healthCheckPortChoiceChoicesModel,
 		)
 		if diags.HasError() {
 			response.Diagnostics.Append(diags...)
@@ -7201,10 +7201,10 @@ func (d *DataSourceF5XCOriginPool) Read(ctx context.Context, request datasource.
 		}
 
 		// Assign the final object to the root data model.
-		data.PortChoice = portChoiceObj
+		data.HealthCheckPortChoice = healthCheckPortChoiceObj
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		data.PortChoice = types.ObjectNull(OriginPoolPortChoiceModelAttributeMap)
+		data.HealthCheckPortChoice = types.ObjectNull(OriginPoolHealthCheckPortChoiceModelAttributeMap)
 	}
 
 	// Set state to fully populated data

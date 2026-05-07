@@ -34,12 +34,12 @@ type DnsDomainGlobalSpecTypeDomainChoice struct {
 
 // DataSourceF5XCDnsDomainModel describes the resource data model.
 type DataSourceF5XCDnsDomainModel struct {
-	Labels       types.Map      `tfsdk:"labels"`
-	Annotations  types.Map      `tfsdk:"annotations"`
 	Description  types.String   `tfsdk:"description"`
 	Name         types.String   `tfsdk:"name"`
 	Namespace    types.String   `tfsdk:"namespace"`
 	Uid          types.String   `tfsdk:"uid"`
+	Labels       types.Map      `tfsdk:"labels"`
+	Annotations  types.Map      `tfsdk:"annotations"`
 	DomainChoice types.Object   `tfsdk:"domain_choice"`
 	TxtRecord    types.String   `tfsdk:"txt_record"`
 	DnssecMode   types.List     `tfsdk:"dnssec_mode"`
@@ -71,20 +71,6 @@ func (r *DataSourceF5XCDnsDomain) Schema(ctx context.Context, request datasource
 		Description:         "DnsDomain data source",
 
 		Attributes: map[string]schema.Attribute{
-			"labels": schema.MapAttribute{
-				Description: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
-			"annotations": schema.MapAttribute{
-				Description: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
 			"description": schema.StringAttribute{
 				Description: "description Human readable description for the object",
 				Required:    false,
@@ -108,6 +94,20 @@ func (r *DataSourceF5XCDnsDomain) Schema(ctx context.Context, request datasource
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
+			},
+			"labels": schema.MapAttribute{
+				Description: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				ElementType: types.StringType,
+			},
+			"annotations": schema.MapAttribute{
+				Description: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				ElementType: types.StringType,
 			},
 			"domain_choice": schema.SingleNestedAttribute{
 				Description: "Choice to Handle Domain Select method to handle this domain",
@@ -207,6 +207,18 @@ func (d *DataSourceF5XCDnsDomain) Read(ctx context.Context, request datasource.R
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
+	// data SpecToModelRoot Meta StringField --> Description
+	data.Description = types.StringValue(metaData.GetDescription())
+
+	// data SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
+
+	// data SpecToModelRoot Meta RequiredStringField --> Namespace
+	data.Namespace = types.StringValue(metaData.GetNamespace())
+
+	// data SpecToModelRoot Meta StringField --> Uid
+	data.Uid = types.StringValue(systemMetaData.GetUid())
+
 	// data SpecToModelRoot Meta MapOfStringField --> Labels
 	if metaData.GetLabels() != nil {
 		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
@@ -242,18 +254,6 @@ func (d *DataSourceF5XCDnsDomain) Read(ctx context.Context, request datasource.R
 		// "Provider produced inconsistent result after apply" errors.
 		data.Annotations = types.MapNull(types.StringType)
 	}
-
-	// data SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
-
-	// data SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
-
-	// data SpecToModelRoot Meta RequiredStringField --> Namespace
-	data.Namespace = types.StringValue(metaData.GetNamespace())
-
-	// data SpecToModelRoot Meta StringField --> Uid
-	data.Uid = types.StringValue(systemMetaData.GetUid())
 
 	// data SpecToModelRoot RequiredOneOfField --> DomainChoice
 	// false

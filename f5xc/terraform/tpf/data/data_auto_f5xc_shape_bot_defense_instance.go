@@ -48,8 +48,8 @@ type ShapeBotDefenseInstanceSecretTypeSecretInfoChoice struct {
 }
 
 type ShapeBotDefenseInstanceSecretTypeClearSecretInfo struct {
-	Url      types.String `tfsdk:"url"`
 	Provider types.String `tfsdk:"provider"`
+	Url      types.String `tfsdk:"url"`
 }
 
 type ShapeBotDefenseInstanceSecretTypeBlindfoldSecretInfo struct {
@@ -87,9 +87,9 @@ var ShapeBotDefenseInstanceWebModelAttributeMap = map[string]attr.Type{
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
 
-				"name":      types.StringType,
 				"tenant":    types.StringType,
 				"namespace": types.StringType,
+				"name":      types.StringType,
 			},
 		},
 	},
@@ -117,8 +117,8 @@ var ShapeBotDefenseInstanceWebApiKeySecretInfoOneofModelAttributeMap = map[strin
 // Attribute map for PointerOfOneOfField --> ClearSecretInfo
 var ShapeBotDefenseInstanceWebApiKeySecretInfoOneofClearSecretInfoModelAttributeMap = map[string]attr.Type{
 
-	"url":      types.StringType,
 	"provider": types.StringType,
+	"url":      types.StringType,
 }
 
 // Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
@@ -132,31 +132,31 @@ var ShapeBotDefenseInstanceWebApiKeySecretInfoOneofBlindfoldSecretInfoModelAttri
 // Attribute map for RequiredArrayOfPointerField --> Cluster
 var ShapeBotDefenseInstanceClusterObjectRefModelAttributeMap = map[string]attr.Type{
 
-	"name":      types.StringType,
 	"tenant":    types.StringType,
 	"namespace": types.StringType,
+	"name":      types.StringType,
 }
 
 // Attribute map for PointerField --> Mobile
 var ShapeBotDefenseInstanceMobileModelAttributeMap = map[string]attr.Type{
-	"api_key": types.ObjectType{
+
+	"cluster": types.ListType{
+		ElemType: types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+
+				"name":      types.StringType,
+				"tenant":    types.StringType,
+				"namespace": types.StringType,
+			},
+		},
+	},
+	"url":              types.StringType,
+	"telemetry_prefix": types.StringType, "api_key": types.ObjectType{
 		AttrTypes: map[string]attr.Type{
 			"secret_info_choice": types.ObjectType{
 				AttrTypes: ShapeBotDefenseInstanceMobileApiKeySecretInfoOneofModelAttributeMap,
 			}},
 	},
-	"cluster": types.ListType{
-		ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-
-				"namespace": types.StringType,
-				"name":      types.StringType,
-				"tenant":    types.StringType,
-			},
-		},
-	},
-	"url":              types.StringType,
-	"telemetry_prefix": types.StringType,
 }
 
 // Attribute map for PointerField --> ApiKey
@@ -196,9 +196,9 @@ var ShapeBotDefenseInstanceMobileApiKeySecretInfoOneofClearSecretInfoModelAttrib
 // Attribute map for ArrayOfPointerField --> JsCluster
 var ShapeBotDefenseInstanceJsClusterObjectRefModelAttributeMap = map[string]attr.Type{
 
+	"tenant":    types.StringType,
 	"namespace": types.StringType,
 	"name":      types.StringType,
-	"tenant":    types.StringType,
 }
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -293,14 +293,14 @@ func (r *DataSourceF5XCShapeBotDefenseInstance) Schema(ctx context.Context, requ
 										Optional:    false,
 										Computed:    true,
 										Attributes: map[string]schema.Attribute{
-											"url": schema.StringAttribute{
-												Description: "URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.",
+											"provider": schema.StringAttribute{
+												Description: "Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
 												Required:    false,
 												Optional:    false,
 												Computed:    true,
 											},
-											"provider": schema.StringAttribute{
-												Description: "Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
+											"url": schema.StringAttribute{
+												Description: "URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.",
 												Required:    false,
 												Optional:    false,
 												Computed:    true,
@@ -344,6 +344,42 @@ func (r *DataSourceF5XCShapeBotDefenseInstance) Schema(ctx context.Context, requ
 						Computed:    true,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
+								"tenant": schema.StringAttribute{
+									Description: "",
+									Required:    false,
+									Optional:    false,
+									Computed:    true,
+								},
+								"namespace": schema.StringAttribute{
+									Description: "",
+									Required:    false,
+									Optional:    false,
+									Computed:    true,
+								},
+								"name": schema.StringAttribute{
+									Description: "",
+									Required:    false,
+									Optional:    false,
+									Computed:    true,
+								},
+							},
+						},
+					},
+				},
+			},
+			"mobile": schema.SingleNestedAttribute{
+				Description: "SSE Instance for Mobile traffic SSE Instance for Mobile traffic",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				Attributes: map[string]schema.Attribute{
+					"cluster": schema.ListNestedAttribute{
+						Description: "SSE CLuster Shape SSE cluster",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
 								"name": schema.StringAttribute{
 									Description: "",
 									Required:    false,
@@ -365,14 +401,18 @@ func (r *DataSourceF5XCShapeBotDefenseInstance) Schema(ctx context.Context, requ
 							},
 						},
 					},
-				},
-			},
-			"mobile": schema.SingleNestedAttribute{
-				Description: "SSE Instance for Mobile traffic SSE Instance for Mobile traffic",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				Attributes: map[string]schema.Attribute{
+					"url": schema.StringAttribute{
+						Description: "URL of Shape Instance URL of deployed shared Shape Bot Defense Instance.",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
+					"telemetry_prefix": schema.StringAttribute{
+						Description: "Telemetry Prefix Shape Telemetry Prefix which is defined by DEX policy.",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
 					"api_key": schema.SingleNestedAttribute{
 						Description: "API key Shape API Key which is defined by DEX policy",
 						Required:    false,
@@ -435,46 +475,6 @@ func (r *DataSourceF5XCShapeBotDefenseInstance) Schema(ctx context.Context, requ
 							},
 						},
 					},
-					"cluster": schema.ListNestedAttribute{
-						Description: "SSE CLuster Shape SSE cluster",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-						NestedObject: schema.NestedAttributeObject{
-							Attributes: map[string]schema.Attribute{
-								"namespace": schema.StringAttribute{
-									Description: "",
-									Required:    false,
-									Optional:    false,
-									Computed:    true,
-								},
-								"name": schema.StringAttribute{
-									Description: "",
-									Required:    false,
-									Optional:    false,
-									Computed:    true,
-								},
-								"tenant": schema.StringAttribute{
-									Description: "",
-									Required:    false,
-									Optional:    false,
-									Computed:    true,
-								},
-							},
-						},
-					},
-					"url": schema.StringAttribute{
-						Description: "URL of Shape Instance URL of deployed shared Shape Bot Defense Instance.",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-					},
-					"telemetry_prefix": schema.StringAttribute{
-						Description: "Telemetry Prefix Shape Telemetry Prefix which is defined by DEX policy.",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-					},
 				},
 			},
 			"js_cluster": schema.ListNestedAttribute{
@@ -484,6 +484,12 @@ func (r *DataSourceF5XCShapeBotDefenseInstance) Schema(ctx context.Context, requ
 				Computed:    true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
+						"tenant": schema.StringAttribute{
+							Description: "",
+							Required:    false,
+							Optional:    false,
+							Computed:    true,
+						},
 						"namespace": schema.StringAttribute{
 							Description: "",
 							Required:    false,
@@ -491,12 +497,6 @@ func (r *DataSourceF5XCShapeBotDefenseInstance) Schema(ctx context.Context, requ
 							Computed:    true,
 						},
 						"name": schema.StringAttribute{
-							Description: "",
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-						},
-						"tenant": schema.StringAttribute{
 							Description: "",
 							Required:    false,
 							Optional:    false,
@@ -674,20 +674,20 @@ func (d *DataSourceF5XCShapeBotDefenseInstance) Read(ctx context.Context, reques
 
 					if isClearSecretInfo && clearSecretInfoOptions != nil {
 
-						// data specToModelNested RequiredStringField --> Url
-						if clearSecretInfoOptions.ClearSecretInfo.GetUrl() != "" {
-							clearSecretInfoAttributeMap["url"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetUrl())
-						} else {
-							// Empty string, set to null
-							clearSecretInfoAttributeMap["url"] = types.StringNull()
-						}
-
 						// data specToModelNested StringField --> Provider
 						if clearSecretInfoOptions.ClearSecretInfo.GetProvider() != "" {
 							clearSecretInfoAttributeMap["provider"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetProvider())
 						} else {
 							// Empty string, set to null
 							clearSecretInfoAttributeMap["provider"] = types.StringNull()
+						}
+
+						// data specToModelNested RequiredStringField --> Url
+						if clearSecretInfoOptions.ClearSecretInfo.GetUrl() != "" {
+							clearSecretInfoAttributeMap["url"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetUrl())
+						} else {
+							// Empty string, set to null
+							clearSecretInfoAttributeMap["url"] = types.StringNull()
 						}
 
 						clearSecretInfoObj, diags := types.ObjectValue(ShapeBotDefenseInstanceWebApiKeySecretInfoOneofClearSecretInfoModelAttributeMap, clearSecretInfoAttributeMap)
@@ -802,6 +802,75 @@ func (d *DataSourceF5XCShapeBotDefenseInstance) Read(ctx context.Context, reques
 			for _, clusterElement := range webElement.GetCluster() {
 				objectRefTypeModelModel := ObjectRefTypeModel{}
 
+				// data specToModelNested StringField --> Tenant
+				if clusterElement.GetTenant() != "" {
+					objectRefTypeModelModel.Tenant = types.StringValue(clusterElement.GetTenant())
+				} else {
+					// Empty string, set to null
+					objectRefTypeModelModel.Tenant = types.StringNull()
+				}
+
+				// data specToModelNested RequiredStringField --> Namespace
+				if clusterElement.GetNamespace() != "" {
+					objectRefTypeModelModel.Namespace = types.StringValue(clusterElement.GetNamespace())
+				} else {
+					// Empty string, set to null
+					objectRefTypeModelModel.Namespace = types.StringNull()
+				}
+
+				// data specToModelNested RequiredStringField --> Name
+				if clusterElement.GetName() != "" {
+					objectRefTypeModelModel.Name = types.StringValue(clusterElement.GetName())
+				} else {
+					// Empty string, set to null
+					objectRefTypeModelModel.Name = types.StringNull()
+				}
+
+				clusterElements = append(clusterElements, objectRefTypeModelModel)
+			}
+			// CASE 1: The target field is a `types.List` or an attribute map.
+			// The intermediate slice of structs must be converted to a `types.ListValue`.
+			clusterListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: ShapeBotDefenseInstanceClusterObjectRefModelAttributeMap}, clusterElements)
+			response.Diagnostics.Append(diags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			shapeBotDefenseInstanceShapeBotDefenseInstanceInstanceModel.Cluster = clusterListValue
+
+		} else {
+			// The source list is empty or nil.
+			// CASE 1: The target field is a `types.List` or an attribute map.
+			// Assign a null `types.ListValue`.
+			shapeBotDefenseInstanceShapeBotDefenseInstanceInstanceModel.Cluster = types.ListNull(types.ObjectType{AttrTypes: ShapeBotDefenseInstanceClusterObjectRefModelAttributeMap})
+		}
+
+		webObj, webDiags := utils.GoStructToObjectValue(
+			ctx,
+			ShapeBotDefenseInstanceWebModelAttributeMap,
+			shapeBotDefenseInstanceShapeBotDefenseInstanceInstanceModel,
+		)
+		response.Diagnostics.Append(webDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.Web = webObj
+	} else {
+		data.Web = types.ObjectNull(ShapeBotDefenseInstanceWebModelAttributeMap)
+	}
+
+	// data SpecToModelRoot PointerField --> Mobile
+	if specData.GetMobile() != nil {
+		var shapeBotDefenseInstanceShapeBotDefenseInstanceInstanceModel = &ShapeBotDefenseInstanceShapeBotDefenseInstanceInstance{}
+		mobileElement := specData.GetMobile()
+
+		// data specToModelNested RequiredArrayOfPointerField --> Cluster
+		if len(mobileElement.GetCluster()) > 0 {
+			// Step 1: Always create a slice of model structs from the spec data.
+			// This slice serves as an intermediate representation.
+			clusterElements := make([]ObjectRefTypeModel, 0, len(mobileElement.GetCluster()))
+			for _, clusterElement := range mobileElement.GetCluster() {
+				objectRefTypeModelModel := ObjectRefTypeModel{}
+
 				// data specToModelNested RequiredStringField --> Name
 				if clusterElement.GetName() != "" {
 					objectRefTypeModelModel.Name = types.StringValue(clusterElement.GetName())
@@ -844,24 +913,21 @@ func (d *DataSourceF5XCShapeBotDefenseInstance) Read(ctx context.Context, reques
 			shapeBotDefenseInstanceShapeBotDefenseInstanceInstanceModel.Cluster = types.ListNull(types.ObjectType{AttrTypes: ShapeBotDefenseInstanceClusterObjectRefModelAttributeMap})
 		}
 
-		webObj, webDiags := utils.GoStructToObjectValue(
-			ctx,
-			ShapeBotDefenseInstanceWebModelAttributeMap,
-			shapeBotDefenseInstanceShapeBotDefenseInstanceInstanceModel,
-		)
-		response.Diagnostics.Append(webDiags...)
-		if response.Diagnostics.HasError() {
-			return
+		// data specToModelNested RequiredStringField --> Url
+		if mobileElement.GetUrl() != "" {
+			shapeBotDefenseInstanceShapeBotDefenseInstanceInstanceModel.Url = types.StringValue(mobileElement.GetUrl())
+		} else {
+			// Empty string, set to null
+			shapeBotDefenseInstanceShapeBotDefenseInstanceInstanceModel.Url = types.StringNull()
 		}
-		data.Web = webObj
-	} else {
-		data.Web = types.ObjectNull(ShapeBotDefenseInstanceWebModelAttributeMap)
-	}
 
-	// data SpecToModelRoot PointerField --> Mobile
-	if specData.GetMobile() != nil {
-		var shapeBotDefenseInstanceShapeBotDefenseInstanceInstanceModel = &ShapeBotDefenseInstanceShapeBotDefenseInstanceInstance{}
-		mobileElement := specData.GetMobile()
+		// data specToModelNested StringField --> TelemetryPrefix
+		if mobileElement.GetTelemetryPrefix() != "" {
+			shapeBotDefenseInstanceShapeBotDefenseInstanceInstanceModel.TelemetryPrefix = types.StringValue(mobileElement.GetTelemetryPrefix())
+		} else {
+			// Empty string, set to null
+			shapeBotDefenseInstanceShapeBotDefenseInstanceInstanceModel.TelemetryPrefix = types.StringNull()
+		}
 
 		// data specToModelNested PointerField --> ApiKey
 		if mobileElement.GetApiKey() != nil {
@@ -1012,72 +1078,6 @@ func (d *DataSourceF5XCShapeBotDefenseInstance) Read(ctx context.Context, reques
 			shapeBotDefenseInstanceShapeBotDefenseInstanceInstanceModel.ApiKey = types.ObjectNull(ShapeBotDefenseInstanceMobileApiKeyModelAttributeMap)
 		}
 
-		// data specToModelNested RequiredArrayOfPointerField --> Cluster
-		if len(mobileElement.GetCluster()) > 0 {
-			// Step 1: Always create a slice of model structs from the spec data.
-			// This slice serves as an intermediate representation.
-			clusterElements := make([]ObjectRefTypeModel, 0, len(mobileElement.GetCluster()))
-			for _, clusterElement := range mobileElement.GetCluster() {
-				objectRefTypeModelModel := ObjectRefTypeModel{}
-
-				// data specToModelNested RequiredStringField --> Namespace
-				if clusterElement.GetNamespace() != "" {
-					objectRefTypeModelModel.Namespace = types.StringValue(clusterElement.GetNamespace())
-				} else {
-					// Empty string, set to null
-					objectRefTypeModelModel.Namespace = types.StringNull()
-				}
-
-				// data specToModelNested RequiredStringField --> Name
-				if clusterElement.GetName() != "" {
-					objectRefTypeModelModel.Name = types.StringValue(clusterElement.GetName())
-				} else {
-					// Empty string, set to null
-					objectRefTypeModelModel.Name = types.StringNull()
-				}
-
-				// data specToModelNested StringField --> Tenant
-				if clusterElement.GetTenant() != "" {
-					objectRefTypeModelModel.Tenant = types.StringValue(clusterElement.GetTenant())
-				} else {
-					// Empty string, set to null
-					objectRefTypeModelModel.Tenant = types.StringNull()
-				}
-
-				clusterElements = append(clusterElements, objectRefTypeModelModel)
-			}
-			// CASE 1: The target field is a `types.List` or an attribute map.
-			// The intermediate slice of structs must be converted to a `types.ListValue`.
-			clusterListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: ShapeBotDefenseInstanceClusterObjectRefModelAttributeMap}, clusterElements)
-			response.Diagnostics.Append(diags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			shapeBotDefenseInstanceShapeBotDefenseInstanceInstanceModel.Cluster = clusterListValue
-
-		} else {
-			// The source list is empty or nil.
-			// CASE 1: The target field is a `types.List` or an attribute map.
-			// Assign a null `types.ListValue`.
-			shapeBotDefenseInstanceShapeBotDefenseInstanceInstanceModel.Cluster = types.ListNull(types.ObjectType{AttrTypes: ShapeBotDefenseInstanceClusterObjectRefModelAttributeMap})
-		}
-
-		// data specToModelNested RequiredStringField --> Url
-		if mobileElement.GetUrl() != "" {
-			shapeBotDefenseInstanceShapeBotDefenseInstanceInstanceModel.Url = types.StringValue(mobileElement.GetUrl())
-		} else {
-			// Empty string, set to null
-			shapeBotDefenseInstanceShapeBotDefenseInstanceInstanceModel.Url = types.StringNull()
-		}
-
-		// data specToModelNested StringField --> TelemetryPrefix
-		if mobileElement.GetTelemetryPrefix() != "" {
-			shapeBotDefenseInstanceShapeBotDefenseInstanceInstanceModel.TelemetryPrefix = types.StringValue(mobileElement.GetTelemetryPrefix())
-		} else {
-			// Empty string, set to null
-			shapeBotDefenseInstanceShapeBotDefenseInstanceInstanceModel.TelemetryPrefix = types.StringNull()
-		}
-
 		mobileObj, mobileDiags := utils.GoStructToObjectValue(
 			ctx,
 			ShapeBotDefenseInstanceMobileModelAttributeMap,
@@ -1099,6 +1099,14 @@ func (d *DataSourceF5XCShapeBotDefenseInstance) Read(ctx context.Context, reques
 		for _, jsClusterElement := range specData.JsCluster {
 			objectRefTypeModelModel := ObjectRefTypeModel{}
 
+			// data specToModelNested StringField --> Tenant
+			if jsClusterElement.GetTenant() != "" {
+				objectRefTypeModelModel.Tenant = types.StringValue(jsClusterElement.GetTenant())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Tenant = types.StringNull()
+			}
+
 			// data specToModelNested RequiredStringField --> Namespace
 			if jsClusterElement.GetNamespace() != "" {
 				objectRefTypeModelModel.Namespace = types.StringValue(jsClusterElement.GetNamespace())
@@ -1113,14 +1121,6 @@ func (d *DataSourceF5XCShapeBotDefenseInstance) Read(ctx context.Context, reques
 			} else {
 				// Empty string, set to null
 				objectRefTypeModelModel.Name = types.StringNull()
-			}
-
-			// data specToModelNested StringField --> Tenant
-			if jsClusterElement.GetTenant() != "" {
-				objectRefTypeModelModel.Tenant = types.StringValue(jsClusterElement.GetTenant())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Tenant = types.StringNull()
 			}
 
 			jsClusterElements = append(jsClusterElements, objectRefTypeModelModel)

@@ -53,8 +53,8 @@ type ResourceF5XCApiDiscovery struct {
 }
 
 type ApiDiscoveryApiDiscoveryCustomAuthType struct {
-	ParameterType types.List   `tfsdk:"parameter_type"`
 	ParameterName types.String `tfsdk:"parameter_name"`
+	ParameterType types.List   `tfsdk:"parameter_type"`
 }
 
 type ApiDiscoveryApiDiscoveryUserDefinedApiDiscoveryPolicy struct {
@@ -63,9 +63,9 @@ type ApiDiscoveryApiDiscoveryUserDefinedApiDiscoveryPolicy struct {
 }
 
 type ApiDiscoveryApiDiscoveryDiscoveryRule struct {
-	Labels         types.Map    `tfsdk:"labels"`
 	Metadata       types.Object `tfsdk:"metadata"`
 	RuleProperties types.Object `tfsdk:"rule_properties"`
+	Labels         types.Map    `tfsdk:"labels"`
 }
 
 type ApiDiscoveryMessageMetaType struct {
@@ -93,15 +93,15 @@ type ApiDiscoveryExclusionConfigActionChoice struct {
 }
 
 type ApiDiscoveryRulePropertiesCriteriaChoice struct {
-	Pattern            types.String `tfsdk:"pattern"`
 	HttpHeaderCriteria types.Object `tfsdk:"http_header_criteria"`
+	Pattern            types.String `tfsdk:"pattern"`
 }
 
 type ApiDiscoveryRulePropertiesHttpHeaderCriteria struct {
+	Location  types.List   `tfsdk:"location"`
 	FieldName types.String `tfsdk:"field_name"`
 	MatchType types.List   `tfsdk:"match_type"`
 	Value     types.String `tfsdk:"value"`
-	Location  types.List   `tfsdk:"location"`
 }
 
 type ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoice struct {
@@ -115,12 +115,12 @@ type ApiDiscoveryUserDefinedApiDiscoveryPolicyExclusive struct {
 
 // ResourceF5XCApiDiscoveryModel describes the resource data model.
 type ResourceF5XCApiDiscoveryModel struct {
-	Description                   types.String   `tfsdk:"description"`
-	Name                          types.String   `tfsdk:"name"`
 	Namespace                     types.String   `tfsdk:"namespace"`
 	Uid                           types.String   `tfsdk:"uid"`
 	Labels                        types.Map      `tfsdk:"labels"`
 	Annotations                   types.Map      `tfsdk:"annotations"`
+	Description                   types.String   `tfsdk:"description"`
+	Name                          types.String   `tfsdk:"name"`
 	CustomAuthTypes               types.List     `tfsdk:"custom_auth_types"`
 	UserDefinedApiDiscoveryPolicy types.Object   `tfsdk:"user_defined_api_discovery_policy"`
 	Timeouts                      timeouts.Value `tfsdk:"timeouts"`
@@ -139,10 +139,10 @@ var (
 // Attribute map for ArrayOfPointerField --> CustomAuthTypes
 var ApiDiscoveryCustomAuthTypesModelAttributeMap = map[string]attr.Type{
 
+	"parameter_name": types.StringType,
 	"parameter_type": types.ListType{
 		ElemType: types.StringType,
 	},
-	"parameter_name": types.StringType,
 }
 
 // Attribute map for PointerField --> UserDefinedApiDiscoveryPolicy
@@ -151,10 +151,7 @@ var ApiDiscoveryUserDefinedApiDiscoveryPolicyModelAttributeMap = map[string]attr
 	"discovery_rules": types.ListType{
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
-
-				"labels": types.MapType{
-					ElemType: types.StringType,
-				}, "metadata": types.ObjectType{
+				"metadata": types.ObjectType{
 					AttrTypes: map[string]attr.Type{
 						"name":        types.StringType,
 						"description": types.StringType},
@@ -167,6 +164,9 @@ var ApiDiscoveryUserDefinedApiDiscoveryPolicyModelAttributeMap = map[string]attr
 							AttrTypes: ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesCriteriaModelAttributeMap,
 						}},
 				},
+				"labels": types.MapType{
+					ElemType: types.StringType,
+				},
 			},
 		},
 	},
@@ -177,10 +177,7 @@ var ApiDiscoveryUserDefinedApiDiscoveryPolicyModelAttributeMap = map[string]attr
 
 // Attribute map for ArrayOfPointerField --> DiscoveryRules
 var ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesModelAttributeMap = map[string]attr.Type{
-
-	"labels": types.MapType{
-		ElemType: types.StringType,
-	}, "metadata": types.ObjectType{
+	"metadata": types.ObjectType{
 		AttrTypes: map[string]attr.Type{
 			"name":        types.StringType,
 			"description": types.StringType},
@@ -192,6 +189,9 @@ var ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesModelAttributeMap = m
 			"criteria_choice": types.ObjectType{
 				AttrTypes: ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesCriteriaModelAttributeMap,
 			}},
+	},
+	"labels": types.MapType{
+		ElemType: types.StringType,
 	},
 }
 
@@ -240,23 +240,23 @@ var ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTyp
 // Attribute map for RequiredOneOfField --> Criteria
 var ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesCriteriaModelAttributeMap = map[string]attr.Type{
 
-	"pattern": types.StringType,
 	"http_header_criteria": types.ObjectType{
 		AttrTypes: ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesCriteriaHttpHeaderCriteriaModelAttributeMap,
 	},
+	"pattern": types.StringType,
 }
 
 // Attribute map for PointerOfOneOfField --> HttpHeaderCriteria
 var ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesCriteriaHttpHeaderCriteriaModelAttributeMap = map[string]attr.Type{
 
+	"location": types.ListType{
+		ElemType: types.StringType,
+	},
 	"field_name": types.StringType,
 	"match_type": types.ListType{
 		ElemType: types.StringType,
 	},
 	"value": types.StringType,
-	"location": types.ListType{
-		ElemType: types.StringType,
-	},
 }
 
 // Attribute map for RequiredOneOfField --> DefaultBehaviorChoice
@@ -298,21 +298,6 @@ func (r *ResourceF5XCApiDiscovery) Schema(ctx context.Context, request resource.
 		Description:         "ApiDiscovery resource",
 
 		Attributes: map[string]schema.Attribute{
-			"description": schema.StringAttribute{
-				Description:         "description Human readable description for the object",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            true,
-				Default:             stringdefault.StaticString(""),
-			},
-			"name": schema.StringAttribute{
-				Description:         "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
-				MarkdownDescription: "",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
-			},
 			"namespace": schema.StringAttribute{
 				Description:         "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
 				MarkdownDescription: "",
@@ -353,6 +338,21 @@ func (r *ResourceF5XCApiDiscovery) Schema(ctx context.Context, request resource.
 					mapvalidator.ValueStringsAre(stringvalidator.LengthBetween(1, 1024)),
 				},
 			},
+			"description": schema.StringAttribute{
+				Description:         "description Human readable description for the object",
+				MarkdownDescription: "",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				Default:             stringdefault.StaticString(""),
+			},
+			"name": schema.StringAttribute{
+				Description:         "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
+				MarkdownDescription: "",
+				Required:            true,
+				Optional:            false,
+				Computed:            false,
+			},
 			"custom_auth_types": schema.ListNestedAttribute{
 				Description:         "custom_auth_types Select your custom authentication types to be detected in the API discovery",
 				MarkdownDescription: "",
@@ -361,18 +361,6 @@ func (r *ResourceF5XCApiDiscovery) Schema(ctx context.Context, request resource.
 				Computed:            false,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
-						"parameter_type": schema.ListAttribute{
-							Description:         "parameter_type",
-							MarkdownDescription: "<br>**Allowed Values (choose one):** `[\"QUERY_PARAMETER\", \"HEADER\", \"COOKIE\"]`",
-							ElementType:         types.StringType,
-							Required:            true,
-							Optional:            false,
-							Computed:            false,
-							Validators: []validator.List{
-								listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"QUERY_PARAMETER", "HEADER", "COOKIE"}...)),
-								listvalidator.SizeAtMost(1),
-							},
-						},
 						"parameter_name": schema.StringAttribute{
 							Description:         "parameter name The authentication parameter name.",
 							MarkdownDescription: "",
@@ -384,6 +372,18 @@ func (r *ResourceF5XCApiDiscovery) Schema(ctx context.Context, request resource.
 									regexp.MustCompile(`^[!#$%&'*+\-.^_`+"`"+`|~0-9A-Za-z]+$`),
 									"must be valid pattern",
 								),
+							},
+						},
+						"parameter_type": schema.ListAttribute{
+							Description:         "parameter_type",
+							MarkdownDescription: "<br>**Allowed Values (choose one):** `[\"QUERY_PARAMETER\", \"HEADER\", \"COOKIE\"]`",
+							ElementType:         types.StringType,
+							Required:            true,
+							Optional:            false,
+							Computed:            false,
+							Validators: []validator.List{
+								listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"QUERY_PARAMETER", "HEADER", "COOKIE"}...)),
+								listvalidator.SizeAtMost(1),
 							},
 						},
 					},
@@ -404,14 +404,6 @@ func (r *ResourceF5XCApiDiscovery) Schema(ctx context.Context, request resource.
 						Computed:            false,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
-								"labels": schema.MapAttribute{
-									Description:         "labels Map of string keys and values that can be used to organize and categorize the rule",
-									MarkdownDescription: "",
-									ElementType:         types.StringType,
-									Required:            false,
-									Optional:            true,
-									Computed:            false,
-								},
 								"metadata": schema.SingleNestedAttribute{
 									Description:         "metadata Standard object metadata including name, labels, and description",
 									MarkdownDescription: "",
@@ -530,13 +522,6 @@ func (r *ResourceF5XCApiDiscovery) Schema(ctx context.Context, request resource.
 												),
 											},
 											Attributes: map[string]schema.Attribute{
-												"pattern": schema.StringAttribute{
-													Description:         "pattern Patterns are matched against the request path to identify endpoints by path structure, file extension, or version prefix. Endpoints that match this pattern are affected by the rule.",
-													MarkdownDescription: "",
-													Required:            false,
-													Optional:            true,
-													Computed:            false,
-												},
 												"http_header_criteria": schema.SingleNestedAttribute{
 													Description:         "http_header_criteria",
 													MarkdownDescription: "",
@@ -544,33 +529,6 @@ func (r *ResourceF5XCApiDiscovery) Schema(ctx context.Context, request resource.
 													Optional:            true,
 													Computed:            false,
 													Attributes: map[string]schema.Attribute{
-														"field_name": schema.StringAttribute{
-															Description:         "field_name",
-															MarkdownDescription: "",
-															Required:            true,
-															Optional:            false,
-															Computed:            false,
-														},
-														"match_type": schema.ListAttribute{
-															Description:         "match_type",
-															MarkdownDescription: "<br>**Allowed Values (choose one):** `[\"REGEX\", \"EXACT_MATCH\", \"SUBSTRING\"]`<br>**Default:** `EXACT_MATCH`",
-															ElementType:         types.StringType,
-															Required:            false,
-															Optional:            true,
-															Computed:            true,
-															Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("EXACT_MATCH")),
-															Validators: []validator.List{
-																listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"REGEX", "EXACT_MATCH", "SUBSTRING"}...)),
-																listvalidator.SizeAtMost(1),
-															},
-														},
-														"value": schema.StringAttribute{
-															Description:         "value",
-															MarkdownDescription: "",
-															Required:            true,
-															Optional:            false,
-															Computed:            false,
-														},
 														"location": schema.ListAttribute{
 															Description:         "location",
 															MarkdownDescription: "<br>**Allowed Values (choose one):** `[\"REQUEST\", \"RESPONSE\"]`",
@@ -583,11 +541,53 @@ func (r *ResourceF5XCApiDiscovery) Schema(ctx context.Context, request resource.
 																listvalidator.SizeAtMost(1),
 															},
 														},
+														"field_name": schema.StringAttribute{
+															Description:         "field_name",
+															MarkdownDescription: "",
+															Required:            true,
+															Optional:            false,
+															Computed:            false,
+														},
+														"match_type": schema.ListAttribute{
+															Description:         "match_type",
+															MarkdownDescription: "<br>**Allowed Values (choose one):** `[\"EXACT_MATCH\", \"SUBSTRING\", \"REGEX\"]`<br>**Default:** `EXACT_MATCH`",
+															ElementType:         types.StringType,
+															Required:            false,
+															Optional:            true,
+															Computed:            true,
+															Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("EXACT_MATCH")),
+															Validators: []validator.List{
+																listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"EXACT_MATCH", "SUBSTRING", "REGEX"}...)),
+																listvalidator.SizeAtMost(1),
+															},
+														},
+														"value": schema.StringAttribute{
+															Description:         "value",
+															MarkdownDescription: "",
+															Required:            true,
+															Optional:            false,
+															Computed:            false,
+														},
 													},
+												},
+												"pattern": schema.StringAttribute{
+													Description:         "pattern Patterns are matched against the request path to identify endpoints by path structure, file extension, or version prefix. Endpoints that match this pattern are affected by the rule.",
+													MarkdownDescription: "",
+													Required:            false,
+													Optional:            true,
+													Computed:            false,
 												},
 											},
 										},
 									},
+								},
+								"labels": schema.MapAttribute{
+									Description:         "labels Map of string keys and values that can be used to organize and categorize the rule",
+									MarkdownDescription: "",
+									ElementType:         types.StringType,
+									Required:            false,
+									Optional:            true,
+									Computed:            false,
 								},
 							},
 						},
@@ -765,16 +765,6 @@ func (r *ResourceF5XCApiDiscovery) Create(ctx context.Context, request resource.
 
 	// Populate createReq from data model
 
-	// resource modelToMetaRoot StringField --> Description
-	if !data.Description.IsNull() && !data.Description.IsUnknown() {
-		meta.Description = string(data.Description.ValueString())
-	}
-
-	// resource modelToMetaRoot RequiredStringField --> Name
-	if !data.Name.IsNull() && !data.Name.IsUnknown() {
-		meta.Name = string(data.Name.ValueString())
-	}
-
 	// resource modelToMetaRoot RequiredStringField --> Namespace
 	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
 		meta.Namespace = string(data.Namespace.ValueString())
@@ -794,6 +784,16 @@ func (r *ResourceF5XCApiDiscovery) Create(ctx context.Context, request resource.
 		meta.Annotations = nil
 	}
 
+	// resource modelToMetaRoot StringField --> Description
+	if !data.Description.IsNull() && !data.Description.IsUnknown() {
+		meta.Description = string(data.Description.ValueString())
+	}
+
+	// resource modelToMetaRoot RequiredStringField --> Name
+	if !data.Name.IsNull() && !data.Name.IsUnknown() {
+		meta.Name = string(data.Name.ValueString())
+	}
+
 	{
 		// resource modelToSpecRoot ArrayOfPointerField --> CustomAuthTypes
 		if !data.CustomAuthTypes.IsNull() && !data.CustomAuthTypes.IsUnknown() {
@@ -808,6 +808,11 @@ func (r *ResourceF5XCApiDiscovery) Create(ctx context.Context, request resource.
 
 			for i, customAuthTypesElement := range customAuthTypesElements {
 				customAuthTypesSpec[i] = &ves_io_schema_api_sec_api_discovery.CustomAuthType{}
+
+				// resource modelToSpecNested RequiredStringField --> ParameterName
+				if !customAuthTypesElement.ParameterName.IsNull() && !customAuthTypesElement.ParameterName.IsUnknown() {
+					customAuthTypesSpec[i].ParameterName = string(customAuthTypesElement.ParameterName.ValueString())
+				}
 
 				// resource modelToSpecNested RequiredEnumField --> ParameterType
 				if !customAuthTypesElement.ParameterType.IsNull() && !customAuthTypesElement.ParameterType.IsUnknown() && len(customAuthTypesElement.ParameterType.Elements()) > 0 {
@@ -831,11 +836,6 @@ func (r *ResourceF5XCApiDiscovery) Create(ctx context.Context, request resource.
 							return
 						}
 					}
-				}
-
-				// resource modelToSpecNested RequiredStringField --> ParameterName
-				if !customAuthTypesElement.ParameterName.IsNull() && !customAuthTypesElement.ParameterName.IsUnknown() {
-					customAuthTypesSpec[i].ParameterName = string(customAuthTypesElement.ParameterName.ValueString())
 				}
 
 			}
@@ -877,20 +877,6 @@ func (r *ResourceF5XCApiDiscovery) Create(ctx context.Context, request resource.
 					userDefinedApiDiscoveryPolicySpec.DiscoveryRules[i] = &ves_io_schema_api_sec_api_discovery.DiscoveryRule{}
 
 					// Recursively process nested elements
-
-					// resource modelToSpecNested MapOfStringField --> Labels
-					if !discoveryRulesElement.Labels.IsNull() && !discoveryRulesElement.Labels.IsUnknown() {
-						var mapOfString map[string]string
-						diags = discoveryRulesElement.Labels.ElementsAs(ctx, &mapOfString, false)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						discoveryRulesSpec[i].Labels = mapOfString
-					} else {
-						discoveryRulesSpec[i].Labels = nil
-					}
 
 					// resource modelToSpecNested PointerField --> Metadata
 					if !discoveryRulesElement.Metadata.IsNull() && !discoveryRulesElement.Metadata.IsUnknown() {
@@ -988,13 +974,6 @@ func (r *ResourceF5XCApiDiscovery) Create(ctx context.Context, request resource.
 								return
 							}
 
-							// resource modelToSpecNested StringOfOneOfField --> Pattern
-							if !rulePropertiesCriteriaChoiceModel.Pattern.IsNull() && !rulePropertiesCriteriaChoiceModel.Pattern.IsUnknown() {
-								patternSpecStr := &ves_io_schema_api_sec_api_discovery.RuleProperties_Pattern{}
-								patternSpecStr.Pattern = string(rulePropertiesCriteriaChoiceModel.Pattern.ValueString())
-								rulePropertiesSpec.Criteria = patternSpecStr
-							}
-
 							// resource modelToSpecNested PointerOfOneOfField --> HttpHeaderCriteria
 							if !rulePropertiesCriteriaChoiceModel.HttpHeaderCriteria.IsNull() && !rulePropertiesCriteriaChoiceModel.HttpHeaderCriteria.IsUnknown() {
 								var apiDiscoveryRulePropertiesHttpHeaderCriteriaModel ApiDiscoveryRulePropertiesHttpHeaderCriteria
@@ -1005,6 +984,26 @@ func (r *ResourceF5XCApiDiscovery) Create(ctx context.Context, request resource.
 								httpHeaderCriteriaOneOfSpec := &ves_io_schema_api_sec_api_discovery.RuleProperties_HttpHeaderCriteria{}
 								httpHeaderCriteriaOneOfSpec.HttpHeaderCriteria = &ves_io_schema_api_sec_api_discovery.HTTPHeaderCriteria{}
 								rulePropertiesSpec.Criteria = httpHeaderCriteriaOneOfSpec
+
+								// resource modelToSpecNested EnumField --> Location
+								if !apiDiscoveryRulePropertiesHttpHeaderCriteriaModel.Location.IsNull() && !apiDiscoveryRulePropertiesHttpHeaderCriteriaModel.Location.IsUnknown() {
+									var locationTfStrings []types.String
+									diags = apiDiscoveryRulePropertiesHttpHeaderCriteriaModel.Location.ElementsAs(ctx, &locationTfStrings, false)
+									response.Diagnostics.Append(diags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+
+									if len(locationTfStrings) > 0 {
+										valStr := locationTfStrings[0].ValueString()
+										if v, ok := ves_io_schema_api_sec_api_discovery.RuleLocation_value[valStr]; ok {
+											httpHeaderCriteriaOneOfSpec.HttpHeaderCriteria.Location = ves_io_schema_api_sec_api_discovery.RuleLocation(v)
+										} else {
+											response.Diagnostics.AddError("Invalid Enum Value", fmt.Sprintf("Value '%s' is not valid for Location", valStr))
+											return
+										}
+									}
+								}
 
 								// resource modelToSpecNested RequiredStringField --> FieldName
 								if !apiDiscoveryRulePropertiesHttpHeaderCriteriaModel.FieldName.IsNull() && !apiDiscoveryRulePropertiesHttpHeaderCriteriaModel.FieldName.IsUnknown() {
@@ -1036,30 +1035,31 @@ func (r *ResourceF5XCApiDiscovery) Create(ctx context.Context, request resource.
 									httpHeaderCriteriaOneOfSpec.HttpHeaderCriteria.Value = string(apiDiscoveryRulePropertiesHttpHeaderCriteriaModel.Value.ValueString())
 								}
 
-								// resource modelToSpecNested EnumField --> Location
-								if !apiDiscoveryRulePropertiesHttpHeaderCriteriaModel.Location.IsNull() && !apiDiscoveryRulePropertiesHttpHeaderCriteriaModel.Location.IsUnknown() {
-									var locationTfStrings []types.String
-									diags = apiDiscoveryRulePropertiesHttpHeaderCriteriaModel.Location.ElementsAs(ctx, &locationTfStrings, false)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
+							}
 
-									if len(locationTfStrings) > 0 {
-										valStr := locationTfStrings[0].ValueString()
-										if v, ok := ves_io_schema_api_sec_api_discovery.RuleLocation_value[valStr]; ok {
-											httpHeaderCriteriaOneOfSpec.HttpHeaderCriteria.Location = ves_io_schema_api_sec_api_discovery.RuleLocation(v)
-										} else {
-											response.Diagnostics.AddError("Invalid Enum Value", fmt.Sprintf("Value '%s' is not valid for Location", valStr))
-											return
-										}
-									}
-								}
-
+							// resource modelToSpecNested StringOfOneOfField --> Pattern
+							if !rulePropertiesCriteriaChoiceModel.Pattern.IsNull() && !rulePropertiesCriteriaChoiceModel.Pattern.IsUnknown() {
+								patternSpecStr := &ves_io_schema_api_sec_api_discovery.RuleProperties_Pattern{}
+								patternSpecStr.Pattern = string(rulePropertiesCriteriaChoiceModel.Pattern.ValueString())
+								rulePropertiesSpec.Criteria = patternSpecStr
 							}
 
 						}
 
+					}
+
+					// resource modelToSpecNested MapOfStringField --> Labels
+					if !discoveryRulesElement.Labels.IsNull() && !discoveryRulesElement.Labels.IsUnknown() {
+						var mapOfString map[string]string
+						diags = discoveryRulesElement.Labels.ElementsAs(ctx, &mapOfString, false)
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						discoveryRulesSpec[i].Labels = mapOfString
+					} else {
+						discoveryRulesSpec[i].Labels = nil
 					}
 
 				}
@@ -1155,12 +1155,6 @@ func (r *ResourceF5XCApiDiscovery) Create(ctx context.Context, request resource.
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
-	// resource SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
-
-	// resource SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
-
 	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
 	data.Namespace = types.StringValue(metaData.GetNamespace())
 
@@ -1245,12 +1239,26 @@ func (r *ResourceF5XCApiDiscovery) Create(ctx context.Context, request resource.
 		data.Annotations = types.MapNull(types.StringType)
 	}
 
+	// resource SpecToModelRoot Meta StringField --> Description
+	data.Description = types.StringValue(metaData.GetDescription())
+
+	// resource SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
+
 	// resource SpecToModelRoot ArrayOfPointerField --> CustomAuthTypes
 	if len(specData.CustomAuthTypes) > 0 {
 		customAuthTypesElements := make([]ApiDiscoveryApiDiscoveryCustomAuthType, 0, len(specData.CustomAuthTypes))
 
 		for _, customAuthTypesElement := range specData.CustomAuthTypes {
 			apiDiscoveryApiDiscoveryCustomAuthTypeModel := ApiDiscoveryApiDiscoveryCustomAuthType{}
+
+			// resource specToModelNested RequiredStringField --> ParameterName
+			if customAuthTypesElement.GetParameterName() != "" {
+				apiDiscoveryApiDiscoveryCustomAuthTypeModel.ParameterName = types.StringValue(customAuthTypesElement.GetParameterName())
+			} else {
+				// Empty string, set to null
+				apiDiscoveryApiDiscoveryCustomAuthTypeModel.ParameterName = types.StringNull()
+			}
 
 			// resource specToModelNested RequiredEnumField --> ParameterType
 			if customAuthTypesElement.GetParameterType().String() != "" {
@@ -1264,14 +1272,6 @@ func (r *ResourceF5XCApiDiscovery) Create(ctx context.Context, request resource.
 				apiDiscoveryApiDiscoveryCustomAuthTypeModel.ParameterType = listValue
 			} else {
 				apiDiscoveryApiDiscoveryCustomAuthTypeModel.ParameterType = types.ListNull(types.StringType)
-			}
-
-			// resource specToModelNested RequiredStringField --> ParameterName
-			if customAuthTypesElement.GetParameterName() != "" {
-				apiDiscoveryApiDiscoveryCustomAuthTypeModel.ParameterName = types.StringValue(customAuthTypesElement.GetParameterName())
-			} else {
-				// Empty string, set to null
-				apiDiscoveryApiDiscoveryCustomAuthTypeModel.ParameterName = types.StringNull()
 			}
 
 			customAuthTypesElements = append(customAuthTypesElements, apiDiscoveryApiDiscoveryCustomAuthTypeModel)
@@ -1309,21 +1309,6 @@ func (r *ResourceF5XCApiDiscovery) Create(ctx context.Context, request resource.
 			discoveryRulesElements := make([]ApiDiscoveryApiDiscoveryDiscoveryRule, 0, len(userDefinedApiDiscoveryPolicyElement.GetDiscoveryRules()))
 			for _, discoveryRulesElement := range userDefinedApiDiscoveryPolicyElement.GetDiscoveryRules() {
 				apiDiscoveryApiDiscoveryDiscoveryRuleModel := ApiDiscoveryApiDiscoveryDiscoveryRule{}
-
-				// resource specToModelNested MapOfStringField --> Labels
-				if discoveryRulesElement.GetLabels() != nil {
-					// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-					labelsMap, labelsDiags := utils.StringMapToTerraformMap(discoveryRulesElement.GetLabels())
-					response.Diagnostics.Append(labelsDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					// Assign the typed map to the model
-					apiDiscoveryApiDiscoveryDiscoveryRuleModel.Labels = labelsMap
-				} else {
-					// Ensure the state reflects a Null map with the correct element type to avoid DynamicPseudoType errors
-					apiDiscoveryApiDiscoveryDiscoveryRuleModel.Labels = types.MapNull(types.StringType)
-				}
 
 				// resource specToModelNested PointerField --> Metadata
 				if discoveryRulesElement.GetMetadata() != nil {
@@ -1493,16 +1478,6 @@ func (r *ResourceF5XCApiDiscovery) Create(ctx context.Context, request resource.
 
 						// Process nested choices, populating the temporary attribute map
 
-						// resource specToModelNested StringOfOneOfField --> Pattern
-						patternItem, isPattern := rulePropertiescriteriaChoiceChoices.(*ves_io_schema_api_sec_api_discovery.RuleProperties_Pattern)
-
-						if isPattern {
-							rulePropertiescriteriaChoiceChoicesAttributeMap["pattern"] = types.StringValue(string(patternItem.Pattern))
-						} else {
-							// Empty string, set to null
-							rulePropertiescriteriaChoiceChoicesAttributeMap["pattern"] = types.StringNull()
-						}
-
 						// resource specToModelNested PointerOfOneOfField --> HttpHeaderCriteria
 						// GlobalSpecType
 						// false
@@ -1511,6 +1486,20 @@ func (r *ResourceF5XCApiDiscovery) Create(ctx context.Context, request resource.
 							httpHeaderCriteriaAttributeMap := make(map[string]attr.Value)
 
 							if isHttpHeaderCriteria && httpHeaderCriteriaOptions != nil {
+
+								// resource specToModelNested EnumField --> Location
+								if httpHeaderCriteriaOptions.HttpHeaderCriteria.GetLocation().String() != "" {
+									stringValue := types.StringValue(httpHeaderCriteriaOptions.HttpHeaderCriteria.GetLocation().String())
+									stringSlice := []types.String{stringValue}
+									listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+									response.Diagnostics.Append(diags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									httpHeaderCriteriaAttributeMap["location"] = listValue
+								} else {
+									httpHeaderCriteriaAttributeMap["location"] = types.ListNull(types.StringType)
+								}
 
 								// resource specToModelNested RequiredStringField --> FieldName
 								if httpHeaderCriteriaOptions.HttpHeaderCriteria.GetFieldName() != "" {
@@ -1542,20 +1531,6 @@ func (r *ResourceF5XCApiDiscovery) Create(ctx context.Context, request resource.
 									httpHeaderCriteriaAttributeMap["value"] = types.StringNull()
 								}
 
-								// resource specToModelNested EnumField --> Location
-								if httpHeaderCriteriaOptions.HttpHeaderCriteria.GetLocation().String() != "" {
-									stringValue := types.StringValue(httpHeaderCriteriaOptions.HttpHeaderCriteria.GetLocation().String())
-									stringSlice := []types.String{stringValue}
-									listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									httpHeaderCriteriaAttributeMap["location"] = listValue
-								} else {
-									httpHeaderCriteriaAttributeMap["location"] = types.ListNull(types.StringType)
-								}
-
 								httpHeaderCriteriaObj, diags := types.ObjectValue(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesCriteriaHttpHeaderCriteriaModelAttributeMap, httpHeaderCriteriaAttributeMap)
 								response.Diagnostics.Append(diags...)
 								if response.Diagnostics.HasError() {
@@ -1565,6 +1540,16 @@ func (r *ResourceF5XCApiDiscovery) Create(ctx context.Context, request resource.
 							} else {
 								rulePropertiescriteriaChoiceChoicesAttributeMap["http_header_criteria"] = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesCriteriaHttpHeaderCriteriaModelAttributeMap)
 							}
+						}
+
+						// resource specToModelNested StringOfOneOfField --> Pattern
+						patternItem, isPattern := rulePropertiescriteriaChoiceChoices.(*ves_io_schema_api_sec_api_discovery.RuleProperties_Pattern)
+
+						if isPattern {
+							rulePropertiescriteriaChoiceChoicesAttributeMap["pattern"] = types.StringValue(string(patternItem.Pattern))
+						} else {
+							// Empty string, set to null
+							rulePropertiescriteriaChoiceChoicesAttributeMap["pattern"] = types.StringNull()
 						}
 
 						// --- End of Choices ---
@@ -1602,6 +1587,21 @@ func (r *ResourceF5XCApiDiscovery) Create(ctx context.Context, request resource.
 					// making this else-branch unreachable. The child OneOf handles the actual healing.
 					// The target is a types.Object, so we use types.ObjectNull.
 					apiDiscoveryApiDiscoveryDiscoveryRuleModel.RuleProperties = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesModelAttributeMap)
+				}
+
+				// resource specToModelNested MapOfStringField --> Labels
+				if discoveryRulesElement.GetLabels() != nil {
+					// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
+					labelsMap, labelsDiags := utils.StringMapToTerraformMap(discoveryRulesElement.GetLabels())
+					response.Diagnostics.Append(labelsDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					// Assign the typed map to the model
+					apiDiscoveryApiDiscoveryDiscoveryRuleModel.Labels = labelsMap
+				} else {
+					// Ensure the state reflects a Null map with the correct element type to avoid DynamicPseudoType errors
+					apiDiscoveryApiDiscoveryDiscoveryRuleModel.Labels = types.MapNull(types.StringType)
 				}
 
 				discoveryRulesElements = append(discoveryRulesElements, apiDiscoveryApiDiscoveryDiscoveryRuleModel)
@@ -1806,12 +1806,6 @@ func (r *ResourceF5XCApiDiscovery) Read(ctx context.Context, request resource.Re
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
-	// resource SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
-
-	// resource SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
-
 	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
 	data.Namespace = types.StringValue(metaData.GetNamespace())
 
@@ -1912,12 +1906,26 @@ func (r *ResourceF5XCApiDiscovery) Read(ctx context.Context, request resource.Re
 		data.Annotations = types.MapNull(types.StringType)
 	}
 
+	// resource SpecToModelRoot Meta StringField --> Description
+	data.Description = types.StringValue(metaData.GetDescription())
+
+	// resource SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
+
 	// resource SpecToModelRoot ArrayOfPointerField --> CustomAuthTypes
 	if len(specData.CustomAuthTypes) > 0 {
 		customAuthTypesElements := make([]ApiDiscoveryApiDiscoveryCustomAuthType, 0, len(specData.CustomAuthTypes))
 
 		for _, customAuthTypesElement := range specData.CustomAuthTypes {
 			apiDiscoveryApiDiscoveryCustomAuthTypeModel := ApiDiscoveryApiDiscoveryCustomAuthType{}
+
+			// resource specToModelNested RequiredStringField --> ParameterName
+			if customAuthTypesElement.GetParameterName() != "" {
+				apiDiscoveryApiDiscoveryCustomAuthTypeModel.ParameterName = types.StringValue(customAuthTypesElement.GetParameterName())
+			} else {
+				// Empty string, set to null
+				apiDiscoveryApiDiscoveryCustomAuthTypeModel.ParameterName = types.StringNull()
+			}
 
 			// resource specToModelNested RequiredEnumField --> ParameterType
 			if customAuthTypesElement.GetParameterType().String() != "" {
@@ -1931,14 +1939,6 @@ func (r *ResourceF5XCApiDiscovery) Read(ctx context.Context, request resource.Re
 				apiDiscoveryApiDiscoveryCustomAuthTypeModel.ParameterType = listValue
 			} else {
 				apiDiscoveryApiDiscoveryCustomAuthTypeModel.ParameterType = types.ListNull(types.StringType)
-			}
-
-			// resource specToModelNested RequiredStringField --> ParameterName
-			if customAuthTypesElement.GetParameterName() != "" {
-				apiDiscoveryApiDiscoveryCustomAuthTypeModel.ParameterName = types.StringValue(customAuthTypesElement.GetParameterName())
-			} else {
-				// Empty string, set to null
-				apiDiscoveryApiDiscoveryCustomAuthTypeModel.ParameterName = types.StringNull()
 			}
 
 			customAuthTypesElements = append(customAuthTypesElements, apiDiscoveryApiDiscoveryCustomAuthTypeModel)
@@ -1976,21 +1976,6 @@ func (r *ResourceF5XCApiDiscovery) Read(ctx context.Context, request resource.Re
 			discoveryRulesElements := make([]ApiDiscoveryApiDiscoveryDiscoveryRule, 0, len(userDefinedApiDiscoveryPolicyElement.GetDiscoveryRules()))
 			for _, discoveryRulesElement := range userDefinedApiDiscoveryPolicyElement.GetDiscoveryRules() {
 				apiDiscoveryApiDiscoveryDiscoveryRuleModel := ApiDiscoveryApiDiscoveryDiscoveryRule{}
-
-				// resource specToModelNested MapOfStringField --> Labels
-				if discoveryRulesElement.GetLabels() != nil {
-					// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-					labelsMap, labelsDiags := utils.StringMapToTerraformMap(discoveryRulesElement.GetLabels())
-					response.Diagnostics.Append(labelsDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					// Assign the typed map to the model
-					apiDiscoveryApiDiscoveryDiscoveryRuleModel.Labels = labelsMap
-				} else {
-					// Ensure the state reflects a Null map with the correct element type to avoid DynamicPseudoType errors
-					apiDiscoveryApiDiscoveryDiscoveryRuleModel.Labels = types.MapNull(types.StringType)
-				}
 
 				// resource specToModelNested PointerField --> Metadata
 				if discoveryRulesElement.GetMetadata() != nil {
@@ -2160,16 +2145,6 @@ func (r *ResourceF5XCApiDiscovery) Read(ctx context.Context, request resource.Re
 
 						// Process nested choices, populating the temporary attribute map
 
-						// resource specToModelNested StringOfOneOfField --> Pattern
-						patternItem, isPattern := rulePropertiescriteriaChoiceChoices.(*ves_io_schema_api_sec_api_discovery.RuleProperties_Pattern)
-
-						if isPattern {
-							rulePropertiescriteriaChoiceChoicesAttributeMap["pattern"] = types.StringValue(string(patternItem.Pattern))
-						} else {
-							// Empty string, set to null
-							rulePropertiescriteriaChoiceChoicesAttributeMap["pattern"] = types.StringNull()
-						}
-
 						// resource specToModelNested PointerOfOneOfField --> HttpHeaderCriteria
 						// <no value>
 						// false
@@ -2178,6 +2153,20 @@ func (r *ResourceF5XCApiDiscovery) Read(ctx context.Context, request resource.Re
 							httpHeaderCriteriaAttributeMap := make(map[string]attr.Value)
 
 							if isHttpHeaderCriteria && httpHeaderCriteriaOptions != nil {
+
+								// resource specToModelNested EnumField --> Location
+								if httpHeaderCriteriaOptions.HttpHeaderCriteria.GetLocation().String() != "" {
+									stringValue := types.StringValue(httpHeaderCriteriaOptions.HttpHeaderCriteria.GetLocation().String())
+									stringSlice := []types.String{stringValue}
+									listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+									response.Diagnostics.Append(diags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									httpHeaderCriteriaAttributeMap["location"] = listValue
+								} else {
+									httpHeaderCriteriaAttributeMap["location"] = types.ListNull(types.StringType)
+								}
 
 								// resource specToModelNested RequiredStringField --> FieldName
 								if httpHeaderCriteriaOptions.HttpHeaderCriteria.GetFieldName() != "" {
@@ -2209,20 +2198,6 @@ func (r *ResourceF5XCApiDiscovery) Read(ctx context.Context, request resource.Re
 									httpHeaderCriteriaAttributeMap["value"] = types.StringNull()
 								}
 
-								// resource specToModelNested EnumField --> Location
-								if httpHeaderCriteriaOptions.HttpHeaderCriteria.GetLocation().String() != "" {
-									stringValue := types.StringValue(httpHeaderCriteriaOptions.HttpHeaderCriteria.GetLocation().String())
-									stringSlice := []types.String{stringValue}
-									listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									httpHeaderCriteriaAttributeMap["location"] = listValue
-								} else {
-									httpHeaderCriteriaAttributeMap["location"] = types.ListNull(types.StringType)
-								}
-
 								httpHeaderCriteriaObj, diags := types.ObjectValue(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesCriteriaHttpHeaderCriteriaModelAttributeMap, httpHeaderCriteriaAttributeMap)
 								response.Diagnostics.Append(diags...)
 								if response.Diagnostics.HasError() {
@@ -2232,6 +2207,16 @@ func (r *ResourceF5XCApiDiscovery) Read(ctx context.Context, request resource.Re
 							} else {
 								rulePropertiescriteriaChoiceChoicesAttributeMap["http_header_criteria"] = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesCriteriaHttpHeaderCriteriaModelAttributeMap)
 							}
+						}
+
+						// resource specToModelNested StringOfOneOfField --> Pattern
+						patternItem, isPattern := rulePropertiescriteriaChoiceChoices.(*ves_io_schema_api_sec_api_discovery.RuleProperties_Pattern)
+
+						if isPattern {
+							rulePropertiescriteriaChoiceChoicesAttributeMap["pattern"] = types.StringValue(string(patternItem.Pattern))
+						} else {
+							// Empty string, set to null
+							rulePropertiescriteriaChoiceChoicesAttributeMap["pattern"] = types.StringNull()
 						}
 
 						// --- End of Choices ---
@@ -2269,6 +2254,21 @@ func (r *ResourceF5XCApiDiscovery) Read(ctx context.Context, request resource.Re
 					// making this else-branch unreachable. The child OneOf handles the actual healing.
 					// The target is a types.Object, so we use types.ObjectNull.
 					apiDiscoveryApiDiscoveryDiscoveryRuleModel.RuleProperties = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesModelAttributeMap)
+				}
+
+				// resource specToModelNested MapOfStringField --> Labels
+				if discoveryRulesElement.GetLabels() != nil {
+					// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
+					labelsMap, labelsDiags := utils.StringMapToTerraformMap(discoveryRulesElement.GetLabels())
+					response.Diagnostics.Append(labelsDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					// Assign the typed map to the model
+					apiDiscoveryApiDiscoveryDiscoveryRuleModel.Labels = labelsMap
+				} else {
+					// Ensure the state reflects a Null map with the correct element type to avoid DynamicPseudoType errors
+					apiDiscoveryApiDiscoveryDiscoveryRuleModel.Labels = types.MapNull(types.StringType)
 				}
 
 				discoveryRulesElements = append(discoveryRulesElements, apiDiscoveryApiDiscoveryDiscoveryRuleModel)
@@ -2457,16 +2457,6 @@ func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.
 
 	// Populate updateReq from data model
 
-	// resource modelToMetaRoot StringField --> Description
-	if !data.Description.IsNull() && !data.Description.IsUnknown() {
-		meta.Description = string(data.Description.ValueString())
-	}
-
-	// resource modelToMetaRoot RequiredStringField --> Name
-	if !data.Name.IsNull() && !data.Name.IsUnknown() {
-		meta.Name = string(data.Name.ValueString())
-	}
-
 	// resource modelToMetaRoot RequiredStringField --> Namespace
 	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
 		meta.Namespace = string(data.Namespace.ValueString())
@@ -2486,6 +2476,16 @@ func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.
 		meta.Annotations = nil
 	}
 
+	// resource modelToMetaRoot StringField --> Description
+	if !data.Description.IsNull() && !data.Description.IsUnknown() {
+		meta.Description = string(data.Description.ValueString())
+	}
+
+	// resource modelToMetaRoot RequiredStringField --> Name
+	if !data.Name.IsNull() && !data.Name.IsUnknown() {
+		meta.Name = string(data.Name.ValueString())
+	}
+
 	{
 		// resource modelToSpecRoot ArrayOfPointerField --> CustomAuthTypes
 		if !data.CustomAuthTypes.IsNull() && !data.CustomAuthTypes.IsUnknown() {
@@ -2500,6 +2500,11 @@ func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.
 
 			for i, customAuthTypesElement := range customAuthTypesElements {
 				customAuthTypesSpec[i] = &ves_io_schema_api_sec_api_discovery.CustomAuthType{}
+
+				// resource modelToSpecNested RequiredStringField --> ParameterName
+				if !customAuthTypesElement.ParameterName.IsNull() && !customAuthTypesElement.ParameterName.IsUnknown() {
+					customAuthTypesSpec[i].ParameterName = string(customAuthTypesElement.ParameterName.ValueString())
+				}
 
 				// resource modelToSpecNested RequiredEnumField --> ParameterType
 				if !customAuthTypesElement.ParameterType.IsNull() && !customAuthTypesElement.ParameterType.IsUnknown() && len(customAuthTypesElement.ParameterType.Elements()) > 0 {
@@ -2523,11 +2528,6 @@ func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.
 							return
 						}
 					}
-				}
-
-				// resource modelToSpecNested RequiredStringField --> ParameterName
-				if !customAuthTypesElement.ParameterName.IsNull() && !customAuthTypesElement.ParameterName.IsUnknown() {
-					customAuthTypesSpec[i].ParameterName = string(customAuthTypesElement.ParameterName.ValueString())
 				}
 
 			}
@@ -2569,20 +2569,6 @@ func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.
 					userDefinedApiDiscoveryPolicySpec.DiscoveryRules[i] = &ves_io_schema_api_sec_api_discovery.DiscoveryRule{}
 
 					// Recursively process nested elements
-
-					// resource modelToSpecNested MapOfStringField --> Labels
-					if !discoveryRulesElement.Labels.IsNull() && !discoveryRulesElement.Labels.IsUnknown() {
-						var mapOfString map[string]string
-						diags = discoveryRulesElement.Labels.ElementsAs(ctx, &mapOfString, false)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						discoveryRulesSpec[i].Labels = mapOfString
-					} else {
-						discoveryRulesSpec[i].Labels = nil
-					}
 
 					// resource modelToSpecNested PointerField --> Metadata
 					if !discoveryRulesElement.Metadata.IsNull() && !discoveryRulesElement.Metadata.IsUnknown() {
@@ -2680,13 +2666,6 @@ func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.
 								return
 							}
 
-							// resource modelToSpecNested StringOfOneOfField --> Pattern
-							if !rulePropertiesCriteriaChoiceModel.Pattern.IsNull() && !rulePropertiesCriteriaChoiceModel.Pattern.IsUnknown() {
-								patternSpecStr := &ves_io_schema_api_sec_api_discovery.RuleProperties_Pattern{}
-								patternSpecStr.Pattern = string(rulePropertiesCriteriaChoiceModel.Pattern.ValueString())
-								rulePropertiesSpec.Criteria = patternSpecStr
-							}
-
 							// resource modelToSpecNested PointerOfOneOfField --> HttpHeaderCriteria
 							if !rulePropertiesCriteriaChoiceModel.HttpHeaderCriteria.IsNull() && !rulePropertiesCriteriaChoiceModel.HttpHeaderCriteria.IsUnknown() {
 								var apiDiscoveryRulePropertiesHttpHeaderCriteriaModel ApiDiscoveryRulePropertiesHttpHeaderCriteria
@@ -2697,6 +2676,26 @@ func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.
 								httpHeaderCriteriaOneOfSpec := &ves_io_schema_api_sec_api_discovery.RuleProperties_HttpHeaderCriteria{}
 								httpHeaderCriteriaOneOfSpec.HttpHeaderCriteria = &ves_io_schema_api_sec_api_discovery.HTTPHeaderCriteria{}
 								rulePropertiesSpec.Criteria = httpHeaderCriteriaOneOfSpec
+
+								// resource modelToSpecNested EnumField --> Location
+								if !apiDiscoveryRulePropertiesHttpHeaderCriteriaModel.Location.IsNull() && !apiDiscoveryRulePropertiesHttpHeaderCriteriaModel.Location.IsUnknown() {
+									var locationTfStrings []types.String
+									diags = apiDiscoveryRulePropertiesHttpHeaderCriteriaModel.Location.ElementsAs(ctx, &locationTfStrings, false)
+									response.Diagnostics.Append(diags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+
+									if len(locationTfStrings) > 0 {
+										valStr := locationTfStrings[0].ValueString()
+										if v, ok := ves_io_schema_api_sec_api_discovery.RuleLocation_value[valStr]; ok {
+											httpHeaderCriteriaOneOfSpec.HttpHeaderCriteria.Location = ves_io_schema_api_sec_api_discovery.RuleLocation(v)
+										} else {
+											response.Diagnostics.AddError("Invalid Enum Value", fmt.Sprintf("Value '%s' is not valid for Location", valStr))
+											return
+										}
+									}
+								}
 
 								// resource modelToSpecNested RequiredStringField --> FieldName
 								if !apiDiscoveryRulePropertiesHttpHeaderCriteriaModel.FieldName.IsNull() && !apiDiscoveryRulePropertiesHttpHeaderCriteriaModel.FieldName.IsUnknown() {
@@ -2728,30 +2727,31 @@ func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.
 									httpHeaderCriteriaOneOfSpec.HttpHeaderCriteria.Value = string(apiDiscoveryRulePropertiesHttpHeaderCriteriaModel.Value.ValueString())
 								}
 
-								// resource modelToSpecNested EnumField --> Location
-								if !apiDiscoveryRulePropertiesHttpHeaderCriteriaModel.Location.IsNull() && !apiDiscoveryRulePropertiesHttpHeaderCriteriaModel.Location.IsUnknown() {
-									var locationTfStrings []types.String
-									diags = apiDiscoveryRulePropertiesHttpHeaderCriteriaModel.Location.ElementsAs(ctx, &locationTfStrings, false)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
+							}
 
-									if len(locationTfStrings) > 0 {
-										valStr := locationTfStrings[0].ValueString()
-										if v, ok := ves_io_schema_api_sec_api_discovery.RuleLocation_value[valStr]; ok {
-											httpHeaderCriteriaOneOfSpec.HttpHeaderCriteria.Location = ves_io_schema_api_sec_api_discovery.RuleLocation(v)
-										} else {
-											response.Diagnostics.AddError("Invalid Enum Value", fmt.Sprintf("Value '%s' is not valid for Location", valStr))
-											return
-										}
-									}
-								}
-
+							// resource modelToSpecNested StringOfOneOfField --> Pattern
+							if !rulePropertiesCriteriaChoiceModel.Pattern.IsNull() && !rulePropertiesCriteriaChoiceModel.Pattern.IsUnknown() {
+								patternSpecStr := &ves_io_schema_api_sec_api_discovery.RuleProperties_Pattern{}
+								patternSpecStr.Pattern = string(rulePropertiesCriteriaChoiceModel.Pattern.ValueString())
+								rulePropertiesSpec.Criteria = patternSpecStr
 							}
 
 						}
 
+					}
+
+					// resource modelToSpecNested MapOfStringField --> Labels
+					if !discoveryRulesElement.Labels.IsNull() && !discoveryRulesElement.Labels.IsUnknown() {
+						var mapOfString map[string]string
+						diags = discoveryRulesElement.Labels.ElementsAs(ctx, &mapOfString, false)
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						discoveryRulesSpec[i].Labels = mapOfString
+					} else {
+						discoveryRulesSpec[i].Labels = nil
 					}
 
 				}
@@ -2847,12 +2847,6 @@ func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
-
-	// resource SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
-
-	// resource SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
 
 	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
 	data.Namespace = types.StringValue(metaData.GetNamespace())
@@ -2954,12 +2948,26 @@ func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.
 		data.Annotations = types.MapNull(types.StringType)
 	}
 
+	// resource SpecToModelRoot Meta StringField --> Description
+	data.Description = types.StringValue(metaData.GetDescription())
+
+	// resource SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
+
 	// resource SpecToModelRoot ArrayOfPointerField --> CustomAuthTypes
 	if len(specData.CustomAuthTypes) > 0 {
 		customAuthTypesElements := make([]ApiDiscoveryApiDiscoveryCustomAuthType, 0, len(specData.CustomAuthTypes))
 
 		for _, customAuthTypesElement := range specData.CustomAuthTypes {
 			apiDiscoveryApiDiscoveryCustomAuthTypeModel := ApiDiscoveryApiDiscoveryCustomAuthType{}
+
+			// resource specToModelNested RequiredStringField --> ParameterName
+			if customAuthTypesElement.GetParameterName() != "" {
+				apiDiscoveryApiDiscoveryCustomAuthTypeModel.ParameterName = types.StringValue(customAuthTypesElement.GetParameterName())
+			} else {
+				// Empty string, set to null
+				apiDiscoveryApiDiscoveryCustomAuthTypeModel.ParameterName = types.StringNull()
+			}
 
 			// resource specToModelNested RequiredEnumField --> ParameterType
 			if customAuthTypesElement.GetParameterType().String() != "" {
@@ -2973,14 +2981,6 @@ func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.
 				apiDiscoveryApiDiscoveryCustomAuthTypeModel.ParameterType = listValue
 			} else {
 				apiDiscoveryApiDiscoveryCustomAuthTypeModel.ParameterType = types.ListNull(types.StringType)
-			}
-
-			// resource specToModelNested RequiredStringField --> ParameterName
-			if customAuthTypesElement.GetParameterName() != "" {
-				apiDiscoveryApiDiscoveryCustomAuthTypeModel.ParameterName = types.StringValue(customAuthTypesElement.GetParameterName())
-			} else {
-				// Empty string, set to null
-				apiDiscoveryApiDiscoveryCustomAuthTypeModel.ParameterName = types.StringNull()
 			}
 
 			customAuthTypesElements = append(customAuthTypesElements, apiDiscoveryApiDiscoveryCustomAuthTypeModel)
@@ -3018,21 +3018,6 @@ func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.
 			discoveryRulesElements := make([]ApiDiscoveryApiDiscoveryDiscoveryRule, 0, len(userDefinedApiDiscoveryPolicyElement.GetDiscoveryRules()))
 			for _, discoveryRulesElement := range userDefinedApiDiscoveryPolicyElement.GetDiscoveryRules() {
 				apiDiscoveryApiDiscoveryDiscoveryRuleModel := ApiDiscoveryApiDiscoveryDiscoveryRule{}
-
-				// resource specToModelNested MapOfStringField --> Labels
-				if discoveryRulesElement.GetLabels() != nil {
-					// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-					labelsMap, labelsDiags := utils.StringMapToTerraformMap(discoveryRulesElement.GetLabels())
-					response.Diagnostics.Append(labelsDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					// Assign the typed map to the model
-					apiDiscoveryApiDiscoveryDiscoveryRuleModel.Labels = labelsMap
-				} else {
-					// Ensure the state reflects a Null map with the correct element type to avoid DynamicPseudoType errors
-					apiDiscoveryApiDiscoveryDiscoveryRuleModel.Labels = types.MapNull(types.StringType)
-				}
 
 				// resource specToModelNested PointerField --> Metadata
 				if discoveryRulesElement.GetMetadata() != nil {
@@ -3202,16 +3187,6 @@ func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.
 
 						// Process nested choices, populating the temporary attribute map
 
-						// resource specToModelNested StringOfOneOfField --> Pattern
-						patternItem, isPattern := rulePropertiescriteriaChoiceChoices.(*ves_io_schema_api_sec_api_discovery.RuleProperties_Pattern)
-
-						if isPattern {
-							rulePropertiescriteriaChoiceChoicesAttributeMap["pattern"] = types.StringValue(string(patternItem.Pattern))
-						} else {
-							// Empty string, set to null
-							rulePropertiescriteriaChoiceChoicesAttributeMap["pattern"] = types.StringNull()
-						}
-
 						// resource specToModelNested PointerOfOneOfField --> HttpHeaderCriteria
 						// GlobalSpecType
 						// false
@@ -3220,6 +3195,20 @@ func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.
 							httpHeaderCriteriaAttributeMap := make(map[string]attr.Value)
 
 							if isHttpHeaderCriteria && httpHeaderCriteriaOptions != nil {
+
+								// resource specToModelNested EnumField --> Location
+								if httpHeaderCriteriaOptions.HttpHeaderCriteria.GetLocation().String() != "" {
+									stringValue := types.StringValue(httpHeaderCriteriaOptions.HttpHeaderCriteria.GetLocation().String())
+									stringSlice := []types.String{stringValue}
+									listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+									response.Diagnostics.Append(diags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									httpHeaderCriteriaAttributeMap["location"] = listValue
+								} else {
+									httpHeaderCriteriaAttributeMap["location"] = types.ListNull(types.StringType)
+								}
 
 								// resource specToModelNested RequiredStringField --> FieldName
 								if httpHeaderCriteriaOptions.HttpHeaderCriteria.GetFieldName() != "" {
@@ -3251,20 +3240,6 @@ func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.
 									httpHeaderCriteriaAttributeMap["value"] = types.StringNull()
 								}
 
-								// resource specToModelNested EnumField --> Location
-								if httpHeaderCriteriaOptions.HttpHeaderCriteria.GetLocation().String() != "" {
-									stringValue := types.StringValue(httpHeaderCriteriaOptions.HttpHeaderCriteria.GetLocation().String())
-									stringSlice := []types.String{stringValue}
-									listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									httpHeaderCriteriaAttributeMap["location"] = listValue
-								} else {
-									httpHeaderCriteriaAttributeMap["location"] = types.ListNull(types.StringType)
-								}
-
 								httpHeaderCriteriaObj, diags := types.ObjectValue(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesCriteriaHttpHeaderCriteriaModelAttributeMap, httpHeaderCriteriaAttributeMap)
 								response.Diagnostics.Append(diags...)
 								if response.Diagnostics.HasError() {
@@ -3274,6 +3249,16 @@ func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.
 							} else {
 								rulePropertiescriteriaChoiceChoicesAttributeMap["http_header_criteria"] = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesCriteriaHttpHeaderCriteriaModelAttributeMap)
 							}
+						}
+
+						// resource specToModelNested StringOfOneOfField --> Pattern
+						patternItem, isPattern := rulePropertiescriteriaChoiceChoices.(*ves_io_schema_api_sec_api_discovery.RuleProperties_Pattern)
+
+						if isPattern {
+							rulePropertiescriteriaChoiceChoicesAttributeMap["pattern"] = types.StringValue(string(patternItem.Pattern))
+						} else {
+							// Empty string, set to null
+							rulePropertiescriteriaChoiceChoicesAttributeMap["pattern"] = types.StringNull()
 						}
 
 						// --- End of Choices ---
@@ -3311,6 +3296,21 @@ func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.
 					// making this else-branch unreachable. The child OneOf handles the actual healing.
 					// The target is a types.Object, so we use types.ObjectNull.
 					apiDiscoveryApiDiscoveryDiscoveryRuleModel.RuleProperties = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesModelAttributeMap)
+				}
+
+				// resource specToModelNested MapOfStringField --> Labels
+				if discoveryRulesElement.GetLabels() != nil {
+					// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
+					labelsMap, labelsDiags := utils.StringMapToTerraformMap(discoveryRulesElement.GetLabels())
+					response.Diagnostics.Append(labelsDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					// Assign the typed map to the model
+					apiDiscoveryApiDiscoveryDiscoveryRuleModel.Labels = labelsMap
+				} else {
+					// Ensure the state reflects a Null map with the correct element type to avoid DynamicPseudoType errors
+					apiDiscoveryApiDiscoveryDiscoveryRuleModel.Labels = types.MapNull(types.StringType)
 				}
 
 				discoveryRulesElements = append(discoveryRulesElements, apiDiscoveryApiDiscoveryDiscoveryRuleModel)

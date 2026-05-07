@@ -57,26 +57,21 @@ type ResourceF5XCV1DnsMonitor struct {
 	client *client.APIClient
 }
 
-type V1DnsMonitorCreateSpecTypeOnFailureToChoice struct {
-	OnFailureToAll types.Bool `tfsdk:"on_failure_to_all"`
-	OnFailureToAny types.Bool `tfsdk:"on_failure_to_any"`
-}
-
 type V1DnsMonitorCreateSpecTypeIntervalChoice struct {
-	Interval_1Hour   types.Bool `tfsdk:"interval_1_hour"`
-	Interval_1Day    types.Bool `tfsdk:"interval_1_day"`
 	Interval_30Secs  types.Bool `tfsdk:"interval_30_secs"`
-	Interval_6Hours  types.Bool `tfsdk:"interval_6_hours"`
-	Interval_12Hours types.Bool `tfsdk:"interval_12_hours"`
+	Interval_1Day    types.Bool `tfsdk:"interval_1_day"`
 	Interval_1Min    types.Bool `tfsdk:"interval_1_min"`
-	Interval_5Mins   types.Bool `tfsdk:"interval_5_mins"`
-	Interval_15Mins  types.Bool `tfsdk:"interval_15_mins"`
 	Interval_30Mins  types.Bool `tfsdk:"interval_30_mins"`
+	Interval_12Hours types.Bool `tfsdk:"interval_12_hours"`
+	Interval_15Mins  types.Bool `tfsdk:"interval_15_mins"`
+	Interval_1Hour   types.Bool `tfsdk:"interval_1_hour"`
+	Interval_6Hours  types.Bool `tfsdk:"interval_6_hours"`
+	Interval_5Mins   types.Bool `tfsdk:"interval_5_mins"`
 }
 
 type V1DnsMonitorV1DnsMonitorNameServer struct {
-	Port       types.Int64  `tfsdk:"port"`
 	NameServer types.String `tfsdk:"name_server"`
+	Port       types.Int64  `tfsdk:"port"`
 }
 
 type V1DnsMonitorSyntheticMonitorSourceExternal struct {
@@ -84,15 +79,15 @@ type V1DnsMonitorSyntheticMonitorSourceExternal struct {
 }
 
 type V1DnsMonitorSourceExternalSourceChoice struct {
-	F5Xc types.Object `tfsdk:"f5xc"`
 	Aws  types.Object `tfsdk:"aws"`
-}
-
-type V1DnsMonitorSourceExternalF5Xc struct {
-	Regions types.List `tfsdk:"regions"`
+	F5Xc types.Object `tfsdk:"f5xc"`
 }
 
 type V1DnsMonitorSourceExternalAws struct {
+	Regions types.List `tfsdk:"regions"`
+}
+
+type V1DnsMonitorSourceExternalF5Xc struct {
 	Regions types.List `tfsdk:"regions"`
 }
 
@@ -113,8 +108,8 @@ type V1DnsMonitorHealthPolicyDynamicThreshold struct {
 }
 
 type V1DnsMonitorHealthPolicyStaticMaxThresholdPolicyChoice struct {
-	StaticMaxThresholdDisabled types.Bool   `tfsdk:"static_max_threshold_disabled"`
 	StaticMaxThreshold         types.Object `tfsdk:"static_max_threshold"`
+	StaticMaxThresholdDisabled types.Bool   `tfsdk:"static_max_threshold_disabled"`
 }
 
 type V1DnsMonitorHealthPolicyStaticMaxThreshold struct {
@@ -128,29 +123,34 @@ type V1DnsMonitorHealthPolicyStaticMinThresholdPolicyChoice struct {
 }
 
 type V1DnsMonitorHealthPolicyStaticMinThreshold struct {
-	MinResponseTime types.Int64 `tfsdk:"min_response_time"`
 	EvalPeriod      types.List  `tfsdk:"eval_period"`
+	MinResponseTime types.Int64 `tfsdk:"min_response_time"`
+}
+
+type V1DnsMonitorCreateSpecTypeOnFailureToChoice struct {
+	OnFailureToAny types.Bool `tfsdk:"on_failure_to_any"`
+	OnFailureToAll types.Bool `tfsdk:"on_failure_to_all"`
 }
 
 // ResourceF5XCV1DnsMonitorModel describes the resource data model.
 type ResourceF5XCV1DnsMonitorModel struct {
-	Labels                  types.Map      `tfsdk:"labels"`
-	Annotations             types.Map      `tfsdk:"annotations"`
-	Description             types.String   `tfsdk:"description"`
 	Name                    types.String   `tfsdk:"name"`
 	Namespace               types.String   `tfsdk:"namespace"`
 	Uid                     types.String   `tfsdk:"uid"`
-	Protocol                types.String   `tfsdk:"protocol"`
-	OnFailureToChoice       types.Object   `tfsdk:"on_failure_to_choice"`
-	OnFailureCount          types.Int64    `tfsdk:"on_failure_count"`
-	LookupTimeout           types.Int64    `tfsdk:"lookup_timeout"`
-	SourceCriticalThreshold types.Int64    `tfsdk:"source_critical_threshold"`
+	Labels                  types.Map      `tfsdk:"labels"`
+	Annotations             types.Map      `tfsdk:"annotations"`
+	Description             types.String   `tfsdk:"description"`
 	Domain                  types.String   `tfsdk:"domain"`
 	IntervalChoice          types.Object   `tfsdk:"interval_choice"`
-	RecordType              types.String   `tfsdk:"record_type"`
+	Protocol                types.String   `tfsdk:"protocol"`
+	OnFailureCount          types.Int64    `tfsdk:"on_failure_count"`
+	LookupTimeout           types.Int64    `tfsdk:"lookup_timeout"`
 	NameServers             types.List     `tfsdk:"name_servers"`
 	ExternalSources         types.List     `tfsdk:"external_sources"`
 	HealthPolicy            types.Object   `tfsdk:"health_policy"`
+	RecordType              types.String   `tfsdk:"record_type"`
+	OnFailureToChoice       types.Object   `tfsdk:"on_failure_to_choice"`
+	SourceCriticalThreshold types.Int64    `tfsdk:"source_critical_threshold"`
 	Receive                 types.String   `tfsdk:"receive"`
 	Timeouts                timeouts.Value `tfsdk:"timeouts"`
 }
@@ -165,32 +165,25 @@ var (
 )
 
 // --- Attribute Maps for Nested Structs ---
-// Attribute map for RequiredOneOfField --> OnFailureToChoice
-var V1DnsMonitorOnFailureToChoiceModelAttributeMap = map[string]attr.Type{
-
-	"on_failure_to_all": types.BoolType,
-	"on_failure_to_any": types.BoolType,
-}
-
 // Attribute map for RequiredOneOfField --> IntervalChoice
 var V1DnsMonitorIntervalChoiceModelAttributeMap = map[string]attr.Type{
 
-	"interval_1_hour":   types.BoolType,
-	"interval_1_day":    types.BoolType,
 	"interval_30_secs":  types.BoolType,
-	"interval_6_hours":  types.BoolType,
-	"interval_12_hours": types.BoolType,
+	"interval_1_day":    types.BoolType,
 	"interval_1_min":    types.BoolType,
-	"interval_5_mins":   types.BoolType,
-	"interval_15_mins":  types.BoolType,
 	"interval_30_mins":  types.BoolType,
+	"interval_12_hours": types.BoolType,
+	"interval_15_mins":  types.BoolType,
+	"interval_1_hour":   types.BoolType,
+	"interval_6_hours":  types.BoolType,
+	"interval_5_mins":   types.BoolType,
 }
 
 // Attribute map for ArrayOfPointerField --> NameServers
 var V1DnsMonitorNameServersModelAttributeMap = map[string]attr.Type{
 
-	"port":        types.Int64Type,
 	"name_server": types.StringType,
+	"port":        types.Int64Type,
 }
 
 // Attribute map for RequiredArrayOfPointerField --> ExternalSources
@@ -204,24 +197,24 @@ var V1DnsMonitorExternalSourcesModelAttributeMap = map[string]attr.Type{
 // Attribute map for RequiredOneOfField --> SourceChoice
 var V1DnsMonitorExternalSourcesSourceChoiceModelAttributeMap = map[string]attr.Type{
 
-	"f5xc": types.ObjectType{
-		AttrTypes: V1DnsMonitorExternalSourcesSourceChoiceF5XcModelAttributeMap,
-	},
 	"aws": types.ObjectType{
 		AttrTypes: V1DnsMonitorExternalSourcesSourceChoiceAwsModelAttributeMap,
 	},
+	"f5xc": types.ObjectType{
+		AttrTypes: V1DnsMonitorExternalSourcesSourceChoiceF5XcModelAttributeMap,
+	},
 }
 
-// Attribute map for PointerOfOneOfField --> F5Xc
-var V1DnsMonitorExternalSourcesSourceChoiceF5XcModelAttributeMap = map[string]attr.Type{
+// Attribute map for PointerOfOneOfField --> Aws
+var V1DnsMonitorExternalSourcesSourceChoiceAwsModelAttributeMap = map[string]attr.Type{
 
 	"regions": types.ListType{
 		ElemType: types.StringType,
 	},
 }
 
-// Attribute map for PointerOfOneOfField --> Aws
-var V1DnsMonitorExternalSourcesSourceChoiceAwsModelAttributeMap = map[string]attr.Type{
+// Attribute map for PointerOfOneOfField --> F5Xc
+var V1DnsMonitorExternalSourcesSourceChoiceF5XcModelAttributeMap = map[string]attr.Type{
 
 	"regions": types.ListType{
 		ElemType: types.StringType,
@@ -265,10 +258,10 @@ var V1DnsMonitorHealthPolicyDynamicThresholdPolicyDynamicThresholdModelAttribute
 // Attribute map for RequiredOneOfField --> StaticMaxThresholdPolicy
 var V1DnsMonitorHealthPolicyStaticMaxThresholdPolicyModelAttributeMap = map[string]attr.Type{
 
-	"static_max_threshold_disabled": types.BoolType,
 	"static_max_threshold": types.ObjectType{
 		AttrTypes: V1DnsMonitorHealthPolicyStaticMaxThresholdPolicyStaticMaxThresholdModelAttributeMap,
 	},
+	"static_max_threshold_disabled": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> StaticMaxThreshold
@@ -292,10 +285,17 @@ var V1DnsMonitorHealthPolicyStaticMinThresholdPolicyModelAttributeMap = map[stri
 // Attribute map for PointerOfOneOfField --> StaticMinThreshold
 var V1DnsMonitorHealthPolicyStaticMinThresholdPolicyStaticMinThresholdModelAttributeMap = map[string]attr.Type{
 
-	"min_response_time": types.Int64Type,
 	"eval_period": types.ListType{
 		ElemType: types.StringType,
 	},
+	"min_response_time": types.Int64Type,
+}
+
+// Attribute map for RequiredOneOfField --> OnFailureToChoice
+var V1DnsMonitorOnFailureToChoiceModelAttributeMap = map[string]attr.Type{
+
+	"on_failure_to_any": types.BoolType,
+	"on_failure_to_all": types.BoolType,
 }
 
 func NewResourceF5XCV1DnsMonitor() resource.Resource {
@@ -313,6 +313,30 @@ func (r *ResourceF5XCV1DnsMonitor) Schema(ctx context.Context, request resource.
 		Description:         "V1DnsMonitor resource",
 
 		Attributes: map[string]schema.Attribute{
+			"name": schema.StringAttribute{
+				Description:         "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
+				MarkdownDescription: "",
+				Required:            true,
+				Optional:            false,
+				Computed:            false,
+			},
+			"namespace": schema.StringAttribute{
+				Description:         "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
+				MarkdownDescription: "",
+				Required:            true,
+				Optional:            false,
+				Computed:            false,
+			},
+			"uid": schema.StringAttribute{
+				Description:         "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
+				MarkdownDescription: "",
+				Required:            false,
+				Optional:            false,
+				Computed:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
 			"labels": schema.MapAttribute{
 				Description:         "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
 				MarkdownDescription: "",
@@ -344,28 +368,126 @@ func (r *ResourceF5XCV1DnsMonitor) Schema(ctx context.Context, request resource.
 				Computed:            true,
 				Default:             stringdefault.StaticString(""),
 			},
-			"name": schema.StringAttribute{
-				Description:         "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
+			"domain": schema.StringAttribute{
+				Description:         "domain",
+				MarkdownDescription: "<br>**Validation:** `Length LengthAtMost(2048)`",
+				Required:            true,
+				Optional:            false,
+				Computed:            false,
+				Validators: []validator.String{
+					stringvalidator.LengthAtMost(2048),
+				},
+			},
+			"interval_choice": schema.SingleNestedAttribute{
+				Description:         "interval How often the monitor will run from each source location",
 				MarkdownDescription: "",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
-			},
-			"namespace": schema.StringAttribute{
-				Description:         "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
-				MarkdownDescription: "",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
-			},
-			"uid": schema.StringAttribute{
-				Description:         "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            false,
-				Computed:            true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
+				Validators: []validator.Object{
+					atmostoneofvalidator.AtMostOneOf(
+						"interval_12_hours",
+						"interval_30_secs",
+						"interval_15_mins",
+						"interval_1_hour",
+						"interval_6_hours",
+						"interval_1_day",
+						"interval_1_min",
+						"interval_5_mins",
+						"interval_30_mins",
+					),
+				},
+				Attributes: map[string]schema.Attribute{
+					"interval_30_secs": schema.BoolAttribute{
+						Description:         "30 seconds",
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Validators: []validator.Bool{
+							boolvalidator.Equals(true),
+						},
+					},
+					"interval_1_day": schema.BoolAttribute{
+						Description:         "1 day",
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Validators: []validator.Bool{
+							boolvalidator.Equals(true),
+						},
+					},
+					"interval_1_min": schema.BoolAttribute{
+						Description:         "1 minute",
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Validators: []validator.Bool{
+							boolvalidator.Equals(true),
+						},
+					},
+					"interval_30_mins": schema.BoolAttribute{
+						Description:         "30 minutes",
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Validators: []validator.Bool{
+							boolvalidator.Equals(true),
+						},
+					},
+					"interval_12_hours": schema.BoolAttribute{
+						Description:         "12 hours",
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Validators: []validator.Bool{
+							boolvalidator.Equals(true),
+						},
+					},
+					"interval_15_mins": schema.BoolAttribute{
+						Description:         "15 minutes",
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Validators: []validator.Bool{
+							boolvalidator.Equals(true),
+						},
+					},
+					"interval_1_hour": schema.BoolAttribute{
+						Description:         "1 hour",
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Validators: []validator.Bool{
+							boolvalidator.Equals(true),
+						},
+					},
+					"interval_6_hours": schema.BoolAttribute{
+						Description:         "6 hours",
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Validators: []validator.Bool{
+							boolvalidator.Equals(true),
+						},
+					},
+					"interval_5_mins": schema.BoolAttribute{
+						Description:         "5 minutes",
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Validators: []validator.Bool{
+							boolvalidator.Equals(true),
+						},
+					},
 				},
 			},
 			"protocol": schema.StringAttribute{
@@ -375,41 +497,6 @@ func (r *ResourceF5XCV1DnsMonitor) Schema(ctx context.Context, request resource.
 				Optional:            true,
 				Computed:            true,
 				Default:             stringdefault.StaticString("UDP"),
-			},
-			"on_failure_to_choice": schema.SingleNestedAttribute{
-				Description:         "on_failure_to The number of nameservers the monitor must fail against before the global monitor changes health",
-				MarkdownDescription: "",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
-				Validators: []validator.Object{
-					atmostoneofvalidator.AtMostOneOf(
-						"on_failure_to_any",
-						"on_failure_to_all",
-					),
-				},
-				Attributes: map[string]schema.Attribute{
-					"on_failure_to_all": schema.BoolAttribute{
-						Description:         "ALL",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Validators: []validator.Bool{
-							boolvalidator.Equals(true),
-						},
-					},
-					"on_failure_to_any": schema.BoolAttribute{
-						Description:         "ANY",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Validators: []validator.Bool{
-							boolvalidator.Equals(true),
-						},
-					},
-				},
 			},
 			"on_failure_count": schema.Int64Attribute{
 				Description:         "on_failure_count The number of times a monitor must fail before the global monitor changes health",
@@ -433,147 +520,6 @@ func (r *ResourceF5XCV1DnsMonitor) Schema(ctx context.Context, request resource.
 					int64validator.Between(10, 60000),
 				},
 			},
-			"source_critical_threshold": schema.Int64Attribute{
-				Description:         "source_critical_threshold The number of provider-regions a monitor must fail from before the global monitor changes health",
-				MarkdownDescription: "<br>**Default:** `1`",
-				Required:            false,
-				Optional:            true,
-				Computed:            true,
-				Default:             int64default.StaticInt64(1),
-				Validators: []validator.Int64{
-					int64validator.Between(1, 256),
-				},
-			},
-			"domain": schema.StringAttribute{
-				Description:         "domain",
-				MarkdownDescription: "<br>**Validation:** `Length LengthAtMost(2048)`",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
-				Validators: []validator.String{
-					stringvalidator.LengthAtMost(2048),
-				},
-			},
-			"interval_choice": schema.SingleNestedAttribute{
-				Description:         "interval How often the monitor will run from each source location",
-				MarkdownDescription: "",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
-				Validators: []validator.Object{
-					atmostoneofvalidator.AtMostOneOf(
-						"interval_30_secs",
-						"interval_1_min",
-						"interval_5_mins",
-						"interval_15_mins",
-						"interval_30_mins",
-						"interval_1_hour",
-						"interval_6_hours",
-						"interval_12_hours",
-						"interval_1_day",
-					),
-				},
-				Attributes: map[string]schema.Attribute{
-					"interval_1_hour": schema.BoolAttribute{
-						Description:         "1 hour",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Validators: []validator.Bool{
-							boolvalidator.Equals(true),
-						},
-					},
-					"interval_1_day": schema.BoolAttribute{
-						Description:         "1 day",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Validators: []validator.Bool{
-							boolvalidator.Equals(true),
-						},
-					},
-					"interval_30_secs": schema.BoolAttribute{
-						Description:         "30 seconds",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Validators: []validator.Bool{
-							boolvalidator.Equals(true),
-						},
-					},
-					"interval_6_hours": schema.BoolAttribute{
-						Description:         "6 hours",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Validators: []validator.Bool{
-							boolvalidator.Equals(true),
-						},
-					},
-					"interval_12_hours": schema.BoolAttribute{
-						Description:         "12 hours",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Validators: []validator.Bool{
-							boolvalidator.Equals(true),
-						},
-					},
-					"interval_1_min": schema.BoolAttribute{
-						Description:         "1 minute",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Validators: []validator.Bool{
-							boolvalidator.Equals(true),
-						},
-					},
-					"interval_5_mins": schema.BoolAttribute{
-						Description:         "5 minutes",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Validators: []validator.Bool{
-							boolvalidator.Equals(true),
-						},
-					},
-					"interval_15_mins": schema.BoolAttribute{
-						Description:         "15 minutes",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Validators: []validator.Bool{
-							boolvalidator.Equals(true),
-						},
-					},
-					"interval_30_mins": schema.BoolAttribute{
-						Description:         "30 minutes",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Validators: []validator.Bool{
-							boolvalidator.Equals(true),
-						},
-					},
-				},
-			},
-			"record_type": schema.StringAttribute{
-				Description:         "record_type",
-				MarkdownDescription: "<br>**Default:** `A`",
-				Required:            false,
-				Optional:            true,
-				Computed:            true,
-				Default:             stringdefault.StaticString("A"),
-			},
 			"name_servers": schema.ListNestedAttribute{
 				Description:         "custom_name_servers",
 				MarkdownDescription: "",
@@ -582,17 +528,6 @@ func (r *ResourceF5XCV1DnsMonitor) Schema(ctx context.Context, request resource.
 				Computed:            false,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
-						"port": schema.Int64Attribute{
-							Description:         "Port Port of the nameserver to execute the monitor against",
-							MarkdownDescription: "<br>**Default:** `53`",
-							Required:            false,
-							Optional:            true,
-							Computed:            true,
-							Default:             int64default.StaticInt64(53),
-							Validators: []validator.Int64{
-								int64validator.Between(1, 65535),
-							},
-						},
 						"name_server": schema.StringAttribute{
 							Description:         "Name Server IP address of the nameserver to execute the monitor against",
 							MarkdownDescription: "",
@@ -604,6 +539,17 @@ func (r *ResourceF5XCV1DnsMonitor) Schema(ctx context.Context, request resource.
 									regexp.MustCompile(`^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)$`),
 									"must be a valid IPv4 address",
 								),
+							},
+						},
+						"port": schema.Int64Attribute{
+							Description:         "Port Port of the nameserver to execute the monitor against",
+							MarkdownDescription: "<br>**Default:** `53`",
+							Required:            false,
+							Optional:            true,
+							Computed:            true,
+							Default:             int64default.StaticInt64(53),
+							Validators: []validator.Int64{
+								int64validator.Between(1, 65535),
 							},
 						},
 					},
@@ -625,28 +571,11 @@ func (r *ResourceF5XCV1DnsMonitor) Schema(ctx context.Context, request resource.
 							Computed:            false,
 							Validators: []validator.Object{
 								atmostoneofvalidator.AtMostOneOf(
-									"f5xc",
 									"aws",
+									"f5xc",
 								),
 							},
 							Attributes: map[string]schema.Attribute{
-								"f5xc": schema.SingleNestedAttribute{
-									Description:         "F5 Distributed Cloud F5 Distributed Cloud",
-									MarkdownDescription: "",
-									Required:            false,
-									Optional:            true,
-									Computed:            false,
-									Attributes: map[string]schema.Attribute{
-										"regions": schema.ListAttribute{
-											Description:         "F5 Distributed Cloud Regions A specific source location within F5 Distributed Cloud",
-											MarkdownDescription: "",
-											ElementType:         types.StringType,
-											Required:            true,
-											Optional:            false,
-											Computed:            false,
-										},
-									},
-								},
 								"aws": schema.SingleNestedAttribute{
 									Description:         "AWS Region Amazon Web Services",
 									MarkdownDescription: "",
@@ -656,6 +585,23 @@ func (r *ResourceF5XCV1DnsMonitor) Schema(ctx context.Context, request resource.
 									Attributes: map[string]schema.Attribute{
 										"regions": schema.ListAttribute{
 											Description:         "AWS Regions A specific source location within AWS",
+											MarkdownDescription: "",
+											ElementType:         types.StringType,
+											Required:            true,
+											Optional:            false,
+											Computed:            false,
+										},
+									},
+								},
+								"f5xc": schema.SingleNestedAttribute{
+									Description:         "F5 Distributed Cloud F5 Distributed Cloud",
+									MarkdownDescription: "",
+									Required:            false,
+									Optional:            true,
+									Computed:            false,
+									Attributes: map[string]schema.Attribute{
+										"regions": schema.ListAttribute{
+											Description:         "F5 Distributed Cloud Regions A specific source location within F5 Distributed Cloud",
 											MarkdownDescription: "",
 											ElementType:         types.StringType,
 											Required:            true,
@@ -684,8 +630,8 @@ func (r *ResourceF5XCV1DnsMonitor) Schema(ctx context.Context, request resource.
 						Computed:            false,
 						Validators: []validator.Object{
 							atmostoneofvalidator.AtMostOneOf(
-								"dynamic_threshold_disabled",
 								"dynamic_threshold",
+								"dynamic_threshold_disabled",
 							),
 						},
 						Attributes: map[string]schema.Attribute{
@@ -720,13 +666,13 @@ func (r *ResourceF5XCV1DnsMonitor) Schema(ctx context.Context, request resource.
 									},
 									"eval_period": schema.ListAttribute{
 										Description:         "eval_period The duration that the response time value must exceed the set threshold before the monitor turns critical.",
-										MarkdownDescription: "<br>**Allowed Values (choose one):** `[\"EVAL_PERIOD_10_MINS\", \"EVAL_PERIOD_15_MINS\", \"EVAL_PERIOD_3_MINS\", \"EVAL_PERIOD_5_MINS\"]`",
+										MarkdownDescription: "<br>**Allowed Values (choose one):** `[\"EVAL_PERIOD_3_MINS\", \"EVAL_PERIOD_5_MINS\", \"EVAL_PERIOD_10_MINS\", \"EVAL_PERIOD_15_MINS\"]`",
 										ElementType:         types.StringType,
 										Required:            true,
 										Optional:            false,
 										Computed:            false,
 										Validators: []validator.List{
-											listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"EVAL_PERIOD_10_MINS", "EVAL_PERIOD_15_MINS", "EVAL_PERIOD_3_MINS", "EVAL_PERIOD_5_MINS"}...)),
+											listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"EVAL_PERIOD_3_MINS", "EVAL_PERIOD_5_MINS", "EVAL_PERIOD_10_MINS", "EVAL_PERIOD_15_MINS"}...)),
 											listvalidator.SizeAtMost(1),
 										},
 									},
@@ -747,16 +693,6 @@ func (r *ResourceF5XCV1DnsMonitor) Schema(ctx context.Context, request resource.
 							),
 						},
 						Attributes: map[string]schema.Attribute{
-							"static_max_threshold_disabled": schema.BoolAttribute{
-								Description:         "static_max_threshold_disabled",
-								MarkdownDescription: "",
-								Required:            false,
-								Optional:            true,
-								Computed:            false,
-								Validators: []validator.Bool{
-									boolvalidator.Equals(true),
-								},
-							},
 							"static_max_threshold": schema.SingleNestedAttribute{
 								Description:         "static_max_threshold",
 								MarkdownDescription: "",
@@ -777,16 +713,26 @@ func (r *ResourceF5XCV1DnsMonitor) Schema(ctx context.Context, request resource.
 									},
 									"eval_period": schema.ListAttribute{
 										Description:         "eval_period The duration that the response time value must exceed the set threshold before the monitor turns critical.",
-										MarkdownDescription: "<br>**Allowed Values (choose one):** `[\"EVAL_PERIOD_3_MINS\", \"EVAL_PERIOD_5_MINS\", \"EVAL_PERIOD_10_MINS\", \"EVAL_PERIOD_15_MINS\"]`",
+										MarkdownDescription: "<br>**Allowed Values (choose one):** `[\"EVAL_PERIOD_5_MINS\", \"EVAL_PERIOD_10_MINS\", \"EVAL_PERIOD_15_MINS\", \"EVAL_PERIOD_3_MINS\"]`",
 										ElementType:         types.StringType,
 										Required:            true,
 										Optional:            false,
 										Computed:            false,
 										Validators: []validator.List{
-											listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"EVAL_PERIOD_3_MINS", "EVAL_PERIOD_5_MINS", "EVAL_PERIOD_10_MINS", "EVAL_PERIOD_15_MINS"}...)),
+											listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"EVAL_PERIOD_5_MINS", "EVAL_PERIOD_10_MINS", "EVAL_PERIOD_15_MINS", "EVAL_PERIOD_3_MINS"}...)),
 											listvalidator.SizeAtMost(1),
 										},
 									},
+								},
+							},
+							"static_max_threshold_disabled": schema.BoolAttribute{
+								Description:         "static_max_threshold_disabled",
+								MarkdownDescription: "",
+								Required:            false,
+								Optional:            true,
+								Computed:            false,
+								Validators: []validator.Bool{
+									boolvalidator.Equals(true),
 								},
 							},
 						},
@@ -821,17 +767,6 @@ func (r *ResourceF5XCV1DnsMonitor) Schema(ctx context.Context, request resource.
 								Optional:            true,
 								Computed:            false,
 								Attributes: map[string]schema.Attribute{
-									"min_response_time": schema.Int64Attribute{
-										Description:         "min_response_time The minimum value that response time must fall below before the monitor turns critical.",
-										MarkdownDescription: "<br>**Default:** `50`",
-										Required:            false,
-										Optional:            true,
-										Computed:            true,
-										Default:             int64default.StaticInt64(50),
-										Validators: []validator.Int64{
-											int64validator.Between(0, 250),
-										},
-									},
 									"eval_period": schema.ListAttribute{
 										Description:         "eval_period The duration that the response time value must fall below the set threshold before the monitor turns critical.",
 										MarkdownDescription: "<br>**Allowed Values (choose one):** `[\"EVAL_PERIOD_3_MINS\", \"EVAL_PERIOD_5_MINS\", \"EVAL_PERIOD_10_MINS\", \"EVAL_PERIOD_15_MINS\"]`",
@@ -844,10 +779,75 @@ func (r *ResourceF5XCV1DnsMonitor) Schema(ctx context.Context, request resource.
 											listvalidator.SizeAtMost(1),
 										},
 									},
+									"min_response_time": schema.Int64Attribute{
+										Description:         "min_response_time The minimum value that response time must fall below before the monitor turns critical.",
+										MarkdownDescription: "<br>**Default:** `50`",
+										Required:            false,
+										Optional:            true,
+										Computed:            true,
+										Default:             int64default.StaticInt64(50),
+										Validators: []validator.Int64{
+											int64validator.Between(0, 250),
+										},
+									},
 								},
 							},
 						},
 					},
+				},
+			},
+			"record_type": schema.StringAttribute{
+				Description:         "record_type",
+				MarkdownDescription: "<br>**Default:** `A`",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				Default:             stringdefault.StaticString("A"),
+			},
+			"on_failure_to_choice": schema.SingleNestedAttribute{
+				Description:         "on_failure_to The number of nameservers the monitor must fail against before the global monitor changes health",
+				MarkdownDescription: "",
+				Required:            true,
+				Optional:            false,
+				Computed:            false,
+				Validators: []validator.Object{
+					atmostoneofvalidator.AtMostOneOf(
+						"on_failure_to_any",
+						"on_failure_to_all",
+					),
+				},
+				Attributes: map[string]schema.Attribute{
+					"on_failure_to_any": schema.BoolAttribute{
+						Description:         "ANY",
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Validators: []validator.Bool{
+							boolvalidator.Equals(true),
+						},
+					},
+					"on_failure_to_all": schema.BoolAttribute{
+						Description:         "ALL",
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Validators: []validator.Bool{
+							boolvalidator.Equals(true),
+						},
+					},
+				},
+			},
+			"source_critical_threshold": schema.Int64Attribute{
+				Description:         "source_critical_threshold The number of provider-regions a monitor must fail from before the global monitor changes health",
+				MarkdownDescription: "<br>**Default:** `1`",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				Default:             int64default.StaticInt64(1),
+				Validators: []validator.Int64{
+					int64validator.Between(1, 256),
 				},
 			},
 			"receive": schema.StringAttribute{
@@ -962,6 +962,16 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 
 	// Populate createReq from data model
 
+	// resource modelToMetaRoot RequiredStringField --> Name
+	if !data.Name.IsNull() && !data.Name.IsUnknown() {
+		meta.Name = string(data.Name.ValueString())
+	}
+
+	// resource modelToMetaRoot RequiredStringField --> Namespace
+	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
+		meta.Namespace = string(data.Namespace.ValueString())
+	}
+
 	// resource modelToMetaRoot MapOfStringField --> Annotations
 	if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
 		var labels map[string]string
@@ -981,52 +991,6 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 		meta.Description = string(data.Description.ValueString())
 	}
 
-	// resource modelToMetaRoot RequiredStringField --> Name
-	if !data.Name.IsNull() && !data.Name.IsUnknown() {
-		meta.Name = string(data.Name.ValueString())
-	}
-
-	// resource modelToMetaRoot RequiredStringField --> Namespace
-	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
-		meta.Namespace = string(data.Namespace.ValueString())
-	}
-
-	// resource modelToSpecRoot RequiredStringField --> Protocol
-	spec.Protocol = string(data.Protocol.ValueString())
-
-	// resource modelToSpecRoot RequiredOneOfField --> OnFailureToChoice
-	if !data.OnFailureToChoice.IsNull() && !data.OnFailureToChoice.IsUnknown() {
-		onFailureToChoiceModel := V1DnsMonitorCreateSpecTypeOnFailureToChoice{}
-		response.Diagnostics.Append(data.OnFailureToChoice.As(ctx, &onFailureToChoiceModel, basetypes.ObjectAsOptions{})...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-
-		// resource modelToSpecNested BoolOfOneOfPointerField --> OnFailureToAll
-		if !onFailureToChoiceModel.OnFailureToAll.IsNull() && !onFailureToChoiceModel.OnFailureToAll.IsUnknown() {
-			onFailureToAllSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_dns_monitor.CreateSpecType_OnFailureToAll{}
-			onFailureToAllSpecBool.OnFailureToAll = &ves_io_schema.Empty{}
-			spec.OnFailureToChoice = onFailureToAllSpecBool
-		}
-
-		// resource modelToSpecNested BoolOfOneOfPointerField --> OnFailureToAny
-		if !onFailureToChoiceModel.OnFailureToAny.IsNull() && !onFailureToChoiceModel.OnFailureToAny.IsUnknown() {
-			onFailureToAnySpecBool := &ves_io_schema_observability_synthetic_monitor_v1_dns_monitor.CreateSpecType_OnFailureToAny{}
-			onFailureToAnySpecBool.OnFailureToAny = &ves_io_schema.Empty{}
-			spec.OnFailureToChoice = onFailureToAnySpecBool
-		}
-
-	}
-
-	// resource modelToSpecRoot RequiredUintField --> OnFailureCount
-	spec.OnFailureCount = uint32(data.OnFailureCount.ValueInt64())
-
-	// resource modelToSpecRoot RequiredUintField --> LookupTimeout
-	spec.LookupTimeout = uint32(data.LookupTimeout.ValueInt64())
-
-	// resource modelToSpecRoot RequiredUintField --> SourceCriticalThreshold
-	spec.SourceCriticalThreshold = uint32(data.SourceCriticalThreshold.ValueInt64())
-
 	// resource modelToSpecRoot RequiredStringField --> Domain
 	spec.Domain = string(data.Domain.ValueString())
 
@@ -1038,11 +1002,11 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 			return
 		}
 
-		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_1Hour
-		if !intervalChoiceModel.Interval_1Hour.IsNull() && !intervalChoiceModel.Interval_1Hour.IsUnknown() {
-			interval1HourSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_dns_monitor.CreateSpecType_Interval_1Hour{}
-			interval1HourSpecBool.Interval_1Hour = &ves_io_schema.Empty{}
-			spec.IntervalChoice = interval1HourSpecBool
+		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_30Secs
+		if !intervalChoiceModel.Interval_30Secs.IsNull() && !intervalChoiceModel.Interval_30Secs.IsUnknown() {
+			interval30SecsSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_dns_monitor.CreateSpecType_Interval_30Secs{}
+			interval30SecsSpecBool.Interval_30Secs = &ves_io_schema.Empty{}
+			spec.IntervalChoice = interval30SecsSpecBool
 		}
 
 		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_1Day
@@ -1052,46 +1016,11 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 			spec.IntervalChoice = interval1DaySpecBool
 		}
 
-		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_30Secs
-		if !intervalChoiceModel.Interval_30Secs.IsNull() && !intervalChoiceModel.Interval_30Secs.IsUnknown() {
-			interval30SecsSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_dns_monitor.CreateSpecType_Interval_30Secs{}
-			interval30SecsSpecBool.Interval_30Secs = &ves_io_schema.Empty{}
-			spec.IntervalChoice = interval30SecsSpecBool
-		}
-
-		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_6Hours
-		if !intervalChoiceModel.Interval_6Hours.IsNull() && !intervalChoiceModel.Interval_6Hours.IsUnknown() {
-			interval6HoursSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_dns_monitor.CreateSpecType_Interval_6Hours{}
-			interval6HoursSpecBool.Interval_6Hours = &ves_io_schema.Empty{}
-			spec.IntervalChoice = interval6HoursSpecBool
-		}
-
-		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_12Hours
-		if !intervalChoiceModel.Interval_12Hours.IsNull() && !intervalChoiceModel.Interval_12Hours.IsUnknown() {
-			interval12HoursSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_dns_monitor.CreateSpecType_Interval_12Hours{}
-			interval12HoursSpecBool.Interval_12Hours = &ves_io_schema.Empty{}
-			spec.IntervalChoice = interval12HoursSpecBool
-		}
-
 		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_1Min
 		if !intervalChoiceModel.Interval_1Min.IsNull() && !intervalChoiceModel.Interval_1Min.IsUnknown() {
 			interval1MinSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_dns_monitor.CreateSpecType_Interval_1Min{}
 			interval1MinSpecBool.Interval_1Min = &ves_io_schema.Empty{}
 			spec.IntervalChoice = interval1MinSpecBool
-		}
-
-		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_5Mins
-		if !intervalChoiceModel.Interval_5Mins.IsNull() && !intervalChoiceModel.Interval_5Mins.IsUnknown() {
-			interval5MinsSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_dns_monitor.CreateSpecType_Interval_5Mins{}
-			interval5MinsSpecBool.Interval_5Mins = &ves_io_schema.Empty{}
-			spec.IntervalChoice = interval5MinsSpecBool
-		}
-
-		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_15Mins
-		if !intervalChoiceModel.Interval_15Mins.IsNull() && !intervalChoiceModel.Interval_15Mins.IsUnknown() {
-			interval15MinsSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_dns_monitor.CreateSpecType_Interval_15Mins{}
-			interval15MinsSpecBool.Interval_15Mins = &ves_io_schema.Empty{}
-			spec.IntervalChoice = interval15MinsSpecBool
 		}
 
 		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_30Mins
@@ -1101,10 +1030,51 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 			spec.IntervalChoice = interval30MinsSpecBool
 		}
 
+		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_12Hours
+		if !intervalChoiceModel.Interval_12Hours.IsNull() && !intervalChoiceModel.Interval_12Hours.IsUnknown() {
+			interval12HoursSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_dns_monitor.CreateSpecType_Interval_12Hours{}
+			interval12HoursSpecBool.Interval_12Hours = &ves_io_schema.Empty{}
+			spec.IntervalChoice = interval12HoursSpecBool
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_15Mins
+		if !intervalChoiceModel.Interval_15Mins.IsNull() && !intervalChoiceModel.Interval_15Mins.IsUnknown() {
+			interval15MinsSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_dns_monitor.CreateSpecType_Interval_15Mins{}
+			interval15MinsSpecBool.Interval_15Mins = &ves_io_schema.Empty{}
+			spec.IntervalChoice = interval15MinsSpecBool
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_1Hour
+		if !intervalChoiceModel.Interval_1Hour.IsNull() && !intervalChoiceModel.Interval_1Hour.IsUnknown() {
+			interval1HourSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_dns_monitor.CreateSpecType_Interval_1Hour{}
+			interval1HourSpecBool.Interval_1Hour = &ves_io_schema.Empty{}
+			spec.IntervalChoice = interval1HourSpecBool
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_6Hours
+		if !intervalChoiceModel.Interval_6Hours.IsNull() && !intervalChoiceModel.Interval_6Hours.IsUnknown() {
+			interval6HoursSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_dns_monitor.CreateSpecType_Interval_6Hours{}
+			interval6HoursSpecBool.Interval_6Hours = &ves_io_schema.Empty{}
+			spec.IntervalChoice = interval6HoursSpecBool
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_5Mins
+		if !intervalChoiceModel.Interval_5Mins.IsNull() && !intervalChoiceModel.Interval_5Mins.IsUnknown() {
+			interval5MinsSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_dns_monitor.CreateSpecType_Interval_5Mins{}
+			interval5MinsSpecBool.Interval_5Mins = &ves_io_schema.Empty{}
+			spec.IntervalChoice = interval5MinsSpecBool
+		}
+
 	}
 
-	// resource modelToSpecRoot RequiredStringField --> RecordType
-	spec.RecordType = string(data.RecordType.ValueString())
+	// resource modelToSpecRoot RequiredStringField --> Protocol
+	spec.Protocol = string(data.Protocol.ValueString())
+
+	// resource modelToSpecRoot RequiredUintField --> OnFailureCount
+	spec.OnFailureCount = uint32(data.OnFailureCount.ValueInt64())
+
+	// resource modelToSpecRoot RequiredUintField --> LookupTimeout
+	spec.LookupTimeout = uint32(data.LookupTimeout.ValueInt64())
 
 	{
 		// resource modelToSpecRoot ArrayOfPointerField --> NameServers
@@ -1121,14 +1091,14 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 			for i, nameServersElement := range nameServersElements {
 				nameServersSpec[i] = &ves_io_schema_observability_synthetic_monitor_v1_dns_monitor.NameServer{}
 
-				// resource modelToSpecNested UintField --> Port
-				if !nameServersElement.Port.IsNull() && !nameServersElement.Port.IsUnknown() {
-					nameServersSpec[i].Port = uint32(uint32(nameServersElement.Port.ValueInt64()))
-				}
-
 				// resource modelToSpecNested RequiredStringField --> NameServer
 				if !nameServersElement.NameServer.IsNull() && !nameServersElement.NameServer.IsUnknown() {
 					nameServersSpec[i].NameServer = string(nameServersElement.NameServer.ValueString())
+				}
+
+				// resource modelToSpecNested UintField --> Port
+				if !nameServersElement.Port.IsNull() && !nameServersElement.Port.IsUnknown() {
+					nameServersSpec[i].Port = uint32(uint32(nameServersElement.Port.ValueInt64()))
 				}
 
 			}
@@ -1158,28 +1128,6 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 					return
 				}
 
-				// resource modelToSpecNested PointerOfOneOfField --> F5Xc
-				if !externalSourcesSourceChoiceModel.F5Xc.IsNull() && !externalSourcesSourceChoiceModel.F5Xc.IsUnknown() {
-					var v1DnsMonitorSourceExternalF5XcModel V1DnsMonitorSourceExternalF5Xc
-					response.Diagnostics.Append(externalSourcesSourceChoiceModel.F5Xc.As(ctx, &v1DnsMonitorSourceExternalF5XcModel, basetypes.ObjectAsOptions{})...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					f5xcOneOfSpec := &ves_io_schema_observability_synthetic_monitor.SourceExternal_F5Xc{}
-					f5xcOneOfSpec.F5Xc = &ves_io_schema_observability_synthetic_monitor.RegionalEdgeExternal{}
-					externalSourcesSpec[i].SourceChoice = f5xcOneOfSpec
-
-					// resource modelToSpecNested RequiredArrayOfStringField --> Regions
-					elements := make([]string, 0, len(v1DnsMonitorSourceExternalF5XcModel.Regions.Elements()))
-					diags = v1DnsMonitorSourceExternalF5XcModel.Regions.ElementsAs(ctx, &elements, false)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					f5xcOneOfSpec.F5Xc.Regions = elements
-
-				}
-
 				// resource modelToSpecNested PointerOfOneOfField --> Aws
 				if !externalSourcesSourceChoiceModel.Aws.IsNull() && !externalSourcesSourceChoiceModel.Aws.IsUnknown() {
 					var v1DnsMonitorSourceExternalAwsModel V1DnsMonitorSourceExternalAws
@@ -1199,6 +1147,28 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 						return
 					}
 					awsOneOfSpec.Aws.Regions = elements
+
+				}
+
+				// resource modelToSpecNested PointerOfOneOfField --> F5Xc
+				if !externalSourcesSourceChoiceModel.F5Xc.IsNull() && !externalSourcesSourceChoiceModel.F5Xc.IsUnknown() {
+					var v1DnsMonitorSourceExternalF5XcModel V1DnsMonitorSourceExternalF5Xc
+					response.Diagnostics.Append(externalSourcesSourceChoiceModel.F5Xc.As(ctx, &v1DnsMonitorSourceExternalF5XcModel, basetypes.ObjectAsOptions{})...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					f5xcOneOfSpec := &ves_io_schema_observability_synthetic_monitor.SourceExternal_F5Xc{}
+					f5xcOneOfSpec.F5Xc = &ves_io_schema_observability_synthetic_monitor.RegionalEdgeExternal{}
+					externalSourcesSpec[i].SourceChoice = f5xcOneOfSpec
+
+					// resource modelToSpecNested RequiredArrayOfStringField --> Regions
+					elements := make([]string, 0, len(v1DnsMonitorSourceExternalF5XcModel.Regions.Elements()))
+					diags = v1DnsMonitorSourceExternalF5XcModel.Regions.ElementsAs(ctx, &elements, false)
+					response.Diagnostics.Append(diags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					f5xcOneOfSpec.F5Xc.Regions = elements
 
 				}
 
@@ -1309,13 +1279,6 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 					return
 				}
 
-				// resource modelToSpecNested BoolOfOneOfPointerField --> StaticMaxThresholdDisabled
-				if !healthPolicyStaticMaxThresholdPolicyChoiceModel.StaticMaxThresholdDisabled.IsNull() && !healthPolicyStaticMaxThresholdPolicyChoiceModel.StaticMaxThresholdDisabled.IsUnknown() {
-					staticMaxThresholdDisabledSpecBool := &ves_io_schema_observability_synthetic_monitor.HealthPolicy_StaticMaxThresholdDisabled{}
-					staticMaxThresholdDisabledSpecBool.StaticMaxThresholdDisabled = &ves_io_schema.Empty{}
-					healthPolicySpec.StaticMaxThresholdPolicy = staticMaxThresholdDisabledSpecBool
-				}
-
 				// resource modelToSpecNested PointerOfOneOfField --> StaticMaxThreshold
 				if !healthPolicyStaticMaxThresholdPolicyChoiceModel.StaticMaxThreshold.IsNull() && !healthPolicyStaticMaxThresholdPolicyChoiceModel.StaticMaxThreshold.IsUnknown() {
 					var v1DnsMonitorHealthPolicyStaticMaxThresholdModel V1DnsMonitorHealthPolicyStaticMaxThreshold
@@ -1356,6 +1319,13 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 
 				}
 
+				// resource modelToSpecNested BoolOfOneOfPointerField --> StaticMaxThresholdDisabled
+				if !healthPolicyStaticMaxThresholdPolicyChoiceModel.StaticMaxThresholdDisabled.IsNull() && !healthPolicyStaticMaxThresholdPolicyChoiceModel.StaticMaxThresholdDisabled.IsUnknown() {
+					staticMaxThresholdDisabledSpecBool := &ves_io_schema_observability_synthetic_monitor.HealthPolicy_StaticMaxThresholdDisabled{}
+					staticMaxThresholdDisabledSpecBool.StaticMaxThresholdDisabled = &ves_io_schema.Empty{}
+					healthPolicySpec.StaticMaxThresholdPolicy = staticMaxThresholdDisabledSpecBool
+				}
+
 			}
 
 			// resource modelToSpecNested RequiredOneOfField --> StaticMinThresholdPolicy
@@ -1384,9 +1354,6 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 					staticMinThresholdOneOfSpec.StaticMinThreshold = &ves_io_schema_observability_synthetic_monitor.StaticMinThreshold{}
 					healthPolicySpec.StaticMinThresholdPolicy = staticMinThresholdOneOfSpec
 
-					// resource modelToSpecNested RequiredUintField --> MinResponseTime
-					staticMinThresholdOneOfSpec.StaticMinThreshold.MinResponseTime = uint32(uint32(v1DnsMonitorHealthPolicyStaticMinThresholdModel.MinResponseTime.ValueInt64()))
-
 					// resource modelToSpecNested RequiredEnumField --> EvalPeriod
 					if !v1DnsMonitorHealthPolicyStaticMinThresholdModel.EvalPeriod.IsNull() && !v1DnsMonitorHealthPolicyStaticMinThresholdModel.EvalPeriod.IsUnknown() && len(v1DnsMonitorHealthPolicyStaticMinThresholdModel.EvalPeriod.Elements()) > 0 {
 						var evalPeriodTfStrings []types.String
@@ -1411,12 +1378,45 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 						}
 					}
 
+					// resource modelToSpecNested RequiredUintField --> MinResponseTime
+					staticMinThresholdOneOfSpec.StaticMinThreshold.MinResponseTime = uint32(uint32(v1DnsMonitorHealthPolicyStaticMinThresholdModel.MinResponseTime.ValueInt64()))
+
 				}
 
 			}
 
 		}
 	}
+
+	// resource modelToSpecRoot RequiredStringField --> RecordType
+	spec.RecordType = string(data.RecordType.ValueString())
+
+	// resource modelToSpecRoot RequiredOneOfField --> OnFailureToChoice
+	if !data.OnFailureToChoice.IsNull() && !data.OnFailureToChoice.IsUnknown() {
+		onFailureToChoiceModel := V1DnsMonitorCreateSpecTypeOnFailureToChoice{}
+		response.Diagnostics.Append(data.OnFailureToChoice.As(ctx, &onFailureToChoiceModel, basetypes.ObjectAsOptions{})...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> OnFailureToAny
+		if !onFailureToChoiceModel.OnFailureToAny.IsNull() && !onFailureToChoiceModel.OnFailureToAny.IsUnknown() {
+			onFailureToAnySpecBool := &ves_io_schema_observability_synthetic_monitor_v1_dns_monitor.CreateSpecType_OnFailureToAny{}
+			onFailureToAnySpecBool.OnFailureToAny = &ves_io_schema.Empty{}
+			spec.OnFailureToChoice = onFailureToAnySpecBool
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> OnFailureToAll
+		if !onFailureToChoiceModel.OnFailureToAll.IsNull() && !onFailureToChoiceModel.OnFailureToAll.IsUnknown() {
+			onFailureToAllSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_dns_monitor.CreateSpecType_OnFailureToAll{}
+			onFailureToAllSpecBool.OnFailureToAll = &ves_io_schema.Empty{}
+			spec.OnFailureToChoice = onFailureToAllSpecBool
+		}
+
+	}
+
+	// resource modelToSpecRoot RequiredUintField --> SourceCriticalThreshold
+	spec.SourceCriticalThreshold = uint32(data.SourceCriticalThreshold.ValueInt64())
 
 	// resource modelToSpecRoot StringField --> Receive
 	if !data.Receive.IsNull() && !data.Receive.IsUnknown() {
@@ -1493,6 +1493,15 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("raw_spec_type: %v", rawSpecMap))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
+
+	// resource SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
+
+	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
+	data.Namespace = types.StringValue(metaData.GetNamespace())
+
+	// resource SpecToModelRoot Meta StringField --> Uid
+	data.Uid = types.StringValue(systemMetaData.GetUid())
 
 	// resource SpecToModelRoot Meta MapOfStringField --> Labels
 	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
@@ -1575,135 +1584,6 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 	// resource SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
 
-	// resource SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
-
-	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
-	data.Namespace = types.StringValue(metaData.GetNamespace())
-
-	// resource SpecToModelRoot Meta StringField --> Uid
-	data.Uid = types.StringValue(systemMetaData.GetUid())
-
-	// resource SpecToModelRoot RequiredStringField --> Protocol
-	if specData.GetProtocol() != "" {
-		data.Protocol = types.StringValue(specData.GetProtocol())
-	} else {
-		// Empty string, set to null
-		data.Protocol = types.StringNull()
-	}
-
-	// resource SpecToModelRoot RequiredOneOfField --> OnFailureToChoice
-	// true
-	// false
-	// This resource uses custom JSON resolution.
-	// The API response for this oneof field can be inconsistent.
-	// We must inspect the raw JSON map to determine which choice is present.
-	// The logic checks for the presence of any of the possible oneof choices.
-	var oneofOnFailureToChoicePresent bool
-
-	// 1. Check for the choice inside a 'gc_spec' map, which is a common pattern in GET responses.
-	if gcSpec, gcSpecOk := rawSpecMap["gc_spec"].(map[string]interface{}); gcSpecOk {
-		if _, ok := gcSpec["on_failure_to_any"]; ok {
-			oneofOnFailureToChoicePresent = true
-		} else if _, ok := gcSpec["on_failure_to_all"]; ok {
-			oneofOnFailureToChoicePresent = true
-		}
-	}
-
-	// 2. If not found in 'gc_spec', check for the choice at the top level of the spec.
-	if !oneofOnFailureToChoicePresent {
-		if _, ok := rawSpecMap["on_failure_to_any"]; ok {
-			oneofOnFailureToChoicePresent = true
-		} else if _, ok := rawSpecMap["on_failure_to_all"]; ok {
-			oneofOnFailureToChoicePresent = true
-		}
-	}
-
-	if oneofOnFailureToChoicePresent {
-
-		// The model struct that will be populated by the nested template.
-		var onFailureToChoiceChoicesModel = &V1DnsMonitorCreateSpecTypeOnFailureToChoice{}
-
-		// Recursively call the nested template to process the oneof choices.
-
-		// resource specToModelNested BoolOfOneOfPointerField --> OnFailureToAll
-		var onFailureToAllInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["on_failure_to_all"]; found {
-				onFailureToAllInMap = true
-			}
-		}
-
-		if !onFailureToAllInMap {
-			if _, found := rawSpecMap["on_failure_to_all"]; found {
-				onFailureToAllInMap = true
-			}
-		}
-
-		if onFailureToAllInMap || specData.GetOnFailureToAll() != nil {
-			onFailureToChoiceChoicesModel.OnFailureToAll = types.BoolValue(true)
-		} else {
-			onFailureToChoiceChoicesModel.OnFailureToAll = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> OnFailureToAny
-		var onFailureToAnyInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["on_failure_to_any"]; found {
-				onFailureToAnyInMap = true
-			}
-		}
-
-		if !onFailureToAnyInMap {
-			if _, found := rawSpecMap["on_failure_to_any"]; found {
-				onFailureToAnyInMap = true
-			}
-		}
-
-		if onFailureToAnyInMap || specData.GetOnFailureToAny() != nil {
-			onFailureToChoiceChoicesModel.OnFailureToAny = types.BoolValue(true)
-		} else {
-			onFailureToChoiceChoicesModel.OnFailureToAny = types.BoolNull()
-		}
-
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		onFailureToChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			V1DnsMonitorOnFailureToChoiceModelAttributeMap,
-			onFailureToChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
-
-		// Assign the final object to the root data model.
-		data.OnFailureToChoice = onFailureToChoiceObj
-	} else {
-		// The oneof field is not present in the API response, so set the Terraform object to null.
-		data.OnFailureToChoice = types.ObjectNull(V1DnsMonitorOnFailureToChoiceModelAttributeMap)
-	}
-
-	// resource SpecToModelRoot RequiredUintField --> OnFailureCount
-	onFailureCountValue := specData.GetOnFailureCount()
-	if onFailureCountValue > 0 {
-		data.OnFailureCount = types.Int64Value(int64(onFailureCountValue))
-	}
-
-	// resource SpecToModelRoot RequiredUintField --> LookupTimeout
-	lookupTimeoutValue := specData.GetLookupTimeout()
-	if lookupTimeoutValue > 0 {
-		data.LookupTimeout = types.Int64Value(int64(lookupTimeoutValue))
-	}
-
-	// resource SpecToModelRoot RequiredUintField --> SourceCriticalThreshold
-	sourceCriticalThresholdValue := specData.GetSourceCriticalThreshold()
-	if sourceCriticalThresholdValue > 0 {
-		data.SourceCriticalThreshold = types.Int64Value(int64(sourceCriticalThresholdValue))
-	}
-
 	// resource SpecToModelRoot RequiredStringField --> Domain
 	if specData.GetDomain() != "" {
 		data.Domain = types.StringValue(specData.GetDomain())
@@ -1723,46 +1603,46 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 
 	// 1. Check for the choice inside a 'gc_spec' map, which is a common pattern in GET responses.
 	if gcSpec, gcSpecOk := rawSpecMap["gc_spec"].(map[string]interface{}); gcSpecOk {
-		if _, ok := gcSpec["interval_30_secs"]; ok {
+		if _, ok := gcSpec["interval_12_hours"]; ok {
 			oneofIntervalChoicePresent = true
-		} else if _, ok := gcSpec["interval_1_min"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := gcSpec["interval_5_mins"]; ok {
+		} else if _, ok := gcSpec["interval_30_secs"]; ok {
 			oneofIntervalChoicePresent = true
 		} else if _, ok := gcSpec["interval_15_mins"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := gcSpec["interval_30_mins"]; ok {
 			oneofIntervalChoicePresent = true
 		} else if _, ok := gcSpec["interval_1_hour"]; ok {
 			oneofIntervalChoicePresent = true
 		} else if _, ok := gcSpec["interval_6_hours"]; ok {
 			oneofIntervalChoicePresent = true
-		} else if _, ok := gcSpec["interval_12_hours"]; ok {
-			oneofIntervalChoicePresent = true
 		} else if _, ok := gcSpec["interval_1_day"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := gcSpec["interval_1_min"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := gcSpec["interval_5_mins"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := gcSpec["interval_30_mins"]; ok {
 			oneofIntervalChoicePresent = true
 		}
 	}
 
 	// 2. If not found in 'gc_spec', check for the choice at the top level of the spec.
 	if !oneofIntervalChoicePresent {
-		if _, ok := rawSpecMap["interval_30_secs"]; ok {
+		if _, ok := rawSpecMap["interval_12_hours"]; ok {
 			oneofIntervalChoicePresent = true
-		} else if _, ok := rawSpecMap["interval_1_min"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := rawSpecMap["interval_5_mins"]; ok {
+		} else if _, ok := rawSpecMap["interval_30_secs"]; ok {
 			oneofIntervalChoicePresent = true
 		} else if _, ok := rawSpecMap["interval_15_mins"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := rawSpecMap["interval_30_mins"]; ok {
 			oneofIntervalChoicePresent = true
 		} else if _, ok := rawSpecMap["interval_1_hour"]; ok {
 			oneofIntervalChoicePresent = true
 		} else if _, ok := rawSpecMap["interval_6_hours"]; ok {
 			oneofIntervalChoicePresent = true
-		} else if _, ok := rawSpecMap["interval_12_hours"]; ok {
-			oneofIntervalChoicePresent = true
 		} else if _, ok := rawSpecMap["interval_1_day"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := rawSpecMap["interval_1_min"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := rawSpecMap["interval_5_mins"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := rawSpecMap["interval_30_mins"]; ok {
 			oneofIntervalChoicePresent = true
 		}
 	}
@@ -1774,25 +1654,25 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 
 		// Recursively call the nested template to process the oneof choices.
 
-		// resource specToModelNested BoolOfOneOfPointerField --> Interval_1Hour
-		var interval1HourInMap bool
+		// resource specToModelNested BoolOfOneOfPointerField --> Interval_30Secs
+		var interval30SecsInMap bool
 
 		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["interval_1_hour"]; found {
-				interval1HourInMap = true
+			if _, found := gcSpec["interval_30_secs"]; found {
+				interval30SecsInMap = true
 			}
 		}
 
-		if !interval1HourInMap {
-			if _, found := rawSpecMap["interval_1_hour"]; found {
-				interval1HourInMap = true
+		if !interval30SecsInMap {
+			if _, found := rawSpecMap["interval_30_secs"]; found {
+				interval30SecsInMap = true
 			}
 		}
 
-		if interval1HourInMap || specData.GetInterval_1Hour() != nil {
-			intervalChoiceChoicesModel.Interval_1Hour = types.BoolValue(true)
+		if interval30SecsInMap || specData.GetInterval_30Secs() != nil {
+			intervalChoiceChoicesModel.Interval_30Secs = types.BoolValue(true)
 		} else {
-			intervalChoiceChoicesModel.Interval_1Hour = types.BoolNull()
+			intervalChoiceChoicesModel.Interval_30Secs = types.BoolNull()
 		}
 
 		// resource specToModelNested BoolOfOneOfPointerField --> Interval_1Day
@@ -1816,69 +1696,6 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 			intervalChoiceChoicesModel.Interval_1Day = types.BoolNull()
 		}
 
-		// resource specToModelNested BoolOfOneOfPointerField --> Interval_30Secs
-		var interval30SecsInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["interval_30_secs"]; found {
-				interval30SecsInMap = true
-			}
-		}
-
-		if !interval30SecsInMap {
-			if _, found := rawSpecMap["interval_30_secs"]; found {
-				interval30SecsInMap = true
-			}
-		}
-
-		if interval30SecsInMap || specData.GetInterval_30Secs() != nil {
-			intervalChoiceChoicesModel.Interval_30Secs = types.BoolValue(true)
-		} else {
-			intervalChoiceChoicesModel.Interval_30Secs = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> Interval_6Hours
-		var interval6HoursInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["interval_6_hours"]; found {
-				interval6HoursInMap = true
-			}
-		}
-
-		if !interval6HoursInMap {
-			if _, found := rawSpecMap["interval_6_hours"]; found {
-				interval6HoursInMap = true
-			}
-		}
-
-		if interval6HoursInMap || specData.GetInterval_6Hours() != nil {
-			intervalChoiceChoicesModel.Interval_6Hours = types.BoolValue(true)
-		} else {
-			intervalChoiceChoicesModel.Interval_6Hours = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> Interval_12Hours
-		var interval12HoursInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["interval_12_hours"]; found {
-				interval12HoursInMap = true
-			}
-		}
-
-		if !interval12HoursInMap {
-			if _, found := rawSpecMap["interval_12_hours"]; found {
-				interval12HoursInMap = true
-			}
-		}
-
-		if interval12HoursInMap || specData.GetInterval_12Hours() != nil {
-			intervalChoiceChoicesModel.Interval_12Hours = types.BoolValue(true)
-		} else {
-			intervalChoiceChoicesModel.Interval_12Hours = types.BoolNull()
-		}
-
 		// resource specToModelNested BoolOfOneOfPointerField --> Interval_1Min
 		var interval1MinInMap bool
 
@@ -1898,48 +1715,6 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 			intervalChoiceChoicesModel.Interval_1Min = types.BoolValue(true)
 		} else {
 			intervalChoiceChoicesModel.Interval_1Min = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> Interval_5Mins
-		var interval5MinsInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["interval_5_mins"]; found {
-				interval5MinsInMap = true
-			}
-		}
-
-		if !interval5MinsInMap {
-			if _, found := rawSpecMap["interval_5_mins"]; found {
-				interval5MinsInMap = true
-			}
-		}
-
-		if interval5MinsInMap || specData.GetInterval_5Mins() != nil {
-			intervalChoiceChoicesModel.Interval_5Mins = types.BoolValue(true)
-		} else {
-			intervalChoiceChoicesModel.Interval_5Mins = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> Interval_15Mins
-		var interval15MinsInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["interval_15_mins"]; found {
-				interval15MinsInMap = true
-			}
-		}
-
-		if !interval15MinsInMap {
-			if _, found := rawSpecMap["interval_15_mins"]; found {
-				interval15MinsInMap = true
-			}
-		}
-
-		if interval15MinsInMap || specData.GetInterval_15Mins() != nil {
-			intervalChoiceChoicesModel.Interval_15Mins = types.BoolValue(true)
-		} else {
-			intervalChoiceChoicesModel.Interval_15Mins = types.BoolNull()
 		}
 
 		// resource specToModelNested BoolOfOneOfPointerField --> Interval_30Mins
@@ -1963,6 +1738,111 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 			intervalChoiceChoicesModel.Interval_30Mins = types.BoolNull()
 		}
 
+		// resource specToModelNested BoolOfOneOfPointerField --> Interval_12Hours
+		var interval12HoursInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["interval_12_hours"]; found {
+				interval12HoursInMap = true
+			}
+		}
+
+		if !interval12HoursInMap {
+			if _, found := rawSpecMap["interval_12_hours"]; found {
+				interval12HoursInMap = true
+			}
+		}
+
+		if interval12HoursInMap || specData.GetInterval_12Hours() != nil {
+			intervalChoiceChoicesModel.Interval_12Hours = types.BoolValue(true)
+		} else {
+			intervalChoiceChoicesModel.Interval_12Hours = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> Interval_15Mins
+		var interval15MinsInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["interval_15_mins"]; found {
+				interval15MinsInMap = true
+			}
+		}
+
+		if !interval15MinsInMap {
+			if _, found := rawSpecMap["interval_15_mins"]; found {
+				interval15MinsInMap = true
+			}
+		}
+
+		if interval15MinsInMap || specData.GetInterval_15Mins() != nil {
+			intervalChoiceChoicesModel.Interval_15Mins = types.BoolValue(true)
+		} else {
+			intervalChoiceChoicesModel.Interval_15Mins = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> Interval_1Hour
+		var interval1HourInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["interval_1_hour"]; found {
+				interval1HourInMap = true
+			}
+		}
+
+		if !interval1HourInMap {
+			if _, found := rawSpecMap["interval_1_hour"]; found {
+				interval1HourInMap = true
+			}
+		}
+
+		if interval1HourInMap || specData.GetInterval_1Hour() != nil {
+			intervalChoiceChoicesModel.Interval_1Hour = types.BoolValue(true)
+		} else {
+			intervalChoiceChoicesModel.Interval_1Hour = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> Interval_6Hours
+		var interval6HoursInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["interval_6_hours"]; found {
+				interval6HoursInMap = true
+			}
+		}
+
+		if !interval6HoursInMap {
+			if _, found := rawSpecMap["interval_6_hours"]; found {
+				interval6HoursInMap = true
+			}
+		}
+
+		if interval6HoursInMap || specData.GetInterval_6Hours() != nil {
+			intervalChoiceChoicesModel.Interval_6Hours = types.BoolValue(true)
+		} else {
+			intervalChoiceChoicesModel.Interval_6Hours = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> Interval_5Mins
+		var interval5MinsInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["interval_5_mins"]; found {
+				interval5MinsInMap = true
+			}
+		}
+
+		if !interval5MinsInMap {
+			if _, found := rawSpecMap["interval_5_mins"]; found {
+				interval5MinsInMap = true
+			}
+		}
+
+		if interval5MinsInMap || specData.GetInterval_5Mins() != nil {
+			intervalChoiceChoicesModel.Interval_5Mins = types.BoolValue(true)
+		} else {
+			intervalChoiceChoicesModel.Interval_5Mins = types.BoolNull()
+		}
+
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
 		intervalChoiceObj, diags := utils.GoStructToObjectValue(
 			ctx,
@@ -1981,12 +1861,24 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 		data.IntervalChoice = types.ObjectNull(V1DnsMonitorIntervalChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredStringField --> RecordType
-	if specData.GetRecordType() != "" {
-		data.RecordType = types.StringValue(specData.GetRecordType())
+	// resource SpecToModelRoot RequiredStringField --> Protocol
+	if specData.GetProtocol() != "" {
+		data.Protocol = types.StringValue(specData.GetProtocol())
 	} else {
 		// Empty string, set to null
-		data.RecordType = types.StringNull()
+		data.Protocol = types.StringNull()
+	}
+
+	// resource SpecToModelRoot RequiredUintField --> OnFailureCount
+	onFailureCountValue := specData.GetOnFailureCount()
+	if onFailureCountValue > 0 {
+		data.OnFailureCount = types.Int64Value(int64(onFailureCountValue))
+	}
+
+	// resource SpecToModelRoot RequiredUintField --> LookupTimeout
+	lookupTimeoutValue := specData.GetLookupTimeout()
+	if lookupTimeoutValue > 0 {
+		data.LookupTimeout = types.Int64Value(int64(lookupTimeoutValue))
 	}
 
 	// resource SpecToModelRoot ArrayOfPointerField --> NameServers
@@ -1996,9 +1888,6 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 		for _, nameServersElement := range specData.NameServers {
 			v1DnsMonitorV1DnsMonitorNameServerModel := V1DnsMonitorV1DnsMonitorNameServer{}
 
-			// resource specToModelNested UintField --> Port
-			v1DnsMonitorV1DnsMonitorNameServerModel.Port = types.Int64Value(int64(nameServersElement.GetPort()))
-
 			// resource specToModelNested RequiredStringField --> NameServer
 			if nameServersElement.GetNameServer() != "" {
 				v1DnsMonitorV1DnsMonitorNameServerModel.NameServer = types.StringValue(nameServersElement.GetNameServer())
@@ -2006,6 +1895,9 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 				// Empty string, set to null
 				v1DnsMonitorV1DnsMonitorNameServerModel.NameServer = types.StringNull()
 			}
+
+			// resource specToModelNested UintField --> Port
+			v1DnsMonitorV1DnsMonitorNameServerModel.Port = types.Int64Value(int64(nameServersElement.GetPort()))
 
 			nameServersElements = append(nameServersElements, v1DnsMonitorV1DnsMonitorNameServerModel)
 		}
@@ -2048,38 +1940,6 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 
 			// Process nested choices, populating the temporary attribute map
 
-			// resource specToModelNested PointerOfOneOfField --> F5Xc
-			// CreateSpecType
-			// true
-			{
-				f5xcOptions, isF5Xc := externalSourcessourceChoiceChoices.(*ves_io_schema_observability_synthetic_monitor.SourceExternal_F5Xc)
-				f5xcAttributeMap := make(map[string]attr.Value)
-
-				if isF5Xc && f5xcOptions != nil {
-
-					// resource specToModelNested RequiredArrayOfStringField --> Regions
-					if len(f5xcOptions.F5Xc.GetRegions()) > 0 {
-						listValue, diags := types.ListValueFrom(ctx, types.StringType, f5xcOptions.F5Xc.GetRegions())
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						f5xcAttributeMap["regions"] = listValue
-					} else {
-						f5xcAttributeMap["regions"] = types.ListNull(types.StringType)
-					}
-
-					f5xcObj, diags := types.ObjectValue(V1DnsMonitorExternalSourcesSourceChoiceF5XcModelAttributeMap, f5xcAttributeMap)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					externalSourcessourceChoiceChoicesAttributeMap["f5xc"] = f5xcObj
-				} else {
-					externalSourcessourceChoiceChoicesAttributeMap["f5xc"] = types.ObjectNull(V1DnsMonitorExternalSourcesSourceChoiceF5XcModelAttributeMap)
-				}
-			}
-
 			// resource specToModelNested PointerOfOneOfField --> Aws
 			// CreateSpecType
 			// true
@@ -2109,6 +1969,38 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 					externalSourcessourceChoiceChoicesAttributeMap["aws"] = awsObj
 				} else {
 					externalSourcessourceChoiceChoicesAttributeMap["aws"] = types.ObjectNull(V1DnsMonitorExternalSourcesSourceChoiceAwsModelAttributeMap)
+				}
+			}
+
+			// resource specToModelNested PointerOfOneOfField --> F5Xc
+			// CreateSpecType
+			// true
+			{
+				f5xcOptions, isF5Xc := externalSourcessourceChoiceChoices.(*ves_io_schema_observability_synthetic_monitor.SourceExternal_F5Xc)
+				f5xcAttributeMap := make(map[string]attr.Value)
+
+				if isF5Xc && f5xcOptions != nil {
+
+					// resource specToModelNested RequiredArrayOfStringField --> Regions
+					if len(f5xcOptions.F5Xc.GetRegions()) > 0 {
+						listValue, diags := types.ListValueFrom(ctx, types.StringType, f5xcOptions.F5Xc.GetRegions())
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						f5xcAttributeMap["regions"] = listValue
+					} else {
+						f5xcAttributeMap["regions"] = types.ListNull(types.StringType)
+					}
+
+					f5xcObj, diags := types.ObjectValue(V1DnsMonitorExternalSourcesSourceChoiceF5XcModelAttributeMap, f5xcAttributeMap)
+					response.Diagnostics.Append(diags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					externalSourcessourceChoiceChoicesAttributeMap["f5xc"] = f5xcObj
+				} else {
+					externalSourcessourceChoiceChoicesAttributeMap["f5xc"] = types.ObjectNull(V1DnsMonitorExternalSourcesSourceChoiceF5XcModelAttributeMap)
 				}
 			}
 
@@ -2262,27 +2154,6 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 
 			// Process nested choices, populating the temporary attribute map
 
-			// resource specToModelNested BoolOfOneOfPointerField --> StaticMaxThresholdDisabled
-			var staticMaxThresholdDisabledInMap bool
-
-			if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-				if _, found := gcSpec["static_max_threshold_disabled"]; found {
-					staticMaxThresholdDisabledInMap = true
-				}
-			}
-
-			if !staticMaxThresholdDisabledInMap {
-				if _, found := rawSpecMap["static_max_threshold_disabled"]; found {
-					staticMaxThresholdDisabledInMap = true
-				}
-			}
-
-			if staticMaxThresholdDisabledInMap || healthPolicyElement.GetStaticMaxThresholdDisabled() != nil {
-				healthPolicystaticMaxThresholdPolicyChoiceChoicesAttributeMap["static_max_threshold_disabled"] = types.BoolValue(true)
-			} else {
-				healthPolicystaticMaxThresholdPolicyChoiceChoicesAttributeMap["static_max_threshold_disabled"] = types.BoolNull()
-			}
-
 			// resource specToModelNested PointerOfOneOfField --> StaticMaxThreshold
 			// CreateSpecType
 			// true
@@ -2318,6 +2189,27 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 				} else {
 					healthPolicystaticMaxThresholdPolicyChoiceChoicesAttributeMap["static_max_threshold"] = types.ObjectNull(V1DnsMonitorHealthPolicyStaticMaxThresholdPolicyStaticMaxThresholdModelAttributeMap)
 				}
+			}
+
+			// resource specToModelNested BoolOfOneOfPointerField --> StaticMaxThresholdDisabled
+			var staticMaxThresholdDisabledInMap bool
+
+			if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+				if _, found := gcSpec["static_max_threshold_disabled"]; found {
+					staticMaxThresholdDisabledInMap = true
+				}
+			}
+
+			if !staticMaxThresholdDisabledInMap {
+				if _, found := rawSpecMap["static_max_threshold_disabled"]; found {
+					staticMaxThresholdDisabledInMap = true
+				}
+			}
+
+			if staticMaxThresholdDisabledInMap || healthPolicyElement.GetStaticMaxThresholdDisabled() != nil {
+				healthPolicystaticMaxThresholdPolicyChoiceChoicesAttributeMap["static_max_threshold_disabled"] = types.BoolValue(true)
+			} else {
+				healthPolicystaticMaxThresholdPolicyChoiceChoicesAttributeMap["static_max_threshold_disabled"] = types.BoolNull()
 			}
 
 			// --- End of Choices ---
@@ -2380,9 +2272,6 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 
 				if isStaticMinThreshold && staticMinThresholdOptions != nil {
 
-					// resource specToModelNested RequiredUintField --> MinResponseTime
-					staticMinThresholdAttributeMap["min_response_time"] = types.Int64Value(int64(staticMinThresholdOptions.StaticMinThreshold.GetMinResponseTime()))
-
 					// resource specToModelNested RequiredEnumField --> EvalPeriod
 					if staticMinThresholdOptions.StaticMinThreshold.GetEvalPeriod().String() != "" {
 						stringValue := types.StringValue(staticMinThresholdOptions.StaticMinThreshold.GetEvalPeriod().String())
@@ -2396,6 +2285,9 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 					} else {
 						staticMinThresholdAttributeMap["eval_period"] = types.ListNull(types.StringType)
 					}
+
+					// resource specToModelNested RequiredUintField --> MinResponseTime
+					staticMinThresholdAttributeMap["min_response_time"] = types.Int64Value(int64(staticMinThresholdOptions.StaticMinThreshold.GetMinResponseTime()))
 
 					staticMinThresholdObj, diags := types.ObjectValue(V1DnsMonitorHealthPolicyStaticMinThresholdPolicyStaticMinThresholdModelAttributeMap, staticMinThresholdAttributeMap)
 					response.Diagnostics.Append(diags...)
@@ -2438,6 +2330,114 @@ func (r *ResourceF5XCV1DnsMonitor) Create(ctx context.Context, request resource.
 		data.HealthPolicy = healthPolicyObj
 	} else {
 		data.HealthPolicy = types.ObjectNull(V1DnsMonitorHealthPolicyModelAttributeMap)
+	}
+
+	// resource SpecToModelRoot RequiredStringField --> RecordType
+	if specData.GetRecordType() != "" {
+		data.RecordType = types.StringValue(specData.GetRecordType())
+	} else {
+		// Empty string, set to null
+		data.RecordType = types.StringNull()
+	}
+
+	// resource SpecToModelRoot RequiredOneOfField --> OnFailureToChoice
+	// true
+	// false
+	// This resource uses custom JSON resolution.
+	// The API response for this oneof field can be inconsistent.
+	// We must inspect the raw JSON map to determine which choice is present.
+	// The logic checks for the presence of any of the possible oneof choices.
+	var oneofOnFailureToChoicePresent bool
+
+	// 1. Check for the choice inside a 'gc_spec' map, which is a common pattern in GET responses.
+	if gcSpec, gcSpecOk := rawSpecMap["gc_spec"].(map[string]interface{}); gcSpecOk {
+		if _, ok := gcSpec["on_failure_to_any"]; ok {
+			oneofOnFailureToChoicePresent = true
+		} else if _, ok := gcSpec["on_failure_to_all"]; ok {
+			oneofOnFailureToChoicePresent = true
+		}
+	}
+
+	// 2. If not found in 'gc_spec', check for the choice at the top level of the spec.
+	if !oneofOnFailureToChoicePresent {
+		if _, ok := rawSpecMap["on_failure_to_any"]; ok {
+			oneofOnFailureToChoicePresent = true
+		} else if _, ok := rawSpecMap["on_failure_to_all"]; ok {
+			oneofOnFailureToChoicePresent = true
+		}
+	}
+
+	if oneofOnFailureToChoicePresent {
+
+		// The model struct that will be populated by the nested template.
+		var onFailureToChoiceChoicesModel = &V1DnsMonitorCreateSpecTypeOnFailureToChoice{}
+
+		// Recursively call the nested template to process the oneof choices.
+
+		// resource specToModelNested BoolOfOneOfPointerField --> OnFailureToAny
+		var onFailureToAnyInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["on_failure_to_any"]; found {
+				onFailureToAnyInMap = true
+			}
+		}
+
+		if !onFailureToAnyInMap {
+			if _, found := rawSpecMap["on_failure_to_any"]; found {
+				onFailureToAnyInMap = true
+			}
+		}
+
+		if onFailureToAnyInMap || specData.GetOnFailureToAny() != nil {
+			onFailureToChoiceChoicesModel.OnFailureToAny = types.BoolValue(true)
+		} else {
+			onFailureToChoiceChoicesModel.OnFailureToAny = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> OnFailureToAll
+		var onFailureToAllInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["on_failure_to_all"]; found {
+				onFailureToAllInMap = true
+			}
+		}
+
+		if !onFailureToAllInMap {
+			if _, found := rawSpecMap["on_failure_to_all"]; found {
+				onFailureToAllInMap = true
+			}
+		}
+
+		if onFailureToAllInMap || specData.GetOnFailureToAll() != nil {
+			onFailureToChoiceChoicesModel.OnFailureToAll = types.BoolValue(true)
+		} else {
+			onFailureToChoiceChoicesModel.OnFailureToAll = types.BoolNull()
+		}
+
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		onFailureToChoiceObj, diags := utils.GoStructToObjectValue(
+			ctx,
+			V1DnsMonitorOnFailureToChoiceModelAttributeMap,
+			onFailureToChoiceChoicesModel,
+		)
+		if diags.HasError() {
+			response.Diagnostics.Append(diags...)
+			return
+		}
+
+		// Assign the final object to the root data model.
+		data.OnFailureToChoice = onFailureToChoiceObj
+	} else {
+		// The oneof field is not present in the API response, so set the Terraform object to null.
+		data.OnFailureToChoice = types.ObjectNull(V1DnsMonitorOnFailureToChoiceModelAttributeMap)
+	}
+
+	// resource SpecToModelRoot RequiredUintField --> SourceCriticalThreshold
+	sourceCriticalThresholdValue := specData.GetSourceCriticalThreshold()
+	if sourceCriticalThresholdValue > 0 {
+		data.SourceCriticalThreshold = types.Int64Value(int64(sourceCriticalThresholdValue))
 	}
 
 	// resource SpecToModelRoot StringField --> Receive
@@ -2548,6 +2548,15 @@ func (r *ResourceF5XCV1DnsMonitor) Read(ctx context.Context, request resource.Re
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
+	// resource SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
+
+	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
+	data.Namespace = types.StringValue(metaData.GetNamespace())
+
+	// resource SpecToModelRoot Meta StringField --> Uid
+	data.Uid = types.StringValue(systemMetaData.GetUid())
+
 	// resource SpecToModelRoot Meta MapOfStringField --> Labels
 	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
 	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
@@ -2645,135 +2654,6 @@ func (r *ResourceF5XCV1DnsMonitor) Read(ctx context.Context, request resource.Re
 	// resource SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
 
-	// resource SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
-
-	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
-	data.Namespace = types.StringValue(metaData.GetNamespace())
-
-	// resource SpecToModelRoot Meta StringField --> Uid
-	data.Uid = types.StringValue(systemMetaData.GetUid())
-
-	// resource SpecToModelRoot RequiredStringField --> Protocol
-	if specData.GetProtocol() != "" {
-		data.Protocol = types.StringValue(specData.GetProtocol())
-	} else {
-		// Empty string, set to null
-		data.Protocol = types.StringNull()
-	}
-
-	// resource SpecToModelRoot RequiredOneOfField --> OnFailureToChoice
-	// true
-	// false
-	// This resource uses custom JSON resolution.
-	// The API response for this oneof field can be inconsistent.
-	// We must inspect the raw JSON map to determine which choice is present.
-	// The logic checks for the presence of any of the possible oneof choices.
-	var oneofOnFailureToChoicePresent bool
-
-	// 1. Check for the choice inside a 'gc_spec' map, which is a common pattern in GET responses.
-	if gcSpec, gcSpecOk := rawSpecMap["gc_spec"].(map[string]interface{}); gcSpecOk {
-		if _, ok := gcSpec["on_failure_to_any"]; ok {
-			oneofOnFailureToChoicePresent = true
-		} else if _, ok := gcSpec["on_failure_to_all"]; ok {
-			oneofOnFailureToChoicePresent = true
-		}
-	}
-
-	// 2. If not found in 'gc_spec', check for the choice at the top level of the spec.
-	if !oneofOnFailureToChoicePresent {
-		if _, ok := rawSpecMap["on_failure_to_any"]; ok {
-			oneofOnFailureToChoicePresent = true
-		} else if _, ok := rawSpecMap["on_failure_to_all"]; ok {
-			oneofOnFailureToChoicePresent = true
-		}
-	}
-
-	if oneofOnFailureToChoicePresent {
-
-		// The model struct that will be populated by the nested template.
-		var onFailureToChoiceChoicesModel = &V1DnsMonitorCreateSpecTypeOnFailureToChoice{}
-
-		// Recursively call the nested template to process the oneof choices.
-
-		// resource specToModelNested BoolOfOneOfPointerField --> OnFailureToAll
-		var onFailureToAllInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["on_failure_to_all"]; found {
-				onFailureToAllInMap = true
-			}
-		}
-
-		if !onFailureToAllInMap {
-			if _, found := rawSpecMap["on_failure_to_all"]; found {
-				onFailureToAllInMap = true
-			}
-		}
-
-		if onFailureToAllInMap || specData.GetOnFailureToAll() != nil {
-			onFailureToChoiceChoicesModel.OnFailureToAll = types.BoolValue(true)
-		} else {
-			onFailureToChoiceChoicesModel.OnFailureToAll = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> OnFailureToAny
-		var onFailureToAnyInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["on_failure_to_any"]; found {
-				onFailureToAnyInMap = true
-			}
-		}
-
-		if !onFailureToAnyInMap {
-			if _, found := rawSpecMap["on_failure_to_any"]; found {
-				onFailureToAnyInMap = true
-			}
-		}
-
-		if onFailureToAnyInMap || specData.GetOnFailureToAny() != nil {
-			onFailureToChoiceChoicesModel.OnFailureToAny = types.BoolValue(true)
-		} else {
-			onFailureToChoiceChoicesModel.OnFailureToAny = types.BoolNull()
-		}
-
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		onFailureToChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			V1DnsMonitorOnFailureToChoiceModelAttributeMap,
-			onFailureToChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
-
-		// Assign the final object to the root data model.
-		data.OnFailureToChoice = onFailureToChoiceObj
-	} else {
-		// The oneof field is not present in the API response, so set the Terraform object to null.
-		data.OnFailureToChoice = types.ObjectNull(V1DnsMonitorOnFailureToChoiceModelAttributeMap)
-	}
-
-	// resource SpecToModelRoot RequiredUintField --> OnFailureCount
-	onFailureCountValue := specData.GetOnFailureCount()
-	if onFailureCountValue > 0 {
-		data.OnFailureCount = types.Int64Value(int64(onFailureCountValue))
-	}
-
-	// resource SpecToModelRoot RequiredUintField --> LookupTimeout
-	lookupTimeoutValue := specData.GetLookupTimeout()
-	if lookupTimeoutValue > 0 {
-		data.LookupTimeout = types.Int64Value(int64(lookupTimeoutValue))
-	}
-
-	// resource SpecToModelRoot RequiredUintField --> SourceCriticalThreshold
-	sourceCriticalThresholdValue := specData.GetSourceCriticalThreshold()
-	if sourceCriticalThresholdValue > 0 {
-		data.SourceCriticalThreshold = types.Int64Value(int64(sourceCriticalThresholdValue))
-	}
-
 	// resource SpecToModelRoot RequiredStringField --> Domain
 	if specData.GetDomain() != "" {
 		data.Domain = types.StringValue(specData.GetDomain())
@@ -2793,46 +2673,46 @@ func (r *ResourceF5XCV1DnsMonitor) Read(ctx context.Context, request resource.Re
 
 	// 1. Check for the choice inside a 'gc_spec' map, which is a common pattern in GET responses.
 	if gcSpec, gcSpecOk := rawSpecMap["gc_spec"].(map[string]interface{}); gcSpecOk {
-		if _, ok := gcSpec["interval_30_secs"]; ok {
+		if _, ok := gcSpec["interval_12_hours"]; ok {
 			oneofIntervalChoicePresent = true
-		} else if _, ok := gcSpec["interval_1_min"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := gcSpec["interval_5_mins"]; ok {
+		} else if _, ok := gcSpec["interval_30_secs"]; ok {
 			oneofIntervalChoicePresent = true
 		} else if _, ok := gcSpec["interval_15_mins"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := gcSpec["interval_30_mins"]; ok {
 			oneofIntervalChoicePresent = true
 		} else if _, ok := gcSpec["interval_1_hour"]; ok {
 			oneofIntervalChoicePresent = true
 		} else if _, ok := gcSpec["interval_6_hours"]; ok {
 			oneofIntervalChoicePresent = true
-		} else if _, ok := gcSpec["interval_12_hours"]; ok {
-			oneofIntervalChoicePresent = true
 		} else if _, ok := gcSpec["interval_1_day"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := gcSpec["interval_1_min"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := gcSpec["interval_5_mins"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := gcSpec["interval_30_mins"]; ok {
 			oneofIntervalChoicePresent = true
 		}
 	}
 
 	// 2. If not found in 'gc_spec', check for the choice at the top level of the spec.
 	if !oneofIntervalChoicePresent {
-		if _, ok := rawSpecMap["interval_30_secs"]; ok {
+		if _, ok := rawSpecMap["interval_12_hours"]; ok {
 			oneofIntervalChoicePresent = true
-		} else if _, ok := rawSpecMap["interval_1_min"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := rawSpecMap["interval_5_mins"]; ok {
+		} else if _, ok := rawSpecMap["interval_30_secs"]; ok {
 			oneofIntervalChoicePresent = true
 		} else if _, ok := rawSpecMap["interval_15_mins"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := rawSpecMap["interval_30_mins"]; ok {
 			oneofIntervalChoicePresent = true
 		} else if _, ok := rawSpecMap["interval_1_hour"]; ok {
 			oneofIntervalChoicePresent = true
 		} else if _, ok := rawSpecMap["interval_6_hours"]; ok {
 			oneofIntervalChoicePresent = true
-		} else if _, ok := rawSpecMap["interval_12_hours"]; ok {
-			oneofIntervalChoicePresent = true
 		} else if _, ok := rawSpecMap["interval_1_day"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := rawSpecMap["interval_1_min"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := rawSpecMap["interval_5_mins"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := rawSpecMap["interval_30_mins"]; ok {
 			oneofIntervalChoicePresent = true
 		}
 	}
@@ -2844,25 +2724,25 @@ func (r *ResourceF5XCV1DnsMonitor) Read(ctx context.Context, request resource.Re
 
 		// Recursively call the nested template to process the oneof choices.
 
-		// resource specToModelNested BoolOfOneOfPointerField --> Interval_1Hour
-		var interval1HourInMap bool
+		// resource specToModelNested BoolOfOneOfPointerField --> Interval_30Secs
+		var interval30SecsInMap bool
 
 		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["interval_1_hour"]; found {
-				interval1HourInMap = true
+			if _, found := gcSpec["interval_30_secs"]; found {
+				interval30SecsInMap = true
 			}
 		}
 
-		if !interval1HourInMap {
-			if _, found := rawSpecMap["interval_1_hour"]; found {
-				interval1HourInMap = true
+		if !interval30SecsInMap {
+			if _, found := rawSpecMap["interval_30_secs"]; found {
+				interval30SecsInMap = true
 			}
 		}
 
-		if interval1HourInMap || specData.GetInterval_1Hour() != nil {
-			intervalChoiceChoicesModel.Interval_1Hour = types.BoolValue(true)
+		if interval30SecsInMap || specData.GetInterval_30Secs() != nil {
+			intervalChoiceChoicesModel.Interval_30Secs = types.BoolValue(true)
 		} else {
-			intervalChoiceChoicesModel.Interval_1Hour = types.BoolNull()
+			intervalChoiceChoicesModel.Interval_30Secs = types.BoolNull()
 		}
 
 		// resource specToModelNested BoolOfOneOfPointerField --> Interval_1Day
@@ -2886,69 +2766,6 @@ func (r *ResourceF5XCV1DnsMonitor) Read(ctx context.Context, request resource.Re
 			intervalChoiceChoicesModel.Interval_1Day = types.BoolNull()
 		}
 
-		// resource specToModelNested BoolOfOneOfPointerField --> Interval_30Secs
-		var interval30SecsInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["interval_30_secs"]; found {
-				interval30SecsInMap = true
-			}
-		}
-
-		if !interval30SecsInMap {
-			if _, found := rawSpecMap["interval_30_secs"]; found {
-				interval30SecsInMap = true
-			}
-		}
-
-		if interval30SecsInMap || specData.GetInterval_30Secs() != nil {
-			intervalChoiceChoicesModel.Interval_30Secs = types.BoolValue(true)
-		} else {
-			intervalChoiceChoicesModel.Interval_30Secs = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> Interval_6Hours
-		var interval6HoursInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["interval_6_hours"]; found {
-				interval6HoursInMap = true
-			}
-		}
-
-		if !interval6HoursInMap {
-			if _, found := rawSpecMap["interval_6_hours"]; found {
-				interval6HoursInMap = true
-			}
-		}
-
-		if interval6HoursInMap || specData.GetInterval_6Hours() != nil {
-			intervalChoiceChoicesModel.Interval_6Hours = types.BoolValue(true)
-		} else {
-			intervalChoiceChoicesModel.Interval_6Hours = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> Interval_12Hours
-		var interval12HoursInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["interval_12_hours"]; found {
-				interval12HoursInMap = true
-			}
-		}
-
-		if !interval12HoursInMap {
-			if _, found := rawSpecMap["interval_12_hours"]; found {
-				interval12HoursInMap = true
-			}
-		}
-
-		if interval12HoursInMap || specData.GetInterval_12Hours() != nil {
-			intervalChoiceChoicesModel.Interval_12Hours = types.BoolValue(true)
-		} else {
-			intervalChoiceChoicesModel.Interval_12Hours = types.BoolNull()
-		}
-
 		// resource specToModelNested BoolOfOneOfPointerField --> Interval_1Min
 		var interval1MinInMap bool
 
@@ -2968,48 +2785,6 @@ func (r *ResourceF5XCV1DnsMonitor) Read(ctx context.Context, request resource.Re
 			intervalChoiceChoicesModel.Interval_1Min = types.BoolValue(true)
 		} else {
 			intervalChoiceChoicesModel.Interval_1Min = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> Interval_5Mins
-		var interval5MinsInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["interval_5_mins"]; found {
-				interval5MinsInMap = true
-			}
-		}
-
-		if !interval5MinsInMap {
-			if _, found := rawSpecMap["interval_5_mins"]; found {
-				interval5MinsInMap = true
-			}
-		}
-
-		if interval5MinsInMap || specData.GetInterval_5Mins() != nil {
-			intervalChoiceChoicesModel.Interval_5Mins = types.BoolValue(true)
-		} else {
-			intervalChoiceChoicesModel.Interval_5Mins = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> Interval_15Mins
-		var interval15MinsInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["interval_15_mins"]; found {
-				interval15MinsInMap = true
-			}
-		}
-
-		if !interval15MinsInMap {
-			if _, found := rawSpecMap["interval_15_mins"]; found {
-				interval15MinsInMap = true
-			}
-		}
-
-		if interval15MinsInMap || specData.GetInterval_15Mins() != nil {
-			intervalChoiceChoicesModel.Interval_15Mins = types.BoolValue(true)
-		} else {
-			intervalChoiceChoicesModel.Interval_15Mins = types.BoolNull()
 		}
 
 		// resource specToModelNested BoolOfOneOfPointerField --> Interval_30Mins
@@ -3033,6 +2808,111 @@ func (r *ResourceF5XCV1DnsMonitor) Read(ctx context.Context, request resource.Re
 			intervalChoiceChoicesModel.Interval_30Mins = types.BoolNull()
 		}
 
+		// resource specToModelNested BoolOfOneOfPointerField --> Interval_12Hours
+		var interval12HoursInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["interval_12_hours"]; found {
+				interval12HoursInMap = true
+			}
+		}
+
+		if !interval12HoursInMap {
+			if _, found := rawSpecMap["interval_12_hours"]; found {
+				interval12HoursInMap = true
+			}
+		}
+
+		if interval12HoursInMap || specData.GetInterval_12Hours() != nil {
+			intervalChoiceChoicesModel.Interval_12Hours = types.BoolValue(true)
+		} else {
+			intervalChoiceChoicesModel.Interval_12Hours = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> Interval_15Mins
+		var interval15MinsInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["interval_15_mins"]; found {
+				interval15MinsInMap = true
+			}
+		}
+
+		if !interval15MinsInMap {
+			if _, found := rawSpecMap["interval_15_mins"]; found {
+				interval15MinsInMap = true
+			}
+		}
+
+		if interval15MinsInMap || specData.GetInterval_15Mins() != nil {
+			intervalChoiceChoicesModel.Interval_15Mins = types.BoolValue(true)
+		} else {
+			intervalChoiceChoicesModel.Interval_15Mins = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> Interval_1Hour
+		var interval1HourInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["interval_1_hour"]; found {
+				interval1HourInMap = true
+			}
+		}
+
+		if !interval1HourInMap {
+			if _, found := rawSpecMap["interval_1_hour"]; found {
+				interval1HourInMap = true
+			}
+		}
+
+		if interval1HourInMap || specData.GetInterval_1Hour() != nil {
+			intervalChoiceChoicesModel.Interval_1Hour = types.BoolValue(true)
+		} else {
+			intervalChoiceChoicesModel.Interval_1Hour = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> Interval_6Hours
+		var interval6HoursInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["interval_6_hours"]; found {
+				interval6HoursInMap = true
+			}
+		}
+
+		if !interval6HoursInMap {
+			if _, found := rawSpecMap["interval_6_hours"]; found {
+				interval6HoursInMap = true
+			}
+		}
+
+		if interval6HoursInMap || specData.GetInterval_6Hours() != nil {
+			intervalChoiceChoicesModel.Interval_6Hours = types.BoolValue(true)
+		} else {
+			intervalChoiceChoicesModel.Interval_6Hours = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> Interval_5Mins
+		var interval5MinsInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["interval_5_mins"]; found {
+				interval5MinsInMap = true
+			}
+		}
+
+		if !interval5MinsInMap {
+			if _, found := rawSpecMap["interval_5_mins"]; found {
+				interval5MinsInMap = true
+			}
+		}
+
+		if interval5MinsInMap || specData.GetInterval_5Mins() != nil {
+			intervalChoiceChoicesModel.Interval_5Mins = types.BoolValue(true)
+		} else {
+			intervalChoiceChoicesModel.Interval_5Mins = types.BoolNull()
+		}
+
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
 		intervalChoiceObj, diags := utils.GoStructToObjectValue(
 			ctx,
@@ -3051,12 +2931,24 @@ func (r *ResourceF5XCV1DnsMonitor) Read(ctx context.Context, request resource.Re
 		data.IntervalChoice = types.ObjectNull(V1DnsMonitorIntervalChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredStringField --> RecordType
-	if specData.GetRecordType() != "" {
-		data.RecordType = types.StringValue(specData.GetRecordType())
+	// resource SpecToModelRoot RequiredStringField --> Protocol
+	if specData.GetProtocol() != "" {
+		data.Protocol = types.StringValue(specData.GetProtocol())
 	} else {
 		// Empty string, set to null
-		data.RecordType = types.StringNull()
+		data.Protocol = types.StringNull()
+	}
+
+	// resource SpecToModelRoot RequiredUintField --> OnFailureCount
+	onFailureCountValue := specData.GetOnFailureCount()
+	if onFailureCountValue > 0 {
+		data.OnFailureCount = types.Int64Value(int64(onFailureCountValue))
+	}
+
+	// resource SpecToModelRoot RequiredUintField --> LookupTimeout
+	lookupTimeoutValue := specData.GetLookupTimeout()
+	if lookupTimeoutValue > 0 {
+		data.LookupTimeout = types.Int64Value(int64(lookupTimeoutValue))
 	}
 
 	// resource SpecToModelRoot ArrayOfPointerField --> NameServers
@@ -3066,9 +2958,6 @@ func (r *ResourceF5XCV1DnsMonitor) Read(ctx context.Context, request resource.Re
 		for _, nameServersElement := range specData.NameServers {
 			v1DnsMonitorV1DnsMonitorNameServerModel := V1DnsMonitorV1DnsMonitorNameServer{}
 
-			// resource specToModelNested UintField --> Port
-			v1DnsMonitorV1DnsMonitorNameServerModel.Port = types.Int64Value(int64(nameServersElement.GetPort()))
-
 			// resource specToModelNested RequiredStringField --> NameServer
 			if nameServersElement.GetNameServer() != "" {
 				v1DnsMonitorV1DnsMonitorNameServerModel.NameServer = types.StringValue(nameServersElement.GetNameServer())
@@ -3076,6 +2965,9 @@ func (r *ResourceF5XCV1DnsMonitor) Read(ctx context.Context, request resource.Re
 				// Empty string, set to null
 				v1DnsMonitorV1DnsMonitorNameServerModel.NameServer = types.StringNull()
 			}
+
+			// resource specToModelNested UintField --> Port
+			v1DnsMonitorV1DnsMonitorNameServerModel.Port = types.Int64Value(int64(nameServersElement.GetPort()))
 
 			nameServersElements = append(nameServersElements, v1DnsMonitorV1DnsMonitorNameServerModel)
 		}
@@ -3118,38 +3010,6 @@ func (r *ResourceF5XCV1DnsMonitor) Read(ctx context.Context, request resource.Re
 
 			// Process nested choices, populating the temporary attribute map
 
-			// resource specToModelNested PointerOfOneOfField --> F5Xc
-			// CreateSpecType
-			// true
-			{
-				f5xcOptions, isF5Xc := externalSourcessourceChoiceChoices.(*ves_io_schema_observability_synthetic_monitor.SourceExternal_F5Xc)
-				f5xcAttributeMap := make(map[string]attr.Value)
-
-				if isF5Xc && f5xcOptions != nil {
-
-					// resource specToModelNested RequiredArrayOfStringField --> Regions
-					if len(f5xcOptions.F5Xc.GetRegions()) > 0 {
-						listValue, diags := types.ListValueFrom(ctx, types.StringType, f5xcOptions.F5Xc.GetRegions())
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						f5xcAttributeMap["regions"] = listValue
-					} else {
-						f5xcAttributeMap["regions"] = types.ListNull(types.StringType)
-					}
-
-					f5xcObj, diags := types.ObjectValue(V1DnsMonitorExternalSourcesSourceChoiceF5XcModelAttributeMap, f5xcAttributeMap)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					externalSourcessourceChoiceChoicesAttributeMap["f5xc"] = f5xcObj
-				} else {
-					externalSourcessourceChoiceChoicesAttributeMap["f5xc"] = types.ObjectNull(V1DnsMonitorExternalSourcesSourceChoiceF5XcModelAttributeMap)
-				}
-			}
-
 			// resource specToModelNested PointerOfOneOfField --> Aws
 			// CreateSpecType
 			// true
@@ -3179,6 +3039,38 @@ func (r *ResourceF5XCV1DnsMonitor) Read(ctx context.Context, request resource.Re
 					externalSourcessourceChoiceChoicesAttributeMap["aws"] = awsObj
 				} else {
 					externalSourcessourceChoiceChoicesAttributeMap["aws"] = types.ObjectNull(V1DnsMonitorExternalSourcesSourceChoiceAwsModelAttributeMap)
+				}
+			}
+
+			// resource specToModelNested PointerOfOneOfField --> F5Xc
+			// CreateSpecType
+			// true
+			{
+				f5xcOptions, isF5Xc := externalSourcessourceChoiceChoices.(*ves_io_schema_observability_synthetic_monitor.SourceExternal_F5Xc)
+				f5xcAttributeMap := make(map[string]attr.Value)
+
+				if isF5Xc && f5xcOptions != nil {
+
+					// resource specToModelNested RequiredArrayOfStringField --> Regions
+					if len(f5xcOptions.F5Xc.GetRegions()) > 0 {
+						listValue, diags := types.ListValueFrom(ctx, types.StringType, f5xcOptions.F5Xc.GetRegions())
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						f5xcAttributeMap["regions"] = listValue
+					} else {
+						f5xcAttributeMap["regions"] = types.ListNull(types.StringType)
+					}
+
+					f5xcObj, diags := types.ObjectValue(V1DnsMonitorExternalSourcesSourceChoiceF5XcModelAttributeMap, f5xcAttributeMap)
+					response.Diagnostics.Append(diags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					externalSourcessourceChoiceChoicesAttributeMap["f5xc"] = f5xcObj
+				} else {
+					externalSourcessourceChoiceChoicesAttributeMap["f5xc"] = types.ObjectNull(V1DnsMonitorExternalSourcesSourceChoiceF5XcModelAttributeMap)
 				}
 			}
 
@@ -3332,27 +3224,6 @@ func (r *ResourceF5XCV1DnsMonitor) Read(ctx context.Context, request resource.Re
 
 			// Process nested choices, populating the temporary attribute map
 
-			// resource specToModelNested BoolOfOneOfPointerField --> StaticMaxThresholdDisabled
-			var staticMaxThresholdDisabledInMap bool
-
-			if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-				if _, found := gcSpec["static_max_threshold_disabled"]; found {
-					staticMaxThresholdDisabledInMap = true
-				}
-			}
-
-			if !staticMaxThresholdDisabledInMap {
-				if _, found := rawSpecMap["static_max_threshold_disabled"]; found {
-					staticMaxThresholdDisabledInMap = true
-				}
-			}
-
-			if staticMaxThresholdDisabledInMap || healthPolicyElement.GetStaticMaxThresholdDisabled() != nil {
-				healthPolicystaticMaxThresholdPolicyChoiceChoicesAttributeMap["static_max_threshold_disabled"] = types.BoolValue(true)
-			} else {
-				healthPolicystaticMaxThresholdPolicyChoiceChoicesAttributeMap["static_max_threshold_disabled"] = types.BoolNull()
-			}
-
 			// resource specToModelNested PointerOfOneOfField --> StaticMaxThreshold
 			// CreateSpecType
 			// true
@@ -3388,6 +3259,27 @@ func (r *ResourceF5XCV1DnsMonitor) Read(ctx context.Context, request resource.Re
 				} else {
 					healthPolicystaticMaxThresholdPolicyChoiceChoicesAttributeMap["static_max_threshold"] = types.ObjectNull(V1DnsMonitorHealthPolicyStaticMaxThresholdPolicyStaticMaxThresholdModelAttributeMap)
 				}
+			}
+
+			// resource specToModelNested BoolOfOneOfPointerField --> StaticMaxThresholdDisabled
+			var staticMaxThresholdDisabledInMap bool
+
+			if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+				if _, found := gcSpec["static_max_threshold_disabled"]; found {
+					staticMaxThresholdDisabledInMap = true
+				}
+			}
+
+			if !staticMaxThresholdDisabledInMap {
+				if _, found := rawSpecMap["static_max_threshold_disabled"]; found {
+					staticMaxThresholdDisabledInMap = true
+				}
+			}
+
+			if staticMaxThresholdDisabledInMap || healthPolicyElement.GetStaticMaxThresholdDisabled() != nil {
+				healthPolicystaticMaxThresholdPolicyChoiceChoicesAttributeMap["static_max_threshold_disabled"] = types.BoolValue(true)
+			} else {
+				healthPolicystaticMaxThresholdPolicyChoiceChoicesAttributeMap["static_max_threshold_disabled"] = types.BoolNull()
 			}
 
 			// --- End of Choices ---
@@ -3450,9 +3342,6 @@ func (r *ResourceF5XCV1DnsMonitor) Read(ctx context.Context, request resource.Re
 
 				if isStaticMinThreshold && staticMinThresholdOptions != nil {
 
-					// resource specToModelNested RequiredUintField --> MinResponseTime
-					staticMinThresholdAttributeMap["min_response_time"] = types.Int64Value(int64(staticMinThresholdOptions.StaticMinThreshold.GetMinResponseTime()))
-
 					// resource specToModelNested RequiredEnumField --> EvalPeriod
 					if staticMinThresholdOptions.StaticMinThreshold.GetEvalPeriod().String() != "" {
 						stringValue := types.StringValue(staticMinThresholdOptions.StaticMinThreshold.GetEvalPeriod().String())
@@ -3466,6 +3355,9 @@ func (r *ResourceF5XCV1DnsMonitor) Read(ctx context.Context, request resource.Re
 					} else {
 						staticMinThresholdAttributeMap["eval_period"] = types.ListNull(types.StringType)
 					}
+
+					// resource specToModelNested RequiredUintField --> MinResponseTime
+					staticMinThresholdAttributeMap["min_response_time"] = types.Int64Value(int64(staticMinThresholdOptions.StaticMinThreshold.GetMinResponseTime()))
 
 					staticMinThresholdObj, diags := types.ObjectValue(V1DnsMonitorHealthPolicyStaticMinThresholdPolicyStaticMinThresholdModelAttributeMap, staticMinThresholdAttributeMap)
 					response.Diagnostics.Append(diags...)
@@ -3508,6 +3400,114 @@ func (r *ResourceF5XCV1DnsMonitor) Read(ctx context.Context, request resource.Re
 		data.HealthPolicy = healthPolicyObj
 	} else {
 		data.HealthPolicy = types.ObjectNull(V1DnsMonitorHealthPolicyModelAttributeMap)
+	}
+
+	// resource SpecToModelRoot RequiredStringField --> RecordType
+	if specData.GetRecordType() != "" {
+		data.RecordType = types.StringValue(specData.GetRecordType())
+	} else {
+		// Empty string, set to null
+		data.RecordType = types.StringNull()
+	}
+
+	// resource SpecToModelRoot RequiredOneOfField --> OnFailureToChoice
+	// true
+	// false
+	// This resource uses custom JSON resolution.
+	// The API response for this oneof field can be inconsistent.
+	// We must inspect the raw JSON map to determine which choice is present.
+	// The logic checks for the presence of any of the possible oneof choices.
+	var oneofOnFailureToChoicePresent bool
+
+	// 1. Check for the choice inside a 'gc_spec' map, which is a common pattern in GET responses.
+	if gcSpec, gcSpecOk := rawSpecMap["gc_spec"].(map[string]interface{}); gcSpecOk {
+		if _, ok := gcSpec["on_failure_to_any"]; ok {
+			oneofOnFailureToChoicePresent = true
+		} else if _, ok := gcSpec["on_failure_to_all"]; ok {
+			oneofOnFailureToChoicePresent = true
+		}
+	}
+
+	// 2. If not found in 'gc_spec', check for the choice at the top level of the spec.
+	if !oneofOnFailureToChoicePresent {
+		if _, ok := rawSpecMap["on_failure_to_any"]; ok {
+			oneofOnFailureToChoicePresent = true
+		} else if _, ok := rawSpecMap["on_failure_to_all"]; ok {
+			oneofOnFailureToChoicePresent = true
+		}
+	}
+
+	if oneofOnFailureToChoicePresent {
+
+		// The model struct that will be populated by the nested template.
+		var onFailureToChoiceChoicesModel = &V1DnsMonitorCreateSpecTypeOnFailureToChoice{}
+
+		// Recursively call the nested template to process the oneof choices.
+
+		// resource specToModelNested BoolOfOneOfPointerField --> OnFailureToAny
+		var onFailureToAnyInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["on_failure_to_any"]; found {
+				onFailureToAnyInMap = true
+			}
+		}
+
+		if !onFailureToAnyInMap {
+			if _, found := rawSpecMap["on_failure_to_any"]; found {
+				onFailureToAnyInMap = true
+			}
+		}
+
+		if onFailureToAnyInMap || specData.GetOnFailureToAny() != nil {
+			onFailureToChoiceChoicesModel.OnFailureToAny = types.BoolValue(true)
+		} else {
+			onFailureToChoiceChoicesModel.OnFailureToAny = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> OnFailureToAll
+		var onFailureToAllInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["on_failure_to_all"]; found {
+				onFailureToAllInMap = true
+			}
+		}
+
+		if !onFailureToAllInMap {
+			if _, found := rawSpecMap["on_failure_to_all"]; found {
+				onFailureToAllInMap = true
+			}
+		}
+
+		if onFailureToAllInMap || specData.GetOnFailureToAll() != nil {
+			onFailureToChoiceChoicesModel.OnFailureToAll = types.BoolValue(true)
+		} else {
+			onFailureToChoiceChoicesModel.OnFailureToAll = types.BoolNull()
+		}
+
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		onFailureToChoiceObj, diags := utils.GoStructToObjectValue(
+			ctx,
+			V1DnsMonitorOnFailureToChoiceModelAttributeMap,
+			onFailureToChoiceChoicesModel,
+		)
+		if diags.HasError() {
+			response.Diagnostics.Append(diags...)
+			return
+		}
+
+		// Assign the final object to the root data model.
+		data.OnFailureToChoice = onFailureToChoiceObj
+	} else {
+		// The oneof field is not present in the API response, so set the Terraform object to null.
+		data.OnFailureToChoice = types.ObjectNull(V1DnsMonitorOnFailureToChoiceModelAttributeMap)
+	}
+
+	// resource SpecToModelRoot RequiredUintField --> SourceCriticalThreshold
+	sourceCriticalThresholdValue := specData.GetSourceCriticalThreshold()
+	if sourceCriticalThresholdValue > 0 {
+		data.SourceCriticalThreshold = types.Int64Value(int64(sourceCriticalThresholdValue))
 	}
 
 	// resource SpecToModelRoot StringField --> Receive
@@ -3565,6 +3565,16 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 
 	// Populate updateReq from data model
 
+	// resource modelToMetaRoot RequiredStringField --> Name
+	if !data.Name.IsNull() && !data.Name.IsUnknown() {
+		meta.Name = string(data.Name.ValueString())
+	}
+
+	// resource modelToMetaRoot RequiredStringField --> Namespace
+	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
+		meta.Namespace = string(data.Namespace.ValueString())
+	}
+
 	// resource modelToMetaRoot MapOfStringField --> Annotations
 	if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
 		var labels map[string]string
@@ -3584,52 +3594,6 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 		meta.Description = string(data.Description.ValueString())
 	}
 
-	// resource modelToMetaRoot RequiredStringField --> Name
-	if !data.Name.IsNull() && !data.Name.IsUnknown() {
-		meta.Name = string(data.Name.ValueString())
-	}
-
-	// resource modelToMetaRoot RequiredStringField --> Namespace
-	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
-		meta.Namespace = string(data.Namespace.ValueString())
-	}
-
-	// resource modelToSpecRoot RequiredStringField --> Protocol
-	spec.Protocol = string(data.Protocol.ValueString())
-
-	// resource modelToSpecRoot RequiredOneOfField --> OnFailureToChoice
-	if !data.OnFailureToChoice.IsNull() && !data.OnFailureToChoice.IsUnknown() {
-		onFailureToChoiceModel := V1DnsMonitorCreateSpecTypeOnFailureToChoice{}
-		response.Diagnostics.Append(data.OnFailureToChoice.As(ctx, &onFailureToChoiceModel, basetypes.ObjectAsOptions{})...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-
-		// resource modelToSpecNested BoolOfOneOfPointerField --> OnFailureToAll
-		if !onFailureToChoiceModel.OnFailureToAll.IsNull() && !onFailureToChoiceModel.OnFailureToAll.IsUnknown() {
-			onFailureToAllSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_dns_monitor.ReplaceSpecType_OnFailureToAll{}
-			onFailureToAllSpecBool.OnFailureToAll = &ves_io_schema.Empty{}
-			spec.OnFailureToChoice = onFailureToAllSpecBool
-		}
-
-		// resource modelToSpecNested BoolOfOneOfPointerField --> OnFailureToAny
-		if !onFailureToChoiceModel.OnFailureToAny.IsNull() && !onFailureToChoiceModel.OnFailureToAny.IsUnknown() {
-			onFailureToAnySpecBool := &ves_io_schema_observability_synthetic_monitor_v1_dns_monitor.ReplaceSpecType_OnFailureToAny{}
-			onFailureToAnySpecBool.OnFailureToAny = &ves_io_schema.Empty{}
-			spec.OnFailureToChoice = onFailureToAnySpecBool
-		}
-
-	}
-
-	// resource modelToSpecRoot RequiredUintField --> OnFailureCount
-	spec.OnFailureCount = uint32(data.OnFailureCount.ValueInt64())
-
-	// resource modelToSpecRoot RequiredUintField --> LookupTimeout
-	spec.LookupTimeout = uint32(data.LookupTimeout.ValueInt64())
-
-	// resource modelToSpecRoot RequiredUintField --> SourceCriticalThreshold
-	spec.SourceCriticalThreshold = uint32(data.SourceCriticalThreshold.ValueInt64())
-
 	// resource modelToSpecRoot RequiredStringField --> Domain
 	spec.Domain = string(data.Domain.ValueString())
 
@@ -3641,11 +3605,11 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 			return
 		}
 
-		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_1Hour
-		if !intervalChoiceModel.Interval_1Hour.IsNull() && !intervalChoiceModel.Interval_1Hour.IsUnknown() {
-			interval1HourSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_dns_monitor.ReplaceSpecType_Interval_1Hour{}
-			interval1HourSpecBool.Interval_1Hour = &ves_io_schema.Empty{}
-			spec.IntervalChoice = interval1HourSpecBool
+		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_30Secs
+		if !intervalChoiceModel.Interval_30Secs.IsNull() && !intervalChoiceModel.Interval_30Secs.IsUnknown() {
+			interval30SecsSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_dns_monitor.ReplaceSpecType_Interval_30Secs{}
+			interval30SecsSpecBool.Interval_30Secs = &ves_io_schema.Empty{}
+			spec.IntervalChoice = interval30SecsSpecBool
 		}
 
 		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_1Day
@@ -3655,46 +3619,11 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 			spec.IntervalChoice = interval1DaySpecBool
 		}
 
-		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_30Secs
-		if !intervalChoiceModel.Interval_30Secs.IsNull() && !intervalChoiceModel.Interval_30Secs.IsUnknown() {
-			interval30SecsSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_dns_monitor.ReplaceSpecType_Interval_30Secs{}
-			interval30SecsSpecBool.Interval_30Secs = &ves_io_schema.Empty{}
-			spec.IntervalChoice = interval30SecsSpecBool
-		}
-
-		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_6Hours
-		if !intervalChoiceModel.Interval_6Hours.IsNull() && !intervalChoiceModel.Interval_6Hours.IsUnknown() {
-			interval6HoursSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_dns_monitor.ReplaceSpecType_Interval_6Hours{}
-			interval6HoursSpecBool.Interval_6Hours = &ves_io_schema.Empty{}
-			spec.IntervalChoice = interval6HoursSpecBool
-		}
-
-		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_12Hours
-		if !intervalChoiceModel.Interval_12Hours.IsNull() && !intervalChoiceModel.Interval_12Hours.IsUnknown() {
-			interval12HoursSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_dns_monitor.ReplaceSpecType_Interval_12Hours{}
-			interval12HoursSpecBool.Interval_12Hours = &ves_io_schema.Empty{}
-			spec.IntervalChoice = interval12HoursSpecBool
-		}
-
 		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_1Min
 		if !intervalChoiceModel.Interval_1Min.IsNull() && !intervalChoiceModel.Interval_1Min.IsUnknown() {
 			interval1MinSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_dns_monitor.ReplaceSpecType_Interval_1Min{}
 			interval1MinSpecBool.Interval_1Min = &ves_io_schema.Empty{}
 			spec.IntervalChoice = interval1MinSpecBool
-		}
-
-		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_5Mins
-		if !intervalChoiceModel.Interval_5Mins.IsNull() && !intervalChoiceModel.Interval_5Mins.IsUnknown() {
-			interval5MinsSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_dns_monitor.ReplaceSpecType_Interval_5Mins{}
-			interval5MinsSpecBool.Interval_5Mins = &ves_io_schema.Empty{}
-			spec.IntervalChoice = interval5MinsSpecBool
-		}
-
-		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_15Mins
-		if !intervalChoiceModel.Interval_15Mins.IsNull() && !intervalChoiceModel.Interval_15Mins.IsUnknown() {
-			interval15MinsSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_dns_monitor.ReplaceSpecType_Interval_15Mins{}
-			interval15MinsSpecBool.Interval_15Mins = &ves_io_schema.Empty{}
-			spec.IntervalChoice = interval15MinsSpecBool
 		}
 
 		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_30Mins
@@ -3704,10 +3633,51 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 			spec.IntervalChoice = interval30MinsSpecBool
 		}
 
+		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_12Hours
+		if !intervalChoiceModel.Interval_12Hours.IsNull() && !intervalChoiceModel.Interval_12Hours.IsUnknown() {
+			interval12HoursSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_dns_monitor.ReplaceSpecType_Interval_12Hours{}
+			interval12HoursSpecBool.Interval_12Hours = &ves_io_schema.Empty{}
+			spec.IntervalChoice = interval12HoursSpecBool
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_15Mins
+		if !intervalChoiceModel.Interval_15Mins.IsNull() && !intervalChoiceModel.Interval_15Mins.IsUnknown() {
+			interval15MinsSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_dns_monitor.ReplaceSpecType_Interval_15Mins{}
+			interval15MinsSpecBool.Interval_15Mins = &ves_io_schema.Empty{}
+			spec.IntervalChoice = interval15MinsSpecBool
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_1Hour
+		if !intervalChoiceModel.Interval_1Hour.IsNull() && !intervalChoiceModel.Interval_1Hour.IsUnknown() {
+			interval1HourSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_dns_monitor.ReplaceSpecType_Interval_1Hour{}
+			interval1HourSpecBool.Interval_1Hour = &ves_io_schema.Empty{}
+			spec.IntervalChoice = interval1HourSpecBool
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_6Hours
+		if !intervalChoiceModel.Interval_6Hours.IsNull() && !intervalChoiceModel.Interval_6Hours.IsUnknown() {
+			interval6HoursSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_dns_monitor.ReplaceSpecType_Interval_6Hours{}
+			interval6HoursSpecBool.Interval_6Hours = &ves_io_schema.Empty{}
+			spec.IntervalChoice = interval6HoursSpecBool
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> Interval_5Mins
+		if !intervalChoiceModel.Interval_5Mins.IsNull() && !intervalChoiceModel.Interval_5Mins.IsUnknown() {
+			interval5MinsSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_dns_monitor.ReplaceSpecType_Interval_5Mins{}
+			interval5MinsSpecBool.Interval_5Mins = &ves_io_schema.Empty{}
+			spec.IntervalChoice = interval5MinsSpecBool
+		}
+
 	}
 
-	// resource modelToSpecRoot RequiredStringField --> RecordType
-	spec.RecordType = string(data.RecordType.ValueString())
+	// resource modelToSpecRoot RequiredStringField --> Protocol
+	spec.Protocol = string(data.Protocol.ValueString())
+
+	// resource modelToSpecRoot RequiredUintField --> OnFailureCount
+	spec.OnFailureCount = uint32(data.OnFailureCount.ValueInt64())
+
+	// resource modelToSpecRoot RequiredUintField --> LookupTimeout
+	spec.LookupTimeout = uint32(data.LookupTimeout.ValueInt64())
 
 	{
 		// resource modelToSpecRoot ArrayOfPointerField --> NameServers
@@ -3724,14 +3694,14 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 			for i, nameServersElement := range nameServersElements {
 				nameServersSpec[i] = &ves_io_schema_observability_synthetic_monitor_v1_dns_monitor.NameServer{}
 
-				// resource modelToSpecNested UintField --> Port
-				if !nameServersElement.Port.IsNull() && !nameServersElement.Port.IsUnknown() {
-					nameServersSpec[i].Port = uint32(uint32(nameServersElement.Port.ValueInt64()))
-				}
-
 				// resource modelToSpecNested RequiredStringField --> NameServer
 				if !nameServersElement.NameServer.IsNull() && !nameServersElement.NameServer.IsUnknown() {
 					nameServersSpec[i].NameServer = string(nameServersElement.NameServer.ValueString())
+				}
+
+				// resource modelToSpecNested UintField --> Port
+				if !nameServersElement.Port.IsNull() && !nameServersElement.Port.IsUnknown() {
+					nameServersSpec[i].Port = uint32(uint32(nameServersElement.Port.ValueInt64()))
 				}
 
 			}
@@ -3761,28 +3731,6 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 					return
 				}
 
-				// resource modelToSpecNested PointerOfOneOfField --> F5Xc
-				if !externalSourcesSourceChoiceModel.F5Xc.IsNull() && !externalSourcesSourceChoiceModel.F5Xc.IsUnknown() {
-					var v1DnsMonitorSourceExternalF5XcModel V1DnsMonitorSourceExternalF5Xc
-					response.Diagnostics.Append(externalSourcesSourceChoiceModel.F5Xc.As(ctx, &v1DnsMonitorSourceExternalF5XcModel, basetypes.ObjectAsOptions{})...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					f5xcOneOfSpec := &ves_io_schema_observability_synthetic_monitor.SourceExternal_F5Xc{}
-					f5xcOneOfSpec.F5Xc = &ves_io_schema_observability_synthetic_monitor.RegionalEdgeExternal{}
-					externalSourcesSpec[i].SourceChoice = f5xcOneOfSpec
-
-					// resource modelToSpecNested RequiredArrayOfStringField --> Regions
-					elements := make([]string, 0, len(v1DnsMonitorSourceExternalF5XcModel.Regions.Elements()))
-					diags = v1DnsMonitorSourceExternalF5XcModel.Regions.ElementsAs(ctx, &elements, false)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					f5xcOneOfSpec.F5Xc.Regions = elements
-
-				}
-
 				// resource modelToSpecNested PointerOfOneOfField --> Aws
 				if !externalSourcesSourceChoiceModel.Aws.IsNull() && !externalSourcesSourceChoiceModel.Aws.IsUnknown() {
 					var v1DnsMonitorSourceExternalAwsModel V1DnsMonitorSourceExternalAws
@@ -3802,6 +3750,28 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 						return
 					}
 					awsOneOfSpec.Aws.Regions = elements
+
+				}
+
+				// resource modelToSpecNested PointerOfOneOfField --> F5Xc
+				if !externalSourcesSourceChoiceModel.F5Xc.IsNull() && !externalSourcesSourceChoiceModel.F5Xc.IsUnknown() {
+					var v1DnsMonitorSourceExternalF5XcModel V1DnsMonitorSourceExternalF5Xc
+					response.Diagnostics.Append(externalSourcesSourceChoiceModel.F5Xc.As(ctx, &v1DnsMonitorSourceExternalF5XcModel, basetypes.ObjectAsOptions{})...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					f5xcOneOfSpec := &ves_io_schema_observability_synthetic_monitor.SourceExternal_F5Xc{}
+					f5xcOneOfSpec.F5Xc = &ves_io_schema_observability_synthetic_monitor.RegionalEdgeExternal{}
+					externalSourcesSpec[i].SourceChoice = f5xcOneOfSpec
+
+					// resource modelToSpecNested RequiredArrayOfStringField --> Regions
+					elements := make([]string, 0, len(v1DnsMonitorSourceExternalF5XcModel.Regions.Elements()))
+					diags = v1DnsMonitorSourceExternalF5XcModel.Regions.ElementsAs(ctx, &elements, false)
+					response.Diagnostics.Append(diags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					f5xcOneOfSpec.F5Xc.Regions = elements
 
 				}
 
@@ -3912,13 +3882,6 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 					return
 				}
 
-				// resource modelToSpecNested BoolOfOneOfPointerField --> StaticMaxThresholdDisabled
-				if !healthPolicyStaticMaxThresholdPolicyChoiceModel.StaticMaxThresholdDisabled.IsNull() && !healthPolicyStaticMaxThresholdPolicyChoiceModel.StaticMaxThresholdDisabled.IsUnknown() {
-					staticMaxThresholdDisabledSpecBool := &ves_io_schema_observability_synthetic_monitor.HealthPolicy_StaticMaxThresholdDisabled{}
-					staticMaxThresholdDisabledSpecBool.StaticMaxThresholdDisabled = &ves_io_schema.Empty{}
-					healthPolicySpec.StaticMaxThresholdPolicy = staticMaxThresholdDisabledSpecBool
-				}
-
 				// resource modelToSpecNested PointerOfOneOfField --> StaticMaxThreshold
 				if !healthPolicyStaticMaxThresholdPolicyChoiceModel.StaticMaxThreshold.IsNull() && !healthPolicyStaticMaxThresholdPolicyChoiceModel.StaticMaxThreshold.IsUnknown() {
 					var v1DnsMonitorHealthPolicyStaticMaxThresholdModel V1DnsMonitorHealthPolicyStaticMaxThreshold
@@ -3959,6 +3922,13 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 
 				}
 
+				// resource modelToSpecNested BoolOfOneOfPointerField --> StaticMaxThresholdDisabled
+				if !healthPolicyStaticMaxThresholdPolicyChoiceModel.StaticMaxThresholdDisabled.IsNull() && !healthPolicyStaticMaxThresholdPolicyChoiceModel.StaticMaxThresholdDisabled.IsUnknown() {
+					staticMaxThresholdDisabledSpecBool := &ves_io_schema_observability_synthetic_monitor.HealthPolicy_StaticMaxThresholdDisabled{}
+					staticMaxThresholdDisabledSpecBool.StaticMaxThresholdDisabled = &ves_io_schema.Empty{}
+					healthPolicySpec.StaticMaxThresholdPolicy = staticMaxThresholdDisabledSpecBool
+				}
+
 			}
 
 			// resource modelToSpecNested RequiredOneOfField --> StaticMinThresholdPolicy
@@ -3987,9 +3957,6 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 					staticMinThresholdOneOfSpec.StaticMinThreshold = &ves_io_schema_observability_synthetic_monitor.StaticMinThreshold{}
 					healthPolicySpec.StaticMinThresholdPolicy = staticMinThresholdOneOfSpec
 
-					// resource modelToSpecNested RequiredUintField --> MinResponseTime
-					staticMinThresholdOneOfSpec.StaticMinThreshold.MinResponseTime = uint32(uint32(v1DnsMonitorHealthPolicyStaticMinThresholdModel.MinResponseTime.ValueInt64()))
-
 					// resource modelToSpecNested RequiredEnumField --> EvalPeriod
 					if !v1DnsMonitorHealthPolicyStaticMinThresholdModel.EvalPeriod.IsNull() && !v1DnsMonitorHealthPolicyStaticMinThresholdModel.EvalPeriod.IsUnknown() && len(v1DnsMonitorHealthPolicyStaticMinThresholdModel.EvalPeriod.Elements()) > 0 {
 						var evalPeriodTfStrings []types.String
@@ -4014,12 +3981,45 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 						}
 					}
 
+					// resource modelToSpecNested RequiredUintField --> MinResponseTime
+					staticMinThresholdOneOfSpec.StaticMinThreshold.MinResponseTime = uint32(uint32(v1DnsMonitorHealthPolicyStaticMinThresholdModel.MinResponseTime.ValueInt64()))
+
 				}
 
 			}
 
 		}
 	}
+
+	// resource modelToSpecRoot RequiredStringField --> RecordType
+	spec.RecordType = string(data.RecordType.ValueString())
+
+	// resource modelToSpecRoot RequiredOneOfField --> OnFailureToChoice
+	if !data.OnFailureToChoice.IsNull() && !data.OnFailureToChoice.IsUnknown() {
+		onFailureToChoiceModel := V1DnsMonitorCreateSpecTypeOnFailureToChoice{}
+		response.Diagnostics.Append(data.OnFailureToChoice.As(ctx, &onFailureToChoiceModel, basetypes.ObjectAsOptions{})...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> OnFailureToAny
+		if !onFailureToChoiceModel.OnFailureToAny.IsNull() && !onFailureToChoiceModel.OnFailureToAny.IsUnknown() {
+			onFailureToAnySpecBool := &ves_io_schema_observability_synthetic_monitor_v1_dns_monitor.ReplaceSpecType_OnFailureToAny{}
+			onFailureToAnySpecBool.OnFailureToAny = &ves_io_schema.Empty{}
+			spec.OnFailureToChoice = onFailureToAnySpecBool
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> OnFailureToAll
+		if !onFailureToChoiceModel.OnFailureToAll.IsNull() && !onFailureToChoiceModel.OnFailureToAll.IsUnknown() {
+			onFailureToAllSpecBool := &ves_io_schema_observability_synthetic_monitor_v1_dns_monitor.ReplaceSpecType_OnFailureToAll{}
+			onFailureToAllSpecBool.OnFailureToAll = &ves_io_schema.Empty{}
+			spec.OnFailureToChoice = onFailureToAllSpecBool
+		}
+
+	}
+
+	// resource modelToSpecRoot RequiredUintField --> SourceCriticalThreshold
+	spec.SourceCriticalThreshold = uint32(data.SourceCriticalThreshold.ValueInt64())
 
 	// resource modelToSpecRoot StringField --> Receive
 	if !data.Receive.IsNull() && !data.Receive.IsUnknown() {
@@ -4096,6 +4096,15 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
+
+	// resource SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
+
+	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
+	data.Namespace = types.StringValue(metaData.GetNamespace())
+
+	// resource SpecToModelRoot Meta StringField --> Uid
+	data.Uid = types.StringValue(systemMetaData.GetUid())
 
 	// resource SpecToModelRoot Meta MapOfStringField --> Labels
 	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
@@ -4194,135 +4203,6 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 	// resource SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
 
-	// resource SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
-
-	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
-	data.Namespace = types.StringValue(metaData.GetNamespace())
-
-	// resource SpecToModelRoot Meta StringField --> Uid
-	data.Uid = types.StringValue(systemMetaData.GetUid())
-
-	// resource SpecToModelRoot RequiredStringField --> Protocol
-	if specData.GetProtocol() != "" {
-		data.Protocol = types.StringValue(specData.GetProtocol())
-	} else {
-		// Empty string, set to null
-		data.Protocol = types.StringNull()
-	}
-
-	// resource SpecToModelRoot RequiredOneOfField --> OnFailureToChoice
-	// true
-	// false
-	// This resource uses custom JSON resolution.
-	// The API response for this oneof field can be inconsistent.
-	// We must inspect the raw JSON map to determine which choice is present.
-	// The logic checks for the presence of any of the possible oneof choices.
-	var oneofOnFailureToChoicePresent bool
-
-	// 1. Check for the choice inside a 'gc_spec' map, which is a common pattern in GET responses.
-	if gcSpec, gcSpecOk := rawSpecMap["gc_spec"].(map[string]interface{}); gcSpecOk {
-		if _, ok := gcSpec["on_failure_to_any"]; ok {
-			oneofOnFailureToChoicePresent = true
-		} else if _, ok := gcSpec["on_failure_to_all"]; ok {
-			oneofOnFailureToChoicePresent = true
-		}
-	}
-
-	// 2. If not found in 'gc_spec', check for the choice at the top level of the spec.
-	if !oneofOnFailureToChoicePresent {
-		if _, ok := rawSpecMap["on_failure_to_any"]; ok {
-			oneofOnFailureToChoicePresent = true
-		} else if _, ok := rawSpecMap["on_failure_to_all"]; ok {
-			oneofOnFailureToChoicePresent = true
-		}
-	}
-
-	if oneofOnFailureToChoicePresent {
-
-		// The model struct that will be populated by the nested template.
-		var onFailureToChoiceChoicesModel = &V1DnsMonitorCreateSpecTypeOnFailureToChoice{}
-
-		// Recursively call the nested template to process the oneof choices.
-
-		// resource specToModelNested BoolOfOneOfPointerField --> OnFailureToAll
-		var onFailureToAllInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["on_failure_to_all"]; found {
-				onFailureToAllInMap = true
-			}
-		}
-
-		if !onFailureToAllInMap {
-			if _, found := rawSpecMap["on_failure_to_all"]; found {
-				onFailureToAllInMap = true
-			}
-		}
-
-		if onFailureToAllInMap || specData.GetOnFailureToAll() != nil {
-			onFailureToChoiceChoicesModel.OnFailureToAll = types.BoolValue(true)
-		} else {
-			onFailureToChoiceChoicesModel.OnFailureToAll = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> OnFailureToAny
-		var onFailureToAnyInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["on_failure_to_any"]; found {
-				onFailureToAnyInMap = true
-			}
-		}
-
-		if !onFailureToAnyInMap {
-			if _, found := rawSpecMap["on_failure_to_any"]; found {
-				onFailureToAnyInMap = true
-			}
-		}
-
-		if onFailureToAnyInMap || specData.GetOnFailureToAny() != nil {
-			onFailureToChoiceChoicesModel.OnFailureToAny = types.BoolValue(true)
-		} else {
-			onFailureToChoiceChoicesModel.OnFailureToAny = types.BoolNull()
-		}
-
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		onFailureToChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			V1DnsMonitorOnFailureToChoiceModelAttributeMap,
-			onFailureToChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
-
-		// Assign the final object to the root data model.
-		data.OnFailureToChoice = onFailureToChoiceObj
-	} else {
-		// The oneof field is not present in the API response, so set the Terraform object to null.
-		data.OnFailureToChoice = types.ObjectNull(V1DnsMonitorOnFailureToChoiceModelAttributeMap)
-	}
-
-	// resource SpecToModelRoot RequiredUintField --> OnFailureCount
-	onFailureCountValue := specData.GetOnFailureCount()
-	if onFailureCountValue > 0 {
-		data.OnFailureCount = types.Int64Value(int64(onFailureCountValue))
-	}
-
-	// resource SpecToModelRoot RequiredUintField --> LookupTimeout
-	lookupTimeoutValue := specData.GetLookupTimeout()
-	if lookupTimeoutValue > 0 {
-		data.LookupTimeout = types.Int64Value(int64(lookupTimeoutValue))
-	}
-
-	// resource SpecToModelRoot RequiredUintField --> SourceCriticalThreshold
-	sourceCriticalThresholdValue := specData.GetSourceCriticalThreshold()
-	if sourceCriticalThresholdValue > 0 {
-		data.SourceCriticalThreshold = types.Int64Value(int64(sourceCriticalThresholdValue))
-	}
-
 	// resource SpecToModelRoot RequiredStringField --> Domain
 	if specData.GetDomain() != "" {
 		data.Domain = types.StringValue(specData.GetDomain())
@@ -4342,46 +4222,46 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 
 	// 1. Check for the choice inside a 'gc_spec' map, which is a common pattern in GET responses.
 	if gcSpec, gcSpecOk := rawSpecMap["gc_spec"].(map[string]interface{}); gcSpecOk {
-		if _, ok := gcSpec["interval_30_secs"]; ok {
+		if _, ok := gcSpec["interval_12_hours"]; ok {
 			oneofIntervalChoicePresent = true
-		} else if _, ok := gcSpec["interval_1_min"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := gcSpec["interval_5_mins"]; ok {
+		} else if _, ok := gcSpec["interval_30_secs"]; ok {
 			oneofIntervalChoicePresent = true
 		} else if _, ok := gcSpec["interval_15_mins"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := gcSpec["interval_30_mins"]; ok {
 			oneofIntervalChoicePresent = true
 		} else if _, ok := gcSpec["interval_1_hour"]; ok {
 			oneofIntervalChoicePresent = true
 		} else if _, ok := gcSpec["interval_6_hours"]; ok {
 			oneofIntervalChoicePresent = true
-		} else if _, ok := gcSpec["interval_12_hours"]; ok {
-			oneofIntervalChoicePresent = true
 		} else if _, ok := gcSpec["interval_1_day"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := gcSpec["interval_1_min"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := gcSpec["interval_5_mins"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := gcSpec["interval_30_mins"]; ok {
 			oneofIntervalChoicePresent = true
 		}
 	}
 
 	// 2. If not found in 'gc_spec', check for the choice at the top level of the spec.
 	if !oneofIntervalChoicePresent {
-		if _, ok := rawSpecMap["interval_30_secs"]; ok {
+		if _, ok := rawSpecMap["interval_12_hours"]; ok {
 			oneofIntervalChoicePresent = true
-		} else if _, ok := rawSpecMap["interval_1_min"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := rawSpecMap["interval_5_mins"]; ok {
+		} else if _, ok := rawSpecMap["interval_30_secs"]; ok {
 			oneofIntervalChoicePresent = true
 		} else if _, ok := rawSpecMap["interval_15_mins"]; ok {
-			oneofIntervalChoicePresent = true
-		} else if _, ok := rawSpecMap["interval_30_mins"]; ok {
 			oneofIntervalChoicePresent = true
 		} else if _, ok := rawSpecMap["interval_1_hour"]; ok {
 			oneofIntervalChoicePresent = true
 		} else if _, ok := rawSpecMap["interval_6_hours"]; ok {
 			oneofIntervalChoicePresent = true
-		} else if _, ok := rawSpecMap["interval_12_hours"]; ok {
-			oneofIntervalChoicePresent = true
 		} else if _, ok := rawSpecMap["interval_1_day"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := rawSpecMap["interval_1_min"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := rawSpecMap["interval_5_mins"]; ok {
+			oneofIntervalChoicePresent = true
+		} else if _, ok := rawSpecMap["interval_30_mins"]; ok {
 			oneofIntervalChoicePresent = true
 		}
 	}
@@ -4393,25 +4273,25 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 
 		// Recursively call the nested template to process the oneof choices.
 
-		// resource specToModelNested BoolOfOneOfPointerField --> Interval_1Hour
-		var interval1HourInMap bool
+		// resource specToModelNested BoolOfOneOfPointerField --> Interval_30Secs
+		var interval30SecsInMap bool
 
 		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["interval_1_hour"]; found {
-				interval1HourInMap = true
+			if _, found := gcSpec["interval_30_secs"]; found {
+				interval30SecsInMap = true
 			}
 		}
 
-		if !interval1HourInMap {
-			if _, found := rawSpecMap["interval_1_hour"]; found {
-				interval1HourInMap = true
+		if !interval30SecsInMap {
+			if _, found := rawSpecMap["interval_30_secs"]; found {
+				interval30SecsInMap = true
 			}
 		}
 
-		if interval1HourInMap || specData.GetInterval_1Hour() != nil {
-			intervalChoiceChoicesModel.Interval_1Hour = types.BoolValue(true)
+		if interval30SecsInMap || specData.GetInterval_30Secs() != nil {
+			intervalChoiceChoicesModel.Interval_30Secs = types.BoolValue(true)
 		} else {
-			intervalChoiceChoicesModel.Interval_1Hour = types.BoolNull()
+			intervalChoiceChoicesModel.Interval_30Secs = types.BoolNull()
 		}
 
 		// resource specToModelNested BoolOfOneOfPointerField --> Interval_1Day
@@ -4435,69 +4315,6 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 			intervalChoiceChoicesModel.Interval_1Day = types.BoolNull()
 		}
 
-		// resource specToModelNested BoolOfOneOfPointerField --> Interval_30Secs
-		var interval30SecsInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["interval_30_secs"]; found {
-				interval30SecsInMap = true
-			}
-		}
-
-		if !interval30SecsInMap {
-			if _, found := rawSpecMap["interval_30_secs"]; found {
-				interval30SecsInMap = true
-			}
-		}
-
-		if interval30SecsInMap || specData.GetInterval_30Secs() != nil {
-			intervalChoiceChoicesModel.Interval_30Secs = types.BoolValue(true)
-		} else {
-			intervalChoiceChoicesModel.Interval_30Secs = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> Interval_6Hours
-		var interval6HoursInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["interval_6_hours"]; found {
-				interval6HoursInMap = true
-			}
-		}
-
-		if !interval6HoursInMap {
-			if _, found := rawSpecMap["interval_6_hours"]; found {
-				interval6HoursInMap = true
-			}
-		}
-
-		if interval6HoursInMap || specData.GetInterval_6Hours() != nil {
-			intervalChoiceChoicesModel.Interval_6Hours = types.BoolValue(true)
-		} else {
-			intervalChoiceChoicesModel.Interval_6Hours = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> Interval_12Hours
-		var interval12HoursInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["interval_12_hours"]; found {
-				interval12HoursInMap = true
-			}
-		}
-
-		if !interval12HoursInMap {
-			if _, found := rawSpecMap["interval_12_hours"]; found {
-				interval12HoursInMap = true
-			}
-		}
-
-		if interval12HoursInMap || specData.GetInterval_12Hours() != nil {
-			intervalChoiceChoicesModel.Interval_12Hours = types.BoolValue(true)
-		} else {
-			intervalChoiceChoicesModel.Interval_12Hours = types.BoolNull()
-		}
-
 		// resource specToModelNested BoolOfOneOfPointerField --> Interval_1Min
 		var interval1MinInMap bool
 
@@ -4517,48 +4334,6 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 			intervalChoiceChoicesModel.Interval_1Min = types.BoolValue(true)
 		} else {
 			intervalChoiceChoicesModel.Interval_1Min = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> Interval_5Mins
-		var interval5MinsInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["interval_5_mins"]; found {
-				interval5MinsInMap = true
-			}
-		}
-
-		if !interval5MinsInMap {
-			if _, found := rawSpecMap["interval_5_mins"]; found {
-				interval5MinsInMap = true
-			}
-		}
-
-		if interval5MinsInMap || specData.GetInterval_5Mins() != nil {
-			intervalChoiceChoicesModel.Interval_5Mins = types.BoolValue(true)
-		} else {
-			intervalChoiceChoicesModel.Interval_5Mins = types.BoolNull()
-		}
-
-		// resource specToModelNested BoolOfOneOfPointerField --> Interval_15Mins
-		var interval15MinsInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["interval_15_mins"]; found {
-				interval15MinsInMap = true
-			}
-		}
-
-		if !interval15MinsInMap {
-			if _, found := rawSpecMap["interval_15_mins"]; found {
-				interval15MinsInMap = true
-			}
-		}
-
-		if interval15MinsInMap || specData.GetInterval_15Mins() != nil {
-			intervalChoiceChoicesModel.Interval_15Mins = types.BoolValue(true)
-		} else {
-			intervalChoiceChoicesModel.Interval_15Mins = types.BoolNull()
 		}
 
 		// resource specToModelNested BoolOfOneOfPointerField --> Interval_30Mins
@@ -4582,6 +4357,111 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 			intervalChoiceChoicesModel.Interval_30Mins = types.BoolNull()
 		}
 
+		// resource specToModelNested BoolOfOneOfPointerField --> Interval_12Hours
+		var interval12HoursInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["interval_12_hours"]; found {
+				interval12HoursInMap = true
+			}
+		}
+
+		if !interval12HoursInMap {
+			if _, found := rawSpecMap["interval_12_hours"]; found {
+				interval12HoursInMap = true
+			}
+		}
+
+		if interval12HoursInMap || specData.GetInterval_12Hours() != nil {
+			intervalChoiceChoicesModel.Interval_12Hours = types.BoolValue(true)
+		} else {
+			intervalChoiceChoicesModel.Interval_12Hours = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> Interval_15Mins
+		var interval15MinsInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["interval_15_mins"]; found {
+				interval15MinsInMap = true
+			}
+		}
+
+		if !interval15MinsInMap {
+			if _, found := rawSpecMap["interval_15_mins"]; found {
+				interval15MinsInMap = true
+			}
+		}
+
+		if interval15MinsInMap || specData.GetInterval_15Mins() != nil {
+			intervalChoiceChoicesModel.Interval_15Mins = types.BoolValue(true)
+		} else {
+			intervalChoiceChoicesModel.Interval_15Mins = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> Interval_1Hour
+		var interval1HourInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["interval_1_hour"]; found {
+				interval1HourInMap = true
+			}
+		}
+
+		if !interval1HourInMap {
+			if _, found := rawSpecMap["interval_1_hour"]; found {
+				interval1HourInMap = true
+			}
+		}
+
+		if interval1HourInMap || specData.GetInterval_1Hour() != nil {
+			intervalChoiceChoicesModel.Interval_1Hour = types.BoolValue(true)
+		} else {
+			intervalChoiceChoicesModel.Interval_1Hour = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> Interval_6Hours
+		var interval6HoursInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["interval_6_hours"]; found {
+				interval6HoursInMap = true
+			}
+		}
+
+		if !interval6HoursInMap {
+			if _, found := rawSpecMap["interval_6_hours"]; found {
+				interval6HoursInMap = true
+			}
+		}
+
+		if interval6HoursInMap || specData.GetInterval_6Hours() != nil {
+			intervalChoiceChoicesModel.Interval_6Hours = types.BoolValue(true)
+		} else {
+			intervalChoiceChoicesModel.Interval_6Hours = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> Interval_5Mins
+		var interval5MinsInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["interval_5_mins"]; found {
+				interval5MinsInMap = true
+			}
+		}
+
+		if !interval5MinsInMap {
+			if _, found := rawSpecMap["interval_5_mins"]; found {
+				interval5MinsInMap = true
+			}
+		}
+
+		if interval5MinsInMap || specData.GetInterval_5Mins() != nil {
+			intervalChoiceChoicesModel.Interval_5Mins = types.BoolValue(true)
+		} else {
+			intervalChoiceChoicesModel.Interval_5Mins = types.BoolNull()
+		}
+
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
 		intervalChoiceObj, diags := utils.GoStructToObjectValue(
 			ctx,
@@ -4600,12 +4480,24 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 		data.IntervalChoice = types.ObjectNull(V1DnsMonitorIntervalChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot RequiredStringField --> RecordType
-	if specData.GetRecordType() != "" {
-		data.RecordType = types.StringValue(specData.GetRecordType())
+	// resource SpecToModelRoot RequiredStringField --> Protocol
+	if specData.GetProtocol() != "" {
+		data.Protocol = types.StringValue(specData.GetProtocol())
 	} else {
 		// Empty string, set to null
-		data.RecordType = types.StringNull()
+		data.Protocol = types.StringNull()
+	}
+
+	// resource SpecToModelRoot RequiredUintField --> OnFailureCount
+	onFailureCountValue := specData.GetOnFailureCount()
+	if onFailureCountValue > 0 {
+		data.OnFailureCount = types.Int64Value(int64(onFailureCountValue))
+	}
+
+	// resource SpecToModelRoot RequiredUintField --> LookupTimeout
+	lookupTimeoutValue := specData.GetLookupTimeout()
+	if lookupTimeoutValue > 0 {
+		data.LookupTimeout = types.Int64Value(int64(lookupTimeoutValue))
 	}
 
 	// resource SpecToModelRoot ArrayOfPointerField --> NameServers
@@ -4615,9 +4507,6 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 		for _, nameServersElement := range specData.NameServers {
 			v1DnsMonitorV1DnsMonitorNameServerModel := V1DnsMonitorV1DnsMonitorNameServer{}
 
-			// resource specToModelNested UintField --> Port
-			v1DnsMonitorV1DnsMonitorNameServerModel.Port = types.Int64Value(int64(nameServersElement.GetPort()))
-
 			// resource specToModelNested RequiredStringField --> NameServer
 			if nameServersElement.GetNameServer() != "" {
 				v1DnsMonitorV1DnsMonitorNameServerModel.NameServer = types.StringValue(nameServersElement.GetNameServer())
@@ -4625,6 +4514,9 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 				// Empty string, set to null
 				v1DnsMonitorV1DnsMonitorNameServerModel.NameServer = types.StringNull()
 			}
+
+			// resource specToModelNested UintField --> Port
+			v1DnsMonitorV1DnsMonitorNameServerModel.Port = types.Int64Value(int64(nameServersElement.GetPort()))
 
 			nameServersElements = append(nameServersElements, v1DnsMonitorV1DnsMonitorNameServerModel)
 		}
@@ -4667,38 +4559,6 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 
 			// Process nested choices, populating the temporary attribute map
 
-			// resource specToModelNested PointerOfOneOfField --> F5Xc
-			// ReplaceSpecType
-			// true
-			{
-				f5xcOptions, isF5Xc := externalSourcessourceChoiceChoices.(*ves_io_schema_observability_synthetic_monitor.SourceExternal_F5Xc)
-				f5xcAttributeMap := make(map[string]attr.Value)
-
-				if isF5Xc && f5xcOptions != nil {
-
-					// resource specToModelNested RequiredArrayOfStringField --> Regions
-					if len(f5xcOptions.F5Xc.GetRegions()) > 0 {
-						listValue, diags := types.ListValueFrom(ctx, types.StringType, f5xcOptions.F5Xc.GetRegions())
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						f5xcAttributeMap["regions"] = listValue
-					} else {
-						f5xcAttributeMap["regions"] = types.ListNull(types.StringType)
-					}
-
-					f5xcObj, diags := types.ObjectValue(V1DnsMonitorExternalSourcesSourceChoiceF5XcModelAttributeMap, f5xcAttributeMap)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					externalSourcessourceChoiceChoicesAttributeMap["f5xc"] = f5xcObj
-				} else {
-					externalSourcessourceChoiceChoicesAttributeMap["f5xc"] = types.ObjectNull(V1DnsMonitorExternalSourcesSourceChoiceF5XcModelAttributeMap)
-				}
-			}
-
 			// resource specToModelNested PointerOfOneOfField --> Aws
 			// ReplaceSpecType
 			// true
@@ -4728,6 +4588,38 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 					externalSourcessourceChoiceChoicesAttributeMap["aws"] = awsObj
 				} else {
 					externalSourcessourceChoiceChoicesAttributeMap["aws"] = types.ObjectNull(V1DnsMonitorExternalSourcesSourceChoiceAwsModelAttributeMap)
+				}
+			}
+
+			// resource specToModelNested PointerOfOneOfField --> F5Xc
+			// ReplaceSpecType
+			// true
+			{
+				f5xcOptions, isF5Xc := externalSourcessourceChoiceChoices.(*ves_io_schema_observability_synthetic_monitor.SourceExternal_F5Xc)
+				f5xcAttributeMap := make(map[string]attr.Value)
+
+				if isF5Xc && f5xcOptions != nil {
+
+					// resource specToModelNested RequiredArrayOfStringField --> Regions
+					if len(f5xcOptions.F5Xc.GetRegions()) > 0 {
+						listValue, diags := types.ListValueFrom(ctx, types.StringType, f5xcOptions.F5Xc.GetRegions())
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						f5xcAttributeMap["regions"] = listValue
+					} else {
+						f5xcAttributeMap["regions"] = types.ListNull(types.StringType)
+					}
+
+					f5xcObj, diags := types.ObjectValue(V1DnsMonitorExternalSourcesSourceChoiceF5XcModelAttributeMap, f5xcAttributeMap)
+					response.Diagnostics.Append(diags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					externalSourcessourceChoiceChoicesAttributeMap["f5xc"] = f5xcObj
+				} else {
+					externalSourcessourceChoiceChoicesAttributeMap["f5xc"] = types.ObjectNull(V1DnsMonitorExternalSourcesSourceChoiceF5XcModelAttributeMap)
 				}
 			}
 
@@ -4881,27 +4773,6 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 
 			// Process nested choices, populating the temporary attribute map
 
-			// resource specToModelNested BoolOfOneOfPointerField --> StaticMaxThresholdDisabled
-			var staticMaxThresholdDisabledInMap bool
-
-			if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-				if _, found := gcSpec["static_max_threshold_disabled"]; found {
-					staticMaxThresholdDisabledInMap = true
-				}
-			}
-
-			if !staticMaxThresholdDisabledInMap {
-				if _, found := rawSpecMap["static_max_threshold_disabled"]; found {
-					staticMaxThresholdDisabledInMap = true
-				}
-			}
-
-			if staticMaxThresholdDisabledInMap || healthPolicyElement.GetStaticMaxThresholdDisabled() != nil {
-				healthPolicystaticMaxThresholdPolicyChoiceChoicesAttributeMap["static_max_threshold_disabled"] = types.BoolValue(true)
-			} else {
-				healthPolicystaticMaxThresholdPolicyChoiceChoicesAttributeMap["static_max_threshold_disabled"] = types.BoolNull()
-			}
-
 			// resource specToModelNested PointerOfOneOfField --> StaticMaxThreshold
 			// ReplaceSpecType
 			// true
@@ -4937,6 +4808,27 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 				} else {
 					healthPolicystaticMaxThresholdPolicyChoiceChoicesAttributeMap["static_max_threshold"] = types.ObjectNull(V1DnsMonitorHealthPolicyStaticMaxThresholdPolicyStaticMaxThresholdModelAttributeMap)
 				}
+			}
+
+			// resource specToModelNested BoolOfOneOfPointerField --> StaticMaxThresholdDisabled
+			var staticMaxThresholdDisabledInMap bool
+
+			if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+				if _, found := gcSpec["static_max_threshold_disabled"]; found {
+					staticMaxThresholdDisabledInMap = true
+				}
+			}
+
+			if !staticMaxThresholdDisabledInMap {
+				if _, found := rawSpecMap["static_max_threshold_disabled"]; found {
+					staticMaxThresholdDisabledInMap = true
+				}
+			}
+
+			if staticMaxThresholdDisabledInMap || healthPolicyElement.GetStaticMaxThresholdDisabled() != nil {
+				healthPolicystaticMaxThresholdPolicyChoiceChoicesAttributeMap["static_max_threshold_disabled"] = types.BoolValue(true)
+			} else {
+				healthPolicystaticMaxThresholdPolicyChoiceChoicesAttributeMap["static_max_threshold_disabled"] = types.BoolNull()
 			}
 
 			// --- End of Choices ---
@@ -4999,9 +4891,6 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 
 				if isStaticMinThreshold && staticMinThresholdOptions != nil {
 
-					// resource specToModelNested RequiredUintField --> MinResponseTime
-					staticMinThresholdAttributeMap["min_response_time"] = types.Int64Value(int64(staticMinThresholdOptions.StaticMinThreshold.GetMinResponseTime()))
-
 					// resource specToModelNested RequiredEnumField --> EvalPeriod
 					if staticMinThresholdOptions.StaticMinThreshold.GetEvalPeriod().String() != "" {
 						stringValue := types.StringValue(staticMinThresholdOptions.StaticMinThreshold.GetEvalPeriod().String())
@@ -5015,6 +4904,9 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 					} else {
 						staticMinThresholdAttributeMap["eval_period"] = types.ListNull(types.StringType)
 					}
+
+					// resource specToModelNested RequiredUintField --> MinResponseTime
+					staticMinThresholdAttributeMap["min_response_time"] = types.Int64Value(int64(staticMinThresholdOptions.StaticMinThreshold.GetMinResponseTime()))
 
 					staticMinThresholdObj, diags := types.ObjectValue(V1DnsMonitorHealthPolicyStaticMinThresholdPolicyStaticMinThresholdModelAttributeMap, staticMinThresholdAttributeMap)
 					response.Diagnostics.Append(diags...)
@@ -5057,6 +4949,114 @@ func (r *ResourceF5XCV1DnsMonitor) Update(ctx context.Context, request resource.
 		data.HealthPolicy = healthPolicyObj
 	} else {
 		data.HealthPolicy = types.ObjectNull(V1DnsMonitorHealthPolicyModelAttributeMap)
+	}
+
+	// resource SpecToModelRoot RequiredStringField --> RecordType
+	if specData.GetRecordType() != "" {
+		data.RecordType = types.StringValue(specData.GetRecordType())
+	} else {
+		// Empty string, set to null
+		data.RecordType = types.StringNull()
+	}
+
+	// resource SpecToModelRoot RequiredOneOfField --> OnFailureToChoice
+	// true
+	// false
+	// This resource uses custom JSON resolution.
+	// The API response for this oneof field can be inconsistent.
+	// We must inspect the raw JSON map to determine which choice is present.
+	// The logic checks for the presence of any of the possible oneof choices.
+	var oneofOnFailureToChoicePresent bool
+
+	// 1. Check for the choice inside a 'gc_spec' map, which is a common pattern in GET responses.
+	if gcSpec, gcSpecOk := rawSpecMap["gc_spec"].(map[string]interface{}); gcSpecOk {
+		if _, ok := gcSpec["on_failure_to_any"]; ok {
+			oneofOnFailureToChoicePresent = true
+		} else if _, ok := gcSpec["on_failure_to_all"]; ok {
+			oneofOnFailureToChoicePresent = true
+		}
+	}
+
+	// 2. If not found in 'gc_spec', check for the choice at the top level of the spec.
+	if !oneofOnFailureToChoicePresent {
+		if _, ok := rawSpecMap["on_failure_to_any"]; ok {
+			oneofOnFailureToChoicePresent = true
+		} else if _, ok := rawSpecMap["on_failure_to_all"]; ok {
+			oneofOnFailureToChoicePresent = true
+		}
+	}
+
+	if oneofOnFailureToChoicePresent {
+
+		// The model struct that will be populated by the nested template.
+		var onFailureToChoiceChoicesModel = &V1DnsMonitorCreateSpecTypeOnFailureToChoice{}
+
+		// Recursively call the nested template to process the oneof choices.
+
+		// resource specToModelNested BoolOfOneOfPointerField --> OnFailureToAny
+		var onFailureToAnyInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["on_failure_to_any"]; found {
+				onFailureToAnyInMap = true
+			}
+		}
+
+		if !onFailureToAnyInMap {
+			if _, found := rawSpecMap["on_failure_to_any"]; found {
+				onFailureToAnyInMap = true
+			}
+		}
+
+		if onFailureToAnyInMap || specData.GetOnFailureToAny() != nil {
+			onFailureToChoiceChoicesModel.OnFailureToAny = types.BoolValue(true)
+		} else {
+			onFailureToChoiceChoicesModel.OnFailureToAny = types.BoolNull()
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> OnFailureToAll
+		var onFailureToAllInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["on_failure_to_all"]; found {
+				onFailureToAllInMap = true
+			}
+		}
+
+		if !onFailureToAllInMap {
+			if _, found := rawSpecMap["on_failure_to_all"]; found {
+				onFailureToAllInMap = true
+			}
+		}
+
+		if onFailureToAllInMap || specData.GetOnFailureToAll() != nil {
+			onFailureToChoiceChoicesModel.OnFailureToAll = types.BoolValue(true)
+		} else {
+			onFailureToChoiceChoicesModel.OnFailureToAll = types.BoolNull()
+		}
+
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		onFailureToChoiceObj, diags := utils.GoStructToObjectValue(
+			ctx,
+			V1DnsMonitorOnFailureToChoiceModelAttributeMap,
+			onFailureToChoiceChoicesModel,
+		)
+		if diags.HasError() {
+			response.Diagnostics.Append(diags...)
+			return
+		}
+
+		// Assign the final object to the root data model.
+		data.OnFailureToChoice = onFailureToChoiceObj
+	} else {
+		// The oneof field is not present in the API response, so set the Terraform object to null.
+		data.OnFailureToChoice = types.ObjectNull(V1DnsMonitorOnFailureToChoiceModelAttributeMap)
+	}
+
+	// resource SpecToModelRoot RequiredUintField --> SourceCriticalThreshold
+	sourceCriticalThresholdValue := specData.GetSourceCriticalThreshold()
+	if sourceCriticalThresholdValue > 0 {
+		data.SourceCriticalThreshold = types.Int64Value(int64(sourceCriticalThresholdValue))
 	}
 
 	// resource SpecToModelRoot StringField --> Receive

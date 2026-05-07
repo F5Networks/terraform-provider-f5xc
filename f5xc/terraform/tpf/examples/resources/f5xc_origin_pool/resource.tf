@@ -9,13 +9,11 @@ resource "f5xc_origin_pool" "example" {
     }
   }]
   tls_choice = {
-    use_tls = {
-      use_tls = "example_use_tls"
-    }
+    no_tls = true
   }
-  loadbalancer_algorithm = ["ENUM_VALUE"]
-  endpoint_selection     = ["ENUM_VALUE"]
   port_choice = {
     automatic_port = true
   }
+  endpoint_selection     = ["ENUM_VALUE"]
+  loadbalancer_algorithm = ["ENUM_VALUE"]
 }

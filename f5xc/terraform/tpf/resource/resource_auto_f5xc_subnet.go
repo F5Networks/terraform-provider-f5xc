@@ -54,8 +54,8 @@ type ResourceF5XCSubnet struct {
 }
 
 type SubnetSubnetSubnetDHCPServerParametersType struct {
-	Site                   types.List   `tfsdk:"site"`
 	SubnetDhcpServerParams types.Object `tfsdk:"subnet_dhcp_server_params"`
+	Site                   types.List   `tfsdk:"site"`
 }
 
 type SubnetNetworkInterfaceDHCPServerParametersType struct {
@@ -65,20 +65,11 @@ type SubnetNetworkInterfaceDHCPServerParametersType struct {
 }
 
 type SubnetNetworkInterfaceDHCPNetworkType struct {
-	NetworkPrefixChoice types.Object `tfsdk:"network_prefix_choice"`
-	Pools               types.List   `tfsdk:"pools"`
 	GatewayChoice       types.Object `tfsdk:"gateway_choice"`
 	DnsChoice           types.Object `tfsdk:"dns_choice"`
 	PoolSettings        types.List   `tfsdk:"pool_settings"`
-}
-
-type SubnetDHCPNetworkTypeNetworkPrefixChoice struct {
-	NetworkPrefix types.String `tfsdk:"network_prefix"`
-}
-
-type SubnetNetworkInterfaceDHCPPoolType struct {
-	StartIp types.String `tfsdk:"start_ip"`
-	EndIp   types.String `tfsdk:"end_ip"`
+	NetworkPrefixChoice types.Object `tfsdk:"network_prefix_choice"`
+	Pools               types.List   `tfsdk:"pools"`
 }
 
 type SubnetDHCPNetworkTypeGatewayChoice struct {
@@ -92,10 +83,19 @@ type SubnetDHCPNetworkTypeDnsChoice struct {
 	DnsAddress types.String `tfsdk:"dns_address"`
 }
 
+type SubnetDHCPNetworkTypeNetworkPrefixChoice struct {
+	NetworkPrefix types.String `tfsdk:"network_prefix"`
+}
+
+type SubnetNetworkInterfaceDHCPPoolType struct {
+	StartIp types.String `tfsdk:"start_ip"`
+	EndIp   types.String `tfsdk:"end_ip"`
+}
+
 type SubnetDHCPServerParametersTypeInterfacesAddressingChoice struct {
-	AutomaticFromStart types.Bool   `tfsdk:"automatic_from_start"`
 	AutomaticFromEnd   types.Bool   `tfsdk:"automatic_from_end"`
 	InterfaceIpMap     types.Object `tfsdk:"interface_ip_map"`
+	AutomaticFromStart types.Bool   `tfsdk:"automatic_from_start"`
 }
 
 type SubnetDHCPServerParametersTypeInterfaceIpMap struct {
@@ -103,14 +103,9 @@ type SubnetDHCPServerParametersTypeInterfaceIpMap struct {
 }
 
 type SubnetSubnetSiteSubnetParametersType struct {
-	AddressChoice          types.Object `tfsdk:"address_choice"`
 	Site                   types.Object `tfsdk:"site"`
 	SubnetDhcpServerParams types.Object `tfsdk:"subnet_dhcp_server_params"`
-}
-
-type SubnetSiteSubnetParametersTypeAddressChoice struct {
-	Dhcp     types.Bool `tfsdk:"dhcp"`
-	StaticIp types.Bool `tfsdk:"static_ip"`
+	AddressChoice          types.Object `tfsdk:"address_choice"`
 }
 
 type SubnetSubnetDHCPServerParametersType struct {
@@ -126,10 +121,15 @@ type SubnetSubnetDHCPNetworkTypeNetworkPrefixChoice struct {
 	NetworkPrefixIpv6 types.String `tfsdk:"network_prefix_ipv6"`
 }
 
+type SubnetSiteSubnetParametersTypeAddressChoice struct {
+	StaticIp types.Bool `tfsdk:"static_ip"`
+	Dhcp     types.Bool `tfsdk:"dhcp"`
+}
+
 type SubnetGlobalSpecTypeConnectionChoice struct {
-	ConnectToSlo    types.Bool   `tfsdk:"connect_to_slo"`
 	IsolatedNw      types.Bool   `tfsdk:"isolated_nw"`
 	ConnectToLayer2 types.Object `tfsdk:"connect_to_layer2"`
+	ConnectToSlo    types.Bool   `tfsdk:"connect_to_slo"`
 }
 
 type SubnetGlobalSpecTypeConnectToLayer2 struct {
@@ -162,17 +162,7 @@ var (
 // --- Attribute Maps for Nested Structs ---
 // Attribute map for RequiredArrayOfPointerField --> SiteDhcpServerParamsInternal
 var SubnetSiteDhcpServerParamsInternalModelAttributeMap = map[string]attr.Type{
-
-	"site": types.ListType{
-		ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-
-				"tenant":    types.StringType,
-				"namespace": types.StringType,
-				"name":      types.StringType,
-			},
-		},
-	}, "subnet_dhcp_server_params": types.ObjectType{
+	"subnet_dhcp_server_params": types.ObjectType{
 		AttrTypes: map[string]attr.Type{
 			"fixed_ip_map": types.MapType{
 				ElemType: types.StringType,
@@ -181,6 +171,15 @@ var SubnetSiteDhcpServerParamsInternalModelAttributeMap = map[string]attr.Type{
 				ElemType: types.ObjectType{
 					AttrTypes: map[string]attr.Type{
 
+						"gateway_choice": types.ObjectType{
+							AttrTypes: SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsDhcpNetworksGatewayChoiceModelAttributeMap,
+						},
+						"dns_choice": types.ObjectType{
+							AttrTypes: SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsDhcpNetworksDnsChoiceModelAttributeMap,
+						},
+						"pool_settings": types.ListType{
+							ElemType: types.StringType,
+						},
 						"network_prefix_choice": types.ObjectType{
 							AttrTypes: SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsDhcpNetworksNetworkPrefixChoiceModelAttributeMap,
 						},
@@ -193,15 +192,6 @@ var SubnetSiteDhcpServerParamsInternalModelAttributeMap = map[string]attr.Type{
 								},
 							},
 						},
-						"gateway_choice": types.ObjectType{
-							AttrTypes: SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsDhcpNetworksGatewayChoiceModelAttributeMap,
-						},
-						"dns_choice": types.ObjectType{
-							AttrTypes: SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsDhcpNetworksDnsChoiceModelAttributeMap,
-						},
-						"pool_settings": types.ListType{
-							ElemType: types.StringType,
-						},
 					},
 				},
 			},
@@ -209,14 +199,16 @@ var SubnetSiteDhcpServerParamsInternalModelAttributeMap = map[string]attr.Type{
 				AttrTypes: SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsInterfacesAddressingChoiceModelAttributeMap,
 			}},
 	},
-}
+	"site": types.ListType{
+		ElemType: types.ObjectType{
+			AttrTypes: map[string]attr.Type{
 
-// Attribute map for ArrayOfPointerField --> Site
-var SubnetSiteObjectRefModelAttributeMap = map[string]attr.Type{
-
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
-	"name":      types.StringType,
+				"name":      types.StringType,
+				"tenant":    types.StringType,
+				"namespace": types.StringType,
+			},
+		},
+	},
 }
 
 // Attribute map for PointerField --> SubnetDhcpServerParams
@@ -229,6 +221,15 @@ var SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsModelAttributeMap = 
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
 
+				"gateway_choice": types.ObjectType{
+					AttrTypes: SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsDhcpNetworksGatewayChoiceModelAttributeMap,
+				},
+				"dns_choice": types.ObjectType{
+					AttrTypes: SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsDhcpNetworksDnsChoiceModelAttributeMap,
+				},
+				"pool_settings": types.ListType{
+					ElemType: types.StringType,
+				},
 				"network_prefix_choice": types.ObjectType{
 					AttrTypes: SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsDhcpNetworksNetworkPrefixChoiceModelAttributeMap,
 				},
@@ -241,15 +242,6 @@ var SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsModelAttributeMap = 
 						},
 					},
 				},
-				"gateway_choice": types.ObjectType{
-					AttrTypes: SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsDhcpNetworksGatewayChoiceModelAttributeMap,
-				},
-				"dns_choice": types.ObjectType{
-					AttrTypes: SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsDhcpNetworksDnsChoiceModelAttributeMap,
-				},
-				"pool_settings": types.ListType{
-					ElemType: types.StringType,
-				},
 			},
 		},
 	},
@@ -261,6 +253,15 @@ var SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsModelAttributeMap = 
 // Attribute map for RequiredArrayOfPointerField --> DhcpNetworks
 var SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsDhcpNetworksModelAttributeMap = map[string]attr.Type{
 
+	"gateway_choice": types.ObjectType{
+		AttrTypes: SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsDhcpNetworksGatewayChoiceModelAttributeMap,
+	},
+	"dns_choice": types.ObjectType{
+		AttrTypes: SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsDhcpNetworksDnsChoiceModelAttributeMap,
+	},
+	"pool_settings": types.ListType{
+		ElemType: types.StringType,
+	},
 	"network_prefix_choice": types.ObjectType{
 		AttrTypes: SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsDhcpNetworksNetworkPrefixChoiceModelAttributeMap,
 	},
@@ -273,28 +274,6 @@ var SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsDhcpNetworksModelAtt
 			},
 		},
 	},
-	"gateway_choice": types.ObjectType{
-		AttrTypes: SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsDhcpNetworksGatewayChoiceModelAttributeMap,
-	},
-	"dns_choice": types.ObjectType{
-		AttrTypes: SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsDhcpNetworksDnsChoiceModelAttributeMap,
-	},
-	"pool_settings": types.ListType{
-		ElemType: types.StringType,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> NetworkPrefixChoice
-var SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsDhcpNetworksNetworkPrefixChoiceModelAttributeMap = map[string]attr.Type{
-
-	"network_prefix": types.StringType,
-}
-
-// Attribute map for ArrayOfPointerField --> Pools
-var SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsDhcpNetworksPoolsModelAttributeMap = map[string]attr.Type{
-
-	"start_ip": types.StringType,
-	"end_ip":   types.StringType,
 }
 
 // Attribute map for RequiredOneOfField --> GatewayChoice
@@ -312,14 +291,27 @@ var SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsDhcpNetworksDnsChoic
 	"dns_address": types.StringType,
 }
 
+// Attribute map for RequiredOneOfField --> NetworkPrefixChoice
+var SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsDhcpNetworksNetworkPrefixChoiceModelAttributeMap = map[string]attr.Type{
+
+	"network_prefix": types.StringType,
+}
+
+// Attribute map for ArrayOfPointerField --> Pools
+var SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsDhcpNetworksPoolsModelAttributeMap = map[string]attr.Type{
+
+	"start_ip": types.StringType,
+	"end_ip":   types.StringType,
+}
+
 // Attribute map for RequiredOneOfField --> InterfacesAddressingChoice
 var SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsInterfacesAddressingChoiceModelAttributeMap = map[string]attr.Type{
 
-	"automatic_from_start": types.BoolType,
-	"automatic_from_end":   types.BoolType,
+	"automatic_from_end": types.BoolType,
 	"interface_ip_map": types.ObjectType{
 		AttrTypes: SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsInterfacesAddressingChoiceInterfaceIpMapModelAttributeMap,
 	},
+	"automatic_from_start": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> InterfaceIpMap
@@ -330,12 +322,17 @@ var SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsInterfacesAddressing
 	},
 }
 
+// Attribute map for ArrayOfPointerField --> Site
+var SubnetSiteObjectRefModelAttributeMap = map[string]attr.Type{
+
+	"name":      types.StringType,
+	"tenant":    types.StringType,
+	"namespace": types.StringType,
+}
+
 // Attribute map for RequiredArrayOfPointerField --> SiteSubnetParams
 var SubnetSiteSubnetParamsModelAttributeMap = map[string]attr.Type{
-
-	"address_choice": types.ObjectType{
-		AttrTypes: SubnetSiteSubnetParamsAddressChoiceModelAttributeMap,
-	}, "site": types.ObjectType{
+	"site": types.ObjectType{
 		AttrTypes: map[string]attr.Type{
 			"name":      types.StringType,
 			"tenant":    types.StringType,
@@ -353,13 +350,9 @@ var SubnetSiteSubnetParamsModelAttributeMap = map[string]attr.Type{
 				},
 			}},
 	},
-}
-
-// Attribute map for OneOfField --> AddressChoice
-var SubnetSiteSubnetParamsAddressChoiceModelAttributeMap = map[string]attr.Type{
-
-	"dhcp":      types.BoolType,
-	"static_ip": types.BoolType,
+	"address_choice": types.ObjectType{
+		AttrTypes: SubnetSiteSubnetParamsAddressChoiceModelAttributeMap,
+	},
 }
 
 // Attribute map for RequiredPointerField --> Site
@@ -400,14 +393,21 @@ var SubnetSiteSubnetParamsSubnetDhcpServerParamsDhcpNetworksNetworkPrefixChoiceM
 	"network_prefix_ipv6": types.StringType,
 }
 
+// Attribute map for OneOfField --> AddressChoice
+var SubnetSiteSubnetParamsAddressChoiceModelAttributeMap = map[string]attr.Type{
+
+	"static_ip": types.BoolType,
+	"dhcp":      types.BoolType,
+}
+
 // Attribute map for OneOfField --> ConnectionChoice
 var SubnetConnectionChoiceModelAttributeMap = map[string]attr.Type{
 
-	"connect_to_slo": types.BoolType,
-	"isolated_nw":    types.BoolType,
+	"isolated_nw": types.BoolType,
 	"connect_to_layer2": types.ObjectType{
 		AttrTypes: SubnetConnectionChoiceConnectToLayer2ModelAttributeMap,
 	},
+	"connect_to_slo": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> ConnectToLayer2
@@ -506,41 +506,6 @@ func (r *ResourceF5XCSubnet) Schema(ctx context.Context, request resource.Schema
 				Computed:            false,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
-						"site": schema.ListNestedAttribute{
-							Description:         "site reference Site that the DHCP parameters are for",
-							MarkdownDescription: "",
-							Required:            false,
-							Optional:            true,
-							Computed:            false,
-							NestedObject: schema.NestedAttributeObject{
-								Attributes: map[string]schema.Attribute{
-									"tenant": schema.StringAttribute{
-										Description:         "",
-										MarkdownDescription: "",
-										Required:            false,
-										Optional:            false,
-										Computed:            true,
-										PlanModifiers: []planmodifier.String{
-											stringplanmodifier.UseStateForUnknown(),
-										},
-									},
-									"namespace": schema.StringAttribute{
-										Description:         "",
-										MarkdownDescription: "",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
-									},
-									"name": schema.StringAttribute{
-										Description:         "",
-										MarkdownDescription: "",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
-									},
-								},
-							},
-						},
 						"subnet_dhcp_server_params": schema.SingleNestedAttribute{
 							Description:         "Site DHCP server parameters DHCP parameters for a subnet on a site. This reuses the DHCPServerParametersType from network_interface.",
 							MarkdownDescription: "",
@@ -564,64 +529,6 @@ func (r *ResourceF5XCSubnet) Schema(ctx context.Context, request resource.Schema
 									Computed:            false,
 									NestedObject: schema.NestedAttributeObject{
 										Attributes: map[string]schema.Attribute{
-											"network_prefix_choice": schema.SingleNestedAttribute{
-												Description:         "Network Prefix choice Select DHCP network prefix for the site",
-												MarkdownDescription: "",
-												Required:            true,
-												Optional:            false,
-												Computed:            false,
-												Validators: []validator.Object{
-													atmostoneofvalidator.AtMostOneOf(
-														"network_prefix",
-													),
-												},
-												Attributes: map[string]schema.Attribute{
-													"network_prefix": schema.StringAttribute{
-														Description:         "Network Prefix Set the network prefix for the site. ex: 10.1.1.0/24",
-														MarkdownDescription: "",
-														Required:            false,
-														Optional:            true,
-														Computed:            false,
-													},
-												},
-											},
-											"pools": schema.ListNestedAttribute{
-												Description:         "DHCP pools List of non overlapping ip address ranges.",
-												MarkdownDescription: "",
-												Required:            false,
-												Optional:            true,
-												Computed:            false,
-												NestedObject: schema.NestedAttributeObject{
-													Attributes: map[string]schema.Attribute{
-														"start_ip": schema.StringAttribute{
-															Description:         "Start IP Starting IP of the pool range. In case of address allocator, offset is derived based on network prefix. 10.1.1.5 with prefix length of 24, start offset is 0.0.0.5",
-															MarkdownDescription: "",
-															Required:            false,
-															Optional:            true,
-															Computed:            false,
-															Validators: []validator.String{
-																stringvalidator.RegexMatches(
-																	regexp.MustCompile(`^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)$`),
-																	"must be a valid IPv4 address",
-																),
-															},
-														},
-														"end_ip": schema.StringAttribute{
-															Description:         "End IP Ending IP of the pool range. In case of address allocator, offset is derived based on network prefix. 10.1.1.200 with prefix length of 24, end offset is 0.0.0.200",
-															MarkdownDescription: "",
-															Required:            false,
-															Optional:            true,
-															Computed:            false,
-															Validators: []validator.String{
-																stringvalidator.RegexMatches(
-																	regexp.MustCompile(`^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)$`),
-																	"must be a valid IPv4 address",
-																),
-															},
-														},
-													},
-												},
-											},
 											"gateway_choice": schema.SingleNestedAttribute{
 												Description:         "Default Gateway Address Select how the default gateway address is determined. This default gateway address will be sent in the DHCP response to the DHCP client.",
 												MarkdownDescription: "",
@@ -721,6 +628,64 @@ func (r *ResourceF5XCSubnet) Schema(ctx context.Context, request resource.Schema
 													listvalidator.SizeAtMost(1),
 												},
 											},
+											"network_prefix_choice": schema.SingleNestedAttribute{
+												Description:         "Network Prefix choice Select DHCP network prefix for the site",
+												MarkdownDescription: "",
+												Required:            true,
+												Optional:            false,
+												Computed:            false,
+												Validators: []validator.Object{
+													atmostoneofvalidator.AtMostOneOf(
+														"network_prefix",
+													),
+												},
+												Attributes: map[string]schema.Attribute{
+													"network_prefix": schema.StringAttribute{
+														Description:         "Network Prefix Set the network prefix for the site. ex: 10.1.1.0/24",
+														MarkdownDescription: "",
+														Required:            false,
+														Optional:            true,
+														Computed:            false,
+													},
+												},
+											},
+											"pools": schema.ListNestedAttribute{
+												Description:         "DHCP pools List of non overlapping ip address ranges.",
+												MarkdownDescription: "",
+												Required:            false,
+												Optional:            true,
+												Computed:            false,
+												NestedObject: schema.NestedAttributeObject{
+													Attributes: map[string]schema.Attribute{
+														"start_ip": schema.StringAttribute{
+															Description:         "Start IP Starting IP of the pool range. In case of address allocator, offset is derived based on network prefix. 10.1.1.5 with prefix length of 24, start offset is 0.0.0.5",
+															MarkdownDescription: "",
+															Required:            false,
+															Optional:            true,
+															Computed:            false,
+															Validators: []validator.String{
+																stringvalidator.RegexMatches(
+																	regexp.MustCompile(`^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)$`),
+																	"must be a valid IPv4 address",
+																),
+															},
+														},
+														"end_ip": schema.StringAttribute{
+															Description:         "End IP Ending IP of the pool range. In case of address allocator, offset is derived based on network prefix. 10.1.1.200 with prefix length of 24, end offset is 0.0.0.200",
+															MarkdownDescription: "",
+															Required:            false,
+															Optional:            true,
+															Computed:            false,
+															Validators: []validator.String{
+																stringvalidator.RegexMatches(
+																	regexp.MustCompile(`^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)$`),
+																	"must be a valid IPv4 address",
+																),
+															},
+														},
+													},
+												},
+											},
 										},
 									},
 								},
@@ -732,22 +697,12 @@ func (r *ResourceF5XCSubnet) Schema(ctx context.Context, request resource.Schema
 									Computed:            false,
 									Validators: []validator.Object{
 										atmostoneofvalidator.AtMostOneOf(
-											"automatic_from_start",
 											"automatic_from_end",
 											"interface_ip_map",
+											"automatic_from_start",
 										),
 									},
 									Attributes: map[string]schema.Attribute{
-										"automatic_from_start": schema.BoolAttribute{
-											Description:         "Automatic Start Assign automatically from start of the first network in the DHCP Network list",
-											MarkdownDescription: "",
-											Required:            false,
-											Optional:            true,
-											Computed:            false,
-											Validators: []validator.Bool{
-												boolvalidator.Equals(true),
-											},
-										},
 										"automatic_from_end": schema.BoolAttribute{
 											Description:         "Automatic End Assign automatically from end of the first network in the DHCP Network list",
 											MarkdownDescription: "",
@@ -778,6 +733,51 @@ func (r *ResourceF5XCSubnet) Schema(ctx context.Context, request resource.Schema
 												},
 											},
 										},
+										"automatic_from_start": schema.BoolAttribute{
+											Description:         "Automatic Start Assign automatically from start of the first network in the DHCP Network list",
+											MarkdownDescription: "",
+											Required:            false,
+											Optional:            true,
+											Computed:            false,
+											Validators: []validator.Bool{
+												boolvalidator.Equals(true),
+											},
+										},
+									},
+								},
+							},
+						},
+						"site": schema.ListNestedAttribute{
+							Description:         "site reference Site that the DHCP parameters are for",
+							MarkdownDescription: "",
+							Required:            false,
+							Optional:            true,
+							Computed:            false,
+							NestedObject: schema.NestedAttributeObject{
+								Attributes: map[string]schema.Attribute{
+									"name": schema.StringAttribute{
+										Description:         "",
+										MarkdownDescription: "",
+										Required:            true,
+										Optional:            false,
+										Computed:            false,
+									},
+									"tenant": schema.StringAttribute{
+										Description:         "",
+										MarkdownDescription: "",
+										Required:            false,
+										Optional:            false,
+										Computed:            true,
+										PlanModifiers: []planmodifier.String{
+											stringplanmodifier.UseStateForUnknown(),
+										},
+									},
+									"namespace": schema.StringAttribute{
+										Description:         "",
+										MarkdownDescription: "",
+										Required:            true,
+										Optional:            false,
+										Computed:            false,
 									},
 								},
 							},
@@ -793,41 +793,6 @@ func (r *ResourceF5XCSubnet) Schema(ctx context.Context, request resource.Schema
 				Computed:            false,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
-						"address_choice": schema.SingleNestedAttribute{
-							Description:         "Subnet IP Addressing Select whether IP addresses are allocated statically or using DHCP",
-							MarkdownDescription: "",
-							Required:            false,
-							Optional:            true,
-							Computed:            false,
-							Validators: []validator.Object{
-								atmostoneofvalidator.AtMostOneOf(
-									"dhcp",
-									"static_ip",
-								),
-							},
-							Attributes: map[string]schema.Attribute{
-								"dhcp": schema.BoolAttribute{
-									Description:         "DHCP Subnet uses DHCP for address allocation",
-									MarkdownDescription: "",
-									Required:            false,
-									Optional:            true,
-									Computed:            false,
-									Validators: []validator.Bool{
-										boolvalidator.Equals(true),
-									},
-								},
-								"static_ip": schema.BoolAttribute{
-									Description:         "Static IP Subnet uses static IP addresses",
-									MarkdownDescription: "",
-									Required:            false,
-									Optional:            true,
-									Computed:            false,
-									Validators: []validator.Bool{
-										boolvalidator.Equals(true),
-									},
-								},
-							},
-						},
 						"site": schema.SingleNestedAttribute{
 							Description:         "site reference Site that the subnet parameters are for",
 							MarkdownDescription: "",
@@ -884,8 +849,8 @@ func (r *ResourceF5XCSubnet) Schema(ctx context.Context, request resource.Schema
 												Computed:            false,
 												Validators: []validator.Object{
 													atmostoneofvalidator.AtMostOneOf(
-														"network_prefix",
 														"network_prefix_ipv6",
+														"network_prefix",
 													),
 												},
 												Attributes: map[string]schema.Attribute{
@@ -910,6 +875,41 @@ func (r *ResourceF5XCSubnet) Schema(ctx context.Context, request resource.Schema
 								},
 							},
 						},
+						"address_choice": schema.SingleNestedAttribute{
+							Description:         "Subnet IP Addressing Select whether IP addresses are allocated statically or using DHCP",
+							MarkdownDescription: "",
+							Required:            false,
+							Optional:            true,
+							Computed:            false,
+							Validators: []validator.Object{
+								atmostoneofvalidator.AtMostOneOf(
+									"dhcp",
+									"static_ip",
+								),
+							},
+							Attributes: map[string]schema.Attribute{
+								"static_ip": schema.BoolAttribute{
+									Description:         "Static IP Subnet uses static IP addresses",
+									MarkdownDescription: "",
+									Required:            false,
+									Optional:            true,
+									Computed:            false,
+									Validators: []validator.Bool{
+										boolvalidator.Equals(true),
+									},
+								},
+								"dhcp": schema.BoolAttribute{
+									Description:         "DHCP Subnet uses DHCP for address allocation",
+									MarkdownDescription: "",
+									Required:            false,
+									Optional:            true,
+									Computed:            false,
+									Validators: []validator.Bool{
+										boolvalidator.Equals(true),
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -921,22 +921,12 @@ func (r *ResourceF5XCSubnet) Schema(ctx context.Context, request resource.Schema
 				Computed:            false,
 				Validators: []validator.Object{
 					atmostoneofvalidator.AtMostOneOf(
-						"connect_to_slo",
 						"isolated_nw",
 						"connect_to_layer2",
+						"connect_to_slo",
 					),
 				},
 				Attributes: map[string]schema.Attribute{
-					"connect_to_slo": schema.BoolAttribute{
-						Description:         "Connect to site-local-outside-network",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Validators: []validator.Bool{
-							boolvalidator.Equals(true),
-						},
-					},
 					"isolated_nw": schema.BoolAttribute{
 						Description:         "Isolated network",
 						MarkdownDescription: "",
@@ -987,6 +977,16 @@ func (r *ResourceF5XCSubnet) Schema(ctx context.Context, request resource.Schema
 									},
 								},
 							},
+						},
+					},
+					"connect_to_slo": schema.BoolAttribute{
+						Description:         "Connect to site-local-outside-network",
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Validators: []validator.Bool{
+							boolvalidator.Equals(true),
 						},
 					},
 				},
@@ -1135,30 +1135,6 @@ func (r *ResourceF5XCSubnet) Create(ctx context.Context, request resource.Create
 		for i, siteSubnetParamsElement := range siteSubnetParamsElementsModelToSpec {
 			siteSubnetParamsSpec[i] = &ves_io_schema_subnet.SiteSubnetParametersType{}
 
-			// resource modelToSpecNested OneOfField --> AddressChoice
-			if !siteSubnetParamsElement.AddressChoice.IsNull() && !siteSubnetParamsElement.AddressChoice.IsUnknown() {
-				siteSubnetParamsAddressChoiceModel := SubnetSiteSubnetParametersTypeAddressChoice{}
-				response.Diagnostics.Append(siteSubnetParamsElement.AddressChoice.As(ctx, &siteSubnetParamsAddressChoiceModel, basetypes.ObjectAsOptions{})...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// resource modelToSpecNested BoolOfOneOfPointerField --> Dhcp
-				if !siteSubnetParamsAddressChoiceModel.Dhcp.IsNull() && !siteSubnetParamsAddressChoiceModel.Dhcp.IsUnknown() {
-					dhcpSpecBool := &ves_io_schema_subnet.SiteSubnetParametersType_Dhcp{}
-					dhcpSpecBool.Dhcp = &ves_io_schema.Empty{}
-					siteSubnetParamsSpec[i].AddressChoice = dhcpSpecBool
-				}
-
-				// resource modelToSpecNested BoolOfOneOfPointerField --> StaticIp
-				if !siteSubnetParamsAddressChoiceModel.StaticIp.IsNull() && !siteSubnetParamsAddressChoiceModel.StaticIp.IsUnknown() {
-					staticIpSpecBool := &ves_io_schema_subnet.SiteSubnetParametersType_StaticIp{}
-					staticIpSpecBool.StaticIp = &ves_io_schema.Empty{}
-					siteSubnetParamsSpec[i].AddressChoice = staticIpSpecBool
-				}
-
-			}
-
 			// resource modelToSpecNested RequiredPointerField --> Site
 			if !siteSubnetParamsElement.Site.IsNull() && !siteSubnetParamsElement.Site.IsUnknown() {
 				var siteModel ObjectRefTypeModel
@@ -1242,6 +1218,30 @@ func (r *ResourceF5XCSubnet) Create(ctx context.Context, request resource.Create
 
 			}
 
+			// resource modelToSpecNested OneOfField --> AddressChoice
+			if !siteSubnetParamsElement.AddressChoice.IsNull() && !siteSubnetParamsElement.AddressChoice.IsUnknown() {
+				siteSubnetParamsAddressChoiceModel := SubnetSiteSubnetParametersTypeAddressChoice{}
+				response.Diagnostics.Append(siteSubnetParamsElement.AddressChoice.As(ctx, &siteSubnetParamsAddressChoiceModel, basetypes.ObjectAsOptions{})...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				// resource modelToSpecNested BoolOfOneOfPointerField --> StaticIp
+				if !siteSubnetParamsAddressChoiceModel.StaticIp.IsNull() && !siteSubnetParamsAddressChoiceModel.StaticIp.IsUnknown() {
+					staticIpSpecBool := &ves_io_schema_subnet.SiteSubnetParametersType_StaticIp{}
+					staticIpSpecBool.StaticIp = &ves_io_schema.Empty{}
+					siteSubnetParamsSpec[i].AddressChoice = staticIpSpecBool
+				}
+
+				// resource modelToSpecNested BoolOfOneOfPointerField --> Dhcp
+				if !siteSubnetParamsAddressChoiceModel.Dhcp.IsNull() && !siteSubnetParamsAddressChoiceModel.Dhcp.IsUnknown() {
+					dhcpSpecBool := &ves_io_schema_subnet.SiteSubnetParametersType_Dhcp{}
+					dhcpSpecBool.Dhcp = &ves_io_schema.Empty{}
+					siteSubnetParamsSpec[i].AddressChoice = dhcpSpecBool
+				}
+
+			}
+
 		}
 
 		spec.SiteSubnetParams = siteSubnetParamsSpec
@@ -1253,13 +1253,6 @@ func (r *ResourceF5XCSubnet) Create(ctx context.Context, request resource.Create
 		response.Diagnostics.Append(data.ConnectionChoice.As(ctx, &connectionChoiceModel, basetypes.ObjectAsOptions{})...)
 		if response.Diagnostics.HasError() {
 			return
-		}
-
-		// resource modelToSpecNested BoolOfOneOfPointerField --> ConnectToSlo
-		if !connectionChoiceModel.ConnectToSlo.IsNull() && !connectionChoiceModel.ConnectToSlo.IsUnknown() {
-			connectToSloSpecBool := &ves_io_schema_subnet.CreateSpecType_ConnectToSlo{}
-			connectToSloSpecBool.ConnectToSlo = &ves_io_schema.Empty{}
-			spec.ConnectionChoice = connectToSloSpecBool
 		}
 
 		// resource modelToSpecNested BoolOfOneOfPointerField --> IsolatedNw
@@ -1303,6 +1296,13 @@ func (r *ResourceF5XCSubnet) Create(ctx context.Context, request resource.Create
 
 			}
 
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> ConnectToSlo
+		if !connectionChoiceModel.ConnectToSlo.IsNull() && !connectionChoiceModel.ConnectToSlo.IsUnknown() {
+			connectToSloSpecBool := &ves_io_schema_subnet.CreateSpecType_ConnectToSlo{}
+			connectToSloSpecBool.ConnectToSlo = &ves_io_schema.Empty{}
+			spec.ConnectionChoice = connectToSloSpecBool
 		}
 
 	}
@@ -1436,56 +1436,6 @@ func (r *ResourceF5XCSubnet) Create(ctx context.Context, request resource.Create
 	for _, siteDhcpServerParamsInternalElement := range specData.SiteDhcpServerParamsInternal {
 		subnetSubnetSubnetDHCPServerParametersTypeModel := SubnetSubnetSubnetDHCPServerParametersType{}
 
-		// resource specToModelNested ArrayOfPointerField --> Site
-		if len(siteDhcpServerParamsInternalElement.GetSite()) > 0 {
-			// Step 1: Always create a slice of model structs from the spec data.
-			// This slice serves as an intermediate representation.
-			siteElements := make([]ObjectRefTypeModel, 0, len(siteDhcpServerParamsInternalElement.GetSite()))
-			for _, siteElement := range siteDhcpServerParamsInternalElement.GetSite() {
-				objectRefTypeModelModel := ObjectRefTypeModel{}
-
-				// resource specToModelNested StringField --> Tenant
-				if siteElement.GetTenant() != "" {
-					objectRefTypeModelModel.Tenant = types.StringValue(siteElement.GetTenant())
-				} else {
-					// Empty string, set to null
-					objectRefTypeModelModel.Tenant = types.StringNull()
-				}
-
-				// resource specToModelNested RequiredStringField --> Namespace
-				if siteElement.GetNamespace() != "" {
-					objectRefTypeModelModel.Namespace = types.StringValue(siteElement.GetNamespace())
-				} else {
-					// Empty string, set to null
-					objectRefTypeModelModel.Namespace = types.StringNull()
-				}
-
-				// resource specToModelNested RequiredStringField --> Name
-				if siteElement.GetName() != "" {
-					objectRefTypeModelModel.Name = types.StringValue(siteElement.GetName())
-				} else {
-					// Empty string, set to null
-					objectRefTypeModelModel.Name = types.StringNull()
-				}
-
-				siteElements = append(siteElements, objectRefTypeModelModel)
-			}
-			// CASE 1: The target field is a `types.List` or an attribute map.
-			// The intermediate slice of structs must be converted to a `types.ListValue`.
-			siteListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: SubnetSiteObjectRefModelAttributeMap}, siteElements)
-			response.Diagnostics.Append(diags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			subnetSubnetSubnetDHCPServerParametersTypeModel.Site = siteListValue
-
-		} else {
-			// The source list is empty or nil.
-			// CASE 1: The target field is a `types.List` or an attribute map.
-			// Assign a null `types.ListValue`.
-			subnetSubnetSubnetDHCPServerParametersTypeModel.Site = types.ListNull(types.ObjectType{AttrTypes: SubnetSiteObjectRefModelAttributeMap})
-		}
-
 		// resource specToModelNested PointerField --> SubnetDhcpServerParams
 		if siteDhcpServerParamsInternalElement.GetSubnetDhcpServerParams() != nil {
 			// Create the nested Go struct
@@ -1516,88 +1466,6 @@ func (r *ResourceF5XCSubnet) Create(ctx context.Context, request resource.Create
 				dhcpNetworksElements := make([]SubnetNetworkInterfaceDHCPNetworkType, 0, len(subnetDhcpServerParamsElement.GetDhcpNetworks()))
 				for _, dhcpNetworksElement := range subnetDhcpServerParamsElement.GetDhcpNetworks() {
 					subnetNetworkInterfaceDHCPNetworkTypeModel := SubnetNetworkInterfaceDHCPNetworkType{}
-
-					// resource specToModelNested RequiredOneOfField --> NetworkPrefixChoice
-					// GlobalSpecType
-					if dhcpNetworksElement.GetNetworkPrefixChoice() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						dhcpNetworksnetworkPrefixChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates
-						dhcpNetworksnetworkPrefixChoiceChoices := dhcpNetworksElement.GetNetworkPrefixChoice()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// resource specToModelNested StringOfOneOfField --> NetworkPrefix
-						networkPrefixItem, isNetworkPrefix := dhcpNetworksnetworkPrefixChoiceChoices.(*ves_io_schema_network_interface.DHCPNetworkType_NetworkPrefix)
-
-						if isNetworkPrefix {
-							dhcpNetworksnetworkPrefixChoiceChoicesAttributeMap["network_prefix"] = types.StringValue(string(networkPrefixItem.NetworkPrefix))
-						} else {
-							// Empty string, set to null
-							dhcpNetworksnetworkPrefixChoiceChoicesAttributeMap["network_prefix"] = types.StringNull()
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, dhcpNetworksnetworkPrefixChoiceChoicesObjDiags := types.ObjectValue(
-							SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsDhcpNetworksNetworkPrefixChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-							dhcpNetworksnetworkPrefixChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(dhcpNetworksnetworkPrefixChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						subnetNetworkInterfaceDHCPNetworkTypeModel.NetworkPrefixChoice = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						subnetNetworkInterfaceDHCPNetworkTypeModel.NetworkPrefixChoice = types.ObjectNull(SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsDhcpNetworksNetworkPrefixChoiceModelAttributeMap)
-					}
-
-					// resource specToModelNested ArrayOfPointerField --> Pools
-					if len(dhcpNetworksElement.GetPools()) > 0 {
-						// Step 1: Always create a slice of model structs from the spec data.
-						// This slice serves as an intermediate representation.
-						poolsElements := make([]SubnetNetworkInterfaceDHCPPoolType, 0, len(dhcpNetworksElement.GetPools()))
-						for _, poolsElement := range dhcpNetworksElement.GetPools() {
-							subnetNetworkInterfaceDHCPPoolTypeModel := SubnetNetworkInterfaceDHCPPoolType{}
-
-							// resource specToModelNested StringField --> StartIp
-							if poolsElement.GetStartIp() != "" {
-								subnetNetworkInterfaceDHCPPoolTypeModel.StartIp = types.StringValue(poolsElement.GetStartIp())
-							} else {
-								// Empty string, set to null
-								subnetNetworkInterfaceDHCPPoolTypeModel.StartIp = types.StringNull()
-							}
-
-							// resource specToModelNested StringField --> EndIp
-							if poolsElement.GetEndIp() != "" {
-								subnetNetworkInterfaceDHCPPoolTypeModel.EndIp = types.StringValue(poolsElement.GetEndIp())
-							} else {
-								// Empty string, set to null
-								subnetNetworkInterfaceDHCPPoolTypeModel.EndIp = types.StringNull()
-							}
-
-							poolsElements = append(poolsElements, subnetNetworkInterfaceDHCPPoolTypeModel)
-						}
-						// CASE 1: The target field is a `types.List` or an attribute map.
-						// The intermediate slice of structs must be converted to a `types.ListValue`.
-						poolsListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsDhcpNetworksPoolsModelAttributeMap}, poolsElements)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						subnetNetworkInterfaceDHCPNetworkTypeModel.Pools = poolsListValue
-
-					} else {
-						// The source list is empty or nil.
-						// CASE 1: The target field is a `types.List` or an attribute map.
-						// Assign a null `types.ListValue`.
-						subnetNetworkInterfaceDHCPNetworkTypeModel.Pools = types.ListNull(types.ObjectType{AttrTypes: SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsDhcpNetworksPoolsModelAttributeMap})
-					}
 
 					// resource specToModelNested RequiredOneOfField --> GatewayChoice
 					// GlobalSpecType
@@ -1720,6 +1588,88 @@ func (r *ResourceF5XCSubnet) Create(ctx context.Context, request resource.Create
 						subnetNetworkInterfaceDHCPNetworkTypeModel.PoolSettings = types.ListNull(types.StringType)
 					}
 
+					// resource specToModelNested RequiredOneOfField --> NetworkPrefixChoice
+					// GlobalSpecType
+					if dhcpNetworksElement.GetNetworkPrefixChoice() != nil {
+						// Create a temporary attribute map for the choices within this OneOf
+						dhcpNetworksnetworkPrefixChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+						// Define a variable for the spec choices to be passed down to nested templates
+						dhcpNetworksnetworkPrefixChoiceChoices := dhcpNetworksElement.GetNetworkPrefixChoice()
+
+						// Process nested choices, populating the temporary attribute map
+
+						// resource specToModelNested StringOfOneOfField --> NetworkPrefix
+						networkPrefixItem, isNetworkPrefix := dhcpNetworksnetworkPrefixChoiceChoices.(*ves_io_schema_network_interface.DHCPNetworkType_NetworkPrefix)
+
+						if isNetworkPrefix {
+							dhcpNetworksnetworkPrefixChoiceChoicesAttributeMap["network_prefix"] = types.StringValue(string(networkPrefixItem.NetworkPrefix))
+						} else {
+							// Empty string, set to null
+							dhcpNetworksnetworkPrefixChoiceChoicesAttributeMap["network_prefix"] = types.StringNull()
+						}
+
+						// --- End of Choices ---
+
+						// Create the final ObjectValue for this OneOf field
+						finalObj, dhcpNetworksnetworkPrefixChoiceChoicesObjDiags := types.ObjectValue(
+							SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsDhcpNetworksNetworkPrefixChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+							dhcpNetworksnetworkPrefixChoiceChoicesAttributeMap,
+						)
+						response.Diagnostics.Append(dhcpNetworksnetworkPrefixChoiceChoicesObjDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						// Assign the final object to the correct place (either the root model or a parent's attribute map)
+						subnetNetworkInterfaceDHCPNetworkTypeModel.NetworkPrefixChoice = finalObj
+					} else {
+						// The OneOf field is nil in the source spec, so set the Terraform object to null.
+						subnetNetworkInterfaceDHCPNetworkTypeModel.NetworkPrefixChoice = types.ObjectNull(SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsDhcpNetworksNetworkPrefixChoiceModelAttributeMap)
+					}
+
+					// resource specToModelNested ArrayOfPointerField --> Pools
+					if len(dhcpNetworksElement.GetPools()) > 0 {
+						// Step 1: Always create a slice of model structs from the spec data.
+						// This slice serves as an intermediate representation.
+						poolsElements := make([]SubnetNetworkInterfaceDHCPPoolType, 0, len(dhcpNetworksElement.GetPools()))
+						for _, poolsElement := range dhcpNetworksElement.GetPools() {
+							subnetNetworkInterfaceDHCPPoolTypeModel := SubnetNetworkInterfaceDHCPPoolType{}
+
+							// resource specToModelNested StringField --> StartIp
+							if poolsElement.GetStartIp() != "" {
+								subnetNetworkInterfaceDHCPPoolTypeModel.StartIp = types.StringValue(poolsElement.GetStartIp())
+							} else {
+								// Empty string, set to null
+								subnetNetworkInterfaceDHCPPoolTypeModel.StartIp = types.StringNull()
+							}
+
+							// resource specToModelNested StringField --> EndIp
+							if poolsElement.GetEndIp() != "" {
+								subnetNetworkInterfaceDHCPPoolTypeModel.EndIp = types.StringValue(poolsElement.GetEndIp())
+							} else {
+								// Empty string, set to null
+								subnetNetworkInterfaceDHCPPoolTypeModel.EndIp = types.StringNull()
+							}
+
+							poolsElements = append(poolsElements, subnetNetworkInterfaceDHCPPoolTypeModel)
+						}
+						// CASE 1: The target field is a `types.List` or an attribute map.
+						// The intermediate slice of structs must be converted to a `types.ListValue`.
+						poolsListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsDhcpNetworksPoolsModelAttributeMap}, poolsElements)
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						subnetNetworkInterfaceDHCPNetworkTypeModel.Pools = poolsListValue
+
+					} else {
+						// The source list is empty or nil.
+						// CASE 1: The target field is a `types.List` or an attribute map.
+						// Assign a null `types.ListValue`.
+						subnetNetworkInterfaceDHCPNetworkTypeModel.Pools = types.ListNull(types.ObjectType{AttrTypes: SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsDhcpNetworksPoolsModelAttributeMap})
+					}
+
 					dhcpNetworksElements = append(dhcpNetworksElements, subnetNetworkInterfaceDHCPNetworkTypeModel)
 				}
 				// CASE 1: The target field is a `types.List` or an attribute map.
@@ -1748,15 +1698,6 @@ func (r *ResourceF5XCSubnet) Create(ctx context.Context, request resource.Create
 				subnetDhcpServerParamsinterfacesAddressingChoiceChoices := subnetDhcpServerParamsElement.GetInterfacesAddressingChoice()
 
 				// Process nested choices, populating the temporary attribute map
-
-				// resource specToModelNested BoolOfOneOfPointerField --> AutomaticFromStart
-				_, isAutomaticFromStart := subnetDhcpServerParamsinterfacesAddressingChoiceChoices.(*ves_io_schema_network_interface.DHCPServerParametersType_AutomaticFromStart)
-
-				if isAutomaticFromStart {
-					subnetDhcpServerParamsinterfacesAddressingChoiceChoicesAttributeMap["automatic_from_start"] = types.BoolValue(true)
-				} else {
-					subnetDhcpServerParamsinterfacesAddressingChoiceChoicesAttributeMap["automatic_from_start"] = types.BoolNull()
-				}
 
 				// resource specToModelNested BoolOfOneOfPointerField --> AutomaticFromEnd
 				_, isAutomaticFromEnd := subnetDhcpServerParamsinterfacesAddressingChoiceChoices.(*ves_io_schema_network_interface.DHCPServerParametersType_AutomaticFromEnd)
@@ -1802,6 +1743,15 @@ func (r *ResourceF5XCSubnet) Create(ctx context.Context, request resource.Create
 					}
 				}
 
+				// resource specToModelNested BoolOfOneOfPointerField --> AutomaticFromStart
+				_, isAutomaticFromStart := subnetDhcpServerParamsinterfacesAddressingChoiceChoices.(*ves_io_schema_network_interface.DHCPServerParametersType_AutomaticFromStart)
+
+				if isAutomaticFromStart {
+					subnetDhcpServerParamsinterfacesAddressingChoiceChoicesAttributeMap["automatic_from_start"] = types.BoolValue(true)
+				} else {
+					subnetDhcpServerParamsinterfacesAddressingChoiceChoicesAttributeMap["automatic_from_start"] = types.BoolNull()
+				}
+
 				// --- End of Choices ---
 
 				// Create the final ObjectValue for this OneOf field
@@ -1839,6 +1789,56 @@ func (r *ResourceF5XCSubnet) Create(ctx context.Context, request resource.Create
 			subnetSubnetSubnetDHCPServerParametersTypeModel.SubnetDhcpServerParams = types.ObjectNull(SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsModelAttributeMap)
 		}
 
+		// resource specToModelNested ArrayOfPointerField --> Site
+		if len(siteDhcpServerParamsInternalElement.GetSite()) > 0 {
+			// Step 1: Always create a slice of model structs from the spec data.
+			// This slice serves as an intermediate representation.
+			siteElements := make([]ObjectRefTypeModel, 0, len(siteDhcpServerParamsInternalElement.GetSite()))
+			for _, siteElement := range siteDhcpServerParamsInternalElement.GetSite() {
+				objectRefTypeModelModel := ObjectRefTypeModel{}
+
+				// resource specToModelNested RequiredStringField --> Name
+				if siteElement.GetName() != "" {
+					objectRefTypeModelModel.Name = types.StringValue(siteElement.GetName())
+				} else {
+					// Empty string, set to null
+					objectRefTypeModelModel.Name = types.StringNull()
+				}
+
+				// resource specToModelNested StringField --> Tenant
+				if siteElement.GetTenant() != "" {
+					objectRefTypeModelModel.Tenant = types.StringValue(siteElement.GetTenant())
+				} else {
+					// Empty string, set to null
+					objectRefTypeModelModel.Tenant = types.StringNull()
+				}
+
+				// resource specToModelNested RequiredStringField --> Namespace
+				if siteElement.GetNamespace() != "" {
+					objectRefTypeModelModel.Namespace = types.StringValue(siteElement.GetNamespace())
+				} else {
+					// Empty string, set to null
+					objectRefTypeModelModel.Namespace = types.StringNull()
+				}
+
+				siteElements = append(siteElements, objectRefTypeModelModel)
+			}
+			// CASE 1: The target field is a `types.List` or an attribute map.
+			// The intermediate slice of structs must be converted to a `types.ListValue`.
+			siteListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: SubnetSiteObjectRefModelAttributeMap}, siteElements)
+			response.Diagnostics.Append(diags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			subnetSubnetSubnetDHCPServerParametersTypeModel.Site = siteListValue
+
+		} else {
+			// The source list is empty or nil.
+			// CASE 1: The target field is a `types.List` or an attribute map.
+			// Assign a null `types.ListValue`.
+			subnetSubnetSubnetDHCPServerParametersTypeModel.Site = types.ListNull(types.ObjectType{AttrTypes: SubnetSiteObjectRefModelAttributeMap})
+		}
+
 		siteDhcpServerParamsInternalElementsSpectToModel = append(siteDhcpServerParamsInternalElementsSpectToModel, subnetSubnetSubnetDHCPServerParametersTypeModel)
 	}
 
@@ -1860,53 +1860,6 @@ func (r *ResourceF5XCSubnet) Create(ctx context.Context, request resource.Create
 
 	for _, siteSubnetParamsElement := range specData.SiteSubnetParams {
 		subnetSubnetSiteSubnetParametersTypeModel := SubnetSubnetSiteSubnetParametersType{}
-
-		// resource specToModelNested OneOfField --> AddressChoice
-		if siteSubnetParamsElement.GetAddressChoice() != nil {
-			// Create a temporary attribute map for the choices within this OneOf
-			siteSubnetParamsaddressChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-			// Define a variable for the spec choices to be passed down to nested templates
-			siteSubnetParamsaddressChoiceChoices := siteSubnetParamsElement.GetAddressChoice()
-
-			// Process nested choices, populating the temporary attribute map
-
-			// resource specToModelNested BoolOfOneOfPointerField --> Dhcp
-			_, isDhcp := siteSubnetParamsaddressChoiceChoices.(*ves_io_schema_subnet.SiteSubnetParametersType_Dhcp)
-
-			if isDhcp {
-				siteSubnetParamsaddressChoiceChoicesAttributeMap["dhcp"] = types.BoolValue(true)
-			} else {
-				siteSubnetParamsaddressChoiceChoicesAttributeMap["dhcp"] = types.BoolNull()
-			}
-
-			// resource specToModelNested BoolOfOneOfPointerField --> StaticIp
-			_, isStaticIp := siteSubnetParamsaddressChoiceChoices.(*ves_io_schema_subnet.SiteSubnetParametersType_StaticIp)
-
-			if isStaticIp {
-				siteSubnetParamsaddressChoiceChoicesAttributeMap["static_ip"] = types.BoolValue(true)
-			} else {
-				siteSubnetParamsaddressChoiceChoicesAttributeMap["static_ip"] = types.BoolNull()
-			}
-
-			// --- End of Choices ---
-
-			// Create the final ObjectValue for this OneOf field
-			finalObj, siteSubnetParamsaddressChoiceChoicesObjDiags := types.ObjectValue(
-				SubnetSiteSubnetParamsAddressChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-				siteSubnetParamsaddressChoiceChoicesAttributeMap,
-			)
-			response.Diagnostics.Append(siteSubnetParamsaddressChoiceChoicesObjDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			subnetSubnetSiteSubnetParametersTypeModel.AddressChoice = finalObj
-		} else {
-			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			subnetSubnetSiteSubnetParametersTypeModel.AddressChoice = types.ObjectNull(SubnetSiteSubnetParamsAddressChoiceModelAttributeMap)
-		}
 
 		// resource specToModelNested RequiredPointerField --> Site
 		if siteSubnetParamsElement.GetSite() != nil {
@@ -2059,6 +2012,53 @@ func (r *ResourceF5XCSubnet) Create(ctx context.Context, request resource.Create
 			subnetSubnetSiteSubnetParametersTypeModel.SubnetDhcpServerParams = types.ObjectNull(SubnetSiteSubnetParamsSubnetDhcpServerParamsModelAttributeMap)
 		}
 
+		// resource specToModelNested OneOfField --> AddressChoice
+		if siteSubnetParamsElement.GetAddressChoice() != nil {
+			// Create a temporary attribute map for the choices within this OneOf
+			siteSubnetParamsaddressChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+			// Define a variable for the spec choices to be passed down to nested templates
+			siteSubnetParamsaddressChoiceChoices := siteSubnetParamsElement.GetAddressChoice()
+
+			// Process nested choices, populating the temporary attribute map
+
+			// resource specToModelNested BoolOfOneOfPointerField --> StaticIp
+			_, isStaticIp := siteSubnetParamsaddressChoiceChoices.(*ves_io_schema_subnet.SiteSubnetParametersType_StaticIp)
+
+			if isStaticIp {
+				siteSubnetParamsaddressChoiceChoicesAttributeMap["static_ip"] = types.BoolValue(true)
+			} else {
+				siteSubnetParamsaddressChoiceChoicesAttributeMap["static_ip"] = types.BoolNull()
+			}
+
+			// resource specToModelNested BoolOfOneOfPointerField --> Dhcp
+			_, isDhcp := siteSubnetParamsaddressChoiceChoices.(*ves_io_schema_subnet.SiteSubnetParametersType_Dhcp)
+
+			if isDhcp {
+				siteSubnetParamsaddressChoiceChoicesAttributeMap["dhcp"] = types.BoolValue(true)
+			} else {
+				siteSubnetParamsaddressChoiceChoicesAttributeMap["dhcp"] = types.BoolNull()
+			}
+
+			// --- End of Choices ---
+
+			// Create the final ObjectValue for this OneOf field
+			finalObj, siteSubnetParamsaddressChoiceChoicesObjDiags := types.ObjectValue(
+				SubnetSiteSubnetParamsAddressChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+				siteSubnetParamsaddressChoiceChoicesAttributeMap,
+			)
+			response.Diagnostics.Append(siteSubnetParamsaddressChoiceChoicesObjDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			// Assign the final object to the correct place (either the root model or a parent's attribute map)
+			subnetSubnetSiteSubnetParametersTypeModel.AddressChoice = finalObj
+		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			subnetSubnetSiteSubnetParametersTypeModel.AddressChoice = types.ObjectNull(SubnetSiteSubnetParamsAddressChoiceModelAttributeMap)
+		}
+
 		siteSubnetParamsElementsSpectToModel = append(siteSubnetParamsElementsSpectToModel, subnetSubnetSiteSubnetParametersTypeModel)
 	}
 
@@ -2087,15 +2087,6 @@ func (r *ResourceF5XCSubnet) Create(ctx context.Context, request resource.Create
 		var connectionChoiceChoicesModel = &SubnetGlobalSpecTypeConnectionChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
-
-		// resource specToModelNested BoolOfOneOfPointerField --> ConnectToSlo
-		_, isConnectToSlo := connectionChoiceChoices.(*ves_io_schema_subnet.GlobalSpecType_ConnectToSlo)
-
-		if isConnectToSlo {
-			connectionChoiceChoicesModel.ConnectToSlo = types.BoolValue(true)
-		} else {
-			connectionChoiceChoicesModel.ConnectToSlo = types.BoolNull()
-		}
 
 		// resource specToModelNested BoolOfOneOfPointerField --> IsolatedNw
 		_, isIsolatedNw := connectionChoiceChoices.(*ves_io_schema_subnet.GlobalSpecType_IsolatedNw)
@@ -2174,6 +2165,15 @@ func (r *ResourceF5XCSubnet) Create(ctx context.Context, request resource.Create
 			} else {
 				connectionChoiceChoicesModel.ConnectToLayer2 = types.ObjectNull(SubnetConnectionChoiceConnectToLayer2ModelAttributeMap)
 			}
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> ConnectToSlo
+		_, isConnectToSlo := connectionChoiceChoices.(*ves_io_schema_subnet.GlobalSpecType_ConnectToSlo)
+
+		if isConnectToSlo {
+			connectionChoiceChoicesModel.ConnectToSlo = types.BoolValue(true)
+		} else {
+			connectionChoiceChoicesModel.ConnectToSlo = types.BoolNull()
 		}
 
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
@@ -2369,56 +2369,6 @@ func (r *ResourceF5XCSubnet) Read(ctx context.Context, request resource.ReadRequ
 	for _, siteDhcpServerParamsInternalElement := range specData.SiteDhcpServerParamsInternal {
 		subnetSubnetSubnetDHCPServerParametersTypeModel := SubnetSubnetSubnetDHCPServerParametersType{}
 
-		// resource specToModelNested ArrayOfPointerField --> Site
-		if len(siteDhcpServerParamsInternalElement.GetSite()) > 0 {
-			// Step 1: Always create a slice of model structs from the spec data.
-			// This slice serves as an intermediate representation.
-			siteElements := make([]ObjectRefTypeModel, 0, len(siteDhcpServerParamsInternalElement.GetSite()))
-			for _, siteElement := range siteDhcpServerParamsInternalElement.GetSite() {
-				objectRefTypeModelModel := ObjectRefTypeModel{}
-
-				// resource specToModelNested StringField --> Tenant
-				if siteElement.GetTenant() != "" {
-					objectRefTypeModelModel.Tenant = types.StringValue(siteElement.GetTenant())
-				} else {
-					// Empty string, set to null
-					objectRefTypeModelModel.Tenant = types.StringNull()
-				}
-
-				// resource specToModelNested RequiredStringField --> Namespace
-				if siteElement.GetNamespace() != "" {
-					objectRefTypeModelModel.Namespace = types.StringValue(siteElement.GetNamespace())
-				} else {
-					// Empty string, set to null
-					objectRefTypeModelModel.Namespace = types.StringNull()
-				}
-
-				// resource specToModelNested RequiredStringField --> Name
-				if siteElement.GetName() != "" {
-					objectRefTypeModelModel.Name = types.StringValue(siteElement.GetName())
-				} else {
-					// Empty string, set to null
-					objectRefTypeModelModel.Name = types.StringNull()
-				}
-
-				siteElements = append(siteElements, objectRefTypeModelModel)
-			}
-			// CASE 1: The target field is a `types.List` or an attribute map.
-			// The intermediate slice of structs must be converted to a `types.ListValue`.
-			siteListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: SubnetSiteObjectRefModelAttributeMap}, siteElements)
-			response.Diagnostics.Append(diags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			subnetSubnetSubnetDHCPServerParametersTypeModel.Site = siteListValue
-
-		} else {
-			// The source list is empty or nil.
-			// CASE 1: The target field is a `types.List` or an attribute map.
-			// Assign a null `types.ListValue`.
-			subnetSubnetSubnetDHCPServerParametersTypeModel.Site = types.ListNull(types.ObjectType{AttrTypes: SubnetSiteObjectRefModelAttributeMap})
-		}
-
 		// resource specToModelNested PointerField --> SubnetDhcpServerParams
 		if siteDhcpServerParamsInternalElement.GetSubnetDhcpServerParams() != nil {
 			// Create the nested Go struct
@@ -2449,88 +2399,6 @@ func (r *ResourceF5XCSubnet) Read(ctx context.Context, request resource.ReadRequ
 				dhcpNetworksElements := make([]SubnetNetworkInterfaceDHCPNetworkType, 0, len(subnetDhcpServerParamsElement.GetDhcpNetworks()))
 				for _, dhcpNetworksElement := range subnetDhcpServerParamsElement.GetDhcpNetworks() {
 					subnetNetworkInterfaceDHCPNetworkTypeModel := SubnetNetworkInterfaceDHCPNetworkType{}
-
-					// resource specToModelNested RequiredOneOfField --> NetworkPrefixChoice
-					// <no value>
-					if dhcpNetworksElement.GetNetworkPrefixChoice() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						dhcpNetworksnetworkPrefixChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates
-						dhcpNetworksnetworkPrefixChoiceChoices := dhcpNetworksElement.GetNetworkPrefixChoice()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// resource specToModelNested StringOfOneOfField --> NetworkPrefix
-						networkPrefixItem, isNetworkPrefix := dhcpNetworksnetworkPrefixChoiceChoices.(*ves_io_schema_network_interface.DHCPNetworkType_NetworkPrefix)
-
-						if isNetworkPrefix {
-							dhcpNetworksnetworkPrefixChoiceChoicesAttributeMap["network_prefix"] = types.StringValue(string(networkPrefixItem.NetworkPrefix))
-						} else {
-							// Empty string, set to null
-							dhcpNetworksnetworkPrefixChoiceChoicesAttributeMap["network_prefix"] = types.StringNull()
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, dhcpNetworksnetworkPrefixChoiceChoicesObjDiags := types.ObjectValue(
-							SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsDhcpNetworksNetworkPrefixChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-							dhcpNetworksnetworkPrefixChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(dhcpNetworksnetworkPrefixChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						subnetNetworkInterfaceDHCPNetworkTypeModel.NetworkPrefixChoice = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						subnetNetworkInterfaceDHCPNetworkTypeModel.NetworkPrefixChoice = types.ObjectNull(SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsDhcpNetworksNetworkPrefixChoiceModelAttributeMap)
-					}
-
-					// resource specToModelNested ArrayOfPointerField --> Pools
-					if len(dhcpNetworksElement.GetPools()) > 0 {
-						// Step 1: Always create a slice of model structs from the spec data.
-						// This slice serves as an intermediate representation.
-						poolsElements := make([]SubnetNetworkInterfaceDHCPPoolType, 0, len(dhcpNetworksElement.GetPools()))
-						for _, poolsElement := range dhcpNetworksElement.GetPools() {
-							subnetNetworkInterfaceDHCPPoolTypeModel := SubnetNetworkInterfaceDHCPPoolType{}
-
-							// resource specToModelNested StringField --> StartIp
-							if poolsElement.GetStartIp() != "" {
-								subnetNetworkInterfaceDHCPPoolTypeModel.StartIp = types.StringValue(poolsElement.GetStartIp())
-							} else {
-								// Empty string, set to null
-								subnetNetworkInterfaceDHCPPoolTypeModel.StartIp = types.StringNull()
-							}
-
-							// resource specToModelNested StringField --> EndIp
-							if poolsElement.GetEndIp() != "" {
-								subnetNetworkInterfaceDHCPPoolTypeModel.EndIp = types.StringValue(poolsElement.GetEndIp())
-							} else {
-								// Empty string, set to null
-								subnetNetworkInterfaceDHCPPoolTypeModel.EndIp = types.StringNull()
-							}
-
-							poolsElements = append(poolsElements, subnetNetworkInterfaceDHCPPoolTypeModel)
-						}
-						// CASE 1: The target field is a `types.List` or an attribute map.
-						// The intermediate slice of structs must be converted to a `types.ListValue`.
-						poolsListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsDhcpNetworksPoolsModelAttributeMap}, poolsElements)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						subnetNetworkInterfaceDHCPNetworkTypeModel.Pools = poolsListValue
-
-					} else {
-						// The source list is empty or nil.
-						// CASE 1: The target field is a `types.List` or an attribute map.
-						// Assign a null `types.ListValue`.
-						subnetNetworkInterfaceDHCPNetworkTypeModel.Pools = types.ListNull(types.ObjectType{AttrTypes: SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsDhcpNetworksPoolsModelAttributeMap})
-					}
 
 					// resource specToModelNested RequiredOneOfField --> GatewayChoice
 					// <no value>
@@ -2653,6 +2521,88 @@ func (r *ResourceF5XCSubnet) Read(ctx context.Context, request resource.ReadRequ
 						subnetNetworkInterfaceDHCPNetworkTypeModel.PoolSettings = types.ListNull(types.StringType)
 					}
 
+					// resource specToModelNested RequiredOneOfField --> NetworkPrefixChoice
+					// <no value>
+					if dhcpNetworksElement.GetNetworkPrefixChoice() != nil {
+						// Create a temporary attribute map for the choices within this OneOf
+						dhcpNetworksnetworkPrefixChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+						// Define a variable for the spec choices to be passed down to nested templates
+						dhcpNetworksnetworkPrefixChoiceChoices := dhcpNetworksElement.GetNetworkPrefixChoice()
+
+						// Process nested choices, populating the temporary attribute map
+
+						// resource specToModelNested StringOfOneOfField --> NetworkPrefix
+						networkPrefixItem, isNetworkPrefix := dhcpNetworksnetworkPrefixChoiceChoices.(*ves_io_schema_network_interface.DHCPNetworkType_NetworkPrefix)
+
+						if isNetworkPrefix {
+							dhcpNetworksnetworkPrefixChoiceChoicesAttributeMap["network_prefix"] = types.StringValue(string(networkPrefixItem.NetworkPrefix))
+						} else {
+							// Empty string, set to null
+							dhcpNetworksnetworkPrefixChoiceChoicesAttributeMap["network_prefix"] = types.StringNull()
+						}
+
+						// --- End of Choices ---
+
+						// Create the final ObjectValue for this OneOf field
+						finalObj, dhcpNetworksnetworkPrefixChoiceChoicesObjDiags := types.ObjectValue(
+							SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsDhcpNetworksNetworkPrefixChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+							dhcpNetworksnetworkPrefixChoiceChoicesAttributeMap,
+						)
+						response.Diagnostics.Append(dhcpNetworksnetworkPrefixChoiceChoicesObjDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						// Assign the final object to the correct place (either the root model or a parent's attribute map)
+						subnetNetworkInterfaceDHCPNetworkTypeModel.NetworkPrefixChoice = finalObj
+					} else {
+						// The OneOf field is nil in the source spec, so set the Terraform object to null.
+						subnetNetworkInterfaceDHCPNetworkTypeModel.NetworkPrefixChoice = types.ObjectNull(SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsDhcpNetworksNetworkPrefixChoiceModelAttributeMap)
+					}
+
+					// resource specToModelNested ArrayOfPointerField --> Pools
+					if len(dhcpNetworksElement.GetPools()) > 0 {
+						// Step 1: Always create a slice of model structs from the spec data.
+						// This slice serves as an intermediate representation.
+						poolsElements := make([]SubnetNetworkInterfaceDHCPPoolType, 0, len(dhcpNetworksElement.GetPools()))
+						for _, poolsElement := range dhcpNetworksElement.GetPools() {
+							subnetNetworkInterfaceDHCPPoolTypeModel := SubnetNetworkInterfaceDHCPPoolType{}
+
+							// resource specToModelNested StringField --> StartIp
+							if poolsElement.GetStartIp() != "" {
+								subnetNetworkInterfaceDHCPPoolTypeModel.StartIp = types.StringValue(poolsElement.GetStartIp())
+							} else {
+								// Empty string, set to null
+								subnetNetworkInterfaceDHCPPoolTypeModel.StartIp = types.StringNull()
+							}
+
+							// resource specToModelNested StringField --> EndIp
+							if poolsElement.GetEndIp() != "" {
+								subnetNetworkInterfaceDHCPPoolTypeModel.EndIp = types.StringValue(poolsElement.GetEndIp())
+							} else {
+								// Empty string, set to null
+								subnetNetworkInterfaceDHCPPoolTypeModel.EndIp = types.StringNull()
+							}
+
+							poolsElements = append(poolsElements, subnetNetworkInterfaceDHCPPoolTypeModel)
+						}
+						// CASE 1: The target field is a `types.List` or an attribute map.
+						// The intermediate slice of structs must be converted to a `types.ListValue`.
+						poolsListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsDhcpNetworksPoolsModelAttributeMap}, poolsElements)
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						subnetNetworkInterfaceDHCPNetworkTypeModel.Pools = poolsListValue
+
+					} else {
+						// The source list is empty or nil.
+						// CASE 1: The target field is a `types.List` or an attribute map.
+						// Assign a null `types.ListValue`.
+						subnetNetworkInterfaceDHCPNetworkTypeModel.Pools = types.ListNull(types.ObjectType{AttrTypes: SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsDhcpNetworksPoolsModelAttributeMap})
+					}
+
 					dhcpNetworksElements = append(dhcpNetworksElements, subnetNetworkInterfaceDHCPNetworkTypeModel)
 				}
 				// CASE 1: The target field is a `types.List` or an attribute map.
@@ -2681,15 +2631,6 @@ func (r *ResourceF5XCSubnet) Read(ctx context.Context, request resource.ReadRequ
 				subnetDhcpServerParamsinterfacesAddressingChoiceChoices := subnetDhcpServerParamsElement.GetInterfacesAddressingChoice()
 
 				// Process nested choices, populating the temporary attribute map
-
-				// resource specToModelNested BoolOfOneOfPointerField --> AutomaticFromStart
-				_, isAutomaticFromStart := subnetDhcpServerParamsinterfacesAddressingChoiceChoices.(*ves_io_schema_network_interface.DHCPServerParametersType_AutomaticFromStart)
-
-				if isAutomaticFromStart {
-					subnetDhcpServerParamsinterfacesAddressingChoiceChoicesAttributeMap["automatic_from_start"] = types.BoolValue(true)
-				} else {
-					subnetDhcpServerParamsinterfacesAddressingChoiceChoicesAttributeMap["automatic_from_start"] = types.BoolNull()
-				}
 
 				// resource specToModelNested BoolOfOneOfPointerField --> AutomaticFromEnd
 				_, isAutomaticFromEnd := subnetDhcpServerParamsinterfacesAddressingChoiceChoices.(*ves_io_schema_network_interface.DHCPServerParametersType_AutomaticFromEnd)
@@ -2735,6 +2676,15 @@ func (r *ResourceF5XCSubnet) Read(ctx context.Context, request resource.ReadRequ
 					}
 				}
 
+				// resource specToModelNested BoolOfOneOfPointerField --> AutomaticFromStart
+				_, isAutomaticFromStart := subnetDhcpServerParamsinterfacesAddressingChoiceChoices.(*ves_io_schema_network_interface.DHCPServerParametersType_AutomaticFromStart)
+
+				if isAutomaticFromStart {
+					subnetDhcpServerParamsinterfacesAddressingChoiceChoicesAttributeMap["automatic_from_start"] = types.BoolValue(true)
+				} else {
+					subnetDhcpServerParamsinterfacesAddressingChoiceChoicesAttributeMap["automatic_from_start"] = types.BoolNull()
+				}
+
 				// --- End of Choices ---
 
 				// Create the final ObjectValue for this OneOf field
@@ -2772,6 +2722,56 @@ func (r *ResourceF5XCSubnet) Read(ctx context.Context, request resource.ReadRequ
 			subnetSubnetSubnetDHCPServerParametersTypeModel.SubnetDhcpServerParams = types.ObjectNull(SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsModelAttributeMap)
 		}
 
+		// resource specToModelNested ArrayOfPointerField --> Site
+		if len(siteDhcpServerParamsInternalElement.GetSite()) > 0 {
+			// Step 1: Always create a slice of model structs from the spec data.
+			// This slice serves as an intermediate representation.
+			siteElements := make([]ObjectRefTypeModel, 0, len(siteDhcpServerParamsInternalElement.GetSite()))
+			for _, siteElement := range siteDhcpServerParamsInternalElement.GetSite() {
+				objectRefTypeModelModel := ObjectRefTypeModel{}
+
+				// resource specToModelNested RequiredStringField --> Name
+				if siteElement.GetName() != "" {
+					objectRefTypeModelModel.Name = types.StringValue(siteElement.GetName())
+				} else {
+					// Empty string, set to null
+					objectRefTypeModelModel.Name = types.StringNull()
+				}
+
+				// resource specToModelNested StringField --> Tenant
+				if siteElement.GetTenant() != "" {
+					objectRefTypeModelModel.Tenant = types.StringValue(siteElement.GetTenant())
+				} else {
+					// Empty string, set to null
+					objectRefTypeModelModel.Tenant = types.StringNull()
+				}
+
+				// resource specToModelNested RequiredStringField --> Namespace
+				if siteElement.GetNamespace() != "" {
+					objectRefTypeModelModel.Namespace = types.StringValue(siteElement.GetNamespace())
+				} else {
+					// Empty string, set to null
+					objectRefTypeModelModel.Namespace = types.StringNull()
+				}
+
+				siteElements = append(siteElements, objectRefTypeModelModel)
+			}
+			// CASE 1: The target field is a `types.List` or an attribute map.
+			// The intermediate slice of structs must be converted to a `types.ListValue`.
+			siteListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: SubnetSiteObjectRefModelAttributeMap}, siteElements)
+			response.Diagnostics.Append(diags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			subnetSubnetSubnetDHCPServerParametersTypeModel.Site = siteListValue
+
+		} else {
+			// The source list is empty or nil.
+			// CASE 1: The target field is a `types.List` or an attribute map.
+			// Assign a null `types.ListValue`.
+			subnetSubnetSubnetDHCPServerParametersTypeModel.Site = types.ListNull(types.ObjectType{AttrTypes: SubnetSiteObjectRefModelAttributeMap})
+		}
+
 		siteDhcpServerParamsInternalElementsSpectToModel = append(siteDhcpServerParamsInternalElementsSpectToModel, subnetSubnetSubnetDHCPServerParametersTypeModel)
 	}
 
@@ -2793,53 +2793,6 @@ func (r *ResourceF5XCSubnet) Read(ctx context.Context, request resource.ReadRequ
 
 	for _, siteSubnetParamsElement := range specData.SiteSubnetParams {
 		subnetSubnetSiteSubnetParametersTypeModel := SubnetSubnetSiteSubnetParametersType{}
-
-		// resource specToModelNested OneOfField --> AddressChoice
-		if siteSubnetParamsElement.GetAddressChoice() != nil {
-			// Create a temporary attribute map for the choices within this OneOf
-			siteSubnetParamsaddressChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-			// Define a variable for the spec choices to be passed down to nested templates
-			siteSubnetParamsaddressChoiceChoices := siteSubnetParamsElement.GetAddressChoice()
-
-			// Process nested choices, populating the temporary attribute map
-
-			// resource specToModelNested BoolOfOneOfPointerField --> Dhcp
-			_, isDhcp := siteSubnetParamsaddressChoiceChoices.(*ves_io_schema_subnet.SiteSubnetParametersType_Dhcp)
-
-			if isDhcp {
-				siteSubnetParamsaddressChoiceChoicesAttributeMap["dhcp"] = types.BoolValue(true)
-			} else {
-				siteSubnetParamsaddressChoiceChoicesAttributeMap["dhcp"] = types.BoolNull()
-			}
-
-			// resource specToModelNested BoolOfOneOfPointerField --> StaticIp
-			_, isStaticIp := siteSubnetParamsaddressChoiceChoices.(*ves_io_schema_subnet.SiteSubnetParametersType_StaticIp)
-
-			if isStaticIp {
-				siteSubnetParamsaddressChoiceChoicesAttributeMap["static_ip"] = types.BoolValue(true)
-			} else {
-				siteSubnetParamsaddressChoiceChoicesAttributeMap["static_ip"] = types.BoolNull()
-			}
-
-			// --- End of Choices ---
-
-			// Create the final ObjectValue for this OneOf field
-			finalObj, siteSubnetParamsaddressChoiceChoicesObjDiags := types.ObjectValue(
-				SubnetSiteSubnetParamsAddressChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-				siteSubnetParamsaddressChoiceChoicesAttributeMap,
-			)
-			response.Diagnostics.Append(siteSubnetParamsaddressChoiceChoicesObjDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			subnetSubnetSiteSubnetParametersTypeModel.AddressChoice = finalObj
-		} else {
-			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			subnetSubnetSiteSubnetParametersTypeModel.AddressChoice = types.ObjectNull(SubnetSiteSubnetParamsAddressChoiceModelAttributeMap)
-		}
 
 		// resource specToModelNested RequiredPointerField --> Site
 		if siteSubnetParamsElement.GetSite() != nil {
@@ -2992,6 +2945,53 @@ func (r *ResourceF5XCSubnet) Read(ctx context.Context, request resource.ReadRequ
 			subnetSubnetSiteSubnetParametersTypeModel.SubnetDhcpServerParams = types.ObjectNull(SubnetSiteSubnetParamsSubnetDhcpServerParamsModelAttributeMap)
 		}
 
+		// resource specToModelNested OneOfField --> AddressChoice
+		if siteSubnetParamsElement.GetAddressChoice() != nil {
+			// Create a temporary attribute map for the choices within this OneOf
+			siteSubnetParamsaddressChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+			// Define a variable for the spec choices to be passed down to nested templates
+			siteSubnetParamsaddressChoiceChoices := siteSubnetParamsElement.GetAddressChoice()
+
+			// Process nested choices, populating the temporary attribute map
+
+			// resource specToModelNested BoolOfOneOfPointerField --> StaticIp
+			_, isStaticIp := siteSubnetParamsaddressChoiceChoices.(*ves_io_schema_subnet.SiteSubnetParametersType_StaticIp)
+
+			if isStaticIp {
+				siteSubnetParamsaddressChoiceChoicesAttributeMap["static_ip"] = types.BoolValue(true)
+			} else {
+				siteSubnetParamsaddressChoiceChoicesAttributeMap["static_ip"] = types.BoolNull()
+			}
+
+			// resource specToModelNested BoolOfOneOfPointerField --> Dhcp
+			_, isDhcp := siteSubnetParamsaddressChoiceChoices.(*ves_io_schema_subnet.SiteSubnetParametersType_Dhcp)
+
+			if isDhcp {
+				siteSubnetParamsaddressChoiceChoicesAttributeMap["dhcp"] = types.BoolValue(true)
+			} else {
+				siteSubnetParamsaddressChoiceChoicesAttributeMap["dhcp"] = types.BoolNull()
+			}
+
+			// --- End of Choices ---
+
+			// Create the final ObjectValue for this OneOf field
+			finalObj, siteSubnetParamsaddressChoiceChoicesObjDiags := types.ObjectValue(
+				SubnetSiteSubnetParamsAddressChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+				siteSubnetParamsaddressChoiceChoicesAttributeMap,
+			)
+			response.Diagnostics.Append(siteSubnetParamsaddressChoiceChoicesObjDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			// Assign the final object to the correct place (either the root model or a parent's attribute map)
+			subnetSubnetSiteSubnetParametersTypeModel.AddressChoice = finalObj
+		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			subnetSubnetSiteSubnetParametersTypeModel.AddressChoice = types.ObjectNull(SubnetSiteSubnetParamsAddressChoiceModelAttributeMap)
+		}
+
 		siteSubnetParamsElementsSpectToModel = append(siteSubnetParamsElementsSpectToModel, subnetSubnetSiteSubnetParametersTypeModel)
 	}
 
@@ -3020,15 +3020,6 @@ func (r *ResourceF5XCSubnet) Read(ctx context.Context, request resource.ReadRequ
 		var connectionChoiceChoicesModel = &SubnetGlobalSpecTypeConnectionChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
-
-		// resource specToModelNested BoolOfOneOfPointerField --> ConnectToSlo
-		_, isConnectToSlo := connectionChoiceChoices.(*ves_io_schema_subnet.GlobalSpecType_ConnectToSlo)
-
-		if isConnectToSlo {
-			connectionChoiceChoicesModel.ConnectToSlo = types.BoolValue(true)
-		} else {
-			connectionChoiceChoicesModel.ConnectToSlo = types.BoolNull()
-		}
 
 		// resource specToModelNested BoolOfOneOfPointerField --> IsolatedNw
 		_, isIsolatedNw := connectionChoiceChoices.(*ves_io_schema_subnet.GlobalSpecType_IsolatedNw)
@@ -3107,6 +3098,15 @@ func (r *ResourceF5XCSubnet) Read(ctx context.Context, request resource.ReadRequ
 			} else {
 				connectionChoiceChoicesModel.ConnectToLayer2 = types.ObjectNull(SubnetConnectionChoiceConnectToLayer2ModelAttributeMap)
 			}
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> ConnectToSlo
+		_, isConnectToSlo := connectionChoiceChoices.(*ves_io_schema_subnet.GlobalSpecType_ConnectToSlo)
+
+		if isConnectToSlo {
+			connectionChoiceChoicesModel.ConnectToSlo = types.BoolValue(true)
+		} else {
+			connectionChoiceChoicesModel.ConnectToSlo = types.BoolNull()
 		}
 
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
@@ -3211,13 +3211,6 @@ func (r *ResourceF5XCSubnet) Update(ctx context.Context, request resource.Update
 			return
 		}
 
-		// resource modelToSpecNested BoolOfOneOfPointerField --> ConnectToSlo
-		if !connectionChoiceModel.ConnectToSlo.IsNull() && !connectionChoiceModel.ConnectToSlo.IsUnknown() {
-			connectToSloSpecBool := &ves_io_schema_subnet.ReplaceSpecType_ConnectToSlo{}
-			connectToSloSpecBool.ConnectToSlo = &ves_io_schema.Empty{}
-			spec.ConnectionChoice = connectToSloSpecBool
-		}
-
 		// resource modelToSpecNested BoolOfOneOfPointerField --> IsolatedNw
 		if !connectionChoiceModel.IsolatedNw.IsNull() && !connectionChoiceModel.IsolatedNw.IsUnknown() {
 			isolatedNwSpecBool := &ves_io_schema_subnet.ReplaceSpecType_IsolatedNw{}
@@ -3259,6 +3252,13 @@ func (r *ResourceF5XCSubnet) Update(ctx context.Context, request resource.Update
 
 			}
 
+		}
+
+		// resource modelToSpecNested BoolOfOneOfPointerField --> ConnectToSlo
+		if !connectionChoiceModel.ConnectToSlo.IsNull() && !connectionChoiceModel.ConnectToSlo.IsUnknown() {
+			connectToSloSpecBool := &ves_io_schema_subnet.ReplaceSpecType_ConnectToSlo{}
+			connectToSloSpecBool.ConnectToSlo = &ves_io_schema.Empty{}
+			spec.ConnectionChoice = connectToSloSpecBool
 		}
 
 	}
@@ -3409,56 +3409,6 @@ func (r *ResourceF5XCSubnet) Update(ctx context.Context, request resource.Update
 	for _, siteDhcpServerParamsInternalElement := range specData.SiteDhcpServerParamsInternal {
 		subnetSubnetSubnetDHCPServerParametersTypeModel := SubnetSubnetSubnetDHCPServerParametersType{}
 
-		// resource specToModelNested ArrayOfPointerField --> Site
-		if len(siteDhcpServerParamsInternalElement.GetSite()) > 0 {
-			// Step 1: Always create a slice of model structs from the spec data.
-			// This slice serves as an intermediate representation.
-			siteElements := make([]ObjectRefTypeModel, 0, len(siteDhcpServerParamsInternalElement.GetSite()))
-			for _, siteElement := range siteDhcpServerParamsInternalElement.GetSite() {
-				objectRefTypeModelModel := ObjectRefTypeModel{}
-
-				// resource specToModelNested StringField --> Tenant
-				if siteElement.GetTenant() != "" {
-					objectRefTypeModelModel.Tenant = types.StringValue(siteElement.GetTenant())
-				} else {
-					// Empty string, set to null
-					objectRefTypeModelModel.Tenant = types.StringNull()
-				}
-
-				// resource specToModelNested RequiredStringField --> Namespace
-				if siteElement.GetNamespace() != "" {
-					objectRefTypeModelModel.Namespace = types.StringValue(siteElement.GetNamespace())
-				} else {
-					// Empty string, set to null
-					objectRefTypeModelModel.Namespace = types.StringNull()
-				}
-
-				// resource specToModelNested RequiredStringField --> Name
-				if siteElement.GetName() != "" {
-					objectRefTypeModelModel.Name = types.StringValue(siteElement.GetName())
-				} else {
-					// Empty string, set to null
-					objectRefTypeModelModel.Name = types.StringNull()
-				}
-
-				siteElements = append(siteElements, objectRefTypeModelModel)
-			}
-			// CASE 1: The target field is a `types.List` or an attribute map.
-			// The intermediate slice of structs must be converted to a `types.ListValue`.
-			siteListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: SubnetSiteObjectRefModelAttributeMap}, siteElements)
-			response.Diagnostics.Append(diags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			subnetSubnetSubnetDHCPServerParametersTypeModel.Site = siteListValue
-
-		} else {
-			// The source list is empty or nil.
-			// CASE 1: The target field is a `types.List` or an attribute map.
-			// Assign a null `types.ListValue`.
-			subnetSubnetSubnetDHCPServerParametersTypeModel.Site = types.ListNull(types.ObjectType{AttrTypes: SubnetSiteObjectRefModelAttributeMap})
-		}
-
 		// resource specToModelNested PointerField --> SubnetDhcpServerParams
 		if siteDhcpServerParamsInternalElement.GetSubnetDhcpServerParams() != nil {
 			// Create the nested Go struct
@@ -3489,88 +3439,6 @@ func (r *ResourceF5XCSubnet) Update(ctx context.Context, request resource.Update
 				dhcpNetworksElements := make([]SubnetNetworkInterfaceDHCPNetworkType, 0, len(subnetDhcpServerParamsElement.GetDhcpNetworks()))
 				for _, dhcpNetworksElement := range subnetDhcpServerParamsElement.GetDhcpNetworks() {
 					subnetNetworkInterfaceDHCPNetworkTypeModel := SubnetNetworkInterfaceDHCPNetworkType{}
-
-					// resource specToModelNested RequiredOneOfField --> NetworkPrefixChoice
-					// GlobalSpecType
-					if dhcpNetworksElement.GetNetworkPrefixChoice() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						dhcpNetworksnetworkPrefixChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates
-						dhcpNetworksnetworkPrefixChoiceChoices := dhcpNetworksElement.GetNetworkPrefixChoice()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// resource specToModelNested StringOfOneOfField --> NetworkPrefix
-						networkPrefixItem, isNetworkPrefix := dhcpNetworksnetworkPrefixChoiceChoices.(*ves_io_schema_network_interface.DHCPNetworkType_NetworkPrefix)
-
-						if isNetworkPrefix {
-							dhcpNetworksnetworkPrefixChoiceChoicesAttributeMap["network_prefix"] = types.StringValue(string(networkPrefixItem.NetworkPrefix))
-						} else {
-							// Empty string, set to null
-							dhcpNetworksnetworkPrefixChoiceChoicesAttributeMap["network_prefix"] = types.StringNull()
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, dhcpNetworksnetworkPrefixChoiceChoicesObjDiags := types.ObjectValue(
-							SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsDhcpNetworksNetworkPrefixChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-							dhcpNetworksnetworkPrefixChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(dhcpNetworksnetworkPrefixChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						subnetNetworkInterfaceDHCPNetworkTypeModel.NetworkPrefixChoice = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						subnetNetworkInterfaceDHCPNetworkTypeModel.NetworkPrefixChoice = types.ObjectNull(SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsDhcpNetworksNetworkPrefixChoiceModelAttributeMap)
-					}
-
-					// resource specToModelNested ArrayOfPointerField --> Pools
-					if len(dhcpNetworksElement.GetPools()) > 0 {
-						// Step 1: Always create a slice of model structs from the spec data.
-						// This slice serves as an intermediate representation.
-						poolsElements := make([]SubnetNetworkInterfaceDHCPPoolType, 0, len(dhcpNetworksElement.GetPools()))
-						for _, poolsElement := range dhcpNetworksElement.GetPools() {
-							subnetNetworkInterfaceDHCPPoolTypeModel := SubnetNetworkInterfaceDHCPPoolType{}
-
-							// resource specToModelNested StringField --> StartIp
-							if poolsElement.GetStartIp() != "" {
-								subnetNetworkInterfaceDHCPPoolTypeModel.StartIp = types.StringValue(poolsElement.GetStartIp())
-							} else {
-								// Empty string, set to null
-								subnetNetworkInterfaceDHCPPoolTypeModel.StartIp = types.StringNull()
-							}
-
-							// resource specToModelNested StringField --> EndIp
-							if poolsElement.GetEndIp() != "" {
-								subnetNetworkInterfaceDHCPPoolTypeModel.EndIp = types.StringValue(poolsElement.GetEndIp())
-							} else {
-								// Empty string, set to null
-								subnetNetworkInterfaceDHCPPoolTypeModel.EndIp = types.StringNull()
-							}
-
-							poolsElements = append(poolsElements, subnetNetworkInterfaceDHCPPoolTypeModel)
-						}
-						// CASE 1: The target field is a `types.List` or an attribute map.
-						// The intermediate slice of structs must be converted to a `types.ListValue`.
-						poolsListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsDhcpNetworksPoolsModelAttributeMap}, poolsElements)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						subnetNetworkInterfaceDHCPNetworkTypeModel.Pools = poolsListValue
-
-					} else {
-						// The source list is empty or nil.
-						// CASE 1: The target field is a `types.List` or an attribute map.
-						// Assign a null `types.ListValue`.
-						subnetNetworkInterfaceDHCPNetworkTypeModel.Pools = types.ListNull(types.ObjectType{AttrTypes: SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsDhcpNetworksPoolsModelAttributeMap})
-					}
 
 					// resource specToModelNested RequiredOneOfField --> GatewayChoice
 					// GlobalSpecType
@@ -3693,6 +3561,88 @@ func (r *ResourceF5XCSubnet) Update(ctx context.Context, request resource.Update
 						subnetNetworkInterfaceDHCPNetworkTypeModel.PoolSettings = types.ListNull(types.StringType)
 					}
 
+					// resource specToModelNested RequiredOneOfField --> NetworkPrefixChoice
+					// GlobalSpecType
+					if dhcpNetworksElement.GetNetworkPrefixChoice() != nil {
+						// Create a temporary attribute map for the choices within this OneOf
+						dhcpNetworksnetworkPrefixChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+						// Define a variable for the spec choices to be passed down to nested templates
+						dhcpNetworksnetworkPrefixChoiceChoices := dhcpNetworksElement.GetNetworkPrefixChoice()
+
+						// Process nested choices, populating the temporary attribute map
+
+						// resource specToModelNested StringOfOneOfField --> NetworkPrefix
+						networkPrefixItem, isNetworkPrefix := dhcpNetworksnetworkPrefixChoiceChoices.(*ves_io_schema_network_interface.DHCPNetworkType_NetworkPrefix)
+
+						if isNetworkPrefix {
+							dhcpNetworksnetworkPrefixChoiceChoicesAttributeMap["network_prefix"] = types.StringValue(string(networkPrefixItem.NetworkPrefix))
+						} else {
+							// Empty string, set to null
+							dhcpNetworksnetworkPrefixChoiceChoicesAttributeMap["network_prefix"] = types.StringNull()
+						}
+
+						// --- End of Choices ---
+
+						// Create the final ObjectValue for this OneOf field
+						finalObj, dhcpNetworksnetworkPrefixChoiceChoicesObjDiags := types.ObjectValue(
+							SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsDhcpNetworksNetworkPrefixChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+							dhcpNetworksnetworkPrefixChoiceChoicesAttributeMap,
+						)
+						response.Diagnostics.Append(dhcpNetworksnetworkPrefixChoiceChoicesObjDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						// Assign the final object to the correct place (either the root model or a parent's attribute map)
+						subnetNetworkInterfaceDHCPNetworkTypeModel.NetworkPrefixChoice = finalObj
+					} else {
+						// The OneOf field is nil in the source spec, so set the Terraform object to null.
+						subnetNetworkInterfaceDHCPNetworkTypeModel.NetworkPrefixChoice = types.ObjectNull(SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsDhcpNetworksNetworkPrefixChoiceModelAttributeMap)
+					}
+
+					// resource specToModelNested ArrayOfPointerField --> Pools
+					if len(dhcpNetworksElement.GetPools()) > 0 {
+						// Step 1: Always create a slice of model structs from the spec data.
+						// This slice serves as an intermediate representation.
+						poolsElements := make([]SubnetNetworkInterfaceDHCPPoolType, 0, len(dhcpNetworksElement.GetPools()))
+						for _, poolsElement := range dhcpNetworksElement.GetPools() {
+							subnetNetworkInterfaceDHCPPoolTypeModel := SubnetNetworkInterfaceDHCPPoolType{}
+
+							// resource specToModelNested StringField --> StartIp
+							if poolsElement.GetStartIp() != "" {
+								subnetNetworkInterfaceDHCPPoolTypeModel.StartIp = types.StringValue(poolsElement.GetStartIp())
+							} else {
+								// Empty string, set to null
+								subnetNetworkInterfaceDHCPPoolTypeModel.StartIp = types.StringNull()
+							}
+
+							// resource specToModelNested StringField --> EndIp
+							if poolsElement.GetEndIp() != "" {
+								subnetNetworkInterfaceDHCPPoolTypeModel.EndIp = types.StringValue(poolsElement.GetEndIp())
+							} else {
+								// Empty string, set to null
+								subnetNetworkInterfaceDHCPPoolTypeModel.EndIp = types.StringNull()
+							}
+
+							poolsElements = append(poolsElements, subnetNetworkInterfaceDHCPPoolTypeModel)
+						}
+						// CASE 1: The target field is a `types.List` or an attribute map.
+						// The intermediate slice of structs must be converted to a `types.ListValue`.
+						poolsListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsDhcpNetworksPoolsModelAttributeMap}, poolsElements)
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						subnetNetworkInterfaceDHCPNetworkTypeModel.Pools = poolsListValue
+
+					} else {
+						// The source list is empty or nil.
+						// CASE 1: The target field is a `types.List` or an attribute map.
+						// Assign a null `types.ListValue`.
+						subnetNetworkInterfaceDHCPNetworkTypeModel.Pools = types.ListNull(types.ObjectType{AttrTypes: SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsDhcpNetworksPoolsModelAttributeMap})
+					}
+
 					dhcpNetworksElements = append(dhcpNetworksElements, subnetNetworkInterfaceDHCPNetworkTypeModel)
 				}
 				// CASE 1: The target field is a `types.List` or an attribute map.
@@ -3721,15 +3671,6 @@ func (r *ResourceF5XCSubnet) Update(ctx context.Context, request resource.Update
 				subnetDhcpServerParamsinterfacesAddressingChoiceChoices := subnetDhcpServerParamsElement.GetInterfacesAddressingChoice()
 
 				// Process nested choices, populating the temporary attribute map
-
-				// resource specToModelNested BoolOfOneOfPointerField --> AutomaticFromStart
-				_, isAutomaticFromStart := subnetDhcpServerParamsinterfacesAddressingChoiceChoices.(*ves_io_schema_network_interface.DHCPServerParametersType_AutomaticFromStart)
-
-				if isAutomaticFromStart {
-					subnetDhcpServerParamsinterfacesAddressingChoiceChoicesAttributeMap["automatic_from_start"] = types.BoolValue(true)
-				} else {
-					subnetDhcpServerParamsinterfacesAddressingChoiceChoicesAttributeMap["automatic_from_start"] = types.BoolNull()
-				}
 
 				// resource specToModelNested BoolOfOneOfPointerField --> AutomaticFromEnd
 				_, isAutomaticFromEnd := subnetDhcpServerParamsinterfacesAddressingChoiceChoices.(*ves_io_schema_network_interface.DHCPServerParametersType_AutomaticFromEnd)
@@ -3775,6 +3716,15 @@ func (r *ResourceF5XCSubnet) Update(ctx context.Context, request resource.Update
 					}
 				}
 
+				// resource specToModelNested BoolOfOneOfPointerField --> AutomaticFromStart
+				_, isAutomaticFromStart := subnetDhcpServerParamsinterfacesAddressingChoiceChoices.(*ves_io_schema_network_interface.DHCPServerParametersType_AutomaticFromStart)
+
+				if isAutomaticFromStart {
+					subnetDhcpServerParamsinterfacesAddressingChoiceChoicesAttributeMap["automatic_from_start"] = types.BoolValue(true)
+				} else {
+					subnetDhcpServerParamsinterfacesAddressingChoiceChoicesAttributeMap["automatic_from_start"] = types.BoolNull()
+				}
+
 				// --- End of Choices ---
 
 				// Create the final ObjectValue for this OneOf field
@@ -3812,6 +3762,56 @@ func (r *ResourceF5XCSubnet) Update(ctx context.Context, request resource.Update
 			subnetSubnetSubnetDHCPServerParametersTypeModel.SubnetDhcpServerParams = types.ObjectNull(SubnetSiteDhcpServerParamsInternalSubnetDhcpServerParamsModelAttributeMap)
 		}
 
+		// resource specToModelNested ArrayOfPointerField --> Site
+		if len(siteDhcpServerParamsInternalElement.GetSite()) > 0 {
+			// Step 1: Always create a slice of model structs from the spec data.
+			// This slice serves as an intermediate representation.
+			siteElements := make([]ObjectRefTypeModel, 0, len(siteDhcpServerParamsInternalElement.GetSite()))
+			for _, siteElement := range siteDhcpServerParamsInternalElement.GetSite() {
+				objectRefTypeModelModel := ObjectRefTypeModel{}
+
+				// resource specToModelNested RequiredStringField --> Name
+				if siteElement.GetName() != "" {
+					objectRefTypeModelModel.Name = types.StringValue(siteElement.GetName())
+				} else {
+					// Empty string, set to null
+					objectRefTypeModelModel.Name = types.StringNull()
+				}
+
+				// resource specToModelNested StringField --> Tenant
+				if siteElement.GetTenant() != "" {
+					objectRefTypeModelModel.Tenant = types.StringValue(siteElement.GetTenant())
+				} else {
+					// Empty string, set to null
+					objectRefTypeModelModel.Tenant = types.StringNull()
+				}
+
+				// resource specToModelNested RequiredStringField --> Namespace
+				if siteElement.GetNamespace() != "" {
+					objectRefTypeModelModel.Namespace = types.StringValue(siteElement.GetNamespace())
+				} else {
+					// Empty string, set to null
+					objectRefTypeModelModel.Namespace = types.StringNull()
+				}
+
+				siteElements = append(siteElements, objectRefTypeModelModel)
+			}
+			// CASE 1: The target field is a `types.List` or an attribute map.
+			// The intermediate slice of structs must be converted to a `types.ListValue`.
+			siteListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: SubnetSiteObjectRefModelAttributeMap}, siteElements)
+			response.Diagnostics.Append(diags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			subnetSubnetSubnetDHCPServerParametersTypeModel.Site = siteListValue
+
+		} else {
+			// The source list is empty or nil.
+			// CASE 1: The target field is a `types.List` or an attribute map.
+			// Assign a null `types.ListValue`.
+			subnetSubnetSubnetDHCPServerParametersTypeModel.Site = types.ListNull(types.ObjectType{AttrTypes: SubnetSiteObjectRefModelAttributeMap})
+		}
+
 		siteDhcpServerParamsInternalElementsSpectToModel = append(siteDhcpServerParamsInternalElementsSpectToModel, subnetSubnetSubnetDHCPServerParametersTypeModel)
 	}
 
@@ -3833,53 +3833,6 @@ func (r *ResourceF5XCSubnet) Update(ctx context.Context, request resource.Update
 
 	for _, siteSubnetParamsElement := range specData.SiteSubnetParams {
 		subnetSubnetSiteSubnetParametersTypeModel := SubnetSubnetSiteSubnetParametersType{}
-
-		// resource specToModelNested OneOfField --> AddressChoice
-		if siteSubnetParamsElement.GetAddressChoice() != nil {
-			// Create a temporary attribute map for the choices within this OneOf
-			siteSubnetParamsaddressChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-			// Define a variable for the spec choices to be passed down to nested templates
-			siteSubnetParamsaddressChoiceChoices := siteSubnetParamsElement.GetAddressChoice()
-
-			// Process nested choices, populating the temporary attribute map
-
-			// resource specToModelNested BoolOfOneOfPointerField --> Dhcp
-			_, isDhcp := siteSubnetParamsaddressChoiceChoices.(*ves_io_schema_subnet.SiteSubnetParametersType_Dhcp)
-
-			if isDhcp {
-				siteSubnetParamsaddressChoiceChoicesAttributeMap["dhcp"] = types.BoolValue(true)
-			} else {
-				siteSubnetParamsaddressChoiceChoicesAttributeMap["dhcp"] = types.BoolNull()
-			}
-
-			// resource specToModelNested BoolOfOneOfPointerField --> StaticIp
-			_, isStaticIp := siteSubnetParamsaddressChoiceChoices.(*ves_io_schema_subnet.SiteSubnetParametersType_StaticIp)
-
-			if isStaticIp {
-				siteSubnetParamsaddressChoiceChoicesAttributeMap["static_ip"] = types.BoolValue(true)
-			} else {
-				siteSubnetParamsaddressChoiceChoicesAttributeMap["static_ip"] = types.BoolNull()
-			}
-
-			// --- End of Choices ---
-
-			// Create the final ObjectValue for this OneOf field
-			finalObj, siteSubnetParamsaddressChoiceChoicesObjDiags := types.ObjectValue(
-				SubnetSiteSubnetParamsAddressChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-				siteSubnetParamsaddressChoiceChoicesAttributeMap,
-			)
-			response.Diagnostics.Append(siteSubnetParamsaddressChoiceChoicesObjDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			subnetSubnetSiteSubnetParametersTypeModel.AddressChoice = finalObj
-		} else {
-			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			subnetSubnetSiteSubnetParametersTypeModel.AddressChoice = types.ObjectNull(SubnetSiteSubnetParamsAddressChoiceModelAttributeMap)
-		}
 
 		// resource specToModelNested RequiredPointerField --> Site
 		if siteSubnetParamsElement.GetSite() != nil {
@@ -4032,6 +3985,53 @@ func (r *ResourceF5XCSubnet) Update(ctx context.Context, request resource.Update
 			subnetSubnetSiteSubnetParametersTypeModel.SubnetDhcpServerParams = types.ObjectNull(SubnetSiteSubnetParamsSubnetDhcpServerParamsModelAttributeMap)
 		}
 
+		// resource specToModelNested OneOfField --> AddressChoice
+		if siteSubnetParamsElement.GetAddressChoice() != nil {
+			// Create a temporary attribute map for the choices within this OneOf
+			siteSubnetParamsaddressChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+			// Define a variable for the spec choices to be passed down to nested templates
+			siteSubnetParamsaddressChoiceChoices := siteSubnetParamsElement.GetAddressChoice()
+
+			// Process nested choices, populating the temporary attribute map
+
+			// resource specToModelNested BoolOfOneOfPointerField --> StaticIp
+			_, isStaticIp := siteSubnetParamsaddressChoiceChoices.(*ves_io_schema_subnet.SiteSubnetParametersType_StaticIp)
+
+			if isStaticIp {
+				siteSubnetParamsaddressChoiceChoicesAttributeMap["static_ip"] = types.BoolValue(true)
+			} else {
+				siteSubnetParamsaddressChoiceChoicesAttributeMap["static_ip"] = types.BoolNull()
+			}
+
+			// resource specToModelNested BoolOfOneOfPointerField --> Dhcp
+			_, isDhcp := siteSubnetParamsaddressChoiceChoices.(*ves_io_schema_subnet.SiteSubnetParametersType_Dhcp)
+
+			if isDhcp {
+				siteSubnetParamsaddressChoiceChoicesAttributeMap["dhcp"] = types.BoolValue(true)
+			} else {
+				siteSubnetParamsaddressChoiceChoicesAttributeMap["dhcp"] = types.BoolNull()
+			}
+
+			// --- End of Choices ---
+
+			// Create the final ObjectValue for this OneOf field
+			finalObj, siteSubnetParamsaddressChoiceChoicesObjDiags := types.ObjectValue(
+				SubnetSiteSubnetParamsAddressChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+				siteSubnetParamsaddressChoiceChoicesAttributeMap,
+			)
+			response.Diagnostics.Append(siteSubnetParamsaddressChoiceChoicesObjDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			// Assign the final object to the correct place (either the root model or a parent's attribute map)
+			subnetSubnetSiteSubnetParametersTypeModel.AddressChoice = finalObj
+		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			subnetSubnetSiteSubnetParametersTypeModel.AddressChoice = types.ObjectNull(SubnetSiteSubnetParamsAddressChoiceModelAttributeMap)
+		}
+
 		siteSubnetParamsElementsSpectToModel = append(siteSubnetParamsElementsSpectToModel, subnetSubnetSiteSubnetParametersTypeModel)
 	}
 
@@ -4060,15 +4060,6 @@ func (r *ResourceF5XCSubnet) Update(ctx context.Context, request resource.Update
 		var connectionChoiceChoicesModel = &SubnetGlobalSpecTypeConnectionChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
-
-		// resource specToModelNested BoolOfOneOfPointerField --> ConnectToSlo
-		_, isConnectToSlo := connectionChoiceChoices.(*ves_io_schema_subnet.GlobalSpecType_ConnectToSlo)
-
-		if isConnectToSlo {
-			connectionChoiceChoicesModel.ConnectToSlo = types.BoolValue(true)
-		} else {
-			connectionChoiceChoicesModel.ConnectToSlo = types.BoolNull()
-		}
 
 		// resource specToModelNested BoolOfOneOfPointerField --> IsolatedNw
 		_, isIsolatedNw := connectionChoiceChoices.(*ves_io_schema_subnet.GlobalSpecType_IsolatedNw)
@@ -4147,6 +4138,15 @@ func (r *ResourceF5XCSubnet) Update(ctx context.Context, request resource.Update
 			} else {
 				connectionChoiceChoicesModel.ConnectToLayer2 = types.ObjectNull(SubnetConnectionChoiceConnectToLayer2ModelAttributeMap)
 			}
+		}
+
+		// resource specToModelNested BoolOfOneOfPointerField --> ConnectToSlo
+		_, isConnectToSlo := connectionChoiceChoices.(*ves_io_schema_subnet.GlobalSpecType_ConnectToSlo)
+
+		if isConnectToSlo {
+			connectionChoiceChoicesModel.ConnectToSlo = types.BoolValue(true)
+		} else {
+			connectionChoiceChoicesModel.ConnectToSlo = types.BoolNull()
 		}
 
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.

@@ -89,9 +89,9 @@ type SecretPolicyGlobalSpecTypeClientSelector struct {
 }
 
 type SecretPolicyGlobalSpecTypeClientNameMatcher struct {
-	ExactValues  types.List `tfsdk:"exact_values"`
 	RegexValues  types.List `tfsdk:"regex_values"`
 	Transformers types.List `tfsdk:"transformers"`
+	ExactValues  types.List `tfsdk:"exact_values"`
 }
 
 type SecretPolicyGlobalSpecTypeLegacyRuleList struct {
@@ -100,12 +100,12 @@ type SecretPolicyGlobalSpecTypeLegacyRuleList struct {
 
 // ResourceF5XCSecretPolicyModel describes the resource data model.
 type ResourceF5XCSecretPolicyModel struct {
-	Labels              types.Map            `tfsdk:"labels"`
 	Annotations         types.Map            `tfsdk:"annotations"`
 	Description         types.String         `tfsdk:"description"`
 	Name                types.String         `tfsdk:"name"`
 	Namespace           types.String         `tfsdk:"namespace"`
 	Uid                 types.String         `tfsdk:"uid"`
+	Labels              types.Map            `tfsdk:"labels"`
 	AllowF5Xc           types.Bool           `tfsdk:"allow_f_5xc"`
 	DecryptCacheTimeout timetypes.GoDuration `tfsdk:"decrypt_cache_timeout"`
 	RuleChoice          types.Object         `tfsdk:"rule_choice"`
@@ -215,13 +215,13 @@ var SecretPolicyRuleChoiceRuleListRulesSpecClientChoiceClientSelectorModelAttrib
 // Attribute map for PointerOfOneOfField --> ClientNameMatcher
 var SecretPolicyRuleChoiceRuleListRulesSpecClientChoiceClientNameMatcherModelAttributeMap = map[string]attr.Type{
 
-	"exact_values": types.ListType{
-		ElemType: types.StringType,
-	},
 	"regex_values": types.ListType{
 		ElemType: types.StringType,
 	},
 	"transformers": types.ListType{
+		ElemType: types.StringType,
+	},
+	"exact_values": types.ListType{
 		ElemType: types.StringType,
 	},
 }
@@ -264,17 +264,6 @@ func (r *ResourceF5XCSecretPolicy) Schema(ctx context.Context, request resource.
 		Description:         "SecretPolicy resource",
 
 		Attributes: map[string]schema.Attribute{
-			"labels": schema.MapAttribute{
-				Description:         "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            true,
-				ElementType:         types.StringType,
-				PlanModifiers: []planmodifier.Map{
-					mapmergemodifier.New(),
-				},
-			},
 			"annotations": schema.MapAttribute{
 				Description:         "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
 				MarkdownDescription: "",
@@ -317,6 +306,17 @@ func (r *ResourceF5XCSecretPolicy) Schema(ctx context.Context, request resource.
 				Computed:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"labels": schema.MapAttribute{
+				Description:         "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				MarkdownDescription: "",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				ElementType:         types.StringType,
+				PlanModifiers: []planmodifier.Map{
+					mapmergemodifier.New(),
 				},
 			},
 			"allow_f_5xc": schema.BoolAttribute{
@@ -401,13 +401,13 @@ func (r *ResourceF5XCSecretPolicy) Schema(ctx context.Context, request resource.
 											Attributes: map[string]schema.Attribute{
 												"action": schema.ListAttribute{
 													Description:         "action Action to be enforced if all the predicates evaluates to true.",
-													MarkdownDescription: "<br>**Allowed Values (choose one):** `[\"LAST_POLICY\", \"GOTO_POLICY\", \"DENY\", \"ALLOW\", \"NEXT_POLICY_SET\", \"NEXT_POLICY\"]`",
+													MarkdownDescription: "<br>**Allowed Values (choose one):** `[\"DENY\", \"ALLOW\", \"NEXT_POLICY_SET\", \"NEXT_POLICY\", \"LAST_POLICY\", \"GOTO_POLICY\"]`",
 													ElementType:         types.StringType,
 													Required:            true,
 													Optional:            false,
 													Computed:            false,
 													Validators: []validator.List{
-														listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"LAST_POLICY", "GOTO_POLICY", "DENY", "ALLOW", "NEXT_POLICY_SET", "NEXT_POLICY"}...)),
+														listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"DENY", "ALLOW", "NEXT_POLICY_SET", "NEXT_POLICY", "LAST_POLICY", "GOTO_POLICY"}...)),
 														listvalidator.SizeAtMost(1),
 													},
 												},
@@ -419,9 +419,9 @@ func (r *ResourceF5XCSecretPolicy) Schema(ctx context.Context, request resource.
 													Computed:            false,
 													Validators: []validator.Object{
 														atmostoneofvalidator.AtMostOneOf(
+															"client_name",
 															"client_selector",
 															"client_name_matcher",
-															"client_name",
 														),
 													},
 													Attributes: map[string]schema.Attribute{
@@ -449,17 +449,6 @@ func (r *ResourceF5XCSecretPolicy) Schema(ctx context.Context, request resource.
 															Optional:            true,
 															Computed:            false,
 															Attributes: map[string]schema.Attribute{
-																"exact_values": schema.ListAttribute{
-																	Description:         "exact values A list of exact values to match the input against.",
-																	MarkdownDescription: "",
-																	ElementType:         types.StringType,
-																	Required:            false,
-																	Optional:            true,
-																	Computed:            false,
-																	Validators: []validator.List{
-																		listvalidator.SizeAtMost(64),
-																	},
-																},
 																"regex_values": schema.ListAttribute{
 																	Description:         "regex values A list of regular expressions to match the input against.",
 																	MarkdownDescription: "",
@@ -473,13 +462,24 @@ func (r *ResourceF5XCSecretPolicy) Schema(ctx context.Context, request resource.
 																},
 																"transformers": schema.ListAttribute{
 																	Description:         "transformers An ordered list of transformers (starting from index 0) to be applied to the path before matching.",
-																	MarkdownDescription: "<br>**Valid Options:** `[\"LOWER_CASE\", \"URL_DECODE\", \"TRIM_LEFT\", \"TRIM_RIGHT\", \"TRIM\", \"TRANSFORMER_NONE\", \"UPPER_CASE\", \"BASE64_DECODE\", \"NORMALIZE_PATH\", \"REMOVE_WHITESPACE\"]` (Multiple selection allowed)",
+																	MarkdownDescription: "<br>**Valid Options:** `[\"TRANSFORMER_NONE\", \"LOWER_CASE\", \"UPPER_CASE\", \"NORMALIZE_PATH\", \"TRIM\", \"BASE64_DECODE\", \"REMOVE_WHITESPACE\", \"URL_DECODE\", \"TRIM_LEFT\", \"TRIM_RIGHT\"]` (Multiple selection allowed)",
 																	ElementType:         types.StringType,
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
 																	Validators: []validator.List{
-																		listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"LOWER_CASE", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "UPPER_CASE", "BASE64_DECODE", "NORMALIZE_PATH", "REMOVE_WHITESPACE"}...)),
+																		listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"TRANSFORMER_NONE", "LOWER_CASE", "UPPER_CASE", "NORMALIZE_PATH", "TRIM", "BASE64_DECODE", "REMOVE_WHITESPACE", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT"}...)),
+																	},
+																},
+																"exact_values": schema.ListAttribute{
+																	Description:         "exact values A list of exact values to match the input against.",
+																	MarkdownDescription: "",
+																	ElementType:         types.StringType,
+																	Required:            false,
+																	Optional:            true,
+																	Computed:            false,
+																	Validators: []validator.List{
+																		listvalidator.SizeAtMost(64),
 																	},
 																},
 															},
@@ -829,17 +829,6 @@ func (r *ResourceF5XCSecretPolicy) Create(ctx context.Context, request resource.
 								clientNameMatcherOneOfSpec.ClientNameMatcher = &ves_io_schema_policy.MatcherType{}
 								specSpec.ClientChoice = clientNameMatcherOneOfSpec
 
-								// resource modelToSpecNested ArrayOfStringField --> ExactValues
-								if !secretPolicyGlobalSpecTypeClientNameMatcherModel.ExactValues.IsNull() && !secretPolicyGlobalSpecTypeClientNameMatcherModel.ExactValues.IsUnknown() {
-									elements := make([]string, 0, len(secretPolicyGlobalSpecTypeClientNameMatcherModel.ExactValues.Elements()))
-									diags := secretPolicyGlobalSpecTypeClientNameMatcherModel.ExactValues.ElementsAs(ctx, &elements, false)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									clientNameMatcherOneOfSpec.ClientNameMatcher.ExactValues = elements
-								}
-
 								// resource modelToSpecNested ArrayOfStringField --> RegexValues
 								if !secretPolicyGlobalSpecTypeClientNameMatcherModel.RegexValues.IsNull() && !secretPolicyGlobalSpecTypeClientNameMatcherModel.RegexValues.IsUnknown() {
 									elements := make([]string, 0, len(secretPolicyGlobalSpecTypeClientNameMatcherModel.RegexValues.Elements()))
@@ -874,6 +863,17 @@ func (r *ResourceF5XCSecretPolicy) Create(ctx context.Context, request resource.
 										}
 									}
 									clientNameMatcherOneOfSpec.ClientNameMatcher.Transformers = transformersSpec
+								}
+
+								// resource modelToSpecNested ArrayOfStringField --> ExactValues
+								if !secretPolicyGlobalSpecTypeClientNameMatcherModel.ExactValues.IsNull() && !secretPolicyGlobalSpecTypeClientNameMatcherModel.ExactValues.IsUnknown() {
+									elements := make([]string, 0, len(secretPolicyGlobalSpecTypeClientNameMatcherModel.ExactValues.Elements()))
+									diags := secretPolicyGlobalSpecTypeClientNameMatcherModel.ExactValues.ElementsAs(ctx, &elements, false)
+									response.Diagnostics.Append(diags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									clientNameMatcherOneOfSpec.ClientNameMatcher.ExactValues = elements
 								}
 
 							}
@@ -975,45 +975,6 @@ func (r *ResourceF5XCSecretPolicy) Create(ctx context.Context, request resource.
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// CREATE / UPDATE: Store the plan value as-is so the apply result matches the plan.
-		// The plan is either:
-		//   - Unknown (config=null): store the full API response.
-		//   - config value (first create with user labels): store only user labels.
-		//   - prior state (update with user+backend labels): store the merged labels.
-		// In all cases, data.Labels already holds the correct plan value
-		// except when it is Unknown — in that case we use the API response.
-		if data.Labels.IsUnknown() {
-			data.Labels = labelsMap
-		}
-		// When plan is a known map, leave data.Labels unchanged (= plan value).
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
-
 	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
 	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
 	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
@@ -1064,6 +1025,45 @@ func (r *ResourceF5XCSecretPolicy) Create(ctx context.Context, request resource.
 
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
+	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
+	//
+	// Create/Update (called from Create/Update handlers):
+	//
+	//	The apply result must match the plan exactly. We store only what the plan
+	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
+	//	the plan are intentionally omitted here — they will be picked up by Read.
+	//
+	// Read (called from Read handler):
+	//
+	//	We merge the current state (user-configured labels) with the API response
+	//	(which may contain backend-injected labels). The merged result is stored in
+	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
+	//	Terraform sees no diff and no "inconsistent result" error occurs.
+	if metaData.GetLabels() != nil {
+		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
+		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+		response.Diagnostics.Append(labelsDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		// CREATE / UPDATE: Store the plan value as-is so the apply result matches the plan.
+		// The plan is either:
+		//   - Unknown (config=null): store the full API response.
+		//   - config value (first create with user labels): store only user labels.
+		//   - prior state (update with user+backend labels): store the merged labels.
+		// In all cases, data.Labels already holds the correct plan value
+		// except when it is Unknown — in that case we use the API response.
+		if data.Labels.IsUnknown() {
+			data.Labels = labelsMap
+		}
+		// When plan is a known map, leave data.Labels unchanged (= plan value).
+	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
+		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
+		data.Labels = types.MapNull(types.StringType)
+	}
 
 	// resource SpecToModelRoot BoolField --> AllowF5Xc
 	data.AllowF5Xc = types.BoolValue(specData.GetAllowF5Xc())
@@ -1222,18 +1222,6 @@ func (r *ResourceF5XCSecretPolicy) Create(ctx context.Context, request resource.
 
 									if isClientNameMatcher && clientNameMatcherOptions != nil {
 
-										// resource specToModelNested ArrayOfStringField --> ExactValues
-										if len(clientNameMatcherOptions.ClientNameMatcher.GetExactValues()) > 0 {
-											listValue, diags := types.ListValueFrom(ctx, types.StringType, clientNameMatcherOptions.ClientNameMatcher.GetExactValues())
-											response.Diagnostics.Append(diags...)
-											if response.Diagnostics.HasError() {
-												return
-											}
-											clientNameMatcherAttributeMap["exact_values"] = listValue
-										} else {
-											clientNameMatcherAttributeMap["exact_values"] = types.ListNull(types.StringType)
-										}
-
 										// resource specToModelNested ArrayOfStringField --> RegexValues
 										if len(clientNameMatcherOptions.ClientNameMatcher.GetRegexValues()) > 0 {
 											listValue, diags := types.ListValueFrom(ctx, types.StringType, clientNameMatcherOptions.ClientNameMatcher.GetRegexValues())
@@ -1262,6 +1250,18 @@ func (r *ResourceF5XCSecretPolicy) Create(ctx context.Context, request resource.
 											clientNameMatcherAttributeMap["transformers"] = listValue
 										} else {
 											clientNameMatcherAttributeMap["transformers"] = types.ListNull(types.StringType)
+										}
+
+										// resource specToModelNested ArrayOfStringField --> ExactValues
+										if len(clientNameMatcherOptions.ClientNameMatcher.GetExactValues()) > 0 {
+											listValue, diags := types.ListValueFrom(ctx, types.StringType, clientNameMatcherOptions.ClientNameMatcher.GetExactValues())
+											response.Diagnostics.Append(diags...)
+											if response.Diagnostics.HasError() {
+												return
+											}
+											clientNameMatcherAttributeMap["exact_values"] = listValue
+										} else {
+											clientNameMatcherAttributeMap["exact_values"] = types.ListNull(types.StringType)
 										}
 
 										clientNameMatcherObj, diags := types.ObjectValue(SecretPolicyRuleChoiceRuleListRulesSpecClientChoiceClientNameMatcherModelAttributeMap, clientNameMatcherAttributeMap)
@@ -1502,53 +1502,6 @@ func (r *ResourceF5XCSecretPolicy) Read(ctx context.Context, request resource.Re
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedLabels := make(map[string]attr.Value)
-		for k, v := range labelsMap.Elements() {
-			mergedLabels[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
-			for k, v := range data.Labels.Elements() {
-				mergedLabels[k] = v
-			}
-		}
-		mergedLabelsMap, mergedLabelsDiags := types.MapValue(types.StringType, mergedLabels)
-		response.Diagnostics.Append(mergedLabelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Labels = mergedLabelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
-
 	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
 	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
 	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
@@ -1607,6 +1560,53 @@ func (r *ResourceF5XCSecretPolicy) Read(ctx context.Context, request resource.Re
 
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
+	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
+	//
+	// Create/Update (called from Create/Update handlers):
+	//
+	//	The apply result must match the plan exactly. We store only what the plan
+	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
+	//	the plan are intentionally omitted here — they will be picked up by Read.
+	//
+	// Read (called from Read handler):
+	//
+	//	We merge the current state (user-configured labels) with the API response
+	//	(which may contain backend-injected labels). The merged result is stored in
+	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
+	//	Terraform sees no diff and no "inconsistent result" error occurs.
+	if metaData.GetLabels() != nil {
+		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
+		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+		response.Diagnostics.Append(labelsDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
+		// Start with the API response as the base (backend is authoritative for its own keys).
+		mergedLabels := make(map[string]attr.Value)
+		for k, v := range labelsMap.Elements() {
+			mergedLabels[k] = v
+		}
+		// Overlay with user-configured labels from the current state so that user labels
+		// are preserved even if the backend does not echo them back.
+		if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
+			for k, v := range data.Labels.Elements() {
+				mergedLabels[k] = v
+			}
+		}
+		mergedLabelsMap, mergedLabelsDiags := types.MapValue(types.StringType, mergedLabels)
+		response.Diagnostics.Append(mergedLabelsDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.Labels = mergedLabelsMap
+	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
+		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
+		data.Labels = types.MapNull(types.StringType)
+	}
 
 	// resource SpecToModelRoot BoolField --> AllowF5Xc
 	data.AllowF5Xc = types.BoolValue(specData.GetAllowF5Xc())
@@ -1765,18 +1765,6 @@ func (r *ResourceF5XCSecretPolicy) Read(ctx context.Context, request resource.Re
 
 									if isClientNameMatcher && clientNameMatcherOptions != nil {
 
-										// resource specToModelNested ArrayOfStringField --> ExactValues
-										if len(clientNameMatcherOptions.ClientNameMatcher.GetExactValues()) > 0 {
-											listValue, diags := types.ListValueFrom(ctx, types.StringType, clientNameMatcherOptions.ClientNameMatcher.GetExactValues())
-											response.Diagnostics.Append(diags...)
-											if response.Diagnostics.HasError() {
-												return
-											}
-											clientNameMatcherAttributeMap["exact_values"] = listValue
-										} else {
-											clientNameMatcherAttributeMap["exact_values"] = types.ListNull(types.StringType)
-										}
-
 										// resource specToModelNested ArrayOfStringField --> RegexValues
 										if len(clientNameMatcherOptions.ClientNameMatcher.GetRegexValues()) > 0 {
 											listValue, diags := types.ListValueFrom(ctx, types.StringType, clientNameMatcherOptions.ClientNameMatcher.GetRegexValues())
@@ -1805,6 +1793,18 @@ func (r *ResourceF5XCSecretPolicy) Read(ctx context.Context, request resource.Re
 											clientNameMatcherAttributeMap["transformers"] = listValue
 										} else {
 											clientNameMatcherAttributeMap["transformers"] = types.ListNull(types.StringType)
+										}
+
+										// resource specToModelNested ArrayOfStringField --> ExactValues
+										if len(clientNameMatcherOptions.ClientNameMatcher.GetExactValues()) > 0 {
+											listValue, diags := types.ListValueFrom(ctx, types.StringType, clientNameMatcherOptions.ClientNameMatcher.GetExactValues())
+											response.Diagnostics.Append(diags...)
+											if response.Diagnostics.HasError() {
+												return
+											}
+											clientNameMatcherAttributeMap["exact_values"] = listValue
+										} else {
+											clientNameMatcherAttributeMap["exact_values"] = types.ListNull(types.StringType)
 										}
 
 										clientNameMatcherObj, diags := types.ObjectValue(SecretPolicyRuleChoiceRuleListRulesSpecClientChoiceClientNameMatcherModelAttributeMap, clientNameMatcherAttributeMap)
@@ -2210,17 +2210,6 @@ func (r *ResourceF5XCSecretPolicy) Update(ctx context.Context, request resource.
 								clientNameMatcherOneOfSpec.ClientNameMatcher = &ves_io_schema_policy.MatcherType{}
 								specSpec.ClientChoice = clientNameMatcherOneOfSpec
 
-								// resource modelToSpecNested ArrayOfStringField --> ExactValues
-								if !secretPolicyGlobalSpecTypeClientNameMatcherModel.ExactValues.IsNull() && !secretPolicyGlobalSpecTypeClientNameMatcherModel.ExactValues.IsUnknown() {
-									elements := make([]string, 0, len(secretPolicyGlobalSpecTypeClientNameMatcherModel.ExactValues.Elements()))
-									diags := secretPolicyGlobalSpecTypeClientNameMatcherModel.ExactValues.ElementsAs(ctx, &elements, false)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									clientNameMatcherOneOfSpec.ClientNameMatcher.ExactValues = elements
-								}
-
 								// resource modelToSpecNested ArrayOfStringField --> RegexValues
 								if !secretPolicyGlobalSpecTypeClientNameMatcherModel.RegexValues.IsNull() && !secretPolicyGlobalSpecTypeClientNameMatcherModel.RegexValues.IsUnknown() {
 									elements := make([]string, 0, len(secretPolicyGlobalSpecTypeClientNameMatcherModel.RegexValues.Elements()))
@@ -2255,6 +2244,17 @@ func (r *ResourceF5XCSecretPolicy) Update(ctx context.Context, request resource.
 										}
 									}
 									clientNameMatcherOneOfSpec.ClientNameMatcher.Transformers = transformersSpec
+								}
+
+								// resource modelToSpecNested ArrayOfStringField --> ExactValues
+								if !secretPolicyGlobalSpecTypeClientNameMatcherModel.ExactValues.IsNull() && !secretPolicyGlobalSpecTypeClientNameMatcherModel.ExactValues.IsUnknown() {
+									elements := make([]string, 0, len(secretPolicyGlobalSpecTypeClientNameMatcherModel.ExactValues.Elements()))
+									diags := secretPolicyGlobalSpecTypeClientNameMatcherModel.ExactValues.ElementsAs(ctx, &elements, false)
+									response.Diagnostics.Append(diags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									clientNameMatcherOneOfSpec.ClientNameMatcher.ExactValues = elements
 								}
 
 							}
@@ -2357,53 +2357,6 @@ func (r *ResourceF5XCSecretPolicy) Update(ctx context.Context, request resource.
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedLabels := make(map[string]attr.Value)
-		for k, v := range labelsMap.Elements() {
-			mergedLabels[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
-			for k, v := range data.Labels.Elements() {
-				mergedLabels[k] = v
-			}
-		}
-		mergedLabelsMap, mergedLabelsDiags := types.MapValue(types.StringType, mergedLabels)
-		response.Diagnostics.Append(mergedLabelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Labels = mergedLabelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
-
 	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
 	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
 	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
@@ -2462,6 +2415,53 @@ func (r *ResourceF5XCSecretPolicy) Update(ctx context.Context, request resource.
 
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
+	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
+	//
+	// Create/Update (called from Create/Update handlers):
+	//
+	//	The apply result must match the plan exactly. We store only what the plan
+	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
+	//	the plan are intentionally omitted here — they will be picked up by Read.
+	//
+	// Read (called from Read handler):
+	//
+	//	We merge the current state (user-configured labels) with the API response
+	//	(which may contain backend-injected labels). The merged result is stored in
+	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
+	//	Terraform sees no diff and no "inconsistent result" error occurs.
+	if metaData.GetLabels() != nil {
+		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
+		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+		response.Diagnostics.Append(labelsDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
+		// Start with the API response as the base (backend is authoritative for its own keys).
+		mergedLabels := make(map[string]attr.Value)
+		for k, v := range labelsMap.Elements() {
+			mergedLabels[k] = v
+		}
+		// Overlay with user-configured labels from the current state so that user labels
+		// are preserved even if the backend does not echo them back.
+		if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
+			for k, v := range data.Labels.Elements() {
+				mergedLabels[k] = v
+			}
+		}
+		mergedLabelsMap, mergedLabelsDiags := types.MapValue(types.StringType, mergedLabels)
+		response.Diagnostics.Append(mergedLabelsDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.Labels = mergedLabelsMap
+	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
+		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
+		data.Labels = types.MapNull(types.StringType)
+	}
 
 	// resource SpecToModelRoot BoolField --> AllowF5Xc
 	data.AllowF5Xc = types.BoolValue(specData.GetAllowF5Xc())
@@ -2620,18 +2620,6 @@ func (r *ResourceF5XCSecretPolicy) Update(ctx context.Context, request resource.
 
 									if isClientNameMatcher && clientNameMatcherOptions != nil {
 
-										// resource specToModelNested ArrayOfStringField --> ExactValues
-										if len(clientNameMatcherOptions.ClientNameMatcher.GetExactValues()) > 0 {
-											listValue, diags := types.ListValueFrom(ctx, types.StringType, clientNameMatcherOptions.ClientNameMatcher.GetExactValues())
-											response.Diagnostics.Append(diags...)
-											if response.Diagnostics.HasError() {
-												return
-											}
-											clientNameMatcherAttributeMap["exact_values"] = listValue
-										} else {
-											clientNameMatcherAttributeMap["exact_values"] = types.ListNull(types.StringType)
-										}
-
 										// resource specToModelNested ArrayOfStringField --> RegexValues
 										if len(clientNameMatcherOptions.ClientNameMatcher.GetRegexValues()) > 0 {
 											listValue, diags := types.ListValueFrom(ctx, types.StringType, clientNameMatcherOptions.ClientNameMatcher.GetRegexValues())
@@ -2660,6 +2648,18 @@ func (r *ResourceF5XCSecretPolicy) Update(ctx context.Context, request resource.
 											clientNameMatcherAttributeMap["transformers"] = listValue
 										} else {
 											clientNameMatcherAttributeMap["transformers"] = types.ListNull(types.StringType)
+										}
+
+										// resource specToModelNested ArrayOfStringField --> ExactValues
+										if len(clientNameMatcherOptions.ClientNameMatcher.GetExactValues()) > 0 {
+											listValue, diags := types.ListValueFrom(ctx, types.StringType, clientNameMatcherOptions.ClientNameMatcher.GetExactValues())
+											response.Diagnostics.Append(diags...)
+											if response.Diagnostics.HasError() {
+												return
+											}
+											clientNameMatcherAttributeMap["exact_values"] = listValue
+										} else {
+											clientNameMatcherAttributeMap["exact_values"] = types.ListNull(types.StringType)
 										}
 
 										clientNameMatcherObj, diags := types.ObjectValue(SecretPolicyRuleChoiceRuleListRulesSpecClientChoiceClientNameMatcherModelAttributeMap, clientNameMatcherAttributeMap)

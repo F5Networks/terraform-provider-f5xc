@@ -58,9 +58,9 @@ type SecretPolicySecretPolicyRuleGlobalSpecType struct {
 }
 
 type SecretPolicyGlobalSpecTypeClientChoice struct {
+	ClientName        types.String `tfsdk:"client_name"`
 	ClientSelector    types.Object `tfsdk:"client_selector"`
 	ClientNameMatcher types.Object `tfsdk:"client_name_matcher"`
-	ClientName        types.String `tfsdk:"client_name"`
 }
 
 type SecretPolicyGlobalSpecTypeClientSelector struct {
@@ -165,13 +165,13 @@ var SecretPolicyRuleChoiceRuleListRulesSpecModelAttributeMap = map[string]attr.T
 // Attribute map for RequiredOneOfField --> ClientChoice
 var SecretPolicyRuleChoiceRuleListRulesSpecClientChoiceModelAttributeMap = map[string]attr.Type{
 
+	"client_name": types.StringType,
 	"client_selector": types.ObjectType{
 		AttrTypes: SecretPolicyRuleChoiceRuleListRulesSpecClientChoiceClientSelectorModelAttributeMap,
 	},
 	"client_name_matcher": types.ObjectType{
 		AttrTypes: SecretPolicyRuleChoiceRuleListRulesSpecClientChoiceClientNameMatcherModelAttributeMap,
 	},
-	"client_name": types.StringType,
 }
 
 // Attribute map for PointerOfOneOfField --> ClientSelector
@@ -203,9 +203,9 @@ var SecretPolicyRuleChoiceLegacyRuleListModelAttributeMap = map[string]attr.Type
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
 
-				"namespace": types.StringType,
 				"name":      types.StringType,
 				"tenant":    types.StringType,
+				"namespace": types.StringType,
 			},
 		},
 	},
@@ -214,9 +214,9 @@ var SecretPolicyRuleChoiceLegacyRuleListModelAttributeMap = map[string]attr.Type
 // Attribute map for ArrayOfPointerField --> Rules
 var SecretPolicyRulesObjectRefModelAttributeMap = map[string]attr.Type{
 
-	"namespace": types.StringType,
 	"name":      types.StringType,
 	"tenant":    types.StringType,
+	"namespace": types.StringType,
 }
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -346,6 +346,12 @@ func (r *DataSourceF5XCSecretPolicy) Schema(ctx context.Context, request datasou
 													Optional:    false,
 													Computed:    true,
 													Attributes: map[string]schema.Attribute{
+														"client_name": schema.StringAttribute{
+															Description: "client name The name of the client trying to access the secret. Name of the client will be extracted from client TLS certificate. This predicate evaluates to true if client name matches the configured name",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+														},
 														"client_selector": schema.SingleNestedAttribute{
 															Description: "client selector A label selector that describes the expected set of clients. The labels associated with the client trying to access the secret are used to evaluate the label expressions in the selector. These labels are derived from the client TLS certificate. This is a more flexible and powerful version of the client name matcher predicate that allows a given rule to be applicable to a set of clients based on the client labels rather than being limited to relying on patterns in the client name. The predicate evaluates to true if the expressions in the label selector are true for the client labels.",
 															Required:    false,
@@ -390,12 +396,6 @@ func (r *DataSourceF5XCSecretPolicy) Schema(ctx context.Context, request datasou
 																},
 															},
 														},
-														"client_name": schema.StringAttribute{
-															Description: "client name The name of the client trying to access the secret. Name of the client will be extracted from client TLS certificate. This predicate evaluates to true if client name matches the configured name",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-														},
 													},
 												},
 											},
@@ -418,12 +418,6 @@ func (r *DataSourceF5XCSecretPolicy) Schema(ctx context.Context, request datasou
 								Computed:    true,
 								NestedObject: schema.NestedAttributeObject{
 									Attributes: map[string]schema.Attribute{
-										"namespace": schema.StringAttribute{
-											Description: "",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-										},
 										"name": schema.StringAttribute{
 											Description: "",
 											Required:    false,
@@ -431,6 +425,12 @@ func (r *DataSourceF5XCSecretPolicy) Schema(ctx context.Context, request datasou
 											Computed:    true,
 										},
 										"tenant": schema.StringAttribute{
+											Description: "",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+										},
+										"namespace": schema.StringAttribute{
 											Description: "",
 											Required:    false,
 											Optional:    false,
@@ -680,6 +680,16 @@ func (d *DataSourceF5XCSecretPolicy) Read(ctx context.Context, request datasourc
 
 								// Process nested choices, populating the temporary attribute map
 
+								// data specToModelNested StringOfOneOfField --> ClientName
+								clientNameItem, isClientName := specclientChoiceChoices.(*ves_io_schema_secret_policy_rule.GlobalSpecType_ClientName)
+
+								if isClientName {
+									specclientChoiceChoicesAttributeMap["client_name"] = types.StringValue(string(clientNameItem.ClientName))
+								} else {
+									// Empty string, set to null
+									specclientChoiceChoicesAttributeMap["client_name"] = types.StringNull()
+								}
+
 								// data specToModelNested PointerOfOneOfField --> ClientSelector
 								// <no value>
 								// false
@@ -774,16 +784,6 @@ func (d *DataSourceF5XCSecretPolicy) Read(ctx context.Context, request datasourc
 									}
 								}
 
-								// data specToModelNested StringOfOneOfField --> ClientName
-								clientNameItem, isClientName := specclientChoiceChoices.(*ves_io_schema_secret_policy_rule.GlobalSpecType_ClientName)
-
-								if isClientName {
-									specclientChoiceChoicesAttributeMap["client_name"] = types.StringValue(string(clientNameItem.ClientName))
-								} else {
-									// Empty string, set to null
-									specclientChoiceChoicesAttributeMap["client_name"] = types.StringNull()
-								}
-
 								// --- End of Choices ---
 
 								// Create the final ObjectValue for this OneOf field
@@ -867,14 +867,6 @@ func (d *DataSourceF5XCSecretPolicy) Read(ctx context.Context, request datasourc
 					for _, rulesElement := range legacyRuleListOptions.LegacyRuleList.GetRules() {
 						objectRefTypeModelModel := ObjectRefTypeModel{}
 
-						// data specToModelNested RequiredStringField --> Namespace
-						if rulesElement.GetNamespace() != "" {
-							objectRefTypeModelModel.Namespace = types.StringValue(rulesElement.GetNamespace())
-						} else {
-							// Empty string, set to null
-							objectRefTypeModelModel.Namespace = types.StringNull()
-						}
-
 						// data specToModelNested RequiredStringField --> Name
 						if rulesElement.GetName() != "" {
 							objectRefTypeModelModel.Name = types.StringValue(rulesElement.GetName())
@@ -889,6 +881,14 @@ func (d *DataSourceF5XCSecretPolicy) Read(ctx context.Context, request datasourc
 						} else {
 							// Empty string, set to null
 							objectRefTypeModelModel.Tenant = types.StringNull()
+						}
+
+						// data specToModelNested RequiredStringField --> Namespace
+						if rulesElement.GetNamespace() != "" {
+							objectRefTypeModelModel.Namespace = types.StringValue(rulesElement.GetNamespace())
+						} else {
+							// Empty string, set to null
+							objectRefTypeModelModel.Namespace = types.StringNull()
 						}
 
 						rulesElements = append(rulesElements, objectRefTypeModelModel)

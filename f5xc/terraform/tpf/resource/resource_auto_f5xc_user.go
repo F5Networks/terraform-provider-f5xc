@@ -42,21 +42,21 @@ type ResourceF5XCUser struct {
 }
 
 type UserNamespaceRoleType struct {
-	Namespace types.String `tfsdk:"namespace"`
 	Role      types.String `tfsdk:"role"`
+	Namespace types.String `tfsdk:"namespace"`
 }
 
 // ResourceF5XCUserModel describes the resource data model.
 type ResourceF5XCUserModel struct {
 	Name           types.String   `tfsdk:"name"`
+	FirstName      types.String   `tfsdk:"first_name"`
+	NamespaceRoles types.List     `tfsdk:"namespace_roles"`
 	LastName       types.String   `tfsdk:"last_name"`
 	Email          types.String   `tfsdk:"email"`
-	NamespaceRoles types.List     `tfsdk:"namespace_roles"`
-	IdmType        types.List     `tfsdk:"idm_type"`
-	Namespace      types.String   `tfsdk:"namespace"`
-	FirstName      types.String   `tfsdk:"first_name"`
 	Type           types.List     `tfsdk:"type"`
+	IdmType        types.List     `tfsdk:"idm_type"`
 	GroupNames     types.List     `tfsdk:"group_names"`
+	Namespace      types.String   `tfsdk:"namespace"`
 	Timeouts       timeouts.Value `tfsdk:"timeouts"`
 }
 
@@ -73,8 +73,8 @@ var (
 // Attribute map for ArrayOfPointerField --> NamespaceRoles
 var UserNamespaceRolesObjectRefModelAttributeMap = map[string]attr.Type{
 
-	"namespace": types.StringType,
 	"role":      types.StringType,
+	"namespace": types.StringType,
 }
 
 func NewResourceF5XCUser() resource.Resource {
@@ -99,6 +99,44 @@ func (r *ResourceF5XCUser) Schema(ctx context.Context, request resource.SchemaRe
 				Optional:            true,
 				Computed:            true,
 			},
+			"first_name": schema.StringAttribute{
+				Description:         "first name User's first name",
+				MarkdownDescription: "",
+				Required:            true,
+				Optional:            false,
+				Computed:            false,
+			},
+			"namespace_roles": schema.ListNestedAttribute{
+				Description:         "Namespace roles List of directly attached roles that the user has for each namespace.",
+				MarkdownDescription: "",
+				Required:            false,
+				Optional:            true,
+				Computed:            false,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"role": schema.StringAttribute{
+							Description:         "Role Users role for this namespace",
+							MarkdownDescription: "<br>**Validation:** `Length LengthAtMost(256)`",
+							Required:            true,
+							Optional:            false,
+							Computed:            false,
+							Validators: []validator.String{
+								stringvalidator.LengthAtMost(256),
+							},
+						},
+						"namespace": schema.StringAttribute{
+							Description:         "Namespace Namespace the role applies to '*' value implies all namespaces",
+							MarkdownDescription: "<br>**Validation:** `Length LengthAtMost(256)`",
+							Required:            true,
+							Optional:            false,
+							Computed:            false,
+							Validators: []validator.String{
+								stringvalidator.LengthAtMost(256),
+							},
+						},
+					},
+				},
+			},
 			"last_name": schema.StringAttribute{
 				Description:         "last name User's last name",
 				MarkdownDescription: "",
@@ -113,73 +151,27 @@ func (r *ResourceF5XCUser) Schema(ctx context.Context, request resource.SchemaRe
 				Optional:            false,
 				Computed:            false,
 			},
-			"namespace_roles": schema.ListNestedAttribute{
-				Description:         "Namespace roles List of directly attached roles that the user has for each namespace.",
-				MarkdownDescription: "",
+			"type": schema.ListAttribute{
+				Description:         "User type Type of the user account (USER, SERVICE)",
+				MarkdownDescription: "<br>**Allowed Values (choose one):** `[\"DEBUG\", \"USER\", \"SERVICE\"]`",
 				Required:            false,
 				Optional:            true,
-				Computed:            false,
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-						"namespace": schema.StringAttribute{
-							Description:         "Namespace Namespace the role applies to '*' value implies all namespaces",
-							MarkdownDescription: "<br>**Validation:** `Length LengthAtMost(256)`",
-							Required:            true,
-							Optional:            false,
-							Computed:            false,
-							Validators: []validator.String{
-								stringvalidator.LengthAtMost(256),
-							},
-						},
-						"role": schema.StringAttribute{
-							Description:         "Role Users role for this namespace",
-							MarkdownDescription: "<br>**Validation:** `Length LengthAtMost(256)`",
-							Required:            true,
-							Optional:            false,
-							Computed:            false,
-							Validators: []validator.String{
-								stringvalidator.LengthAtMost(256),
-							},
-						},
-					},
+				Computed:            true,
+				ElementType:         types.StringType,
+				Validators: []validator.List{
+					listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"DEBUG", "USER", "SERVICE"}...)),
+					listvalidator.SizeAtMost(1),
 				},
 			},
 			"idm_type": schema.ListAttribute{
 				Description:         "IDM Type Type of the Identity management required for the user. if SSO is not enabled, set this to VOLTERRA_MANAGED VOLTERRA_MANGED user is a local user fully managed by Volterra's User Access Management.",
-				MarkdownDescription: "<br>**Allowed Values (choose one):** `[\"VOLTERRA_MANAGED\", \"UNDEFINED\", \"SSO\"]`",
+				MarkdownDescription: "<br>**Allowed Values (choose one):** `[\"SSO\", \"VOLTERRA_MANAGED\", \"UNDEFINED\"]`",
 				Required:            false,
 				Optional:            true,
 				Computed:            true,
 				ElementType:         types.StringType,
 				Validators: []validator.List{
-					listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"VOLTERRA_MANAGED", "UNDEFINED", "SSO"}...)),
-					listvalidator.SizeAtMost(1),
-				},
-			},
-			"namespace": schema.StringAttribute{
-				Description:         "namespace All users of a tenant must be created in tenant's system namespace.",
-				MarkdownDescription: "<br>**Default:** `system`",
-				Required:            false,
-				Optional:            true,
-				Computed:            true,
-				Default:             stringdefault.StaticString("system"),
-			},
-			"first_name": schema.StringAttribute{
-				Description:         "first name User's first name",
-				MarkdownDescription: "",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
-			},
-			"type": schema.ListAttribute{
-				Description:         "User type Type of the user account (USER, SERVICE)",
-				MarkdownDescription: "<br>**Allowed Values (choose one):** `[\"USER\", \"SERVICE\", \"DEBUG\"]`",
-				Required:            false,
-				Optional:            true,
-				Computed:            true,
-				ElementType:         types.StringType,
-				Validators: []validator.List{
-					listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"USER", "SERVICE", "DEBUG"}...)),
+					listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"SSO", "VOLTERRA_MANAGED", "UNDEFINED"}...)),
 					listvalidator.SizeAtMost(1),
 				},
 			},
@@ -190,6 +182,14 @@ func (r *ResourceF5XCUser) Schema(ctx context.Context, request resource.SchemaRe
 				Optional:            true,
 				Computed:            false,
 				ElementType:         types.StringType,
+			},
+			"namespace": schema.StringAttribute{
+				Description:         "namespace All users of a tenant must be created in tenant's system namespace.",
+				MarkdownDescription: "<br>**Default:** `system`",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				Default:             stringdefault.StaticString("system"),
 			},
 			"timeouts": timeouts.Attributes(ctx, timeouts.Opts{
 				Create: true, // activate timeouts.create
@@ -288,11 +288,8 @@ func (r *ResourceF5XCUser) Create(ctx context.Context, request resource.CreateRe
 
 	// Populate createReq from data model
 
-	// resource modelToSpecRoot RequiredStringField --> LastName
-	req.LastName = string(data.LastName.ValueString())
-
-	// resource modelToSpecRoot RequiredStringField --> Email
-	req.Email = string(data.Email.ValueString())
+	// resource modelToSpecRoot RequiredStringField --> FirstName
+	req.FirstName = string(data.FirstName.ValueString())
 
 	{
 		// resource modelToSpecRoot ArrayOfPointerField --> NamespaceRoles
@@ -309,14 +306,14 @@ func (r *ResourceF5XCUser) Create(ctx context.Context, request resource.CreateRe
 			for i, namespaceRolesElement := range namespaceRolesElements {
 				namespaceRolesSpec[i] = &ves_io_schema.NamespaceRoleType{}
 
-				// resource modelToSpecNested RequiredStringField --> Namespace
-				if !namespaceRolesElement.Namespace.IsNull() && !namespaceRolesElement.Namespace.IsUnknown() {
-					namespaceRolesSpec[i].Namespace = string(namespaceRolesElement.Namespace.ValueString())
-				}
-
 				// resource modelToSpecNested RequiredStringField --> Role
 				if !namespaceRolesElement.Role.IsNull() && !namespaceRolesElement.Role.IsUnknown() {
 					namespaceRolesSpec[i].Role = string(namespaceRolesElement.Role.ValueString())
+				}
+
+				// resource modelToSpecNested RequiredStringField --> Namespace
+				if !namespaceRolesElement.Namespace.IsNull() && !namespaceRolesElement.Namespace.IsUnknown() {
+					namespaceRolesSpec[i].Namespace = string(namespaceRolesElement.Namespace.ValueString())
 				}
 
 			}
@@ -325,13 +322,11 @@ func (r *ResourceF5XCUser) Create(ctx context.Context, request resource.CreateRe
 		}
 	}
 
-	// resource modelToSpecRoot StringField --> Namespace
-	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
-		req.Namespace = string(data.Namespace.ValueString())
-	}
+	// resource modelToSpecRoot RequiredStringField --> LastName
+	req.LastName = string(data.LastName.ValueString())
 
-	// resource modelToSpecRoot RequiredStringField --> FirstName
-	req.FirstName = string(data.FirstName.ValueString())
+	// resource modelToSpecRoot RequiredStringField --> Email
+	req.Email = string(data.Email.ValueString())
 
 	{
 		// resource modelToSpecRoot ArrayOfStringField--> GroupNames
@@ -341,6 +336,11 @@ func (r *ResourceF5XCUser) Create(ctx context.Context, request resource.CreateRe
 			response.Diagnostics.Append(diags...)
 			req.GroupNames = elements
 		}
+	}
+
+	// resource modelToSpecRoot StringField --> Namespace
+	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
+		req.Namespace = string(data.Namespace.ValueString())
 	}
 
 	if response.Diagnostics.HasError() {
@@ -474,20 +474,12 @@ func (r *ResourceF5XCUser) Read(ctx context.Context, request resource.ReadReques
 		data.Name = types.StringNull()
 	}
 
-	// resource SpecToModelRoot RequiredStringField --> LastName
-	if specData.GetLastName() != "" {
-		data.LastName = types.StringValue(specData.GetLastName())
+	// resource SpecToModelRoot RequiredStringField --> FirstName
+	if specData.GetFirstName() != "" {
+		data.FirstName = types.StringValue(specData.GetFirstName())
 	} else {
 		// Empty string, set to null
-		data.LastName = types.StringNull()
-	}
-
-	// resource SpecToModelRoot RequiredStringField --> Email
-	if specData.GetEmail() != "" {
-		data.Email = types.StringValue(specData.GetEmail())
-	} else {
-		// Empty string, set to null
-		data.Email = types.StringNull()
+		data.FirstName = types.StringNull()
 	}
 
 	// resource SpecToModelRoot ArrayOfPointerField --> NamespaceRoles
@@ -497,20 +489,20 @@ func (r *ResourceF5XCUser) Read(ctx context.Context, request resource.ReadReques
 		for _, namespaceRolesElement := range specData.NamespaceRoles {
 			userNamespaceRoleTypeModel := UserNamespaceRoleType{}
 
-			// resource specToModelNested RequiredStringField --> Namespace
-			if namespaceRolesElement.GetNamespace() != "" {
-				userNamespaceRoleTypeModel.Namespace = types.StringValue(namespaceRolesElement.GetNamespace())
-			} else {
-				// Empty string, set to null
-				userNamespaceRoleTypeModel.Namespace = types.StringNull()
-			}
-
 			// resource specToModelNested RequiredStringField --> Role
 			if namespaceRolesElement.GetRole() != "" {
 				userNamespaceRoleTypeModel.Role = types.StringValue(namespaceRolesElement.GetRole())
 			} else {
 				// Empty string, set to null
 				userNamespaceRoleTypeModel.Role = types.StringNull()
+			}
+
+			// resource specToModelNested RequiredStringField --> Namespace
+			if namespaceRolesElement.GetNamespace() != "" {
+				userNamespaceRoleTypeModel.Namespace = types.StringValue(namespaceRolesElement.GetNamespace())
+			} else {
+				// Empty string, set to null
+				userNamespaceRoleTypeModel.Namespace = types.StringNull()
 			}
 
 			namespaceRolesElements = append(namespaceRolesElements, userNamespaceRoleTypeModel)
@@ -536,35 +528,20 @@ func (r *ResourceF5XCUser) Read(ctx context.Context, request resource.ReadReques
 		data.NamespaceRoles = nullNamespaceRolesList
 	}
 
-	// resource SpecToModelRoot EnumField --> IdmType
-	if specData.GetIdmType().String() != "" {
-		stringValue := types.StringValue(specData.GetIdmType().String())
-		stringSlice := []types.String{stringValue}
-		listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.IdmType = listValue
+	// resource SpecToModelRoot RequiredStringField --> LastName
+	if specData.GetLastName() != "" {
+		data.LastName = types.StringValue(specData.GetLastName())
 	} else {
 		// Empty string, set to null
-		data.IdmType = types.ListNull(types.StringType)
+		data.LastName = types.StringNull()
 	}
 
-	// resource SpecToModelRoot StringField --> Namespace
-	if specData.GetNamespace() != "" {
-		data.Namespace = types.StringValue(specData.GetNamespace())
-	} else {
-		// Empty string, set to null to avoid "inconsistent result after apply" errors
-		data.Namespace = types.StringNull()
-	}
-
-	// resource SpecToModelRoot RequiredStringField --> FirstName
-	if specData.GetFirstName() != "" {
-		data.FirstName = types.StringValue(specData.GetFirstName())
+	// resource SpecToModelRoot RequiredStringField --> Email
+	if specData.GetEmail() != "" {
+		data.Email = types.StringValue(specData.GetEmail())
 	} else {
 		// Empty string, set to null
-		data.FirstName = types.StringNull()
+		data.Email = types.StringNull()
 	}
 
 	// resource SpecToModelRoot EnumField --> Type
@@ -582,6 +559,21 @@ func (r *ResourceF5XCUser) Read(ctx context.Context, request resource.ReadReques
 		data.Type = types.ListNull(types.StringType)
 	}
 
+	// resource SpecToModelRoot EnumField --> IdmType
+	if specData.GetIdmType().String() != "" {
+		stringValue := types.StringValue(specData.GetIdmType().String())
+		stringSlice := []types.String{stringValue}
+		listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.IdmType = listValue
+	} else {
+		// Empty string, set to null
+		data.IdmType = types.ListNull(types.StringType)
+	}
+
 	// resource specToModelRoot ArrayOfStringField --> GroupNames
 	if len(specData.GetGroupNames()) > 0 {
 		listValue, diags := types.ListValueFrom(ctx, types.StringType, specData.GetGroupNames())
@@ -592,6 +584,14 @@ func (r *ResourceF5XCUser) Read(ctx context.Context, request resource.ReadReques
 		data.GroupNames = listValue
 	} else {
 		data.GroupNames = types.ListNull(types.StringType)
+	}
+
+	// resource SpecToModelRoot StringField --> Namespace
+	if specData.GetNamespace() != "" {
+		data.Namespace = types.StringValue(specData.GetNamespace())
+	} else {
+		// Empty string, set to null to avoid "inconsistent result after apply" errors
+		data.Namespace = types.StringNull()
 	}
 
 	if response.Diagnostics.HasError() {
@@ -636,11 +636,8 @@ func (r *ResourceF5XCUser) Update(ctx context.Context, request resource.UpdateRe
 
 	// Populate updateReq from data model
 
-	// resource modelToSpecRoot RequiredStringField --> LastName
-	req.LastName = string(data.LastName.ValueString())
-
-	// resource modelToSpecRoot RequiredStringField --> Email
-	req.Email = string(data.Email.ValueString())
+	// resource modelToSpecRoot RequiredStringField --> FirstName
+	req.FirstName = string(data.FirstName.ValueString())
 
 	{
 		// resource modelToSpecRoot ArrayOfPointerField --> NamespaceRoles
@@ -657,14 +654,14 @@ func (r *ResourceF5XCUser) Update(ctx context.Context, request resource.UpdateRe
 			for i, namespaceRolesElement := range namespaceRolesElements {
 				namespaceRolesSpec[i] = &ves_io_schema.NamespaceRoleType{}
 
-				// resource modelToSpecNested RequiredStringField --> Namespace
-				if !namespaceRolesElement.Namespace.IsNull() && !namespaceRolesElement.Namespace.IsUnknown() {
-					namespaceRolesSpec[i].Namespace = string(namespaceRolesElement.Namespace.ValueString())
-				}
-
 				// resource modelToSpecNested RequiredStringField --> Role
 				if !namespaceRolesElement.Role.IsNull() && !namespaceRolesElement.Role.IsUnknown() {
 					namespaceRolesSpec[i].Role = string(namespaceRolesElement.Role.ValueString())
+				}
+
+				// resource modelToSpecNested RequiredStringField --> Namespace
+				if !namespaceRolesElement.Namespace.IsNull() && !namespaceRolesElement.Namespace.IsUnknown() {
+					namespaceRolesSpec[i].Namespace = string(namespaceRolesElement.Namespace.ValueString())
 				}
 
 			}
@@ -673,13 +670,11 @@ func (r *ResourceF5XCUser) Update(ctx context.Context, request resource.UpdateRe
 		}
 	}
 
-	// resource modelToSpecRoot StringField --> Namespace
-	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
-		req.Namespace = string(data.Namespace.ValueString())
-	}
+	// resource modelToSpecRoot RequiredStringField --> LastName
+	req.LastName = string(data.LastName.ValueString())
 
-	// resource modelToSpecRoot RequiredStringField --> FirstName
-	req.FirstName = string(data.FirstName.ValueString())
+	// resource modelToSpecRoot RequiredStringField --> Email
+	req.Email = string(data.Email.ValueString())
 
 	{
 		// resource modelToSpecRoot ArrayOfStringField--> GroupNames
@@ -689,6 +684,11 @@ func (r *ResourceF5XCUser) Update(ctx context.Context, request resource.UpdateRe
 			response.Diagnostics.Append(diags...)
 			req.GroupNames = elements
 		}
+	}
+
+	// resource modelToSpecRoot StringField --> Namespace
+	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
+		req.Namespace = string(data.Namespace.ValueString())
 	}
 
 	if response.Diagnostics.HasError() {

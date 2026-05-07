@@ -62,9 +62,19 @@ type LogReceiverGlobalSpecTypeSyslog struct {
 }
 
 type LogReceiverSyslogReceiverModeChoice struct {
-	TlsServer types.Object `tfsdk:"tls_server"`
 	UdpServer types.Object `tfsdk:"udp_server"`
 	TcpServer types.Object `tfsdk:"tcp_server"`
+	TlsServer types.Object `tfsdk:"tls_server"`
+}
+
+type LogReceiverSyslogReceiverUdpServer struct {
+	ServerName types.String `tfsdk:"server_name"`
+	Port       types.Int64  `tfsdk:"port"`
+}
+
+type LogReceiverSyslogReceiverTcpServer struct {
+	ServerName types.String `tfsdk:"server_name"`
+	Port       types.Int64  `tfsdk:"port"`
 }
 
 type LogReceiverSyslogReceiverTlsServer struct {
@@ -75,9 +85,9 @@ type LogReceiverSyslogReceiverTlsServer struct {
 }
 
 type LogReceiverTLSConfigTypePortChoice struct {
+	Port                 types.Int64 `tfsdk:"port"`
 	DefaultSyslogTlsPort types.Bool  `tfsdk:"default_syslog_tls_port"`
 	DefaultHttpsPort     types.Bool  `tfsdk:"default_https_port"`
-	Port                 types.Int64 `tfsdk:"port"`
 }
 
 type LogReceiverTLSConfigTypeCaChoice struct {
@@ -91,8 +101,8 @@ type LogReceiverTLSConfigTypeMtlsChoice struct {
 }
 
 type LogReceiverTLSConfigTypeMtlsEnable struct {
-	Certificate types.String `tfsdk:"certificate"`
 	KeyUrl      types.Object `tfsdk:"key_url"`
+	Certificate types.String `tfsdk:"certificate"`
 }
 
 type LogReceiverSecretType struct {
@@ -100,14 +110,8 @@ type LogReceiverSecretType struct {
 }
 
 type LogReceiverSecretTypeSecretInfoChoice struct {
-	BlindfoldSecretInfo types.Object `tfsdk:"blindfold_secret_info"`
 	ClearSecretInfo     types.Object `tfsdk:"clear_secret_info"`
-}
-
-type LogReceiverSecretTypeBlindfoldSecretInfo struct {
-	DecryptionProvider types.String `tfsdk:"decryption_provider"`
-	StoreProvider      types.String `tfsdk:"store_provider"`
-	Location           types.String `tfsdk:"location"`
+	BlindfoldSecretInfo types.Object `tfsdk:"blindfold_secret_info"`
 }
 
 type LogReceiverSecretTypeClearSecretInfo struct {
@@ -115,14 +119,10 @@ type LogReceiverSecretTypeClearSecretInfo struct {
 	Url      types.String `tfsdk:"url"`
 }
 
-type LogReceiverSyslogReceiverUdpServer struct {
-	ServerName types.String `tfsdk:"server_name"`
-	Port       types.Int64  `tfsdk:"port"`
-}
-
-type LogReceiverSyslogReceiverTcpServer struct {
-	ServerName types.String `tfsdk:"server_name"`
-	Port       types.Int64  `tfsdk:"port"`
+type LogReceiverSecretTypeBlindfoldSecretInfo struct {
+	DecryptionProvider types.String `tfsdk:"decryption_provider"`
+	StoreProvider      types.String `tfsdk:"store_provider"`
+	Location           types.String `tfsdk:"location"`
 }
 
 type LogReceiverSyslogReceiverFormatChoice struct {
@@ -135,12 +135,12 @@ type LogReceiverGlobalSpecTypeWhereChoice struct {
 
 // ResourceF5XCLogReceiverModel describes the resource data model.
 type ResourceF5XCLogReceiverModel struct {
+	Name              types.String   `tfsdk:"name"`
 	Namespace         types.String   `tfsdk:"namespace"`
 	Uid               types.String   `tfsdk:"uid"`
 	Labels            types.Map      `tfsdk:"labels"`
 	Annotations       types.Map      `tfsdk:"annotations"`
 	Description       types.String   `tfsdk:"description"`
-	Name              types.String   `tfsdk:"name"`
 	LogReceiverChoice types.Object   `tfsdk:"log_receiver_choice"`
 	WhereChoice       types.Object   `tfsdk:"where_choice"`
 	Timeouts          timeouts.Value `tfsdk:"timeouts"`
@@ -178,15 +178,29 @@ var LogReceiverLogReceiverChoiceSyslogModelAttributeMap = map[string]attr.Type{
 // Attribute map for RequiredOneOfField --> ModeChoice
 var LogReceiverLogReceiverChoiceSyslogModeChoiceModelAttributeMap = map[string]attr.Type{
 
-	"tls_server": types.ObjectType{
-		AttrTypes: LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerModelAttributeMap,
-	},
 	"udp_server": types.ObjectType{
 		AttrTypes: LogReceiverLogReceiverChoiceSyslogModeChoiceUdpServerModelAttributeMap,
 	},
 	"tcp_server": types.ObjectType{
 		AttrTypes: LogReceiverLogReceiverChoiceSyslogModeChoiceTcpServerModelAttributeMap,
 	},
+	"tls_server": types.ObjectType{
+		AttrTypes: LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> UdpServer
+var LogReceiverLogReceiverChoiceSyslogModeChoiceUdpServerModelAttributeMap = map[string]attr.Type{
+
+	"server_name": types.StringType,
+	"port":        types.Int64Type,
+}
+
+// Attribute map for PointerOfOneOfField --> TcpServer
+var LogReceiverLogReceiverChoiceSyslogModeChoiceTcpServerModelAttributeMap = map[string]attr.Type{
+
+	"server_name": types.StringType,
+	"port":        types.Int64Type,
 }
 
 // Attribute map for PointerOfOneOfField --> TlsServer
@@ -207,9 +221,9 @@ var LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerModelAttributeMap = map
 // Attribute map for RequiredOneOfField --> PortChoice
 var LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerPortChoiceModelAttributeMap = map[string]attr.Type{
 
+	"port":                    types.Int64Type,
 	"default_syslog_tls_port": types.BoolType,
 	"default_https_port":      types.BoolType,
-	"port":                    types.Int64Type,
 }
 
 // Attribute map for RequiredOneOfField --> CaChoice
@@ -230,13 +244,13 @@ var LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceModelAttribut
 
 // Attribute map for PointerOfOneOfField --> MtlsEnable
 var LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableModelAttributeMap = map[string]attr.Type{
-
-	"certificate": types.StringType, "key_url": types.ObjectType{
+	"key_url": types.ObjectType{
 		AttrTypes: map[string]attr.Type{
 			"secret_info_choice": types.ObjectType{
 				AttrTypes: LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofModelAttributeMap,
 			}},
 	},
+	"certificate": types.StringType,
 }
 
 // Attribute map for PointerField --> KeyUrl
@@ -250,20 +264,12 @@ var LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKey
 // Attribute map for RequiredOneOfField --> SecretInfoOneof
 var LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofModelAttributeMap = map[string]attr.Type{
 
-	"blindfold_secret_info": types.ObjectType{
-		AttrTypes: LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofBlindfoldSecretInfoModelAttributeMap,
-	},
 	"clear_secret_info": types.ObjectType{
 		AttrTypes: LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap,
 	},
-}
-
-// Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
-var LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofBlindfoldSecretInfoModelAttributeMap = map[string]attr.Type{
-
-	"decryption_provider": types.StringType,
-	"store_provider":      types.StringType,
-	"location":            types.StringType,
+	"blindfold_secret_info": types.ObjectType{
+		AttrTypes: LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofBlindfoldSecretInfoModelAttributeMap,
+	},
 }
 
 // Attribute map for PointerOfOneOfField --> ClearSecretInfo
@@ -273,18 +279,12 @@ var LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKey
 	"url":      types.StringType,
 }
 
-// Attribute map for PointerOfOneOfField --> UdpServer
-var LogReceiverLogReceiverChoiceSyslogModeChoiceUdpServerModelAttributeMap = map[string]attr.Type{
+// Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
+var LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofBlindfoldSecretInfoModelAttributeMap = map[string]attr.Type{
 
-	"server_name": types.StringType,
-	"port":        types.Int64Type,
-}
-
-// Attribute map for PointerOfOneOfField --> TcpServer
-var LogReceiverLogReceiverChoiceSyslogModeChoiceTcpServerModelAttributeMap = map[string]attr.Type{
-
-	"server_name": types.StringType,
-	"port":        types.Int64Type,
+	"decryption_provider": types.StringType,
+	"store_provider":      types.StringType,
+	"location":            types.StringType,
 }
 
 // Attribute map for RequiredOneOfField --> FormatChoice
@@ -314,6 +314,13 @@ func (r *ResourceF5XCLogReceiver) Schema(ctx context.Context, request resource.S
 		Description:         "LogReceiver resource",
 
 		Attributes: map[string]schema.Attribute{
+			"name": schema.StringAttribute{
+				Description:         "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
+				MarkdownDescription: "",
+				Required:            true,
+				Optional:            false,
+				Computed:            false,
+			},
 			"namespace": schema.StringAttribute{
 				Description:         "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
 				MarkdownDescription: "",
@@ -362,13 +369,6 @@ func (r *ResourceF5XCLogReceiver) Schema(ctx context.Context, request resource.S
 				Computed:            true,
 				Default:             stringdefault.StaticString(""),
 			},
-			"name": schema.StringAttribute{
-				Description:         "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
-				MarkdownDescription: "",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
-			},
 			"log_receiver_choice": schema.SingleNestedAttribute{
 				Description:         "Receiver Select type of log receiver",
 				MarkdownDescription: "",
@@ -396,12 +396,72 @@ func (r *ResourceF5XCLogReceiver) Schema(ctx context.Context, request resource.S
 								Computed:            false,
 								Validators: []validator.Object{
 									atmostoneofvalidator.AtMostOneOf(
-										"tls_server",
 										"udp_server",
 										"tcp_server",
+										"tls_server",
 									),
 								},
 								Attributes: map[string]schema.Attribute{
+									"udp_server": schema.SingleNestedAttribute{
+										Description:         "Mode UDP Syslog transport mode is UDP",
+										MarkdownDescription: "",
+										Required:            false,
+										Optional:            true,
+										Computed:            false,
+										Attributes: map[string]schema.Attribute{
+											"server_name": schema.StringAttribute{
+												Description:         "Server Name Server name is fully qualified domain name or IP address of the server",
+												MarkdownDescription: "<br>**Validation:** `Length LengthAtMost(256)`",
+												Required:            true,
+												Optional:            false,
+												Computed:            false,
+												Validators: []validator.String{
+													stringvalidator.LengthAtMost(256),
+												},
+											},
+											"port": schema.Int64Attribute{
+												Description:         "Port Number Port number used for communication",
+												MarkdownDescription: "<br>**Default:** `514`",
+												Required:            false,
+												Optional:            true,
+												Computed:            true,
+												Default:             int64default.StaticInt64(514),
+												Validators: []validator.Int64{
+													int64validator.Between(1, 65535),
+												},
+											},
+										},
+									},
+									"tcp_server": schema.SingleNestedAttribute{
+										Description:         "Mode TCP Syslog transport mode is TCP",
+										MarkdownDescription: "",
+										Required:            false,
+										Optional:            true,
+										Computed:            false,
+										Attributes: map[string]schema.Attribute{
+											"server_name": schema.StringAttribute{
+												Description:         "Server Name Server name is fully qualified domain name or IP address of the server",
+												MarkdownDescription: "<br>**Validation:** `Length LengthAtMost(256)`",
+												Required:            true,
+												Optional:            false,
+												Computed:            false,
+												Validators: []validator.String{
+													stringvalidator.LengthAtMost(256),
+												},
+											},
+											"port": schema.Int64Attribute{
+												Description:         "Port Number Port number used for communication",
+												MarkdownDescription: "<br>**Default:** `601`",
+												Required:            false,
+												Optional:            true,
+												Computed:            true,
+												Default:             int64default.StaticInt64(601),
+												Validators: []validator.Int64{
+													int64validator.Between(1, 65535),
+												},
+											},
+										},
+									},
 									"tls_server": schema.SingleNestedAttribute{
 										Description:         "Mode TLS Syslog transport mode is TLS",
 										MarkdownDescription: "",
@@ -427,12 +487,19 @@ func (r *ResourceF5XCLogReceiver) Schema(ctx context.Context, request resource.S
 												Computed:            false,
 												Validators: []validator.Object{
 													atmostoneofvalidator.AtMostOneOf(
+														"port",
 														"default_syslog_tls_port",
 														"default_https_port",
-														"port",
 													),
 												},
 												Attributes: map[string]schema.Attribute{
+													"port": schema.Int64Attribute{
+														Description:         "Custom Port Number Custom port number used for communication",
+														MarkdownDescription: "",
+														Required:            false,
+														Optional:            true,
+														Computed:            false,
+													},
 													"default_syslog_tls_port": schema.BoolAttribute{
 														Description:         "Default Syslog Port Default port number for syslog TLS is 6514",
 														MarkdownDescription: "",
@@ -452,13 +519,6 @@ func (r *ResourceF5XCLogReceiver) Schema(ctx context.Context, request resource.S
 														Validators: []validator.Bool{
 															boolvalidator.Equals(true),
 														},
-													},
-													"port": schema.Int64Attribute{
-														Description:         "Custom Port Number Custom port number used for communication",
-														MarkdownDescription: "",
-														Required:            false,
-														Optional:            true,
-														Computed:            false,
 													},
 												},
 											},
@@ -524,13 +584,6 @@ func (r *ResourceF5XCLogReceiver) Schema(ctx context.Context, request resource.S
 														Optional:            true,
 														Computed:            false,
 														Attributes: map[string]schema.Attribute{
-															"certificate": schema.StringAttribute{
-																Description:         "The TLS certificate URL. Client  certificate is PEM-encoded certificate or certificate-chain.",
-																MarkdownDescription: "",
-																Required:            false,
-																Optional:            true,
-																Computed:            false,
-															},
 															"key_url": schema.SingleNestedAttribute{
 																Description:         "Private Key Client private key file containing data in PEM format including the PEM headers. The data in this key file has to match accompanying certificate. The data may be optionally secured using BlindFold.",
 																MarkdownDescription: "",
@@ -551,6 +604,30 @@ func (r *ResourceF5XCLogReceiver) Schema(ctx context.Context, request resource.S
 																			),
 																		},
 																		Attributes: map[string]schema.Attribute{
+																			"clear_secret_info": schema.SingleNestedAttribute{
+																				Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																				MarkdownDescription: "",
+																				Required:            false,
+																				Optional:            true,
+																				Computed:            false,
+																				Attributes: map[string]schema.Attribute{
+																					"provider": schema.StringAttribute{
+																						Description:         "Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
+																						MarkdownDescription: "",
+																						Required:            false,
+																						Optional:            true,
+																						Computed:            false,
+																					},
+																					"url": schema.StringAttribute{
+																						Description:         "URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.",
+																						MarkdownDescription: "",
+																						Required:            true,
+																						Optional:            false,
+																						Computed:            false,
+																						Sensitive:           true,
+																					},
+																				},
+																			},
 																			"blindfold_secret_info": schema.SingleNestedAttribute{
 																				Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
 																				MarkdownDescription: "",
@@ -581,96 +658,19 @@ func (r *ResourceF5XCLogReceiver) Schema(ctx context.Context, request resource.S
 																					},
 																				},
 																			},
-																			"clear_secret_info": schema.SingleNestedAttribute{
-																				Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																				MarkdownDescription: "",
-																				Required:            false,
-																				Optional:            true,
-																				Computed:            false,
-																				Attributes: map[string]schema.Attribute{
-																					"provider": schema.StringAttribute{
-																						Description:         "Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
-																						MarkdownDescription: "",
-																						Required:            false,
-																						Optional:            true,
-																						Computed:            false,
-																					},
-																					"url": schema.StringAttribute{
-																						Description:         "URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.",
-																						MarkdownDescription: "",
-																						Required:            true,
-																						Optional:            false,
-																						Computed:            false,
-																						Sensitive:           true,
-																					},
-																				},
-																			},
 																		},
 																	},
 																},
 															},
+															"certificate": schema.StringAttribute{
+																Description:         "The TLS certificate URL. Client  certificate is PEM-encoded certificate or certificate-chain.",
+																MarkdownDescription: "",
+																Required:            false,
+																Optional:            true,
+																Computed:            false,
+															},
 														},
 													},
-												},
-											},
-										},
-									},
-									"udp_server": schema.SingleNestedAttribute{
-										Description:         "Mode UDP Syslog transport mode is UDP",
-										MarkdownDescription: "",
-										Required:            false,
-										Optional:            true,
-										Computed:            false,
-										Attributes: map[string]schema.Attribute{
-											"server_name": schema.StringAttribute{
-												Description:         "Server Name Server name is fully qualified domain name or IP address of the server",
-												MarkdownDescription: "<br>**Validation:** `Length LengthAtMost(256)`",
-												Required:            true,
-												Optional:            false,
-												Computed:            false,
-												Validators: []validator.String{
-													stringvalidator.LengthAtMost(256),
-												},
-											},
-											"port": schema.Int64Attribute{
-												Description:         "Port Number Port number used for communication",
-												MarkdownDescription: "<br>**Default:** `514`",
-												Required:            false,
-												Optional:            true,
-												Computed:            true,
-												Default:             int64default.StaticInt64(514),
-												Validators: []validator.Int64{
-													int64validator.Between(1, 65535),
-												},
-											},
-										},
-									},
-									"tcp_server": schema.SingleNestedAttribute{
-										Description:         "Mode TCP Syslog transport mode is TCP",
-										MarkdownDescription: "",
-										Required:            false,
-										Optional:            true,
-										Computed:            false,
-										Attributes: map[string]schema.Attribute{
-											"server_name": schema.StringAttribute{
-												Description:         "Server Name Server name is fully qualified domain name or IP address of the server",
-												MarkdownDescription: "<br>**Validation:** `Length LengthAtMost(256)`",
-												Required:            true,
-												Optional:            false,
-												Computed:            false,
-												Validators: []validator.String{
-													stringvalidator.LengthAtMost(256),
-												},
-											},
-											"port": schema.Int64Attribute{
-												Description:         "Port Number Port number used for communication",
-												MarkdownDescription: "<br>**Default:** `601`",
-												Required:            false,
-												Optional:            true,
-												Computed:            true,
-												Default:             int64default.StaticInt64(601),
-												Validators: []validator.Int64{
-													int64validator.Between(1, 65535),
 												},
 											},
 										},
@@ -831,6 +831,11 @@ func (r *ResourceF5XCLogReceiver) Create(ctx context.Context, request resource.C
 
 	// Populate createReq from data model
 
+	// resource modelToMetaRoot RequiredStringField --> Name
+	if !data.Name.IsNull() && !data.Name.IsUnknown() {
+		meta.Name = string(data.Name.ValueString())
+	}
+
 	// resource modelToMetaRoot RequiredStringField --> Namespace
 	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
 		meta.Namespace = string(data.Namespace.ValueString())
@@ -853,11 +858,6 @@ func (r *ResourceF5XCLogReceiver) Create(ctx context.Context, request resource.C
 	// resource modelToMetaRoot StringField --> Description
 	if !data.Description.IsNull() && !data.Description.IsUnknown() {
 		meta.Description = string(data.Description.ValueString())
-	}
-
-	// resource modelToMetaRoot RequiredStringField --> Name
-	if !data.Name.IsNull() && !data.Name.IsUnknown() {
-		meta.Name = string(data.Name.ValueString())
 	}
 
 	// resource modelToSpecRoot RequiredOneOfField --> LogReceiverChoice
@@ -887,6 +887,48 @@ func (r *ResourceF5XCLogReceiver) Create(ctx context.Context, request resource.C
 					return
 				}
 
+				// resource modelToSpecNested PointerOfOneOfField --> UdpServer
+				if !syslogModeChoiceModel.UdpServer.IsNull() && !syslogModeChoiceModel.UdpServer.IsUnknown() {
+					var logReceiverSyslogReceiverUdpServerModel LogReceiverSyslogReceiverUdpServer
+					response.Diagnostics.Append(syslogModeChoiceModel.UdpServer.As(ctx, &logReceiverSyslogReceiverUdpServerModel, basetypes.ObjectAsOptions{})...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					udpServerOneOfSpec := &ves_io_schema_log_receiver.SyslogReceiver_UdpServer{}
+					udpServerOneOfSpec.UdpServer = &ves_io_schema_log_receiver.UDPServerConfigType{}
+					syslogOneOfSpec.Syslog.ModeChoice = udpServerOneOfSpec
+
+					// resource modelToSpecNested RequiredStringField --> ServerName
+					if !logReceiverSyslogReceiverUdpServerModel.ServerName.IsNull() && !logReceiverSyslogReceiverUdpServerModel.ServerName.IsUnknown() {
+						udpServerOneOfSpec.UdpServer.ServerName = string(logReceiverSyslogReceiverUdpServerModel.ServerName.ValueString())
+					}
+
+					// resource modelToSpecNested RequiredUintField --> Port
+					udpServerOneOfSpec.UdpServer.Port = uint32(uint32(logReceiverSyslogReceiverUdpServerModel.Port.ValueInt64()))
+
+				}
+
+				// resource modelToSpecNested PointerOfOneOfField --> TcpServer
+				if !syslogModeChoiceModel.TcpServer.IsNull() && !syslogModeChoiceModel.TcpServer.IsUnknown() {
+					var logReceiverSyslogReceiverTcpServerModel LogReceiverSyslogReceiverTcpServer
+					response.Diagnostics.Append(syslogModeChoiceModel.TcpServer.As(ctx, &logReceiverSyslogReceiverTcpServerModel, basetypes.ObjectAsOptions{})...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					tcpServerOneOfSpec := &ves_io_schema_log_receiver.SyslogReceiver_TcpServer{}
+					tcpServerOneOfSpec.TcpServer = &ves_io_schema_log_receiver.TCPServerConfigType{}
+					syslogOneOfSpec.Syslog.ModeChoice = tcpServerOneOfSpec
+
+					// resource modelToSpecNested RequiredStringField --> ServerName
+					if !logReceiverSyslogReceiverTcpServerModel.ServerName.IsNull() && !logReceiverSyslogReceiverTcpServerModel.ServerName.IsUnknown() {
+						tcpServerOneOfSpec.TcpServer.ServerName = string(logReceiverSyslogReceiverTcpServerModel.ServerName.ValueString())
+					}
+
+					// resource modelToSpecNested RequiredUintField --> Port
+					tcpServerOneOfSpec.TcpServer.Port = uint32(uint32(logReceiverSyslogReceiverTcpServerModel.Port.ValueInt64()))
+
+				}
+
 				// resource modelToSpecNested PointerOfOneOfField --> TlsServer
 				if !syslogModeChoiceModel.TlsServer.IsNull() && !syslogModeChoiceModel.TlsServer.IsUnknown() {
 					var logReceiverSyslogReceiverTlsServerModel LogReceiverSyslogReceiverTlsServer
@@ -911,6 +953,13 @@ func (r *ResourceF5XCLogReceiver) Create(ctx context.Context, request resource.C
 							return
 						}
 
+						// resource modelToSpecNested UintOfOneOfField --> Port
+						if !tlsServerPortChoiceModel.Port.IsNull() {
+							portSpecUint := &ves_io_schema_log_receiver.TLSConfigType_Port{}
+							portSpecUint.Port = uint32(tlsServerPortChoiceModel.Port.ValueInt64())
+							tlsServerOneOfSpec.TlsServer.PortChoice = portSpecUint
+						}
+
 						// resource modelToSpecNested BoolOfOneOfPointerField --> DefaultSyslogTlsPort
 						if !tlsServerPortChoiceModel.DefaultSyslogTlsPort.IsNull() && !tlsServerPortChoiceModel.DefaultSyslogTlsPort.IsUnknown() {
 							defaultSyslogTlsPortSpecBool := &ves_io_schema_log_receiver.TLSConfigType_DefaultSyslogTlsPort{}
@@ -923,13 +972,6 @@ func (r *ResourceF5XCLogReceiver) Create(ctx context.Context, request resource.C
 							defaultHttpsPortSpecBool := &ves_io_schema_log_receiver.TLSConfigType_DefaultHttpsPort{}
 							defaultHttpsPortSpecBool.DefaultHttpsPort = &ves_io_schema.Empty{}
 							tlsServerOneOfSpec.TlsServer.PortChoice = defaultHttpsPortSpecBool
-						}
-
-						// resource modelToSpecNested UintOfOneOfField --> Port
-						if !tlsServerPortChoiceModel.Port.IsNull() {
-							portSpecUint := &ves_io_schema_log_receiver.TLSConfigType_Port{}
-							portSpecUint.Port = uint32(tlsServerPortChoiceModel.Port.ValueInt64())
-							tlsServerOneOfSpec.TlsServer.PortChoice = portSpecUint
 						}
 
 					}
@@ -984,11 +1026,6 @@ func (r *ResourceF5XCLogReceiver) Create(ctx context.Context, request resource.C
 							mtlsEnableOneOfSpec.MtlsEnable = &ves_io_schema_log_receiver.TLSClientConfigType{}
 							tlsServerOneOfSpec.TlsServer.MtlsChoice = mtlsEnableOneOfSpec
 
-							// resource modelToSpecNested StringField --> Certificate
-							if !logReceiverTLSConfigTypeMtlsEnableModel.Certificate.IsNull() && !logReceiverTLSConfigTypeMtlsEnableModel.Certificate.IsUnknown() {
-								mtlsEnableOneOfSpec.MtlsEnable.Certificate = string(logReceiverTLSConfigTypeMtlsEnableModel.Certificate.ValueString())
-							}
-
 							// resource modelToSpecNested PointerField --> KeyUrl
 							if !logReceiverTLSConfigTypeMtlsEnableModel.KeyUrl.IsNull() && !logReceiverTLSConfigTypeMtlsEnableModel.KeyUrl.IsUnknown() {
 								var keyUrlModel LogReceiverSecretType
@@ -1006,6 +1043,29 @@ func (r *ResourceF5XCLogReceiver) Create(ctx context.Context, request resource.C
 									response.Diagnostics.Append(keyUrlModel.SecretInfoChoice.As(ctx, &keyUrlSecretInfoChoiceModel, basetypes.ObjectAsOptions{})...)
 									if response.Diagnostics.HasError() {
 										return
+									}
+
+									// resource modelToSpecNested PointerOfOneOfField --> ClearSecretInfo
+									if !keyUrlSecretInfoChoiceModel.ClearSecretInfo.IsNull() && !keyUrlSecretInfoChoiceModel.ClearSecretInfo.IsUnknown() {
+										var logReceiverSecretTypeClearSecretInfoModel LogReceiverSecretTypeClearSecretInfo
+										response.Diagnostics.Append(keyUrlSecretInfoChoiceModel.ClearSecretInfo.As(ctx, &logReceiverSecretTypeClearSecretInfoModel, basetypes.ObjectAsOptions{})...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										clearSecretInfoOneOfSpec := &ves_io_schema.SecretType_ClearSecretInfo{}
+										clearSecretInfoOneOfSpec.ClearSecretInfo = &ves_io_schema.ClearSecretInfoType{}
+										keyUrlSpec.SecretInfoOneof = clearSecretInfoOneOfSpec
+
+										// resource modelToSpecNested StringField --> Provider
+										if !logReceiverSecretTypeClearSecretInfoModel.Provider.IsNull() && !logReceiverSecretTypeClearSecretInfoModel.Provider.IsUnknown() {
+											clearSecretInfoOneOfSpec.ClearSecretInfo.Provider = string(logReceiverSecretTypeClearSecretInfoModel.Provider.ValueString())
+										}
+
+										// resource modelToSpecNested RequiredStringField --> Url
+										if !logReceiverSecretTypeClearSecretInfoModel.Url.IsNull() && !logReceiverSecretTypeClearSecretInfoModel.Url.IsUnknown() {
+											clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(logReceiverSecretTypeClearSecretInfoModel.Url.ValueString())
+										}
+
 									}
 
 									// resource modelToSpecNested PointerOfOneOfField --> BlindfoldSecretInfo
@@ -1036,78 +1096,18 @@ func (r *ResourceF5XCLogReceiver) Create(ctx context.Context, request resource.C
 
 									}
 
-									// resource modelToSpecNested PointerOfOneOfField --> ClearSecretInfo
-									if !keyUrlSecretInfoChoiceModel.ClearSecretInfo.IsNull() && !keyUrlSecretInfoChoiceModel.ClearSecretInfo.IsUnknown() {
-										var logReceiverSecretTypeClearSecretInfoModel LogReceiverSecretTypeClearSecretInfo
-										response.Diagnostics.Append(keyUrlSecretInfoChoiceModel.ClearSecretInfo.As(ctx, &logReceiverSecretTypeClearSecretInfoModel, basetypes.ObjectAsOptions{})...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										clearSecretInfoOneOfSpec := &ves_io_schema.SecretType_ClearSecretInfo{}
-										clearSecretInfoOneOfSpec.ClearSecretInfo = &ves_io_schema.ClearSecretInfoType{}
-										keyUrlSpec.SecretInfoOneof = clearSecretInfoOneOfSpec
-
-										// resource modelToSpecNested StringField --> Provider
-										if !logReceiverSecretTypeClearSecretInfoModel.Provider.IsNull() && !logReceiverSecretTypeClearSecretInfoModel.Provider.IsUnknown() {
-											clearSecretInfoOneOfSpec.ClearSecretInfo.Provider = string(logReceiverSecretTypeClearSecretInfoModel.Provider.ValueString())
-										}
-
-										// resource modelToSpecNested RequiredStringField --> Url
-										if !logReceiverSecretTypeClearSecretInfoModel.Url.IsNull() && !logReceiverSecretTypeClearSecretInfoModel.Url.IsUnknown() {
-											clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(logReceiverSecretTypeClearSecretInfoModel.Url.ValueString())
-										}
-
-									}
-
 								}
 
+							}
+
+							// resource modelToSpecNested StringField --> Certificate
+							if !logReceiverTLSConfigTypeMtlsEnableModel.Certificate.IsNull() && !logReceiverTLSConfigTypeMtlsEnableModel.Certificate.IsUnknown() {
+								mtlsEnableOneOfSpec.MtlsEnable.Certificate = string(logReceiverTLSConfigTypeMtlsEnableModel.Certificate.ValueString())
 							}
 
 						}
 
 					}
-
-				}
-
-				// resource modelToSpecNested PointerOfOneOfField --> UdpServer
-				if !syslogModeChoiceModel.UdpServer.IsNull() && !syslogModeChoiceModel.UdpServer.IsUnknown() {
-					var logReceiverSyslogReceiverUdpServerModel LogReceiverSyslogReceiverUdpServer
-					response.Diagnostics.Append(syslogModeChoiceModel.UdpServer.As(ctx, &logReceiverSyslogReceiverUdpServerModel, basetypes.ObjectAsOptions{})...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					udpServerOneOfSpec := &ves_io_schema_log_receiver.SyslogReceiver_UdpServer{}
-					udpServerOneOfSpec.UdpServer = &ves_io_schema_log_receiver.UDPServerConfigType{}
-					syslogOneOfSpec.Syslog.ModeChoice = udpServerOneOfSpec
-
-					// resource modelToSpecNested RequiredStringField --> ServerName
-					if !logReceiverSyslogReceiverUdpServerModel.ServerName.IsNull() && !logReceiverSyslogReceiverUdpServerModel.ServerName.IsUnknown() {
-						udpServerOneOfSpec.UdpServer.ServerName = string(logReceiverSyslogReceiverUdpServerModel.ServerName.ValueString())
-					}
-
-					// resource modelToSpecNested RequiredUintField --> Port
-					udpServerOneOfSpec.UdpServer.Port = uint32(uint32(logReceiverSyslogReceiverUdpServerModel.Port.ValueInt64()))
-
-				}
-
-				// resource modelToSpecNested PointerOfOneOfField --> TcpServer
-				if !syslogModeChoiceModel.TcpServer.IsNull() && !syslogModeChoiceModel.TcpServer.IsUnknown() {
-					var logReceiverSyslogReceiverTcpServerModel LogReceiverSyslogReceiverTcpServer
-					response.Diagnostics.Append(syslogModeChoiceModel.TcpServer.As(ctx, &logReceiverSyslogReceiverTcpServerModel, basetypes.ObjectAsOptions{})...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					tcpServerOneOfSpec := &ves_io_schema_log_receiver.SyslogReceiver_TcpServer{}
-					tcpServerOneOfSpec.TcpServer = &ves_io_schema_log_receiver.TCPServerConfigType{}
-					syslogOneOfSpec.Syslog.ModeChoice = tcpServerOneOfSpec
-
-					// resource modelToSpecNested RequiredStringField --> ServerName
-					if !logReceiverSyslogReceiverTcpServerModel.ServerName.IsNull() && !logReceiverSyslogReceiverTcpServerModel.ServerName.IsUnknown() {
-						tcpServerOneOfSpec.TcpServer.ServerName = string(logReceiverSyslogReceiverTcpServerModel.ServerName.ValueString())
-					}
-
-					// resource modelToSpecNested RequiredUintField --> Port
-					tcpServerOneOfSpec.TcpServer.Port = uint32(uint32(logReceiverSyslogReceiverTcpServerModel.Port.ValueInt64()))
 
 				}
 
@@ -1183,6 +1183,9 @@ func (r *ResourceF5XCLogReceiver) Create(ctx context.Context, request resource.C
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
+
+	// resource SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
 
 	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
 	data.Namespace = types.StringValue(metaData.GetNamespace())
@@ -1271,9 +1274,6 @@ func (r *ResourceF5XCLogReceiver) Create(ctx context.Context, request resource.C
 	// resource SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
 
-	// resource SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
-
 	// resource SpecToModelRoot RequiredOneOfField --> LogReceiverChoice
 	// false
 	// true
@@ -1307,6 +1307,68 @@ func (r *ResourceF5XCLogReceiver) Create(ctx context.Context, request resource.C
 
 					// Process nested choices, populating the temporary attribute map
 
+					// resource specToModelNested PointerOfOneOfField --> UdpServer
+					// GlobalSpecType
+					// false
+					{
+						udpServerOptions, isUdpServer := syslogmodeChoiceChoices.(*ves_io_schema_log_receiver.SyslogReceiver_UdpServer)
+						udpServerAttributeMap := make(map[string]attr.Value)
+
+						if isUdpServer && udpServerOptions != nil {
+
+							// resource specToModelNested RequiredStringField --> ServerName
+							if udpServerOptions.UdpServer.GetServerName() != "" {
+								udpServerAttributeMap["server_name"] = types.StringValue(udpServerOptions.UdpServer.GetServerName())
+							} else {
+								// Empty string, set to null
+								udpServerAttributeMap["server_name"] = types.StringNull()
+							}
+
+							// resource specToModelNested RequiredUintField --> Port
+							udpServerAttributeMap["port"] = types.Int64Value(int64(udpServerOptions.UdpServer.GetPort()))
+
+							udpServerObj, diags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceUdpServerModelAttributeMap, udpServerAttributeMap)
+							response.Diagnostics.Append(diags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							syslogmodeChoiceChoicesAttributeMap["udp_server"] = udpServerObj
+						} else {
+							syslogmodeChoiceChoicesAttributeMap["udp_server"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceUdpServerModelAttributeMap)
+						}
+					}
+
+					// resource specToModelNested PointerOfOneOfField --> TcpServer
+					// GlobalSpecType
+					// false
+					{
+						tcpServerOptions, isTcpServer := syslogmodeChoiceChoices.(*ves_io_schema_log_receiver.SyslogReceiver_TcpServer)
+						tcpServerAttributeMap := make(map[string]attr.Value)
+
+						if isTcpServer && tcpServerOptions != nil {
+
+							// resource specToModelNested RequiredStringField --> ServerName
+							if tcpServerOptions.TcpServer.GetServerName() != "" {
+								tcpServerAttributeMap["server_name"] = types.StringValue(tcpServerOptions.TcpServer.GetServerName())
+							} else {
+								// Empty string, set to null
+								tcpServerAttributeMap["server_name"] = types.StringNull()
+							}
+
+							// resource specToModelNested RequiredUintField --> Port
+							tcpServerAttributeMap["port"] = types.Int64Value(int64(tcpServerOptions.TcpServer.GetPort()))
+
+							tcpServerObj, diags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceTcpServerModelAttributeMap, tcpServerAttributeMap)
+							response.Diagnostics.Append(diags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							syslogmodeChoiceChoicesAttributeMap["tcp_server"] = tcpServerObj
+						} else {
+							syslogmodeChoiceChoicesAttributeMap["tcp_server"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTcpServerModelAttributeMap)
+						}
+					}
+
 					// resource specToModelNested PointerOfOneOfField --> TlsServer
 					// GlobalSpecType
 					// false
@@ -1335,6 +1397,16 @@ func (r *ResourceF5XCLogReceiver) Create(ctx context.Context, request resource.C
 
 								// Process nested choices, populating the temporary attribute map
 
+								// resource specToModelNested UintOfOneOfField --> Port
+								portItem, isPort := tlsServerportChoiceChoices.(*ves_io_schema_log_receiver.TLSConfigType_Port)
+
+								if isPort {
+									tlsServerportChoiceChoicesAttributeMap["port"] = types.Int64Value(int64(portItem.Port))
+								} else {
+									// Empty uint, set to null
+									tlsServerportChoiceChoicesAttributeMap["port"] = types.Int64Null()
+								}
+
 								// resource specToModelNested BoolOfOneOfPointerField --> DefaultSyslogTlsPort
 								_, isDefaultSyslogTlsPort := tlsServerportChoiceChoices.(*ves_io_schema_log_receiver.TLSConfigType_DefaultSyslogTlsPort)
 
@@ -1351,16 +1423,6 @@ func (r *ResourceF5XCLogReceiver) Create(ctx context.Context, request resource.C
 									tlsServerportChoiceChoicesAttributeMap["default_https_port"] = types.BoolValue(true)
 								} else {
 									tlsServerportChoiceChoicesAttributeMap["default_https_port"] = types.BoolNull()
-								}
-
-								// resource specToModelNested UintOfOneOfField --> Port
-								portItem, isPort := tlsServerportChoiceChoices.(*ves_io_schema_log_receiver.TLSConfigType_Port)
-
-								if isPort {
-									tlsServerportChoiceChoicesAttributeMap["port"] = types.Int64Value(int64(portItem.Port))
-								} else {
-									// Empty uint, set to null
-									tlsServerportChoiceChoicesAttributeMap["port"] = types.Int64Null()
 								}
 
 								// --- End of Choices ---
@@ -1460,14 +1522,6 @@ func (r *ResourceF5XCLogReceiver) Create(ctx context.Context, request resource.C
 
 									if isMtlsEnable && mtlsEnableOptions != nil {
 
-										// resource specToModelNested StringField --> Certificate
-										if mtlsEnableOptions.MtlsEnable.GetCertificate() != "" {
-											mtlsEnableAttributeMap["certificate"] = types.StringValue(mtlsEnableOptions.MtlsEnable.GetCertificate())
-										} else {
-											// Empty string, set to null
-											mtlsEnableAttributeMap["certificate"] = types.StringNull()
-										}
-
 										// resource specToModelNested PointerField --> KeyUrl
 										if mtlsEnableOptions.MtlsEnable.GetKeyUrl() != nil {
 											// Create the nested Go struct
@@ -1486,6 +1540,42 @@ func (r *ResourceF5XCLogReceiver) Create(ctx context.Context, request resource.C
 												keyUrlsecretInfoChoiceChoices := keyUrlElement.GetSecretInfoOneof()
 
 												// Process nested choices, populating the temporary attribute map
+
+												// resource specToModelNested PointerOfOneOfField --> ClearSecretInfo
+												// GlobalSpecType
+												// false
+												{
+													clearSecretInfoOptions, isClearSecretInfo := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_ClearSecretInfo)
+													clearSecretInfoAttributeMap := make(map[string]attr.Value)
+
+													if isClearSecretInfo && clearSecretInfoOptions != nil {
+
+														// resource specToModelNested StringField --> Provider
+														if clearSecretInfoOptions.ClearSecretInfo.GetProvider() != "" {
+															clearSecretInfoAttributeMap["provider"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetProvider())
+														} else {
+															// Empty string, set to null
+															clearSecretInfoAttributeMap["provider"] = types.StringNull()
+														}
+
+														// resource specToModelNested RequiredStringField --> Url
+														if clearSecretInfoOptions.ClearSecretInfo.GetUrl() != "" {
+															clearSecretInfoAttributeMap["url"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetUrl())
+														} else {
+															// Empty string, set to null
+															clearSecretInfoAttributeMap["url"] = types.StringNull()
+														}
+
+														clearSecretInfoObj, diags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap, clearSecretInfoAttributeMap)
+														response.Diagnostics.Append(diags...)
+														if response.Diagnostics.HasError() {
+															return
+														}
+														keyUrlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = clearSecretInfoObj
+													} else {
+														keyUrlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap)
+													}
+												}
 
 												// resource specToModelNested PointerOfOneOfField --> BlindfoldSecretInfo
 												// GlobalSpecType
@@ -1531,42 +1621,6 @@ func (r *ResourceF5XCLogReceiver) Create(ctx context.Context, request resource.C
 													}
 												}
 
-												// resource specToModelNested PointerOfOneOfField --> ClearSecretInfo
-												// GlobalSpecType
-												// false
-												{
-													clearSecretInfoOptions, isClearSecretInfo := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_ClearSecretInfo)
-													clearSecretInfoAttributeMap := make(map[string]attr.Value)
-
-													if isClearSecretInfo && clearSecretInfoOptions != nil {
-
-														// resource specToModelNested StringField --> Provider
-														if clearSecretInfoOptions.ClearSecretInfo.GetProvider() != "" {
-															clearSecretInfoAttributeMap["provider"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetProvider())
-														} else {
-															// Empty string, set to null
-															clearSecretInfoAttributeMap["provider"] = types.StringNull()
-														}
-
-														// resource specToModelNested RequiredStringField --> Url
-														if clearSecretInfoOptions.ClearSecretInfo.GetUrl() != "" {
-															clearSecretInfoAttributeMap["url"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetUrl())
-														} else {
-															// Empty string, set to null
-															clearSecretInfoAttributeMap["url"] = types.StringNull()
-														}
-
-														clearSecretInfoObj, diags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap, clearSecretInfoAttributeMap)
-														response.Diagnostics.Append(diags...)
-														if response.Diagnostics.HasError() {
-															return
-														}
-														keyUrlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = clearSecretInfoObj
-													} else {
-														keyUrlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap)
-													}
-												}
-
 												// --- End of Choices ---
 
 												// Create the final ObjectValue for this OneOf field
@@ -1602,6 +1656,14 @@ func (r *ResourceF5XCLogReceiver) Create(ctx context.Context, request resource.C
 											// making this else-branch unreachable. The child OneOf handles the actual healing.
 											// The target is a types.Object, so we use types.ObjectNull.
 											mtlsEnableAttributeMap["key_url"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlModelAttributeMap)
+										}
+
+										// resource specToModelNested StringField --> Certificate
+										if mtlsEnableOptions.MtlsEnable.GetCertificate() != "" {
+											mtlsEnableAttributeMap["certificate"] = types.StringValue(mtlsEnableOptions.MtlsEnable.GetCertificate())
+										} else {
+											// Empty string, set to null
+											mtlsEnableAttributeMap["certificate"] = types.StringNull()
 										}
 
 										mtlsEnableObj, diags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableModelAttributeMap, mtlsEnableAttributeMap)
@@ -1642,68 +1704,6 @@ func (r *ResourceF5XCLogReceiver) Create(ctx context.Context, request resource.C
 							syslogmodeChoiceChoicesAttributeMap["tls_server"] = tlsServerObj
 						} else {
 							syslogmodeChoiceChoicesAttributeMap["tls_server"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerModelAttributeMap)
-						}
-					}
-
-					// resource specToModelNested PointerOfOneOfField --> UdpServer
-					// GlobalSpecType
-					// false
-					{
-						udpServerOptions, isUdpServer := syslogmodeChoiceChoices.(*ves_io_schema_log_receiver.SyslogReceiver_UdpServer)
-						udpServerAttributeMap := make(map[string]attr.Value)
-
-						if isUdpServer && udpServerOptions != nil {
-
-							// resource specToModelNested RequiredStringField --> ServerName
-							if udpServerOptions.UdpServer.GetServerName() != "" {
-								udpServerAttributeMap["server_name"] = types.StringValue(udpServerOptions.UdpServer.GetServerName())
-							} else {
-								// Empty string, set to null
-								udpServerAttributeMap["server_name"] = types.StringNull()
-							}
-
-							// resource specToModelNested RequiredUintField --> Port
-							udpServerAttributeMap["port"] = types.Int64Value(int64(udpServerOptions.UdpServer.GetPort()))
-
-							udpServerObj, diags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceUdpServerModelAttributeMap, udpServerAttributeMap)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							syslogmodeChoiceChoicesAttributeMap["udp_server"] = udpServerObj
-						} else {
-							syslogmodeChoiceChoicesAttributeMap["udp_server"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceUdpServerModelAttributeMap)
-						}
-					}
-
-					// resource specToModelNested PointerOfOneOfField --> TcpServer
-					// GlobalSpecType
-					// false
-					{
-						tcpServerOptions, isTcpServer := syslogmodeChoiceChoices.(*ves_io_schema_log_receiver.SyslogReceiver_TcpServer)
-						tcpServerAttributeMap := make(map[string]attr.Value)
-
-						if isTcpServer && tcpServerOptions != nil {
-
-							// resource specToModelNested RequiredStringField --> ServerName
-							if tcpServerOptions.TcpServer.GetServerName() != "" {
-								tcpServerAttributeMap["server_name"] = types.StringValue(tcpServerOptions.TcpServer.GetServerName())
-							} else {
-								// Empty string, set to null
-								tcpServerAttributeMap["server_name"] = types.StringNull()
-							}
-
-							// resource specToModelNested RequiredUintField --> Port
-							tcpServerAttributeMap["port"] = types.Int64Value(int64(tcpServerOptions.TcpServer.GetPort()))
-
-							tcpServerObj, diags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceTcpServerModelAttributeMap, tcpServerAttributeMap)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							syslogmodeChoiceChoicesAttributeMap["tcp_server"] = tcpServerObj
-						} else {
-							syslogmodeChoiceChoicesAttributeMap["tcp_server"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTcpServerModelAttributeMap)
 						}
 					}
 
@@ -1898,6 +1898,9 @@ func (r *ResourceF5XCLogReceiver) Read(ctx context.Context, request resource.Rea
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
+	// resource SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
+
 	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
 	data.Namespace = types.StringValue(metaData.GetNamespace())
 
@@ -2001,9 +2004,6 @@ func (r *ResourceF5XCLogReceiver) Read(ctx context.Context, request resource.Rea
 	// resource SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
 
-	// resource SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
-
 	// resource SpecToModelRoot RequiredOneOfField --> LogReceiverChoice
 	// false
 	// true
@@ -2037,6 +2037,68 @@ func (r *ResourceF5XCLogReceiver) Read(ctx context.Context, request resource.Rea
 
 					// Process nested choices, populating the temporary attribute map
 
+					// resource specToModelNested PointerOfOneOfField --> UdpServer
+					// <no value>
+					// false
+					{
+						udpServerOptions, isUdpServer := syslogmodeChoiceChoices.(*ves_io_schema_log_receiver.SyslogReceiver_UdpServer)
+						udpServerAttributeMap := make(map[string]attr.Value)
+
+						if isUdpServer && udpServerOptions != nil {
+
+							// resource specToModelNested RequiredStringField --> ServerName
+							if udpServerOptions.UdpServer.GetServerName() != "" {
+								udpServerAttributeMap["server_name"] = types.StringValue(udpServerOptions.UdpServer.GetServerName())
+							} else {
+								// Empty string, set to null
+								udpServerAttributeMap["server_name"] = types.StringNull()
+							}
+
+							// resource specToModelNested RequiredUintField --> Port
+							udpServerAttributeMap["port"] = types.Int64Value(int64(udpServerOptions.UdpServer.GetPort()))
+
+							udpServerObj, diags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceUdpServerModelAttributeMap, udpServerAttributeMap)
+							response.Diagnostics.Append(diags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							syslogmodeChoiceChoicesAttributeMap["udp_server"] = udpServerObj
+						} else {
+							syslogmodeChoiceChoicesAttributeMap["udp_server"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceUdpServerModelAttributeMap)
+						}
+					}
+
+					// resource specToModelNested PointerOfOneOfField --> TcpServer
+					// <no value>
+					// false
+					{
+						tcpServerOptions, isTcpServer := syslogmodeChoiceChoices.(*ves_io_schema_log_receiver.SyslogReceiver_TcpServer)
+						tcpServerAttributeMap := make(map[string]attr.Value)
+
+						if isTcpServer && tcpServerOptions != nil {
+
+							// resource specToModelNested RequiredStringField --> ServerName
+							if tcpServerOptions.TcpServer.GetServerName() != "" {
+								tcpServerAttributeMap["server_name"] = types.StringValue(tcpServerOptions.TcpServer.GetServerName())
+							} else {
+								// Empty string, set to null
+								tcpServerAttributeMap["server_name"] = types.StringNull()
+							}
+
+							// resource specToModelNested RequiredUintField --> Port
+							tcpServerAttributeMap["port"] = types.Int64Value(int64(tcpServerOptions.TcpServer.GetPort()))
+
+							tcpServerObj, diags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceTcpServerModelAttributeMap, tcpServerAttributeMap)
+							response.Diagnostics.Append(diags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							syslogmodeChoiceChoicesAttributeMap["tcp_server"] = tcpServerObj
+						} else {
+							syslogmodeChoiceChoicesAttributeMap["tcp_server"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTcpServerModelAttributeMap)
+						}
+					}
+
 					// resource specToModelNested PointerOfOneOfField --> TlsServer
 					// <no value>
 					// false
@@ -2065,6 +2127,16 @@ func (r *ResourceF5XCLogReceiver) Read(ctx context.Context, request resource.Rea
 
 								// Process nested choices, populating the temporary attribute map
 
+								// resource specToModelNested UintOfOneOfField --> Port
+								portItem, isPort := tlsServerportChoiceChoices.(*ves_io_schema_log_receiver.TLSConfigType_Port)
+
+								if isPort {
+									tlsServerportChoiceChoicesAttributeMap["port"] = types.Int64Value(int64(portItem.Port))
+								} else {
+									// Empty uint, set to null
+									tlsServerportChoiceChoicesAttributeMap["port"] = types.Int64Null()
+								}
+
 								// resource specToModelNested BoolOfOneOfPointerField --> DefaultSyslogTlsPort
 								_, isDefaultSyslogTlsPort := tlsServerportChoiceChoices.(*ves_io_schema_log_receiver.TLSConfigType_DefaultSyslogTlsPort)
 
@@ -2081,16 +2153,6 @@ func (r *ResourceF5XCLogReceiver) Read(ctx context.Context, request resource.Rea
 									tlsServerportChoiceChoicesAttributeMap["default_https_port"] = types.BoolValue(true)
 								} else {
 									tlsServerportChoiceChoicesAttributeMap["default_https_port"] = types.BoolNull()
-								}
-
-								// resource specToModelNested UintOfOneOfField --> Port
-								portItem, isPort := tlsServerportChoiceChoices.(*ves_io_schema_log_receiver.TLSConfigType_Port)
-
-								if isPort {
-									tlsServerportChoiceChoicesAttributeMap["port"] = types.Int64Value(int64(portItem.Port))
-								} else {
-									// Empty uint, set to null
-									tlsServerportChoiceChoicesAttributeMap["port"] = types.Int64Null()
 								}
 
 								// --- End of Choices ---
@@ -2190,14 +2252,6 @@ func (r *ResourceF5XCLogReceiver) Read(ctx context.Context, request resource.Rea
 
 									if isMtlsEnable && mtlsEnableOptions != nil {
 
-										// resource specToModelNested StringField --> Certificate
-										if mtlsEnableOptions.MtlsEnable.GetCertificate() != "" {
-											mtlsEnableAttributeMap["certificate"] = types.StringValue(mtlsEnableOptions.MtlsEnable.GetCertificate())
-										} else {
-											// Empty string, set to null
-											mtlsEnableAttributeMap["certificate"] = types.StringNull()
-										}
-
 										// resource specToModelNested PointerField --> KeyUrl
 										if mtlsEnableOptions.MtlsEnable.GetKeyUrl() != nil {
 											// Create the nested Go struct
@@ -2216,6 +2270,42 @@ func (r *ResourceF5XCLogReceiver) Read(ctx context.Context, request resource.Rea
 												keyUrlsecretInfoChoiceChoices := keyUrlElement.GetSecretInfoOneof()
 
 												// Process nested choices, populating the temporary attribute map
+
+												// resource specToModelNested PointerOfOneOfField --> ClearSecretInfo
+												// <no value>
+												// false
+												{
+													clearSecretInfoOptions, isClearSecretInfo := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_ClearSecretInfo)
+													clearSecretInfoAttributeMap := make(map[string]attr.Value)
+
+													if isClearSecretInfo && clearSecretInfoOptions != nil {
+
+														// resource specToModelNested StringField --> Provider
+														if clearSecretInfoOptions.ClearSecretInfo.GetProvider() != "" {
+															clearSecretInfoAttributeMap["provider"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetProvider())
+														} else {
+															// Empty string, set to null
+															clearSecretInfoAttributeMap["provider"] = types.StringNull()
+														}
+
+														// resource specToModelNested RequiredStringField --> Url
+														if clearSecretInfoOptions.ClearSecretInfo.GetUrl() != "" {
+															clearSecretInfoAttributeMap["url"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetUrl())
+														} else {
+															// Empty string, set to null
+															clearSecretInfoAttributeMap["url"] = types.StringNull()
+														}
+
+														clearSecretInfoObj, diags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap, clearSecretInfoAttributeMap)
+														response.Diagnostics.Append(diags...)
+														if response.Diagnostics.HasError() {
+															return
+														}
+														keyUrlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = clearSecretInfoObj
+													} else {
+														keyUrlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap)
+													}
+												}
 
 												// resource specToModelNested PointerOfOneOfField --> BlindfoldSecretInfo
 												// <no value>
@@ -2258,42 +2348,6 @@ func (r *ResourceF5XCLogReceiver) Read(ctx context.Context, request resource.Rea
 														keyUrlsecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = blindfoldSecretInfoObj
 													} else {
 														keyUrlsecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofBlindfoldSecretInfoModelAttributeMap)
-													}
-												}
-
-												// resource specToModelNested PointerOfOneOfField --> ClearSecretInfo
-												// <no value>
-												// false
-												{
-													clearSecretInfoOptions, isClearSecretInfo := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_ClearSecretInfo)
-													clearSecretInfoAttributeMap := make(map[string]attr.Value)
-
-													if isClearSecretInfo && clearSecretInfoOptions != nil {
-
-														// resource specToModelNested StringField --> Provider
-														if clearSecretInfoOptions.ClearSecretInfo.GetProvider() != "" {
-															clearSecretInfoAttributeMap["provider"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetProvider())
-														} else {
-															// Empty string, set to null
-															clearSecretInfoAttributeMap["provider"] = types.StringNull()
-														}
-
-														// resource specToModelNested RequiredStringField --> Url
-														if clearSecretInfoOptions.ClearSecretInfo.GetUrl() != "" {
-															clearSecretInfoAttributeMap["url"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetUrl())
-														} else {
-															// Empty string, set to null
-															clearSecretInfoAttributeMap["url"] = types.StringNull()
-														}
-
-														clearSecretInfoObj, diags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap, clearSecretInfoAttributeMap)
-														response.Diagnostics.Append(diags...)
-														if response.Diagnostics.HasError() {
-															return
-														}
-														keyUrlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = clearSecretInfoObj
-													} else {
-														keyUrlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap)
 													}
 												}
 
@@ -2346,6 +2400,14 @@ func (r *ResourceF5XCLogReceiver) Read(ctx context.Context, request resource.Rea
 											mtlsEnableAttributeMap["key_url"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlModelAttributeMap)
 										}
 
+										// resource specToModelNested StringField --> Certificate
+										if mtlsEnableOptions.MtlsEnable.GetCertificate() != "" {
+											mtlsEnableAttributeMap["certificate"] = types.StringValue(mtlsEnableOptions.MtlsEnable.GetCertificate())
+										} else {
+											// Empty string, set to null
+											mtlsEnableAttributeMap["certificate"] = types.StringNull()
+										}
+
 										mtlsEnableObj, diags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableModelAttributeMap, mtlsEnableAttributeMap)
 										response.Diagnostics.Append(diags...)
 										if response.Diagnostics.HasError() {
@@ -2384,68 +2446,6 @@ func (r *ResourceF5XCLogReceiver) Read(ctx context.Context, request resource.Rea
 							syslogmodeChoiceChoicesAttributeMap["tls_server"] = tlsServerObj
 						} else {
 							syslogmodeChoiceChoicesAttributeMap["tls_server"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerModelAttributeMap)
-						}
-					}
-
-					// resource specToModelNested PointerOfOneOfField --> UdpServer
-					// <no value>
-					// false
-					{
-						udpServerOptions, isUdpServer := syslogmodeChoiceChoices.(*ves_io_schema_log_receiver.SyslogReceiver_UdpServer)
-						udpServerAttributeMap := make(map[string]attr.Value)
-
-						if isUdpServer && udpServerOptions != nil {
-
-							// resource specToModelNested RequiredStringField --> ServerName
-							if udpServerOptions.UdpServer.GetServerName() != "" {
-								udpServerAttributeMap["server_name"] = types.StringValue(udpServerOptions.UdpServer.GetServerName())
-							} else {
-								// Empty string, set to null
-								udpServerAttributeMap["server_name"] = types.StringNull()
-							}
-
-							// resource specToModelNested RequiredUintField --> Port
-							udpServerAttributeMap["port"] = types.Int64Value(int64(udpServerOptions.UdpServer.GetPort()))
-
-							udpServerObj, diags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceUdpServerModelAttributeMap, udpServerAttributeMap)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							syslogmodeChoiceChoicesAttributeMap["udp_server"] = udpServerObj
-						} else {
-							syslogmodeChoiceChoicesAttributeMap["udp_server"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceUdpServerModelAttributeMap)
-						}
-					}
-
-					// resource specToModelNested PointerOfOneOfField --> TcpServer
-					// <no value>
-					// false
-					{
-						tcpServerOptions, isTcpServer := syslogmodeChoiceChoices.(*ves_io_schema_log_receiver.SyslogReceiver_TcpServer)
-						tcpServerAttributeMap := make(map[string]attr.Value)
-
-						if isTcpServer && tcpServerOptions != nil {
-
-							// resource specToModelNested RequiredStringField --> ServerName
-							if tcpServerOptions.TcpServer.GetServerName() != "" {
-								tcpServerAttributeMap["server_name"] = types.StringValue(tcpServerOptions.TcpServer.GetServerName())
-							} else {
-								// Empty string, set to null
-								tcpServerAttributeMap["server_name"] = types.StringNull()
-							}
-
-							// resource specToModelNested RequiredUintField --> Port
-							tcpServerAttributeMap["port"] = types.Int64Value(int64(tcpServerOptions.TcpServer.GetPort()))
-
-							tcpServerObj, diags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceTcpServerModelAttributeMap, tcpServerAttributeMap)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							syslogmodeChoiceChoicesAttributeMap["tcp_server"] = tcpServerObj
-						} else {
-							syslogmodeChoiceChoicesAttributeMap["tcp_server"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTcpServerModelAttributeMap)
 						}
 					}
 
@@ -2624,6 +2624,11 @@ func (r *ResourceF5XCLogReceiver) Update(ctx context.Context, request resource.U
 
 	// Populate updateReq from data model
 
+	// resource modelToMetaRoot RequiredStringField --> Name
+	if !data.Name.IsNull() && !data.Name.IsUnknown() {
+		meta.Name = string(data.Name.ValueString())
+	}
+
 	// resource modelToMetaRoot RequiredStringField --> Namespace
 	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
 		meta.Namespace = string(data.Namespace.ValueString())
@@ -2646,11 +2651,6 @@ func (r *ResourceF5XCLogReceiver) Update(ctx context.Context, request resource.U
 	// resource modelToMetaRoot StringField --> Description
 	if !data.Description.IsNull() && !data.Description.IsUnknown() {
 		meta.Description = string(data.Description.ValueString())
-	}
-
-	// resource modelToMetaRoot RequiredStringField --> Name
-	if !data.Name.IsNull() && !data.Name.IsUnknown() {
-		meta.Name = string(data.Name.ValueString())
 	}
 
 	// resource modelToSpecRoot RequiredOneOfField --> LogReceiverChoice
@@ -2680,6 +2680,48 @@ func (r *ResourceF5XCLogReceiver) Update(ctx context.Context, request resource.U
 					return
 				}
 
+				// resource modelToSpecNested PointerOfOneOfField --> UdpServer
+				if !syslogModeChoiceModel.UdpServer.IsNull() && !syslogModeChoiceModel.UdpServer.IsUnknown() {
+					var logReceiverSyslogReceiverUdpServerModel LogReceiverSyslogReceiverUdpServer
+					response.Diagnostics.Append(syslogModeChoiceModel.UdpServer.As(ctx, &logReceiverSyslogReceiverUdpServerModel, basetypes.ObjectAsOptions{})...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					udpServerOneOfSpec := &ves_io_schema_log_receiver.SyslogReceiver_UdpServer{}
+					udpServerOneOfSpec.UdpServer = &ves_io_schema_log_receiver.UDPServerConfigType{}
+					syslogOneOfSpec.Syslog.ModeChoice = udpServerOneOfSpec
+
+					// resource modelToSpecNested RequiredStringField --> ServerName
+					if !logReceiverSyslogReceiverUdpServerModel.ServerName.IsNull() && !logReceiverSyslogReceiverUdpServerModel.ServerName.IsUnknown() {
+						udpServerOneOfSpec.UdpServer.ServerName = string(logReceiverSyslogReceiverUdpServerModel.ServerName.ValueString())
+					}
+
+					// resource modelToSpecNested RequiredUintField --> Port
+					udpServerOneOfSpec.UdpServer.Port = uint32(uint32(logReceiverSyslogReceiverUdpServerModel.Port.ValueInt64()))
+
+				}
+
+				// resource modelToSpecNested PointerOfOneOfField --> TcpServer
+				if !syslogModeChoiceModel.TcpServer.IsNull() && !syslogModeChoiceModel.TcpServer.IsUnknown() {
+					var logReceiverSyslogReceiverTcpServerModel LogReceiverSyslogReceiverTcpServer
+					response.Diagnostics.Append(syslogModeChoiceModel.TcpServer.As(ctx, &logReceiverSyslogReceiverTcpServerModel, basetypes.ObjectAsOptions{})...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					tcpServerOneOfSpec := &ves_io_schema_log_receiver.SyslogReceiver_TcpServer{}
+					tcpServerOneOfSpec.TcpServer = &ves_io_schema_log_receiver.TCPServerConfigType{}
+					syslogOneOfSpec.Syslog.ModeChoice = tcpServerOneOfSpec
+
+					// resource modelToSpecNested RequiredStringField --> ServerName
+					if !logReceiverSyslogReceiverTcpServerModel.ServerName.IsNull() && !logReceiverSyslogReceiverTcpServerModel.ServerName.IsUnknown() {
+						tcpServerOneOfSpec.TcpServer.ServerName = string(logReceiverSyslogReceiverTcpServerModel.ServerName.ValueString())
+					}
+
+					// resource modelToSpecNested RequiredUintField --> Port
+					tcpServerOneOfSpec.TcpServer.Port = uint32(uint32(logReceiverSyslogReceiverTcpServerModel.Port.ValueInt64()))
+
+				}
+
 				// resource modelToSpecNested PointerOfOneOfField --> TlsServer
 				if !syslogModeChoiceModel.TlsServer.IsNull() && !syslogModeChoiceModel.TlsServer.IsUnknown() {
 					var logReceiverSyslogReceiverTlsServerModel LogReceiverSyslogReceiverTlsServer
@@ -2704,6 +2746,13 @@ func (r *ResourceF5XCLogReceiver) Update(ctx context.Context, request resource.U
 							return
 						}
 
+						// resource modelToSpecNested UintOfOneOfField --> Port
+						if !tlsServerPortChoiceModel.Port.IsNull() {
+							portSpecUint := &ves_io_schema_log_receiver.TLSConfigType_Port{}
+							portSpecUint.Port = uint32(tlsServerPortChoiceModel.Port.ValueInt64())
+							tlsServerOneOfSpec.TlsServer.PortChoice = portSpecUint
+						}
+
 						// resource modelToSpecNested BoolOfOneOfPointerField --> DefaultSyslogTlsPort
 						if !tlsServerPortChoiceModel.DefaultSyslogTlsPort.IsNull() && !tlsServerPortChoiceModel.DefaultSyslogTlsPort.IsUnknown() {
 							defaultSyslogTlsPortSpecBool := &ves_io_schema_log_receiver.TLSConfigType_DefaultSyslogTlsPort{}
@@ -2716,13 +2765,6 @@ func (r *ResourceF5XCLogReceiver) Update(ctx context.Context, request resource.U
 							defaultHttpsPortSpecBool := &ves_io_schema_log_receiver.TLSConfigType_DefaultHttpsPort{}
 							defaultHttpsPortSpecBool.DefaultHttpsPort = &ves_io_schema.Empty{}
 							tlsServerOneOfSpec.TlsServer.PortChoice = defaultHttpsPortSpecBool
-						}
-
-						// resource modelToSpecNested UintOfOneOfField --> Port
-						if !tlsServerPortChoiceModel.Port.IsNull() {
-							portSpecUint := &ves_io_schema_log_receiver.TLSConfigType_Port{}
-							portSpecUint.Port = uint32(tlsServerPortChoiceModel.Port.ValueInt64())
-							tlsServerOneOfSpec.TlsServer.PortChoice = portSpecUint
 						}
 
 					}
@@ -2777,11 +2819,6 @@ func (r *ResourceF5XCLogReceiver) Update(ctx context.Context, request resource.U
 							mtlsEnableOneOfSpec.MtlsEnable = &ves_io_schema_log_receiver.TLSClientConfigType{}
 							tlsServerOneOfSpec.TlsServer.MtlsChoice = mtlsEnableOneOfSpec
 
-							// resource modelToSpecNested StringField --> Certificate
-							if !logReceiverTLSConfigTypeMtlsEnableModel.Certificate.IsNull() && !logReceiverTLSConfigTypeMtlsEnableModel.Certificate.IsUnknown() {
-								mtlsEnableOneOfSpec.MtlsEnable.Certificate = string(logReceiverTLSConfigTypeMtlsEnableModel.Certificate.ValueString())
-							}
-
 							// resource modelToSpecNested PointerField --> KeyUrl
 							if !logReceiverTLSConfigTypeMtlsEnableModel.KeyUrl.IsNull() && !logReceiverTLSConfigTypeMtlsEnableModel.KeyUrl.IsUnknown() {
 								var keyUrlModel LogReceiverSecretType
@@ -2799,6 +2836,29 @@ func (r *ResourceF5XCLogReceiver) Update(ctx context.Context, request resource.U
 									response.Diagnostics.Append(keyUrlModel.SecretInfoChoice.As(ctx, &keyUrlSecretInfoChoiceModel, basetypes.ObjectAsOptions{})...)
 									if response.Diagnostics.HasError() {
 										return
+									}
+
+									// resource modelToSpecNested PointerOfOneOfField --> ClearSecretInfo
+									if !keyUrlSecretInfoChoiceModel.ClearSecretInfo.IsNull() && !keyUrlSecretInfoChoiceModel.ClearSecretInfo.IsUnknown() {
+										var logReceiverSecretTypeClearSecretInfoModel LogReceiverSecretTypeClearSecretInfo
+										response.Diagnostics.Append(keyUrlSecretInfoChoiceModel.ClearSecretInfo.As(ctx, &logReceiverSecretTypeClearSecretInfoModel, basetypes.ObjectAsOptions{})...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										clearSecretInfoOneOfSpec := &ves_io_schema.SecretType_ClearSecretInfo{}
+										clearSecretInfoOneOfSpec.ClearSecretInfo = &ves_io_schema.ClearSecretInfoType{}
+										keyUrlSpec.SecretInfoOneof = clearSecretInfoOneOfSpec
+
+										// resource modelToSpecNested StringField --> Provider
+										if !logReceiverSecretTypeClearSecretInfoModel.Provider.IsNull() && !logReceiverSecretTypeClearSecretInfoModel.Provider.IsUnknown() {
+											clearSecretInfoOneOfSpec.ClearSecretInfo.Provider = string(logReceiverSecretTypeClearSecretInfoModel.Provider.ValueString())
+										}
+
+										// resource modelToSpecNested RequiredStringField --> Url
+										if !logReceiverSecretTypeClearSecretInfoModel.Url.IsNull() && !logReceiverSecretTypeClearSecretInfoModel.Url.IsUnknown() {
+											clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(logReceiverSecretTypeClearSecretInfoModel.Url.ValueString())
+										}
+
 									}
 
 									// resource modelToSpecNested PointerOfOneOfField --> BlindfoldSecretInfo
@@ -2829,78 +2889,18 @@ func (r *ResourceF5XCLogReceiver) Update(ctx context.Context, request resource.U
 
 									}
 
-									// resource modelToSpecNested PointerOfOneOfField --> ClearSecretInfo
-									if !keyUrlSecretInfoChoiceModel.ClearSecretInfo.IsNull() && !keyUrlSecretInfoChoiceModel.ClearSecretInfo.IsUnknown() {
-										var logReceiverSecretTypeClearSecretInfoModel LogReceiverSecretTypeClearSecretInfo
-										response.Diagnostics.Append(keyUrlSecretInfoChoiceModel.ClearSecretInfo.As(ctx, &logReceiverSecretTypeClearSecretInfoModel, basetypes.ObjectAsOptions{})...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										clearSecretInfoOneOfSpec := &ves_io_schema.SecretType_ClearSecretInfo{}
-										clearSecretInfoOneOfSpec.ClearSecretInfo = &ves_io_schema.ClearSecretInfoType{}
-										keyUrlSpec.SecretInfoOneof = clearSecretInfoOneOfSpec
-
-										// resource modelToSpecNested StringField --> Provider
-										if !logReceiverSecretTypeClearSecretInfoModel.Provider.IsNull() && !logReceiverSecretTypeClearSecretInfoModel.Provider.IsUnknown() {
-											clearSecretInfoOneOfSpec.ClearSecretInfo.Provider = string(logReceiverSecretTypeClearSecretInfoModel.Provider.ValueString())
-										}
-
-										// resource modelToSpecNested RequiredStringField --> Url
-										if !logReceiverSecretTypeClearSecretInfoModel.Url.IsNull() && !logReceiverSecretTypeClearSecretInfoModel.Url.IsUnknown() {
-											clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(logReceiverSecretTypeClearSecretInfoModel.Url.ValueString())
-										}
-
-									}
-
 								}
 
+							}
+
+							// resource modelToSpecNested StringField --> Certificate
+							if !logReceiverTLSConfigTypeMtlsEnableModel.Certificate.IsNull() && !logReceiverTLSConfigTypeMtlsEnableModel.Certificate.IsUnknown() {
+								mtlsEnableOneOfSpec.MtlsEnable.Certificate = string(logReceiverTLSConfigTypeMtlsEnableModel.Certificate.ValueString())
 							}
 
 						}
 
 					}
-
-				}
-
-				// resource modelToSpecNested PointerOfOneOfField --> UdpServer
-				if !syslogModeChoiceModel.UdpServer.IsNull() && !syslogModeChoiceModel.UdpServer.IsUnknown() {
-					var logReceiverSyslogReceiverUdpServerModel LogReceiverSyslogReceiverUdpServer
-					response.Diagnostics.Append(syslogModeChoiceModel.UdpServer.As(ctx, &logReceiverSyslogReceiverUdpServerModel, basetypes.ObjectAsOptions{})...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					udpServerOneOfSpec := &ves_io_schema_log_receiver.SyslogReceiver_UdpServer{}
-					udpServerOneOfSpec.UdpServer = &ves_io_schema_log_receiver.UDPServerConfigType{}
-					syslogOneOfSpec.Syslog.ModeChoice = udpServerOneOfSpec
-
-					// resource modelToSpecNested RequiredStringField --> ServerName
-					if !logReceiverSyslogReceiverUdpServerModel.ServerName.IsNull() && !logReceiverSyslogReceiverUdpServerModel.ServerName.IsUnknown() {
-						udpServerOneOfSpec.UdpServer.ServerName = string(logReceiverSyslogReceiverUdpServerModel.ServerName.ValueString())
-					}
-
-					// resource modelToSpecNested RequiredUintField --> Port
-					udpServerOneOfSpec.UdpServer.Port = uint32(uint32(logReceiverSyslogReceiverUdpServerModel.Port.ValueInt64()))
-
-				}
-
-				// resource modelToSpecNested PointerOfOneOfField --> TcpServer
-				if !syslogModeChoiceModel.TcpServer.IsNull() && !syslogModeChoiceModel.TcpServer.IsUnknown() {
-					var logReceiverSyslogReceiverTcpServerModel LogReceiverSyslogReceiverTcpServer
-					response.Diagnostics.Append(syslogModeChoiceModel.TcpServer.As(ctx, &logReceiverSyslogReceiverTcpServerModel, basetypes.ObjectAsOptions{})...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					tcpServerOneOfSpec := &ves_io_schema_log_receiver.SyslogReceiver_TcpServer{}
-					tcpServerOneOfSpec.TcpServer = &ves_io_schema_log_receiver.TCPServerConfigType{}
-					syslogOneOfSpec.Syslog.ModeChoice = tcpServerOneOfSpec
-
-					// resource modelToSpecNested RequiredStringField --> ServerName
-					if !logReceiverSyslogReceiverTcpServerModel.ServerName.IsNull() && !logReceiverSyslogReceiverTcpServerModel.ServerName.IsUnknown() {
-						tcpServerOneOfSpec.TcpServer.ServerName = string(logReceiverSyslogReceiverTcpServerModel.ServerName.ValueString())
-					}
-
-					// resource modelToSpecNested RequiredUintField --> Port
-					tcpServerOneOfSpec.TcpServer.Port = uint32(uint32(logReceiverSyslogReceiverTcpServerModel.Port.ValueInt64()))
 
 				}
 
@@ -2977,6 +2977,9 @@ func (r *ResourceF5XCLogReceiver) Update(ctx context.Context, request resource.U
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
+
+	// resource SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
 
 	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
 	data.Namespace = types.StringValue(metaData.GetNamespace())
@@ -3081,9 +3084,6 @@ func (r *ResourceF5XCLogReceiver) Update(ctx context.Context, request resource.U
 	// resource SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
 
-	// resource SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
-
 	// resource SpecToModelRoot RequiredOneOfField --> LogReceiverChoice
 	// false
 	// true
@@ -3117,6 +3117,68 @@ func (r *ResourceF5XCLogReceiver) Update(ctx context.Context, request resource.U
 
 					// Process nested choices, populating the temporary attribute map
 
+					// resource specToModelNested PointerOfOneOfField --> UdpServer
+					// GlobalSpecType
+					// false
+					{
+						udpServerOptions, isUdpServer := syslogmodeChoiceChoices.(*ves_io_schema_log_receiver.SyslogReceiver_UdpServer)
+						udpServerAttributeMap := make(map[string]attr.Value)
+
+						if isUdpServer && udpServerOptions != nil {
+
+							// resource specToModelNested RequiredStringField --> ServerName
+							if udpServerOptions.UdpServer.GetServerName() != "" {
+								udpServerAttributeMap["server_name"] = types.StringValue(udpServerOptions.UdpServer.GetServerName())
+							} else {
+								// Empty string, set to null
+								udpServerAttributeMap["server_name"] = types.StringNull()
+							}
+
+							// resource specToModelNested RequiredUintField --> Port
+							udpServerAttributeMap["port"] = types.Int64Value(int64(udpServerOptions.UdpServer.GetPort()))
+
+							udpServerObj, diags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceUdpServerModelAttributeMap, udpServerAttributeMap)
+							response.Diagnostics.Append(diags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							syslogmodeChoiceChoicesAttributeMap["udp_server"] = udpServerObj
+						} else {
+							syslogmodeChoiceChoicesAttributeMap["udp_server"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceUdpServerModelAttributeMap)
+						}
+					}
+
+					// resource specToModelNested PointerOfOneOfField --> TcpServer
+					// GlobalSpecType
+					// false
+					{
+						tcpServerOptions, isTcpServer := syslogmodeChoiceChoices.(*ves_io_schema_log_receiver.SyslogReceiver_TcpServer)
+						tcpServerAttributeMap := make(map[string]attr.Value)
+
+						if isTcpServer && tcpServerOptions != nil {
+
+							// resource specToModelNested RequiredStringField --> ServerName
+							if tcpServerOptions.TcpServer.GetServerName() != "" {
+								tcpServerAttributeMap["server_name"] = types.StringValue(tcpServerOptions.TcpServer.GetServerName())
+							} else {
+								// Empty string, set to null
+								tcpServerAttributeMap["server_name"] = types.StringNull()
+							}
+
+							// resource specToModelNested RequiredUintField --> Port
+							tcpServerAttributeMap["port"] = types.Int64Value(int64(tcpServerOptions.TcpServer.GetPort()))
+
+							tcpServerObj, diags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceTcpServerModelAttributeMap, tcpServerAttributeMap)
+							response.Diagnostics.Append(diags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							syslogmodeChoiceChoicesAttributeMap["tcp_server"] = tcpServerObj
+						} else {
+							syslogmodeChoiceChoicesAttributeMap["tcp_server"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTcpServerModelAttributeMap)
+						}
+					}
+
 					// resource specToModelNested PointerOfOneOfField --> TlsServer
 					// GlobalSpecType
 					// false
@@ -3145,6 +3207,16 @@ func (r *ResourceF5XCLogReceiver) Update(ctx context.Context, request resource.U
 
 								// Process nested choices, populating the temporary attribute map
 
+								// resource specToModelNested UintOfOneOfField --> Port
+								portItem, isPort := tlsServerportChoiceChoices.(*ves_io_schema_log_receiver.TLSConfigType_Port)
+
+								if isPort {
+									tlsServerportChoiceChoicesAttributeMap["port"] = types.Int64Value(int64(portItem.Port))
+								} else {
+									// Empty uint, set to null
+									tlsServerportChoiceChoicesAttributeMap["port"] = types.Int64Null()
+								}
+
 								// resource specToModelNested BoolOfOneOfPointerField --> DefaultSyslogTlsPort
 								_, isDefaultSyslogTlsPort := tlsServerportChoiceChoices.(*ves_io_schema_log_receiver.TLSConfigType_DefaultSyslogTlsPort)
 
@@ -3161,16 +3233,6 @@ func (r *ResourceF5XCLogReceiver) Update(ctx context.Context, request resource.U
 									tlsServerportChoiceChoicesAttributeMap["default_https_port"] = types.BoolValue(true)
 								} else {
 									tlsServerportChoiceChoicesAttributeMap["default_https_port"] = types.BoolNull()
-								}
-
-								// resource specToModelNested UintOfOneOfField --> Port
-								portItem, isPort := tlsServerportChoiceChoices.(*ves_io_schema_log_receiver.TLSConfigType_Port)
-
-								if isPort {
-									tlsServerportChoiceChoicesAttributeMap["port"] = types.Int64Value(int64(portItem.Port))
-								} else {
-									// Empty uint, set to null
-									tlsServerportChoiceChoicesAttributeMap["port"] = types.Int64Null()
 								}
 
 								// --- End of Choices ---
@@ -3270,14 +3332,6 @@ func (r *ResourceF5XCLogReceiver) Update(ctx context.Context, request resource.U
 
 									if isMtlsEnable && mtlsEnableOptions != nil {
 
-										// resource specToModelNested StringField --> Certificate
-										if mtlsEnableOptions.MtlsEnable.GetCertificate() != "" {
-											mtlsEnableAttributeMap["certificate"] = types.StringValue(mtlsEnableOptions.MtlsEnable.GetCertificate())
-										} else {
-											// Empty string, set to null
-											mtlsEnableAttributeMap["certificate"] = types.StringNull()
-										}
-
 										// resource specToModelNested PointerField --> KeyUrl
 										if mtlsEnableOptions.MtlsEnable.GetKeyUrl() != nil {
 											// Create the nested Go struct
@@ -3296,6 +3350,42 @@ func (r *ResourceF5XCLogReceiver) Update(ctx context.Context, request resource.U
 												keyUrlsecretInfoChoiceChoices := keyUrlElement.GetSecretInfoOneof()
 
 												// Process nested choices, populating the temporary attribute map
+
+												// resource specToModelNested PointerOfOneOfField --> ClearSecretInfo
+												// GlobalSpecType
+												// false
+												{
+													clearSecretInfoOptions, isClearSecretInfo := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_ClearSecretInfo)
+													clearSecretInfoAttributeMap := make(map[string]attr.Value)
+
+													if isClearSecretInfo && clearSecretInfoOptions != nil {
+
+														// resource specToModelNested StringField --> Provider
+														if clearSecretInfoOptions.ClearSecretInfo.GetProvider() != "" {
+															clearSecretInfoAttributeMap["provider"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetProvider())
+														} else {
+															// Empty string, set to null
+															clearSecretInfoAttributeMap["provider"] = types.StringNull()
+														}
+
+														// resource specToModelNested RequiredStringField --> Url
+														if clearSecretInfoOptions.ClearSecretInfo.GetUrl() != "" {
+															clearSecretInfoAttributeMap["url"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetUrl())
+														} else {
+															// Empty string, set to null
+															clearSecretInfoAttributeMap["url"] = types.StringNull()
+														}
+
+														clearSecretInfoObj, diags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap, clearSecretInfoAttributeMap)
+														response.Diagnostics.Append(diags...)
+														if response.Diagnostics.HasError() {
+															return
+														}
+														keyUrlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = clearSecretInfoObj
+													} else {
+														keyUrlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap)
+													}
+												}
 
 												// resource specToModelNested PointerOfOneOfField --> BlindfoldSecretInfo
 												// GlobalSpecType
@@ -3338,42 +3428,6 @@ func (r *ResourceF5XCLogReceiver) Update(ctx context.Context, request resource.U
 														keyUrlsecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = blindfoldSecretInfoObj
 													} else {
 														keyUrlsecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofBlindfoldSecretInfoModelAttributeMap)
-													}
-												}
-
-												// resource specToModelNested PointerOfOneOfField --> ClearSecretInfo
-												// GlobalSpecType
-												// false
-												{
-													clearSecretInfoOptions, isClearSecretInfo := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_ClearSecretInfo)
-													clearSecretInfoAttributeMap := make(map[string]attr.Value)
-
-													if isClearSecretInfo && clearSecretInfoOptions != nil {
-
-														// resource specToModelNested StringField --> Provider
-														if clearSecretInfoOptions.ClearSecretInfo.GetProvider() != "" {
-															clearSecretInfoAttributeMap["provider"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetProvider())
-														} else {
-															// Empty string, set to null
-															clearSecretInfoAttributeMap["provider"] = types.StringNull()
-														}
-
-														// resource specToModelNested RequiredStringField --> Url
-														if clearSecretInfoOptions.ClearSecretInfo.GetUrl() != "" {
-															clearSecretInfoAttributeMap["url"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetUrl())
-														} else {
-															// Empty string, set to null
-															clearSecretInfoAttributeMap["url"] = types.StringNull()
-														}
-
-														clearSecretInfoObj, diags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap, clearSecretInfoAttributeMap)
-														response.Diagnostics.Append(diags...)
-														if response.Diagnostics.HasError() {
-															return
-														}
-														keyUrlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = clearSecretInfoObj
-													} else {
-														keyUrlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap)
 													}
 												}
 
@@ -3426,6 +3480,14 @@ func (r *ResourceF5XCLogReceiver) Update(ctx context.Context, request resource.U
 											mtlsEnableAttributeMap["key_url"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlModelAttributeMap)
 										}
 
+										// resource specToModelNested StringField --> Certificate
+										if mtlsEnableOptions.MtlsEnable.GetCertificate() != "" {
+											mtlsEnableAttributeMap["certificate"] = types.StringValue(mtlsEnableOptions.MtlsEnable.GetCertificate())
+										} else {
+											// Empty string, set to null
+											mtlsEnableAttributeMap["certificate"] = types.StringNull()
+										}
+
 										mtlsEnableObj, diags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableModelAttributeMap, mtlsEnableAttributeMap)
 										response.Diagnostics.Append(diags...)
 										if response.Diagnostics.HasError() {
@@ -3464,68 +3526,6 @@ func (r *ResourceF5XCLogReceiver) Update(ctx context.Context, request resource.U
 							syslogmodeChoiceChoicesAttributeMap["tls_server"] = tlsServerObj
 						} else {
 							syslogmodeChoiceChoicesAttributeMap["tls_server"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerModelAttributeMap)
-						}
-					}
-
-					// resource specToModelNested PointerOfOneOfField --> UdpServer
-					// GlobalSpecType
-					// false
-					{
-						udpServerOptions, isUdpServer := syslogmodeChoiceChoices.(*ves_io_schema_log_receiver.SyslogReceiver_UdpServer)
-						udpServerAttributeMap := make(map[string]attr.Value)
-
-						if isUdpServer && udpServerOptions != nil {
-
-							// resource specToModelNested RequiredStringField --> ServerName
-							if udpServerOptions.UdpServer.GetServerName() != "" {
-								udpServerAttributeMap["server_name"] = types.StringValue(udpServerOptions.UdpServer.GetServerName())
-							} else {
-								// Empty string, set to null
-								udpServerAttributeMap["server_name"] = types.StringNull()
-							}
-
-							// resource specToModelNested RequiredUintField --> Port
-							udpServerAttributeMap["port"] = types.Int64Value(int64(udpServerOptions.UdpServer.GetPort()))
-
-							udpServerObj, diags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceUdpServerModelAttributeMap, udpServerAttributeMap)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							syslogmodeChoiceChoicesAttributeMap["udp_server"] = udpServerObj
-						} else {
-							syslogmodeChoiceChoicesAttributeMap["udp_server"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceUdpServerModelAttributeMap)
-						}
-					}
-
-					// resource specToModelNested PointerOfOneOfField --> TcpServer
-					// GlobalSpecType
-					// false
-					{
-						tcpServerOptions, isTcpServer := syslogmodeChoiceChoices.(*ves_io_schema_log_receiver.SyslogReceiver_TcpServer)
-						tcpServerAttributeMap := make(map[string]attr.Value)
-
-						if isTcpServer && tcpServerOptions != nil {
-
-							// resource specToModelNested RequiredStringField --> ServerName
-							if tcpServerOptions.TcpServer.GetServerName() != "" {
-								tcpServerAttributeMap["server_name"] = types.StringValue(tcpServerOptions.TcpServer.GetServerName())
-							} else {
-								// Empty string, set to null
-								tcpServerAttributeMap["server_name"] = types.StringNull()
-							}
-
-							// resource specToModelNested RequiredUintField --> Port
-							tcpServerAttributeMap["port"] = types.Int64Value(int64(tcpServerOptions.TcpServer.GetPort()))
-
-							tcpServerObj, diags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceTcpServerModelAttributeMap, tcpServerAttributeMap)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							syslogmodeChoiceChoicesAttributeMap["tcp_server"] = tcpServerObj
-						} else {
-							syslogmodeChoiceChoicesAttributeMap["tcp_server"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTcpServerModelAttributeMap)
 						}
 					}
 

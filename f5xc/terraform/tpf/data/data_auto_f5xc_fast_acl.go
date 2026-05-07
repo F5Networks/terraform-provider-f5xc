@@ -35,9 +35,9 @@ type FastAclVirtualNetworkSelectorType struct {
 }
 
 type FastAclVirtualNetworkSelectorTypeVnTypeChoice struct {
-	SiteLocal       types.Bool `tfsdk:"site_local"`
 	SiteLocalInside types.Bool `tfsdk:"site_local_inside"`
 	Public          types.Bool `tfsdk:"public"`
+	SiteLocal       types.Bool `tfsdk:"site_local"`
 }
 
 type FastAclFastAclDestinationType struct {
@@ -45,35 +45,18 @@ type FastAclFastAclDestinationType struct {
 }
 
 type FastAclDestinationTypeDestinationTypeChoice struct {
+	SharedVipServices    types.Bool   `tfsdk:"shared_vip_services"`
 	InterfaceServices    types.Bool   `tfsdk:"interface_services"`
 	VipServices          types.Bool   `tfsdk:"vip_services"`
 	AllServices          types.Bool   `tfsdk:"all_services"`
 	DestinationIpAddress types.Object `tfsdk:"destination_ip_address"`
 	SelectedVipAddress   types.Object `tfsdk:"selected_vip_address"`
-	SharedVipServices    types.Bool   `tfsdk:"shared_vip_services"`
 }
 
 type FastAclDestinationTypeDestinationIpAddress struct {
-	Address  types.List   `tfsdk:"address"`
 	Ports    types.List   `tfsdk:"ports"`
 	Protocol types.String `tfsdk:"protocol"`
-}
-
-type FastAclIpAddressType struct {
-	VerChoice types.Object `tfsdk:"ver_choice"`
-}
-
-type FastAclIpAddressTypeVerChoice struct {
-	Ipv6 types.Object `tfsdk:"ipv6"`
-	Ipv4 types.Object `tfsdk:"ipv4"`
-}
-
-type FastAclIpAddressTypeIpv6 struct {
-	Addr types.String `tfsdk:"addr"`
-}
-
-type FastAclIpAddressTypeIpv4 struct {
-	Addr types.String `tfsdk:"addr"`
+	Address  types.List   `tfsdk:"address"`
 }
 
 type FastAclPortValueType struct {
@@ -86,35 +69,44 @@ type FastAclPortValueTypePortValueTypeChoice struct {
 	Dns         types.Bool  `tfsdk:"dns"`
 }
 
+type FastAclIpAddressType struct {
+	VerChoice types.Object `tfsdk:"ver_choice"`
+}
+
+type FastAclIpAddressTypeVerChoice struct {
+	Ipv4 types.Object `tfsdk:"ipv4"`
+	Ipv6 types.Object `tfsdk:"ipv6"`
+}
+
+type FastAclIpAddressTypeIpv4 struct {
+	Addr types.String `tfsdk:"addr"`
+}
+
+type FastAclIpAddressTypeIpv6 struct {
+	Addr types.String `tfsdk:"addr"`
+}
+
 type FastAclDestinationTypeSelectedVipAddress struct {
 	Address types.List `tfsdk:"address"`
 }
 
 // DataSourceF5XCFastAclModel describes the resource data model.
 type DataSourceF5XCFastAclModel struct {
+	Name                   types.String   `tfsdk:"name"`
+	Namespace              types.String   `tfsdk:"namespace"`
 	Uid                    types.String   `tfsdk:"uid"`
 	Labels                 types.Map      `tfsdk:"labels"`
 	Annotations            types.Map      `tfsdk:"annotations"`
 	Description            types.String   `tfsdk:"description"`
-	Name                   types.String   `tfsdk:"name"`
-	Namespace              types.String   `tfsdk:"namespace"`
-	SourceRules            types.List     `tfsdk:"source_rules"`
 	DefaultProtocolPolicer types.List     `tfsdk:"default_protocol_policer"`
 	ProtocolPolicer        types.Object   `tfsdk:"protocol_policer"`
 	NetworkType            types.Object   `tfsdk:"network_type"`
 	DestinationType        types.Object   `tfsdk:"destination_type"`
+	SourceRules            types.List     `tfsdk:"source_rules"`
 	Timeouts               timeouts.Value `tfsdk:"timeouts"`
 }
 
 // --- Attribute Maps for Nested Structs ---
-// Attribute map for ArrayOfPointerField --> SourceRules
-var FastAclSourceRulesObjectRefModelAttributeMap = map[string]attr.Type{
-
-	"name":      types.StringType,
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
-}
-
 // Attribute map for ArrayOfPointerField --> DefaultProtocolPolicer
 var FastAclDefaultProtocolPolicerObjectRefModelAttributeMap = map[string]attr.Type{
 
@@ -126,9 +118,9 @@ var FastAclDefaultProtocolPolicerObjectRefModelAttributeMap = map[string]attr.Ty
 // Attribute map for PointerField --> ProtocolPolicer
 var FastAclProtocolPolicerModelAttributeMap = map[string]attr.Type{
 
-	"namespace": types.StringType,
 	"name":      types.StringType,
 	"tenant":    types.StringType,
+	"namespace": types.StringType,
 }
 
 // Attribute map for RequiredPointerField --> NetworkType
@@ -142,9 +134,9 @@ var FastAclNetworkTypeModelAttributeMap = map[string]attr.Type{
 // Attribute map for OneOfField --> VnTypeChoice
 var FastAclNetworkTypeVnTypeChoiceModelAttributeMap = map[string]attr.Type{
 
-	"site_local":        types.BoolType,
 	"site_local_inside": types.BoolType,
 	"public":            types.BoolType,
+	"site_local":        types.BoolType,
 }
 
 // Attribute map for RequiredPointerField --> DestinationType
@@ -158,31 +150,21 @@ var FastAclDestinationTypeModelAttributeMap = map[string]attr.Type{
 // Attribute map for OneOfField --> DestinationTypeChoice
 var FastAclDestinationTypeDestinationTypeChoiceModelAttributeMap = map[string]attr.Type{
 
-	"interface_services": types.BoolType,
-	"vip_services":       types.BoolType,
-	"all_services":       types.BoolType,
+	"shared_vip_services": types.BoolType,
+	"interface_services":  types.BoolType,
+	"vip_services":        types.BoolType,
+	"all_services":        types.BoolType,
 	"destination_ip_address": types.ObjectType{
 		AttrTypes: FastAclDestinationTypeDestinationTypeChoiceDestinationIpAddressModelAttributeMap,
 	},
 	"selected_vip_address": types.ObjectType{
 		AttrTypes: FastAclDestinationTypeDestinationTypeChoiceSelectedVipAddressModelAttributeMap,
 	},
-	"shared_vip_services": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> DestinationIpAddress
 var FastAclDestinationTypeDestinationTypeChoiceDestinationIpAddressModelAttributeMap = map[string]attr.Type{
 
-	"address": types.ListType{
-		ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-
-				"ver_choice": types.ObjectType{
-					AttrTypes: FastAclDestinationTypeDestinationTypeChoiceDestinationIpAddressAddressVerModelAttributeMap,
-				},
-			},
-		},
-	},
 	"ports": types.ListType{
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
@@ -194,37 +176,16 @@ var FastAclDestinationTypeDestinationTypeChoiceDestinationIpAddressModelAttribut
 		},
 	},
 	"protocol": types.StringType,
-}
+	"address": types.ListType{
+		ElemType: types.ObjectType{
+			AttrTypes: map[string]attr.Type{
 
-// Attribute map for ArrayOfPointerField --> Address
-var FastAclDestinationTypeDestinationTypeChoiceDestinationIpAddressAddressModelAttributeMap = map[string]attr.Type{
-
-	"ver_choice": types.ObjectType{
-		AttrTypes: FastAclDestinationTypeDestinationTypeChoiceDestinationIpAddressAddressVerModelAttributeMap,
+				"ver_choice": types.ObjectType{
+					AttrTypes: FastAclDestinationTypeDestinationTypeChoiceDestinationIpAddressAddressVerModelAttributeMap,
+				},
+			},
+		},
 	},
-}
-
-// Attribute map for OneOfField --> Ver
-var FastAclDestinationTypeDestinationTypeChoiceDestinationIpAddressAddressVerModelAttributeMap = map[string]attr.Type{
-
-	"ipv6": types.ObjectType{
-		AttrTypes: FastAclDestinationTypeDestinationTypeChoiceDestinationIpAddressAddressVerIpv6ModelAttributeMap,
-	},
-	"ipv4": types.ObjectType{
-		AttrTypes: FastAclDestinationTypeDestinationTypeChoiceDestinationIpAddressAddressVerIpv4ModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> Ipv6
-var FastAclDestinationTypeDestinationTypeChoiceDestinationIpAddressAddressVerIpv6ModelAttributeMap = map[string]attr.Type{
-
-	"addr": types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> Ipv4
-var FastAclDestinationTypeDestinationTypeChoiceDestinationIpAddressAddressVerIpv4ModelAttributeMap = map[string]attr.Type{
-
-	"addr": types.StringType,
 }
 
 // Attribute map for RequiredArrayOfPointerField --> Ports
@@ -241,6 +202,37 @@ var FastAclDestinationTypeDestinationTypeChoiceDestinationIpAddressPortsPortValu
 	"all":          types.BoolType,
 	"user_defined": types.Int64Type,
 	"dns":          types.BoolType,
+}
+
+// Attribute map for ArrayOfPointerField --> Address
+var FastAclDestinationTypeDestinationTypeChoiceDestinationIpAddressAddressModelAttributeMap = map[string]attr.Type{
+
+	"ver_choice": types.ObjectType{
+		AttrTypes: FastAclDestinationTypeDestinationTypeChoiceDestinationIpAddressAddressVerModelAttributeMap,
+	},
+}
+
+// Attribute map for OneOfField --> Ver
+var FastAclDestinationTypeDestinationTypeChoiceDestinationIpAddressAddressVerModelAttributeMap = map[string]attr.Type{
+
+	"ipv4": types.ObjectType{
+		AttrTypes: FastAclDestinationTypeDestinationTypeChoiceDestinationIpAddressAddressVerIpv4ModelAttributeMap,
+	},
+	"ipv6": types.ObjectType{
+		AttrTypes: FastAclDestinationTypeDestinationTypeChoiceDestinationIpAddressAddressVerIpv6ModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> Ipv4
+var FastAclDestinationTypeDestinationTypeChoiceDestinationIpAddressAddressVerIpv4ModelAttributeMap = map[string]attr.Type{
+
+	"addr": types.StringType,
+}
+
+// Attribute map for PointerOfOneOfField --> Ipv6
+var FastAclDestinationTypeDestinationTypeChoiceDestinationIpAddressAddressVerIpv6ModelAttributeMap = map[string]attr.Type{
+
+	"addr": types.StringType,
 }
 
 // Attribute map for PointerOfOneOfField --> SelectedVipAddress
@@ -289,6 +281,14 @@ var FastAclDestinationTypeDestinationTypeChoiceSelectedVipAddressAddressVerIpv6M
 	"addr": types.StringType,
 }
 
+// Attribute map for ArrayOfPointerField --> SourceRules
+var FastAclSourceRulesObjectRefModelAttributeMap = map[string]attr.Type{
+
+	"name":      types.StringType,
+	"tenant":    types.StringType,
+	"namespace": types.StringType,
+}
+
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ datasource.DataSource = &DataSourceF5XCFastAcl{}
 
@@ -307,6 +307,18 @@ func (r *DataSourceF5XCFastAcl) Schema(ctx context.Context, request datasource.S
 		Description:         "FastAcl data source",
 
 		Attributes: map[string]schema.Attribute{
+			"name": schema.StringAttribute{
+				Description: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
+				Required:    false,
+				Optional:    true,
+				Computed:    true,
+			},
+			"namespace": schema.StringAttribute{
+				Description: "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
+				Required:    false,
+				Optional:    true,
+				Computed:    true,
+			},
 			"uid": schema.StringAttribute{
 				Description: "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
 				Required:    false,
@@ -332,46 +344,6 @@ func (r *DataSourceF5XCFastAcl) Schema(ctx context.Context, request datasource.S
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
-			},
-			"name": schema.StringAttribute{
-				Description: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
-				Required:    false,
-				Optional:    true,
-				Computed:    true,
-			},
-			"namespace": schema.StringAttribute{
-				Description: "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
-				Required:    false,
-				Optional:    true,
-				Computed:    true,
-			},
-			"source_rules": schema.ListNestedAttribute{
-				Description: "Source Rules List of Fast ACL rules to be applied to received packets on this site",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-						"name": schema.StringAttribute{
-							Description: "",
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-						},
-						"tenant": schema.StringAttribute{
-							Description: "",
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-						},
-						"namespace": schema.StringAttribute{
-							Description: "",
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-						},
-					},
-				},
 			},
 			"default_protocol_policer": schema.ListNestedAttribute{
 				Description: "Default protocol policer Protocol rate limits to be applied if none of the source rules match. Traffic from source is classified into hash buckets based on first 24 bits of source IP address and rate limiting is applied on each hash bucket. This helps in grouping source IP address and ratelimiting traffic on that group, giving a semantics of hash limit for source IP",
@@ -407,12 +379,6 @@ func (r *DataSourceF5XCFastAcl) Schema(ctx context.Context, request datasource.S
 				Optional:    false,
 				Computed:    true,
 				Attributes: map[string]schema.Attribute{
-					"namespace": schema.StringAttribute{
-						Description: "",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-					},
 					"name": schema.StringAttribute{
 						Description: "",
 						Required:    false,
@@ -420,6 +386,12 @@ func (r *DataSourceF5XCFastAcl) Schema(ctx context.Context, request datasource.S
 						Computed:    true,
 					},
 					"tenant": schema.StringAttribute{
+						Description: "",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
+					"namespace": schema.StringAttribute{
 						Description: "",
 						Required:    false,
 						Optional:    false,
@@ -439,12 +411,6 @@ func (r *DataSourceF5XCFastAcl) Schema(ctx context.Context, request datasource.S
 						Optional:    false,
 						Computed:    true,
 						Attributes: map[string]schema.Attribute{
-							"site_local": schema.BoolAttribute{
-								Description: "Site Local Network Indicates use of site local network",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-							},
 							"site_local_inside": schema.BoolAttribute{
 								Description: "SiteLocal Inside Network Indicates use of site local inside network",
 								Required:    false,
@@ -453,6 +419,12 @@ func (r *DataSourceF5XCFastAcl) Schema(ctx context.Context, request datasource.S
 							},
 							"public": schema.BoolAttribute{
 								Description: "Public Network Indicates use of public network",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
+							"site_local": schema.BoolAttribute{
+								Description: "Site Local Network Indicates use of site local network",
 								Required:    false,
 								Optional:    false,
 								Computed:    true,
@@ -473,6 +445,12 @@ func (r *DataSourceF5XCFastAcl) Schema(ctx context.Context, request datasource.S
 						Optional:    false,
 						Computed:    true,
 						Attributes: map[string]schema.Attribute{
+							"shared_vip_services": schema.BoolAttribute{
+								Description: "Shared VIP services Port and protocol is picked up from listener config of shared VIP Note: This option is available only for volterra administrators Customer Edge: Not applicable Regional Edge: Applies configuration on all shared VIPs used for services",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
 							"interface_services": schema.BoolAttribute{
 								Description: "Interface Services Destination matching any IP address assigned to the interfaces (e.g from DHCP) and participating as listener(VIP) Port and protocol is picked up from listener config of each VIP Customer Edge : Applies the configuration to IP of interface if configured for services Regional Edge : tenants CANNOT use this option on RE",
 								Required:    false,
@@ -497,52 +475,6 @@ func (r *DataSourceF5XCFastAcl) Schema(ctx context.Context, request datasource.S
 								Optional:    false,
 								Computed:    true,
 								Attributes: map[string]schema.Attribute{
-									"address": schema.ListNestedAttribute{
-										Description: "IP Address List of IP addresses to match with destination",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-										NestedObject: schema.NestedAttributeObject{
-											Attributes: map[string]schema.Attribute{
-												"ver_choice": schema.SingleNestedAttribute{
-													Description: "Version IP Address version. Can be IPv4 Address or IPv6 Address",
-													Required:    false,
-													Optional:    false,
-													Computed:    true,
-													Attributes: map[string]schema.Attribute{
-														"ipv6": schema.SingleNestedAttribute{
-															Description: "IPv6 ADDRESS IPv6 Address",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-															Attributes: map[string]schema.Attribute{
-																"addr": schema.StringAttribute{
-																	Description: "IPv6 Address IPv6 Address in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' The address can be compacted by suppressing zeros e.g. '2001:db8:0:0:0:0:2:1' becomes '2001:db8::2:1' or '2001:db8:0:0:0:2:0:0' becomes '2001:db8::2::'",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-															},
-														},
-														"ipv4": schema.SingleNestedAttribute{
-															Description: "IPv4 Address IPv4 Address",
-															Required:    false,
-															Optional:    false,
-															Computed:    true,
-															Attributes: map[string]schema.Attribute{
-																"addr": schema.StringAttribute{
-																	Description: "IPv4 Address IPv4 Address in string form with dot-decimal notation",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-															},
-														},
-													},
-												},
-											},
-										},
-									},
 									"ports": schema.ListNestedAttribute{
 										Description: "Ports List of ports to match with destination ports Special value '0' means all valid ports on the VIPs",
 										Required:    false,
@@ -584,6 +516,52 @@ func (r *DataSourceF5XCFastAcl) Schema(ctx context.Context, request datasource.S
 										Required:    false,
 										Optional:    false,
 										Computed:    true,
+									},
+									"address": schema.ListNestedAttribute{
+										Description: "IP Address List of IP addresses to match with destination",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+										NestedObject: schema.NestedAttributeObject{
+											Attributes: map[string]schema.Attribute{
+												"ver_choice": schema.SingleNestedAttribute{
+													Description: "Version IP Address version. Can be IPv4 Address or IPv6 Address",
+													Required:    false,
+													Optional:    false,
+													Computed:    true,
+													Attributes: map[string]schema.Attribute{
+														"ipv4": schema.SingleNestedAttribute{
+															Description: "IPv4 Address IPv4 Address",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+															Attributes: map[string]schema.Attribute{
+																"addr": schema.StringAttribute{
+																	Description: "IPv4 Address IPv4 Address in string form with dot-decimal notation",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
+															},
+														},
+														"ipv6": schema.SingleNestedAttribute{
+															Description: "IPv6 ADDRESS IPv6 Address",
+															Required:    false,
+															Optional:    false,
+															Computed:    true,
+															Attributes: map[string]schema.Attribute{
+																"addr": schema.StringAttribute{
+																	Description: "IPv6 Address IPv6 Address in form of string. IPv6 address must be specified as hexadecimal numbers separated by ':' The address can be compacted by suppressing zeros e.g. '2001:db8:0:0:0:0:2:1' becomes '2001:db8::2:1' or '2001:db8:0:0:0:2:0:0' becomes '2001:db8::2::'",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
+															},
+														},
+													},
+												},
+											},
+										},
 									},
 								},
 							},
@@ -641,12 +619,34 @@ func (r *DataSourceF5XCFastAcl) Schema(ctx context.Context, request datasource.S
 									},
 								},
 							},
-							"shared_vip_services": schema.BoolAttribute{
-								Description: "Shared VIP services Port and protocol is picked up from listener config of shared VIP Note: This option is available only for volterra administrators Customer Edge: Not applicable Regional Edge: Applies configuration on all shared VIPs used for services",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-							},
+						},
+					},
+				},
+			},
+			"source_rules": schema.ListNestedAttribute{
+				Description: "Source Rules List of Fast ACL rules to be applied to received packets on this site",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"name": schema.StringAttribute{
+							Description: "",
+							Required:    false,
+							Optional:    false,
+							Computed:    true,
+						},
+						"tenant": schema.StringAttribute{
+							Description: "",
+							Required:    false,
+							Optional:    false,
+							Computed:    true,
+						},
+						"namespace": schema.StringAttribute{
+							Description: "",
+							Required:    false,
+							Optional:    false,
+							Computed:    true,
 						},
 					},
 				},
@@ -722,6 +722,12 @@ func (d *DataSourceF5XCFastAcl) Read(ctx context.Context, request datasource.Rea
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
+	// data SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
+
+	// data SpecToModelRoot Meta RequiredStringField --> Namespace
+	data.Namespace = types.StringValue(metaData.GetNamespace())
+
 	// data SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
@@ -763,66 +769,6 @@ func (d *DataSourceF5XCFastAcl) Read(ctx context.Context, request datasource.Rea
 
 	// data SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
-
-	// data SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
-
-	// data SpecToModelRoot Meta RequiredStringField --> Namespace
-	data.Namespace = types.StringValue(metaData.GetNamespace())
-
-	// data SpecToModelRoot ArrayOfPointerField --> SourceRules
-	if len(specData.SourceRules) > 0 {
-		sourceRulesElements := make([]ObjectRefTypeModel, 0, len(specData.SourceRules))
-
-		for _, sourceRulesElement := range specData.SourceRules {
-			objectRefTypeModelModel := ObjectRefTypeModel{}
-
-			// data specToModelNested RequiredStringField --> Name
-			if sourceRulesElement.GetName() != "" {
-				objectRefTypeModelModel.Name = types.StringValue(sourceRulesElement.GetName())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Name = types.StringNull()
-			}
-
-			// data specToModelNested StringField --> Tenant
-			if sourceRulesElement.GetTenant() != "" {
-				objectRefTypeModelModel.Tenant = types.StringValue(sourceRulesElement.GetTenant())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Tenant = types.StringNull()
-			}
-
-			// data specToModelNested RequiredStringField --> Namespace
-			if sourceRulesElement.GetNamespace() != "" {
-				objectRefTypeModelModel.Namespace = types.StringValue(sourceRulesElement.GetNamespace())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Namespace = types.StringNull()
-			}
-
-			sourceRulesElements = append(sourceRulesElements, objectRefTypeModelModel)
-		}
-
-		sourceRulesList, diags := utils.GoStructSliceToListValue(
-			ctx,
-			FastAclSourceRulesObjectRefModelAttributeMap,
-			sourceRulesElements,
-		)
-
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-
-		data.SourceRules = sourceRulesList
-	} else {
-		var sourceRulesObjectType = basetypes.ObjectType{
-			AttrTypes: FastAclSourceRulesObjectRefModelAttributeMap,
-		}
-		nullSourceRulesList := basetypes.NewListNull(sourceRulesObjectType)
-		data.SourceRules = nullSourceRulesList
-	}
 
 	// data SpecToModelRoot ArrayOfPointerField --> DefaultProtocolPolicer
 	if len(specData.DefaultProtocolPolicer) > 0 {
@@ -883,14 +829,6 @@ func (d *DataSourceF5XCFastAcl) Read(ctx context.Context, request datasource.Rea
 		var objectRefTypeModelModel = &ObjectRefTypeModel{}
 		protocolPolicerElement := specData.GetProtocolPolicer()
 
-		// data specToModelNested RequiredStringField --> Namespace
-		if protocolPolicerElement.GetNamespace() != "" {
-			objectRefTypeModelModel.Namespace = types.StringValue(protocolPolicerElement.GetNamespace())
-		} else {
-			// Empty string, set to null
-			objectRefTypeModelModel.Namespace = types.StringNull()
-		}
-
 		// data specToModelNested RequiredStringField --> Name
 		if protocolPolicerElement.GetName() != "" {
 			objectRefTypeModelModel.Name = types.StringValue(protocolPolicerElement.GetName())
@@ -905,6 +843,14 @@ func (d *DataSourceF5XCFastAcl) Read(ctx context.Context, request datasource.Rea
 		} else {
 			// Empty string, set to null
 			objectRefTypeModelModel.Tenant = types.StringNull()
+		}
+
+		// data specToModelNested RequiredStringField --> Namespace
+		if protocolPolicerElement.GetNamespace() != "" {
+			objectRefTypeModelModel.Namespace = types.StringValue(protocolPolicerElement.GetNamespace())
+		} else {
+			// Empty string, set to null
+			objectRefTypeModelModel.Namespace = types.StringNull()
 		}
 
 		protocolPolicerObj, protocolPolicerDiags := utils.GoStructToObjectValue(
@@ -937,15 +883,6 @@ func (d *DataSourceF5XCFastAcl) Read(ctx context.Context, request datasource.Rea
 
 			// Process nested choices, populating the temporary attribute map
 
-			// data specToModelNested BoolOfOneOfPointerField --> SiteLocal
-			_, isSiteLocal := networkTypevnTypeChoiceChoices.(*ves_io_schema.VirtualNetworkSelectorType_SiteLocal)
-
-			if isSiteLocal {
-				networkTypevnTypeChoiceChoicesAttributeMap["site_local"] = types.BoolValue(true)
-			} else {
-				networkTypevnTypeChoiceChoicesAttributeMap["site_local"] = types.BoolNull()
-			}
-
 			// data specToModelNested BoolOfOneOfPointerField --> SiteLocalInside
 			_, isSiteLocalInside := networkTypevnTypeChoiceChoices.(*ves_io_schema.VirtualNetworkSelectorType_SiteLocalInside)
 
@@ -962,6 +899,15 @@ func (d *DataSourceF5XCFastAcl) Read(ctx context.Context, request datasource.Rea
 				networkTypevnTypeChoiceChoicesAttributeMap["public"] = types.BoolValue(true)
 			} else {
 				networkTypevnTypeChoiceChoicesAttributeMap["public"] = types.BoolNull()
+			}
+
+			// data specToModelNested BoolOfOneOfPointerField --> SiteLocal
+			_, isSiteLocal := networkTypevnTypeChoiceChoices.(*ves_io_schema.VirtualNetworkSelectorType_SiteLocal)
+
+			if isSiteLocal {
+				networkTypevnTypeChoiceChoicesAttributeMap["site_local"] = types.BoolValue(true)
+			} else {
+				networkTypevnTypeChoiceChoicesAttributeMap["site_local"] = types.BoolNull()
 			}
 
 			// --- End of Choices ---
@@ -1013,6 +959,15 @@ func (d *DataSourceF5XCFastAcl) Read(ctx context.Context, request datasource.Rea
 
 			// Process nested choices, populating the temporary attribute map
 
+			// data specToModelNested BoolOfOneOfPointerField --> SharedVipServices
+			_, isSharedVipServices := destinationTypedestinationTypeChoiceChoices.(*ves_io_schema_fast_acl.DestinationType_SharedVipServices)
+
+			if isSharedVipServices {
+				destinationTypedestinationTypeChoiceChoicesAttributeMap["shared_vip_services"] = types.BoolValue(true)
+			} else {
+				destinationTypedestinationTypeChoiceChoicesAttributeMap["shared_vip_services"] = types.BoolNull()
+			}
+
 			// data specToModelNested BoolOfOneOfPointerField --> InterfaceServices
 			_, isInterfaceServices := destinationTypedestinationTypeChoiceChoices.(*ves_io_schema_fast_acl.DestinationType_InterfaceServices)
 
@@ -1048,118 +1003,6 @@ func (d *DataSourceF5XCFastAcl) Read(ctx context.Context, request datasource.Rea
 				destinationIpAddressAttributeMap := make(map[string]attr.Value)
 
 				if isDestinationIpAddress && destinationIpAddressOptions != nil {
-
-					// data specToModelNested ArrayOfPointerField --> Address
-					if len(destinationIpAddressOptions.DestinationIpAddress.GetAddress()) > 0 {
-						// Step 1: Always create a slice of model structs from the spec data.
-						// This slice serves as an intermediate representation.
-						addressElements := make([]FastAclIpAddressType, 0, len(destinationIpAddressOptions.DestinationIpAddress.GetAddress()))
-						for _, addressElement := range destinationIpAddressOptions.DestinationIpAddress.GetAddress() {
-							fastAclIpAddressTypeModel := FastAclIpAddressType{}
-
-							// data specToModelNested OneOfField --> Ver
-							if addressElement.GetVer() != nil {
-								// Create a temporary attribute map for the choices within this OneOf
-								addressverChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-								// Define a variable for the spec choices to be passed down to nested templates.
-								// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-								addressverChoiceChoices := addressElement.GetVer()
-
-								// Process nested choices, populating the temporary attribute map
-
-								// data specToModelNested PointerOfOneOfField --> Ipv6
-								// <no value>
-								// false
-								{
-									ipv6Options, isIpv6 := addressverChoiceChoices.(*ves_io_schema.IpAddressType_Ipv6)
-									ipv6AttributeMap := make(map[string]attr.Value)
-
-									if isIpv6 && ipv6Options != nil {
-
-										// data specToModelNested StringField --> Addr
-										if ipv6Options.Ipv6.GetAddr() != "" {
-											ipv6AttributeMap["addr"] = types.StringValue(ipv6Options.Ipv6.GetAddr())
-										} else {
-											// Empty string, set to null
-											ipv6AttributeMap["addr"] = types.StringNull()
-										}
-
-										ipv6Obj, diags := types.ObjectValue(FastAclDestinationTypeDestinationTypeChoiceDestinationIpAddressAddressVerIpv6ModelAttributeMap, ipv6AttributeMap)
-										response.Diagnostics.Append(diags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										addressverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
-									} else {
-										addressverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(FastAclDestinationTypeDestinationTypeChoiceDestinationIpAddressAddressVerIpv6ModelAttributeMap)
-									}
-								}
-
-								// data specToModelNested PointerOfOneOfField --> Ipv4
-								// <no value>
-								// false
-								{
-									ipv4Options, isIpv4 := addressverChoiceChoices.(*ves_io_schema.IpAddressType_Ipv4)
-									ipv4AttributeMap := make(map[string]attr.Value)
-
-									if isIpv4 && ipv4Options != nil {
-
-										// data specToModelNested StringField --> Addr
-										if ipv4Options.Ipv4.GetAddr() != "" {
-											ipv4AttributeMap["addr"] = types.StringValue(ipv4Options.Ipv4.GetAddr())
-										} else {
-											// Empty string, set to null
-											ipv4AttributeMap["addr"] = types.StringNull()
-										}
-
-										ipv4Obj, diags := types.ObjectValue(FastAclDestinationTypeDestinationTypeChoiceDestinationIpAddressAddressVerIpv4ModelAttributeMap, ipv4AttributeMap)
-										response.Diagnostics.Append(diags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										addressverChoiceChoicesAttributeMap["ipv4"] = ipv4Obj
-									} else {
-										addressverChoiceChoicesAttributeMap["ipv4"] = types.ObjectNull(FastAclDestinationTypeDestinationTypeChoiceDestinationIpAddressAddressVerIpv4ModelAttributeMap)
-									}
-								}
-
-								// --- End of Choices ---
-
-								// Create the final ObjectValue for this OneOf field
-								finalObj, addressverChoiceChoicesObjDiags := types.ObjectValue(
-									FastAclDestinationTypeDestinationTypeChoiceDestinationIpAddressAddressVerModelAttributeMap, // The attribute schema for the OneOf choices
-									addressverChoiceChoicesAttributeMap,
-								)
-								response.Diagnostics.Append(addressverChoiceChoicesObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-
-								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								fastAclIpAddressTypeModel.VerChoice = finalObj
-							} else {
-								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								fastAclIpAddressTypeModel.VerChoice = types.ObjectNull(FastAclDestinationTypeDestinationTypeChoiceDestinationIpAddressAddressVerModelAttributeMap)
-							}
-
-							addressElements = append(addressElements, fastAclIpAddressTypeModel)
-						}
-						// CASE 1: The target field is a `types.List` or an attribute map.
-						// The intermediate slice of structs must be converted to a `types.ListValue`.
-						addressListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: FastAclDestinationTypeDestinationTypeChoiceDestinationIpAddressAddressModelAttributeMap}, addressElements)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						destinationIpAddressAttributeMap["address"] = addressListValue
-
-					} else {
-						// The source list is empty or nil.
-						// CASE 1: The target field is a `types.List` or an attribute map.
-						// Assign a null `types.ListValue`.
-						destinationIpAddressAttributeMap["address"] = types.ListNull(types.ObjectType{AttrTypes: FastAclDestinationTypeDestinationTypeChoiceDestinationIpAddressAddressModelAttributeMap})
-					}
 
 					// data specToModelNested RequiredArrayOfPointerField --> Ports
 					if len(destinationIpAddressOptions.DestinationIpAddress.GetPorts()) > 0 {
@@ -1251,6 +1094,118 @@ func (d *DataSourceF5XCFastAcl) Read(ctx context.Context, request datasource.Rea
 					} else {
 						// Empty string, set to null
 						destinationIpAddressAttributeMap["protocol"] = types.StringNull()
+					}
+
+					// data specToModelNested ArrayOfPointerField --> Address
+					if len(destinationIpAddressOptions.DestinationIpAddress.GetAddress()) > 0 {
+						// Step 1: Always create a slice of model structs from the spec data.
+						// This slice serves as an intermediate representation.
+						addressElements := make([]FastAclIpAddressType, 0, len(destinationIpAddressOptions.DestinationIpAddress.GetAddress()))
+						for _, addressElement := range destinationIpAddressOptions.DestinationIpAddress.GetAddress() {
+							fastAclIpAddressTypeModel := FastAclIpAddressType{}
+
+							// data specToModelNested OneOfField --> Ver
+							if addressElement.GetVer() != nil {
+								// Create a temporary attribute map for the choices within this OneOf
+								addressverChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+								// Define a variable for the spec choices to be passed down to nested templates.
+								// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+								addressverChoiceChoices := addressElement.GetVer()
+
+								// Process nested choices, populating the temporary attribute map
+
+								// data specToModelNested PointerOfOneOfField --> Ipv4
+								// <no value>
+								// false
+								{
+									ipv4Options, isIpv4 := addressverChoiceChoices.(*ves_io_schema.IpAddressType_Ipv4)
+									ipv4AttributeMap := make(map[string]attr.Value)
+
+									if isIpv4 && ipv4Options != nil {
+
+										// data specToModelNested StringField --> Addr
+										if ipv4Options.Ipv4.GetAddr() != "" {
+											ipv4AttributeMap["addr"] = types.StringValue(ipv4Options.Ipv4.GetAddr())
+										} else {
+											// Empty string, set to null
+											ipv4AttributeMap["addr"] = types.StringNull()
+										}
+
+										ipv4Obj, diags := types.ObjectValue(FastAclDestinationTypeDestinationTypeChoiceDestinationIpAddressAddressVerIpv4ModelAttributeMap, ipv4AttributeMap)
+										response.Diagnostics.Append(diags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										addressverChoiceChoicesAttributeMap["ipv4"] = ipv4Obj
+									} else {
+										addressverChoiceChoicesAttributeMap["ipv4"] = types.ObjectNull(FastAclDestinationTypeDestinationTypeChoiceDestinationIpAddressAddressVerIpv4ModelAttributeMap)
+									}
+								}
+
+								// data specToModelNested PointerOfOneOfField --> Ipv6
+								// <no value>
+								// false
+								{
+									ipv6Options, isIpv6 := addressverChoiceChoices.(*ves_io_schema.IpAddressType_Ipv6)
+									ipv6AttributeMap := make(map[string]attr.Value)
+
+									if isIpv6 && ipv6Options != nil {
+
+										// data specToModelNested StringField --> Addr
+										if ipv6Options.Ipv6.GetAddr() != "" {
+											ipv6AttributeMap["addr"] = types.StringValue(ipv6Options.Ipv6.GetAddr())
+										} else {
+											// Empty string, set to null
+											ipv6AttributeMap["addr"] = types.StringNull()
+										}
+
+										ipv6Obj, diags := types.ObjectValue(FastAclDestinationTypeDestinationTypeChoiceDestinationIpAddressAddressVerIpv6ModelAttributeMap, ipv6AttributeMap)
+										response.Diagnostics.Append(diags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										addressverChoiceChoicesAttributeMap["ipv6"] = ipv6Obj
+									} else {
+										addressverChoiceChoicesAttributeMap["ipv6"] = types.ObjectNull(FastAclDestinationTypeDestinationTypeChoiceDestinationIpAddressAddressVerIpv6ModelAttributeMap)
+									}
+								}
+
+								// --- End of Choices ---
+
+								// Create the final ObjectValue for this OneOf field
+								finalObj, addressverChoiceChoicesObjDiags := types.ObjectValue(
+									FastAclDestinationTypeDestinationTypeChoiceDestinationIpAddressAddressVerModelAttributeMap, // The attribute schema for the OneOf choices
+									addressverChoiceChoicesAttributeMap,
+								)
+								response.Diagnostics.Append(addressverChoiceChoicesObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+
+								// Assign the final object to the correct place (either the root model or a parent's attribute map)
+								fastAclIpAddressTypeModel.VerChoice = finalObj
+							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
+								fastAclIpAddressTypeModel.VerChoice = types.ObjectNull(FastAclDestinationTypeDestinationTypeChoiceDestinationIpAddressAddressVerModelAttributeMap)
+							}
+
+							addressElements = append(addressElements, fastAclIpAddressTypeModel)
+						}
+						// CASE 1: The target field is a `types.List` or an attribute map.
+						// The intermediate slice of structs must be converted to a `types.ListValue`.
+						addressListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: FastAclDestinationTypeDestinationTypeChoiceDestinationIpAddressAddressModelAttributeMap}, addressElements)
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						destinationIpAddressAttributeMap["address"] = addressListValue
+
+					} else {
+						// The source list is empty or nil.
+						// CASE 1: The target field is a `types.List` or an attribute map.
+						// Assign a null `types.ListValue`.
+						destinationIpAddressAttributeMap["address"] = types.ListNull(types.ObjectType{AttrTypes: FastAclDestinationTypeDestinationTypeChoiceDestinationIpAddressAddressModelAttributeMap})
 					}
 
 					destinationIpAddressObj, diags := types.ObjectValue(FastAclDestinationTypeDestinationTypeChoiceDestinationIpAddressModelAttributeMap, destinationIpAddressAttributeMap)
@@ -1396,15 +1351,6 @@ func (d *DataSourceF5XCFastAcl) Read(ctx context.Context, request datasource.Rea
 				}
 			}
 
-			// data specToModelNested BoolOfOneOfPointerField --> SharedVipServices
-			_, isSharedVipServices := destinationTypedestinationTypeChoiceChoices.(*ves_io_schema_fast_acl.DestinationType_SharedVipServices)
-
-			if isSharedVipServices {
-				destinationTypedestinationTypeChoiceChoicesAttributeMap["shared_vip_services"] = types.BoolValue(true)
-			} else {
-				destinationTypedestinationTypeChoiceChoicesAttributeMap["shared_vip_services"] = types.BoolNull()
-			}
-
 			// --- End of Choices ---
 
 			// Create the final ObjectValue for this OneOf field
@@ -1436,6 +1382,60 @@ func (d *DataSourceF5XCFastAcl) Read(ctx context.Context, request datasource.Rea
 		data.DestinationType = destinationTypeObj
 	} else {
 		data.DestinationType = types.ObjectNull(FastAclDestinationTypeModelAttributeMap)
+	}
+
+	// data SpecToModelRoot ArrayOfPointerField --> SourceRules
+	if len(specData.SourceRules) > 0 {
+		sourceRulesElements := make([]ObjectRefTypeModel, 0, len(specData.SourceRules))
+
+		for _, sourceRulesElement := range specData.SourceRules {
+			objectRefTypeModelModel := ObjectRefTypeModel{}
+
+			// data specToModelNested RequiredStringField --> Name
+			if sourceRulesElement.GetName() != "" {
+				objectRefTypeModelModel.Name = types.StringValue(sourceRulesElement.GetName())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Name = types.StringNull()
+			}
+
+			// data specToModelNested StringField --> Tenant
+			if sourceRulesElement.GetTenant() != "" {
+				objectRefTypeModelModel.Tenant = types.StringValue(sourceRulesElement.GetTenant())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Tenant = types.StringNull()
+			}
+
+			// data specToModelNested RequiredStringField --> Namespace
+			if sourceRulesElement.GetNamespace() != "" {
+				objectRefTypeModelModel.Namespace = types.StringValue(sourceRulesElement.GetNamespace())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Namespace = types.StringNull()
+			}
+
+			sourceRulesElements = append(sourceRulesElements, objectRefTypeModelModel)
+		}
+
+		sourceRulesList, diags := utils.GoStructSliceToListValue(
+			ctx,
+			FastAclSourceRulesObjectRefModelAttributeMap,
+			sourceRulesElements,
+		)
+
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+
+		data.SourceRules = sourceRulesList
+	} else {
+		var sourceRulesObjectType = basetypes.ObjectType{
+			AttrTypes: FastAclSourceRulesObjectRefModelAttributeMap,
+		}
+		nullSourceRulesList := basetypes.NewListNull(sourceRulesObjectType)
+		data.SourceRules = nullSourceRulesList
 	}
 
 	// Set state to fully populated data

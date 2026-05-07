@@ -54,10 +54,10 @@ type ResourceF5XCVirtualNetwork struct {
 }
 
 type VirtualNetworkCreateSpecTypeNetworkChoice struct {
-	GlobalNetwork          types.Bool `tfsdk:"global_network"`
 	SiteLocalNetwork       types.Bool `tfsdk:"site_local_network"`
 	SiteLocalInsideNetwork types.Bool `tfsdk:"site_local_inside_network"`
 	LegacyType             types.List `tfsdk:"legacy_type"`
+	GlobalNetwork          types.Bool `tfsdk:"global_network"`
 }
 
 type VirtualNetworkVirtualNetworkStaticRouteViewType struct {
@@ -67,9 +67,9 @@ type VirtualNetworkVirtualNetworkStaticRouteViewType struct {
 }
 
 type VirtualNetworkStaticRouteViewTypeNextHopChoice struct {
-	DefaultGateway types.Bool   `tfsdk:"default_gateway"`
 	IpAddress      types.String `tfsdk:"ip_address"`
 	NodeInterface  types.Object `tfsdk:"node_interface"`
+	DefaultGateway types.Bool   `tfsdk:"default_gateway"`
 }
 
 type VirtualNetworkStaticRouteViewTypeNodeInterface struct {
@@ -88,9 +88,9 @@ type VirtualNetworkVirtualNetworkStaticV6RouteViewType struct {
 }
 
 type VirtualNetworkStaticV6RouteViewTypeNextHopChoice struct {
-	IpAddress      types.String `tfsdk:"ip_address"`
 	NodeInterface  types.Object `tfsdk:"node_interface"`
 	DefaultGateway types.Bool   `tfsdk:"default_gateway"`
+	IpAddress      types.String `tfsdk:"ip_address"`
 }
 
 type VirtualNetworkStaticV6RouteViewTypeNodeInterface struct {
@@ -99,12 +99,12 @@ type VirtualNetworkStaticV6RouteViewTypeNodeInterface struct {
 
 // ResourceF5XCVirtualNetworkModel describes the resource data model.
 type ResourceF5XCVirtualNetworkModel struct {
-	Name           types.String   `tfsdk:"name"`
-	Namespace      types.String   `tfsdk:"namespace"`
-	Uid            types.String   `tfsdk:"uid"`
 	Labels         types.Map      `tfsdk:"labels"`
 	Annotations    types.Map      `tfsdk:"annotations"`
 	Description    types.String   `tfsdk:"description"`
+	Name           types.String   `tfsdk:"name"`
+	Namespace      types.String   `tfsdk:"namespace"`
+	Uid            types.String   `tfsdk:"uid"`
 	NetworkChoice  types.Object   `tfsdk:"network_choice"`
 	StaticRoutes   types.List     `tfsdk:"static_routes"`
 	StaticV6Routes types.List     `tfsdk:"static_v6_routes"`
@@ -124,12 +124,12 @@ var (
 // Attribute map for RequiredOneOfField --> NetworkChoice
 var VirtualNetworkNetworkChoiceModelAttributeMap = map[string]attr.Type{
 
-	"global_network":            types.BoolType,
 	"site_local_network":        types.BoolType,
 	"site_local_inside_network": types.BoolType,
 	"legacy_type": types.ListType{
 		ElemType: types.StringType,
 	},
+	"global_network": types.BoolType,
 }
 
 // Attribute map for ArrayOfPointerField --> StaticRoutes
@@ -149,11 +149,11 @@ var VirtualNetworkStaticRoutesModelAttributeMap = map[string]attr.Type{
 // Attribute map for RequiredOneOfField --> NextHopChoice
 var VirtualNetworkStaticRoutesNextHopChoiceModelAttributeMap = map[string]attr.Type{
 
-	"default_gateway": types.BoolType,
-	"ip_address":      types.StringType,
+	"ip_address": types.StringType,
 	"node_interface": types.ObjectType{
 		AttrTypes: VirtualNetworkStaticRoutesNextHopChoiceNodeInterfaceModelAttributeMap,
 	},
+	"default_gateway": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> NodeInterface
@@ -220,11 +220,11 @@ var VirtualNetworkStaticV6RoutesModelAttributeMap = map[string]attr.Type{
 // Attribute map for RequiredOneOfField --> NextHopChoice
 var VirtualNetworkStaticV6RoutesNextHopChoiceModelAttributeMap = map[string]attr.Type{
 
-	"ip_address": types.StringType,
 	"node_interface": types.ObjectType{
 		AttrTypes: VirtualNetworkStaticV6RoutesNextHopChoiceNodeInterfaceModelAttributeMap,
 	},
 	"default_gateway": types.BoolType,
+	"ip_address":      types.StringType,
 }
 
 // Attribute map for PointerOfOneOfField --> NodeInterface
@@ -239,9 +239,9 @@ var VirtualNetworkStaticV6RoutesNextHopChoiceNodeInterfaceModelAttributeMap = ma
 					ElemType: types.ObjectType{
 						AttrTypes: map[string]attr.Type{
 
+							"namespace": types.StringType,
 							"name":      types.StringType,
 							"tenant":    types.StringType,
-							"namespace": types.StringType,
 						},
 					},
 				},
@@ -265,30 +265,6 @@ func (r *ResourceF5XCVirtualNetwork) Schema(ctx context.Context, request resourc
 		Description:         "VirtualNetwork resource",
 
 		Attributes: map[string]schema.Attribute{
-			"name": schema.StringAttribute{
-				Description:         "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
-				MarkdownDescription: "",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
-			},
-			"namespace": schema.StringAttribute{
-				Description:         "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
-				MarkdownDescription: "",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
-			},
-			"uid": schema.StringAttribute{
-				Description:         "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            false,
-				Computed:            true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
-			},
 			"labels": schema.MapAttribute{
 				Description:         "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
 				MarkdownDescription: "",
@@ -320,6 +296,30 @@ func (r *ResourceF5XCVirtualNetwork) Schema(ctx context.Context, request resourc
 				Computed:            true,
 				Default:             stringdefault.StaticString(""),
 			},
+			"name": schema.StringAttribute{
+				Description:         "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
+				MarkdownDescription: "",
+				Required:            true,
+				Optional:            false,
+				Computed:            false,
+			},
+			"namespace": schema.StringAttribute{
+				Description:         "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
+				MarkdownDescription: "",
+				Required:            true,
+				Optional:            false,
+				Computed:            false,
+			},
+			"uid": schema.StringAttribute{
+				Description:         "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
+				MarkdownDescription: "",
+				Required:            false,
+				Optional:            false,
+				Computed:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
 			"network_choice": schema.SingleNestedAttribute{
 				Description:         "Network Type Choice Select network type, Global, inside or outside",
 				MarkdownDescription: "",
@@ -328,23 +328,13 @@ func (r *ResourceF5XCVirtualNetwork) Schema(ctx context.Context, request resourc
 				Computed:            false,
 				Validators: []validator.Object{
 					atmostoneofvalidator.AtMostOneOf(
-						"global_network",
 						"site_local_network",
 						"site_local_inside_network",
 						"legacy_type",
+						"global_network",
 					),
 				},
 				Attributes: map[string]schema.Attribute{
-					"global_network": schema.BoolAttribute{
-						Description:         "Global Network Global network can extend to multiple sites.",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Validators: []validator.Bool{
-							boolvalidator.Equals(true),
-						},
-					},
 					"site_local_network": schema.BoolAttribute{
 						Description:         "Site Local Network (outside) Site local network, also known as outside network",
 						MarkdownDescription: "",
@@ -367,14 +357,24 @@ func (r *ResourceF5XCVirtualNetwork) Schema(ctx context.Context, request resourc
 					},
 					"legacy_type": schema.ListAttribute{
 						Description:         "Legacy Network config Type of virtual network",
-						MarkdownDescription: "<br>**Allowed Values (choose one):** `[\"VIRTUAL_NETWORK_SEGMENT\", \"VIRTUAL_NETWORK_MANAGEMENT\", \"VIRTUAL_NETWORK_SITE_LOCAL\", \"VIRTUAL_NETWORK_SITE_LOCAL_INSIDE\", \"VIRTUAL_NETWORK_PUBLIC\", \"VIRTUAL_NETWORK_GLOBAL\", \"VIRTUAL_NETWORK_SITE_SERVICE\", \"VIRTUAL_NETWORK_VER_INTERNAL\", \"VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE\", \"VIRTUAL_NETWORK_IP_AUTO\", \"VIRTUAL_NETWORK_PER_SITE\", \"VIRTUAL_NETWORK_VOLTADN_PRIVATE_NETWORK\", \"VIRTUAL_NETWORK_SRV6_NETWORK\", \"VIRTUAL_NETWORK_IP_FABRIC\"]`",
+						MarkdownDescription: "<br>**Allowed Values (choose one):** `[\"VIRTUAL_NETWORK_SEGMENT\", \"VIRTUAL_NETWORK_MANAGEMENT\", \"VIRTUAL_NETWORK_SITE_LOCAL\", \"VIRTUAL_NETWORK_SITE_LOCAL_INSIDE\", \"VIRTUAL_NETWORK_PER_SITE\", \"VIRTUAL_NETWORK_PUBLIC\", \"VIRTUAL_NETWORK_SITE_SERVICE\", \"VIRTUAL_NETWORK_VER_INTERNAL\", \"VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE\", \"VIRTUAL_NETWORK_SRV6_NETWORK\", \"VIRTUAL_NETWORK_GLOBAL\", \"VIRTUAL_NETWORK_IP_AUTO\", \"VIRTUAL_NETWORK_VOLTADN_PRIVATE_NETWORK\", \"VIRTUAL_NETWORK_IP_FABRIC\"]`",
 						ElementType:         types.StringType,
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
 						Validators: []validator.List{
-							listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"VIRTUAL_NETWORK_SEGMENT", "VIRTUAL_NETWORK_MANAGEMENT", "VIRTUAL_NETWORK_SITE_LOCAL", "VIRTUAL_NETWORK_SITE_LOCAL_INSIDE", "VIRTUAL_NETWORK_PUBLIC", "VIRTUAL_NETWORK_GLOBAL", "VIRTUAL_NETWORK_SITE_SERVICE", "VIRTUAL_NETWORK_VER_INTERNAL", "VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE", "VIRTUAL_NETWORK_IP_AUTO", "VIRTUAL_NETWORK_PER_SITE", "VIRTUAL_NETWORK_VOLTADN_PRIVATE_NETWORK", "VIRTUAL_NETWORK_SRV6_NETWORK", "VIRTUAL_NETWORK_IP_FABRIC"}...)),
+							listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"VIRTUAL_NETWORK_SEGMENT", "VIRTUAL_NETWORK_MANAGEMENT", "VIRTUAL_NETWORK_SITE_LOCAL", "VIRTUAL_NETWORK_SITE_LOCAL_INSIDE", "VIRTUAL_NETWORK_PER_SITE", "VIRTUAL_NETWORK_PUBLIC", "VIRTUAL_NETWORK_SITE_SERVICE", "VIRTUAL_NETWORK_VER_INTERNAL", "VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE", "VIRTUAL_NETWORK_SRV6_NETWORK", "VIRTUAL_NETWORK_GLOBAL", "VIRTUAL_NETWORK_IP_AUTO", "VIRTUAL_NETWORK_VOLTADN_PRIVATE_NETWORK", "VIRTUAL_NETWORK_IP_FABRIC"}...)),
 							listvalidator.SizeBetween(1, 1),
+						},
+					},
+					"global_network": schema.BoolAttribute{
+						Description:         "Global Network Global network can extend to multiple sites.",
+						MarkdownDescription: "",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Validators: []validator.Bool{
+							boolvalidator.Equals(true),
 						},
 					},
 				},
@@ -403,22 +403,12 @@ func (r *ResourceF5XCVirtualNetwork) Schema(ctx context.Context, request resourc
 							Computed:            false,
 							Validators: []validator.Object{
 								atmostoneofvalidator.AtMostOneOf(
+									"ip_address",
 									"node_interface",
 									"default_gateway",
-									"ip_address",
 								),
 							},
 							Attributes: map[string]schema.Attribute{
-								"default_gateway": schema.BoolAttribute{
-									Description:         "Default Gateway Traffic matching the ip prefixes is sent to the default gateway",
-									MarkdownDescription: "",
-									Required:            false,
-									Optional:            true,
-									Computed:            false,
-									Validators: []validator.Bool{
-										boolvalidator.Equals(true),
-									},
-								},
 								"ip_address": schema.StringAttribute{
 									Description:         "IP Address Traffic matching the ip prefixes is sent to this IP Address",
 									MarkdownDescription: "",
@@ -494,17 +484,27 @@ func (r *ResourceF5XCVirtualNetwork) Schema(ctx context.Context, request resourc
 										},
 									},
 								},
+								"default_gateway": schema.BoolAttribute{
+									Description:         "Default Gateway Traffic matching the ip prefixes is sent to the default gateway",
+									MarkdownDescription: "",
+									Required:            false,
+									Optional:            true,
+									Computed:            false,
+									Validators: []validator.Bool{
+										boolvalidator.Equals(true),
+									},
+								},
 							},
 						},
 						"attrs": schema.ListAttribute{
 							Description:         "Attributes List of attributes that control forwarding, dynamic routing and control plane (host) reachability",
-							MarkdownDescription: "<br>**Valid Options:** `[\"ROUTE_ATTR_ADVERTISE\", \"ROUTE_ATTR_INSTALL_HOST\", \"ROUTE_ATTR_INSTALL_FORWARDING\", \"ROUTE_ATTR_MERGE_ONLY\", \"ROUTE_ATTR_NO_OP\"]` (Multiple selection allowed)",
+							MarkdownDescription: "<br>**Valid Options:** `[\"ROUTE_ATTR_NO_OP\", \"ROUTE_ATTR_ADVERTISE\", \"ROUTE_ATTR_INSTALL_HOST\", \"ROUTE_ATTR_INSTALL_FORWARDING\", \"ROUTE_ATTR_MERGE_ONLY\"]` (Multiple selection allowed)",
 							ElementType:         types.StringType,
 							Required:            false,
 							Optional:            true,
 							Computed:            false,
 							Validators: []validator.List{
-								listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"ROUTE_ATTR_ADVERTISE", "ROUTE_ATTR_INSTALL_HOST", "ROUTE_ATTR_INSTALL_FORWARDING", "ROUTE_ATTR_MERGE_ONLY", "ROUTE_ATTR_NO_OP"}...)),
+								listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"ROUTE_ATTR_NO_OP", "ROUTE_ATTR_ADVERTISE", "ROUTE_ATTR_INSTALL_HOST", "ROUTE_ATTR_INSTALL_FORWARDING", "ROUTE_ATTR_MERGE_ONLY"}...)),
 							},
 						},
 					},
@@ -540,19 +540,6 @@ func (r *ResourceF5XCVirtualNetwork) Schema(ctx context.Context, request resourc
 								),
 							},
 							Attributes: map[string]schema.Attribute{
-								"ip_address": schema.StringAttribute{
-									Description:         "IP Address Traffic matching the ip prefixes is sent to this IP Address",
-									MarkdownDescription: "",
-									Required:            false,
-									Optional:            true,
-									Computed:            false,
-									Validators: []validator.String{
-										stringvalidator.RegexMatches(
-											regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$`),
-											"must be a valid IPv6 address",
-										),
-									},
-								},
 								"node_interface": schema.SingleNestedAttribute{
 									Description:         "Node Interface Traffic matching the ip prefixes is sent to this interface",
 									MarkdownDescription: "",
@@ -583,6 +570,13 @@ func (r *ResourceF5XCVirtualNetwork) Schema(ctx context.Context, request resourc
 														Computed:            false,
 														NestedObject: schema.NestedAttributeObject{
 															Attributes: map[string]schema.Attribute{
+																"namespace": schema.StringAttribute{
+																	Description:         "",
+																	MarkdownDescription: "",
+																	Required:            true,
+																	Optional:            false,
+																	Computed:            false,
+																},
 																"name": schema.StringAttribute{
 																	Description:         "",
 																	MarkdownDescription: "",
@@ -600,13 +594,6 @@ func (r *ResourceF5XCVirtualNetwork) Schema(ctx context.Context, request resourc
 																		stringplanmodifier.UseStateForUnknown(),
 																	},
 																},
-																"namespace": schema.StringAttribute{
-																	Description:         "",
-																	MarkdownDescription: "",
-																	Required:            true,
-																	Optional:            false,
-																	Computed:            false,
-																},
 															},
 														},
 													},
@@ -623,6 +610,19 @@ func (r *ResourceF5XCVirtualNetwork) Schema(ctx context.Context, request resourc
 									Computed:            false,
 									Validators: []validator.Bool{
 										boolvalidator.Equals(true),
+									},
+								},
+								"ip_address": schema.StringAttribute{
+									Description:         "IP Address Traffic matching the ip prefixes is sent to this IP Address",
+									MarkdownDescription: "",
+									Required:            false,
+									Optional:            true,
+									Computed:            false,
+									Validators: []validator.String{
+										stringvalidator.RegexMatches(
+											regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$`),
+											"must be a valid IPv6 address",
+										),
 									},
 								},
 							},
@@ -743,16 +743,6 @@ func (r *ResourceF5XCVirtualNetwork) Create(ctx context.Context, request resourc
 
 	// Populate createReq from data model
 
-	// resource modelToMetaRoot RequiredStringField --> Name
-	if !data.Name.IsNull() && !data.Name.IsUnknown() {
-		meta.Name = string(data.Name.ValueString())
-	}
-
-	// resource modelToMetaRoot RequiredStringField --> Namespace
-	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
-		meta.Namespace = string(data.Namespace.ValueString())
-	}
-
 	// resource modelToMetaRoot MapOfStringField --> Annotations
 	if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
 		var labels map[string]string
@@ -772,19 +762,22 @@ func (r *ResourceF5XCVirtualNetwork) Create(ctx context.Context, request resourc
 		meta.Description = string(data.Description.ValueString())
 	}
 
+	// resource modelToMetaRoot RequiredStringField --> Name
+	if !data.Name.IsNull() && !data.Name.IsUnknown() {
+		meta.Name = string(data.Name.ValueString())
+	}
+
+	// resource modelToMetaRoot RequiredStringField --> Namespace
+	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
+		meta.Namespace = string(data.Namespace.ValueString())
+	}
+
 	// resource modelToSpecRoot RequiredOneOfField --> NetworkChoice
 	if !data.NetworkChoice.IsNull() && !data.NetworkChoice.IsUnknown() {
 		networkChoiceModel := VirtualNetworkCreateSpecTypeNetworkChoice{}
 		response.Diagnostics.Append(data.NetworkChoice.As(ctx, &networkChoiceModel, basetypes.ObjectAsOptions{})...)
 		if response.Diagnostics.HasError() {
 			return
-		}
-
-		// resource modelToSpecNested BoolOfOneOfPointerField --> GlobalNetwork
-		if !networkChoiceModel.GlobalNetwork.IsNull() && !networkChoiceModel.GlobalNetwork.IsUnknown() {
-			globalNetworkSpecBool := &ves_io_schema_virtual_network.CreateSpecType_GlobalNetwork{}
-			globalNetworkSpecBool.GlobalNetwork = &ves_io_schema.Empty{}
-			spec.NetworkChoice = globalNetworkSpecBool
 		}
 
 		// resource modelToSpecNested BoolOfOneOfPointerField --> SiteLocalNetwork
@@ -823,6 +816,13 @@ func (r *ResourceF5XCVirtualNetwork) Create(ctx context.Context, request resourc
 			}
 		}
 
+		// resource modelToSpecNested BoolOfOneOfPointerField --> GlobalNetwork
+		if !networkChoiceModel.GlobalNetwork.IsNull() && !networkChoiceModel.GlobalNetwork.IsUnknown() {
+			globalNetworkSpecBool := &ves_io_schema_virtual_network.CreateSpecType_GlobalNetwork{}
+			globalNetworkSpecBool.GlobalNetwork = &ves_io_schema.Empty{}
+			spec.NetworkChoice = globalNetworkSpecBool
+		}
+
 	}
 
 	{
@@ -855,13 +855,6 @@ func (r *ResourceF5XCVirtualNetwork) Create(ctx context.Context, request resourc
 					response.Diagnostics.Append(staticRoutesElement.NextHopChoice.As(ctx, &staticRoutesNextHopChoiceModel, basetypes.ObjectAsOptions{})...)
 					if response.Diagnostics.HasError() {
 						return
-					}
-
-					// resource modelToSpecNested BoolOfOneOfPointerField --> DefaultGateway
-					if !staticRoutesNextHopChoiceModel.DefaultGateway.IsNull() && !staticRoutesNextHopChoiceModel.DefaultGateway.IsUnknown() {
-						defaultGatewaySpecBool := &ves_io_schema_virtual_network.StaticRouteViewType_DefaultGateway{}
-						defaultGatewaySpecBool.DefaultGateway = &ves_io_schema.Empty{}
-						staticRoutesSpec[i].NextHopChoice = defaultGatewaySpecBool
 					}
 
 					// resource modelToSpecNested StringOfOneOfField --> IpAddress
@@ -945,6 +938,13 @@ func (r *ResourceF5XCVirtualNetwork) Create(ctx context.Context, request resourc
 
 					}
 
+					// resource modelToSpecNested BoolOfOneOfPointerField --> DefaultGateway
+					if !staticRoutesNextHopChoiceModel.DefaultGateway.IsNull() && !staticRoutesNextHopChoiceModel.DefaultGateway.IsUnknown() {
+						defaultGatewaySpecBool := &ves_io_schema_virtual_network.StaticRouteViewType_DefaultGateway{}
+						defaultGatewaySpecBool.DefaultGateway = &ves_io_schema.Empty{}
+						staticRoutesSpec[i].NextHopChoice = defaultGatewaySpecBool
+					}
+
 				}
 
 				// resource modelToSpecNested ArrayOfEnumField --> Attrs
@@ -1010,13 +1010,6 @@ func (r *ResourceF5XCVirtualNetwork) Create(ctx context.Context, request resourc
 						return
 					}
 
-					// resource modelToSpecNested StringOfOneOfField --> IpAddress
-					if !staticV6RoutesNextHopChoiceModel.IpAddress.IsNull() && !staticV6RoutesNextHopChoiceModel.IpAddress.IsUnknown() {
-						ipAddressSpecStr := &ves_io_schema_virtual_network.StaticV6RouteViewType_IpAddress{}
-						ipAddressSpecStr.IpAddress = string(staticV6RoutesNextHopChoiceModel.IpAddress.ValueString())
-						staticV6RoutesSpec[i].NextHopChoice = ipAddressSpecStr
-					}
-
 					// resource modelToSpecNested PointerOfOneOfField --> NodeInterface
 					if !staticV6RoutesNextHopChoiceModel.NodeInterface.IsNull() && !staticV6RoutesNextHopChoiceModel.NodeInterface.IsUnknown() {
 						var virtualNetworkStaticV6RouteViewTypeNodeInterfaceModel VirtualNetworkStaticV6RouteViewTypeNodeInterface
@@ -1073,14 +1066,14 @@ func (r *ResourceF5XCVirtualNetwork) Create(ctx context.Context, request resourc
 
 										// Recursively process nested elements
 
-										// resource modelToSpecNested RequiredStringField --> Name
-										if !interfaceElement.Name.IsNull() && !interfaceElement.Name.IsUnknown() {
-											interfaceSpec[i].Name = string(interfaceElement.Name.ValueString())
-										}
-
 										// resource modelToSpecNested RequiredStringField --> Namespace
 										if !interfaceElement.Namespace.IsNull() && !interfaceElement.Namespace.IsUnknown() {
 											interfaceSpec[i].Namespace = string(interfaceElement.Namespace.ValueString())
+										}
+
+										// resource modelToSpecNested RequiredStringField --> Name
+										if !interfaceElement.Name.IsNull() && !interfaceElement.Name.IsUnknown() {
+											interfaceSpec[i].Name = string(interfaceElement.Name.ValueString())
 										}
 
 									}
@@ -1096,6 +1089,13 @@ func (r *ResourceF5XCVirtualNetwork) Create(ctx context.Context, request resourc
 						defaultGatewaySpecBool := &ves_io_schema_virtual_network.StaticV6RouteViewType_DefaultGateway{}
 						defaultGatewaySpecBool.DefaultGateway = &ves_io_schema.Empty{}
 						staticV6RoutesSpec[i].NextHopChoice = defaultGatewaySpecBool
+					}
+
+					// resource modelToSpecNested StringOfOneOfField --> IpAddress
+					if !staticV6RoutesNextHopChoiceModel.IpAddress.IsNull() && !staticV6RoutesNextHopChoiceModel.IpAddress.IsUnknown() {
+						ipAddressSpecStr := &ves_io_schema_virtual_network.StaticV6RouteViewType_IpAddress{}
+						ipAddressSpecStr.IpAddress = string(staticV6RoutesNextHopChoiceModel.IpAddress.ValueString())
+						staticV6RoutesSpec[i].NextHopChoice = ipAddressSpecStr
 					}
 
 				}
@@ -1202,15 +1202,6 @@ func (r *ResourceF5XCVirtualNetwork) Create(ctx context.Context, request resourc
 	tflog.Info(ctx, fmt.Sprintf("raw_spec_type: %v", rawSpecMap))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
-	// resource SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
-
-	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
-	data.Namespace = types.StringValue(metaData.GetNamespace())
-
-	// resource SpecToModelRoot Meta StringField --> Uid
-	data.Uid = types.StringValue(systemMetaData.GetUid())
-
 	// resource SpecToModelRoot Meta MapOfStringField --> Labels
 	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
 	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
@@ -1292,6 +1283,15 @@ func (r *ResourceF5XCVirtualNetwork) Create(ctx context.Context, request resourc
 	// resource SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
 
+	// resource SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
+
+	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
+	data.Namespace = types.StringValue(metaData.GetNamespace())
+
+	// resource SpecToModelRoot Meta StringField --> Uid
+	data.Uid = types.StringValue(systemMetaData.GetUid())
+
 	// resource SpecToModelRoot RequiredOneOfField --> NetworkChoice
 	// true
 	// true
@@ -1303,26 +1303,26 @@ func (r *ResourceF5XCVirtualNetwork) Create(ctx context.Context, request resourc
 
 	// 1. Check for the choice inside a 'gc_spec' map, which is a common pattern in GET responses.
 	if gcSpec, gcSpecOk := rawSpecMap["gc_spec"].(map[string]interface{}); gcSpecOk {
-		if _, ok := gcSpec["global_network"]; ok {
-			oneofNetworkChoicePresent = true
-		} else if _, ok := gcSpec["site_local_network"]; ok {
+		if _, ok := gcSpec["site_local_network"]; ok {
 			oneofNetworkChoicePresent = true
 		} else if _, ok := gcSpec["site_local_inside_network"]; ok {
 			oneofNetworkChoicePresent = true
 		} else if _, ok := gcSpec["legacy_type"]; ok {
+			oneofNetworkChoicePresent = true
+		} else if _, ok := gcSpec["global_network"]; ok {
 			oneofNetworkChoicePresent = true
 		}
 	}
 
 	// 2. If not found in 'gc_spec', check for the choice at the top level of the spec.
 	if !oneofNetworkChoicePresent {
-		if _, ok := rawSpecMap["global_network"]; ok {
-			oneofNetworkChoicePresent = true
-		} else if _, ok := rawSpecMap["site_local_network"]; ok {
+		if _, ok := rawSpecMap["site_local_network"]; ok {
 			oneofNetworkChoicePresent = true
 		} else if _, ok := rawSpecMap["site_local_inside_network"]; ok {
 			oneofNetworkChoicePresent = true
 		} else if _, ok := rawSpecMap["legacy_type"]; ok {
+			oneofNetworkChoicePresent = true
+		} else if _, ok := rawSpecMap["global_network"]; ok {
 			oneofNetworkChoicePresent = true
 		}
 	}
@@ -1335,27 +1335,6 @@ func (r *ResourceF5XCVirtualNetwork) Create(ctx context.Context, request resourc
 		var networkChoiceChoicesModel = &VirtualNetworkCreateSpecTypeNetworkChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
-
-		// resource specToModelNested BoolOfOneOfPointerField --> GlobalNetwork
-		var globalNetworkInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["global_network"]; found {
-				globalNetworkInMap = true
-			}
-		}
-
-		if !globalNetworkInMap {
-			if _, found := rawSpecMap["global_network"]; found {
-				globalNetworkInMap = true
-			}
-		}
-
-		if globalNetworkInMap || specData.GetGlobalNetwork() != nil {
-			networkChoiceChoicesModel.GlobalNetwork = types.BoolValue(true)
-		} else {
-			networkChoiceChoicesModel.GlobalNetwork = types.BoolNull()
-		}
 
 		// resource specToModelNested BoolOfOneOfPointerField --> SiteLocalNetwork
 		var siteLocalNetworkInMap bool
@@ -1440,6 +1419,27 @@ func (r *ResourceF5XCVirtualNetwork) Create(ctx context.Context, request resourc
 			}
 		}
 
+		// resource specToModelNested BoolOfOneOfPointerField --> GlobalNetwork
+		var globalNetworkInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["global_network"]; found {
+				globalNetworkInMap = true
+			}
+		}
+
+		if !globalNetworkInMap {
+			if _, found := rawSpecMap["global_network"]; found {
+				globalNetworkInMap = true
+			}
+		}
+
+		if globalNetworkInMap || specData.GetGlobalNetwork() != nil {
+			networkChoiceChoicesModel.GlobalNetwork = types.BoolValue(true)
+		} else {
+			networkChoiceChoicesModel.GlobalNetwork = types.BoolNull()
+		}
+
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
 		networkChoiceObj, diags := utils.GoStructToObjectValue(
 			ctx,
@@ -1488,27 +1488,6 @@ func (r *ResourceF5XCVirtualNetwork) Create(ctx context.Context, request resourc
 				staticRoutesnextHopChoiceChoices := staticRoutesElement.GetNextHopChoice()
 
 				// Process nested choices, populating the temporary attribute map
-
-				// resource specToModelNested BoolOfOneOfPointerField --> DefaultGateway
-				var defaultGatewayInMap bool
-
-				if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-					if _, found := gcSpec["default_gateway"]; found {
-						defaultGatewayInMap = true
-					}
-				}
-
-				if !defaultGatewayInMap {
-					if _, found := rawSpecMap["default_gateway"]; found {
-						defaultGatewayInMap = true
-					}
-				}
-
-				if defaultGatewayInMap || staticRoutesElement.GetDefaultGateway() != nil {
-					staticRoutesnextHopChoiceChoicesAttributeMap["default_gateway"] = types.BoolValue(true)
-				} else {
-					staticRoutesnextHopChoiceChoicesAttributeMap["default_gateway"] = types.BoolNull()
-				}
 
 				// resource specToModelNested StringOfOneOfField --> IpAddress
 				ipAddressItem, isIpAddress := staticRoutesnextHopChoiceChoices.(*ves_io_schema_virtual_network.StaticRouteViewType_IpAddress)
@@ -1624,6 +1603,27 @@ func (r *ResourceF5XCVirtualNetwork) Create(ctx context.Context, request resourc
 					}
 				}
 
+				// resource specToModelNested BoolOfOneOfPointerField --> DefaultGateway
+				var defaultGatewayInMap bool
+
+				if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+					if _, found := gcSpec["default_gateway"]; found {
+						defaultGatewayInMap = true
+					}
+				}
+
+				if !defaultGatewayInMap {
+					if _, found := rawSpecMap["default_gateway"]; found {
+						defaultGatewayInMap = true
+					}
+				}
+
+				if defaultGatewayInMap || staticRoutesElement.GetDefaultGateway() != nil {
+					staticRoutesnextHopChoiceChoicesAttributeMap["default_gateway"] = types.BoolValue(true)
+				} else {
+					staticRoutesnextHopChoiceChoicesAttributeMap["default_gateway"] = types.BoolNull()
+				}
+
 				// --- End of Choices ---
 
 				// Create the final ObjectValue for this OneOf field
@@ -1714,16 +1714,6 @@ func (r *ResourceF5XCVirtualNetwork) Create(ctx context.Context, request resourc
 
 				// Process nested choices, populating the temporary attribute map
 
-				// resource specToModelNested StringOfOneOfField --> IpAddress
-				ipAddressItem, isIpAddress := staticV6RoutesnextHopChoiceChoices.(*ves_io_schema_virtual_network.StaticV6RouteViewType_IpAddress)
-
-				if isIpAddress {
-					staticV6RoutesnextHopChoiceChoicesAttributeMap["ip_address"] = types.StringValue(string(ipAddressItem.IpAddress))
-				} else {
-					// Empty string, set to null
-					staticV6RoutesnextHopChoiceChoicesAttributeMap["ip_address"] = types.StringNull()
-				}
-
 				// resource specToModelNested PointerOfOneOfField --> NodeInterface
 				// CreateSpecType
 				// true
@@ -1757,6 +1747,14 @@ func (r *ResourceF5XCVirtualNetwork) Create(ctx context.Context, request resourc
 									for _, interfaceElement := range listElement.GetInterface() {
 										objectRefTypeModelModel := ObjectRefTypeModel{}
 
+										// resource specToModelNested RequiredStringField --> Namespace
+										if interfaceElement.GetNamespace() != "" {
+											objectRefTypeModelModel.Namespace = types.StringValue(interfaceElement.GetNamespace())
+										} else {
+											// Empty string, set to null
+											objectRefTypeModelModel.Namespace = types.StringNull()
+										}
+
 										// resource specToModelNested RequiredStringField --> Name
 										if interfaceElement.GetName() != "" {
 											objectRefTypeModelModel.Name = types.StringValue(interfaceElement.GetName())
@@ -1771,14 +1769,6 @@ func (r *ResourceF5XCVirtualNetwork) Create(ctx context.Context, request resourc
 										} else {
 											// Empty string, set to null
 											objectRefTypeModelModel.Tenant = types.StringNull()
-										}
-
-										// resource specToModelNested RequiredStringField --> Namespace
-										if interfaceElement.GetNamespace() != "" {
-											objectRefTypeModelModel.Namespace = types.StringValue(interfaceElement.GetNamespace())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Namespace = types.StringNull()
 										}
 
 										interfaceElements = append(interfaceElements, objectRefTypeModelModel)
@@ -1847,6 +1837,16 @@ func (r *ResourceF5XCVirtualNetwork) Create(ctx context.Context, request resourc
 					staticV6RoutesnextHopChoiceChoicesAttributeMap["default_gateway"] = types.BoolValue(true)
 				} else {
 					staticV6RoutesnextHopChoiceChoicesAttributeMap["default_gateway"] = types.BoolNull()
+				}
+
+				// resource specToModelNested StringOfOneOfField --> IpAddress
+				ipAddressItem, isIpAddress := staticV6RoutesnextHopChoiceChoices.(*ves_io_schema_virtual_network.StaticV6RouteViewType_IpAddress)
+
+				if isIpAddress {
+					staticV6RoutesnextHopChoiceChoicesAttributeMap["ip_address"] = types.StringValue(string(ipAddressItem.IpAddress))
+				} else {
+					// Empty string, set to null
+					staticV6RoutesnextHopChoiceChoicesAttributeMap["ip_address"] = types.StringNull()
 				}
 
 				// --- End of Choices ---
@@ -2008,15 +2008,6 @@ func (r *ResourceF5XCVirtualNetwork) Read(ctx context.Context, request resource.
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
-	// resource SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
-
-	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
-	data.Namespace = types.StringValue(metaData.GetNamespace())
-
-	// resource SpecToModelRoot Meta StringField --> Uid
-	data.Uid = types.StringValue(systemMetaData.GetUid())
-
 	// resource SpecToModelRoot Meta MapOfStringField --> Labels
 	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
 	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
@@ -2114,6 +2105,15 @@ func (r *ResourceF5XCVirtualNetwork) Read(ctx context.Context, request resource.
 	// resource SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
 
+	// resource SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
+
+	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
+	data.Namespace = types.StringValue(metaData.GetNamespace())
+
+	// resource SpecToModelRoot Meta StringField --> Uid
+	data.Uid = types.StringValue(systemMetaData.GetUid())
+
 	// resource SpecToModelRoot RequiredOneOfField --> NetworkChoice
 	// true
 	// true
@@ -2125,26 +2125,26 @@ func (r *ResourceF5XCVirtualNetwork) Read(ctx context.Context, request resource.
 
 	// 1. Check for the choice inside a 'gc_spec' map, which is a common pattern in GET responses.
 	if gcSpec, gcSpecOk := rawSpecMap["gc_spec"].(map[string]interface{}); gcSpecOk {
-		if _, ok := gcSpec["global_network"]; ok {
-			oneofNetworkChoicePresent = true
-		} else if _, ok := gcSpec["site_local_network"]; ok {
+		if _, ok := gcSpec["site_local_network"]; ok {
 			oneofNetworkChoicePresent = true
 		} else if _, ok := gcSpec["site_local_inside_network"]; ok {
 			oneofNetworkChoicePresent = true
 		} else if _, ok := gcSpec["legacy_type"]; ok {
+			oneofNetworkChoicePresent = true
+		} else if _, ok := gcSpec["global_network"]; ok {
 			oneofNetworkChoicePresent = true
 		}
 	}
 
 	// 2. If not found in 'gc_spec', check for the choice at the top level of the spec.
 	if !oneofNetworkChoicePresent {
-		if _, ok := rawSpecMap["global_network"]; ok {
-			oneofNetworkChoicePresent = true
-		} else if _, ok := rawSpecMap["site_local_network"]; ok {
+		if _, ok := rawSpecMap["site_local_network"]; ok {
 			oneofNetworkChoicePresent = true
 		} else if _, ok := rawSpecMap["site_local_inside_network"]; ok {
 			oneofNetworkChoicePresent = true
 		} else if _, ok := rawSpecMap["legacy_type"]; ok {
+			oneofNetworkChoicePresent = true
+		} else if _, ok := rawSpecMap["global_network"]; ok {
 			oneofNetworkChoicePresent = true
 		}
 	}
@@ -2157,27 +2157,6 @@ func (r *ResourceF5XCVirtualNetwork) Read(ctx context.Context, request resource.
 		var networkChoiceChoicesModel = &VirtualNetworkCreateSpecTypeNetworkChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
-
-		// resource specToModelNested BoolOfOneOfPointerField --> GlobalNetwork
-		var globalNetworkInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["global_network"]; found {
-				globalNetworkInMap = true
-			}
-		}
-
-		if !globalNetworkInMap {
-			if _, found := rawSpecMap["global_network"]; found {
-				globalNetworkInMap = true
-			}
-		}
-
-		if globalNetworkInMap || specData.GetGlobalNetwork() != nil {
-			networkChoiceChoicesModel.GlobalNetwork = types.BoolValue(true)
-		} else {
-			networkChoiceChoicesModel.GlobalNetwork = types.BoolNull()
-		}
 
 		// resource specToModelNested BoolOfOneOfPointerField --> SiteLocalNetwork
 		var siteLocalNetworkInMap bool
@@ -2262,6 +2241,27 @@ func (r *ResourceF5XCVirtualNetwork) Read(ctx context.Context, request resource.
 			}
 		}
 
+		// resource specToModelNested BoolOfOneOfPointerField --> GlobalNetwork
+		var globalNetworkInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["global_network"]; found {
+				globalNetworkInMap = true
+			}
+		}
+
+		if !globalNetworkInMap {
+			if _, found := rawSpecMap["global_network"]; found {
+				globalNetworkInMap = true
+			}
+		}
+
+		if globalNetworkInMap || specData.GetGlobalNetwork() != nil {
+			networkChoiceChoicesModel.GlobalNetwork = types.BoolValue(true)
+		} else {
+			networkChoiceChoicesModel.GlobalNetwork = types.BoolNull()
+		}
+
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
 		networkChoiceObj, diags := utils.GoStructToObjectValue(
 			ctx,
@@ -2310,27 +2310,6 @@ func (r *ResourceF5XCVirtualNetwork) Read(ctx context.Context, request resource.
 				staticRoutesnextHopChoiceChoices := staticRoutesElement.GetNextHopChoice()
 
 				// Process nested choices, populating the temporary attribute map
-
-				// resource specToModelNested BoolOfOneOfPointerField --> DefaultGateway
-				var defaultGatewayInMap bool
-
-				if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-					if _, found := gcSpec["default_gateway"]; found {
-						defaultGatewayInMap = true
-					}
-				}
-
-				if !defaultGatewayInMap {
-					if _, found := rawSpecMap["default_gateway"]; found {
-						defaultGatewayInMap = true
-					}
-				}
-
-				if defaultGatewayInMap || staticRoutesElement.GetDefaultGateway() != nil {
-					staticRoutesnextHopChoiceChoicesAttributeMap["default_gateway"] = types.BoolValue(true)
-				} else {
-					staticRoutesnextHopChoiceChoicesAttributeMap["default_gateway"] = types.BoolNull()
-				}
 
 				// resource specToModelNested StringOfOneOfField --> IpAddress
 				ipAddressItem, isIpAddress := staticRoutesnextHopChoiceChoices.(*ves_io_schema_virtual_network.StaticRouteViewType_IpAddress)
@@ -2446,6 +2425,27 @@ func (r *ResourceF5XCVirtualNetwork) Read(ctx context.Context, request resource.
 					}
 				}
 
+				// resource specToModelNested BoolOfOneOfPointerField --> DefaultGateway
+				var defaultGatewayInMap bool
+
+				if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+					if _, found := gcSpec["default_gateway"]; found {
+						defaultGatewayInMap = true
+					}
+				}
+
+				if !defaultGatewayInMap {
+					if _, found := rawSpecMap["default_gateway"]; found {
+						defaultGatewayInMap = true
+					}
+				}
+
+				if defaultGatewayInMap || staticRoutesElement.GetDefaultGateway() != nil {
+					staticRoutesnextHopChoiceChoicesAttributeMap["default_gateway"] = types.BoolValue(true)
+				} else {
+					staticRoutesnextHopChoiceChoicesAttributeMap["default_gateway"] = types.BoolNull()
+				}
+
 				// --- End of Choices ---
 
 				// Create the final ObjectValue for this OneOf field
@@ -2536,16 +2536,6 @@ func (r *ResourceF5XCVirtualNetwork) Read(ctx context.Context, request resource.
 
 				// Process nested choices, populating the temporary attribute map
 
-				// resource specToModelNested StringOfOneOfField --> IpAddress
-				ipAddressItem, isIpAddress := staticV6RoutesnextHopChoiceChoices.(*ves_io_schema_virtual_network.StaticV6RouteViewType_IpAddress)
-
-				if isIpAddress {
-					staticV6RoutesnextHopChoiceChoicesAttributeMap["ip_address"] = types.StringValue(string(ipAddressItem.IpAddress))
-				} else {
-					// Empty string, set to null
-					staticV6RoutesnextHopChoiceChoicesAttributeMap["ip_address"] = types.StringNull()
-				}
-
 				// resource specToModelNested PointerOfOneOfField --> NodeInterface
 				// CreateSpecType
 				// true
@@ -2579,6 +2569,14 @@ func (r *ResourceF5XCVirtualNetwork) Read(ctx context.Context, request resource.
 									for _, interfaceElement := range listElement.GetInterface() {
 										objectRefTypeModelModel := ObjectRefTypeModel{}
 
+										// resource specToModelNested RequiredStringField --> Namespace
+										if interfaceElement.GetNamespace() != "" {
+											objectRefTypeModelModel.Namespace = types.StringValue(interfaceElement.GetNamespace())
+										} else {
+											// Empty string, set to null
+											objectRefTypeModelModel.Namespace = types.StringNull()
+										}
+
 										// resource specToModelNested RequiredStringField --> Name
 										if interfaceElement.GetName() != "" {
 											objectRefTypeModelModel.Name = types.StringValue(interfaceElement.GetName())
@@ -2593,14 +2591,6 @@ func (r *ResourceF5XCVirtualNetwork) Read(ctx context.Context, request resource.
 										} else {
 											// Empty string, set to null
 											objectRefTypeModelModel.Tenant = types.StringNull()
-										}
-
-										// resource specToModelNested RequiredStringField --> Namespace
-										if interfaceElement.GetNamespace() != "" {
-											objectRefTypeModelModel.Namespace = types.StringValue(interfaceElement.GetNamespace())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Namespace = types.StringNull()
 										}
 
 										interfaceElements = append(interfaceElements, objectRefTypeModelModel)
@@ -2669,6 +2659,16 @@ func (r *ResourceF5XCVirtualNetwork) Read(ctx context.Context, request resource.
 					staticV6RoutesnextHopChoiceChoicesAttributeMap["default_gateway"] = types.BoolValue(true)
 				} else {
 					staticV6RoutesnextHopChoiceChoicesAttributeMap["default_gateway"] = types.BoolNull()
+				}
+
+				// resource specToModelNested StringOfOneOfField --> IpAddress
+				ipAddressItem, isIpAddress := staticV6RoutesnextHopChoiceChoices.(*ves_io_schema_virtual_network.StaticV6RouteViewType_IpAddress)
+
+				if isIpAddress {
+					staticV6RoutesnextHopChoiceChoicesAttributeMap["ip_address"] = types.StringValue(string(ipAddressItem.IpAddress))
+				} else {
+					// Empty string, set to null
+					staticV6RoutesnextHopChoiceChoicesAttributeMap["ip_address"] = types.StringNull()
 				}
 
 				// --- End of Choices ---
@@ -2777,16 +2777,6 @@ func (r *ResourceF5XCVirtualNetwork) Update(ctx context.Context, request resourc
 
 	// Populate updateReq from data model
 
-	// resource modelToMetaRoot RequiredStringField --> Name
-	if !data.Name.IsNull() && !data.Name.IsUnknown() {
-		meta.Name = string(data.Name.ValueString())
-	}
-
-	// resource modelToMetaRoot RequiredStringField --> Namespace
-	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
-		meta.Namespace = string(data.Namespace.ValueString())
-	}
-
 	// resource modelToMetaRoot MapOfStringField --> Annotations
 	if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
 		var labels map[string]string
@@ -2806,19 +2796,22 @@ func (r *ResourceF5XCVirtualNetwork) Update(ctx context.Context, request resourc
 		meta.Description = string(data.Description.ValueString())
 	}
 
+	// resource modelToMetaRoot RequiredStringField --> Name
+	if !data.Name.IsNull() && !data.Name.IsUnknown() {
+		meta.Name = string(data.Name.ValueString())
+	}
+
+	// resource modelToMetaRoot RequiredStringField --> Namespace
+	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
+		meta.Namespace = string(data.Namespace.ValueString())
+	}
+
 	// resource modelToSpecRoot RequiredOneOfField --> NetworkChoice
 	if !data.NetworkChoice.IsNull() && !data.NetworkChoice.IsUnknown() {
 		networkChoiceModel := VirtualNetworkCreateSpecTypeNetworkChoice{}
 		response.Diagnostics.Append(data.NetworkChoice.As(ctx, &networkChoiceModel, basetypes.ObjectAsOptions{})...)
 		if response.Diagnostics.HasError() {
 			return
-		}
-
-		// resource modelToSpecNested BoolOfOneOfPointerField --> GlobalNetwork
-		if !networkChoiceModel.GlobalNetwork.IsNull() && !networkChoiceModel.GlobalNetwork.IsUnknown() {
-			globalNetworkSpecBool := &ves_io_schema_virtual_network.ReplaceSpecType_GlobalNetwork{}
-			globalNetworkSpecBool.GlobalNetwork = &ves_io_schema.Empty{}
-			spec.NetworkChoice = globalNetworkSpecBool
 		}
 
 		// resource modelToSpecNested BoolOfOneOfPointerField --> SiteLocalNetwork
@@ -2857,6 +2850,13 @@ func (r *ResourceF5XCVirtualNetwork) Update(ctx context.Context, request resourc
 			}
 		}
 
+		// resource modelToSpecNested BoolOfOneOfPointerField --> GlobalNetwork
+		if !networkChoiceModel.GlobalNetwork.IsNull() && !networkChoiceModel.GlobalNetwork.IsUnknown() {
+			globalNetworkSpecBool := &ves_io_schema_virtual_network.ReplaceSpecType_GlobalNetwork{}
+			globalNetworkSpecBool.GlobalNetwork = &ves_io_schema.Empty{}
+			spec.NetworkChoice = globalNetworkSpecBool
+		}
+
 	}
 
 	{
@@ -2889,13 +2889,6 @@ func (r *ResourceF5XCVirtualNetwork) Update(ctx context.Context, request resourc
 					response.Diagnostics.Append(staticRoutesElement.NextHopChoice.As(ctx, &staticRoutesNextHopChoiceModel, basetypes.ObjectAsOptions{})...)
 					if response.Diagnostics.HasError() {
 						return
-					}
-
-					// resource modelToSpecNested BoolOfOneOfPointerField --> DefaultGateway
-					if !staticRoutesNextHopChoiceModel.DefaultGateway.IsNull() && !staticRoutesNextHopChoiceModel.DefaultGateway.IsUnknown() {
-						defaultGatewaySpecBool := &ves_io_schema_virtual_network.StaticRouteViewType_DefaultGateway{}
-						defaultGatewaySpecBool.DefaultGateway = &ves_io_schema.Empty{}
-						staticRoutesSpec[i].NextHopChoice = defaultGatewaySpecBool
 					}
 
 					// resource modelToSpecNested StringOfOneOfField --> IpAddress
@@ -2979,6 +2972,13 @@ func (r *ResourceF5XCVirtualNetwork) Update(ctx context.Context, request resourc
 
 					}
 
+					// resource modelToSpecNested BoolOfOneOfPointerField --> DefaultGateway
+					if !staticRoutesNextHopChoiceModel.DefaultGateway.IsNull() && !staticRoutesNextHopChoiceModel.DefaultGateway.IsUnknown() {
+						defaultGatewaySpecBool := &ves_io_schema_virtual_network.StaticRouteViewType_DefaultGateway{}
+						defaultGatewaySpecBool.DefaultGateway = &ves_io_schema.Empty{}
+						staticRoutesSpec[i].NextHopChoice = defaultGatewaySpecBool
+					}
+
 				}
 
 				// resource modelToSpecNested ArrayOfEnumField --> Attrs
@@ -3044,13 +3044,6 @@ func (r *ResourceF5XCVirtualNetwork) Update(ctx context.Context, request resourc
 						return
 					}
 
-					// resource modelToSpecNested StringOfOneOfField --> IpAddress
-					if !staticV6RoutesNextHopChoiceModel.IpAddress.IsNull() && !staticV6RoutesNextHopChoiceModel.IpAddress.IsUnknown() {
-						ipAddressSpecStr := &ves_io_schema_virtual_network.StaticV6RouteViewType_IpAddress{}
-						ipAddressSpecStr.IpAddress = string(staticV6RoutesNextHopChoiceModel.IpAddress.ValueString())
-						staticV6RoutesSpec[i].NextHopChoice = ipAddressSpecStr
-					}
-
 					// resource modelToSpecNested PointerOfOneOfField --> NodeInterface
 					if !staticV6RoutesNextHopChoiceModel.NodeInterface.IsNull() && !staticV6RoutesNextHopChoiceModel.NodeInterface.IsUnknown() {
 						var virtualNetworkStaticV6RouteViewTypeNodeInterfaceModel VirtualNetworkStaticV6RouteViewTypeNodeInterface
@@ -3107,14 +3100,14 @@ func (r *ResourceF5XCVirtualNetwork) Update(ctx context.Context, request resourc
 
 										// Recursively process nested elements
 
-										// resource modelToSpecNested RequiredStringField --> Name
-										if !interfaceElement.Name.IsNull() && !interfaceElement.Name.IsUnknown() {
-											interfaceSpec[i].Name = string(interfaceElement.Name.ValueString())
-										}
-
 										// resource modelToSpecNested RequiredStringField --> Namespace
 										if !interfaceElement.Namespace.IsNull() && !interfaceElement.Namespace.IsUnknown() {
 											interfaceSpec[i].Namespace = string(interfaceElement.Namespace.ValueString())
+										}
+
+										// resource modelToSpecNested RequiredStringField --> Name
+										if !interfaceElement.Name.IsNull() && !interfaceElement.Name.IsUnknown() {
+											interfaceSpec[i].Name = string(interfaceElement.Name.ValueString())
 										}
 
 									}
@@ -3130,6 +3123,13 @@ func (r *ResourceF5XCVirtualNetwork) Update(ctx context.Context, request resourc
 						defaultGatewaySpecBool := &ves_io_schema_virtual_network.StaticV6RouteViewType_DefaultGateway{}
 						defaultGatewaySpecBool.DefaultGateway = &ves_io_schema.Empty{}
 						staticV6RoutesSpec[i].NextHopChoice = defaultGatewaySpecBool
+					}
+
+					// resource modelToSpecNested StringOfOneOfField --> IpAddress
+					if !staticV6RoutesNextHopChoiceModel.IpAddress.IsNull() && !staticV6RoutesNextHopChoiceModel.IpAddress.IsUnknown() {
+						ipAddressSpecStr := &ves_io_schema_virtual_network.StaticV6RouteViewType_IpAddress{}
+						ipAddressSpecStr.IpAddress = string(staticV6RoutesNextHopChoiceModel.IpAddress.ValueString())
+						staticV6RoutesSpec[i].NextHopChoice = ipAddressSpecStr
 					}
 
 				}
@@ -3236,15 +3236,6 @@ func (r *ResourceF5XCVirtualNetwork) Update(ctx context.Context, request resourc
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
-	// resource SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
-
-	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
-	data.Namespace = types.StringValue(metaData.GetNamespace())
-
-	// resource SpecToModelRoot Meta StringField --> Uid
-	data.Uid = types.StringValue(systemMetaData.GetUid())
-
 	// resource SpecToModelRoot Meta MapOfStringField --> Labels
 	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
 	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
@@ -3342,6 +3333,15 @@ func (r *ResourceF5XCVirtualNetwork) Update(ctx context.Context, request resourc
 	// resource SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
 
+	// resource SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
+
+	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
+	data.Namespace = types.StringValue(metaData.GetNamespace())
+
+	// resource SpecToModelRoot Meta StringField --> Uid
+	data.Uid = types.StringValue(systemMetaData.GetUid())
+
 	// resource SpecToModelRoot RequiredOneOfField --> NetworkChoice
 	// true
 	// true
@@ -3353,26 +3353,26 @@ func (r *ResourceF5XCVirtualNetwork) Update(ctx context.Context, request resourc
 
 	// 1. Check for the choice inside a 'gc_spec' map, which is a common pattern in GET responses.
 	if gcSpec, gcSpecOk := rawSpecMap["gc_spec"].(map[string]interface{}); gcSpecOk {
-		if _, ok := gcSpec["global_network"]; ok {
-			oneofNetworkChoicePresent = true
-		} else if _, ok := gcSpec["site_local_network"]; ok {
+		if _, ok := gcSpec["site_local_network"]; ok {
 			oneofNetworkChoicePresent = true
 		} else if _, ok := gcSpec["site_local_inside_network"]; ok {
 			oneofNetworkChoicePresent = true
 		} else if _, ok := gcSpec["legacy_type"]; ok {
+			oneofNetworkChoicePresent = true
+		} else if _, ok := gcSpec["global_network"]; ok {
 			oneofNetworkChoicePresent = true
 		}
 	}
 
 	// 2. If not found in 'gc_spec', check for the choice at the top level of the spec.
 	if !oneofNetworkChoicePresent {
-		if _, ok := rawSpecMap["global_network"]; ok {
-			oneofNetworkChoicePresent = true
-		} else if _, ok := rawSpecMap["site_local_network"]; ok {
+		if _, ok := rawSpecMap["site_local_network"]; ok {
 			oneofNetworkChoicePresent = true
 		} else if _, ok := rawSpecMap["site_local_inside_network"]; ok {
 			oneofNetworkChoicePresent = true
 		} else if _, ok := rawSpecMap["legacy_type"]; ok {
+			oneofNetworkChoicePresent = true
+		} else if _, ok := rawSpecMap["global_network"]; ok {
 			oneofNetworkChoicePresent = true
 		}
 	}
@@ -3385,27 +3385,6 @@ func (r *ResourceF5XCVirtualNetwork) Update(ctx context.Context, request resourc
 		var networkChoiceChoicesModel = &VirtualNetworkCreateSpecTypeNetworkChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
-
-		// resource specToModelNested BoolOfOneOfPointerField --> GlobalNetwork
-		var globalNetworkInMap bool
-
-		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["global_network"]; found {
-				globalNetworkInMap = true
-			}
-		}
-
-		if !globalNetworkInMap {
-			if _, found := rawSpecMap["global_network"]; found {
-				globalNetworkInMap = true
-			}
-		}
-
-		if globalNetworkInMap || specData.GetGlobalNetwork() != nil {
-			networkChoiceChoicesModel.GlobalNetwork = types.BoolValue(true)
-		} else {
-			networkChoiceChoicesModel.GlobalNetwork = types.BoolNull()
-		}
 
 		// resource specToModelNested BoolOfOneOfPointerField --> SiteLocalNetwork
 		var siteLocalNetworkInMap bool
@@ -3490,6 +3469,27 @@ func (r *ResourceF5XCVirtualNetwork) Update(ctx context.Context, request resourc
 			}
 		}
 
+		// resource specToModelNested BoolOfOneOfPointerField --> GlobalNetwork
+		var globalNetworkInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["global_network"]; found {
+				globalNetworkInMap = true
+			}
+		}
+
+		if !globalNetworkInMap {
+			if _, found := rawSpecMap["global_network"]; found {
+				globalNetworkInMap = true
+			}
+		}
+
+		if globalNetworkInMap || specData.GetGlobalNetwork() != nil {
+			networkChoiceChoicesModel.GlobalNetwork = types.BoolValue(true)
+		} else {
+			networkChoiceChoicesModel.GlobalNetwork = types.BoolNull()
+		}
+
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
 		networkChoiceObj, diags := utils.GoStructToObjectValue(
 			ctx,
@@ -3538,27 +3538,6 @@ func (r *ResourceF5XCVirtualNetwork) Update(ctx context.Context, request resourc
 				staticRoutesnextHopChoiceChoices := staticRoutesElement.GetNextHopChoice()
 
 				// Process nested choices, populating the temporary attribute map
-
-				// resource specToModelNested BoolOfOneOfPointerField --> DefaultGateway
-				var defaultGatewayInMap bool
-
-				if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-					if _, found := gcSpec["default_gateway"]; found {
-						defaultGatewayInMap = true
-					}
-				}
-
-				if !defaultGatewayInMap {
-					if _, found := rawSpecMap["default_gateway"]; found {
-						defaultGatewayInMap = true
-					}
-				}
-
-				if defaultGatewayInMap || staticRoutesElement.GetDefaultGateway() != nil {
-					staticRoutesnextHopChoiceChoicesAttributeMap["default_gateway"] = types.BoolValue(true)
-				} else {
-					staticRoutesnextHopChoiceChoicesAttributeMap["default_gateway"] = types.BoolNull()
-				}
 
 				// resource specToModelNested StringOfOneOfField --> IpAddress
 				ipAddressItem, isIpAddress := staticRoutesnextHopChoiceChoices.(*ves_io_schema_virtual_network.StaticRouteViewType_IpAddress)
@@ -3674,6 +3653,27 @@ func (r *ResourceF5XCVirtualNetwork) Update(ctx context.Context, request resourc
 					}
 				}
 
+				// resource specToModelNested BoolOfOneOfPointerField --> DefaultGateway
+				var defaultGatewayInMap bool
+
+				if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+					if _, found := gcSpec["default_gateway"]; found {
+						defaultGatewayInMap = true
+					}
+				}
+
+				if !defaultGatewayInMap {
+					if _, found := rawSpecMap["default_gateway"]; found {
+						defaultGatewayInMap = true
+					}
+				}
+
+				if defaultGatewayInMap || staticRoutesElement.GetDefaultGateway() != nil {
+					staticRoutesnextHopChoiceChoicesAttributeMap["default_gateway"] = types.BoolValue(true)
+				} else {
+					staticRoutesnextHopChoiceChoicesAttributeMap["default_gateway"] = types.BoolNull()
+				}
+
 				// --- End of Choices ---
 
 				// Create the final ObjectValue for this OneOf field
@@ -3764,16 +3764,6 @@ func (r *ResourceF5XCVirtualNetwork) Update(ctx context.Context, request resourc
 
 				// Process nested choices, populating the temporary attribute map
 
-				// resource specToModelNested StringOfOneOfField --> IpAddress
-				ipAddressItem, isIpAddress := staticV6RoutesnextHopChoiceChoices.(*ves_io_schema_virtual_network.StaticV6RouteViewType_IpAddress)
-
-				if isIpAddress {
-					staticV6RoutesnextHopChoiceChoicesAttributeMap["ip_address"] = types.StringValue(string(ipAddressItem.IpAddress))
-				} else {
-					// Empty string, set to null
-					staticV6RoutesnextHopChoiceChoicesAttributeMap["ip_address"] = types.StringNull()
-				}
-
 				// resource specToModelNested PointerOfOneOfField --> NodeInterface
 				// ReplaceSpecType
 				// true
@@ -3807,6 +3797,14 @@ func (r *ResourceF5XCVirtualNetwork) Update(ctx context.Context, request resourc
 									for _, interfaceElement := range listElement.GetInterface() {
 										objectRefTypeModelModel := ObjectRefTypeModel{}
 
+										// resource specToModelNested RequiredStringField --> Namespace
+										if interfaceElement.GetNamespace() != "" {
+											objectRefTypeModelModel.Namespace = types.StringValue(interfaceElement.GetNamespace())
+										} else {
+											// Empty string, set to null
+											objectRefTypeModelModel.Namespace = types.StringNull()
+										}
+
 										// resource specToModelNested RequiredStringField --> Name
 										if interfaceElement.GetName() != "" {
 											objectRefTypeModelModel.Name = types.StringValue(interfaceElement.GetName())
@@ -3821,14 +3819,6 @@ func (r *ResourceF5XCVirtualNetwork) Update(ctx context.Context, request resourc
 										} else {
 											// Empty string, set to null
 											objectRefTypeModelModel.Tenant = types.StringNull()
-										}
-
-										// resource specToModelNested RequiredStringField --> Namespace
-										if interfaceElement.GetNamespace() != "" {
-											objectRefTypeModelModel.Namespace = types.StringValue(interfaceElement.GetNamespace())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Namespace = types.StringNull()
 										}
 
 										interfaceElements = append(interfaceElements, objectRefTypeModelModel)
@@ -3897,6 +3887,16 @@ func (r *ResourceF5XCVirtualNetwork) Update(ctx context.Context, request resourc
 					staticV6RoutesnextHopChoiceChoicesAttributeMap["default_gateway"] = types.BoolValue(true)
 				} else {
 					staticV6RoutesnextHopChoiceChoicesAttributeMap["default_gateway"] = types.BoolNull()
+				}
+
+				// resource specToModelNested StringOfOneOfField --> IpAddress
+				ipAddressItem, isIpAddress := staticV6RoutesnextHopChoiceChoices.(*ves_io_schema_virtual_network.StaticV6RouteViewType_IpAddress)
+
+				if isIpAddress {
+					staticV6RoutesnextHopChoiceChoicesAttributeMap["ip_address"] = types.StringValue(string(ipAddressItem.IpAddress))
+				} else {
+					// Empty string, set to null
+					staticV6RoutesnextHopChoiceChoicesAttributeMap["ip_address"] = types.StringNull()
 				}
 
 				// --- End of Choices ---

@@ -17,13 +17,13 @@ resource "f5xc_waf_exclusion_policy" "example" {
   namespace = "example_namespace"
   waf_exclusion_rules = [{
     domain_choice = {
-      exact_value = "example_exact_value"
+      any_domain = true
     }
     metadata = {
       name = "example_waf_exclusion_policy"
     }
     path_choice = {
-      path_prefix = "example_path_prefix"
+      any_path = true
     }
   }]
 }
@@ -63,7 +63,7 @@ Required:
 Optional:
 
 - `expiration_timestamp` (String) expiration timestamp The expiration_timestamp is the RFC 3339 format timestamp at which the containing rule is considered to be logically expired. The rule continues to exist in the configuration but is not applied anymore.
-- `methods` (List of String) <br>**Valid Options:** `["ANY", "GET", "POST", "CONNECT", "OPTIONS", "PATCH", "HEAD", "PUT", "DELETE", "TRACE", "COPY"]` (Multiple selection allowed)
+- `methods` (List of String) <br>**Valid Options:** `["POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "ANY", "GET", "TRACE", "PATCH", "COPY", "HEAD"]` (Multiple selection allowed)
 - `waf_advanced_configuration_choice` (Attributes) WAF Exclusion Rule Action WAF Exclusion Rule action to be enforced if the input request matches the rule. (see [below for nested schema](#nestedatt--waf_exclusion_rules--waf_advanced_configuration_choice))
 
 <a id="nestedatt--waf_exclusion_rules--domain_choice"></a>
@@ -121,8 +121,8 @@ Optional:
 
 Required:
 
-- `context` (List of String) <br>**Allowed Values (choose one):** `["CONTEXT_URL", "CONTEXT_BODY", "CONTEXT_REQUEST", "CONTEXT_RESPONSE", "CONTEXT_PARAMETER", "CONTEXT_HEADER", "CONTEXT_URI", "CONTEXT_ANY", "CONTEXT_COOKIE"]`
-- `exclude_attack_type` (List of String) <br>**Allowed Values (choose one):** `["ATTACK_TYPE_OTHER_APPLICATION_ATTACKS", "ATTACK_TYPE_COMMAND_EXECUTION", "ATTACK_TYPE_DENIAL_OF_SERVICE", "ATTACK_TYPE_REMOTE_FILE_INCLUDE", "ATTACK_TYPE_XPATH_INJECTION", "ATTACK_TYPE_NONE", "ATTACK_TYPE_TROJAN_BACKDOOR_SPYWARE", "ATTACK_TYPE_VULNERABILITY_SCAN", "ATTACK_TYPE_ABUSE_OF_FUNCTIONALITY", "ATTACK_TYPE_BUFFER_OVERFLOW", "ATTACK_TYPE_PREDICTABLE_RESOURCE_LOCATION", "ATTACK_TYPE_HTTP_RESPONSE_SPLITTING", "ATTACK_TYPE_AUTHENTICATION_AUTHORIZATION_ATTACKS", "ATTACK_TYPE_DIRECTORY_INDEXING", "ATTACK_TYPE_PATH_TRAVERSAL", "ATTACK_TYPE_LDAP_INJECTION", "ATTACK_TYPE_SERVER_SIDE_CODE_INJECTION", "ATTACK_TYPE_SQL_INJECTION", "ATTACK_TYPE_CROSS_SITE_SCRIPTING", "ATTACK_TYPE_HTTP_PARSER_ATTACK", "ATTACK_TYPE_INFORMATION_LEAKAGE", "ATTACK_TYPE_NON_BROWSER_CLIENT", "ATTACK_TYPE_DETECTION_EVASION", "ATTACK_TYPE_SESSION_HIJACKING", "ATTACK_TYPE_FORCEFUL_BROWSING", "ATTACK_TYPE_MALICIOUS_FILE_UPLOAD", "ATTACK_TYPE_GRAPHQL_PARSER_ATTACK"]`
+- `context` (List of String) <br>**Allowed Values (choose one):** `["CONTEXT_ANY", "CONTEXT_BODY", "CONTEXT_REQUEST", "CONTEXT_RESPONSE", "CONTEXT_PARAMETER", "CONTEXT_URL", "CONTEXT_HEADER", "CONTEXT_COOKIE", "CONTEXT_URI"]`
+- `exclude_attack_type` (List of String) <br>**Allowed Values (choose one):** `["ATTACK_TYPE_HTTP_PARSER_ATTACK", "ATTACK_TYPE_HTTP_RESPONSE_SPLITTING", "ATTACK_TYPE_FORCEFUL_BROWSING", "ATTACK_TYPE_INFORMATION_LEAKAGE", "ATTACK_TYPE_NON_BROWSER_CLIENT", "ATTACK_TYPE_DETECTION_EVASION", "ATTACK_TYPE_VULNERABILITY_SCAN", "ATTACK_TYPE_ABUSE_OF_FUNCTIONALITY", "ATTACK_TYPE_BUFFER_OVERFLOW", "ATTACK_TYPE_PREDICTABLE_RESOURCE_LOCATION", "ATTACK_TYPE_COMMAND_EXECUTION", "ATTACK_TYPE_LDAP_INJECTION", "ATTACK_TYPE_SERVER_SIDE_CODE_INJECTION", "ATTACK_TYPE_SQL_INJECTION", "ATTACK_TYPE_CROSS_SITE_SCRIPTING", "ATTACK_TYPE_SESSION_HIJACKING", "ATTACK_TYPE_REMOTE_FILE_INCLUDE", "ATTACK_TYPE_GRAPHQL_PARSER_ATTACK", "ATTACK_TYPE_OTHER_APPLICATION_ATTACKS", "ATTACK_TYPE_TROJAN_BACKDOOR_SPYWARE", "ATTACK_TYPE_DENIAL_OF_SERVICE", "ATTACK_TYPE_MALICIOUS_FILE_UPLOAD", "ATTACK_TYPE_NONE", "ATTACK_TYPE_AUTHENTICATION_AUTHORIZATION_ATTACKS", "ATTACK_TYPE_DIRECTORY_INDEXING", "ATTACK_TYPE_PATH_TRAVERSAL", "ATTACK_TYPE_XPATH_INJECTION"]`
 
 Optional:
 
@@ -142,7 +142,7 @@ Required:
 
 Required:
 
-- `context` (List of String) <br>**Allowed Values (choose one):** `["CONTEXT_BODY", "CONTEXT_REQUEST", "CONTEXT_RESPONSE", "CONTEXT_PARAMETER", "CONTEXT_HEADER", "CONTEXT_URI", "CONTEXT_ANY", "CONTEXT_COOKIE", "CONTEXT_URL"]`
+- `context` (List of String) <br>**Allowed Values (choose one):** `["CONTEXT_ANY", "CONTEXT_BODY", "CONTEXT_REQUEST", "CONTEXT_RESPONSE", "CONTEXT_PARAMETER", "CONTEXT_URL", "CONTEXT_HEADER", "CONTEXT_COOKIE", "CONTEXT_URI"]`
 - `signature_id` (Number) SignatureID The allowed values for signature id are 0 and in the range of 200000001-299999999. 0 implies that all signatures will be excluded for the specified context.
 
 Optional:
@@ -155,8 +155,8 @@ Optional:
 
 Required:
 
-- `context` (List of String) <br>**Allowed Values (choose one):** `["CONTEXT_REQUEST", "CONTEXT_RESPONSE", "CONTEXT_PARAMETER", "CONTEXT_HEADER", "CONTEXT_URI", "CONTEXT_ANY", "CONTEXT_COOKIE", "CONTEXT_URL", "CONTEXT_BODY"]`
-- `exclude_violation` (List of String) <br>**Allowed Values (choose one):** `["VIOL_NONE", "VIOL_HTTP_RESPONSE_STATUS", "VIOL_REQUEST_MAX_LENGTH", "VIOL_FILE_UPLOAD_IN_BODY", "VIOL_HTTP_PROTOCOL_BAD_MULTIPART_PARAMETERS_PARSING", "VIOL_EVASION_MULTIPLE_DECODING", "VIOL_EVASION_BAD_UNESCAPE", "VIOL_COOKIE_MALFORMED", "VIOL_METHOD", "VIOL_MANDATORY_HEADER", "VIOL_HTTP_PROTOCOL_CRLF_CHARACTERS_BEFORE_REQUEST_START", "VIOL_GRAPHQL_FORMAT", "VIOL_GRAPHQL_INTROSPECTION_QUERY", "VIOL_HTTP_PROTOCOL_UNPARSABLE_REQUEST_CONTENT", "VIOL_HTTP_PROTOCOL_SEVERAL_CONTENT_LENGTH_HEADERS", "VIOL_DATA_GUARD", "VIOL_EVASION_IIS_UNICODE_CODEPOINTS", "VIOL_FILETYPE", "VIOL_EVASION_PERCENT_U_DECODING", "VIOL_EVASION_BARE_BYTE_DECODING", "VIOL_EVASION_APACHE_WHITESPACE", "VIOL_COOKIE_MODIFIED", "VIOL_ASM_COOKIE_MODIFIED", "VIOL_HTTP_PROTOCOL_MULTIPLE_HOST_HEADERS", "VIOL_HTTP_PROTOCOL_CONTENT_LENGTH_SHOULD_BE_A_POSITIVE_NUMBER", "VIOL_EVASION_DIRECTORY_TRAVERSALS", "VIOL_MALFORMED_REQUEST", "VIOL_HTTP_PROTOCOL_BODY_IN_GET_OR_HEAD_REQUEST", "VIOL_FILE_UPLOAD", "VIOL_HTTP_PROTOCOL_BAD_HOST_HEADER_VALUE", "VIOL_HTTP_PROTOCOL_BAD_MULTIPART_FORMDATA_REQUEST_PARSING", "VIOL_GRAPHQL_MALFORMED", "VIOL_XML_MALFORMED", "VIOL_HTTP_PROTOCOL_NULL_IN_REQUEST", "VIOL_HTTP_PROTOCOL_BAD_HTTP_VERSION", "VIOL_EVASION_IIS_BACKSLASHES", "VIOL_ENCODING", "VIOL_JSON_MALFORMED", "VIOL_HTTP_PROTOCOL_NO_HOST_HEADER_IN_HTTP_1_1_REQUEST", "VIOL_HTTP_PROTOCOL_HIGH_ASCII_CHARACTERS_IN_HEADERS"]`
+- `context` (List of String) <br>**Allowed Values (choose one):** `["CONTEXT_HEADER", "CONTEXT_COOKIE", "CONTEXT_URI", "CONTEXT_ANY", "CONTEXT_BODY", "CONTEXT_REQUEST", "CONTEXT_RESPONSE", "CONTEXT_PARAMETER", "CONTEXT_URL"]`
+- `exclude_violation` (List of String) <br>**Allowed Values (choose one):** `["VIOL_HTTP_PROTOCOL_UNPARSABLE_REQUEST_CONTENT", "VIOL_DATA_GUARD", "VIOL_COOKIE_MODIFIED", "VIOL_HTTP_PROTOCOL_HIGH_ASCII_CHARACTERS_IN_HEADERS", "VIOL_FILETYPE", "VIOL_XML_MALFORMED", "VIOL_HTTP_PROTOCOL_BAD_HTTP_VERSION", "VIOL_HTTP_PROTOCOL_BAD_MULTIPART_PARAMETERS_PARSING", "VIOL_HTTP_PROTOCOL_CONTENT_LENGTH_SHOULD_BE_A_POSITIVE_NUMBER", "VIOL_EVASION_DIRECTORY_TRAVERSALS", "VIOL_MALFORMED_REQUEST", "VIOL_GRAPHQL_FORMAT", "VIOL_METHOD", "VIOL_REQUEST_MAX_LENGTH", "VIOL_FILE_UPLOAD", "VIOL_EVASION_BAD_UNESCAPE", "VIOL_GRAPHQL_INTROSPECTION_QUERY", "VIOL_HTTP_RESPONSE_STATUS", "VIOL_ASM_COOKIE_MODIFIED", "VIOL_EVASION_MULTIPLE_DECODING", "VIOL_EVASION_APACHE_WHITESPACE", "VIOL_EVASION_IIS_BACKSLASHES", "VIOL_ENCODING", "VIOL_MANDATORY_HEADER", "VIOL_HTTP_PROTOCOL_MULTIPLE_HOST_HEADERS", "VIOL_EVASION_IIS_UNICODE_CODEPOINTS", "VIOL_HTTP_PROTOCOL_BODY_IN_GET_OR_HEAD_REQUEST", "VIOL_JSON_MALFORMED", "VIOL_EVASION_PERCENT_U_DECODING", "VIOL_HTTP_PROTOCOL_BAD_MULTIPART_FORMDATA_REQUEST_PARSING", "VIOL_HTTP_PROTOCOL_CRLF_CHARACTERS_BEFORE_REQUEST_START", "VIOL_HTTP_PROTOCOL_NO_HOST_HEADER_IN_HTTP_1_1_REQUEST", "VIOL_HTTP_PROTOCOL_SEVERAL_CONTENT_LENGTH_HEADERS", "VIOL_EVASION_BARE_BYTE_DECODING", "VIOL_NONE", "VIOL_HTTP_PROTOCOL_BAD_HOST_HEADER_VALUE", "VIOL_HTTP_PROTOCOL_NULL_IN_REQUEST", "VIOL_COOKIE_MALFORMED", "VIOL_GRAPHQL_MALFORMED", "VIOL_FILE_UPLOAD_IN_BODY"]`
 
 Optional:
 
@@ -173,4 +173,5 @@ Optional:
 
 - `create` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 - `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
 - `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).

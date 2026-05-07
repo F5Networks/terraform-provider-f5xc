@@ -13,14 +13,10 @@ V1HttpMonitor resource
 
 ```terraform
 resource "f5xc_v1_http_monitor" "example" {
-  name           = "example_v1_http_monitor"
-  namespace      = "example_namespace"
-  response_codes = ["example_v1_http_monitor"]
-  url            = "example_v1_http_monitor"
+  name      = "example_v1_http_monitor"
+  namespace = "example_namespace"
   method = {
-    post = {
-      post = "example_post"
-    }
+    options = true
   }
   external_sources = [{
     source_choice = {
@@ -29,8 +25,10 @@ resource "f5xc_v1_http_monitor" "example" {
       }
     }
   }]
+  response_codes = ["example_v1_http_monitor"]
+  url            = "example_v1_http_monitor"
   interval_choice = {
-    interval_15_mins = true
+    interval_5_mins = true
   }
 }
 ```
@@ -187,8 +185,8 @@ Optional:
 
 Required:
 
-- `eval_period` (List of String) <br>**Allowed Values (choose one):** `["EVAL_PERIOD_10_MINS", "EVAL_PERIOD_15_MINS", "EVAL_PERIOD_3_MINS", "EVAL_PERIOD_5_MINS"]`
-- `std_dev_val` (List of String) <br>**Allowed Values (choose one):** `["STD_DEV_VAL_3", "STD_DEV_VAL_4", "STD_DEV_VAL_5", "STD_DEV_VAL_6"]`
+- `eval_period` (List of String) <br>**Allowed Values (choose one):** `["EVAL_PERIOD_5_MINS", "EVAL_PERIOD_10_MINS", "EVAL_PERIOD_15_MINS", "EVAL_PERIOD_3_MINS"]`
+- `std_dev_val` (List of String) <br>**Allowed Values (choose one):** `["STD_DEV_VAL_6", "STD_DEV_VAL_3", "STD_DEV_VAL_4", "STD_DEV_VAL_5"]`
 
 
 
@@ -205,7 +203,7 @@ Optional:
 
 Required:
 
-- `eval_period` (List of String) <br>**Allowed Values (choose one):** `["EVAL_PERIOD_3_MINS", "EVAL_PERIOD_5_MINS", "EVAL_PERIOD_10_MINS", "EVAL_PERIOD_15_MINS"]`
+- `eval_period` (List of String) <br>**Allowed Values (choose one):** `["EVAL_PERIOD_5_MINS", "EVAL_PERIOD_10_MINS", "EVAL_PERIOD_15_MINS", "EVAL_PERIOD_3_MINS"]`
 
 Optional:
 
@@ -226,7 +224,7 @@ Optional:
 
 Required:
 
-- `eval_period` (List of String) <br>**Allowed Values (choose one):** `["EVAL_PERIOD_5_MINS", "EVAL_PERIOD_10_MINS", "EVAL_PERIOD_15_MINS", "EVAL_PERIOD_3_MINS"]`
+- `eval_period` (List of String) <br>**Allowed Values (choose one):** `["EVAL_PERIOD_3_MINS", "EVAL_PERIOD_5_MINS", "EVAL_PERIOD_10_MINS", "EVAL_PERIOD_15_MINS"]`
 
 Optional:
 
@@ -254,4 +252,5 @@ Optional:
 
 - `create` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 - `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
 - `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).

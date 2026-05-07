@@ -15,8 +15,8 @@ The `f5xc_forward_proxy_policy` data source allows you to retrieve information a
 
 ```terraform
 data "f5xc_forward_proxy_policy" "example" {
-  name      = "example_forward_proxy_policy"
   namespace = "example_namespace"
+  name      = "example_forward_proxy_policy"
 }
 ```
 

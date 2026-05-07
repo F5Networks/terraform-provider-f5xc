@@ -14,7 +14,7 @@ import (
 	_ "github.com/gogo/googleapis/google/api"
 	_ "github.com/gogo/protobuf/gogoproto"
 	proto "github.com/gogo/protobuf/proto"
-	_ "github.com/gogo/protobuf/types"
+	types "github.com/gogo/protobuf/types"
 	golang_proto "github.com/golang/protobuf/proto"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
@@ -83,6 +83,150 @@ var ScriptApprovalStatus_value = map[string]int32{
 
 func (ScriptApprovalStatus) EnumDescriptor() ([]byte, []int) {
 	return fileDescriptor_4a834ca50e24bc0b, []int{0}
+}
+
+// ReportType
+//
+// x-displayName: "Report Type"
+// x-example: "REPORT_TYPE_SCRIPTS"
+// Type of report to generate
+type ReportType int32
+
+const (
+	// REPORT_TYPE_UNSPECIFIED
+	//
+	// x-displayName: "Unspecified"
+	// x-example: "REPORT_TYPE_UNSPECIFIED"
+	REPORT_TYPE_UNSPECIFIED ReportType = 0
+	// REPORT_TYPE_SCRIPTS
+	//
+	// x-displayName: "Scripts Report"
+	// x-example: "REPORT_TYPE_SCRIPTS"
+	REPORT_TYPE_SCRIPTS ReportType = 1
+	// REPORT_TYPE_AFFECTED_USERS
+	//
+	// x-displayName: "Affected Users Report"
+	// x-example: "REPORT_TYPE_AFFECTED_USERS"
+	REPORT_TYPE_AFFECTED_USERS ReportType = 2
+)
+
+var ReportType_name = map[int32]string{
+	0: "REPORT_TYPE_UNSPECIFIED",
+	1: "REPORT_TYPE_SCRIPTS",
+	2: "REPORT_TYPE_AFFECTED_USERS",
+}
+
+var ReportType_value = map[string]int32{
+	"REPORT_TYPE_UNSPECIFIED":    0,
+	"REPORT_TYPE_SCRIPTS":        1,
+	"REPORT_TYPE_AFFECTED_USERS": 2,
+}
+
+func (ReportType) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_4a834ca50e24bc0b, []int{1}
+}
+
+// ReportStatus
+//
+// x-displayName: "Report Status"
+// x-example: "REPORT_STATUS_COMPLETED"
+// Status of a report generation job
+type ReportStatus int32
+
+const (
+	// REPORT_STATUS_UNSPECIFIED
+	//
+	// x-displayName: "Unspecified"
+	// x-example: "REPORT_STATUS_UNSPECIFIED"
+	REPORT_STATUS_UNSPECIFIED ReportStatus = 0
+	// REPORT_STATUS_QUEUED
+	//
+	// x-displayName: "Queued"
+	// x-example: "REPORT_STATUS_QUEUED"
+	REPORT_STATUS_QUEUED ReportStatus = 1
+	// REPORT_STATUS_IN_PROGRESS
+	//
+	// x-displayName: "In Progress"
+	// x-example: "REPORT_STATUS_IN_PROGRESS"
+	REPORT_STATUS_IN_PROGRESS ReportStatus = 2
+	// REPORT_STATUS_COMPLETED
+	//
+	// x-displayName: "Completed"
+	// x-example: "REPORT_STATUS_COMPLETED"
+	REPORT_STATUS_COMPLETED ReportStatus = 3
+	// REPORT_STATUS_ERRORED
+	//
+	// x-displayName: "Errored"
+	// x-example: "REPORT_STATUS_ERRORED"
+	REPORT_STATUS_ERRORED ReportStatus = 4
+	// REPORT_STATUS_TIMED_OUT
+	//
+	// x-displayName: "Timed Out"
+	// x-example: "REPORT_STATUS_TIMED_OUT"
+	REPORT_STATUS_TIMED_OUT ReportStatus = 5
+)
+
+var ReportStatus_name = map[int32]string{
+	0: "REPORT_STATUS_UNSPECIFIED",
+	1: "REPORT_STATUS_QUEUED",
+	2: "REPORT_STATUS_IN_PROGRESS",
+	3: "REPORT_STATUS_COMPLETED",
+	4: "REPORT_STATUS_ERRORED",
+	5: "REPORT_STATUS_TIMED_OUT",
+}
+
+var ReportStatus_value = map[string]int32{
+	"REPORT_STATUS_UNSPECIFIED": 0,
+	"REPORT_STATUS_QUEUED":      1,
+	"REPORT_STATUS_IN_PROGRESS": 2,
+	"REPORT_STATUS_COMPLETED":   3,
+	"REPORT_STATUS_ERRORED":     4,
+	"REPORT_STATUS_TIMED_OUT":   5,
+}
+
+func (ReportStatus) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_4a834ca50e24bc0b, []int{2}
+}
+
+// ReportFilterOperator
+//
+// x-displayName: "Report Filter Operator"
+// x-example: "REPORT_FILTER_OPERATOR_IN"
+// Filter operator for report criteria
+type ReportFilterOperator int32
+
+const (
+	// REPORT_FILTER_OPERATOR_UNSPECIFIED
+	//
+	// x-displayName: "Unspecified"
+	// x-example: "REPORT_FILTER_OPERATOR_UNSPECIFIED"
+	REPORT_FILTER_OPERATOR_UNSPECIFIED ReportFilterOperator = 0
+	// REPORT_FILTER_OPERATOR_IN
+	//
+	// x-displayName: "In"
+	// x-example: "REPORT_FILTER_OPERATOR_IN"
+	REPORT_FILTER_OPERATOR_IN ReportFilterOperator = 1
+	// REPORT_FILTER_OPERATOR_NOT_IN
+	//
+	// x-displayName: "Not In"
+	// x-example: "REPORT_FILTER_OPERATOR_NOT_IN"
+	REPORT_FILTER_OPERATOR_NOT_IN ReportFilterOperator = 2
+)
+
+var ReportFilterOperator_name = map[int32]string{
+	0: "REPORT_FILTER_OPERATOR_UNSPECIFIED",
+	1: "REPORT_FILTER_OPERATOR_IN",
+	2: "REPORT_FILTER_OPERATOR_NOT_IN",
+}
+
+var ReportFilterOperator_value = map[string]int32{
+	"REPORT_FILTER_OPERATOR_UNSPECIFIED": 0,
+	"REPORT_FILTER_OPERATOR_IN":          1,
+	"REPORT_FILTER_OPERATOR_NOT_IN":      2,
+}
+
+func (ReportFilterOperator) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_4a834ca50e24bc0b, []int{3}
 }
 
 // UpdateScriptApprovalStatusRequest
@@ -1031,9 +1175,1071 @@ func (m *BulkDeleteDomainsResponse) GetDeleted() bool {
 	return false
 }
 
+// ReportFilter
+//
+// x-displayName: "Report Filter"
+// Filter definition for report criteria
+type ReportFilter struct {
+	// column_name
+	//
+	// x-displayName: "Column Name"
+	// x-example: "script_name"
+	// Column name to filter
+	ColumnName string `protobuf:"bytes,1,opt,name=column_name,json=columnName,proto3" json:"column_name,omitempty"`
+	// operator
+	//
+	// x-displayName: "Operator"
+	// x-example: "REPORT_FILTER_OPERATOR_IN"
+	// Filter operator
+	Operator ReportFilterOperator `protobuf:"varint,2,opt,name=operator,proto3,enum=ves.io.schema.shape.client_side_defense.ReportFilterOperator" json:"operator,omitempty"`
+	// values
+	//
+	// x-displayName: "Values"
+	// x-example: "['analytics.js']"
+	// Filter values
+	Values []string `protobuf:"bytes,3,rep,name=values,proto3" json:"values,omitempty"`
+}
+
+func (m *ReportFilter) Reset()      { *m = ReportFilter{} }
+func (*ReportFilter) ProtoMessage() {}
+func (*ReportFilter) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4a834ca50e24bc0b, []int{12}
+}
+func (m *ReportFilter) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ReportFilter) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ReportFilter.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ReportFilter) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ReportFilter.Merge(m, src)
+}
+func (m *ReportFilter) XXX_Size() int {
+	return m.Size()
+}
+func (m *ReportFilter) XXX_DiscardUnknown() {
+	xxx_messageInfo_ReportFilter.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ReportFilter proto.InternalMessageInfo
+
+func (m *ReportFilter) GetColumnName() string {
+	if m != nil {
+		return m.ColumnName
+	}
+	return ""
+}
+
+func (m *ReportFilter) GetOperator() ReportFilterOperator {
+	if m != nil {
+		return m.Operator
+	}
+	return REPORT_FILTER_OPERATOR_UNSPECIFIED
+}
+
+func (m *ReportFilter) GetValues() []string {
+	if m != nil {
+		return m.Values
+	}
+	return nil
+}
+
+// ScriptsReportCriteria
+//
+// x-displayName: "Scripts Report Criteria"
+// Criteria to generate a scripts report
+type ScriptsReportCriteria struct {
+	// start_time
+	//
+	// x-displayName: "Start Time"
+	// x-example: "1570194000"
+	// format: unix epoch timestamp in seconds
+	// Fetch scripts whose timestamp >= start_time
+	StartTime string `protobuf:"bytes,1,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
+	// end_time
+	//
+	// x-displayName: "End Time"
+	// x-example: "1570194300"
+	// format: unix epoch timestamp in seconds
+	// Fetch scripts whose timestamp <= end_time
+	EndTime string `protobuf:"bytes,2,opt,name=end_time,json=endTime,proto3" json:"end_time,omitempty"`
+	// filters
+	//
+	// x-displayName: "Filters"
+	// Additional filters for the query
+	Filters []*ReportFilter `protobuf:"bytes,3,rep,name=filters,proto3" json:"filters,omitempty"`
+}
+
+func (m *ScriptsReportCriteria) Reset()      { *m = ScriptsReportCriteria{} }
+func (*ScriptsReportCriteria) ProtoMessage() {}
+func (*ScriptsReportCriteria) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4a834ca50e24bc0b, []int{13}
+}
+func (m *ScriptsReportCriteria) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ScriptsReportCriteria) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ScriptsReportCriteria.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ScriptsReportCriteria) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ScriptsReportCriteria.Merge(m, src)
+}
+func (m *ScriptsReportCriteria) XXX_Size() int {
+	return m.Size()
+}
+func (m *ScriptsReportCriteria) XXX_DiscardUnknown() {
+	xxx_messageInfo_ScriptsReportCriteria.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ScriptsReportCriteria proto.InternalMessageInfo
+
+func (m *ScriptsReportCriteria) GetStartTime() string {
+	if m != nil {
+		return m.StartTime
+	}
+	return ""
+}
+
+func (m *ScriptsReportCriteria) GetEndTime() string {
+	if m != nil {
+		return m.EndTime
+	}
+	return ""
+}
+
+func (m *ScriptsReportCriteria) GetFilters() []*ReportFilter {
+	if m != nil {
+		return m.Filters
+	}
+	return nil
+}
+
+// AffectedUsersReportCriteria
+//
+// x-displayName: "Affected Users Report Criteria"
+// Criteria to generate an affected users report
+type AffectedUsersReportCriteria struct {
+	// start_time
+	//
+	// x-displayName: "Start Time"
+	// x-example: "1570194000"
+	// format: unix epoch timestamp in seconds
+	// Fetch users whose timestamp >= start_time
+	StartTime string `protobuf:"bytes,1,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
+	// end_time
+	//
+	// x-displayName: "End Time"
+	// x-example: "1570194300"
+	// format: unix epoch timestamp in seconds
+	// Fetch users whose timestamp <= end_time
+	EndTime string `protobuf:"bytes,2,opt,name=end_time,json=endTime,proto3" json:"end_time,omitempty"`
+	// filters
+	//
+	// x-displayName: "Filters"
+	// Additional filters for the query
+	Filters []*ReportFilter `protobuf:"bytes,3,rep,name=filters,proto3" json:"filters,omitempty"`
+	// script_id
+	//
+	// x-displayName: "Script ID"
+	// x-example: "s-1234567"
+	// Script ID to filter affected users by
+	ScriptId string `protobuf:"bytes,4,opt,name=script_id,json=scriptId,proto3" json:"script_id,omitempty"`
+}
+
+func (m *AffectedUsersReportCriteria) Reset()      { *m = AffectedUsersReportCriteria{} }
+func (*AffectedUsersReportCriteria) ProtoMessage() {}
+func (*AffectedUsersReportCriteria) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4a834ca50e24bc0b, []int{14}
+}
+func (m *AffectedUsersReportCriteria) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *AffectedUsersReportCriteria) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_AffectedUsersReportCriteria.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *AffectedUsersReportCriteria) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AffectedUsersReportCriteria.Merge(m, src)
+}
+func (m *AffectedUsersReportCriteria) XXX_Size() int {
+	return m.Size()
+}
+func (m *AffectedUsersReportCriteria) XXX_DiscardUnknown() {
+	xxx_messageInfo_AffectedUsersReportCriteria.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_AffectedUsersReportCriteria proto.InternalMessageInfo
+
+func (m *AffectedUsersReportCriteria) GetStartTime() string {
+	if m != nil {
+		return m.StartTime
+	}
+	return ""
+}
+
+func (m *AffectedUsersReportCriteria) GetEndTime() string {
+	if m != nil {
+		return m.EndTime
+	}
+	return ""
+}
+
+func (m *AffectedUsersReportCriteria) GetFilters() []*ReportFilter {
+	if m != nil {
+		return m.Filters
+	}
+	return nil
+}
+
+func (m *AffectedUsersReportCriteria) GetScriptId() string {
+	if m != nil {
+		return m.ScriptId
+	}
+	return ""
+}
+
+// ReportCriteria
+//
+// x-displayName: "Report Criteria"
+// Criteria definition for a report
+type ReportCriteria struct {
+	// criteria
+	//
+	// x-displayName: "Criteria"
+	//
+	// Types that are valid to be assigned to Criteria:
+	//	*ReportCriteria_Scripts
+	//	*ReportCriteria_AffectedUsers
+	Criteria isReportCriteria_Criteria `protobuf_oneof:"criteria"`
+}
+
+func (m *ReportCriteria) Reset()      { *m = ReportCriteria{} }
+func (*ReportCriteria) ProtoMessage() {}
+func (*ReportCriteria) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4a834ca50e24bc0b, []int{15}
+}
+func (m *ReportCriteria) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ReportCriteria) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ReportCriteria.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ReportCriteria) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ReportCriteria.Merge(m, src)
+}
+func (m *ReportCriteria) XXX_Size() int {
+	return m.Size()
+}
+func (m *ReportCriteria) XXX_DiscardUnknown() {
+	xxx_messageInfo_ReportCriteria.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ReportCriteria proto.InternalMessageInfo
+
+type isReportCriteria_Criteria interface {
+	isReportCriteria_Criteria()
+	Equal(interface{}) bool
+	MarshalTo([]byte) (int, error)
+	Size() int
+}
+
+type ReportCriteria_Scripts struct {
+	Scripts *ScriptsReportCriteria `protobuf:"bytes,2,opt,name=scripts,proto3,oneof" json:"scripts,omitempty"`
+}
+type ReportCriteria_AffectedUsers struct {
+	AffectedUsers *AffectedUsersReportCriteria `protobuf:"bytes,3,opt,name=affected_users,json=affectedUsers,proto3,oneof" json:"affected_users,omitempty"`
+}
+
+func (*ReportCriteria_Scripts) isReportCriteria_Criteria()       {}
+func (*ReportCriteria_AffectedUsers) isReportCriteria_Criteria() {}
+
+func (m *ReportCriteria) GetCriteria() isReportCriteria_Criteria {
+	if m != nil {
+		return m.Criteria
+	}
+	return nil
+}
+
+func (m *ReportCriteria) GetScripts() *ScriptsReportCriteria {
+	if x, ok := m.GetCriteria().(*ReportCriteria_Scripts); ok {
+		return x.Scripts
+	}
+	return nil
+}
+
+func (m *ReportCriteria) GetAffectedUsers() *AffectedUsersReportCriteria {
+	if x, ok := m.GetCriteria().(*ReportCriteria_AffectedUsers); ok {
+		return x.AffectedUsers
+	}
+	return nil
+}
+
+// XXX_OneofWrappers is for the internal use of the proto package.
+func (*ReportCriteria) XXX_OneofWrappers() []interface{} {
+	return []interface{}{
+		(*ReportCriteria_Scripts)(nil),
+		(*ReportCriteria_AffectedUsers)(nil),
+	}
+}
+
+// Report
+//
+// x-displayName: "Report"
+// Report configuration
+type Report struct {
+	// namespace
+	//
+	// x-displayName: "Namespace"
+	// x-example: "default"
+	// Namespace
+	Namespace string `protobuf:"bytes,1,opt,name=namespace,proto3" json:"namespace,omitempty"`
+	// report_id
+	//
+	// x-displayName: "Report ID"
+	// x-example: "r-1234567"
+	// Unique report identifier
+	ReportId string `protobuf:"bytes,2,opt,name=report_id,json=reportId,proto3" json:"report_id,omitempty"`
+	// report_type
+	//
+	// x-displayName: "Report Type"
+	// x-example: "REPORT_TYPE_SCRIPTS"
+	// Report type
+	ReportType ReportType `protobuf:"varint,3,opt,name=report_type,json=reportType,proto3,enum=ves.io.schema.shape.client_side_defense.ReportType" json:"report_type,omitempty"`
+	// report_criteria
+	//
+	// x-displayName: "Report Criteria"
+	// Criteria definition for report generation
+	ReportCriteria *ReportCriteria `protobuf:"bytes,4,opt,name=report_criteria,json=reportCriteria,proto3" json:"report_criteria,omitempty"`
+	// created_by
+	//
+	// x-displayName: "Created By"
+	// x-example: "user@example.com"
+	// User who created the report
+	CreatedBy string `protobuf:"bytes,5,opt,name=created_by,json=createdBy,proto3" json:"created_by,omitempty"`
+	// created_at
+	//
+	// x-displayName: "Created At"
+	// x-example: "2024-01-01T00:00:00Z"
+	// Creation timestamp
+	CreatedAt *types.Timestamp `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	// updated_by
+	//
+	// x-displayName: "Updated By"
+	// x-example: "user@example.com"
+	// User who last updated the report
+	UpdatedBy string `protobuf:"bytes,7,opt,name=updated_by,json=updatedBy,proto3" json:"updated_by,omitempty"`
+	// updated_at
+	//
+	// x-displayName: "Updated At"
+	// x-example: "2024-01-02T00:00:00Z"
+	// Update timestamp
+	UpdatedAt *types.Timestamp `protobuf:"bytes,8,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	// report_name
+	//
+	// x-displayName: "Report Name"
+	// x-example: "Monthly Script Analysis"
+	// x-required
+	// Human-readable name for the report
+	ReportName string `protobuf:"bytes,9,opt,name=report_name,json=reportName,proto3" json:"report_name,omitempty"`
+}
+
+func (m *Report) Reset()      { *m = Report{} }
+func (*Report) ProtoMessage() {}
+func (*Report) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4a834ca50e24bc0b, []int{16}
+}
+func (m *Report) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *Report) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_Report.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *Report) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Report.Merge(m, src)
+}
+func (m *Report) XXX_Size() int {
+	return m.Size()
+}
+func (m *Report) XXX_DiscardUnknown() {
+	xxx_messageInfo_Report.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Report proto.InternalMessageInfo
+
+func (m *Report) GetNamespace() string {
+	if m != nil {
+		return m.Namespace
+	}
+	return ""
+}
+
+func (m *Report) GetReportId() string {
+	if m != nil {
+		return m.ReportId
+	}
+	return ""
+}
+
+func (m *Report) GetReportType() ReportType {
+	if m != nil {
+		return m.ReportType
+	}
+	return REPORT_TYPE_UNSPECIFIED
+}
+
+func (m *Report) GetReportCriteria() *ReportCriteria {
+	if m != nil {
+		return m.ReportCriteria
+	}
+	return nil
+}
+
+func (m *Report) GetCreatedBy() string {
+	if m != nil {
+		return m.CreatedBy
+	}
+	return ""
+}
+
+func (m *Report) GetCreatedAt() *types.Timestamp {
+	if m != nil {
+		return m.CreatedAt
+	}
+	return nil
+}
+
+func (m *Report) GetUpdatedBy() string {
+	if m != nil {
+		return m.UpdatedBy
+	}
+	return ""
+}
+
+func (m *Report) GetUpdatedAt() *types.Timestamp {
+	if m != nil {
+		return m.UpdatedAt
+	}
+	return nil
+}
+
+func (m *Report) GetReportName() string {
+	if m != nil {
+		return m.ReportName
+	}
+	return ""
+}
+
+// ReportWithHistory
+//
+// x-displayName: "Report With History"
+// Report configuration with its generation job history
+type ReportWithHistory struct {
+	// namespace
+	//
+	// x-displayName: "Namespace"
+	// x-example: "default"
+	// Namespace
+	Namespace string `protobuf:"bytes,1,opt,name=namespace,proto3" json:"namespace,omitempty"`
+	// job_id
+	//
+	// x-displayName: "Job ID"
+	// x-example: "j-1234567"
+	// Report generation job identifier
+	JobId string `protobuf:"bytes,2,opt,name=job_id,json=jobId,proto3" json:"job_id,omitempty"`
+	// report_id
+	//
+	// x-displayName: "Report ID"
+	// x-example: "r-1234567"
+	// Report identifier
+	ReportId string `protobuf:"bytes,3,opt,name=report_id,json=reportId,proto3" json:"report_id,omitempty"`
+	// status
+	//
+	// x-displayName: "Status"
+	// x-example: "REPORT_STATUS_COMPLETED"
+	// Report generation status
+	Status ReportStatus `protobuf:"varint,4,opt,name=status,proto3,enum=ves.io.schema.shape.client_side_defense.ReportStatus" json:"status,omitempty"`
+	// created_by
+	//
+	// x-displayName: "Created By"
+	// x-example: "user@example.com"
+	// User who created the report
+	CreatedBy string `protobuf:"bytes,5,opt,name=created_by,json=createdBy,proto3" json:"created_by,omitempty"`
+	// created_at
+	//
+	// x-displayName: "Created At"
+	// x-example: "2024-01-01T00:00:00Z"
+	// Creation timestamp
+	CreatedAt *types.Timestamp `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	// completed_at
+	//
+	// x-displayName: "Completed At"
+	// x-example: "2024-01-01T01:00:00Z"
+	// Report completion timestamp
+	CompletedAt *types.Timestamp `protobuf:"bytes,7,opt,name=completed_at,json=completedAt,proto3" json:"completed_at,omitempty"`
+	// x-displayName: "Report Type"
+	// x-example: "REPORT_TYPE_SCRIPTS"
+	// Report type
+	ReportType ReportType `protobuf:"varint,8,opt,name=report_type,json=reportType,proto3,enum=ves.io.schema.shape.client_side_defense.ReportType" json:"report_type,omitempty"`
+	// report_criteria
+	//
+	// x-displayName: "Report Criteria"
+	// x-example: "{"filter": {"status": "COMPLETED"}}"
+	// Criteria definition for report generation
+	ReportCriteria *ReportCriteria `protobuf:"bytes,9,opt,name=report_criteria,json=reportCriteria,proto3" json:"report_criteria,omitempty"`
+	// report_name
+	//
+	// x-displayName: "Report Name"
+	// x-example: "Monthly Script Analysis"
+	// Human-readable name for the report
+	ReportName string `protobuf:"bytes,10,opt,name=report_name,json=reportName,proto3" json:"report_name,omitempty"`
+}
+
+func (m *ReportWithHistory) Reset()      { *m = ReportWithHistory{} }
+func (*ReportWithHistory) ProtoMessage() {}
+func (*ReportWithHistory) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4a834ca50e24bc0b, []int{17}
+}
+func (m *ReportWithHistory) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ReportWithHistory) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ReportWithHistory.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ReportWithHistory) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ReportWithHistory.Merge(m, src)
+}
+func (m *ReportWithHistory) XXX_Size() int {
+	return m.Size()
+}
+func (m *ReportWithHistory) XXX_DiscardUnknown() {
+	xxx_messageInfo_ReportWithHistory.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ReportWithHistory proto.InternalMessageInfo
+
+func (m *ReportWithHistory) GetNamespace() string {
+	if m != nil {
+		return m.Namespace
+	}
+	return ""
+}
+
+func (m *ReportWithHistory) GetJobId() string {
+	if m != nil {
+		return m.JobId
+	}
+	return ""
+}
+
+func (m *ReportWithHistory) GetReportId() string {
+	if m != nil {
+		return m.ReportId
+	}
+	return ""
+}
+
+func (m *ReportWithHistory) GetStatus() ReportStatus {
+	if m != nil {
+		return m.Status
+	}
+	return REPORT_STATUS_UNSPECIFIED
+}
+
+func (m *ReportWithHistory) GetCreatedBy() string {
+	if m != nil {
+		return m.CreatedBy
+	}
+	return ""
+}
+
+func (m *ReportWithHistory) GetCreatedAt() *types.Timestamp {
+	if m != nil {
+		return m.CreatedAt
+	}
+	return nil
+}
+
+func (m *ReportWithHistory) GetCompletedAt() *types.Timestamp {
+	if m != nil {
+		return m.CompletedAt
+	}
+	return nil
+}
+
+func (m *ReportWithHistory) GetReportType() ReportType {
+	if m != nil {
+		return m.ReportType
+	}
+	return REPORT_TYPE_UNSPECIFIED
+}
+
+func (m *ReportWithHistory) GetReportCriteria() *ReportCriteria {
+	if m != nil {
+		return m.ReportCriteria
+	}
+	return nil
+}
+
+func (m *ReportWithHistory) GetReportName() string {
+	if m != nil {
+		return m.ReportName
+	}
+	return ""
+}
+
+// ListReportsWithHistoryRequest
+//
+// x-displayName: "List Reports With History Request"
+// Request to list report configurations with generation job history
+type ListReportsWithHistoryRequest struct {
+	// namespace
+	//
+	// x-displayName: "Namespace"
+	// x-example: "default"
+	// Namespace
+	Namespace string `protobuf:"bytes,1,opt,name=namespace,proto3" json:"namespace,omitempty"`
+}
+
+func (m *ListReportsWithHistoryRequest) Reset()      { *m = ListReportsWithHistoryRequest{} }
+func (*ListReportsWithHistoryRequest) ProtoMessage() {}
+func (*ListReportsWithHistoryRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4a834ca50e24bc0b, []int{18}
+}
+func (m *ListReportsWithHistoryRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ListReportsWithHistoryRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ListReportsWithHistoryRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ListReportsWithHistoryRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ListReportsWithHistoryRequest.Merge(m, src)
+}
+func (m *ListReportsWithHistoryRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *ListReportsWithHistoryRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_ListReportsWithHistoryRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ListReportsWithHistoryRequest proto.InternalMessageInfo
+
+func (m *ListReportsWithHistoryRequest) GetNamespace() string {
+	if m != nil {
+		return m.Namespace
+	}
+	return ""
+}
+
+// ListReportsWithHistoryResponse
+//
+// x-displayName: "List Reports With History Response"
+// Response with report configurations and their generation job history
+type ListReportsWithHistoryResponse struct {
+	// reports
+	//
+	// x-displayName: "Reports"
+	// List of report configurations with history
+	Reports []*ReportWithHistory `protobuf:"bytes,1,rep,name=reports,proto3" json:"reports,omitempty"`
+}
+
+func (m *ListReportsWithHistoryResponse) Reset()      { *m = ListReportsWithHistoryResponse{} }
+func (*ListReportsWithHistoryResponse) ProtoMessage() {}
+func (*ListReportsWithHistoryResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4a834ca50e24bc0b, []int{19}
+}
+func (m *ListReportsWithHistoryResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ListReportsWithHistoryResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ListReportsWithHistoryResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ListReportsWithHistoryResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ListReportsWithHistoryResponse.Merge(m, src)
+}
+func (m *ListReportsWithHistoryResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *ListReportsWithHistoryResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_ListReportsWithHistoryResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ListReportsWithHistoryResponse proto.InternalMessageInfo
+
+func (m *ListReportsWithHistoryResponse) GetReports() []*ReportWithHistory {
+	if m != nil {
+		return m.Reports
+	}
+	return nil
+}
+
+// CreateReportRequest
+//
+// x-displayName: "Create Report Request"
+// Request to create a report configuration
+type CreateReportRequest struct {
+	// namespace
+	//
+	// x-displayName: "Namespace"
+	// x-example: "default"
+	// Namespace
+	Namespace string `protobuf:"bytes,1,opt,name=namespace,proto3" json:"namespace,omitempty"`
+	// report_type
+	//
+	// x-displayName: "Report Type"
+	// x-example: "REPORT_TYPE_SCRIPTS"
+	// x-required
+	// Report type to create
+	ReportType ReportType `protobuf:"varint,2,opt,name=report_type,json=reportType,proto3,enum=ves.io.schema.shape.client_side_defense.ReportType" json:"report_type,omitempty"`
+	// report_criteria
+	//
+	// x-displayName: "Report Criteria"
+	// x-required
+	// Criteria definition for report generation
+	ReportCriteria *ReportCriteria `protobuf:"bytes,3,opt,name=report_criteria,json=reportCriteria,proto3" json:"report_criteria,omitempty"`
+	// report_name
+	//
+	// x-displayName: "Report Name"
+	// x-example: "Monthly Script Analysis"
+	// x-required
+	// Human-readable name for the report
+	ReportName string `protobuf:"bytes,4,opt,name=report_name,json=reportName,proto3" json:"report_name,omitempty"`
+	// generate_on_create
+	//
+	// x-displayName: "Generate On Create"
+	// x-example: "true"
+	// Automatically generate report upon creation
+	GenerateOnCreate bool `protobuf:"varint,5,opt,name=generate_on_create,json=generateOnCreate,proto3" json:"generate_on_create,omitempty"`
+}
+
+func (m *CreateReportRequest) Reset()      { *m = CreateReportRequest{} }
+func (*CreateReportRequest) ProtoMessage() {}
+func (*CreateReportRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4a834ca50e24bc0b, []int{20}
+}
+func (m *CreateReportRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *CreateReportRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_CreateReportRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *CreateReportRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CreateReportRequest.Merge(m, src)
+}
+func (m *CreateReportRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *CreateReportRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_CreateReportRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_CreateReportRequest proto.InternalMessageInfo
+
+func (m *CreateReportRequest) GetNamespace() string {
+	if m != nil {
+		return m.Namespace
+	}
+	return ""
+}
+
+func (m *CreateReportRequest) GetReportType() ReportType {
+	if m != nil {
+		return m.ReportType
+	}
+	return REPORT_TYPE_UNSPECIFIED
+}
+
+func (m *CreateReportRequest) GetReportCriteria() *ReportCriteria {
+	if m != nil {
+		return m.ReportCriteria
+	}
+	return nil
+}
+
+func (m *CreateReportRequest) GetReportName() string {
+	if m != nil {
+		return m.ReportName
+	}
+	return ""
+}
+
+func (m *CreateReportRequest) GetGenerateOnCreate() bool {
+	if m != nil {
+		return m.GenerateOnCreate
+	}
+	return false
+}
+
+// CreateReportResponse
+//
+// x-displayName: "Create Report Response"
+// Response after creating a report
+type CreateReportResponse struct {
+	// report
+	//
+	// x-displayName: "Report"
+	// Created report configuration
+	Report *Report `protobuf:"bytes,1,opt,name=report,proto3" json:"report,omitempty"`
+}
+
+func (m *CreateReportResponse) Reset()      { *m = CreateReportResponse{} }
+func (*CreateReportResponse) ProtoMessage() {}
+func (*CreateReportResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4a834ca50e24bc0b, []int{21}
+}
+func (m *CreateReportResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *CreateReportResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_CreateReportResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *CreateReportResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CreateReportResponse.Merge(m, src)
+}
+func (m *CreateReportResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *CreateReportResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_CreateReportResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_CreateReportResponse proto.InternalMessageInfo
+
+func (m *CreateReportResponse) GetReport() *Report {
+	if m != nil {
+		return m.Report
+	}
+	return nil
+}
+
+// GetDownloadReportPresignedUrlRequest
+//
+// x-displayName: "Get Report Download URL Request"
+// Request to get a presigned URL for a report artifact
+type GetDownloadReportPresignedUrlRequest struct {
+	// namespace
+	//
+	// x-displayName: "Namespace"
+	// x-example: "default"
+	// Namespace
+	Namespace string `protobuf:"bytes,1,opt,name=namespace,proto3" json:"namespace,omitempty"`
+	// job_id
+	//
+	// x-displayName: "Job ID"
+	// x-example: "j-1234567"
+	// x-required
+	// Report generation job identifier
+	JobId string `protobuf:"bytes,2,opt,name=job_id,json=jobId,proto3" json:"job_id,omitempty"`
+}
+
+func (m *GetDownloadReportPresignedUrlRequest) Reset()      { *m = GetDownloadReportPresignedUrlRequest{} }
+func (*GetDownloadReportPresignedUrlRequest) ProtoMessage() {}
+func (*GetDownloadReportPresignedUrlRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4a834ca50e24bc0b, []int{22}
+}
+func (m *GetDownloadReportPresignedUrlRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *GetDownloadReportPresignedUrlRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_GetDownloadReportPresignedUrlRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *GetDownloadReportPresignedUrlRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetDownloadReportPresignedUrlRequest.Merge(m, src)
+}
+func (m *GetDownloadReportPresignedUrlRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *GetDownloadReportPresignedUrlRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetDownloadReportPresignedUrlRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetDownloadReportPresignedUrlRequest proto.InternalMessageInfo
+
+func (m *GetDownloadReportPresignedUrlRequest) GetNamespace() string {
+	if m != nil {
+		return m.Namespace
+	}
+	return ""
+}
+
+func (m *GetDownloadReportPresignedUrlRequest) GetJobId() string {
+	if m != nil {
+		return m.JobId
+	}
+	return ""
+}
+
+// GetDownloadReportPresignedUrlResponse
+//
+// x-displayName: "Get Report Download URL Response"
+// Response with a presigned download URL
+type GetDownloadReportPresignedUrlResponse struct {
+	// presigned_url
+	//
+	// x-displayName: "Presigned URL"
+	// x-example: "https://storage.googleapis.com/..."
+	// Presigned URL for report download
+	PresignedUrl string `protobuf:"bytes,1,opt,name=presigned_url,json=presignedUrl,proto3" json:"presigned_url,omitempty"`
+	// expires_in_seconds
+	//
+	// x-displayName: "Expires In Seconds"
+	// x-example: "600"
+	// URL expiration in seconds
+	ExpiresInSeconds int64 `protobuf:"varint,2,opt,name=expires_in_seconds,json=expiresInSeconds,proto3" json:"expires_in_seconds,omitempty"`
+}
+
+func (m *GetDownloadReportPresignedUrlResponse) Reset()      { *m = GetDownloadReportPresignedUrlResponse{} }
+func (*GetDownloadReportPresignedUrlResponse) ProtoMessage() {}
+func (*GetDownloadReportPresignedUrlResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4a834ca50e24bc0b, []int{23}
+}
+func (m *GetDownloadReportPresignedUrlResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *GetDownloadReportPresignedUrlResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_GetDownloadReportPresignedUrlResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *GetDownloadReportPresignedUrlResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetDownloadReportPresignedUrlResponse.Merge(m, src)
+}
+func (m *GetDownloadReportPresignedUrlResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *GetDownloadReportPresignedUrlResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetDownloadReportPresignedUrlResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetDownloadReportPresignedUrlResponse proto.InternalMessageInfo
+
+func (m *GetDownloadReportPresignedUrlResponse) GetPresignedUrl() string {
+	if m != nil {
+		return m.PresignedUrl
+	}
+	return ""
+}
+
+func (m *GetDownloadReportPresignedUrlResponse) GetExpiresInSeconds() int64 {
+	if m != nil {
+		return m.ExpiresInSeconds
+	}
+	return 0
+}
+
 func init() {
 	proto.RegisterEnum("ves.io.schema.shape.client_side_defense.ScriptApprovalStatus", ScriptApprovalStatus_name, ScriptApprovalStatus_value)
 	golang_proto.RegisterEnum("ves.io.schema.shape.client_side_defense.ScriptApprovalStatus", ScriptApprovalStatus_name, ScriptApprovalStatus_value)
+	proto.RegisterEnum("ves.io.schema.shape.client_side_defense.ReportType", ReportType_name, ReportType_value)
+	golang_proto.RegisterEnum("ves.io.schema.shape.client_side_defense.ReportType", ReportType_name, ReportType_value)
+	proto.RegisterEnum("ves.io.schema.shape.client_side_defense.ReportStatus", ReportStatus_name, ReportStatus_value)
+	golang_proto.RegisterEnum("ves.io.schema.shape.client_side_defense.ReportStatus", ReportStatus_name, ReportStatus_value)
+	proto.RegisterEnum("ves.io.schema.shape.client_side_defense.ReportFilterOperator", ReportFilterOperator_name, ReportFilterOperator_value)
+	golang_proto.RegisterEnum("ves.io.schema.shape.client_side_defense.ReportFilterOperator", ReportFilterOperator_name, ReportFilterOperator_value)
 	proto.RegisterType((*UpdateScriptApprovalStatusRequest)(nil), "ves.io.schema.shape.client_side_defense.UpdateScriptApprovalStatusRequest")
 	golang_proto.RegisterType((*UpdateScriptApprovalStatusRequest)(nil), "ves.io.schema.shape.client_side_defense.UpdateScriptApprovalStatusRequest")
 	proto.RegisterType((*UpdateScriptApprovalStatusResponse)(nil), "ves.io.schema.shape.client_side_defense.UpdateScriptApprovalStatusResponse")
@@ -1058,6 +2264,30 @@ func init() {
 	golang_proto.RegisterType((*BulkDeleteDomainsRequest)(nil), "ves.io.schema.shape.client_side_defense.BulkDeleteDomainsRequest")
 	proto.RegisterType((*BulkDeleteDomainsResponse)(nil), "ves.io.schema.shape.client_side_defense.BulkDeleteDomainsResponse")
 	golang_proto.RegisterType((*BulkDeleteDomainsResponse)(nil), "ves.io.schema.shape.client_side_defense.BulkDeleteDomainsResponse")
+	proto.RegisterType((*ReportFilter)(nil), "ves.io.schema.shape.client_side_defense.ReportFilter")
+	golang_proto.RegisterType((*ReportFilter)(nil), "ves.io.schema.shape.client_side_defense.ReportFilter")
+	proto.RegisterType((*ScriptsReportCriteria)(nil), "ves.io.schema.shape.client_side_defense.ScriptsReportCriteria")
+	golang_proto.RegisterType((*ScriptsReportCriteria)(nil), "ves.io.schema.shape.client_side_defense.ScriptsReportCriteria")
+	proto.RegisterType((*AffectedUsersReportCriteria)(nil), "ves.io.schema.shape.client_side_defense.AffectedUsersReportCriteria")
+	golang_proto.RegisterType((*AffectedUsersReportCriteria)(nil), "ves.io.schema.shape.client_side_defense.AffectedUsersReportCriteria")
+	proto.RegisterType((*ReportCriteria)(nil), "ves.io.schema.shape.client_side_defense.ReportCriteria")
+	golang_proto.RegisterType((*ReportCriteria)(nil), "ves.io.schema.shape.client_side_defense.ReportCriteria")
+	proto.RegisterType((*Report)(nil), "ves.io.schema.shape.client_side_defense.Report")
+	golang_proto.RegisterType((*Report)(nil), "ves.io.schema.shape.client_side_defense.Report")
+	proto.RegisterType((*ReportWithHistory)(nil), "ves.io.schema.shape.client_side_defense.ReportWithHistory")
+	golang_proto.RegisterType((*ReportWithHistory)(nil), "ves.io.schema.shape.client_side_defense.ReportWithHistory")
+	proto.RegisterType((*ListReportsWithHistoryRequest)(nil), "ves.io.schema.shape.client_side_defense.ListReportsWithHistoryRequest")
+	golang_proto.RegisterType((*ListReportsWithHistoryRequest)(nil), "ves.io.schema.shape.client_side_defense.ListReportsWithHistoryRequest")
+	proto.RegisterType((*ListReportsWithHistoryResponse)(nil), "ves.io.schema.shape.client_side_defense.ListReportsWithHistoryResponse")
+	golang_proto.RegisterType((*ListReportsWithHistoryResponse)(nil), "ves.io.schema.shape.client_side_defense.ListReportsWithHistoryResponse")
+	proto.RegisterType((*CreateReportRequest)(nil), "ves.io.schema.shape.client_side_defense.CreateReportRequest")
+	golang_proto.RegisterType((*CreateReportRequest)(nil), "ves.io.schema.shape.client_side_defense.CreateReportRequest")
+	proto.RegisterType((*CreateReportResponse)(nil), "ves.io.schema.shape.client_side_defense.CreateReportResponse")
+	golang_proto.RegisterType((*CreateReportResponse)(nil), "ves.io.schema.shape.client_side_defense.CreateReportResponse")
+	proto.RegisterType((*GetDownloadReportPresignedUrlRequest)(nil), "ves.io.schema.shape.client_side_defense.GetDownloadReportPresignedUrlRequest")
+	golang_proto.RegisterType((*GetDownloadReportPresignedUrlRequest)(nil), "ves.io.schema.shape.client_side_defense.GetDownloadReportPresignedUrlRequest")
+	proto.RegisterType((*GetDownloadReportPresignedUrlResponse)(nil), "ves.io.schema.shape.client_side_defense.GetDownloadReportPresignedUrlResponse")
+	golang_proto.RegisterType((*GetDownloadReportPresignedUrlResponse)(nil), "ves.io.schema.shape.client_side_defense.GetDownloadReportPresignedUrlResponse")
 }
 
 func init() {
@@ -1068,171 +2298,254 @@ func init() {
 }
 
 var fileDescriptor_4a834ca50e24bc0b = []byte{
-	// 2560 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x5a, 0x5f, 0x6c, 0x1c, 0x47,
-	0xfd, 0xf7, 0xdc, 0xf9, 0xef, 0x38, 0x49, 0xdd, 0x69, 0x7f, 0xf9, 0x9d, 0xaf, 0xe9, 0xd5, 0xd9,
-	0x28, 0x89, 0xed, 0xb0, 0x77, 0xc5, 0xc1, 0x4d, 0xd3, 0xa4, 0x49, 0xfc, 0x1f, 0x3b, 0xa9, 0x1d,
-	0xad, 0x93, 0x94, 0xc6, 0xb4, 0xcb, 0xde, 0xed, 0xdc, 0xdd, 0x26, 0x77, 0xbb, 0xc7, 0xce, 0x9c,
-	0x1d, 0x27, 0xaa, 0x14, 0xa5, 0x12, 0x7f, 0xc4, 0x03, 0x25, 0x45, 0x6d, 0x25, 0x04, 0x4f, 0x48,
-	0xf0, 0x02, 0x2f, 0xbc, 0x20, 0xe0, 0x21, 0x4f, 0xa4, 0x12, 0x12, 0x8a, 0x84, 0x90, 0x22, 0x10,
-	0x88, 0x38, 0x7d, 0x28, 0x79, 0xa1, 0x42, 0x20, 0x50, 0x91, 0x10, 0x9a, 0x9d, 0xd9, 0xf3, 0xee,
-	0x79, 0x1d, 0xef, 0x9c, 0x9d, 0xb7, 0x9b, 0x3f, 0xdf, 0xcf, 0xcc, 0xe7, 0xfb, 0x99, 0xf9, 0xee,
-	0xf7, 0xbe, 0xbb, 0xf0, 0xd4, 0x32, 0x26, 0x59, 0xcb, 0xc9, 0x91, 0x42, 0x19, 0x57, 0x8d, 0x1c,
-	0x29, 0x1b, 0x35, 0x9c, 0x2b, 0x54, 0x2c, 0x6c, 0x53, 0x9d, 0x58, 0x26, 0xd6, 0x4d, 0x5c, 0xc4,
-	0x36, 0xc1, 0xb9, 0x5a, 0x3d, 0x5f, 0xb1, 0x0a, 0x7a, 0xa1, 0x4e, 0xa8, 0x53, 0x35, 0x6a, 0x56,
-	0xb6, 0xe6, 0x3a, 0xd4, 0x41, 0x87, 0xb9, 0x7d, 0x96, 0xdb, 0x67, 0x3d, 0xfb, 0x6c, 0x84, 0x7d,
-	0x5a, 0x2d, 0x59, 0xb4, 0x5c, 0xcf, 0x67, 0x0b, 0x4e, 0x35, 0x57, 0x72, 0x4a, 0x4e, 0xce, 0xb3,
-	0xcf, 0xd7, 0x8b, 0x5e, 0xcb, 0x6b, 0x78, 0xbf, 0x38, 0x6e, 0x7a, 0x5f, 0xc9, 0x71, 0x4a, 0x15,
-	0x9c, 0x33, 0x6a, 0x56, 0xce, 0xb0, 0x6d, 0x87, 0x1a, 0xd4, 0x72, 0x6c, 0x22, 0x46, 0x5f, 0x10,
-	0xa3, 0x0d, 0x0c, 0x6a, 0x55, 0x31, 0xa1, 0x46, 0xb5, 0x26, 0x26, 0x3c, 0x17, 0xa6, 0xe5, 0xd4,
-	0x82, 0xd6, 0x47, 0xe3, 0x72, 0xa6, 0xab, 0x35, 0xec, 0x1b, 0xed, 0x0b, 0x1b, 0x2d, 0x1b, 0x15,
-	0xcb, 0x34, 0x28, 0x16, 0xa3, 0x4a, 0xd3, 0x28, 0x26, 0xd8, 0x5e, 0x6e, 0x5a, 0x76, 0xa0, 0x69,
-	0x8e, 0x85, 0x57, 0xf4, 0xd0, 0x0c, 0xe5, 0x0e, 0x80, 0xfb, 0x2f, 0xd6, 0x18, 0xec, 0x62, 0xc1,
-	0xb5, 0x6a, 0x74, 0xac, 0x56, 0x73, 0x9d, 0x65, 0xa3, 0xb2, 0x48, 0x0d, 0x5a, 0x27, 0x1a, 0xfe,
-	0x6a, 0x1d, 0x13, 0x8a, 0xf6, 0xc1, 0x1e, 0xdb, 0xa8, 0x62, 0x52, 0x33, 0x0a, 0x38, 0x05, 0x06,
-	0xc0, 0x60, 0x8f, 0xb6, 0xde, 0x81, 0xd2, 0x30, 0x61, 0x99, 0xa9, 0x04, 0xeb, 0x1e, 0x87, 0xbf,
-	0xf8, 0xeb, 0x9d, 0x64, 0x87, 0x9b, 0xbc, 0x0f, 0x80, 0x96, 0xb0, 0x4c, 0x64, 0xc0, 0x4e, 0xe2,
-	0x41, 0xa5, 0x92, 0x03, 0x60, 0x70, 0xcf, 0xc8, 0xab, 0xd9, 0x98, 0xea, 0x65, 0xa3, 0xf6, 0x23,
-	0xe0, 0x6f, 0x81, 0x44, 0x1f, 0xd0, 0x04, 0xb0, 0x32, 0x06, 0x95, 0xc7, 0x31, 0x20, 0x35, 0xc7,
-	0x26, 0x18, 0x3d, 0x07, 0x7b, 0x88, 0x37, 0xae, 0x5b, 0xa6, 0xa0, 0xd0, 0xcd, 0x3b, 0x66, 0x4d,
-	0xe5, 0x67, 0x00, 0xa6, 0xce, 0x59, 0x84, 0xce, 0xda, 0x15, 0xcb, 0x16, 0x38, 0x31, 0xc9, 0x1f,
-	0x0e, 0xe2, 0x6e, 0xf4, 0x41, 0x63, 0x0d, 0x34, 0x04, 0x21, 0xa1, 0x86, 0x4b, 0x75, 0x76, 0x70,
-	0x3c, 0x6f, 0xac, 0xcf, 0xfc, 0xb0, 0x1d, 0x68, 0x3d, 0xde, 0xe8, 0x05, 0xab, 0x8a, 0xd1, 0x41,
-	0xd8, 0x8d, 0x6d, 0x93, 0x4f, 0x6c, 0xdf, 0x30, 0xb1, 0x0b, 0xdb, 0x26, 0x9b, 0xa6, 0x54, 0x60,
-	0x7f, 0xc4, 0xa6, 0x05, 0xdf, 0x05, 0xd8, 0xc5, 0x97, 0x26, 0x29, 0x30, 0x90, 0x1c, 0xec, 0x1d,
-	0x19, 0x8d, 0xed, 0xf9, 0x20, 0xa0, 0xe6, 0xa3, 0x28, 0xff, 0x06, 0x70, 0x57, 0x70, 0xe4, 0xb1,
-	0x1e, 0x45, 0x2f, 0xc0, 0x5e, 0x31, 0xc8, 0x5c, 0xc5, 0x1d, 0xa3, 0x41, 0xde, 0x35, 0x6f, 0x54,
-	0x31, 0x42, 0xb0, 0xbd, 0x6c, 0x90, 0x32, 0x77, 0x84, 0xe6, 0xfd, 0x46, 0x69, 0xd8, 0x4d, 0x70,
-	0x05, 0x17, 0xa8, 0xe3, 0x72, 0xde, 0x5a, 0xa3, 0xcd, 0x54, 0xb0, 0x6c, 0x8a, 0x4b, 0xae, 0x45,
-	0x57, 0x53, 0x9d, 0x5c, 0x85, 0x46, 0x07, 0xb3, 0x2c, 0x1b, 0xb6, 0x59, 0xc1, 0x2e, 0x49, 0x75,
-	0x0d, 0x24, 0x99, 0xa5, 0xdf, 0x46, 0xcf, 0x43, 0x58, 0xb4, 0x5c, 0x42, 0x75, 0x82, 0xb1, 0x9d,
-	0xea, 0x1e, 0x00, 0x83, 0x49, 0xad, 0xc7, 0xeb, 0x59, 0xc4, 0xd8, 0x66, 0x34, 0x2a, 0x86, 0x3f,
-	0xda, 0xe3, 0x8d, 0x76, 0xb3, 0x0e, 0x36, 0x38, 0xd7, 0xde, 0xdd, 0xd1, 0xd7, 0xa9, 0x7c, 0x0b,
-	0xc0, 0xfe, 0x19, 0x4c, 0x85, 0x8b, 0x17, 0x96, 0xb1, 0xcb, 0x6e, 0x52, 0xbc, 0xf3, 0x11, 0x96,
-	0x3d, 0x11, 0x57, 0xf6, 0xe4, 0xe6, 0xb2, 0xdb, 0xf0, 0xd9, 0xf0, 0x19, 0x9f, 0x70, 0xea, 0x36,
-	0x25, 0xcc, 0x07, 0x86, 0xd7, 0x8f, 0xf9, 0x41, 0xec, 0xd0, 0x1a, 0x6d, 0x36, 0xe6, 0xe2, 0x2b,
-	0xb8, 0x40, 0xb1, 0xe9, 0x41, 0x77, 0x68, 0x8d, 0x36, 0xca, 0x40, 0x58, 0xb7, 0x1b, 0x96, 0xed,
-	0xde, 0x68, 0xa0, 0x47, 0x79, 0x07, 0xc0, 0xbd, 0xaf, 0x59, 0xd4, 0x2a, 0x79, 0xf1, 0x30, 0xb4,
-	0xe4, 0x01, 0xb8, 0xdb, 0x28, 0xb0, 0x5e, 0xdd, 0xc6, 0xd8, 0xc4, 0xfc, 0x18, 0x74, 0x68, 0xbb,
-	0x78, 0xe7, 0xbc, 0xd7, 0x87, 0x06, 0x61, 0x9f, 0xed, 0xe8, 0xe1, 0x79, 0x7c, 0x7f, 0x7b, 0x6c,
-	0x67, 0x2c, 0x38, 0xd3, 0xdb, 0x25, 0x71, 0x2a, 0xcb, 0xc1, 0x5d, 0xf2, 0xb6, 0xf2, 0x47, 0x00,
-	0x9f, 0x1a, 0xc7, 0x65, 0x63, 0xd9, 0x72, 0xdc, 0xd7, 0x30, 0x75, 0xad, 0x02, 0x41, 0xb3, 0x70,
-	0xbf, 0x38, 0x9d, 0xfa, 0x8a, 0x45, 0xcb, 0xba, 0x8d, 0xe9, 0x8a, 0xe3, 0x5e, 0xd5, 0xd9, 0xb9,
-	0x70, 0xf9, 0x82, 0x44, 0x6c, 0x29, 0x23, 0x26, 0xbe, 0x6e, 0xd1, 0xf2, 0x3c, 0x9f, 0x36, 0x1b,
-	0x98, 0x85, 0xce, 0xc0, 0xe7, 0x43, 0x50, 0x45, 0xc7, 0xad, 0xea, 0x45, 0x0b, 0x57, 0x4c, 0xdd,
-	0xc5, 0x86, 0x49, 0xc4, 0x8e, 0xfb, 0x03, 0x30, 0xd3, 0x8e, 0x5b, 0x9d, 0x66, 0x33, 0x34, 0x36,
-	0x01, 0x9d, 0x80, 0xe9, 0xa6, 0xcd, 0xac, 0xe8, 0x79, 0xb1, 0x61, 0x22, 0xe8, 0xfc, 0x7f, 0x68,
-	0x17, 0x2b, 0x3e, 0x1f, 0xa2, 0xbc, 0x9f, 0x84, 0xe9, 0xa8, 0x13, 0x26, 0x2e, 0xf3, 0x01, 0xb8,
-	0x9b, 0x3a, 0xd4, 0xa8, 0xe8, 0xeb, 0x57, 0xda, 0xf3, 0xb3, 0xd7, 0x29, 0x8c, 0x10, 0x81, 0x7b,
-	0x0d, 0x71, 0x2e, 0x74, 0x1e, 0x1a, 0xf5, 0x82, 0x27, 0x93, 0xb7, 0xf7, 0x5e, 0x89, 0xd0, 0x1b,
-	0x75, 0xbc, 0xb4, 0x67, 0x8d, 0xa8, 0x43, 0xb7, 0x0a, 0x53, 0xd5, 0xc6, 0xd9, 0x68, 0x5a, 0x36,
-	0xe9, 0x2d, 0x7b, 0x3a, 0xf6, 0xb2, 0xd1, 0x87, 0x4c, 0xdb, 0x5b, 0x8d, 0x3e, 0x7c, 0x05, 0xd8,
-	0xe7, 0xfb, 0x57, 0xaf, 0xf2, 0x13, 0xe1, 0x9d, 0xde, 0xde, 0x91, 0x97, 0x63, 0x2f, 0xd9, 0x74,
-	0xa2, 0xb4, 0xa7, 0xf2, 0xe1, 0x0e, 0xe5, 0x57, 0x00, 0xa6, 0xc6, 0xeb, 0x95, 0xab, 0x93, 0xb8,
-	0x82, 0x29, 0x9e, 0x74, 0xaa, 0x86, 0x65, 0xc7, 0x7c, 0x32, 0x9c, 0x84, 0xd0, 0xa8, 0x54, 0x9c,
-	0x15, 0xbd, 0x62, 0x11, 0x9a, 0x4a, 0xb0, 0xa8, 0x34, 0xfe, 0x3c, 0xbb, 0xd0, 0x3d, 0xb7, 0x41,
-	0xa7, 0xd2, 0xee, 0x26, 0xca, 0x80, 0xb5, 0xe0, 0x6d, 0xd0, 0xa5, 0x74, 0xb8, 0xc9, 0xd4, 0xcd,
-	0x84, 0xd6, 0xe3, 0x19, 0xb0, 0xa0, 0x8e, 0x26, 0xe1, 0x1e, 0xc1, 0x1b, 0x9b, 0x1c, 0x21, 0x19,
-	0x07, 0x61, 0x77, 0xc3, 0x88, 0xa1, 0x28, 0xa3, 0xb0, 0x3f, 0x62, 0xf7, 0xe2, 0x54, 0xa5, 0x60,
-	0x97, 0xe9, 0x0d, 0xf0, 0x7b, 0xdb, 0xad, 0xf9, 0xcd, 0xe1, 0xd3, 0xf0, 0xd9, 0xa8, 0x87, 0x29,
-	0xea, 0x85, 0x5d, 0x17, 0xe7, 0xcf, 0xce, 0x2f, 0xbc, 0x3e, 0xdf, 0xd7, 0x86, 0x76, 0xc1, 0xee,
-	0xb1, 0xf3, 0xe7, 0xb5, 0x85, 0x4b, 0x53, 0x93, 0x7d, 0x80, 0xb5, 0xb4, 0xa9, 0xb9, 0xa9, 0x89,
-	0x0b, 0x53, 0x93, 0x7d, 0x89, 0x91, 0x9f, 0x4c, 0xc0, 0x9e, 0x09, 0x2f, 0x6f, 0x1b, 0x3b, 0x3f,
-	0x8b, 0xfe, 0x04, 0x60, 0xfb, 0xac, 0x6d, 0x51, 0xf4, 0x05, 0x89, 0x67, 0x90, 0x45, 0x85, 0x9b,
-	0xd3, 0xa3, 0x92, 0x56, 0x9c, 0x9e, 0x52, 0xfe, 0xc3, 0xcf, 0x13, 0x4f, 0x5f, 0x24, 0x78, 0x60,
-	0xb1, 0x9e, 0x67, 0xf7, 0x26, 0x8f, 0x07, 0xc6, 0xce, 0xcf, 0xae, 0xdd, 0x4d, 0x1d, 0x2a, 0x8e,
-	0x5e, 0x2b, 0xa8, 0xdc, 0x5e, 0x65, 0xf6, 0xaa, 0xb0, 0x57, 0x09, 0x35, 0x6c, 0xd3, 0x70, 0x4d,
-	0xb5, 0x4e, 0xb0, 0x7b, 0xeb, 0x77, 0x1f, 0xbf, 0x97, 0x38, 0xa0, 0x64, 0x44, 0x1e, 0x9a, 0x6b,
-	0x28, 0x4b, 0x72, 0x64, 0x95, 0x50, 0x5c, 0xcd, 0x59, 0xb6, 0x45, 0x5f, 0x01, 0xc3, 0xe8, 0x9d,
-	0x04, 0x44, 0x33, 0x98, 0x4e, 0x62, 0xea, 0x45, 0x54, 0xe1, 0x67, 0x34, 0x1e, 0x7b, 0xdf, 0x1b,
-	0x8d, 0x7d, 0xee, 0x13, 0xdb, 0xc2, 0x10, 0x9e, 0x30, 0xd7, 0xee, 0xa6, 0x86, 0xb6, 0x26, 0x5d,
-	0x75, 0x6c, 0x8b, 0x3a, 0x9c, 0xf7, 0xe7, 0x51, 0x2e, 0x82, 0xf7, 0x8d, 0xc6, 0xef, 0xb7, 0x73,
-	0xa6, 0x58, 0x4c, 0x37, 0x05, 0xdd, 0x6f, 0x24, 0xe0, 0x33, 0xec, 0xd0, 0x35, 0xbb, 0x21, 0x3e,
-	0x85, 0x08, 0x6b, 0xdf, 0x0f, 0x93, 0xdb, 0x03, 0x11, 0x8e, 0x28, 0xca, 0x3b, 0xe2, 0xa8, 0x92,
-	0x8d, 0xe9, 0x08, 0xb1, 0x18, 0x3b, 0x10, 0xff, 0x01, 0xb0, 0x8f, 0xe9, 0xe1, 0xf5, 0x4c, 0x62,
-	0x6a, 0x58, 0x15, 0x82, 0xce, 0x48, 0x49, 0x19, 0x34, 0xf5, 0x9d, 0x30, 0xb6, 0x0d, 0x04, 0xe1,
-	0x81, 0xbc, 0xbc, 0x07, 0x72, 0x48, 0xdd, 0xca, 0x03, 0xde, 0x52, 0xba, 0x29, 0x88, 0xfe, 0x20,
-	0x01, 0x9f, 0x9b, 0xc1, 0x74, 0x8e, 0xcc, 0xda, 0x2c, 0xc5, 0xb0, 0x1c, 0x7b, 0xc2, 0xb1, 0x8b,
-	0x56, 0xa9, 0xee, 0x7a, 0x41, 0x1c, 0x9d, 0x95, 0xa1, 0xb1, 0x19, 0x8a, 0xef, 0x93, 0x73, 0x3b,
-	0x03, 0xf6, 0x24, 0x6f, 0xca, 0x15, 0xf6, 0x44, 0x0c, 0x3a, 0xe0, 0xf7, 0x00, 0x76, 0x5e, 0xc0,
-	0x84, 0xce, 0x2d, 0xa2, 0x97, 0x62, 0x6f, 0x9f, 0x1b, 0xf8, 0xb4, 0x8f, 0x49, 0xdb, 0x09, 0x86,
-	0x97, 0x25, 0x03, 0xe0, 0xb0, 0x72, 0x70, 0x0b, 0x7a, 0x14, 0x13, 0x7a, 0xc5, 0x3b, 0xf6, 0x7f,
-	0x06, 0xb0, 0x87, 0x65, 0x31, 0xfc, 0x61, 0x71, 0x5c, 0x46, 0x99, 0xd0, 0xff, 0xcd, 0xf4, 0x2b,
-	0xad, 0x98, 0x06, 0x08, 0x4a, 0x4a, 0x78, 0x18, 0x6d, 0xc5, 0x91, 0x27, 0x36, 0xe8, 0xef, 0x00,
-	0xee, 0xe6, 0xff, 0x35, 0xfd, 0xe0, 0x16, 0x3f, 0xa9, 0x0a, 0xd9, 0xf9, 0x44, 0x4f, 0xb5, 0x6a,
-	0x1e, 0xb8, 0xce, 0x32, 0x6a, 0x8e, 0x28, 0x5b, 0xdd, 0xe5, 0xba, 0xb7, 0x8e, 0x1f, 0xd4, 0x99,
-	0xaa, 0x9f, 0x00, 0xd8, 0xcb, 0x82, 0xaa, 0x9f, 0x67, 0x9e, 0x90, 0x0a, 0xc5, 0xe1, 0x3f, 0xd3,
-	0xe9, 0x93, 0xad, 0x19, 0x0b, 0xba, 0x6f, 0xc9, 0x6b, 0x7b, 0x44, 0x39, 0xb4, 0x95, 0xb6, 0x7c,
-	0x11, 0x46, 0xf5, 0xd7, 0x49, 0xd8, 0x1f, 0xac, 0x25, 0xcc, 0xd5, 0x09, 0xb5, 0x8a, 0x56, 0x81,
-	0x5f, 0xdb, 0x59, 0x49, 0xb1, 0x22, 0x30, 0x7c, 0x37, 0xcc, 0xed, 0x04, 0x94, 0x70, 0xca, 0x77,
-	0x12, 0xf1, 0x0f, 0xc1, 0xa3, 0xbb, 0xa9, 0x0f, 0x00, 0x54, 0x97, 0x31, 0x51, 0x2d, 0x47, 0xe5,
-	0x8b, 0xab, 0x05, 0x62, 0xaa, 0x5c, 0x76, 0x95, 0xfb, 0x42, 0xbd, 0x12, 0xe2, 0xfd, 0x16, 0x6c,
-	0xaf, 0x39, 0x84, 0xa2, 0x4b, 0x11, 0x8e, 0x1c, 0x5c, 0x32, 0xd4, 0xeb, 0x6f, 0x0e, 0x2e, 0xa9,
-	0x86, 0x7a, 0xfd, 0x45, 0xf5, 0xf8, 0x9b, 0xc3, 0x4b, 0xe2, 0xc7, 0xd0, 0xe9, 0x21, 0xdf, 0xb3,
-	0xb9, 0xc1, 0x25, 0x55, 0x37, 0xd4, 0xeb, 0x63, 0xea, 0x65, 0x36, 0x72, 0x64, 0x28, 0x17, 0xc2,
-	0x4f, 0x77, 0xf2, 0x74, 0xca, 0x93, 0x6b, 0x4a, 0x39, 0x13, 0x4f, 0xae, 0xdc, 0x8d, 0x46, 0xf1,
-	0xe1, 0xed, 0x30, 0x1e, 0x13, 0xf2, 0x37, 0x49, 0xd8, 0xcf, 0x93, 0xde, 0xed, 0x09, 0xb9, 0x29,
-	0x86, 0xbc, 0x90, 0x8f, 0x81, 0x12, 0x42, 0xbe, 0xcf, 0x84, 0x3c, 0xbc, 0xb5, 0x90, 0x86, 0x59,
-	0xb5, 0xec, 0x47, 0x77, 0x53, 0x1f, 0x46, 0x2a, 0xc9, 0x73, 0xf8, 0x68, 0x25, 0x75, 0xd8, 0xc9,
-	0x87, 0xd1, 0xc5, 0xd6, 0xb4, 0x0c, 0x7b, 0x7a, 0x83, 0xb0, 0x21, 0x29, 0xbf, 0x38, 0x3c, 0x1d,
-	0x4b, 0xca, 0x26, 0xcc, 0x1b, 0xa1, 0x26, 0x93, 0x17, 0xfd, 0x0b, 0xc0, 0xa7, 0x37, 0xfc, 0x8d,
-	0x41, 0xf1, 0xb3, 0xa1, 0xcd, 0xfe, 0xc0, 0xa5, 0xc7, 0xb7, 0x03, 0x21, 0x54, 0x5b, 0x92, 0x0c,
-	0xc1, 0x47, 0x86, 0x0f, 0xc5, 0x4a, 0xa7, 0xbc, 0x80, 0xc4, 0x98, 0x07, 0x02, 0xe1, 0x39, 0x5c,
-	0x32, 0x0a, 0xab, 0x12, 0xcc, 0x37, 0xd8, 0xca, 0x33, 0x8f, 0x80, 0x08, 0x30, 0x97, 0x8c, 0xc6,
-	0x83, 0x28, 0x66, 0x34, 0x46, 0xdf, 0x4d, 0x70, 0xe6, 0x63, 0xc5, 0xa2, 0x97, 0x5d, 0x5f, 0x24,
-	0xd8, 0x25, 0x92, 0xcc, 0x43, 0xb6, 0xad, 0x31, 0x6f, 0x82, 0x10, 0xcc, 0xaf, 0xc9, 0x33, 0x6f,
-	0x2d, 0xb0, 0x19, 0xc1, 0xe5, 0xd9, 0x81, 0xf8, 0x20, 0xc9, 0xdd, 0x12, 0x2a, 0xfa, 0x4a, 0xba,
-	0x25, 0xaa, 0xca, 0x2d, 0xe9, 0x96, 0xc8, 0x9a, 0xb3, 0xf2, 0x19, 0x90, 0xf2, 0xcb, 0xa3, 0xbb,
-	0xa9, 0xaf, 0x03, 0x78, 0x70, 0x63, 0x08, 0xab, 0x58, 0x84, 0xaa, 0x96, 0xb7, 0x84, 0xea, 0x9f,
-	0x87, 0x4b, 0x30, 0x59, 0xc2, 0x14, 0x2d, 0xec, 0xd8, 0x33, 0x88, 0xe3, 0x87, 0x22, 0xd6, 0x09,
-	0x74, 0xbc, 0x05, 0x8d, 0x38, 0x10, 0xfa, 0x38, 0x09, 0x5f, 0x60, 0xae, 0x89, 0xa8, 0x2e, 0x8e,
-	0xaf, 0x8a, 0x92, 0xf9, 0x82, 0x94, 0x93, 0x1f, 0x83, 0xe4, 0xab, 0x76, 0x7e, 0xe7, 0x00, 0x85,
-	0x86, 0xdf, 0x4f, 0xc8, 0x6a, 0xf8, 0x43, 0x00, 0x47, 0x37, 0xd1, 0x50, 0x14, 0x64, 0xd5, 0x60,
-	0x41, 0x56, 0xcd, 0xaf, 0x0a, 0x51, 0x51, 0x81, 0x6b, 0xfa, 0xe5, 0x1d, 0xd3, 0xd4, 0xde, 0x48,
-	0x30, 0x24, 0xf0, 0x18, 0x3a, 0x1d, 0x57, 0x60, 0xa6, 0x6c, 0x04, 0x1c, 0xfa, 0x69, 0x12, 0xee,
-	0x65, 0xbe, 0x6c, 0x54, 0x7f, 0xd7, 0xd5, 0x9d, 0x96, 0x12, 0x63, 0x23, 0x80, 0x2f, 0xea, 0xcc,
-	0xb6, 0x71, 0x84, 0x96, 0xb7, 0xa4, 0xb5, 0xbc, 0x0d, 0xe0, 0xe7, 0x36, 0xd1, 0xb2, 0xe8, 0xb8,
-	0x55, 0xd5, 0xab, 0x88, 0x07, 0x25, 0xbc, 0xcc, 0x25, 0x5c, 0xdc, 0x31, 0x09, 0x8b, 0x0d, 0x3a,
-	0x21, 0xe5, 0x5e, 0x46, 0x2f, 0xc9, 0x28, 0xb7, 0x8e, 0x82, 0x7e, 0x94, 0x84, 0xff, 0xc7, 0xfc,
-	0xd4, 0x28, 0xb6, 0x37, 0xf4, 0x9a, 0x92, 0xf2, 0xf3, 0x06, 0x7b, 0x5f, 0xae, 0xe9, 0xed, 0xc2,
-	0x08, 0xb5, 0xfe, 0x2b, 0x1d, 0x3d, 0xbf, 0x0d, 0xe0, 0xf0, 0x26, 0x6a, 0x35, 0xde, 0x3c, 0x04,
-	0xb4, 0x7a, 0x83, 0x6b, 0xa5, 0xed, 0x98, 0x56, 0x8d, 0x45, 0x42, 0x52, 0x1d, 0x43, 0xa3, 0x32,
-	0x52, 0x35, 0x40, 0xd0, 0xed, 0x24, 0x7c, 0xba, 0xf1, 0x12, 0xc4, 0x7f, 0x07, 0x82, 0xa4, 0x8a,
-	0x5e, 0x61, 0x5b, 0xf9, 0x67, 0x5b, 0x04, 0x84, 0x50, 0xe7, 0x9f, 0xd2, 0xea, 0x7c, 0x0d, 0xc0,
-	0xfd, 0x1b, 0xd5, 0x11, 0x79, 0xb9, 0xe3, 0xd3, 0xdb, 0x71, 0x51, 0x4c, 0x83, 0x94, 0xf3, 0x8e,
-	0xe1, 0x9a, 0xdb, 0x11, 0xa5, 0x01, 0x82, 0xfe, 0x01, 0xe0, 0x9e, 0x70, 0x98, 0x41, 0xa7, 0x5a,
-	0x8c, 0x4f, 0xbe, 0x1c, 0xa7, 0x5b, 0xb6, 0x17, 0x5a, 0x18, 0xf2, 0xe9, 0x57, 0x56, 0x19, 0xda,
-	0x82, 0xff, 0x7a, 0xc8, 0x60, 0x79, 0xd6, 0x67, 0x22, 0xf1, 0x5e, 0x5f, 0x7d, 0x06, 0x53, 0xc9,
-	0x3c, 0x2b, 0x64, 0xdb, 0x5a, 0x9e, 0xd5, 0x04, 0xb1, 0x8d, 0x32, 0x08, 0x8a, 0xcf, 0x1f, 0xfd,
-	0x2d, 0x01, 0x77, 0xcd, 0xe0, 0xf5, 0xc5, 0xd1, 0x49, 0x99, 0x0b, 0x14, 0x78, 0x2f, 0xca, 0x29,
-	0xbf, 0xda, 0xa2, 0xb5, 0x60, 0xfb, 0x40, 0xfa, 0xe6, 0x5d, 0x87, 0xfb, 0xc2, 0x17, 0xaf, 0x84,
-	0x83, 0xcf, 0x2f, 0xa4, 0xf1, 0x3b, 0x77, 0x56, 0xf6, 0xce, 0xad, 0xbb, 0xe8, 0xf1, 0xff, 0x7c,
-	0x5f, 0x44, 0xd9, 0xd8, 0xce, 0xf6, 0xee, 0x9b, 0x97, 0x55, 0x04, 0x2b, 0x3d, 0x1a, 0x36, 0x4c,
-	0x51, 0x46, 0x9d, 0x6e, 0xa9, 0x54, 0xb4, 0x0e, 0x20, 0x9f, 0x55, 0x6c, 0x86, 0x13, 0xcc, 0x2a,
-	0xe2, 0xd7, 0x9b, 0x6e, 0x03, 0x78, 0x64, 0xab, 0x7a, 0x93, 0x8b, 0x0d, 0x53, 0x15, 0x35, 0xd6,
-	0x25, 0x51, 0x6d, 0xda, 0xb9, 0x94, 0xc2, 0x6d, 0x70, 0x08, 0x67, 0xfb, 0x8a, 0x54, 0x4a, 0xb1,
-	0x8e, 0xc2, 0xe2, 0xc3, 0x47, 0x49, 0x98, 0xde, 0xfc, 0xab, 0x23, 0xd4, 0x5a, 0x7d, 0x2f, 0xf2,
-	0xe3, 0xab, 0xf4, 0xd9, 0x1d, 0xc1, 0x12, 0xe2, 0xbd, 0x2b, 0x27, 0xde, 0xf7, 0x00, 0xcc, 0x6d,
-	0x25, 0x9e, 0xff, 0x5d, 0x80, 0x2f, 0xe0, 0x57, 0x84, 0x80, 0x5f, 0xda, 0x31, 0x01, 0x9b, 0x56,
-	0x08, 0xa9, 0x78, 0x46, 0x39, 0x21, 0xa3, 0x62, 0x13, 0x14, 0x93, 0xf2, 0x9b, 0x09, 0xf8, 0x0c,
-	0xf7, 0x9c, 0x77, 0x23, 0xc7, 0x6c, 0xa3, 0xb2, 0x4a, 0x2c, 0x99, 0xf7, 0x96, 0x11, 0xd6, 0xf2,
-	0xef, 0x2d, 0x23, 0x41, 0x84, 0x6a, 0x25, 0xc9, 0x1a, 0xd3, 0x31, 0x65, 0x24, 0x7e, 0x00, 0x32,
-	0xc4, 0x6a, 0xcc, 0x17, 0x6b, 0x00, 0x42, 0x96, 0x03, 0xd5, 0xab, 0x55, 0xc3, 0x5d, 0x45, 0x72,
-	0xef, 0x61, 0xb8, 0x91, 0xcf, 0xfc, 0x44, 0x4b, 0xb6, 0x4f, 0xb4, 0xb4, 0x24, 0x58, 0x89, 0xd7,
-	0xf5, 0x4d, 0x1f, 0xdb, 0xa0, 0x16, 0xb2, 0xc4, 0xe6, 0x6f, 0xc1, 0xe4, 0x5e, 0xd7, 0x6f, 0xf2,
-	0xb5, 0xcf, 0x93, 0x79, 0x09, 0xe9, 0xdf, 0x02, 0x3f, 0xf1, 0x4c, 0xf7, 0xde, 0xf9, 0x25, 0x48,
-	0xde, 0xfa, 0x6d, 0x2a, 0x79, 0x13, 0x80, 0xf1, 0xf7, 0xc0, 0xbd, 0x07, 0x99, 0xb6, 0xfb, 0x0f,
-	0x32, 0x6d, 0x9f, 0x3e, 0xc8, 0x80, 0x9b, 0x6b, 0x19, 0xf0, 0xe3, 0xb5, 0x0c, 0xf8, 0x68, 0x2d,
-	0x03, 0xee, 0xad, 0x65, 0xc0, 0x5f, 0xd6, 0x32, 0xe0, 0x93, 0xb5, 0x4c, 0xdb, 0xa7, 0x6b, 0x19,
-	0xf0, 0xee, 0xc3, 0x4c, 0xdb, 0x9d, 0x87, 0x19, 0x70, 0xef, 0x61, 0xa6, 0xed, 0xfe, 0xc3, 0x4c,
-	0xdb, 0xe5, 0x37, 0x4a, 0x4e, 0xed, 0x6a, 0x29, 0xbb, 0xec, 0x54, 0x28, 0x76, 0x5d, 0x23, 0x5b,
-	0x27, 0x39, 0xef, 0x87, 0xf7, 0xbc, 0x65, 0x97, 0xcd, 0x32, 0xb1, 0xab, 0x32, 0x3a, 0xb9, 0x5a,
-	0xbe, 0xe4, 0xe4, 0xf0, 0x35, 0xea, 0x7f, 0x05, 0xbb, 0xc5, 0xc7, 0xb0, 0xf9, 0x4e, 0xef, 0x1b,
-	0xd5, 0xa3, 0xff, 0x0b, 0x00, 0x00, 0xff, 0xff, 0xfa, 0xe5, 0x98, 0x34, 0x32, 0x2c, 0x00, 0x00,
+	// 3549 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xd4, 0x5b, 0x5b, 0x8c, 0x1b, 0xc9,
+	0x5a, 0x9e, 0xb2, 0xe7, 0x5a, 0x33, 0x49, 0x9c, 0xca, 0x65, 0x3d, 0x4e, 0xe2, 0x4c, 0x7a, 0x49,
+	0x32, 0x99, 0x9c, 0xb6, 0x0f, 0x13, 0x72, 0x72, 0x92, 0x6c, 0x2e, 0x9e, 0x19, 0xcf, 0xc4, 0xb9,
+	0x8c, 0x87, 0xb6, 0x67, 0x0f, 0x49, 0x38, 0xa7, 0xb7, 0xed, 0xae, 0xf1, 0x74, 0xd6, 0xee, 0x36,
+	0xdd, 0xed, 0x49, 0x26, 0xd1, 0x4a, 0x51, 0x8e, 0x04, 0x07, 0x21, 0xc1, 0x21, 0x07, 0x9d, 0xb3,
+	0xd2, 0x0a, 0xc4, 0x03, 0x12, 0x3c, 0xf1, 0xc2, 0x0b, 0xda, 0x20, 0x94, 0x27, 0xb2, 0x02, 0x09,
+	0x45, 0x5a, 0x90, 0x56, 0xc0, 0x22, 0x32, 0xd9, 0x87, 0x25, 0x2f, 0xac, 0xb8, 0x08, 0xb4, 0x48,
+	0x80, 0xaa, 0xab, 0xba, 0xdd, 0xed, 0x4b, 0xdc, 0x35, 0x33, 0x59, 0x89, 0x37, 0x77, 0x55, 0xfd,
+	0x5f, 0xd5, 0xff, 0x7f, 0x7f, 0xfd, 0xf5, 0xd7, 0xc5, 0xf0, 0xe2, 0x1a, 0xb6, 0x52, 0x9a, 0x91,
+	0xb6, 0xca, 0xab, 0xb8, 0xa6, 0xa4, 0xad, 0x55, 0xa5, 0x8e, 0xd3, 0xe5, 0xaa, 0x86, 0x75, 0x5b,
+	0xb6, 0x34, 0x15, 0xcb, 0x2a, 0x5e, 0xc1, 0xba, 0x85, 0xd3, 0xf5, 0x46, 0xa9, 0xaa, 0x95, 0xe5,
+	0x72, 0xc3, 0xb2, 0x8d, 0x9a, 0x52, 0xd7, 0x52, 0x75, 0xd3, 0xb0, 0x0d, 0x74, 0x9c, 0xca, 0xa7,
+	0xa8, 0x7c, 0xca, 0x91, 0x4f, 0x75, 0x90, 0x4f, 0x88, 0x15, 0xcd, 0x5e, 0x6d, 0x94, 0x52, 0x65,
+	0xa3, 0x96, 0xae, 0x18, 0x15, 0x23, 0xed, 0xc8, 0x97, 0x1a, 0x2b, 0xce, 0x97, 0xf3, 0xe1, 0xfc,
+	0xa2, 0xb8, 0x89, 0x83, 0x15, 0xc3, 0xa8, 0x54, 0x71, 0x5a, 0xa9, 0x6b, 0x69, 0x45, 0xd7, 0x0d,
+	0x5b, 0xb1, 0x35, 0x43, 0xb7, 0x58, 0xed, 0x61, 0x56, 0xeb, 0x61, 0xd8, 0x5a, 0x0d, 0x5b, 0xb6,
+	0x52, 0xab, 0xb3, 0x06, 0x07, 0x82, 0x6a, 0x19, 0x75, 0xbf, 0xf4, 0xa9, 0xb0, 0x3a, 0xdb, 0xeb,
+	0x75, 0xec, 0x0a, 0x1d, 0x0c, 0x0a, 0xad, 0x29, 0x55, 0x4d, 0x55, 0x6c, 0xcc, 0x6a, 0x85, 0x96,
+	0x5a, 0x6c, 0x61, 0x7d, 0xad, 0xa5, 0xdb, 0x89, 0x96, 0x36, 0x1a, 0xbe, 0x2b, 0x07, 0x5a, 0x08,
+	0x4f, 0x01, 0x3c, 0xb2, 0x5c, 0x27, 0xb0, 0x85, 0xb2, 0xa9, 0xd5, 0xed, 0x4c, 0xbd, 0x6e, 0x1a,
+	0x6b, 0x4a, 0xb5, 0x60, 0x2b, 0x76, 0xc3, 0x92, 0xf0, 0xaf, 0x34, 0xb0, 0x65, 0xa3, 0x83, 0x70,
+	0x44, 0x57, 0x6a, 0xd8, 0xaa, 0x2b, 0x65, 0x1c, 0x07, 0x13, 0x60, 0x72, 0x44, 0x6a, 0x16, 0xa0,
+	0x04, 0x8c, 0x68, 0x6a, 0x3c, 0x42, 0x8a, 0x67, 0xe0, 0xc7, 0xff, 0xfc, 0x34, 0x3a, 0x60, 0x46,
+	0x3f, 0x03, 0x40, 0x8a, 0x68, 0x2a, 0x52, 0xe0, 0xa0, 0xe5, 0x40, 0xc5, 0xa3, 0x13, 0x60, 0x72,
+	0xe7, 0xf4, 0x85, 0x54, 0x48, 0xf6, 0x52, 0x9d, 0xc6, 0xc3, 0xe0, 0x1f, 0x81, 0x48, 0x0c, 0x48,
+	0x0c, 0x58, 0xc8, 0x40, 0xe1, 0x75, 0x1a, 0x58, 0x75, 0x43, 0xb7, 0x30, 0x3a, 0x00, 0x47, 0x2c,
+	0xa7, 0x5e, 0xd6, 0x54, 0xa6, 0xc2, 0x30, 0x2d, 0xc8, 0xa9, 0xc2, 0x9f, 0x00, 0x18, 0xbf, 0xae,
+	0x59, 0x76, 0x4e, 0xaf, 0x6a, 0x3a, 0xc3, 0x09, 0xa9, 0xfc, 0x71, 0x3f, 0x6e, 0xbb, 0x0d, 0xbc,
+	0x3e, 0xd0, 0x09, 0x08, 0x2d, 0x5b, 0x31, 0x6d, 0x99, 0x38, 0x8e, 0x63, 0x8d, 0x66, 0xcb, 0x0f,
+	0xfb, 0x81, 0x34, 0xe2, 0xd4, 0x16, 0xb5, 0x1a, 0x46, 0x47, 0xe1, 0x30, 0xd6, 0x55, 0xda, 0xb0,
+	0xbf, 0xad, 0xe1, 0x10, 0xd6, 0x55, 0xd2, 0x4c, 0xa8, 0xc2, 0xf1, 0x0e, 0x83, 0x66, 0xfa, 0xe6,
+	0xe1, 0x10, 0xed, 0xda, 0x8a, 0x83, 0x89, 0xe8, 0xe4, 0xe8, 0xf4, 0xe9, 0xd0, 0x96, 0xf7, 0x03,
+	0x4a, 0x2e, 0x8a, 0xf0, 0x5f, 0x00, 0x8e, 0xf9, 0x6b, 0x5e, 0x6b, 0x51, 0x74, 0x18, 0x8e, 0xb2,
+	0x4a, 0x62, 0x2a, 0x6a, 0x18, 0x09, 0xd2, 0xa2, 0x45, 0xa5, 0x86, 0x11, 0x82, 0xfd, 0xab, 0x8a,
+	0xb5, 0x4a, 0x0d, 0x21, 0x39, 0xbf, 0x51, 0x02, 0x0e, 0x5b, 0xb8, 0x8a, 0xcb, 0xb6, 0x61, 0x52,
+	0xbd, 0x25, 0xef, 0x9b, 0xb0, 0xa0, 0xe9, 0x36, 0xae, 0x98, 0x9a, 0xbd, 0x1e, 0x1f, 0xa4, 0x2c,
+	0x78, 0x05, 0x44, 0x72, 0x55, 0xd1, 0xd5, 0x2a, 0x36, 0xad, 0xf8, 0xd0, 0x44, 0x94, 0x48, 0xba,
+	0xdf, 0xe8, 0x10, 0x84, 0x2b, 0x9a, 0x69, 0xd9, 0xb2, 0x85, 0xb1, 0x1e, 0x1f, 0x9e, 0x00, 0x93,
+	0x51, 0x69, 0xc4, 0x29, 0x29, 0x60, 0xac, 0x13, 0x35, 0xaa, 0x8a, 0x5b, 0x3b, 0xe2, 0xd4, 0x0e,
+	0x93, 0x02, 0x52, 0x79, 0xb5, 0x7f, 0x78, 0x20, 0x36, 0x28, 0xfc, 0x06, 0x80, 0xe3, 0x0b, 0xd8,
+	0x66, 0x26, 0xce, 0xaf, 0x61, 0x93, 0xcc, 0xa4, 0x70, 0xfe, 0x11, 0xa4, 0x3d, 0x12, 0x96, 0xf6,
+	0x68, 0x77, 0xda, 0x75, 0xb8, 0x37, 0xe8, 0xe3, 0xb3, 0x46, 0x43, 0xb7, 0x2d, 0x62, 0x03, 0xc5,
+	0x29, 0xc7, 0xd4, 0x11, 0x07, 0x24, 0xef, 0x9b, 0xd4, 0x99, 0xf8, 0x0e, 0x2e, 0xdb, 0x58, 0x75,
+	0xa0, 0x07, 0x24, 0xef, 0x1b, 0x25, 0x21, 0x6c, 0xe8, 0x9e, 0x64, 0xbf, 0x53, 0xeb, 0x2b, 0x11,
+	0x7e, 0x08, 0xe0, 0xfe, 0x1b, 0x9a, 0xad, 0x55, 0x9c, 0x78, 0x18, 0xe8, 0xf2, 0x6d, 0xb8, 0x43,
+	0x29, 0x93, 0x52, 0x59, 0xc7, 0x58, 0xc5, 0xd4, 0x0d, 0x06, 0xa4, 0x31, 0x5a, 0xb8, 0xe8, 0x94,
+	0xa1, 0x49, 0x18, 0xd3, 0x0d, 0x39, 0xd8, 0x8e, 0x8e, 0x6f, 0xa7, 0x6e, 0x64, 0xfc, 0x2d, 0x9d,
+	0x51, 0x5a, 0x46, 0x75, 0xcd, 0x3f, 0x4a, 0xfa, 0x2d, 0xfc, 0x3d, 0x80, 0xbb, 0x66, 0xf0, 0xaa,
+	0xb2, 0xa6, 0x19, 0xe6, 0x0d, 0x6c, 0x9b, 0x5a, 0xd9, 0x42, 0x39, 0x78, 0x84, 0x79, 0xa7, 0x7c,
+	0x57, 0xb3, 0x57, 0x65, 0x1d, 0xdb, 0x77, 0x0d, 0xf3, 0x7d, 0x99, 0xf8, 0x85, 0x49, 0x3b, 0xb4,
+	0xd8, 0x90, 0x92, 0xac, 0xe1, 0xf7, 0x34, 0x7b, 0x75, 0x91, 0x36, 0xcb, 0xf9, 0x5a, 0xa1, 0xcb,
+	0xf0, 0x50, 0x00, 0x6a, 0xc5, 0x30, 0x6b, 0xf2, 0x8a, 0x86, 0xab, 0xaa, 0x6c, 0x62, 0x45, 0xb5,
+	0xd8, 0x88, 0xc7, 0x7d, 0x30, 0xf3, 0x86, 0x59, 0x9b, 0x27, 0x2d, 0x24, 0xd2, 0x00, 0x9d, 0x87,
+	0x89, 0x96, 0xc1, 0xdc, 0x95, 0x4b, 0x6c, 0xc0, 0x16, 0x53, 0xe7, 0xad, 0xc0, 0x28, 0xee, 0xba,
+	0xfa, 0x58, 0xc2, 0x4f, 0xa3, 0x30, 0xd1, 0xc9, 0xc3, 0xd8, 0x64, 0x7e, 0x1b, 0xee, 0xb0, 0x0d,
+	0x5b, 0xa9, 0xca, 0xcd, 0x29, 0xed, 0xd8, 0xd9, 0x29, 0x64, 0x42, 0xc8, 0x82, 0xfb, 0x15, 0xe6,
+	0x17, 0x32, 0x0d, 0x8d, 0x72, 0xd9, 0xa1, 0xc9, 0x19, 0xfb, 0x28, 0x47, 0xe8, 0xed, 0xe4, 0x5e,
+	0xd2, 0x5e, 0xa5, 0x93, 0xd3, 0xad, 0xc3, 0x78, 0xcd, 0xf3, 0x8d, 0x96, 0x6e, 0xa3, 0x4e, 0xb7,
+	0x97, 0x42, 0x77, 0xdb, 0xd9, 0xc9, 0xa4, 0xfd, 0xb5, 0xce, 0xce, 0x57, 0x86, 0x31, 0xd7, 0xbe,
+	0x72, 0x8d, 0x7a, 0x84, 0xe3, 0xbd, 0xa3, 0xd3, 0xdf, 0x0d, 0xdd, 0x65, 0x8b, 0x47, 0x49, 0xbb,
+	0x4a, 0xc1, 0x02, 0xe1, 0xcf, 0x00, 0x8c, 0xcf, 0x34, 0xaa, 0xef, 0xcf, 0xe1, 0x2a, 0xb6, 0xf1,
+	0x9c, 0x51, 0x53, 0x34, 0x3d, 0xe4, 0xca, 0xf0, 0x0e, 0x84, 0x4a, 0xb5, 0x6a, 0xdc, 0x95, 0xab,
+	0x9a, 0x65, 0xc7, 0x23, 0x24, 0x2a, 0xcd, 0x1c, 0x22, 0x13, 0x7a, 0xe4, 0x31, 0x18, 0x14, 0xfa,
+	0xcd, 0xc8, 0x2a, 0x20, 0x5f, 0xf0, 0x31, 0x18, 0x12, 0x06, 0xcc, 0x68, 0xfc, 0x61, 0x44, 0x1a,
+	0x71, 0x04, 0x48, 0x50, 0x47, 0x73, 0x70, 0x27, 0xd3, 0x1b, 0xab, 0x14, 0x21, 0x1a, 0x06, 0x61,
+	0x87, 0x27, 0x44, 0x50, 0x84, 0xd3, 0x70, 0xbc, 0xc3, 0xe8, 0x99, 0x57, 0xc5, 0xe1, 0x90, 0xea,
+	0x54, 0xd0, 0x79, 0x3b, 0x2c, 0xb9, 0x9f, 0xc2, 0xa7, 0x00, 0x8e, 0x49, 0xb8, 0x6e, 0x98, 0xf6,
+	0xbc, 0x56, 0xb5, 0xb1, 0x89, 0x4e, 0xc2, 0xd1, 0xb2, 0x51, 0x6d, 0xd4, 0x74, 0x1a, 0xce, 0x41,
+	0xdb, 0x3a, 0x07, 0x69, 0xb5, 0x13, 0xda, 0x31, 0x1c, 0x36, 0xea, 0xd8, 0x54, 0x48, 0x18, 0x8f,
+	0x70, 0xae, 0xfa, 0xfe, 0x5e, 0xf3, 0x0c, 0x24, 0xb0, 0xea, 0x7b, 0xd0, 0xe8, 0x38, 0x1c, 0x5c,
+	0x53, 0xaa, 0x0d, 0x6c, 0x31, 0xcb, 0xec, 0x6a, 0xb5, 0x05, 0xab, 0x3e, 0x37, 0xf8, 0x97, 0x4f,
+	0x88, 0xa8, 0xf0, 0x31, 0x80, 0xfb, 0xbc, 0x65, 0x92, 0x74, 0x33, 0x6b, 0x6a, 0x36, 0x36, 0x35,
+	0xa5, 0x25, 0x48, 0x83, 0xb0, 0x41, 0x3a, 0xd2, 0x35, 0x48, 0x93, 0xe5, 0x77, 0xc5, 0x51, 0x82,
+	0x8e, 0x8e, 0x67, 0xf9, 0xf5, 0x9b, 0x40, 0x72, 0x51, 0x84, 0xcf, 0x01, 0x3c, 0x90, 0x59, 0x59,
+	0x71, 0x42, 0xf6, 0xb2, 0x85, 0xcd, 0xff, 0x7f, 0x2a, 0x04, 0x13, 0x86, 0xfe, 0x96, 0x14, 0xec,
+	0xdf, 0x00, 0xdc, 0xd9, 0xa2, 0xd2, 0xad, 0x66, 0x0a, 0x43, 0x23, 0xd8, 0x45, 0xce, 0xe4, 0xb1,
+	0xc5, 0x46, 0x57, 0xfa, 0xbc, 0x6c, 0x06, 0xd5, 0xe0, 0x4e, 0x85, 0x59, 0x53, 0x6e, 0x58, 0xd8,
+	0x74, 0xa3, 0xd5, 0x5c, 0xf8, 0x20, 0xd9, 0x9d, 0x8c, 0x2b, 0x7d, 0xd2, 0x0e, 0xc5, 0x5f, 0x3d,
+	0x13, 0x83, 0xc3, 0x65, 0x57, 0xad, 0xfe, 0xe7, 0x4f, 0x00, 0xb8, 0xda, 0x3f, 0x0c, 0x62, 0x11,
+	0xe1, 0x55, 0x14, 0x0e, 0x52, 0xd9, 0x1e, 0xc1, 0xe4, 0x00, 0x1c, 0x31, 0x9d, 0x76, 0x5e, 0x9a,
+	0x49, 0xd6, 0x46, 0x52, 0x90, 0x53, 0xd1, 0x7b, 0x70, 0x94, 0x55, 0x92, 0xed, 0x03, 0xcb, 0xb4,
+	0x4f, 0x71, 0xb2, 0x55, 0x5c, 0xaf, 0xe3, 0xc0, 0x4c, 0x83, 0xa6, 0x57, 0x8e, 0xde, 0x83, 0xbb,
+	0x58, 0x0f, 0xae, 0x1a, 0x2c, 0xd4, 0x9e, 0xe1, 0xec, 0xc5, 0x35, 0x91, 0xb4, 0xd3, 0x0c, 0x92,
+	0x7d, 0x08, 0xc2, 0xb2, 0x89, 0x9d, 0x68, 0x57, 0x5a, 0x8f, 0x0f, 0x50, 0xfd, 0x59, 0xc9, 0xcc,
+	0x3a, 0x3a, 0xdb, 0xac, 0x56, 0x6c, 0x27, 0xff, 0x1b, 0x9d, 0x4e, 0xa4, 0xe8, 0x9e, 0x2c, 0xe5,
+	0xee, 0xc9, 0x52, 0x45, 0x77, 0x4f, 0xe6, 0x89, 0x66, 0x6c, 0x82, 0xdc, 0x70, 0xf6, 0x07, 0x0e,
+	0xf2, 0x10, 0x45, 0x66, 0x25, 0x14, 0xd9, 0xad, 0x56, 0x6c, 0x27, 0x3d, 0xec, 0x81, 0xcc, 0x5a,
+	0x67, 0x6c, 0x24, 0x7a, 0x76, 0x77, 0xa2, 0xe2, 0x88, 0x33, 0x97, 0xc6, 0x88, 0x09, 0x87, 0xcc,
+	0x81, 0x18, 0x88, 0xff, 0xaf, 0x67, 0x44, 0x12, 0x17, 0x85, 0x3f, 0xef, 0x87, 0xbb, 0xa9, 0x15,
+	0xc8, 0xfa, 0x7f, 0x45, 0xb3, 0x6c, 0xc3, 0x5c, 0xef, 0xc1, 0xfb, 0x3e, 0x38, 0x78, 0xc7, 0x28,
+	0x35, 0x49, 0x1f, 0xb8, 0x63, 0x94, 0x72, 0x6a, 0xd0, 0x1d, 0xa2, 0x2d, 0xee, 0x70, 0xd3, 0xdb,
+	0x73, 0xf5, 0x3b, 0x9e, 0xc0, 0x3b, 0x6f, 0xbb, 0xef, 0xb5, 0xde, 0x20, 0x4b, 0x17, 0xe0, 0x58,
+	0xd9, 0xa8, 0xd5, 0x9d, 0xf5, 0x87, 0x08, 0x0f, 0xf5, 0x14, 0x1e, 0xf5, 0xda, 0x67, 0xec, 0xd6,
+	0x29, 0x30, 0xfc, 0x8d, 0x4c, 0x81, 0x91, 0xed, 0x9d, 0x02, 0x87, 0x83, 0xee, 0x04, 0xe9, 0x9e,
+	0xc9, 0xe7, 0x40, 0x17, 0xe0, 0x21, 0xb2, 0xaa, 0x53, 0x18, 0xcb, 0xe7, 0x44, 0xa1, 0x12, 0x12,
+	0x61, 0x0d, 0x26, 0xbb, 0x89, 0xb3, 0x8c, 0xa0, 0x08, 0x87, 0x68, 0x77, 0xee, 0xa6, 0xf1, 0x1c,
+	0xa7, 0x6e, 0x7e, 0x50, 0x17, 0x4a, 0xf8, 0x9b, 0x08, 0xdc, 0x33, 0xeb, 0x10, 0x4d, 0x1b, 0x85,
+	0x4b, 0x9f, 0x5a, 0x18, 0x8d, 0x7c, 0x23, 0x8c, 0x46, 0xb7, 0x97, 0xd1, 0x96, 0x00, 0xd1, 0xff,
+	0xfa, 0x00, 0x81, 0xbe, 0x05, 0x51, 0x05, 0xeb, 0x24, 0xbd, 0xc1, 0xb2, 0xa1, 0xcb, 0x74, 0x72,
+	0x38, 0xb3, 0x6c, 0x58, 0x8a, 0xb9, 0x35, 0x79, 0x9d, 0xda, 0x52, 0x90, 0xe1, 0xde, 0xa0, 0x55,
+	0x19, 0x89, 0x0b, 0x70, 0x90, 0x62, 0x3a, 0x36, 0x1d, 0x9d, 0x4e, 0x73, 0x6a, 0x23, 0x31, 0x71,
+	0xa1, 0x02, 0x7f, 0x6e, 0x01, 0xdb, 0x73, 0xc6, 0x5d, 0xbd, 0x6a, 0x28, 0x2a, 0xad, 0x5c, 0x32,
+	0xb1, 0xa5, 0x55, 0x74, 0xac, 0x2e, 0x9b, 0xd5, 0x70, 0x3c, 0x1e, 0x09, 0x46, 0xb0, 0x40, 0xd6,
+	0x48, 0xa3, 0x99, 0x70, 0x1f, 0x1e, 0xed, 0xd1, 0x51, 0x73, 0x1f, 0x54, 0x77, 0xcb, 0xe5, 0x86,
+	0x59, 0x65, 0xbd, 0x8d, 0xd5, 0x7d, 0x8d, 0x89, 0x15, 0xf1, 0xbd, 0xba, 0x66, 0x62, 0x4b, 0xd6,
+	0x74, 0xd9, 0xc2, 0x65, 0x43, 0x67, 0xfb, 0xb7, 0xa8, 0x14, 0x63, 0x35, 0x39, 0xbd, 0x40, 0xcb,
+	0xa7, 0x2e, 0xc1, 0xbd, 0x9d, 0xce, 0x8d, 0xd0, 0x28, 0x1c, 0x5a, 0x5e, 0xbc, 0xb6, 0x98, 0xff,
+	0xde, 0x62, 0xac, 0x0f, 0x8d, 0xc1, 0xe1, 0xcc, 0xd2, 0x92, 0x94, 0x7f, 0x37, 0x3b, 0x17, 0x03,
+	0xe4, 0x4b, 0xca, 0x5e, 0xcd, 0xce, 0x16, 0xb3, 0x73, 0xb1, 0xc8, 0x54, 0x09, 0xc2, 0xa6, 0xaf,
+	0xa1, 0x03, 0xf0, 0x2d, 0x29, 0xbb, 0x94, 0x97, 0x8a, 0x72, 0xf1, 0xe6, 0x52, 0x56, 0x5e, 0x5e,
+	0x2c, 0x2c, 0x65, 0x67, 0x73, 0xf3, 0xb9, 0xec, 0x5c, 0xac, 0x0f, 0xbd, 0x05, 0xf7, 0xf8, 0x2b,
+	0x0b, 0xb3, 0x52, 0x6e, 0xa9, 0x58, 0x88, 0x01, 0x94, 0x84, 0x09, 0x7f, 0x45, 0x66, 0x7e, 0xde,
+	0x41, 0x97, 0x97, 0x0b, 0x59, 0xa9, 0x10, 0x8b, 0x4c, 0x3d, 0xf1, 0xf2, 0xf1, 0x82, 0x1b, 0x87,
+	0xc7, 0x99, 0x40, 0xa1, 0x98, 0x29, 0x2e, 0x17, 0x5a, 0x3a, 0x8a, 0xc3, 0xbd, 0xc1, 0xea, 0x5f,
+	0x5c, 0xce, 0x2e, 0x3b, 0x63, 0x6f, 0x13, 0xcc, 0x2d, 0xca, 0x4b, 0x52, 0x7e, 0x41, 0xca, 0x16,
+	0x0a, 0xb1, 0x88, 0x6f, 0xf8, 0xac, 0x7a, 0x36, 0x7f, 0x63, 0xe9, 0x7a, 0x96, 0x68, 0x1a, 0x45,
+	0xe3, 0x70, 0x5f, 0xb0, 0x32, 0x2b, 0x49, 0x79, 0x29, 0x3b, 0x17, 0xeb, 0x6f, 0x97, 0x2b, 0xe6,
+	0x6e, 0x64, 0xe7, 0xe4, 0xfc, 0x72, 0x31, 0x36, 0x30, 0xf5, 0x10, 0xc0, 0xbd, 0x9d, 0xf2, 0x7a,
+	0x74, 0x0c, 0x0a, 0x4c, 0x6a, 0x3e, 0x77, 0xbd, 0x98, 0x95, 0xe4, 0xfc, 0x52, 0x56, 0xca, 0x14,
+	0xf3, 0x52, 0x8b, 0x3a, 0xcd, 0x41, 0xb7, 0xb6, 0xcb, 0x2d, 0xc6, 0x00, 0x3a, 0x02, 0x0f, 0x75,
+	0xa9, 0x5e, 0xcc, 0x17, 0x49, 0x93, 0xc8, 0xf4, 0x8f, 0xae, 0xc1, 0x91, 0x59, 0xe7, 0x1c, 0x39,
+	0xb3, 0x94, 0x43, 0x9f, 0x03, 0xd8, 0x9f, 0xd3, 0x35, 0x1b, 0xfd, 0x02, 0xc7, 0x99, 0x98, 0xe6,
+	0xc6, 0xad, 0xc4, 0x69, 0x4e, 0x29, 0xea, 0xbc, 0xc2, 0xea, 0xdf, 0xfd, 0x69, 0x64, 0xf7, 0xb2,
+	0x85, 0x27, 0x0a, 0x8d, 0x12, 0x49, 0x43, 0x4b, 0x78, 0x22, 0xb3, 0x94, 0xdb, 0x78, 0x16, 0x3f,
+	0xb6, 0x72, 0xfa, 0x5e, 0x59, 0xa4, 0xf2, 0x22, 0x91, 0x17, 0x99, 0xbc, 0x68, 0xd9, 0x8a, 0xae,
+	0x2a, 0xa6, 0x2a, 0x92, 0x14, 0xf5, 0xd1, 0xa7, 0x5f, 0xfc, 0x24, 0xf2, 0xb6, 0x90, 0x64, 0xe7,
+	0xe2, 0x69, 0x6f, 0x8a, 0x59, 0x69, 0x6b, 0xdd, 0xb2, 0x71, 0x2d, 0xad, 0xe9, 0x9a, 0x7d, 0x0e,
+	0x4c, 0xa1, 0x1f, 0x46, 0x20, 0x22, 0x13, 0x0a, 0xdb, 0x4e, 0x0a, 0xca, 0xf6, 0x7d, 0x68, 0x26,
+	0xf4, 0xb8, 0xdb, 0x85, 0x5d, 0xdd, 0x67, 0xb7, 0x84, 0xc1, 0x2c, 0xa1, 0x6e, 0x3c, 0x8b, 0x9f,
+	0xe8, 0xad, 0x74, 0xcd, 0xd0, 0x35, 0xdb, 0xa0, 0x7a, 0xff, 0x3c, 0x4a, 0x77, 0xd0, 0xfb, 0x81,
+	0xf7, 0xfb, 0x83, 0xb4, 0xca, 0x3a, 0x93, 0x55, 0xa6, 0xee, 0x8f, 0x22, 0x70, 0x0f, 0x59, 0xef,
+	0x5a, 0xcd, 0x10, 0x5e, 0x85, 0x0e, 0xd2, 0xae, 0x1d, 0xe6, 0xb6, 0x06, 0xc2, 0x0c, 0xb1, 0xc2,
+	0x6f, 0x88, 0x53, 0x42, 0x2a, 0xa4, 0x21, 0x58, 0x67, 0xc4, 0x21, 0xfe, 0x1b, 0xc0, 0x98, 0x13,
+	0x61, 0x49, 0xc9, 0x1c, 0xb6, 0x15, 0xad, 0x6a, 0xa1, 0xcb, 0x5c, 0x54, 0xfa, 0x45, 0x5d, 0x23,
+	0x64, 0xb6, 0x80, 0xc0, 0x2c, 0x50, 0xe2, 0xb7, 0x40, 0x1a, 0x89, 0xbd, 0x2c, 0xe0, 0x74, 0x25,
+	0xab, 0x4c, 0xd1, 0xdf, 0x8b, 0xc0, 0x03, 0x0b, 0xd8, 0xbe, 0x6a, 0xe5, 0xf4, 0x3b, 0xd8, 0x39,
+	0xef, 0x9b, 0x35, 0xf4, 0x15, 0xad, 0xd2, 0x30, 0x9d, 0x43, 0x25, 0x74, 0x8d, 0x47, 0x8d, 0x6e,
+	0x28, 0xae, 0x4d, 0xae, 0x6f, 0x0f, 0xd8, 0x9b, 0x9c, 0x29, 0x77, 0x2c, 0xb9, 0x1c, 0x30, 0xc0,
+	0xdf, 0x02, 0x38, 0x58, 0xc4, 0x96, 0x7d, 0xb5, 0x80, 0xbe, 0x13, 0x7a, 0xf8, 0x54, 0xc0, 0x55,
+	0xfb, 0x0c, 0xb7, 0x1c, 0xd3, 0xf0, 0x16, 0x67, 0x00, 0x9c, 0x12, 0x8e, 0xf6, 0x50, 0xcf, 0xc6,
+	0x96, 0x7d, 0xc7, 0x71, 0xfb, 0x7f, 0x04, 0x70, 0x64, 0x01, 0xbb, 0x6b, 0xe6, 0x59, 0x1e, 0x66,
+	0x02, 0xf7, 0x5f, 0x89, 0x73, 0x9b, 0x11, 0xf5, 0x29, 0xc8, 0x49, 0xe1, 0x71, 0xd4, 0x4b, 0x47,
+	0xb6, 0x1d, 0xfb, 0x57, 0x00, 0x77, 0xd0, 0xbb, 0x2f, 0x37, 0xb8, 0x85, 0x3f, 0x69, 0x0b, 0xc8,
+	0xb9, 0x8a, 0x5e, 0xdc, 0xac, 0xb8, 0x6f, 0x3a, 0xf3, 0xb0, 0x39, 0x2d, 0xf4, 0x9a, 0xcb, 0x74,
+	0xb7, 0xed, 0x06, 0x75, 0xc2, 0xea, 0x97, 0x00, 0x8e, 0x92, 0xa0, 0xea, 0x9e, 0x7b, 0x9f, 0xe7,
+	0x0a, 0xc5, 0xc1, 0xcb, 0xbd, 0xc4, 0x3b, 0x9b, 0x13, 0x66, 0xea, 0xfe, 0x80, 0x9f, 0xdb, 0x93,
+	0xc2, 0xb1, 0x5e, 0xdc, 0xd2, 0x4e, 0x88, 0xaa, 0x7f, 0x11, 0x85, 0xe3, 0xfe, 0xbb, 0xcd, 0xab,
+	0x0d, 0xcb, 0xd6, 0x56, 0xb4, 0x32, 0x9d, 0xb6, 0x39, 0x4e, 0xb2, 0x3a, 0x60, 0xb8, 0x66, 0xb8,
+	0xba, 0x1d, 0x50, 0xcc, 0x28, 0xbf, 0x1d, 0x09, 0xef, 0x04, 0xaf, 0x9e, 0xc5, 0x7f, 0x06, 0xa0,
+	0xb8, 0x86, 0x2d, 0x51, 0x33, 0x44, 0xda, 0xb9, 0x58, 0xb6, 0x54, 0x91, 0xd2, 0x2e, 0x52, 0x5b,
+	0x88, 0x77, 0x02, 0x7a, 0xff, 0x00, 0xf6, 0xd7, 0x0d, 0xcb, 0x46, 0xef, 0x76, 0x30, 0xe4, 0xe4,
+	0x6d, 0x45, 0xbc, 0xff, 0xfd, 0xc9, 0xdb, 0xa2, 0x22, 0xde, 0xff, 0xb6, 0x78, 0xf6, 0xfb, 0x53,
+	0xb7, 0xd9, 0x8f, 0x13, 0x97, 0x4e, 0xb8, 0x96, 0x4d, 0x4f, 0xde, 0x16, 0x65, 0x45, 0xbc, 0x9f,
+	0x11, 0x6f, 0x91, 0x9a, 0x93, 0x27, 0xd2, 0x01, 0xfc, 0xc4, 0x20, 0x4d, 0xa7, 0x1c, 0xba, 0xb2,
+	0xc2, 0xe5, 0x70, 0x74, 0xa5, 0x1f, 0x78, 0x67, 0x9b, 0x1f, 0x04, 0xf1, 0x08, 0x91, 0x7f, 0x15,
+	0x85, 0xe3, 0xf4, 0x10, 0x7e, 0x6b, 0x44, 0x76, 0xc5, 0xe0, 0x27, 0xf2, 0x35, 0x50, 0x8c, 0xc8,
+	0x9f, 0x12, 0x22, 0x8f, 0xf7, 0x26, 0x52, 0x51, 0x6b, 0x9a, 0xfe, 0xea, 0x59, 0xfc, 0xc3, 0x8e,
+	0x4c, 0xd2, 0x3b, 0x85, 0xce, 0x4c, 0xca, 0x70, 0x90, 0x56, 0xa3, 0xe5, 0xcd, 0x71, 0x19, 0xb4,
+	0x74, 0x1b, 0xb1, 0x01, 0x2a, 0xaf, 0x4c, 0xcd, 0x87, 0xa2, 0xb2, 0x05, 0xf3, 0x41, 0xe0, 0x93,
+	0xd0, 0x8b, 0xfe, 0x13, 0xc0, 0xdd, 0x6d, 0xd7, 0x2a, 0x28, 0x7c, 0x36, 0xd4, 0xed, 0x42, 0x29,
+	0x31, 0xb3, 0x15, 0x08, 0xc6, 0xda, 0x6d, 0xce, 0x10, 0x7c, 0x72, 0xea, 0x58, 0xa8, 0x74, 0xca,
+	0x09, 0x48, 0x44, 0x73, 0x5f, 0x20, 0xbc, 0x8e, 0x2b, 0x4a, 0x79, 0x9d, 0x43, 0xf3, 0x36, 0x59,
+	0x7e, 0xcd, 0x3b, 0x40, 0xf8, 0x34, 0xe7, 0x8c, 0xc6, 0x93, 0x28, 0x64, 0x34, 0x46, 0xbf, 0x13,
+	0xa1, 0x9a, 0x07, 0x8e, 0xfd, 0x39, 0x35, 0x6f, 0xb9, 0x32, 0xd8, 0x8c, 0xe6, 0x2d, 0x10, 0x4c,
+	0xf3, 0x7b, 0xfc, 0x9a, 0x6f, 0x2e, 0xb0, 0x05, 0x6e, 0x35, 0x88, 0x43, 0xfc, 0x2c, 0x4a, 0xcd,
+	0x12, 0x78, 0x84, 0xc2, 0x69, 0x96, 0x4e, 0xaf, 0x6e, 0x38, 0xcd, 0xd2, 0xf1, 0x0d, 0x8c, 0xf0,
+	0x35, 0xe0, 0xb2, 0xcb, 0xab, 0x67, 0xf1, 0x5f, 0x03, 0xf0, 0x68, 0x7b, 0x08, 0xab, 0x6a, 0x96,
+	0x2d, 0x6a, 0x4e, 0x17, 0xa2, 0xeb, 0x0f, 0xef, 0xc2, 0x68, 0x05, 0xdb, 0x28, 0xbf, 0x6d, 0x6b,
+	0x10, 0xc5, 0x0f, 0x44, 0xac, 0xf3, 0xe8, 0xec, 0x26, 0x38, 0xa2, 0x40, 0xe8, 0x8b, 0x28, 0x3c,
+	0x4c, 0x4c, 0xd3, 0xe1, 0xb5, 0xc3, 0xcc, 0x3a, 0x7b, 0xc2, 0x93, 0xe7, 0x32, 0xf2, 0x6b, 0x90,
+	0x5c, 0xd6, 0x96, 0xb6, 0x0f, 0x90, 0x71, 0xf8, 0xbb, 0x11, 0x5e, 0x0e, 0xff, 0x00, 0xc0, 0xd3,
+	0x5d, 0x38, 0x64, 0x0f, 0x44, 0x44, 0xff, 0x03, 0x11, 0xb1, 0xb4, 0xce, 0x48, 0x45, 0x65, 0xca,
+	0xe9, 0x2f, 0x6f, 0x1b, 0xa7, 0x7a, 0xbb, 0x82, 0x01, 0x82, 0x33, 0xe8, 0x52, 0x58, 0x82, 0x09,
+	0xb3, 0x1d, 0xe0, 0xd0, 0x1f, 0x47, 0xe1, 0x7e, 0x62, 0x4b, 0xef, 0x35, 0x4a, 0x93, 0xdd, 0x79,
+	0x2e, 0x32, 0xda, 0x01, 0x5c, 0x52, 0x17, 0xb6, 0x8c, 0xc3, 0xb8, 0x7c, 0xc4, 0xcd, 0xe5, 0x63,
+	0x00, 0xbf, 0xd5, 0x85, 0xcb, 0x15, 0xc3, 0xac, 0x89, 0xce, 0x0b, 0x1d, 0x3f, 0x85, 0xb7, 0x28,
+	0x85, 0x85, 0x6d, 0xa3, 0x70, 0xc5, 0x53, 0x27, 0xc0, 0xdc, 0x77, 0xd1, 0x77, 0x78, 0x98, 0x6b,
+	0xa2, 0xa0, 0x3f, 0x8c, 0xc2, 0x7d, 0xc4, 0x4e, 0xde, 0xe3, 0x1f, 0x8f, 0xaf, 0x2c, 0x97, 0x9d,
+	0xdb, 0xe4, 0x5d, 0xba, 0xe6, 0xb7, 0x0a, 0xc3, 0xd8, 0xfa, 0x1f, 0xee, 0xe8, 0xf9, 0x5b, 0x00,
+	0x4e, 0x75, 0x61, 0xcb, 0x7b, 0x09, 0xe5, 0xe3, 0xea, 0x26, 0xe5, 0x4a, 0xda, 0x36, 0xae, 0xbc,
+	0x4e, 0x02, 0x54, 0x9d, 0x41, 0xa7, 0x79, 0xa8, 0xf2, 0x40, 0xd0, 0xe3, 0x28, 0xdc, 0xed, 0x3d,
+	0xca, 0x72, 0xdf, 0x64, 0x21, 0xae, 0x43, 0xaf, 0xa0, 0x2c, 0xff, 0xda, 0xd6, 0x01, 0x82, 0xb1,
+	0xf3, 0x1f, 0xdc, 0xec, 0xfc, 0x2a, 0x80, 0x47, 0xda, 0xd9, 0x61, 0x79, 0xb9, 0xe1, 0xaa, 0xb7,
+	0xed, 0xa4, 0xa8, 0x8a, 0xb5, 0x5a, 0x32, 0x14, 0x53, 0xdd, 0x0a, 0x29, 0x1e, 0x08, 0xfa, 0x77,
+	0x00, 0x77, 0x06, 0xc3, 0x0c, 0xba, 0xb8, 0xc9, 0xf8, 0xe4, 0xd2, 0x71, 0x69, 0xd3, 0xf2, 0x8c,
+	0x0b, 0x85, 0x3f, 0xfd, 0x4a, 0x09, 0x27, 0x7a, 0xe8, 0xdf, 0x0c, 0x19, 0x24, 0xcf, 0xfa, 0x9a,
+	0x25, 0xde, 0xcd, 0xde, 0x17, 0xb0, 0xcd, 0x99, 0x67, 0x05, 0x64, 0x37, 0x97, 0x67, 0xb5, 0x40,
+	0x6c, 0xe1, 0x18, 0x04, 0x85, 0xd7, 0x1f, 0xfd, 0x4b, 0x04, 0x8e, 0x2d, 0xe0, 0x66, 0xe7, 0xe8,
+	0x1d, 0x9e, 0x09, 0xe4, 0x7b, 0xa7, 0x49, 0x55, 0xbe, 0xb0, 0x49, 0x69, 0xa6, 0xed, 0x0b, 0xee,
+	0x99, 0x77, 0x1f, 0x1e, 0x0c, 0x4e, 0xbc, 0x0a, 0xf6, 0xaf, 0x5f, 0x48, 0xa2, 0x73, 0xee, 0x1a,
+	0xef, 0x9c, 0x6b, 0x9a, 0xe8, 0xf5, 0x3b, 0xdf, 0x6f, 0xa3, 0x54, 0x68, 0x63, 0x3b, 0xf3, 0xcd,
+	0xc9, 0x2a, 0xfc, 0x27, 0x3d, 0x12, 0x56, 0x54, 0x76, 0x8c, 0x3a, 0xbf, 0xa9, 0xa3, 0xa2, 0x26,
+	0x00, 0x7f, 0x56, 0xd1, 0x0d, 0xc7, 0x9f, 0x55, 0x84, 0x3f, 0x6f, 0x7a, 0x0c, 0xe0, 0xc9, 0x5e,
+	0xe7, 0x4d, 0x26, 0x56, 0x54, 0x91, 0x9d, 0xb1, 0xde, 0x66, 0xa7, 0x4d, 0xdb, 0x97, 0x52, 0x98,
+	0x9e, 0x0e, 0xc1, 0x6c, 0x5f, 0xe0, 0x4a, 0x29, 0x9a, 0x28, 0x24, 0x3e, 0x7c, 0x12, 0x85, 0x89,
+	0xee, 0xff, 0x82, 0x40, 0x9b, 0x3b, 0xdf, 0xeb, 0xf8, 0x67, 0x90, 0xc4, 0xb5, 0x6d, 0xc1, 0x62,
+	0xe4, 0xfd, 0x98, 0x8f, 0xbc, 0x8f, 0x00, 0x4c, 0xf7, 0x22, 0xcf, 0x7d, 0xa7, 0xec, 0x12, 0xf8,
+	0x1e, 0x23, 0xf0, 0x97, 0xb6, 0x8d, 0xc0, 0x96, 0x1e, 0x02, 0x2c, 0x5e, 0x16, 0xce, 0xf3, 0xb0,
+	0xd8, 0x02, 0x45, 0xa8, 0xfc, 0xf5, 0x08, 0xdc, 0x43, 0x2d, 0xe7, 0xcc, 0xc8, 0x8c, 0xae, 0x54,
+	0xd7, 0x2d, 0x8d, 0xe7, 0xde, 0xb2, 0x83, 0x34, 0xff, 0xbd, 0x65, 0x47, 0x10, 0xc6, 0x5a, 0x85,
+	0xf3, 0x8c, 0xe9, 0x8c, 0x30, 0x1d, 0x3e, 0x00, 0x29, 0xac, 0x37, 0x62, 0x8b, 0x0d, 0x00, 0x21,
+	0xc9, 0x81, 0x1a, 0xb5, 0x9a, 0x62, 0xae, 0x23, 0xbe, 0x7b, 0x18, 0x2a, 0xe4, 0x6a, 0x7e, 0x7e,
+	0x53, 0xb2, 0x6f, 0xf4, 0x68, 0x89, 0x69, 0xc5, 0xae, 0xeb, 0x5b, 0x1e, 0xff, 0xa3, 0x4d, 0x64,
+	0x89, 0xad, 0xff, 0x4d, 0xe1, 0xbb, 0xae, 0xef, 0xf2, 0xef, 0x83, 0x37, 0x73, 0x09, 0xe9, 0xce,
+	0x02, 0x2f, 0xf1, 0xfc, 0xcd, 0x08, 0xdd, 0xc8, 0xb6, 0x3f, 0x4f, 0xe3, 0xdc, 0xc8, 0x76, 0x7d,
+	0x1e, 0xc7, 0xb9, 0x91, 0xed, 0xfe, 0x4e, 0x4e, 0x28, 0xf3, 0x5b, 0xa4, 0xf7, 0x1a, 0xcc, 0x9e,
+	0xcb, 0x89, 0xab, 0x4c, 0xeb, 0x2f, 0x01, 0x1c, 0xf3, 0x3f, 0xf0, 0xe2, 0xc8, 0x7a, 0x3a, 0xbc,
+	0xb6, 0xe3, 0xc8, 0x7a, 0x3a, 0xbd, 0x2a, 0xe3, 0x3f, 0x56, 0xee, 0x79, 0xcf, 0xc5, 0xf4, 0x25,
+	0xd3, 0xfc, 0x1f, 0xa2, 0xf0, 0xd0, 0x6b, 0x5f, 0x80, 0xa1, 0x1b, 0x7c, 0x4f, 0x0d, 0x7a, 0x3c,
+	0x59, 0x4b, 0x2c, 0x6e, 0x17, 0x1c, 0xb3, 0xce, 0x47, 0xdc, 0x27, 0x1b, 0xbf, 0x0f, 0xe0, 0xa9,
+	0xf6, 0x95, 0x8c, 0x24, 0x86, 0x2a, 0xeb, 0x4e, 0xa4, 0x06, 0x12, 0xbd, 0xc7, 0x6d, 0x62, 0xc3,
+	0xac, 0x22, 0x85, 0xe6, 0x8a, 0xb7, 0x78, 0x17, 0x33, 0x66, 0xed, 0x74, 0x0d, 0xdb, 0x8a, 0xaa,
+	0xd8, 0x4a, 0x87, 0x8d, 0x1a, 0xeb, 0x37, 0xb0, 0x9c, 0xcd, 0xa2, 0x4c, 0x38, 0x1a, 0x9b, 0xc0,
+	0x0f, 0xe8, 0x73, 0xbf, 0x0f, 0x9a, 0x80, 0xa3, 0x4f, 0x9f, 0x80, 0xe8, 0xa3, 0xbf, 0x8e, 0x47,
+	0x1f, 0x02, 0x30, 0xf3, 0x13, 0xf0, 0xfc, 0x45, 0xb2, 0xef, 0xb3, 0x17, 0xc9, 0xbe, 0xaf, 0x5e,
+	0x24, 0xc1, 0xc3, 0x8d, 0x24, 0xf8, 0xa3, 0x8d, 0x24, 0xf8, 0x64, 0x23, 0x09, 0x9e, 0x6f, 0x24,
+	0xc1, 0x3f, 0x6d, 0x24, 0xc1, 0x97, 0x1b, 0xc9, 0xbe, 0xaf, 0x36, 0x92, 0xe0, 0xc7, 0x2f, 0x93,
+	0x7d, 0x4f, 0x5f, 0x26, 0xc1, 0xf3, 0x97, 0xc9, 0xbe, 0xcf, 0x5e, 0x26, 0xfb, 0x6e, 0xdd, 0xac,
+	0x18, 0xf5, 0xf7, 0x2b, 0xa9, 0x35, 0xa3, 0x6a, 0x63, 0xd3, 0x54, 0x52, 0x0d, 0x2b, 0xed, 0xfc,
+	0x70, 0x52, 0x69, 0xb2, 0x8e, 0x6a, 0x2a, 0x36, 0x45, 0xc2, 0x42, 0xba, 0x5e, 0xaa, 0x18, 0x69,
+	0x7c, 0xcf, 0x76, 0xff, 0x70, 0xdb, 0xe3, 0x7f, 0xb7, 0xa5, 0x41, 0xe7, 0x81, 0xf1, 0xa9, 0xff,
+	0x0b, 0x00, 0x00, 0xff, 0xff, 0xfc, 0x07, 0x22, 0x5a, 0x9d, 0x3c, 0x00, 0x00,
 }
 
 func (x ScriptApprovalStatus) String() string {
 	s, ok := ScriptApprovalStatus_name[int32(x)]
+	if ok {
+		return s
+	}
+	return strconv.Itoa(int(x))
+}
+func (x ReportType) String() string {
+	s, ok := ReportType_name[int32(x)]
+	if ok {
+		return s
+	}
+	return strconv.Itoa(int(x))
+}
+func (x ReportStatus) String() string {
+	s, ok := ReportStatus_name[int32(x)]
+	if ok {
+		return s
+	}
+	return strconv.Itoa(int(x))
+}
+func (x ReportFilterOperator) String() string {
+	s, ok := ReportFilterOperator_name[int32(x)]
 	if ok {
 		return s
 	}
@@ -1621,6 +2934,458 @@ func (this *BulkDeleteDomainsResponse) Equal(that interface{}) bool {
 	}
 	return true
 }
+func (this *ReportFilter) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ReportFilter)
+	if !ok {
+		that2, ok := that.(ReportFilter)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.ColumnName != that1.ColumnName {
+		return false
+	}
+	if this.Operator != that1.Operator {
+		return false
+	}
+	if len(this.Values) != len(that1.Values) {
+		return false
+	}
+	for i := range this.Values {
+		if this.Values[i] != that1.Values[i] {
+			return false
+		}
+	}
+	return true
+}
+func (this *ScriptsReportCriteria) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ScriptsReportCriteria)
+	if !ok {
+		that2, ok := that.(ScriptsReportCriteria)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.StartTime != that1.StartTime {
+		return false
+	}
+	if this.EndTime != that1.EndTime {
+		return false
+	}
+	if len(this.Filters) != len(that1.Filters) {
+		return false
+	}
+	for i := range this.Filters {
+		if !this.Filters[i].Equal(that1.Filters[i]) {
+			return false
+		}
+	}
+	return true
+}
+func (this *AffectedUsersReportCriteria) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*AffectedUsersReportCriteria)
+	if !ok {
+		that2, ok := that.(AffectedUsersReportCriteria)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.StartTime != that1.StartTime {
+		return false
+	}
+	if this.EndTime != that1.EndTime {
+		return false
+	}
+	if len(this.Filters) != len(that1.Filters) {
+		return false
+	}
+	for i := range this.Filters {
+		if !this.Filters[i].Equal(that1.Filters[i]) {
+			return false
+		}
+	}
+	if this.ScriptId != that1.ScriptId {
+		return false
+	}
+	return true
+}
+func (this *ReportCriteria) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ReportCriteria)
+	if !ok {
+		that2, ok := that.(ReportCriteria)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if that1.Criteria == nil {
+		if this.Criteria != nil {
+			return false
+		}
+	} else if this.Criteria == nil {
+		return false
+	} else if !this.Criteria.Equal(that1.Criteria) {
+		return false
+	}
+	return true
+}
+func (this *ReportCriteria_Scripts) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ReportCriteria_Scripts)
+	if !ok {
+		that2, ok := that.(ReportCriteria_Scripts)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.Scripts.Equal(that1.Scripts) {
+		return false
+	}
+	return true
+}
+func (this *ReportCriteria_AffectedUsers) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ReportCriteria_AffectedUsers)
+	if !ok {
+		that2, ok := that.(ReportCriteria_AffectedUsers)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.AffectedUsers.Equal(that1.AffectedUsers) {
+		return false
+	}
+	return true
+}
+func (this *Report) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*Report)
+	if !ok {
+		that2, ok := that.(Report)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Namespace != that1.Namespace {
+		return false
+	}
+	if this.ReportId != that1.ReportId {
+		return false
+	}
+	if this.ReportType != that1.ReportType {
+		return false
+	}
+	if !this.ReportCriteria.Equal(that1.ReportCriteria) {
+		return false
+	}
+	if this.CreatedBy != that1.CreatedBy {
+		return false
+	}
+	if !this.CreatedAt.Equal(that1.CreatedAt) {
+		return false
+	}
+	if this.UpdatedBy != that1.UpdatedBy {
+		return false
+	}
+	if !this.UpdatedAt.Equal(that1.UpdatedAt) {
+		return false
+	}
+	if this.ReportName != that1.ReportName {
+		return false
+	}
+	return true
+}
+func (this *ReportWithHistory) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ReportWithHistory)
+	if !ok {
+		that2, ok := that.(ReportWithHistory)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Namespace != that1.Namespace {
+		return false
+	}
+	if this.JobId != that1.JobId {
+		return false
+	}
+	if this.ReportId != that1.ReportId {
+		return false
+	}
+	if this.Status != that1.Status {
+		return false
+	}
+	if this.CreatedBy != that1.CreatedBy {
+		return false
+	}
+	if !this.CreatedAt.Equal(that1.CreatedAt) {
+		return false
+	}
+	if !this.CompletedAt.Equal(that1.CompletedAt) {
+		return false
+	}
+	if this.ReportType != that1.ReportType {
+		return false
+	}
+	if !this.ReportCriteria.Equal(that1.ReportCriteria) {
+		return false
+	}
+	if this.ReportName != that1.ReportName {
+		return false
+	}
+	return true
+}
+func (this *ListReportsWithHistoryRequest) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ListReportsWithHistoryRequest)
+	if !ok {
+		that2, ok := that.(ListReportsWithHistoryRequest)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Namespace != that1.Namespace {
+		return false
+	}
+	return true
+}
+func (this *ListReportsWithHistoryResponse) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ListReportsWithHistoryResponse)
+	if !ok {
+		that2, ok := that.(ListReportsWithHistoryResponse)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if len(this.Reports) != len(that1.Reports) {
+		return false
+	}
+	for i := range this.Reports {
+		if !this.Reports[i].Equal(that1.Reports[i]) {
+			return false
+		}
+	}
+	return true
+}
+func (this *CreateReportRequest) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*CreateReportRequest)
+	if !ok {
+		that2, ok := that.(CreateReportRequest)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Namespace != that1.Namespace {
+		return false
+	}
+	if this.ReportType != that1.ReportType {
+		return false
+	}
+	if !this.ReportCriteria.Equal(that1.ReportCriteria) {
+		return false
+	}
+	if this.ReportName != that1.ReportName {
+		return false
+	}
+	if this.GenerateOnCreate != that1.GenerateOnCreate {
+		return false
+	}
+	return true
+}
+func (this *CreateReportResponse) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*CreateReportResponse)
+	if !ok {
+		that2, ok := that.(CreateReportResponse)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.Report.Equal(that1.Report) {
+		return false
+	}
+	return true
+}
+func (this *GetDownloadReportPresignedUrlRequest) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GetDownloadReportPresignedUrlRequest)
+	if !ok {
+		that2, ok := that.(GetDownloadReportPresignedUrlRequest)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Namespace != that1.Namespace {
+		return false
+	}
+	if this.JobId != that1.JobId {
+		return false
+	}
+	return true
+}
+func (this *GetDownloadReportPresignedUrlResponse) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GetDownloadReportPresignedUrlResponse)
+	if !ok {
+		that2, ok := that.(GetDownloadReportPresignedUrlResponse)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.PresignedUrl != that1.PresignedUrl {
+		return false
+	}
+	if this.ExpiresInSeconds != that1.ExpiresInSeconds {
+		return false
+	}
+	return true
+}
 func (this *UpdateScriptApprovalStatusRequest) GoString() string {
 	if this == nil {
 		return "nil"
@@ -1771,6 +3536,196 @@ func (this *BulkDeleteDomainsResponse) GoString() string {
 	s := make([]string, 0, 5)
 	s = append(s, "&client_side_defense.BulkDeleteDomainsResponse{")
 	s = append(s, "Deleted: "+fmt.Sprintf("%#v", this.Deleted)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *ReportFilter) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 7)
+	s = append(s, "&client_side_defense.ReportFilter{")
+	s = append(s, "ColumnName: "+fmt.Sprintf("%#v", this.ColumnName)+",\n")
+	s = append(s, "Operator: "+fmt.Sprintf("%#v", this.Operator)+",\n")
+	s = append(s, "Values: "+fmt.Sprintf("%#v", this.Values)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *ScriptsReportCriteria) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 7)
+	s = append(s, "&client_side_defense.ScriptsReportCriteria{")
+	s = append(s, "StartTime: "+fmt.Sprintf("%#v", this.StartTime)+",\n")
+	s = append(s, "EndTime: "+fmt.Sprintf("%#v", this.EndTime)+",\n")
+	if this.Filters != nil {
+		s = append(s, "Filters: "+fmt.Sprintf("%#v", this.Filters)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *AffectedUsersReportCriteria) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 8)
+	s = append(s, "&client_side_defense.AffectedUsersReportCriteria{")
+	s = append(s, "StartTime: "+fmt.Sprintf("%#v", this.StartTime)+",\n")
+	s = append(s, "EndTime: "+fmt.Sprintf("%#v", this.EndTime)+",\n")
+	if this.Filters != nil {
+		s = append(s, "Filters: "+fmt.Sprintf("%#v", this.Filters)+",\n")
+	}
+	s = append(s, "ScriptId: "+fmt.Sprintf("%#v", this.ScriptId)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *ReportCriteria) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&client_side_defense.ReportCriteria{")
+	if this.Criteria != nil {
+		s = append(s, "Criteria: "+fmt.Sprintf("%#v", this.Criteria)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *ReportCriteria_Scripts) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&client_side_defense.ReportCriteria_Scripts{` +
+		`Scripts:` + fmt.Sprintf("%#v", this.Scripts) + `}`}, ", ")
+	return s
+}
+func (this *ReportCriteria_AffectedUsers) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&client_side_defense.ReportCriteria_AffectedUsers{` +
+		`AffectedUsers:` + fmt.Sprintf("%#v", this.AffectedUsers) + `}`}, ", ")
+	return s
+}
+func (this *Report) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 13)
+	s = append(s, "&client_side_defense.Report{")
+	s = append(s, "Namespace: "+fmt.Sprintf("%#v", this.Namespace)+",\n")
+	s = append(s, "ReportId: "+fmt.Sprintf("%#v", this.ReportId)+",\n")
+	s = append(s, "ReportType: "+fmt.Sprintf("%#v", this.ReportType)+",\n")
+	if this.ReportCriteria != nil {
+		s = append(s, "ReportCriteria: "+fmt.Sprintf("%#v", this.ReportCriteria)+",\n")
+	}
+	s = append(s, "CreatedBy: "+fmt.Sprintf("%#v", this.CreatedBy)+",\n")
+	if this.CreatedAt != nil {
+		s = append(s, "CreatedAt: "+fmt.Sprintf("%#v", this.CreatedAt)+",\n")
+	}
+	s = append(s, "UpdatedBy: "+fmt.Sprintf("%#v", this.UpdatedBy)+",\n")
+	if this.UpdatedAt != nil {
+		s = append(s, "UpdatedAt: "+fmt.Sprintf("%#v", this.UpdatedAt)+",\n")
+	}
+	s = append(s, "ReportName: "+fmt.Sprintf("%#v", this.ReportName)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *ReportWithHistory) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 14)
+	s = append(s, "&client_side_defense.ReportWithHistory{")
+	s = append(s, "Namespace: "+fmt.Sprintf("%#v", this.Namespace)+",\n")
+	s = append(s, "JobId: "+fmt.Sprintf("%#v", this.JobId)+",\n")
+	s = append(s, "ReportId: "+fmt.Sprintf("%#v", this.ReportId)+",\n")
+	s = append(s, "Status: "+fmt.Sprintf("%#v", this.Status)+",\n")
+	s = append(s, "CreatedBy: "+fmt.Sprintf("%#v", this.CreatedBy)+",\n")
+	if this.CreatedAt != nil {
+		s = append(s, "CreatedAt: "+fmt.Sprintf("%#v", this.CreatedAt)+",\n")
+	}
+	if this.CompletedAt != nil {
+		s = append(s, "CompletedAt: "+fmt.Sprintf("%#v", this.CompletedAt)+",\n")
+	}
+	s = append(s, "ReportType: "+fmt.Sprintf("%#v", this.ReportType)+",\n")
+	if this.ReportCriteria != nil {
+		s = append(s, "ReportCriteria: "+fmt.Sprintf("%#v", this.ReportCriteria)+",\n")
+	}
+	s = append(s, "ReportName: "+fmt.Sprintf("%#v", this.ReportName)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *ListReportsWithHistoryRequest) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 5)
+	s = append(s, "&client_side_defense.ListReportsWithHistoryRequest{")
+	s = append(s, "Namespace: "+fmt.Sprintf("%#v", this.Namespace)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *ListReportsWithHistoryResponse) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 5)
+	s = append(s, "&client_side_defense.ListReportsWithHistoryResponse{")
+	if this.Reports != nil {
+		s = append(s, "Reports: "+fmt.Sprintf("%#v", this.Reports)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *CreateReportRequest) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 9)
+	s = append(s, "&client_side_defense.CreateReportRequest{")
+	s = append(s, "Namespace: "+fmt.Sprintf("%#v", this.Namespace)+",\n")
+	s = append(s, "ReportType: "+fmt.Sprintf("%#v", this.ReportType)+",\n")
+	if this.ReportCriteria != nil {
+		s = append(s, "ReportCriteria: "+fmt.Sprintf("%#v", this.ReportCriteria)+",\n")
+	}
+	s = append(s, "ReportName: "+fmt.Sprintf("%#v", this.ReportName)+",\n")
+	s = append(s, "GenerateOnCreate: "+fmt.Sprintf("%#v", this.GenerateOnCreate)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *CreateReportResponse) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 5)
+	s = append(s, "&client_side_defense.CreateReportResponse{")
+	if this.Report != nil {
+		s = append(s, "Report: "+fmt.Sprintf("%#v", this.Report)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *GetDownloadReportPresignedUrlRequest) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&client_side_defense.GetDownloadReportPresignedUrlRequest{")
+	s = append(s, "Namespace: "+fmt.Sprintf("%#v", this.Namespace)+",\n")
+	s = append(s, "JobId: "+fmt.Sprintf("%#v", this.JobId)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *GetDownloadReportPresignedUrlResponse) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&client_side_defense.GetDownloadReportPresignedUrlResponse{")
+	s = append(s, "PresignedUrl: "+fmt.Sprintf("%#v", this.PresignedUrl)+",\n")
+	s = append(s, "ExpiresInSeconds: "+fmt.Sprintf("%#v", this.ExpiresInSeconds)+",\n")
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
@@ -1930,6 +3885,21 @@ type CustomAPIClient interface {
 	// x-displayName: "Get Scripts Overview"
 	// Get aggregated overview metrics for all scripts including approval status, mitigation status, and behavior metrics
 	GetScriptsOverview(ctx context.Context, in *GetScriptsOverviewRequest, opts ...grpc.CallOption) (*GetScriptsOverviewResponse, error)
+	// ListReportsWithHistory
+	//
+	// x-displayName: "List Reports With History"
+	// List report configurations with their generation job history
+	ListReportsWithHistory(ctx context.Context, in *ListReportsWithHistoryRequest, opts ...grpc.CallOption) (*ListReportsWithHistoryResponse, error)
+	// CreateReport
+	//
+	// x-displayName: "Create Report"
+	// Create a report configuration
+	CreateReport(ctx context.Context, in *CreateReportRequest, opts ...grpc.CallOption) (*CreateReportResponse, error)
+	// GetDownloadReportPresignedUrl
+	//
+	// x-displayName: "Get Report Download URL"
+	// Get a presigned URL to download a report artifact
+	GetDownloadReportPresignedUrl(ctx context.Context, in *GetDownloadReportPresignedUrlRequest, opts ...grpc.CallOption) (*GetDownloadReportPresignedUrlResponse, error)
 }
 
 type customAPIClient struct {
@@ -2183,6 +4153,33 @@ func (c *customAPIClient) GetScriptsOverview(ctx context.Context, in *GetScripts
 	return out, nil
 }
 
+func (c *customAPIClient) ListReportsWithHistory(ctx context.Context, in *ListReportsWithHistoryRequest, opts ...grpc.CallOption) (*ListReportsWithHistoryResponse, error) {
+	out := new(ListReportsWithHistoryResponse)
+	err := c.cc.Invoke(ctx, "/ves.io.schema.shape.client_side_defense.CustomAPI/ListReportsWithHistory", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *customAPIClient) CreateReport(ctx context.Context, in *CreateReportRequest, opts ...grpc.CallOption) (*CreateReportResponse, error) {
+	out := new(CreateReportResponse)
+	err := c.cc.Invoke(ctx, "/ves.io.schema.shape.client_side_defense.CustomAPI/CreateReport", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *customAPIClient) GetDownloadReportPresignedUrl(ctx context.Context, in *GetDownloadReportPresignedUrlRequest, opts ...grpc.CallOption) (*GetDownloadReportPresignedUrlResponse, error) {
+	out := new(GetDownloadReportPresignedUrlResponse)
+	err := c.cc.Invoke(ctx, "/ves.io.schema.shape.client_side_defense.CustomAPI/GetDownloadReportPresignedUrl", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CustomAPIServer is the server API for CustomAPI service.
 type CustomAPIServer interface {
 	// Enable
@@ -2320,6 +4317,21 @@ type CustomAPIServer interface {
 	// x-displayName: "Get Scripts Overview"
 	// Get aggregated overview metrics for all scripts including approval status, mitigation status, and behavior metrics
 	GetScriptsOverview(context.Context, *GetScriptsOverviewRequest) (*GetScriptsOverviewResponse, error)
+	// ListReportsWithHistory
+	//
+	// x-displayName: "List Reports With History"
+	// List report configurations with their generation job history
+	ListReportsWithHistory(context.Context, *ListReportsWithHistoryRequest) (*ListReportsWithHistoryResponse, error)
+	// CreateReport
+	//
+	// x-displayName: "Create Report"
+	// Create a report configuration
+	CreateReport(context.Context, *CreateReportRequest) (*CreateReportResponse, error)
+	// GetDownloadReportPresignedUrl
+	//
+	// x-displayName: "Get Report Download URL"
+	// Get a presigned URL to download a report artifact
+	GetDownloadReportPresignedUrl(context.Context, *GetDownloadReportPresignedUrlRequest) (*GetDownloadReportPresignedUrlResponse, error)
 }
 
 // UnimplementedCustomAPIServer can be embedded to have forward compatible implementations.
@@ -2406,6 +4418,15 @@ func (*UnimplementedCustomAPIServer) GetSummary(ctx context.Context, req *GetSum
 }
 func (*UnimplementedCustomAPIServer) GetScriptsOverview(ctx context.Context, req *GetScriptsOverviewRequest) (*GetScriptsOverviewResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetScriptsOverview not implemented")
+}
+func (*UnimplementedCustomAPIServer) ListReportsWithHistory(ctx context.Context, req *ListReportsWithHistoryRequest) (*ListReportsWithHistoryResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListReportsWithHistory not implemented")
+}
+func (*UnimplementedCustomAPIServer) CreateReport(ctx context.Context, req *CreateReportRequest) (*CreateReportResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateReport not implemented")
+}
+func (*UnimplementedCustomAPIServer) GetDownloadReportPresignedUrl(ctx context.Context, req *GetDownloadReportPresignedUrlRequest) (*GetDownloadReportPresignedUrlResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetDownloadReportPresignedUrl not implemented")
 }
 
 func RegisterCustomAPIServer(s *grpc.Server, srv CustomAPIServer) {
@@ -2898,6 +4919,60 @@ func _CustomAPI_GetScriptsOverview_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CustomAPI_ListReportsWithHistory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListReportsWithHistoryRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CustomAPIServer).ListReportsWithHistory(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ves.io.schema.shape.client_side_defense.CustomAPI/ListReportsWithHistory",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CustomAPIServer).ListReportsWithHistory(ctx, req.(*ListReportsWithHistoryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CustomAPI_CreateReport_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateReportRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CustomAPIServer).CreateReport(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ves.io.schema.shape.client_side_defense.CustomAPI/CreateReport",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CustomAPIServer).CreateReport(ctx, req.(*CreateReportRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CustomAPI_GetDownloadReportPresignedUrl_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetDownloadReportPresignedUrlRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CustomAPIServer).GetDownloadReportPresignedUrl(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ves.io.schema.shape.client_side_defense.CustomAPI/GetDownloadReportPresignedUrl",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CustomAPIServer).GetDownloadReportPresignedUrl(ctx, req.(*GetDownloadReportPresignedUrlRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _CustomAPI_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "ves.io.schema.shape.client_side_defense.CustomAPI",
 	HandlerType: (*CustomAPIServer)(nil),
@@ -3009,6 +5084,18 @@ var _CustomAPI_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetScriptsOverview",
 			Handler:    _CustomAPI_GetScriptsOverview_Handler,
+		},
+		{
+			MethodName: "ListReportsWithHistory",
+			Handler:    _CustomAPI_ListReportsWithHistory_Handler,
+		},
+		{
+			MethodName: "CreateReport",
+			Handler:    _CustomAPI_CreateReport_Handler,
+		},
+		{
+			MethodName: "GetDownloadReportPresignedUrl",
+			Handler:    _CustomAPI_GetDownloadReportPresignedUrl_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -3555,6 +5642,674 @@ func (m *BulkDeleteDomainsResponse) MarshalToSizedBuffer(dAtA []byte) (int, erro
 	return len(dAtA) - i, nil
 }
 
+func (m *ReportFilter) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ReportFilter) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ReportFilter) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Values) > 0 {
+		for iNdEx := len(m.Values) - 1; iNdEx >= 0; iNdEx-- {
+			i -= len(m.Values[iNdEx])
+			copy(dAtA[i:], m.Values[iNdEx])
+			i = encodeVarintPublicCustomapi(dAtA, i, uint64(len(m.Values[iNdEx])))
+			i--
+			dAtA[i] = 0x1a
+		}
+	}
+	if m.Operator != 0 {
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(m.Operator))
+		i--
+		dAtA[i] = 0x10
+	}
+	if len(m.ColumnName) > 0 {
+		i -= len(m.ColumnName)
+		copy(dAtA[i:], m.ColumnName)
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(len(m.ColumnName)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *ScriptsReportCriteria) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ScriptsReportCriteria) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ScriptsReportCriteria) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Filters) > 0 {
+		for iNdEx := len(m.Filters) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Filters[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintPublicCustomapi(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x1a
+		}
+	}
+	if len(m.EndTime) > 0 {
+		i -= len(m.EndTime)
+		copy(dAtA[i:], m.EndTime)
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(len(m.EndTime)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.StartTime) > 0 {
+		i -= len(m.StartTime)
+		copy(dAtA[i:], m.StartTime)
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(len(m.StartTime)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *AffectedUsersReportCriteria) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *AffectedUsersReportCriteria) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *AffectedUsersReportCriteria) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.ScriptId) > 0 {
+		i -= len(m.ScriptId)
+		copy(dAtA[i:], m.ScriptId)
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(len(m.ScriptId)))
+		i--
+		dAtA[i] = 0x22
+	}
+	if len(m.Filters) > 0 {
+		for iNdEx := len(m.Filters) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Filters[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintPublicCustomapi(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x1a
+		}
+	}
+	if len(m.EndTime) > 0 {
+		i -= len(m.EndTime)
+		copy(dAtA[i:], m.EndTime)
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(len(m.EndTime)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.StartTime) > 0 {
+		i -= len(m.StartTime)
+		copy(dAtA[i:], m.StartTime)
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(len(m.StartTime)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *ReportCriteria) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ReportCriteria) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ReportCriteria) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Criteria != nil {
+		{
+			size := m.Criteria.Size()
+			i -= size
+			if _, err := m.Criteria.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *ReportCriteria_Scripts) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ReportCriteria_Scripts) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.Scripts != nil {
+		{
+			size, err := m.Scripts.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintPublicCustomapi(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	return len(dAtA) - i, nil
+}
+func (m *ReportCriteria_AffectedUsers) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ReportCriteria_AffectedUsers) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.AffectedUsers != nil {
+		{
+			size, err := m.AffectedUsers.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintPublicCustomapi(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1a
+	}
+	return len(dAtA) - i, nil
+}
+func (m *Report) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *Report) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *Report) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.ReportName) > 0 {
+		i -= len(m.ReportName)
+		copy(dAtA[i:], m.ReportName)
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(len(m.ReportName)))
+		i--
+		dAtA[i] = 0x4a
+	}
+	if m.UpdatedAt != nil {
+		{
+			size, err := m.UpdatedAt.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintPublicCustomapi(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x42
+	}
+	if len(m.UpdatedBy) > 0 {
+		i -= len(m.UpdatedBy)
+		copy(dAtA[i:], m.UpdatedBy)
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(len(m.UpdatedBy)))
+		i--
+		dAtA[i] = 0x3a
+	}
+	if m.CreatedAt != nil {
+		{
+			size, err := m.CreatedAt.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintPublicCustomapi(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x32
+	}
+	if len(m.CreatedBy) > 0 {
+		i -= len(m.CreatedBy)
+		copy(dAtA[i:], m.CreatedBy)
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(len(m.CreatedBy)))
+		i--
+		dAtA[i] = 0x2a
+	}
+	if m.ReportCriteria != nil {
+		{
+			size, err := m.ReportCriteria.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintPublicCustomapi(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x22
+	}
+	if m.ReportType != 0 {
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(m.ReportType))
+		i--
+		dAtA[i] = 0x18
+	}
+	if len(m.ReportId) > 0 {
+		i -= len(m.ReportId)
+		copy(dAtA[i:], m.ReportId)
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(len(m.ReportId)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Namespace) > 0 {
+		i -= len(m.Namespace)
+		copy(dAtA[i:], m.Namespace)
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(len(m.Namespace)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *ReportWithHistory) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ReportWithHistory) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ReportWithHistory) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.ReportName) > 0 {
+		i -= len(m.ReportName)
+		copy(dAtA[i:], m.ReportName)
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(len(m.ReportName)))
+		i--
+		dAtA[i] = 0x52
+	}
+	if m.ReportCriteria != nil {
+		{
+			size, err := m.ReportCriteria.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintPublicCustomapi(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x4a
+	}
+	if m.ReportType != 0 {
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(m.ReportType))
+		i--
+		dAtA[i] = 0x40
+	}
+	if m.CompletedAt != nil {
+		{
+			size, err := m.CompletedAt.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintPublicCustomapi(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x3a
+	}
+	if m.CreatedAt != nil {
+		{
+			size, err := m.CreatedAt.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintPublicCustomapi(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x32
+	}
+	if len(m.CreatedBy) > 0 {
+		i -= len(m.CreatedBy)
+		copy(dAtA[i:], m.CreatedBy)
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(len(m.CreatedBy)))
+		i--
+		dAtA[i] = 0x2a
+	}
+	if m.Status != 0 {
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(m.Status))
+		i--
+		dAtA[i] = 0x20
+	}
+	if len(m.ReportId) > 0 {
+		i -= len(m.ReportId)
+		copy(dAtA[i:], m.ReportId)
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(len(m.ReportId)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.JobId) > 0 {
+		i -= len(m.JobId)
+		copy(dAtA[i:], m.JobId)
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(len(m.JobId)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Namespace) > 0 {
+		i -= len(m.Namespace)
+		copy(dAtA[i:], m.Namespace)
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(len(m.Namespace)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *ListReportsWithHistoryRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ListReportsWithHistoryRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ListReportsWithHistoryRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Namespace) > 0 {
+		i -= len(m.Namespace)
+		copy(dAtA[i:], m.Namespace)
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(len(m.Namespace)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *ListReportsWithHistoryResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ListReportsWithHistoryResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ListReportsWithHistoryResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Reports) > 0 {
+		for iNdEx := len(m.Reports) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Reports[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintPublicCustomapi(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *CreateReportRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *CreateReportRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *CreateReportRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.GenerateOnCreate {
+		i--
+		if m.GenerateOnCreate {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x28
+	}
+	if len(m.ReportName) > 0 {
+		i -= len(m.ReportName)
+		copy(dAtA[i:], m.ReportName)
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(len(m.ReportName)))
+		i--
+		dAtA[i] = 0x22
+	}
+	if m.ReportCriteria != nil {
+		{
+			size, err := m.ReportCriteria.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintPublicCustomapi(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1a
+	}
+	if m.ReportType != 0 {
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(m.ReportType))
+		i--
+		dAtA[i] = 0x10
+	}
+	if len(m.Namespace) > 0 {
+		i -= len(m.Namespace)
+		copy(dAtA[i:], m.Namespace)
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(len(m.Namespace)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *CreateReportResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *CreateReportResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *CreateReportResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Report != nil {
+		{
+			size, err := m.Report.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintPublicCustomapi(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *GetDownloadReportPresignedUrlRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *GetDownloadReportPresignedUrlRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetDownloadReportPresignedUrlRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.JobId) > 0 {
+		i -= len(m.JobId)
+		copy(dAtA[i:], m.JobId)
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(len(m.JobId)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Namespace) > 0 {
+		i -= len(m.Namespace)
+		copy(dAtA[i:], m.Namespace)
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(len(m.Namespace)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *GetDownloadReportPresignedUrlResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *GetDownloadReportPresignedUrlResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetDownloadReportPresignedUrlResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.ExpiresInSeconds != 0 {
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(m.ExpiresInSeconds))
+		i--
+		dAtA[i] = 0x10
+	}
+	if len(m.PresignedUrl) > 0 {
+		i -= len(m.PresignedUrl)
+		copy(dAtA[i:], m.PresignedUrl)
+		i = encodeVarintPublicCustomapi(dAtA, i, uint64(len(m.PresignedUrl)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintPublicCustomapi(dAtA []byte, offset int, v uint64) int {
 	offset -= sovPublicCustomapi(v)
 	base := offset
@@ -3816,6 +6571,306 @@ func (m *BulkDeleteDomainsResponse) Size() (n int) {
 	return n
 }
 
+func (m *ReportFilter) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.ColumnName)
+	if l > 0 {
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	if m.Operator != 0 {
+		n += 1 + sovPublicCustomapi(uint64(m.Operator))
+	}
+	if len(m.Values) > 0 {
+		for _, s := range m.Values {
+			l = len(s)
+			n += 1 + l + sovPublicCustomapi(uint64(l))
+		}
+	}
+	return n
+}
+
+func (m *ScriptsReportCriteria) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.StartTime)
+	if l > 0 {
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	l = len(m.EndTime)
+	if l > 0 {
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	if len(m.Filters) > 0 {
+		for _, e := range m.Filters {
+			l = e.Size()
+			n += 1 + l + sovPublicCustomapi(uint64(l))
+		}
+	}
+	return n
+}
+
+func (m *AffectedUsersReportCriteria) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.StartTime)
+	if l > 0 {
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	l = len(m.EndTime)
+	if l > 0 {
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	if len(m.Filters) > 0 {
+		for _, e := range m.Filters {
+			l = e.Size()
+			n += 1 + l + sovPublicCustomapi(uint64(l))
+		}
+	}
+	l = len(m.ScriptId)
+	if l > 0 {
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	return n
+}
+
+func (m *ReportCriteria) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Criteria != nil {
+		n += m.Criteria.Size()
+	}
+	return n
+}
+
+func (m *ReportCriteria_Scripts) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Scripts != nil {
+		l = m.Scripts.Size()
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	return n
+}
+func (m *ReportCriteria_AffectedUsers) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.AffectedUsers != nil {
+		l = m.AffectedUsers.Size()
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	return n
+}
+func (m *Report) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Namespace)
+	if l > 0 {
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	l = len(m.ReportId)
+	if l > 0 {
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	if m.ReportType != 0 {
+		n += 1 + sovPublicCustomapi(uint64(m.ReportType))
+	}
+	if m.ReportCriteria != nil {
+		l = m.ReportCriteria.Size()
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	l = len(m.CreatedBy)
+	if l > 0 {
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	if m.CreatedAt != nil {
+		l = m.CreatedAt.Size()
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	l = len(m.UpdatedBy)
+	if l > 0 {
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	if m.UpdatedAt != nil {
+		l = m.UpdatedAt.Size()
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	l = len(m.ReportName)
+	if l > 0 {
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	return n
+}
+
+func (m *ReportWithHistory) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Namespace)
+	if l > 0 {
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	l = len(m.JobId)
+	if l > 0 {
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	l = len(m.ReportId)
+	if l > 0 {
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	if m.Status != 0 {
+		n += 1 + sovPublicCustomapi(uint64(m.Status))
+	}
+	l = len(m.CreatedBy)
+	if l > 0 {
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	if m.CreatedAt != nil {
+		l = m.CreatedAt.Size()
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	if m.CompletedAt != nil {
+		l = m.CompletedAt.Size()
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	if m.ReportType != 0 {
+		n += 1 + sovPublicCustomapi(uint64(m.ReportType))
+	}
+	if m.ReportCriteria != nil {
+		l = m.ReportCriteria.Size()
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	l = len(m.ReportName)
+	if l > 0 {
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	return n
+}
+
+func (m *ListReportsWithHistoryRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Namespace)
+	if l > 0 {
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	return n
+}
+
+func (m *ListReportsWithHistoryResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.Reports) > 0 {
+		for _, e := range m.Reports {
+			l = e.Size()
+			n += 1 + l + sovPublicCustomapi(uint64(l))
+		}
+	}
+	return n
+}
+
+func (m *CreateReportRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Namespace)
+	if l > 0 {
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	if m.ReportType != 0 {
+		n += 1 + sovPublicCustomapi(uint64(m.ReportType))
+	}
+	if m.ReportCriteria != nil {
+		l = m.ReportCriteria.Size()
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	l = len(m.ReportName)
+	if l > 0 {
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	if m.GenerateOnCreate {
+		n += 2
+	}
+	return n
+}
+
+func (m *CreateReportResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Report != nil {
+		l = m.Report.Size()
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	return n
+}
+
+func (m *GetDownloadReportPresignedUrlRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Namespace)
+	if l > 0 {
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	l = len(m.JobId)
+	if l > 0 {
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	return n
+}
+
+func (m *GetDownloadReportPresignedUrlResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.PresignedUrl)
+	if l > 0 {
+		n += 1 + l + sovPublicCustomapi(uint64(l))
+	}
+	if m.ExpiresInSeconds != 0 {
+		n += 1 + sovPublicCustomapi(uint64(m.ExpiresInSeconds))
+	}
+	return n
+}
+
 func sovPublicCustomapi(x uint64) (n int) {
 	return (math_bits.Len64(x|1) + 6) / 7
 }
@@ -3968,6 +7023,191 @@ func (this *BulkDeleteDomainsResponse) String() string {
 	}
 	s := strings.Join([]string{`&BulkDeleteDomainsResponse{`,
 		`Deleted:` + fmt.Sprintf("%v", this.Deleted) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ReportFilter) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ReportFilter{`,
+		`ColumnName:` + fmt.Sprintf("%v", this.ColumnName) + `,`,
+		`Operator:` + fmt.Sprintf("%v", this.Operator) + `,`,
+		`Values:` + fmt.Sprintf("%v", this.Values) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ScriptsReportCriteria) String() string {
+	if this == nil {
+		return "nil"
+	}
+	repeatedStringForFilters := "[]*ReportFilter{"
+	for _, f := range this.Filters {
+		repeatedStringForFilters += strings.Replace(f.String(), "ReportFilter", "ReportFilter", 1) + ","
+	}
+	repeatedStringForFilters += "}"
+	s := strings.Join([]string{`&ScriptsReportCriteria{`,
+		`StartTime:` + fmt.Sprintf("%v", this.StartTime) + `,`,
+		`EndTime:` + fmt.Sprintf("%v", this.EndTime) + `,`,
+		`Filters:` + repeatedStringForFilters + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *AffectedUsersReportCriteria) String() string {
+	if this == nil {
+		return "nil"
+	}
+	repeatedStringForFilters := "[]*ReportFilter{"
+	for _, f := range this.Filters {
+		repeatedStringForFilters += strings.Replace(f.String(), "ReportFilter", "ReportFilter", 1) + ","
+	}
+	repeatedStringForFilters += "}"
+	s := strings.Join([]string{`&AffectedUsersReportCriteria{`,
+		`StartTime:` + fmt.Sprintf("%v", this.StartTime) + `,`,
+		`EndTime:` + fmt.Sprintf("%v", this.EndTime) + `,`,
+		`Filters:` + repeatedStringForFilters + `,`,
+		`ScriptId:` + fmt.Sprintf("%v", this.ScriptId) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ReportCriteria) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ReportCriteria{`,
+		`Criteria:` + fmt.Sprintf("%v", this.Criteria) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ReportCriteria_Scripts) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ReportCriteria_Scripts{`,
+		`Scripts:` + strings.Replace(fmt.Sprintf("%v", this.Scripts), "ScriptsReportCriteria", "ScriptsReportCriteria", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ReportCriteria_AffectedUsers) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ReportCriteria_AffectedUsers{`,
+		`AffectedUsers:` + strings.Replace(fmt.Sprintf("%v", this.AffectedUsers), "AffectedUsersReportCriteria", "AffectedUsersReportCriteria", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *Report) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&Report{`,
+		`Namespace:` + fmt.Sprintf("%v", this.Namespace) + `,`,
+		`ReportId:` + fmt.Sprintf("%v", this.ReportId) + `,`,
+		`ReportType:` + fmt.Sprintf("%v", this.ReportType) + `,`,
+		`ReportCriteria:` + strings.Replace(this.ReportCriteria.String(), "ReportCriteria", "ReportCriteria", 1) + `,`,
+		`CreatedBy:` + fmt.Sprintf("%v", this.CreatedBy) + `,`,
+		`CreatedAt:` + strings.Replace(fmt.Sprintf("%v", this.CreatedAt), "Timestamp", "types.Timestamp", 1) + `,`,
+		`UpdatedBy:` + fmt.Sprintf("%v", this.UpdatedBy) + `,`,
+		`UpdatedAt:` + strings.Replace(fmt.Sprintf("%v", this.UpdatedAt), "Timestamp", "types.Timestamp", 1) + `,`,
+		`ReportName:` + fmt.Sprintf("%v", this.ReportName) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ReportWithHistory) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ReportWithHistory{`,
+		`Namespace:` + fmt.Sprintf("%v", this.Namespace) + `,`,
+		`JobId:` + fmt.Sprintf("%v", this.JobId) + `,`,
+		`ReportId:` + fmt.Sprintf("%v", this.ReportId) + `,`,
+		`Status:` + fmt.Sprintf("%v", this.Status) + `,`,
+		`CreatedBy:` + fmt.Sprintf("%v", this.CreatedBy) + `,`,
+		`CreatedAt:` + strings.Replace(fmt.Sprintf("%v", this.CreatedAt), "Timestamp", "types.Timestamp", 1) + `,`,
+		`CompletedAt:` + strings.Replace(fmt.Sprintf("%v", this.CompletedAt), "Timestamp", "types.Timestamp", 1) + `,`,
+		`ReportType:` + fmt.Sprintf("%v", this.ReportType) + `,`,
+		`ReportCriteria:` + strings.Replace(this.ReportCriteria.String(), "ReportCriteria", "ReportCriteria", 1) + `,`,
+		`ReportName:` + fmt.Sprintf("%v", this.ReportName) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ListReportsWithHistoryRequest) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ListReportsWithHistoryRequest{`,
+		`Namespace:` + fmt.Sprintf("%v", this.Namespace) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ListReportsWithHistoryResponse) String() string {
+	if this == nil {
+		return "nil"
+	}
+	repeatedStringForReports := "[]*ReportWithHistory{"
+	for _, f := range this.Reports {
+		repeatedStringForReports += strings.Replace(f.String(), "ReportWithHistory", "ReportWithHistory", 1) + ","
+	}
+	repeatedStringForReports += "}"
+	s := strings.Join([]string{`&ListReportsWithHistoryResponse{`,
+		`Reports:` + repeatedStringForReports + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *CreateReportRequest) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&CreateReportRequest{`,
+		`Namespace:` + fmt.Sprintf("%v", this.Namespace) + `,`,
+		`ReportType:` + fmt.Sprintf("%v", this.ReportType) + `,`,
+		`ReportCriteria:` + strings.Replace(this.ReportCriteria.String(), "ReportCriteria", "ReportCriteria", 1) + `,`,
+		`ReportName:` + fmt.Sprintf("%v", this.ReportName) + `,`,
+		`GenerateOnCreate:` + fmt.Sprintf("%v", this.GenerateOnCreate) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *CreateReportResponse) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&CreateReportResponse{`,
+		`Report:` + strings.Replace(this.Report.String(), "Report", "Report", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GetDownloadReportPresignedUrlRequest) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GetDownloadReportPresignedUrlRequest{`,
+		`Namespace:` + fmt.Sprintf("%v", this.Namespace) + `,`,
+		`JobId:` + fmt.Sprintf("%v", this.JobId) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GetDownloadReportPresignedUrlResponse) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GetDownloadReportPresignedUrlResponse{`,
+		`PresignedUrl:` + fmt.Sprintf("%v", this.PresignedUrl) + `,`,
+		`ExpiresInSeconds:` + fmt.Sprintf("%v", this.ExpiresInSeconds) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -5609,6 +8849,1972 @@ func (m *BulkDeleteDomainsResponse) Unmarshal(dAtA []byte) error {
 				}
 			}
 			m.Deleted = bool(v != 0)
+		default:
+			iNdEx = preIndex
+			skippy, err := skipPublicCustomapi(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ReportFilter) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowPublicCustomapi
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ReportFilter: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ReportFilter: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ColumnName", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ColumnName = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Operator", wireType)
+			}
+			m.Operator = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Operator |= ReportFilterOperator(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Values", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Values = append(m.Values, string(dAtA[iNdEx:postIndex]))
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipPublicCustomapi(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ScriptsReportCriteria) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowPublicCustomapi
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ScriptsReportCriteria: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ScriptsReportCriteria: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field StartTime", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.StartTime = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field EndTime", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.EndTime = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Filters", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Filters = append(m.Filters, &ReportFilter{})
+			if err := m.Filters[len(m.Filters)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipPublicCustomapi(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *AffectedUsersReportCriteria) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowPublicCustomapi
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: AffectedUsersReportCriteria: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: AffectedUsersReportCriteria: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field StartTime", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.StartTime = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field EndTime", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.EndTime = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Filters", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Filters = append(m.Filters, &ReportFilter{})
+			if err := m.Filters[len(m.Filters)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ScriptId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ScriptId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipPublicCustomapi(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ReportCriteria) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowPublicCustomapi
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ReportCriteria: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ReportCriteria: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Scripts", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &ScriptsReportCriteria{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.Criteria = &ReportCriteria_Scripts{v}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AffectedUsers", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &AffectedUsersReportCriteria{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.Criteria = &ReportCriteria_AffectedUsers{v}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipPublicCustomapi(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *Report) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowPublicCustomapi
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: Report: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: Report: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Namespace", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Namespace = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ReportId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ReportId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ReportType", wireType)
+			}
+			m.ReportType = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.ReportType |= ReportType(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ReportCriteria", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.ReportCriteria == nil {
+				m.ReportCriteria = &ReportCriteria{}
+			}
+			if err := m.ReportCriteria.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field CreatedBy", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.CreatedBy = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 6:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field CreatedAt", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.CreatedAt == nil {
+				m.CreatedAt = &types.Timestamp{}
+			}
+			if err := m.CreatedAt.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 7:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field UpdatedBy", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.UpdatedBy = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 8:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field UpdatedAt", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.UpdatedAt == nil {
+				m.UpdatedAt = &types.Timestamp{}
+			}
+			if err := m.UpdatedAt.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 9:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ReportName", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ReportName = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipPublicCustomapi(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ReportWithHistory) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowPublicCustomapi
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ReportWithHistory: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ReportWithHistory: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Namespace", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Namespace = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field JobId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.JobId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ReportId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ReportId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 4:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Status", wireType)
+			}
+			m.Status = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Status |= ReportStatus(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field CreatedBy", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.CreatedBy = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 6:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field CreatedAt", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.CreatedAt == nil {
+				m.CreatedAt = &types.Timestamp{}
+			}
+			if err := m.CreatedAt.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 7:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field CompletedAt", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.CompletedAt == nil {
+				m.CompletedAt = &types.Timestamp{}
+			}
+			if err := m.CompletedAt.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 8:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ReportType", wireType)
+			}
+			m.ReportType = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.ReportType |= ReportType(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 9:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ReportCriteria", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.ReportCriteria == nil {
+				m.ReportCriteria = &ReportCriteria{}
+			}
+			if err := m.ReportCriteria.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 10:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ReportName", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ReportName = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipPublicCustomapi(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ListReportsWithHistoryRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowPublicCustomapi
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ListReportsWithHistoryRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ListReportsWithHistoryRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Namespace", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Namespace = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipPublicCustomapi(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ListReportsWithHistoryResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowPublicCustomapi
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ListReportsWithHistoryResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ListReportsWithHistoryResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Reports", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Reports = append(m.Reports, &ReportWithHistory{})
+			if err := m.Reports[len(m.Reports)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipPublicCustomapi(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *CreateReportRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowPublicCustomapi
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: CreateReportRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: CreateReportRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Namespace", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Namespace = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ReportType", wireType)
+			}
+			m.ReportType = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.ReportType |= ReportType(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ReportCriteria", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.ReportCriteria == nil {
+				m.ReportCriteria = &ReportCriteria{}
+			}
+			if err := m.ReportCriteria.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ReportName", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ReportName = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 5:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field GenerateOnCreate", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.GenerateOnCreate = bool(v != 0)
+		default:
+			iNdEx = preIndex
+			skippy, err := skipPublicCustomapi(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *CreateReportResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowPublicCustomapi
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: CreateReportResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: CreateReportResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Report", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Report == nil {
+				m.Report = &Report{}
+			}
+			if err := m.Report.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipPublicCustomapi(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *GetDownloadReportPresignedUrlRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowPublicCustomapi
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: GetDownloadReportPresignedUrlRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: GetDownloadReportPresignedUrlRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Namespace", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Namespace = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field JobId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.JobId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipPublicCustomapi(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *GetDownloadReportPresignedUrlResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowPublicCustomapi
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: GetDownloadReportPresignedUrlResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: GetDownloadReportPresignedUrlResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field PresignedUrl", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.PresignedUrl = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ExpiresInSeconds", wireType)
+			}
+			m.ExpiresInSeconds = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.ExpiresInSeconds |= int64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
 		default:
 			iNdEx = preIndex
 			skippy, err := skipPublicCustomapi(dAtA[iNdEx:])

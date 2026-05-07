@@ -61,7 +61,7 @@ Optional:
 
 Required:
 
-- `method` (List of String) <br>**Allowed Values (choose one):** `["HEAD", "PUT", "DELETE", "TRACE", "COPY", "ANY", "GET", "POST", "CONNECT", "OPTIONS", "PATCH"]`
+- `method` (List of String) <br>**Allowed Values (choose one):** `["POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "ANY", "GET", "TRACE", "PATCH", "COPY", "HEAD"]`
 - `path` (String) path An endpoint path, as specified in OpenAPI, including parameters. The path should comply with RFC 3986 and may have parameters according to OpenAPI specification
 
 
@@ -70,7 +70,7 @@ Required:
 
 Required:
 
-- `method` (List of String) <br>**Allowed Values (choose one):** `["ANY", "GET", "POST", "CONNECT", "OPTIONS", "PATCH", "HEAD", "PUT", "DELETE", "TRACE", "COPY"]`
+- `method` (List of String) <br>**Allowed Values (choose one):** `["HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "ANY", "GET", "TRACE", "PATCH", "COPY"]`
 - `path` (String) path An endpoint path, as specified in OpenAPI, including parameters. The path should comply with RFC 3986 and may have parameters according to OpenAPI specification
 
 
@@ -79,7 +79,7 @@ Required:
 
 Required:
 
-- `method` (List of String) <br>**Allowed Values (choose one):** `["PUT", "DELETE", "TRACE", "COPY", "ANY", "GET", "POST", "CONNECT", "OPTIONS", "PATCH", "HEAD"]`
+- `method` (List of String) <br>**Allowed Values (choose one):** `["TRACE", "PATCH", "COPY", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "ANY", "GET"]`
 - `path` (String) path An endpoint path, as specified in OpenAPI, including parameters. The path should comply with RFC 3986 and may have parameters according to OpenAPI specification
 
 
@@ -90,4 +90,5 @@ Optional:
 
 - `create` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 - `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
 - `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).

@@ -24,6 +24,148 @@ var (
 
 // augmented methods on protoc/std generated struct
 
+func (m *AffectedUsersReportCriteria) ToJSON() (string, error) {
+	return codec.ToJSON(m)
+}
+
+func (m *AffectedUsersReportCriteria) ToYAML() (string, error) {
+	return codec.ToYAML(m)
+}
+
+func (m *AffectedUsersReportCriteria) DeepCopy() *AffectedUsersReportCriteria {
+	if m == nil {
+		return nil
+	}
+	ser, err := m.Marshal()
+	if err != nil {
+		return nil
+	}
+	c := &AffectedUsersReportCriteria{}
+	err = c.Unmarshal(ser)
+	if err != nil {
+		return nil
+	}
+	return c
+}
+
+func (m *AffectedUsersReportCriteria) DeepCopyProto() proto.Message {
+	if m == nil {
+		return nil
+	}
+	return m.DeepCopy()
+}
+
+func (m *AffectedUsersReportCriteria) Validate(ctx context.Context, opts ...db.ValidateOpt) error {
+	return AffectedUsersReportCriteriaValidator().Validate(ctx, m, opts...)
+}
+
+type ValidateAffectedUsersReportCriteria struct {
+	FldValidators map[string]db.ValidatorFunc
+}
+
+func (v *ValidateAffectedUsersReportCriteria) StartTimeValidationRuleHandler(rules map[string]string) (db.ValidatorFunc, error) {
+	validatorFn, err := db.NewStringValidationRuleHandler(rules)
+	if err != nil {
+		return nil, errors.Wrap(err, "ValidationRuleHandler for start_time")
+	}
+
+	return validatorFn, nil
+}
+func (v *ValidateAffectedUsersReportCriteria) EndTimeValidationRuleHandler(rules map[string]string) (db.ValidatorFunc, error) {
+	validatorFn, err := db.NewStringValidationRuleHandler(rules)
+	if err != nil {
+		return nil, errors.Wrap(err, "ValidationRuleHandler for end_time")
+	}
+
+	return validatorFn, nil
+}
+
+func (v *ValidateAffectedUsersReportCriteria) Validate(ctx context.Context, pm interface{}, opts ...db.ValidateOpt) error {
+	m, ok := pm.(*AffectedUsersReportCriteria)
+	if !ok {
+		switch t := pm.(type) {
+		case nil:
+			return nil
+		default:
+			return fmt.Errorf("Expected type *AffectedUsersReportCriteria got type %s", t)
+		}
+	}
+	if m == nil {
+		return nil
+	}
+	if fv, exists := v.FldValidators["end_time"]; exists {
+		vOpts := append(opts, db.WithValidateField("end_time"))
+		if err := fv(ctx, m.GetEndTime(), vOpts...); err != nil {
+			return err
+		}
+	}
+	if fv, exists := v.FldValidators["filters"]; exists {
+		vOpts := append(opts, db.WithValidateField("filters"))
+		for idx, item := range m.GetFilters() {
+			vOpts := append(vOpts, db.WithValidateRepItem(idx), db.WithValidateIsRepItem(true))
+			if err := fv(ctx, item, vOpts...); err != nil {
+				return err
+			}
+		}
+	}
+	if fv, exists := v.FldValidators["script_id"]; exists {
+		vOpts := append(opts, db.WithValidateField("script_id"))
+		if err := fv(ctx, m.GetScriptId(), vOpts...); err != nil {
+			return err
+		}
+	}
+	if fv, exists := v.FldValidators["start_time"]; exists {
+		vOpts := append(opts, db.WithValidateField("start_time"))
+		if err := fv(ctx, m.GetStartTime(), vOpts...); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// Well-known symbol for default validator implementation
+var DefaultAffectedUsersReportCriteriaValidator = func() *ValidateAffectedUsersReportCriteria {
+	v := &ValidateAffectedUsersReportCriteria{FldValidators: map[string]db.ValidatorFunc{}}
+	var (
+		err error
+		vFn db.ValidatorFunc
+	)
+	_, _ = err, vFn
+	vFnMap := map[string]db.ValidatorFunc{}
+	_ = vFnMap
+
+	vrhStartTime := v.StartTimeValidationRuleHandler
+	rulesStartTime := map[string]string{
+		"ves.io.schema.rules.string.query_time": "true",
+	}
+	vFn, err = vrhStartTime(rulesStartTime)
+	if err != nil {
+		errMsg := fmt.Sprintf("ValidationRuleHandler for AffectedUsersReportCriteria.start_time: %s", err)
+		panic(errMsg)
+	}
+	v.FldValidators["start_time"] = vFn
+
+	vrhEndTime := v.EndTimeValidationRuleHandler
+	rulesEndTime := map[string]string{
+		"ves.io.schema.rules.string.query_time": "true",
+	}
+	vFn, err = vrhEndTime(rulesEndTime)
+	if err != nil {
+		errMsg := fmt.Sprintf("ValidationRuleHandler for AffectedUsersReportCriteria.end_time: %s", err)
+		panic(errMsg)
+	}
+	v.FldValidators["end_time"] = vFn
+	v.FldValidators["filters"] = ReportFilterValidator().Validate
+
+	return v
+}()
+
+func AffectedUsersReportCriteriaValidator() db.Validator {
+	return DefaultAffectedUsersReportCriteriaValidator
+}
+
+// augmented methods on protoc/std generated struct
+
 func (m *ApprovalStatusCounts) ToJSON() (string, error) {
 	return codec.ToJSON(m)
 }
@@ -464,6 +606,447 @@ var DefaultBulkDeleteDomainsResponseValidator = func() *ValidateBulkDeleteDomain
 
 func BulkDeleteDomainsResponseValidator() db.Validator {
 	return DefaultBulkDeleteDomainsResponseValidator
+}
+
+// augmented methods on protoc/std generated struct
+
+func (m *CreateReportRequest) ToJSON() (string, error) {
+	return codec.ToJSON(m)
+}
+
+func (m *CreateReportRequest) ToYAML() (string, error) {
+	return codec.ToYAML(m)
+}
+
+func (m *CreateReportRequest) DeepCopy() *CreateReportRequest {
+	if m == nil {
+		return nil
+	}
+	ser, err := m.Marshal()
+	if err != nil {
+		return nil
+	}
+	c := &CreateReportRequest{}
+	err = c.Unmarshal(ser)
+	if err != nil {
+		return nil
+	}
+	return c
+}
+
+func (m *CreateReportRequest) DeepCopyProto() proto.Message {
+	if m == nil {
+		return nil
+	}
+	return m.DeepCopy()
+}
+
+func (m *CreateReportRequest) Validate(ctx context.Context, opts ...db.ValidateOpt) error {
+	return CreateReportRequestValidator().Validate(ctx, m, opts...)
+}
+
+type ValidateCreateReportRequest struct {
+	FldValidators map[string]db.ValidatorFunc
+}
+
+func (v *ValidateCreateReportRequest) ReportTypeValidationRuleHandler(rules map[string]string) (db.ValidatorFunc, error) {
+	var conv db.EnumConvFn
+	conv = func(v interface{}) int32 {
+		i := v.(ReportType)
+		return int32(i)
+	}
+	// ReportType_name is generated in .pb.go
+	validatorFn, err := db.NewEnumValidationRuleHandler(rules, ReportType_name, conv)
+	if err != nil {
+		return nil, errors.Wrap(err, "ValidationRuleHandler for report_type")
+	}
+
+	return validatorFn, nil
+}
+func (v *ValidateCreateReportRequest) ReportCriteriaValidationRuleHandler(rules map[string]string) (db.ValidatorFunc, error) {
+	reqdValidatorFn, err := db.NewMessageValidationRuleHandler(rules)
+	if err != nil {
+		return nil, errors.Wrap(err, "MessageValidationRuleHandler for report_criteria")
+	}
+	validatorFn := func(ctx context.Context, val interface{}, opts ...db.ValidateOpt) error {
+		if err := reqdValidatorFn(ctx, val, opts...); err != nil {
+			return err
+		}
+		return nil
+	}
+
+	return validatorFn, nil
+}
+func (v *ValidateCreateReportRequest) ReportNameValidationRuleHandler(rules map[string]string) (db.ValidatorFunc, error) {
+	validatorFn, err := db.NewStringValidationRuleHandler(rules)
+	if err != nil {
+		return nil, errors.Wrap(err, "ValidationRuleHandler for report_name")
+	}
+
+	return validatorFn, nil
+}
+
+func (v *ValidateCreateReportRequest) Validate(ctx context.Context, pm interface{}, opts ...db.ValidateOpt) error {
+	m, ok := pm.(*CreateReportRequest)
+	if !ok {
+		switch t := pm.(type) {
+		case nil:
+			return nil
+		default:
+			return fmt.Errorf("Expected type *CreateReportRequest got type %s", t)
+		}
+	}
+	if m == nil {
+		return nil
+	}
+	if fv, exists := v.FldValidators["generate_on_create"]; exists {
+		vOpts := append(opts, db.WithValidateField("generate_on_create"))
+		if err := fv(ctx, m.GetGenerateOnCreate(), vOpts...); err != nil {
+			return err
+		}
+	}
+	if fv, exists := v.FldValidators["namespace"]; exists {
+		vOpts := append(opts, db.WithValidateField("namespace"))
+		if err := fv(ctx, m.GetNamespace(), vOpts...); err != nil {
+			return err
+		}
+	}
+	if fv, exists := v.FldValidators["report_criteria"]; exists {
+		vOpts := append(opts, db.WithValidateField("report_criteria"))
+		if err := fv(ctx, m.GetReportCriteria(), vOpts...); err != nil {
+			return err
+		}
+	}
+	if fv, exists := v.FldValidators["report_name"]; exists {
+		vOpts := append(opts, db.WithValidateField("report_name"))
+		if err := fv(ctx, m.GetReportName(), vOpts...); err != nil {
+			return err
+		}
+	}
+	if fv, exists := v.FldValidators["report_type"]; exists {
+		vOpts := append(opts, db.WithValidateField("report_type"))
+		if err := fv(ctx, m.GetReportType(), vOpts...); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// Well-known symbol for default validator implementation
+var DefaultCreateReportRequestValidator = func() *ValidateCreateReportRequest {
+	v := &ValidateCreateReportRequest{FldValidators: map[string]db.ValidatorFunc{}}
+	var (
+		err error
+		vFn db.ValidatorFunc
+	)
+	_, _ = err, vFn
+	vFnMap := map[string]db.ValidatorFunc{}
+	_ = vFnMap
+
+	vrhReportType := v.ReportTypeValidationRuleHandler
+	rulesReportType := map[string]string{
+		"ves.io.schema.rules.enum.defined_only": "true",
+		"ves.io.schema.rules.message.required":  "true",
+	}
+	vFn, err = vrhReportType(rulesReportType)
+	if err != nil {
+		errMsg := fmt.Sprintf("ValidationRuleHandler for CreateReportRequest.report_type: %s", err)
+		panic(errMsg)
+	}
+	v.FldValidators["report_type"] = vFn
+
+	vrhReportCriteria := v.ReportCriteriaValidationRuleHandler
+	rulesReportCriteria := map[string]string{
+		"ves.io.schema.rules.message.required": "true",
+	}
+	vFn, err = vrhReportCriteria(rulesReportCriteria)
+	if err != nil {
+		errMsg := fmt.Sprintf("ValidationRuleHandler for CreateReportRequest.report_criteria: %s", err)
+		panic(errMsg)
+	}
+	v.FldValidators["report_criteria"] = vFn
+
+	vrhReportName := v.ReportNameValidationRuleHandler
+	rulesReportName := map[string]string{
+		"ves.io.schema.rules.message.required": "true",
+		"ves.io.schema.rules.string.max_len":   "255",
+		"ves.io.schema.rules.string.min_len":   "1",
+	}
+	vFn, err = vrhReportName(rulesReportName)
+	if err != nil {
+		errMsg := fmt.Sprintf("ValidationRuleHandler for CreateReportRequest.report_name: %s", err)
+		panic(errMsg)
+	}
+	v.FldValidators["report_name"] = vFn
+
+	return v
+}()
+
+func CreateReportRequestValidator() db.Validator {
+	return DefaultCreateReportRequestValidator
+}
+
+// augmented methods on protoc/std generated struct
+
+func (m *CreateReportResponse) ToJSON() (string, error) {
+	return codec.ToJSON(m)
+}
+
+func (m *CreateReportResponse) ToYAML() (string, error) {
+	return codec.ToYAML(m)
+}
+
+func (m *CreateReportResponse) DeepCopy() *CreateReportResponse {
+	if m == nil {
+		return nil
+	}
+	ser, err := m.Marshal()
+	if err != nil {
+		return nil
+	}
+	c := &CreateReportResponse{}
+	err = c.Unmarshal(ser)
+	if err != nil {
+		return nil
+	}
+	return c
+}
+
+func (m *CreateReportResponse) DeepCopyProto() proto.Message {
+	if m == nil {
+		return nil
+	}
+	return m.DeepCopy()
+}
+
+func (m *CreateReportResponse) Validate(ctx context.Context, opts ...db.ValidateOpt) error {
+	return CreateReportResponseValidator().Validate(ctx, m, opts...)
+}
+
+type ValidateCreateReportResponse struct {
+	FldValidators map[string]db.ValidatorFunc
+}
+
+func (v *ValidateCreateReportResponse) Validate(ctx context.Context, pm interface{}, opts ...db.ValidateOpt) error {
+	m, ok := pm.(*CreateReportResponse)
+	if !ok {
+		switch t := pm.(type) {
+		case nil:
+			return nil
+		default:
+			return fmt.Errorf("Expected type *CreateReportResponse got type %s", t)
+		}
+	}
+	if m == nil {
+		return nil
+	}
+	if fv, exists := v.FldValidators["report"]; exists {
+		vOpts := append(opts, db.WithValidateField("report"))
+		if err := fv(ctx, m.GetReport(), vOpts...); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// Well-known symbol for default validator implementation
+var DefaultCreateReportResponseValidator = func() *ValidateCreateReportResponse {
+	v := &ValidateCreateReportResponse{FldValidators: map[string]db.ValidatorFunc{}}
+	v.FldValidators["report"] = ReportValidator().Validate
+
+	return v
+}()
+
+func CreateReportResponseValidator() db.Validator {
+	return DefaultCreateReportResponseValidator
+}
+
+// augmented methods on protoc/std generated struct
+
+func (m *GetDownloadReportPresignedUrlRequest) ToJSON() (string, error) {
+	return codec.ToJSON(m)
+}
+
+func (m *GetDownloadReportPresignedUrlRequest) ToYAML() (string, error) {
+	return codec.ToYAML(m)
+}
+
+func (m *GetDownloadReportPresignedUrlRequest) DeepCopy() *GetDownloadReportPresignedUrlRequest {
+	if m == nil {
+		return nil
+	}
+	ser, err := m.Marshal()
+	if err != nil {
+		return nil
+	}
+	c := &GetDownloadReportPresignedUrlRequest{}
+	err = c.Unmarshal(ser)
+	if err != nil {
+		return nil
+	}
+	return c
+}
+
+func (m *GetDownloadReportPresignedUrlRequest) DeepCopyProto() proto.Message {
+	if m == nil {
+		return nil
+	}
+	return m.DeepCopy()
+}
+
+func (m *GetDownloadReportPresignedUrlRequest) Validate(ctx context.Context, opts ...db.ValidateOpt) error {
+	return GetDownloadReportPresignedUrlRequestValidator().Validate(ctx, m, opts...)
+}
+
+type ValidateGetDownloadReportPresignedUrlRequest struct {
+	FldValidators map[string]db.ValidatorFunc
+}
+
+func (v *ValidateGetDownloadReportPresignedUrlRequest) JobIdValidationRuleHandler(rules map[string]string) (db.ValidatorFunc, error) {
+	validatorFn, err := db.NewStringValidationRuleHandler(rules)
+	if err != nil {
+		return nil, errors.Wrap(err, "ValidationRuleHandler for job_id")
+	}
+
+	return validatorFn, nil
+}
+
+func (v *ValidateGetDownloadReportPresignedUrlRequest) Validate(ctx context.Context, pm interface{}, opts ...db.ValidateOpt) error {
+	m, ok := pm.(*GetDownloadReportPresignedUrlRequest)
+	if !ok {
+		switch t := pm.(type) {
+		case nil:
+			return nil
+		default:
+			return fmt.Errorf("Expected type *GetDownloadReportPresignedUrlRequest got type %s", t)
+		}
+	}
+	if m == nil {
+		return nil
+	}
+	if fv, exists := v.FldValidators["job_id"]; exists {
+		vOpts := append(opts, db.WithValidateField("job_id"))
+		if err := fv(ctx, m.GetJobId(), vOpts...); err != nil {
+			return err
+		}
+	}
+	if fv, exists := v.FldValidators["namespace"]; exists {
+		vOpts := append(opts, db.WithValidateField("namespace"))
+		if err := fv(ctx, m.GetNamespace(), vOpts...); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// Well-known symbol for default validator implementation
+var DefaultGetDownloadReportPresignedUrlRequestValidator = func() *ValidateGetDownloadReportPresignedUrlRequest {
+	v := &ValidateGetDownloadReportPresignedUrlRequest{FldValidators: map[string]db.ValidatorFunc{}}
+	var (
+		err error
+		vFn db.ValidatorFunc
+	)
+	_, _ = err, vFn
+	vFnMap := map[string]db.ValidatorFunc{}
+	_ = vFnMap
+
+	vrhJobId := v.JobIdValidationRuleHandler
+	rulesJobId := map[string]string{
+		"ves.io.schema.rules.message.required": "true",
+		"ves.io.schema.rules.string.not_empty": "true",
+	}
+	vFn, err = vrhJobId(rulesJobId)
+	if err != nil {
+		errMsg := fmt.Sprintf("ValidationRuleHandler for GetDownloadReportPresignedUrlRequest.job_id: %s", err)
+		panic(errMsg)
+	}
+	v.FldValidators["job_id"] = vFn
+
+	return v
+}()
+
+func GetDownloadReportPresignedUrlRequestValidator() db.Validator {
+	return DefaultGetDownloadReportPresignedUrlRequestValidator
+}
+
+// augmented methods on protoc/std generated struct
+
+func (m *GetDownloadReportPresignedUrlResponse) ToJSON() (string, error) {
+	return codec.ToJSON(m)
+}
+
+func (m *GetDownloadReportPresignedUrlResponse) ToYAML() (string, error) {
+	return codec.ToYAML(m)
+}
+
+func (m *GetDownloadReportPresignedUrlResponse) DeepCopy() *GetDownloadReportPresignedUrlResponse {
+	if m == nil {
+		return nil
+	}
+	ser, err := m.Marshal()
+	if err != nil {
+		return nil
+	}
+	c := &GetDownloadReportPresignedUrlResponse{}
+	err = c.Unmarshal(ser)
+	if err != nil {
+		return nil
+	}
+	return c
+}
+
+func (m *GetDownloadReportPresignedUrlResponse) DeepCopyProto() proto.Message {
+	if m == nil {
+		return nil
+	}
+	return m.DeepCopy()
+}
+
+func (m *GetDownloadReportPresignedUrlResponse) Validate(ctx context.Context, opts ...db.ValidateOpt) error {
+	return GetDownloadReportPresignedUrlResponseValidator().Validate(ctx, m, opts...)
+}
+
+type ValidateGetDownloadReportPresignedUrlResponse struct {
+	FldValidators map[string]db.ValidatorFunc
+}
+
+func (v *ValidateGetDownloadReportPresignedUrlResponse) Validate(ctx context.Context, pm interface{}, opts ...db.ValidateOpt) error {
+	m, ok := pm.(*GetDownloadReportPresignedUrlResponse)
+	if !ok {
+		switch t := pm.(type) {
+		case nil:
+			return nil
+		default:
+			return fmt.Errorf("Expected type *GetDownloadReportPresignedUrlResponse got type %s", t)
+		}
+	}
+	if m == nil {
+		return nil
+	}
+	if fv, exists := v.FldValidators["expires_in_seconds"]; exists {
+		vOpts := append(opts, db.WithValidateField("expires_in_seconds"))
+		if err := fv(ctx, m.GetExpiresInSeconds(), vOpts...); err != nil {
+			return err
+		}
+	}
+	if fv, exists := v.FldValidators["presigned_url"]; exists {
+		vOpts := append(opts, db.WithValidateField("presigned_url"))
+		if err := fv(ctx, m.GetPresignedUrl(), vOpts...); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// Well-known symbol for default validator implementation
+var DefaultGetDownloadReportPresignedUrlResponseValidator = func() *ValidateGetDownloadReportPresignedUrlResponse {
+	v := &ValidateGetDownloadReportPresignedUrlResponse{FldValidators: map[string]db.ValidatorFunc{}}
+
+	return v
+}()
+
+func GetDownloadReportPresignedUrlResponseValidator() db.Validator {
+	return DefaultGetDownloadReportPresignedUrlResponseValidator
 }
 
 // augmented methods on protoc/std generated struct
@@ -1045,6 +1628,158 @@ func ListInlineScriptsResponseValidator() db.Validator {
 
 // augmented methods on protoc/std generated struct
 
+func (m *ListReportsWithHistoryRequest) ToJSON() (string, error) {
+	return codec.ToJSON(m)
+}
+
+func (m *ListReportsWithHistoryRequest) ToYAML() (string, error) {
+	return codec.ToYAML(m)
+}
+
+func (m *ListReportsWithHistoryRequest) DeepCopy() *ListReportsWithHistoryRequest {
+	if m == nil {
+		return nil
+	}
+	ser, err := m.Marshal()
+	if err != nil {
+		return nil
+	}
+	c := &ListReportsWithHistoryRequest{}
+	err = c.Unmarshal(ser)
+	if err != nil {
+		return nil
+	}
+	return c
+}
+
+func (m *ListReportsWithHistoryRequest) DeepCopyProto() proto.Message {
+	if m == nil {
+		return nil
+	}
+	return m.DeepCopy()
+}
+
+func (m *ListReportsWithHistoryRequest) Validate(ctx context.Context, opts ...db.ValidateOpt) error {
+	return ListReportsWithHistoryRequestValidator().Validate(ctx, m, opts...)
+}
+
+type ValidateListReportsWithHistoryRequest struct {
+	FldValidators map[string]db.ValidatorFunc
+}
+
+func (v *ValidateListReportsWithHistoryRequest) Validate(ctx context.Context, pm interface{}, opts ...db.ValidateOpt) error {
+	m, ok := pm.(*ListReportsWithHistoryRequest)
+	if !ok {
+		switch t := pm.(type) {
+		case nil:
+			return nil
+		default:
+			return fmt.Errorf("Expected type *ListReportsWithHistoryRequest got type %s", t)
+		}
+	}
+	if m == nil {
+		return nil
+	}
+	if fv, exists := v.FldValidators["namespace"]; exists {
+		vOpts := append(opts, db.WithValidateField("namespace"))
+		if err := fv(ctx, m.GetNamespace(), vOpts...); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// Well-known symbol for default validator implementation
+var DefaultListReportsWithHistoryRequestValidator = func() *ValidateListReportsWithHistoryRequest {
+	v := &ValidateListReportsWithHistoryRequest{FldValidators: map[string]db.ValidatorFunc{}}
+
+	return v
+}()
+
+func ListReportsWithHistoryRequestValidator() db.Validator {
+	return DefaultListReportsWithHistoryRequestValidator
+}
+
+// augmented methods on protoc/std generated struct
+
+func (m *ListReportsWithHistoryResponse) ToJSON() (string, error) {
+	return codec.ToJSON(m)
+}
+
+func (m *ListReportsWithHistoryResponse) ToYAML() (string, error) {
+	return codec.ToYAML(m)
+}
+
+func (m *ListReportsWithHistoryResponse) DeepCopy() *ListReportsWithHistoryResponse {
+	if m == nil {
+		return nil
+	}
+	ser, err := m.Marshal()
+	if err != nil {
+		return nil
+	}
+	c := &ListReportsWithHistoryResponse{}
+	err = c.Unmarshal(ser)
+	if err != nil {
+		return nil
+	}
+	return c
+}
+
+func (m *ListReportsWithHistoryResponse) DeepCopyProto() proto.Message {
+	if m == nil {
+		return nil
+	}
+	return m.DeepCopy()
+}
+
+func (m *ListReportsWithHistoryResponse) Validate(ctx context.Context, opts ...db.ValidateOpt) error {
+	return ListReportsWithHistoryResponseValidator().Validate(ctx, m, opts...)
+}
+
+type ValidateListReportsWithHistoryResponse struct {
+	FldValidators map[string]db.ValidatorFunc
+}
+
+func (v *ValidateListReportsWithHistoryResponse) Validate(ctx context.Context, pm interface{}, opts ...db.ValidateOpt) error {
+	m, ok := pm.(*ListReportsWithHistoryResponse)
+	if !ok {
+		switch t := pm.(type) {
+		case nil:
+			return nil
+		default:
+			return fmt.Errorf("Expected type *ListReportsWithHistoryResponse got type %s", t)
+		}
+	}
+	if m == nil {
+		return nil
+	}
+	if fv, exists := v.FldValidators["reports"]; exists {
+		vOpts := append(opts, db.WithValidateField("reports"))
+		for idx, item := range m.GetReports() {
+			vOpts := append(vOpts, db.WithValidateRepItem(idx), db.WithValidateIsRepItem(true))
+			if err := fv(ctx, item, vOpts...); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+// Well-known symbol for default validator implementation
+var DefaultListReportsWithHistoryResponseValidator = func() *ValidateListReportsWithHistoryResponse {
+	v := &ValidateListReportsWithHistoryResponse{FldValidators: map[string]db.ValidatorFunc{}}
+	v.FldValidators["reports"] = ReportWithHistoryValidator().Validate
+
+	return v
+}()
+
+func ListReportsWithHistoryResponseValidator() db.Validator {
+	return DefaultListReportsWithHistoryResponseValidator
+}
+
+// augmented methods on protoc/std generated struct
+
 func (m *MitigationStatusCounts) ToJSON() (string, error) {
 	return codec.ToJSON(m)
 }
@@ -1127,6 +1862,790 @@ var DefaultMitigationStatusCountsValidator = func() *ValidateMitigationStatusCou
 
 func MitigationStatusCountsValidator() db.Validator {
 	return DefaultMitigationStatusCountsValidator
+}
+
+// augmented methods on protoc/std generated struct
+
+func (m *Report) ToJSON() (string, error) {
+	return codec.ToJSON(m)
+}
+
+func (m *Report) ToYAML() (string, error) {
+	return codec.ToYAML(m)
+}
+
+func (m *Report) DeepCopy() *Report {
+	if m == nil {
+		return nil
+	}
+	ser, err := m.Marshal()
+	if err != nil {
+		return nil
+	}
+	c := &Report{}
+	err = c.Unmarshal(ser)
+	if err != nil {
+		return nil
+	}
+	return c
+}
+
+func (m *Report) DeepCopyProto() proto.Message {
+	if m == nil {
+		return nil
+	}
+	return m.DeepCopy()
+}
+
+func (m *Report) Validate(ctx context.Context, opts ...db.ValidateOpt) error {
+	return ReportValidator().Validate(ctx, m, opts...)
+}
+
+type ValidateReport struct {
+	FldValidators map[string]db.ValidatorFunc
+}
+
+func (v *ValidateReport) ReportTypeValidationRuleHandler(rules map[string]string) (db.ValidatorFunc, error) {
+	var conv db.EnumConvFn
+	conv = func(v interface{}) int32 {
+		i := v.(ReportType)
+		return int32(i)
+	}
+	// ReportType_name is generated in .pb.go
+	validatorFn, err := db.NewEnumValidationRuleHandler(rules, ReportType_name, conv)
+	if err != nil {
+		return nil, errors.Wrap(err, "ValidationRuleHandler for report_type")
+	}
+
+	return validatorFn, nil
+}
+func (v *ValidateReport) ReportNameValidationRuleHandler(rules map[string]string) (db.ValidatorFunc, error) {
+	validatorFn, err := db.NewStringValidationRuleHandler(rules)
+	if err != nil {
+		return nil, errors.Wrap(err, "ValidationRuleHandler for report_name")
+	}
+
+	return validatorFn, nil
+}
+
+func (v *ValidateReport) Validate(ctx context.Context, pm interface{}, opts ...db.ValidateOpt) error {
+	m, ok := pm.(*Report)
+	if !ok {
+		switch t := pm.(type) {
+		case nil:
+			return nil
+		default:
+			return fmt.Errorf("Expected type *Report got type %s", t)
+		}
+	}
+	if m == nil {
+		return nil
+	}
+	if fv, exists := v.FldValidators["created_at"]; exists {
+		vOpts := append(opts, db.WithValidateField("created_at"))
+		if err := fv(ctx, m.GetCreatedAt(), vOpts...); err != nil {
+			return err
+		}
+	}
+	if fv, exists := v.FldValidators["created_by"]; exists {
+		vOpts := append(opts, db.WithValidateField("created_by"))
+		if err := fv(ctx, m.GetCreatedBy(), vOpts...); err != nil {
+			return err
+		}
+	}
+	if fv, exists := v.FldValidators["namespace"]; exists {
+		vOpts := append(opts, db.WithValidateField("namespace"))
+		if err := fv(ctx, m.GetNamespace(), vOpts...); err != nil {
+			return err
+		}
+	}
+	if fv, exists := v.FldValidators["report_criteria"]; exists {
+		vOpts := append(opts, db.WithValidateField("report_criteria"))
+		if err := fv(ctx, m.GetReportCriteria(), vOpts...); err != nil {
+			return err
+		}
+	}
+	if fv, exists := v.FldValidators["report_id"]; exists {
+		vOpts := append(opts, db.WithValidateField("report_id"))
+		if err := fv(ctx, m.GetReportId(), vOpts...); err != nil {
+			return err
+		}
+	}
+	if fv, exists := v.FldValidators["report_name"]; exists {
+		vOpts := append(opts, db.WithValidateField("report_name"))
+		if err := fv(ctx, m.GetReportName(), vOpts...); err != nil {
+			return err
+		}
+	}
+	if fv, exists := v.FldValidators["report_type"]; exists {
+		vOpts := append(opts, db.WithValidateField("report_type"))
+		if err := fv(ctx, m.GetReportType(), vOpts...); err != nil {
+			return err
+		}
+	}
+	if fv, exists := v.FldValidators["updated_at"]; exists {
+		vOpts := append(opts, db.WithValidateField("updated_at"))
+		if err := fv(ctx, m.GetUpdatedAt(), vOpts...); err != nil {
+			return err
+		}
+	}
+	if fv, exists := v.FldValidators["updated_by"]; exists {
+		vOpts := append(opts, db.WithValidateField("updated_by"))
+		if err := fv(ctx, m.GetUpdatedBy(), vOpts...); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// Well-known symbol for default validator implementation
+var DefaultReportValidator = func() *ValidateReport {
+	v := &ValidateReport{FldValidators: map[string]db.ValidatorFunc{}}
+	var (
+		err error
+		vFn db.ValidatorFunc
+	)
+	_, _ = err, vFn
+	vFnMap := map[string]db.ValidatorFunc{}
+	_ = vFnMap
+
+	vrhReportType := v.ReportTypeValidationRuleHandler
+	rulesReportType := map[string]string{
+		"ves.io.schema.rules.enum.defined_only": "true",
+	}
+	vFn, err = vrhReportType(rulesReportType)
+	if err != nil {
+		errMsg := fmt.Sprintf("ValidationRuleHandler for Report.report_type: %s", err)
+		panic(errMsg)
+	}
+	v.FldValidators["report_type"] = vFn
+
+	vrhReportName := v.ReportNameValidationRuleHandler
+	rulesReportName := map[string]string{
+		"ves.io.schema.rules.message.required": "true",
+		"ves.io.schema.rules.string.max_len":   "255",
+		"ves.io.schema.rules.string.min_len":   "1",
+	}
+	vFn, err = vrhReportName(rulesReportName)
+	if err != nil {
+		errMsg := fmt.Sprintf("ValidationRuleHandler for Report.report_name: %s", err)
+		panic(errMsg)
+	}
+	v.FldValidators["report_name"] = vFn
+	v.FldValidators["report_criteria"] = ReportCriteriaValidator().Validate
+
+	return v
+}()
+
+func ReportValidator() db.Validator {
+	return DefaultReportValidator
+}
+
+// augmented methods on protoc/std generated struct
+
+func (m *ReportCriteria) ToJSON() (string, error) {
+	return codec.ToJSON(m)
+}
+
+func (m *ReportCriteria) ToYAML() (string, error) {
+	return codec.ToYAML(m)
+}
+
+func (m *ReportCriteria) DeepCopy() *ReportCriteria {
+	if m == nil {
+		return nil
+	}
+	ser, err := m.Marshal()
+	if err != nil {
+		return nil
+	}
+	c := &ReportCriteria{}
+	err = c.Unmarshal(ser)
+	if err != nil {
+		return nil
+	}
+	return c
+}
+
+func (m *ReportCriteria) DeepCopyProto() proto.Message {
+	if m == nil {
+		return nil
+	}
+	return m.DeepCopy()
+}
+
+func (m *ReportCriteria) Validate(ctx context.Context, opts ...db.ValidateOpt) error {
+	return ReportCriteriaValidator().Validate(ctx, m, opts...)
+}
+
+type ValidateReportCriteria struct {
+	FldValidators map[string]db.ValidatorFunc
+}
+
+func (v *ValidateReportCriteria) Validate(ctx context.Context, pm interface{}, opts ...db.ValidateOpt) error {
+	m, ok := pm.(*ReportCriteria)
+	if !ok {
+		switch t := pm.(type) {
+		case nil:
+			return nil
+		default:
+			return fmt.Errorf("Expected type *ReportCriteria got type %s", t)
+		}
+	}
+	if m == nil {
+		return nil
+	}
+
+	switch m.GetCriteria().(type) {
+	case *ReportCriteria_Scripts:
+		if fv, exists := v.FldValidators["criteria.scripts"]; exists {
+			val := m.GetCriteria().(*ReportCriteria_Scripts).Scripts
+			vOpts := append(opts,
+				db.WithValidateField("criteria"),
+				db.WithValidateField("scripts"),
+			)
+			if err := fv(ctx, val, vOpts...); err != nil {
+				return err
+			}
+		}
+	case *ReportCriteria_AffectedUsers:
+		if fv, exists := v.FldValidators["criteria.affected_users"]; exists {
+			val := m.GetCriteria().(*ReportCriteria_AffectedUsers).AffectedUsers
+			vOpts := append(opts,
+				db.WithValidateField("criteria"),
+				db.WithValidateField("affected_users"),
+			)
+			if err := fv(ctx, val, vOpts...); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+// Well-known symbol for default validator implementation
+var DefaultReportCriteriaValidator = func() *ValidateReportCriteria {
+	v := &ValidateReportCriteria{FldValidators: map[string]db.ValidatorFunc{}}
+	v.FldValidators["criteria.scripts"] = ScriptsReportCriteriaValidator().Validate
+	v.FldValidators["criteria.affected_users"] = AffectedUsersReportCriteriaValidator().Validate
+
+	return v
+}()
+
+func ReportCriteriaValidator() db.Validator {
+	return DefaultReportCriteriaValidator
+}
+
+// augmented methods on protoc/std generated struct
+
+func (m *ReportFilter) ToJSON() (string, error) {
+	return codec.ToJSON(m)
+}
+
+func (m *ReportFilter) ToYAML() (string, error) {
+	return codec.ToYAML(m)
+}
+
+func (m *ReportFilter) DeepCopy() *ReportFilter {
+	if m == nil {
+		return nil
+	}
+	ser, err := m.Marshal()
+	if err != nil {
+		return nil
+	}
+	c := &ReportFilter{}
+	err = c.Unmarshal(ser)
+	if err != nil {
+		return nil
+	}
+	return c
+}
+
+func (m *ReportFilter) DeepCopyProto() proto.Message {
+	if m == nil {
+		return nil
+	}
+	return m.DeepCopy()
+}
+
+func (m *ReportFilter) Validate(ctx context.Context, opts ...db.ValidateOpt) error {
+	return ReportFilterValidator().Validate(ctx, m, opts...)
+}
+
+type ValidateReportFilter struct {
+	FldValidators map[string]db.ValidatorFunc
+}
+
+func (v *ValidateReportFilter) ColumnNameValidationRuleHandler(rules map[string]string) (db.ValidatorFunc, error) {
+	validatorFn, err := db.NewStringValidationRuleHandler(rules)
+	if err != nil {
+		return nil, errors.Wrap(err, "ValidationRuleHandler for column_name")
+	}
+
+	return validatorFn, nil
+}
+func (v *ValidateReportFilter) OperatorValidationRuleHandler(rules map[string]string) (db.ValidatorFunc, error) {
+	var conv db.EnumConvFn
+	conv = func(v interface{}) int32 {
+		i := v.(ReportFilterOperator)
+		return int32(i)
+	}
+	// ReportFilterOperator_name is generated in .pb.go
+	validatorFn, err := db.NewEnumValidationRuleHandler(rules, ReportFilterOperator_name, conv)
+	if err != nil {
+		return nil, errors.Wrap(err, "ValidationRuleHandler for operator")
+	}
+
+	return validatorFn, nil
+}
+func (v *ValidateReportFilter) ValuesValidationRuleHandler(rules map[string]string) (db.ValidatorFunc, error) {
+	itemRules := db.GetRepStringItemRules(rules)
+	itemValFn, err := db.NewStringValidationRuleHandler(itemRules)
+	if err != nil {
+		return nil, errors.Wrap(err, "Item ValidationRuleHandler for values")
+	}
+	itemsValidatorFn := func(ctx context.Context, elems []string, opts ...db.ValidateOpt) error {
+		for i, el := range elems {
+			if err := itemValFn(ctx, el, opts...); err != nil {
+				return errors.Wrap(err, fmt.Sprintf("element %d", i))
+			}
+		}
+		return nil
+	}
+	repValFn, err := db.NewRepeatedValidationRuleHandler(rules)
+	if err != nil {
+		return nil, errors.Wrap(err, "Repeated ValidationRuleHandler for values")
+	}
+
+	validatorFn := func(ctx context.Context, val interface{}, opts ...db.ValidateOpt) error {
+		elems, ok := val.([]string)
+		if !ok {
+			return fmt.Errorf("Repeated validation expected []string, got %T", val)
+		}
+		l := []string{}
+		for _, elem := range elems {
+			strVal := fmt.Sprintf("%v", elem)
+			l = append(l, strVal)
+		}
+		if err := repValFn(ctx, l, opts...); err != nil {
+			return errors.Wrap(err, "repeated values")
+		}
+		if err := itemsValidatorFn(ctx, elems, opts...); err != nil {
+			return errors.Wrap(err, "items values")
+		}
+		return nil
+	}
+
+	return validatorFn, nil
+}
+
+func (v *ValidateReportFilter) Validate(ctx context.Context, pm interface{}, opts ...db.ValidateOpt) error {
+	m, ok := pm.(*ReportFilter)
+	if !ok {
+		switch t := pm.(type) {
+		case nil:
+			return nil
+		default:
+			return fmt.Errorf("Expected type *ReportFilter got type %s", t)
+		}
+	}
+	if m == nil {
+		return nil
+	}
+	if fv, exists := v.FldValidators["column_name"]; exists {
+		vOpts := append(opts, db.WithValidateField("column_name"))
+		if err := fv(ctx, m.GetColumnName(), vOpts...); err != nil {
+			return err
+		}
+	}
+	if fv, exists := v.FldValidators["operator"]; exists {
+		vOpts := append(opts, db.WithValidateField("operator"))
+		if err := fv(ctx, m.GetOperator(), vOpts...); err != nil {
+			return err
+		}
+	}
+	if fv, exists := v.FldValidators["values"]; exists {
+		vOpts := append(opts, db.WithValidateField("values"))
+		if err := fv(ctx, m.GetValues(), vOpts...); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// Well-known symbol for default validator implementation
+var DefaultReportFilterValidator = func() *ValidateReportFilter {
+	v := &ValidateReportFilter{FldValidators: map[string]db.ValidatorFunc{}}
+	var (
+		err error
+		vFn db.ValidatorFunc
+	)
+	_, _ = err, vFn
+	vFnMap := map[string]db.ValidatorFunc{}
+	_ = vFnMap
+
+	vrhColumnName := v.ColumnNameValidationRuleHandler
+	rulesColumnName := map[string]string{
+		"ves.io.schema.rules.string.not_empty": "true",
+	}
+	vFn, err = vrhColumnName(rulesColumnName)
+	if err != nil {
+		errMsg := fmt.Sprintf("ValidationRuleHandler for ReportFilter.column_name: %s", err)
+		panic(errMsg)
+	}
+	v.FldValidators["column_name"] = vFn
+
+	vrhOperator := v.OperatorValidationRuleHandler
+	rulesOperator := map[string]string{
+		"ves.io.schema.rules.enum.defined_only": "true",
+	}
+	vFn, err = vrhOperator(rulesOperator)
+	if err != nil {
+		errMsg := fmt.Sprintf("ValidationRuleHandler for ReportFilter.operator: %s", err)
+		panic(errMsg)
+	}
+	v.FldValidators["operator"] = vFn
+
+	vrhValues := v.ValuesValidationRuleHandler
+	rulesValues := map[string]string{
+		"ves.io.schema.rules.repeated.items.string.max_len": "256",
+	}
+	vFn, err = vrhValues(rulesValues)
+	if err != nil {
+		errMsg := fmt.Sprintf("ValidationRuleHandler for ReportFilter.values: %s", err)
+		panic(errMsg)
+	}
+	v.FldValidators["values"] = vFn
+
+	return v
+}()
+
+func ReportFilterValidator() db.Validator {
+	return DefaultReportFilterValidator
+}
+
+// augmented methods on protoc/std generated struct
+
+func (m *ReportWithHistory) ToJSON() (string, error) {
+	return codec.ToJSON(m)
+}
+
+func (m *ReportWithHistory) ToYAML() (string, error) {
+	return codec.ToYAML(m)
+}
+
+func (m *ReportWithHistory) DeepCopy() *ReportWithHistory {
+	if m == nil {
+		return nil
+	}
+	ser, err := m.Marshal()
+	if err != nil {
+		return nil
+	}
+	c := &ReportWithHistory{}
+	err = c.Unmarshal(ser)
+	if err != nil {
+		return nil
+	}
+	return c
+}
+
+func (m *ReportWithHistory) DeepCopyProto() proto.Message {
+	if m == nil {
+		return nil
+	}
+	return m.DeepCopy()
+}
+
+func (m *ReportWithHistory) Validate(ctx context.Context, opts ...db.ValidateOpt) error {
+	return ReportWithHistoryValidator().Validate(ctx, m, opts...)
+}
+
+type ValidateReportWithHistory struct {
+	FldValidators map[string]db.ValidatorFunc
+}
+
+func (v *ValidateReportWithHistory) StatusValidationRuleHandler(rules map[string]string) (db.ValidatorFunc, error) {
+	var conv db.EnumConvFn
+	conv = func(v interface{}) int32 {
+		i := v.(ReportStatus)
+		return int32(i)
+	}
+	// ReportStatus_name is generated in .pb.go
+	validatorFn, err := db.NewEnumValidationRuleHandler(rules, ReportStatus_name, conv)
+	if err != nil {
+		return nil, errors.Wrap(err, "ValidationRuleHandler for status")
+	}
+
+	return validatorFn, nil
+}
+func (v *ValidateReportWithHistory) ReportTypeValidationRuleHandler(rules map[string]string) (db.ValidatorFunc, error) {
+	var conv db.EnumConvFn
+	conv = func(v interface{}) int32 {
+		i := v.(ReportType)
+		return int32(i)
+	}
+	// ReportType_name is generated in .pb.go
+	validatorFn, err := db.NewEnumValidationRuleHandler(rules, ReportType_name, conv)
+	if err != nil {
+		return nil, errors.Wrap(err, "ValidationRuleHandler for report_type")
+	}
+
+	return validatorFn, nil
+}
+
+func (v *ValidateReportWithHistory) Validate(ctx context.Context, pm interface{}, opts ...db.ValidateOpt) error {
+	m, ok := pm.(*ReportWithHistory)
+	if !ok {
+		switch t := pm.(type) {
+		case nil:
+			return nil
+		default:
+			return fmt.Errorf("Expected type *ReportWithHistory got type %s", t)
+		}
+	}
+	if m == nil {
+		return nil
+	}
+	if fv, exists := v.FldValidators["completed_at"]; exists {
+		vOpts := append(opts, db.WithValidateField("completed_at"))
+		if err := fv(ctx, m.GetCompletedAt(), vOpts...); err != nil {
+			return err
+		}
+	}
+	if fv, exists := v.FldValidators["created_at"]; exists {
+		vOpts := append(opts, db.WithValidateField("created_at"))
+		if err := fv(ctx, m.GetCreatedAt(), vOpts...); err != nil {
+			return err
+		}
+	}
+	if fv, exists := v.FldValidators["created_by"]; exists {
+		vOpts := append(opts, db.WithValidateField("created_by"))
+		if err := fv(ctx, m.GetCreatedBy(), vOpts...); err != nil {
+			return err
+		}
+	}
+	if fv, exists := v.FldValidators["job_id"]; exists {
+		vOpts := append(opts, db.WithValidateField("job_id"))
+		if err := fv(ctx, m.GetJobId(), vOpts...); err != nil {
+			return err
+		}
+	}
+	if fv, exists := v.FldValidators["namespace"]; exists {
+		vOpts := append(opts, db.WithValidateField("namespace"))
+		if err := fv(ctx, m.GetNamespace(), vOpts...); err != nil {
+			return err
+		}
+	}
+	if fv, exists := v.FldValidators["report_criteria"]; exists {
+		vOpts := append(opts, db.WithValidateField("report_criteria"))
+		if err := fv(ctx, m.GetReportCriteria(), vOpts...); err != nil {
+			return err
+		}
+	}
+	if fv, exists := v.FldValidators["report_id"]; exists {
+		vOpts := append(opts, db.WithValidateField("report_id"))
+		if err := fv(ctx, m.GetReportId(), vOpts...); err != nil {
+			return err
+		}
+	}
+	if fv, exists := v.FldValidators["report_name"]; exists {
+		vOpts := append(opts, db.WithValidateField("report_name"))
+		if err := fv(ctx, m.GetReportName(), vOpts...); err != nil {
+			return err
+		}
+	}
+	if fv, exists := v.FldValidators["report_type"]; exists {
+		vOpts := append(opts, db.WithValidateField("report_type"))
+		if err := fv(ctx, m.GetReportType(), vOpts...); err != nil {
+			return err
+		}
+	}
+	if fv, exists := v.FldValidators["status"]; exists {
+		vOpts := append(opts, db.WithValidateField("status"))
+		if err := fv(ctx, m.GetStatus(), vOpts...); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// Well-known symbol for default validator implementation
+var DefaultReportWithHistoryValidator = func() *ValidateReportWithHistory {
+	v := &ValidateReportWithHistory{FldValidators: map[string]db.ValidatorFunc{}}
+	var (
+		err error
+		vFn db.ValidatorFunc
+	)
+	_, _ = err, vFn
+	vFnMap := map[string]db.ValidatorFunc{}
+	_ = vFnMap
+
+	vrhStatus := v.StatusValidationRuleHandler
+	rulesStatus := map[string]string{
+		"ves.io.schema.rules.enum.defined_only": "true",
+	}
+	vFn, err = vrhStatus(rulesStatus)
+	if err != nil {
+		errMsg := fmt.Sprintf("ValidationRuleHandler for ReportWithHistory.status: %s", err)
+		panic(errMsg)
+	}
+	v.FldValidators["status"] = vFn
+
+	vrhReportType := v.ReportTypeValidationRuleHandler
+	rulesReportType := map[string]string{
+		"ves.io.schema.rules.enum.defined_only": "true",
+	}
+	vFn, err = vrhReportType(rulesReportType)
+	if err != nil {
+		errMsg := fmt.Sprintf("ValidationRuleHandler for ReportWithHistory.report_type: %s", err)
+		panic(errMsg)
+	}
+	v.FldValidators["report_type"] = vFn
+	v.FldValidators["report_criteria"] = ReportCriteriaValidator().Validate
+
+	return v
+}()
+
+func ReportWithHistoryValidator() db.Validator {
+	return DefaultReportWithHistoryValidator
+}
+
+// augmented methods on protoc/std generated struct
+
+func (m *ScriptsReportCriteria) ToJSON() (string, error) {
+	return codec.ToJSON(m)
+}
+
+func (m *ScriptsReportCriteria) ToYAML() (string, error) {
+	return codec.ToYAML(m)
+}
+
+func (m *ScriptsReportCriteria) DeepCopy() *ScriptsReportCriteria {
+	if m == nil {
+		return nil
+	}
+	ser, err := m.Marshal()
+	if err != nil {
+		return nil
+	}
+	c := &ScriptsReportCriteria{}
+	err = c.Unmarshal(ser)
+	if err != nil {
+		return nil
+	}
+	return c
+}
+
+func (m *ScriptsReportCriteria) DeepCopyProto() proto.Message {
+	if m == nil {
+		return nil
+	}
+	return m.DeepCopy()
+}
+
+func (m *ScriptsReportCriteria) Validate(ctx context.Context, opts ...db.ValidateOpt) error {
+	return ScriptsReportCriteriaValidator().Validate(ctx, m, opts...)
+}
+
+type ValidateScriptsReportCriteria struct {
+	FldValidators map[string]db.ValidatorFunc
+}
+
+func (v *ValidateScriptsReportCriteria) StartTimeValidationRuleHandler(rules map[string]string) (db.ValidatorFunc, error) {
+	validatorFn, err := db.NewStringValidationRuleHandler(rules)
+	if err != nil {
+		return nil, errors.Wrap(err, "ValidationRuleHandler for start_time")
+	}
+
+	return validatorFn, nil
+}
+func (v *ValidateScriptsReportCriteria) EndTimeValidationRuleHandler(rules map[string]string) (db.ValidatorFunc, error) {
+	validatorFn, err := db.NewStringValidationRuleHandler(rules)
+	if err != nil {
+		return nil, errors.Wrap(err, "ValidationRuleHandler for end_time")
+	}
+
+	return validatorFn, nil
+}
+
+func (v *ValidateScriptsReportCriteria) Validate(ctx context.Context, pm interface{}, opts ...db.ValidateOpt) error {
+	m, ok := pm.(*ScriptsReportCriteria)
+	if !ok {
+		switch t := pm.(type) {
+		case nil:
+			return nil
+		default:
+			return fmt.Errorf("Expected type *ScriptsReportCriteria got type %s", t)
+		}
+	}
+	if m == nil {
+		return nil
+	}
+	if fv, exists := v.FldValidators["end_time"]; exists {
+		vOpts := append(opts, db.WithValidateField("end_time"))
+		if err := fv(ctx, m.GetEndTime(), vOpts...); err != nil {
+			return err
+		}
+	}
+	if fv, exists := v.FldValidators["filters"]; exists {
+		vOpts := append(opts, db.WithValidateField("filters"))
+		for idx, item := range m.GetFilters() {
+			vOpts := append(vOpts, db.WithValidateRepItem(idx), db.WithValidateIsRepItem(true))
+			if err := fv(ctx, item, vOpts...); err != nil {
+				return err
+			}
+		}
+	}
+	if fv, exists := v.FldValidators["start_time"]; exists {
+		vOpts := append(opts, db.WithValidateField("start_time"))
+		if err := fv(ctx, m.GetStartTime(), vOpts...); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// Well-known symbol for default validator implementation
+var DefaultScriptsReportCriteriaValidator = func() *ValidateScriptsReportCriteria {
+	v := &ValidateScriptsReportCriteria{FldValidators: map[string]db.ValidatorFunc{}}
+	var (
+		err error
+		vFn db.ValidatorFunc
+	)
+	_, _ = err, vFn
+	vFnMap := map[string]db.ValidatorFunc{}
+	_ = vFnMap
+
+	vrhStartTime := v.StartTimeValidationRuleHandler
+	rulesStartTime := map[string]string{
+		"ves.io.schema.rules.string.query_time": "true",
+	}
+	vFn, err = vrhStartTime(rulesStartTime)
+	if err != nil {
+		errMsg := fmt.Sprintf("ValidationRuleHandler for ScriptsReportCriteria.start_time: %s", err)
+		panic(errMsg)
+	}
+	v.FldValidators["start_time"] = vFn
+
+	vrhEndTime := v.EndTimeValidationRuleHandler
+	rulesEndTime := map[string]string{
+		"ves.io.schema.rules.string.query_time": "true",
+	}
+	vFn, err = vrhEndTime(rulesEndTime)
+	if err != nil {
+		errMsg := fmt.Sprintf("ValidationRuleHandler for ScriptsReportCriteria.end_time: %s", err)
+		panic(errMsg)
+	}
+	v.FldValidators["end_time"] = vFn
+	v.FldValidators["filters"] = ReportFilterValidator().Validate
+
+	return v
+}()
+
+func ScriptsReportCriteriaValidator() db.Validator {
+	return DefaultScriptsReportCriteriaValidator
 }
 
 // augmented methods on protoc/std generated struct

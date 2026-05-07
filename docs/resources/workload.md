@@ -16,8 +16,8 @@ resource "f5xc_workload" "example" {
   name      = "example_workload"
   namespace = "example_namespace"
   workload_choice = {
-    job = {
-      job = "example_job"
+    service = {
+      service = "example_service"
     }
   }
 }
@@ -96,7 +96,7 @@ Required:
 
 Optional:
 
-- `pull_policy` (List of String) <br>**Allowed Values (choose one):** `["IMAGE_PULL_POLICY_DEFAULT", "IMAGE_PULL_POLICY_IF_NOT_PRESENT", "IMAGE_PULL_POLICY_ALWAYS", "IMAGE_PULL_POLICY_NEVER"]`
+- `pull_policy` (List of String) <br>**Allowed Values (choose one):** `["IMAGE_PULL_POLICY_IF_NOT_PRESENT", "IMAGE_PULL_POLICY_ALWAYS", "IMAGE_PULL_POLICY_NEVER", "IMAGE_PULL_POLICY_DEFAULT"]`
 
 <a id="nestedatt--workload_choice--job--containers--image--registry_choice"></a>
 ### Nested Schema for `workload_choice.job.containers.image.registry_choice`
@@ -128,7 +128,7 @@ Optional:
 
 - `custom_flavor` (Attributes) Custom Container resources based on Workload Flavor (see [below for nested schema](#nestedatt--workload_choice--job--containers--flavor_choice--custom_flavor))
 - `default_flavor` (Boolean) Default Container resources based on default workload flavor of the Virtual Kubernetes
-- `flavor` (List of String) <br>**Allowed Values (choose one):** `["CONTAINER_FLAVOR_TYPE_MEDIUM", "CONTAINER_FLAVOR_TYPE_LARGE", "CONTAINER_FLAVOR_TYPE_TINY"]`
+- `flavor` (List of String) <br>**Allowed Values (choose one):** `["CONTAINER_FLAVOR_TYPE_TINY", "CONTAINER_FLAVOR_TYPE_MEDIUM", "CONTAINER_FLAVOR_TYPE_LARGE"]`
 
 <a id="nestedatt--workload_choice--job--containers--flavor_choice--custom_flavor"></a>
 ### Nested Schema for `workload_choice.job.containers.flavor_choice.custom_flavor`
@@ -670,7 +670,7 @@ Optional:
 
 Required:
 
-- `network` (List of String) <br>**Allowed Values (choose one):** `["SITE_NETWORK_IP_FABRIC", "SITE_NETWORK_INSIDE_AND_OUTSIDE", "SITE_NETWORK_INSIDE_AND_OUTSIDE_WITH_INTERNET_VIP", "SITE_NETWORK_INSIDE", "SITE_NETWORK_OUTSIDE", "SITE_NETWORK_OUTSIDE_WITH_INTERNET_VIP", "SITE_NETWORK_SERVICE"]`
+- `network` (List of String) <br>**Allowed Values (choose one):** `["SITE_NETWORK_INSIDE", "SITE_NETWORK_OUTSIDE", "SITE_NETWORK_OUTSIDE_WITH_INTERNET_VIP", "SITE_NETWORK_SERVICE", "SITE_NETWORK_IP_FABRIC", "SITE_NETWORK_INSIDE_AND_OUTSIDE", "SITE_NETWORK_INSIDE_AND_OUTSIDE_WITH_INTERNET_VIP"]`
 - `site` (Attributes) Site Reference to site object (see [below for nested schema](#nestedatt--workload_choice--service--advertise_options--advertise_choice--advertise_custom--advertise_where--choice--site--site))
 
 Optional:
@@ -697,7 +697,7 @@ Read-Only:
 
 Required:
 
-- `network` (List of String) <br>**Allowed Values (choose one):** `["SITE_NETWORK_SERVICE", "SITE_NETWORK_IP_FABRIC", "SITE_NETWORK_INSIDE_AND_OUTSIDE", "SITE_NETWORK_INSIDE_AND_OUTSIDE_WITH_INTERNET_VIP", "SITE_NETWORK_INSIDE", "SITE_NETWORK_OUTSIDE", "SITE_NETWORK_OUTSIDE_WITH_INTERNET_VIP"]`
+- `network` (List of String) <br>**Allowed Values (choose one):** `["SITE_NETWORK_INSIDE", "SITE_NETWORK_OUTSIDE", "SITE_NETWORK_OUTSIDE_WITH_INTERNET_VIP", "SITE_NETWORK_SERVICE", "SITE_NETWORK_IP_FABRIC", "SITE_NETWORK_INSIDE_AND_OUTSIDE", "SITE_NETWORK_INSIDE_AND_OUTSIDE_WITH_INTERNET_VIP"]`
 - `virtual_site` (Attributes) Virtual Site Reference to virtual site object (see [below for nested schema](#nestedatt--workload_choice--service--advertise_options--advertise_choice--advertise_custom--advertise_where--choice--virtual_site--virtual_site))
 
 <a id="nestedatt--workload_choice--service--advertise_options--advertise_choice--advertise_custom--advertise_where--choice--virtual_site--virtual_site"></a>
@@ -809,7 +809,7 @@ Optional:
 
 Optional:
 
-- `port` (Number) <br>**Default:** `80`
+- `port` (Number) HTTP port to listen HTTP port to Listen.
 - `port_ranges` (String) <br>**Validation:** `Length LengthBetween(1, 512)`
 
 
@@ -847,7 +847,7 @@ Optional:
 
 Optional:
 
-- `port` (Number) <br>**Default:** `443`
+- `port` (Number) HTTPS port to listen HTTPS port to Listen.
 - `port_ranges` (String) <br>**Validation:** `Length LengthBetween(1, 512)`
 
 
@@ -962,7 +962,7 @@ Optional:
 
 Required:
 
-- `xfcc_header_elements` (List of String) <br>**Valid Options:** `["XFCC_CERT", "XFCC_CHAIN", "XFCC_SUBJECT", "XFCC_URI", "XFCC_DNS", "XFCC_NONE"]` (Multiple selection allowed)
+- `xfcc_header_elements` (List of String) <br>**Valid Options:** `["XFCC_NONE", "XFCC_CERT", "XFCC_CHAIN", "XFCC_SUBJECT", "XFCC_URI", "XFCC_DNS"]` (Multiple selection allowed)
 
 
 
@@ -1091,7 +1091,7 @@ Optional:
 
 Required:
 
-- `xfcc_header_elements` (List of String) <br>**Valid Options:** `["XFCC_NONE", "XFCC_CERT", "XFCC_CHAIN", "XFCC_SUBJECT", "XFCC_URI", "XFCC_DNS"]` (Multiple selection allowed)
+- `xfcc_header_elements` (List of String) <br>**Valid Options:** `["XFCC_CHAIN", "XFCC_SUBJECT", "XFCC_URI", "XFCC_DNS", "XFCC_NONE", "XFCC_CERT"]` (Multiple selection allowed)
 
 
 
@@ -1386,7 +1386,7 @@ Optional:
 
 Required:
 
-- `xfcc_header_elements` (List of String) <br>**Valid Options:** `["XFCC_SUBJECT", "XFCC_URI", "XFCC_DNS", "XFCC_NONE", "XFCC_CERT", "XFCC_CHAIN"]` (Multiple selection allowed)
+- `xfcc_header_elements` (List of String) <br>**Valid Options:** `["XFCC_URI", "XFCC_DNS", "XFCC_NONE", "XFCC_CERT", "XFCC_CHAIN", "XFCC_SUBJECT"]` (Multiple selection allowed)
 
 
 
@@ -1477,7 +1477,7 @@ Optional:
 
 Optional:
 
-- `port` (Number) <br>**Default:** `443`
+- `port` (Number) HTTPS port to listen HTTPS port to Listen.
 - `port_ranges` (String) <br>**Validation:** `Length LengthBetween(1, 512)`
 
 
@@ -1518,8 +1518,8 @@ Required:
 
 Optional:
 
-- `max_version` (List of String) <br>**Allowed Values (choose one):** `["TLSv1_2", "TLSv1_3", "TLS_AUTO", "TLSv1_0", "TLSv1_1"]`
-- `min_version` (List of String) <br>**Allowed Values (choose one):** `["TLS_AUTO", "TLSv1_0", "TLSv1_1", "TLSv1_2", "TLSv1_3"]`
+- `max_version` (List of String) <br>**Allowed Values (choose one):** `["TLS_AUTO", "TLSv1_0", "TLSv1_1", "TLSv1_2", "TLSv1_3"]`
+- `min_version` (List of String) <br>**Allowed Values (choose one):** `["TLSv1_2", "TLSv1_3", "TLS_AUTO", "TLSv1_0", "TLSv1_1"]`
 
 
 
@@ -1617,7 +1617,7 @@ Required:
 Optional:
 
 - `headers` (Attributes List) headers List of (key, value) headers (see [below for nested schema](#nestedatt--workload_choice--service--advertise_options--advertise_choice--advertise_custom--ports--advertise_choice--http_loadbalancer--route_choice--specific_routes--routes--choice--direct_response_route--headers))
-- `http_method` (List of String) <br>**Allowed Values (choose one):** `["GET", "POST", "CONNECT", "OPTIONS", "PATCH", "HEAD", "PUT", "DELETE", "TRACE", "COPY", "ANY"]`
+- `http_method` (List of String) <br>**Allowed Values (choose one):** `["HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "ANY", "GET", "TRACE", "PATCH", "COPY"]`
 - `incoming_port` (Attributes) incoming_port The port on which the request is received (see [below for nested schema](#nestedatt--workload_choice--service--advertise_options--advertise_choice--advertise_custom--ports--advertise_choice--http_loadbalancer--route_choice--specific_routes--routes--choice--direct_response_route--incoming_port))
 - `route_direct_response` (Attributes) route_direct_response Send direct response (see [below for nested schema](#nestedatt--workload_choice--service--advertise_options--advertise_choice--advertise_custom--ports--advertise_choice--http_loadbalancer--route_choice--specific_routes--routes--choice--direct_response_route--route_direct_response))
 
@@ -1700,7 +1700,7 @@ Required:
 Optional:
 
 - `headers` (Attributes List) headers List of (key, value) headers (see [below for nested schema](#nestedatt--workload_choice--service--advertise_options--advertise_choice--advertise_custom--ports--advertise_choice--http_loadbalancer--route_choice--specific_routes--routes--choice--redirect_route--headers))
-- `http_method` (List of String) <br>**Allowed Values (choose one):** `["PATCH", "HEAD", "PUT", "DELETE", "TRACE", "COPY", "ANY", "GET", "POST", "CONNECT", "OPTIONS"]`
+- `http_method` (List of String) <br>**Allowed Values (choose one):** `["ANY", "GET", "TRACE", "PATCH", "COPY", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS"]`
 - `incoming_port` (Attributes) incoming_port The port on which the request is received (see [below for nested schema](#nestedatt--workload_choice--service--advertise_options--advertise_choice--advertise_custom--ports--advertise_choice--http_loadbalancer--route_choice--specific_routes--routes--choice--redirect_route--incoming_port))
 - `route_redirect` (Attributes) route_redirect Send redirect response (see [below for nested schema](#nestedatt--workload_choice--service--advertise_options--advertise_choice--advertise_custom--ports--advertise_choice--http_loadbalancer--route_choice--specific_routes--routes--choice--redirect_route--route_redirect))
 
@@ -1805,7 +1805,7 @@ Required:
 
 Optional:
 
-- `http_method` (List of String) <br>**Allowed Values (choose one):** `["CONNECT", "OPTIONS", "PATCH", "HEAD", "PUT", "DELETE", "TRACE", "COPY", "ANY", "GET", "POST"]`
+- `http_method` (List of String) <br>**Allowed Values (choose one):** `["HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "ANY", "GET", "TRACE", "PATCH", "COPY"]`
 
 <a id="nestedatt--workload_choice--service--advertise_options--advertise_choice--advertise_custom--ports--advertise_choice--http_loadbalancer--route_choice--specific_routes--routes--choice--simple_route--host_rewrite_params_choice"></a>
 ### Nested Schema for `workload_choice.service.advertise_options.advertise_choice.advertise_custom.ports.advertise_choice.http_loadbalancer.route_choice.specific_routes.routes.choice.simple_route.host_rewrite_params_choice`
@@ -1924,7 +1924,7 @@ Required:
 
 Optional:
 
-- `protocol` (List of String) <br>**Allowed Values (choose one):** `["PROTOCOL_HTTP2", "PROTOCOL_TLS_WITH_SNI", "PROTOCOL_UDP", "PROTOCOL_TCP", "PROTOCOL_HTTP"]`
+- `protocol` (List of String) <br>**Allowed Values (choose one):** `["PROTOCOL_TCP", "PROTOCOL_HTTP", "PROTOCOL_HTTP2", "PROTOCOL_TLS_WITH_SNI", "PROTOCOL_UDP"]`
 
 <a id="nestedatt--workload_choice--service--advertise_options--advertise_choice--advertise_in_cluster--port_choice--multi_ports--ports--info--target_port_choice"></a>
 ### Nested Schema for `workload_choice.service.advertise_options.advertise_choice.advertise_in_cluster.port_choice.multi_ports.ports.info.target_port_choice`
@@ -1955,7 +1955,7 @@ Required:
 
 Optional:
 
-- `protocol` (List of String) <br>**Allowed Values (choose one):** `["PROTOCOL_TCP", "PROTOCOL_HTTP", "PROTOCOL_HTTP2", "PROTOCOL_TLS_WITH_SNI", "PROTOCOL_UDP"]`
+- `protocol` (List of String) <br>**Allowed Values (choose one):** `["PROTOCOL_TLS_WITH_SNI", "PROTOCOL_UDP", "PROTOCOL_TCP", "PROTOCOL_HTTP", "PROTOCOL_HTTP2"]`
 
 <a id="nestedatt--workload_choice--service--advertise_options--advertise_choice--advertise_in_cluster--port_choice--port--info--target_port_choice"></a>
 ### Nested Schema for `workload_choice.service.advertise_options.advertise_choice.advertise_in_cluster.port_choice.port.info.target_port_choice`
@@ -2042,7 +2042,7 @@ Optional:
 
 Optional:
 
-- `port` (Number) <br>**Default:** `80`
+- `port` (Number) HTTP port to listen HTTP port to Listen.
 - `port_ranges` (String) <br>**Validation:** `Length LengthBetween(1, 512)`
 
 
@@ -2080,7 +2080,7 @@ Optional:
 
 Optional:
 
-- `port` (Number) <br>**Default:** `443`
+- `port` (Number) HTTPS port to listen HTTPS port to Listen.
 - `port_ranges` (String) <br>**Validation:** `Length LengthBetween(1, 512)`
 
 
@@ -2195,7 +2195,7 @@ Optional:
 
 Required:
 
-- `xfcc_header_elements` (List of String) <br>**Valid Options:** `["XFCC_CERT", "XFCC_CHAIN", "XFCC_SUBJECT", "XFCC_URI", "XFCC_DNS", "XFCC_NONE"]` (Multiple selection allowed)
+- `xfcc_header_elements` (List of String) <br>**Valid Options:** `["XFCC_NONE", "XFCC_CERT", "XFCC_CHAIN", "XFCC_SUBJECT", "XFCC_URI", "XFCC_DNS"]` (Multiple selection allowed)
 
 
 
@@ -2227,7 +2227,7 @@ Required:
 
 Optional:
 
-- `max_version` (List of String) <br>**Allowed Values (choose one):** `["TLSv1_3", "TLS_AUTO", "TLSv1_0", "TLSv1_1", "TLSv1_2"]`
+- `max_version` (List of String) <br>**Allowed Values (choose one):** `["TLS_AUTO", "TLSv1_0", "TLSv1_1", "TLSv1_2", "TLSv1_3"]`
 - `min_version` (List of String) <br>**Allowed Values (choose one):** `["TLS_AUTO", "TLSv1_0", "TLSv1_1", "TLSv1_2", "TLSv1_3"]`
 
 
@@ -2324,7 +2324,7 @@ Optional:
 
 Required:
 
-- `xfcc_header_elements` (List of String) <br>**Valid Options:** `["XFCC_CHAIN", "XFCC_SUBJECT", "XFCC_URI", "XFCC_DNS", "XFCC_NONE", "XFCC_CERT"]` (Multiple selection allowed)
+- `xfcc_header_elements` (List of String) <br>**Valid Options:** `["XFCC_NONE", "XFCC_CERT", "XFCC_CHAIN", "XFCC_SUBJECT", "XFCC_URI", "XFCC_DNS"]` (Multiple selection allowed)
 
 
 
@@ -2399,7 +2399,7 @@ Optional:
 
 Required:
 
-- `hash_algorithms` (List of String) <br>**Valid Options:** `["INVALID_HASH_ALGORITHM", "SHA256", "SHA1"]` (Multiple selection allowed)
+- `hash_algorithms` (List of String) <br>**Valid Options:** `["SHA256", "SHA1", "INVALID_HASH_ALGORITHM"]` (Multiple selection allowed)
 
 
 
@@ -2431,7 +2431,7 @@ Required:
 Optional:
 
 - `max_version` (List of String) <br>**Allowed Values (choose one):** `["TLS_AUTO", "TLSv1_0", "TLSv1_1", "TLSv1_2", "TLSv1_3"]`
-- `min_version` (List of String) <br>**Allowed Values (choose one):** `["TLS_AUTO", "TLSv1_0", "TLSv1_1", "TLSv1_2", "TLSv1_3"]`
+- `min_version` (List of String) <br>**Allowed Values (choose one):** `["TLSv1_0", "TLSv1_1", "TLSv1_2", "TLSv1_3", "TLS_AUTO"]`
 
 
 
@@ -2619,7 +2619,7 @@ Optional:
 
 Required:
 
-- `xfcc_header_elements` (List of String) <br>**Valid Options:** `["XFCC_SUBJECT", "XFCC_URI", "XFCC_DNS", "XFCC_NONE", "XFCC_CERT", "XFCC_CHAIN"]` (Multiple selection allowed)
+- `xfcc_header_elements` (List of String) <br>**Valid Options:** `["XFCC_NONE", "XFCC_CERT", "XFCC_CHAIN", "XFCC_SUBJECT", "XFCC_URI", "XFCC_DNS"]` (Multiple selection allowed)
 
 
 
@@ -2710,7 +2710,7 @@ Optional:
 
 Optional:
 
-- `port` (Number) <br>**Default:** `443`
+- `port` (Number) HTTPS port to listen HTTPS port to Listen.
 - `port_ranges` (String) <br>**Validation:** `Length LengthBetween(1, 512)`
 
 
@@ -2751,8 +2751,8 @@ Required:
 
 Optional:
 
-- `max_version` (List of String) <br>**Allowed Values (choose one):** `["TLSv1_2", "TLSv1_3", "TLS_AUTO", "TLSv1_0", "TLSv1_1"]`
-- `min_version` (List of String) <br>**Allowed Values (choose one):** `["TLSv1_3", "TLS_AUTO", "TLSv1_0", "TLSv1_1", "TLSv1_2"]`
+- `max_version` (List of String) <br>**Allowed Values (choose one):** `["TLSv1_3", "TLS_AUTO", "TLSv1_0", "TLSv1_1", "TLSv1_2"]`
+- `min_version` (List of String) <br>**Allowed Values (choose one):** `["TLSv1_2", "TLSv1_3", "TLS_AUTO", "TLSv1_0", "TLSv1_1"]`
 
 
 
@@ -2850,7 +2850,7 @@ Required:
 Optional:
 
 - `headers` (Attributes List) headers List of (key, value) headers (see [below for nested schema](#nestedatt--workload_choice--service--advertise_options--advertise_choice--advertise_on_public--advertise_choice--multi_ports--ports--advertise_choice--http_loadbalancer--route_choice--specific_routes--routes--choice--direct_response_route--headers))
-- `http_method` (List of String) <br>**Allowed Values (choose one):** `["CONNECT", "OPTIONS", "PATCH", "HEAD", "PUT", "DELETE", "TRACE", "COPY", "ANY", "GET", "POST"]`
+- `http_method` (List of String) <br>**Allowed Values (choose one):** `["GET", "TRACE", "PATCH", "COPY", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "ANY"]`
 - `incoming_port` (Attributes) incoming_port The port on which the request is received (see [below for nested schema](#nestedatt--workload_choice--service--advertise_options--advertise_choice--advertise_on_public--advertise_choice--multi_ports--ports--advertise_choice--http_loadbalancer--route_choice--specific_routes--routes--choice--direct_response_route--incoming_port))
 - `route_direct_response` (Attributes) route_direct_response Send direct response (see [below for nested schema](#nestedatt--workload_choice--service--advertise_options--advertise_choice--advertise_on_public--advertise_choice--multi_ports--ports--advertise_choice--http_loadbalancer--route_choice--specific_routes--routes--choice--direct_response_route--route_direct_response))
 
@@ -2933,7 +2933,7 @@ Required:
 Optional:
 
 - `headers` (Attributes List) headers List of (key, value) headers (see [below for nested schema](#nestedatt--workload_choice--service--advertise_options--advertise_choice--advertise_on_public--advertise_choice--multi_ports--ports--advertise_choice--http_loadbalancer--route_choice--specific_routes--routes--choice--redirect_route--headers))
-- `http_method` (List of String) <br>**Allowed Values (choose one):** `["DELETE", "TRACE", "COPY", "ANY", "GET", "POST", "CONNECT", "OPTIONS", "PATCH", "HEAD", "PUT"]`
+- `http_method` (List of String) <br>**Allowed Values (choose one):** `["HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "ANY", "GET", "TRACE", "PATCH", "COPY"]`
 - `incoming_port` (Attributes) incoming_port The port on which the request is received (see [below for nested schema](#nestedatt--workload_choice--service--advertise_options--advertise_choice--advertise_on_public--advertise_choice--multi_ports--ports--advertise_choice--http_loadbalancer--route_choice--specific_routes--routes--choice--redirect_route--incoming_port))
 - `route_redirect` (Attributes) route_redirect Send redirect response (see [below for nested schema](#nestedatt--workload_choice--service--advertise_options--advertise_choice--advertise_on_public--advertise_choice--multi_ports--ports--advertise_choice--http_loadbalancer--route_choice--specific_routes--routes--choice--redirect_route--route_redirect))
 
@@ -3038,7 +3038,7 @@ Required:
 
 Optional:
 
-- `http_method` (List of String) <br>**Allowed Values (choose one):** `["HEAD", "PUT", "DELETE", "TRACE", "COPY", "ANY", "GET", "POST", "CONNECT", "OPTIONS", "PATCH"]`
+- `http_method` (List of String) <br>**Allowed Values (choose one):** `["COPY", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "ANY", "GET", "TRACE", "PATCH"]`
 
 <a id="nestedatt--workload_choice--service--advertise_options--advertise_choice--advertise_on_public--advertise_choice--multi_ports--ports--advertise_choice--http_loadbalancer--route_choice--specific_routes--routes--choice--simple_route--host_rewrite_params_choice"></a>
 ### Nested Schema for `workload_choice.service.advertise_options.advertise_choice.advertise_on_public.advertise_choice.multi_ports.ports.advertise_choice.http_loadbalancer.route_choice.specific_routes.routes.choice.simple_route.host_rewrite_params_choice`
@@ -3167,7 +3167,7 @@ Optional:
 
 Optional:
 
-- `port` (Number) <br>**Default:** `80`
+- `port` (Number) HTTP port to listen HTTP port to Listen.
 - `port_ranges` (String) <br>**Validation:** `Length LengthBetween(1, 512)`
 
 
@@ -3205,7 +3205,7 @@ Optional:
 
 Optional:
 
-- `port` (Number) <br>**Default:** `443`
+- `port` (Number) HTTPS port to listen HTTPS port to Listen.
 - `port_ranges` (String) <br>**Validation:** `Length LengthBetween(1, 512)`
 
 
@@ -3320,7 +3320,7 @@ Optional:
 
 Required:
 
-- `xfcc_header_elements` (List of String) <br>**Valid Options:** `["XFCC_CHAIN", "XFCC_SUBJECT", "XFCC_URI", "XFCC_DNS", "XFCC_NONE", "XFCC_CERT"]` (Multiple selection allowed)
+- `xfcc_header_elements` (List of String) <br>**Valid Options:** `["XFCC_CERT", "XFCC_CHAIN", "XFCC_SUBJECT", "XFCC_URI", "XFCC_DNS", "XFCC_NONE"]` (Multiple selection allowed)
 
 
 
@@ -3449,7 +3449,7 @@ Optional:
 
 Required:
 
-- `xfcc_header_elements` (List of String) <br>**Valid Options:** `["XFCC_URI", "XFCC_DNS", "XFCC_NONE", "XFCC_CERT", "XFCC_CHAIN", "XFCC_SUBJECT"]` (Multiple selection allowed)
+- `xfcc_header_elements` (List of String) <br>**Valid Options:** `["XFCC_DNS", "XFCC_NONE", "XFCC_CERT", "XFCC_CHAIN", "XFCC_SUBJECT", "XFCC_URI"]` (Multiple selection allowed)
 
 
 
@@ -3524,7 +3524,7 @@ Optional:
 
 Required:
 
-- `hash_algorithms` (List of String) <br>**Valid Options:** `["INVALID_HASH_ALGORITHM", "SHA256", "SHA1"]` (Multiple selection allowed)
+- `hash_algorithms` (List of String) <br>**Valid Options:** `["SHA256", "SHA1", "INVALID_HASH_ALGORITHM"]` (Multiple selection allowed)
 
 
 
@@ -3555,8 +3555,8 @@ Required:
 
 Optional:
 
-- `max_version` (List of String) <br>**Allowed Values (choose one):** `["TLS_AUTO", "TLSv1_0", "TLSv1_1", "TLSv1_2", "TLSv1_3"]`
-- `min_version` (List of String) <br>**Allowed Values (choose one):** `["TLS_AUTO", "TLSv1_0", "TLSv1_1", "TLSv1_2", "TLSv1_3"]`
+- `max_version` (List of String) <br>**Allowed Values (choose one):** `["TLSv1_2", "TLSv1_3", "TLS_AUTO", "TLSv1_0", "TLSv1_1"]`
+- `min_version` (List of String) <br>**Allowed Values (choose one):** `["TLSv1_1", "TLSv1_2", "TLSv1_3", "TLS_AUTO", "TLSv1_0"]`
 
 
 
@@ -3744,7 +3744,7 @@ Optional:
 
 Required:
 
-- `xfcc_header_elements` (List of String) <br>**Valid Options:** `["XFCC_NONE", "XFCC_CERT", "XFCC_CHAIN", "XFCC_SUBJECT", "XFCC_URI", "XFCC_DNS"]` (Multiple selection allowed)
+- `xfcc_header_elements` (List of String) <br>**Valid Options:** `["XFCC_URI", "XFCC_DNS", "XFCC_NONE", "XFCC_CERT", "XFCC_CHAIN", "XFCC_SUBJECT"]` (Multiple selection allowed)
 
 
 
@@ -3835,7 +3835,7 @@ Optional:
 
 Optional:
 
-- `port` (Number) <br>**Default:** `443`
+- `port` (Number) HTTPS port to listen HTTPS port to Listen.
 - `port_ranges` (String) <br>**Validation:** `Length LengthBetween(1, 512)`
 
 
@@ -3877,7 +3877,7 @@ Required:
 Optional:
 
 - `max_version` (List of String) <br>**Allowed Values (choose one):** `["TLSv1_3", "TLS_AUTO", "TLSv1_0", "TLSv1_1", "TLSv1_2"]`
-- `min_version` (List of String) <br>**Allowed Values (choose one):** `["TLS_AUTO", "TLSv1_0", "TLSv1_1", "TLSv1_2", "TLSv1_3"]`
+- `min_version` (List of String) <br>**Allowed Values (choose one):** `["TLSv1_0", "TLSv1_1", "TLSv1_2", "TLSv1_3", "TLS_AUTO"]`
 
 
 
@@ -3975,7 +3975,7 @@ Required:
 Optional:
 
 - `headers` (Attributes List) headers List of (key, value) headers (see [below for nested schema](#nestedatt--workload_choice--service--advertise_options--advertise_choice--advertise_on_public--advertise_choice--port--advertise_choice--http_loadbalancer--route_choice--specific_routes--routes--choice--direct_response_route--headers))
-- `http_method` (List of String) <br>**Allowed Values (choose one):** `["OPTIONS", "PATCH", "HEAD", "PUT", "DELETE", "TRACE", "COPY", "ANY", "GET", "POST", "CONNECT"]`
+- `http_method` (List of String) <br>**Allowed Values (choose one):** `["TRACE", "PATCH", "COPY", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "ANY", "GET"]`
 - `incoming_port` (Attributes) incoming_port The port on which the request is received (see [below for nested schema](#nestedatt--workload_choice--service--advertise_options--advertise_choice--advertise_on_public--advertise_choice--port--advertise_choice--http_loadbalancer--route_choice--specific_routes--routes--choice--direct_response_route--incoming_port))
 - `route_direct_response` (Attributes) route_direct_response Send direct response (see [below for nested schema](#nestedatt--workload_choice--service--advertise_options--advertise_choice--advertise_on_public--advertise_choice--port--advertise_choice--http_loadbalancer--route_choice--specific_routes--routes--choice--direct_response_route--route_direct_response))
 
@@ -4058,7 +4058,7 @@ Required:
 Optional:
 
 - `headers` (Attributes List) headers List of (key, value) headers (see [below for nested schema](#nestedatt--workload_choice--service--advertise_options--advertise_choice--advertise_on_public--advertise_choice--port--advertise_choice--http_loadbalancer--route_choice--specific_routes--routes--choice--redirect_route--headers))
-- `http_method` (List of String) <br>**Allowed Values (choose one):** `["CONNECT", "OPTIONS", "PATCH", "HEAD", "PUT", "DELETE", "TRACE", "COPY", "ANY", "GET", "POST"]`
+- `http_method` (List of String) <br>**Allowed Values (choose one):** `["ANY", "GET", "TRACE", "PATCH", "COPY", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS"]`
 - `incoming_port` (Attributes) incoming_port The port on which the request is received (see [below for nested schema](#nestedatt--workload_choice--service--advertise_options--advertise_choice--advertise_on_public--advertise_choice--port--advertise_choice--http_loadbalancer--route_choice--specific_routes--routes--choice--redirect_route--incoming_port))
 - `route_redirect` (Attributes) route_redirect Send redirect response (see [below for nested schema](#nestedatt--workload_choice--service--advertise_options--advertise_choice--advertise_on_public--advertise_choice--port--advertise_choice--http_loadbalancer--route_choice--specific_routes--routes--choice--redirect_route--route_redirect))
 
@@ -4163,7 +4163,7 @@ Required:
 
 Optional:
 
-- `http_method` (List of String) <br>**Allowed Values (choose one):** `["DELETE", "TRACE", "COPY", "ANY", "GET", "POST", "CONNECT", "OPTIONS", "PATCH", "HEAD", "PUT"]`
+- `http_method` (List of String) <br>**Allowed Values (choose one):** `["ANY", "GET", "TRACE", "PATCH", "COPY", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS"]`
 
 <a id="nestedatt--workload_choice--service--advertise_options--advertise_choice--advertise_on_public--advertise_choice--port--advertise_choice--http_loadbalancer--route_choice--specific_routes--routes--choice--simple_route--host_rewrite_params_choice"></a>
 ### Nested Schema for `workload_choice.service.advertise_options.advertise_choice.advertise_on_public.advertise_choice.port.advertise_choice.http_loadbalancer.route_choice.specific_routes.routes.choice.simple_route.host_rewrite_params_choice`
@@ -4226,7 +4226,7 @@ Required:
 
 Optional:
 
-- `protocol` (List of String) <br>**Allowed Values (choose one):** `["PROTOCOL_UDP", "PROTOCOL_TCP", "PROTOCOL_HTTP", "PROTOCOL_HTTP2", "PROTOCOL_TLS_WITH_SNI"]`
+- `protocol` (List of String) <br>**Allowed Values (choose one):** `["PROTOCOL_TLS_WITH_SNI", "PROTOCOL_UDP", "PROTOCOL_TCP", "PROTOCOL_HTTP", "PROTOCOL_HTTP2"]`
 
 <a id="nestedatt--workload_choice--service--advertise_options--advertise_choice--advertise_on_public--advertise_choice--port--port--info--target_port_choice"></a>
 ### Nested Schema for `workload_choice.service.advertise_options.advertise_choice.advertise_on_public.advertise_choice.port.port.info.target_port_choice`
@@ -4271,7 +4271,7 @@ Required:
 
 Optional:
 
-- `pull_policy` (List of String) <br>**Allowed Values (choose one):** `["IMAGE_PULL_POLICY_DEFAULT", "IMAGE_PULL_POLICY_IF_NOT_PRESENT", "IMAGE_PULL_POLICY_ALWAYS", "IMAGE_PULL_POLICY_NEVER"]`
+- `pull_policy` (List of String) <br>**Allowed Values (choose one):** `["IMAGE_PULL_POLICY_NEVER", "IMAGE_PULL_POLICY_DEFAULT", "IMAGE_PULL_POLICY_IF_NOT_PRESENT", "IMAGE_PULL_POLICY_ALWAYS"]`
 
 <a id="nestedatt--workload_choice--service--containers--image--registry_choice"></a>
 ### Nested Schema for `workload_choice.service.containers.image.registry_choice`
@@ -4303,7 +4303,7 @@ Optional:
 
 - `custom_flavor` (Attributes) Custom Container resources based on Workload Flavor (see [below for nested schema](#nestedatt--workload_choice--service--containers--flavor_choice--custom_flavor))
 - `default_flavor` (Boolean) Default Container resources based on default workload flavor of the Virtual Kubernetes
-- `flavor` (List of String) <br>**Allowed Values (choose one):** `["CONTAINER_FLAVOR_TYPE_LARGE", "CONTAINER_FLAVOR_TYPE_TINY", "CONTAINER_FLAVOR_TYPE_MEDIUM"]`
+- `flavor` (List of String) <br>**Allowed Values (choose one):** `["CONTAINER_FLAVOR_TYPE_TINY", "CONTAINER_FLAVOR_TYPE_MEDIUM", "CONTAINER_FLAVOR_TYPE_LARGE"]`
 
 <a id="nestedatt--workload_choice--service--containers--flavor_choice--custom_flavor"></a>
 ### Nested Schema for `workload_choice.service.containers.flavor_choice.custom_flavor`
@@ -4610,7 +4610,7 @@ Read-Only:
 
 Optional:
 
-- `num_replicas` (Number) <br>**Default:** `1`
+- `num_replicas` (Number) Number of Replicas Number of replicas of service to spawn per site
 - `scale_to_zero` (Boolean) Scale down to zero Set number of replicas of service to spawn per site to zero
 
 
@@ -4870,7 +4870,7 @@ Required:
 
 Optional:
 
-- `pull_policy` (List of String) <br>**Allowed Values (choose one):** `["IMAGE_PULL_POLICY_DEFAULT", "IMAGE_PULL_POLICY_IF_NOT_PRESENT", "IMAGE_PULL_POLICY_ALWAYS", "IMAGE_PULL_POLICY_NEVER"]`
+- `pull_policy` (List of String) <br>**Allowed Values (choose one):** `["IMAGE_PULL_POLICY_ALWAYS", "IMAGE_PULL_POLICY_NEVER", "IMAGE_PULL_POLICY_DEFAULT", "IMAGE_PULL_POLICY_IF_NOT_PRESENT"]`
 
 <a id="nestedatt--workload_choice--simple_service--container--image--registry_choice"></a>
 ### Nested Schema for `workload_choice.simple_service.container.image.registry_choice`
@@ -5132,7 +5132,7 @@ Required:
 
 Optional:
 
-- `mode` (List of String) <br>**Allowed Values (choose one):** `["VOLUME_MOUNT_READ_ONLY", "VOLUME_MOUNT_READ_WRITE"]`
+- `mode` (List of String) <br>**Allowed Values (choose one):** `["VOLUME_MOUNT_READ_WRITE", "VOLUME_MOUNT_READ_ONLY"]`
 - `sub_path` (String) <br>**Validation:** `Length LengthAtMost(256)`
 
 
@@ -5289,7 +5289,7 @@ Optional:
 
 Required:
 
-- `network` (List of String) <br>**Allowed Values (choose one):** `["SITE_NETWORK_INSIDE_AND_OUTSIDE", "SITE_NETWORK_INSIDE_AND_OUTSIDE_WITH_INTERNET_VIP", "SITE_NETWORK_INSIDE", "SITE_NETWORK_OUTSIDE", "SITE_NETWORK_OUTSIDE_WITH_INTERNET_VIP", "SITE_NETWORK_SERVICE", "SITE_NETWORK_IP_FABRIC"]`
+- `network` (List of String) <br>**Allowed Values (choose one):** `["SITE_NETWORK_IP_FABRIC", "SITE_NETWORK_INSIDE_AND_OUTSIDE", "SITE_NETWORK_INSIDE_AND_OUTSIDE_WITH_INTERNET_VIP", "SITE_NETWORK_INSIDE", "SITE_NETWORK_OUTSIDE", "SITE_NETWORK_OUTSIDE_WITH_INTERNET_VIP", "SITE_NETWORK_SERVICE"]`
 - `site` (Attributes) Site Reference to site object (see [below for nested schema](#nestedatt--workload_choice--stateful_service--advertise_options--advertise_choice--advertise_custom--advertise_where--choice--site--site))
 
 Optional:
@@ -5316,7 +5316,7 @@ Read-Only:
 
 Required:
 
-- `network` (List of String) <br>**Allowed Values (choose one):** `["SITE_NETWORK_INSIDE", "SITE_NETWORK_OUTSIDE", "SITE_NETWORK_OUTSIDE_WITH_INTERNET_VIP", "SITE_NETWORK_SERVICE", "SITE_NETWORK_IP_FABRIC", "SITE_NETWORK_INSIDE_AND_OUTSIDE", "SITE_NETWORK_INSIDE_AND_OUTSIDE_WITH_INTERNET_VIP"]`
+- `network` (List of String) <br>**Allowed Values (choose one):** `["SITE_NETWORK_OUTSIDE", "SITE_NETWORK_OUTSIDE_WITH_INTERNET_VIP", "SITE_NETWORK_SERVICE", "SITE_NETWORK_IP_FABRIC", "SITE_NETWORK_INSIDE_AND_OUTSIDE", "SITE_NETWORK_INSIDE_AND_OUTSIDE_WITH_INTERNET_VIP", "SITE_NETWORK_INSIDE"]`
 - `virtual_site` (Attributes) Virtual Site Reference to virtual site object (see [below for nested schema](#nestedatt--workload_choice--stateful_service--advertise_options--advertise_choice--advertise_custom--advertise_where--choice--virtual_site--virtual_site))
 
 <a id="nestedatt--workload_choice--stateful_service--advertise_options--advertise_choice--advertise_custom--advertise_where--choice--virtual_site--virtual_site"></a>
@@ -5428,7 +5428,7 @@ Optional:
 
 Optional:
 
-- `port` (Number) <br>**Default:** `80`
+- `port` (Number) HTTP port to listen HTTP port to Listen.
 - `port_ranges` (String) <br>**Validation:** `Length LengthBetween(1, 512)`
 
 
@@ -5466,7 +5466,7 @@ Optional:
 
 Optional:
 
-- `port` (Number) <br>**Default:** `443`
+- `port` (Number) HTTPS port to listen HTTPS port to Listen.
 - `port_ranges` (String) <br>**Validation:** `Length LengthBetween(1, 512)`
 
 
@@ -5581,7 +5581,7 @@ Optional:
 
 Required:
 
-- `xfcc_header_elements` (List of String) <br>**Valid Options:** `["XFCC_DNS", "XFCC_NONE", "XFCC_CERT", "XFCC_CHAIN", "XFCC_SUBJECT", "XFCC_URI"]` (Multiple selection allowed)
+- `xfcc_header_elements` (List of String) <br>**Valid Options:** `["XFCC_CHAIN", "XFCC_SUBJECT", "XFCC_URI", "XFCC_DNS", "XFCC_NONE", "XFCC_CERT"]` (Multiple selection allowed)
 
 
 
@@ -5710,7 +5710,7 @@ Optional:
 
 Required:
 
-- `xfcc_header_elements` (List of String) <br>**Valid Options:** `["XFCC_CERT", "XFCC_CHAIN", "XFCC_SUBJECT", "XFCC_URI", "XFCC_DNS", "XFCC_NONE"]` (Multiple selection allowed)
+- `xfcc_header_elements` (List of String) <br>**Valid Options:** `["XFCC_NONE", "XFCC_CERT", "XFCC_CHAIN", "XFCC_SUBJECT", "XFCC_URI", "XFCC_DNS"]` (Multiple selection allowed)
 
 
 
@@ -5816,8 +5816,8 @@ Required:
 
 Optional:
 
-- `max_version` (List of String) <br>**Allowed Values (choose one):** `["TLS_AUTO", "TLSv1_0", "TLSv1_1", "TLSv1_2", "TLSv1_3"]`
-- `min_version` (List of String) <br>**Allowed Values (choose one):** `["TLSv1_0", "TLSv1_1", "TLSv1_2", "TLSv1_3", "TLS_AUTO"]`
+- `max_version` (List of String) <br>**Allowed Values (choose one):** `["TLSv1_0", "TLSv1_1", "TLSv1_2", "TLSv1_3", "TLS_AUTO"]`
+- `min_version` (List of String) <br>**Allowed Values (choose one):** `["TLS_AUTO", "TLSv1_0", "TLSv1_1", "TLSv1_2", "TLSv1_3"]`
 
 
 
@@ -6005,7 +6005,7 @@ Optional:
 
 Required:
 
-- `xfcc_header_elements` (List of String) <br>**Valid Options:** `["XFCC_CERT", "XFCC_CHAIN", "XFCC_SUBJECT", "XFCC_URI", "XFCC_DNS", "XFCC_NONE"]` (Multiple selection allowed)
+- `xfcc_header_elements` (List of String) <br>**Valid Options:** `["XFCC_URI", "XFCC_DNS", "XFCC_NONE", "XFCC_CERT", "XFCC_CHAIN", "XFCC_SUBJECT"]` (Multiple selection allowed)
 
 
 
@@ -6096,7 +6096,7 @@ Optional:
 
 Optional:
 
-- `port` (Number) <br>**Default:** `443`
+- `port` (Number) HTTPS port to listen HTTPS port to Listen.
 - `port_ranges` (String) <br>**Validation:** `Length LengthBetween(1, 512)`
 
 
@@ -6137,8 +6137,8 @@ Required:
 
 Optional:
 
-- `max_version` (List of String) <br>**Allowed Values (choose one):** `["TLS_AUTO", "TLSv1_0", "TLSv1_1", "TLSv1_2", "TLSv1_3"]`
-- `min_version` (List of String) <br>**Allowed Values (choose one):** `["TLS_AUTO", "TLSv1_0", "TLSv1_1", "TLSv1_2", "TLSv1_3"]`
+- `max_version` (List of String) <br>**Allowed Values (choose one):** `["TLSv1_3", "TLS_AUTO", "TLSv1_0", "TLSv1_1", "TLSv1_2"]`
+- `min_version` (List of String) <br>**Allowed Values (choose one):** `["TLSv1_3", "TLS_AUTO", "TLSv1_0", "TLSv1_1", "TLSv1_2"]`
 
 
 
@@ -6236,7 +6236,7 @@ Required:
 Optional:
 
 - `headers` (Attributes List) headers List of (key, value) headers (see [below for nested schema](#nestedatt--workload_choice--stateful_service--advertise_options--advertise_choice--advertise_custom--ports--advertise_choice--http_loadbalancer--route_choice--specific_routes--routes--choice--direct_response_route--headers))
-- `http_method` (List of String) <br>**Allowed Values (choose one):** `["HEAD", "PUT", "DELETE", "TRACE", "COPY", "ANY", "GET", "POST", "CONNECT", "OPTIONS", "PATCH"]`
+- `http_method` (List of String) <br>**Allowed Values (choose one):** `["COPY", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "ANY", "GET", "TRACE", "PATCH"]`
 - `incoming_port` (Attributes) incoming_port The port on which the request is received (see [below for nested schema](#nestedatt--workload_choice--stateful_service--advertise_options--advertise_choice--advertise_custom--ports--advertise_choice--http_loadbalancer--route_choice--specific_routes--routes--choice--direct_response_route--incoming_port))
 - `route_direct_response` (Attributes) route_direct_response Send direct response (see [below for nested schema](#nestedatt--workload_choice--stateful_service--advertise_options--advertise_choice--advertise_custom--ports--advertise_choice--http_loadbalancer--route_choice--specific_routes--routes--choice--direct_response_route--route_direct_response))
 
@@ -6319,7 +6319,7 @@ Required:
 Optional:
 
 - `headers` (Attributes List) headers List of (key, value) headers (see [below for nested schema](#nestedatt--workload_choice--stateful_service--advertise_options--advertise_choice--advertise_custom--ports--advertise_choice--http_loadbalancer--route_choice--specific_routes--routes--choice--redirect_route--headers))
-- `http_method` (List of String) <br>**Allowed Values (choose one):** `["POST", "CONNECT", "OPTIONS", "PATCH", "HEAD", "PUT", "DELETE", "TRACE", "COPY", "ANY", "GET"]`
+- `http_method` (List of String) <br>**Allowed Values (choose one):** `["ANY", "GET", "TRACE", "PATCH", "COPY", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS"]`
 - `incoming_port` (Attributes) incoming_port The port on which the request is received (see [below for nested schema](#nestedatt--workload_choice--stateful_service--advertise_options--advertise_choice--advertise_custom--ports--advertise_choice--http_loadbalancer--route_choice--specific_routes--routes--choice--redirect_route--incoming_port))
 - `route_redirect` (Attributes) route_redirect Send redirect response (see [below for nested schema](#nestedatt--workload_choice--stateful_service--advertise_options--advertise_choice--advertise_custom--ports--advertise_choice--http_loadbalancer--route_choice--specific_routes--routes--choice--redirect_route--route_redirect))
 
@@ -6424,7 +6424,7 @@ Required:
 
 Optional:
 
-- `http_method` (List of String) <br>**Allowed Values (choose one):** `["HEAD", "PUT", "DELETE", "TRACE", "COPY", "ANY", "GET", "POST", "CONNECT", "OPTIONS", "PATCH"]`
+- `http_method` (List of String) <br>**Allowed Values (choose one):** `["POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "ANY", "GET", "TRACE", "PATCH", "COPY", "HEAD"]`
 
 <a id="nestedatt--workload_choice--stateful_service--advertise_options--advertise_choice--advertise_custom--ports--advertise_choice--http_loadbalancer--route_choice--specific_routes--routes--choice--simple_route--host_rewrite_params_choice"></a>
 ### Nested Schema for `workload_choice.stateful_service.advertise_options.advertise_choice.advertise_custom.ports.advertise_choice.http_loadbalancer.route_choice.specific_routes.routes.choice.simple_route.host_rewrite_params_choice`
@@ -6488,7 +6488,7 @@ Required:
 
 Optional:
 
-- `protocol` (List of String) <br>**Allowed Values (choose one):** `["PROTOCOL_HTTP2", "PROTOCOL_TLS_WITH_SNI", "PROTOCOL_UDP", "PROTOCOL_TCP", "PROTOCOL_HTTP"]`
+- `protocol` (List of String) <br>**Allowed Values (choose one):** `["PROTOCOL_TCP", "PROTOCOL_HTTP", "PROTOCOL_HTTP2", "PROTOCOL_TLS_WITH_SNI", "PROTOCOL_UDP"]`
 
 <a id="nestedatt--workload_choice--stateful_service--advertise_options--advertise_choice--advertise_custom--ports--port--info--target_port_choice"></a>
 ### Nested Schema for `workload_choice.stateful_service.advertise_options.advertise_choice.advertise_custom.ports.port.info.target_port_choice`
@@ -6574,7 +6574,7 @@ Required:
 
 Optional:
 
-- `protocol` (List of String) <br>**Allowed Values (choose one):** `["PROTOCOL_TLS_WITH_SNI", "PROTOCOL_UDP", "PROTOCOL_TCP", "PROTOCOL_HTTP", "PROTOCOL_HTTP2"]`
+- `protocol` (List of String) <br>**Allowed Values (choose one):** `["PROTOCOL_UDP", "PROTOCOL_TCP", "PROTOCOL_HTTP", "PROTOCOL_HTTP2", "PROTOCOL_TLS_WITH_SNI"]`
 
 <a id="nestedatt--workload_choice--stateful_service--advertise_options--advertise_choice--advertise_in_cluster--port_choice--port--info--target_port_choice"></a>
 ### Nested Schema for `workload_choice.stateful_service.advertise_options.advertise_choice.advertise_in_cluster.port_choice.port.info.target_port_choice`
@@ -6661,7 +6661,7 @@ Optional:
 
 Optional:
 
-- `port` (Number) <br>**Default:** `80`
+- `port` (Number) HTTP port to listen HTTP port to Listen.
 - `port_ranges` (String) <br>**Validation:** `Length LengthBetween(1, 512)`
 
 
@@ -6699,7 +6699,7 @@ Optional:
 
 Optional:
 
-- `port` (Number) <br>**Default:** `443`
+- `port` (Number) HTTPS port to listen HTTPS port to Listen.
 - `port_ranges` (String) <br>**Validation:** `Length LengthBetween(1, 512)`
 
 
@@ -6814,7 +6814,7 @@ Optional:
 
 Required:
 
-- `xfcc_header_elements` (List of String) <br>**Valid Options:** `["XFCC_CHAIN", "XFCC_SUBJECT", "XFCC_URI", "XFCC_DNS", "XFCC_NONE", "XFCC_CERT"]` (Multiple selection allowed)
+- `xfcc_header_elements` (List of String) <br>**Valid Options:** `["XFCC_URI", "XFCC_DNS", "XFCC_NONE", "XFCC_CERT", "XFCC_CHAIN", "XFCC_SUBJECT"]` (Multiple selection allowed)
 
 
 
@@ -6943,7 +6943,7 @@ Optional:
 
 Required:
 
-- `xfcc_header_elements` (List of String) <br>**Valid Options:** `["XFCC_SUBJECT", "XFCC_URI", "XFCC_DNS", "XFCC_NONE", "XFCC_CERT", "XFCC_CHAIN"]` (Multiple selection allowed)
+- `xfcc_header_elements` (List of String) <br>**Valid Options:** `["XFCC_CERT", "XFCC_CHAIN", "XFCC_SUBJECT", "XFCC_URI", "XFCC_DNS", "XFCC_NONE"]` (Multiple selection allowed)
 
 
 
@@ -7018,7 +7018,7 @@ Optional:
 
 Required:
 
-- `hash_algorithms` (List of String) <br>**Valid Options:** `["INVALID_HASH_ALGORITHM", "SHA256", "SHA1"]` (Multiple selection allowed)
+- `hash_algorithms` (List of String) <br>**Valid Options:** `["SHA256", "SHA1", "INVALID_HASH_ALGORITHM"]` (Multiple selection allowed)
 
 
 
@@ -7049,8 +7049,8 @@ Required:
 
 Optional:
 
-- `max_version` (List of String) <br>**Allowed Values (choose one):** `["TLS_AUTO", "TLSv1_0", "TLSv1_1", "TLSv1_2", "TLSv1_3"]`
-- `min_version` (List of String) <br>**Allowed Values (choose one):** `["TLS_AUTO", "TLSv1_0", "TLSv1_1", "TLSv1_2", "TLSv1_3"]`
+- `max_version` (List of String) <br>**Allowed Values (choose one):** `["TLSv1_0", "TLSv1_1", "TLSv1_2", "TLSv1_3", "TLS_AUTO"]`
+- `min_version` (List of String) <br>**Allowed Values (choose one):** `["TLSv1_0", "TLSv1_1", "TLSv1_2", "TLSv1_3", "TLS_AUTO"]`
 
 
 
@@ -7238,7 +7238,7 @@ Optional:
 
 Required:
 
-- `xfcc_header_elements` (List of String) <br>**Valid Options:** `["XFCC_SUBJECT", "XFCC_URI", "XFCC_DNS", "XFCC_NONE", "XFCC_CERT", "XFCC_CHAIN"]` (Multiple selection allowed)
+- `xfcc_header_elements` (List of String) <br>**Valid Options:** `["XFCC_NONE", "XFCC_CERT", "XFCC_CHAIN", "XFCC_SUBJECT", "XFCC_URI", "XFCC_DNS"]` (Multiple selection allowed)
 
 
 
@@ -7329,7 +7329,7 @@ Optional:
 
 Optional:
 
-- `port` (Number) <br>**Default:** `443`
+- `port` (Number) HTTPS port to listen HTTPS port to Listen.
 - `port_ranges` (String) <br>**Validation:** `Length LengthBetween(1, 512)`
 
 
@@ -7370,7 +7370,7 @@ Required:
 
 Optional:
 
-- `max_version` (List of String) <br>**Allowed Values (choose one):** `["TLSv1_2", "TLSv1_3", "TLS_AUTO", "TLSv1_0", "TLSv1_1"]`
+- `max_version` (List of String) <br>**Allowed Values (choose one):** `["TLS_AUTO", "TLSv1_0", "TLSv1_1", "TLSv1_2", "TLSv1_3"]`
 - `min_version` (List of String) <br>**Allowed Values (choose one):** `["TLS_AUTO", "TLSv1_0", "TLSv1_1", "TLSv1_2", "TLSv1_3"]`
 
 
@@ -7469,7 +7469,7 @@ Required:
 Optional:
 
 - `headers` (Attributes List) headers List of (key, value) headers (see [below for nested schema](#nestedatt--workload_choice--stateful_service--advertise_options--advertise_choice--advertise_on_public--advertise_choice--multi_ports--ports--advertise_choice--http_loadbalancer--route_choice--specific_routes--routes--choice--direct_response_route--headers))
-- `http_method` (List of String) <br>**Allowed Values (choose one):** `["HEAD", "PUT", "DELETE", "TRACE", "COPY", "ANY", "GET", "POST", "CONNECT", "OPTIONS", "PATCH"]`
+- `http_method` (List of String) <br>**Allowed Values (choose one):** `["PATCH", "COPY", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "ANY", "GET", "TRACE"]`
 - `incoming_port` (Attributes) incoming_port The port on which the request is received (see [below for nested schema](#nestedatt--workload_choice--stateful_service--advertise_options--advertise_choice--advertise_on_public--advertise_choice--multi_ports--ports--advertise_choice--http_loadbalancer--route_choice--specific_routes--routes--choice--direct_response_route--incoming_port))
 - `route_direct_response` (Attributes) route_direct_response Send direct response (see [below for nested schema](#nestedatt--workload_choice--stateful_service--advertise_options--advertise_choice--advertise_on_public--advertise_choice--multi_ports--ports--advertise_choice--http_loadbalancer--route_choice--specific_routes--routes--choice--direct_response_route--route_direct_response))
 
@@ -7552,7 +7552,7 @@ Required:
 Optional:
 
 - `headers` (Attributes List) headers List of (key, value) headers (see [below for nested schema](#nestedatt--workload_choice--stateful_service--advertise_options--advertise_choice--advertise_on_public--advertise_choice--multi_ports--ports--advertise_choice--http_loadbalancer--route_choice--specific_routes--routes--choice--redirect_route--headers))
-- `http_method` (List of String) <br>**Allowed Values (choose one):** `["HEAD", "PUT", "DELETE", "TRACE", "COPY", "ANY", "GET", "POST", "CONNECT", "OPTIONS", "PATCH"]`
+- `http_method` (List of String) <br>**Allowed Values (choose one):** `["COPY", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "ANY", "GET", "TRACE", "PATCH"]`
 - `incoming_port` (Attributes) incoming_port The port on which the request is received (see [below for nested schema](#nestedatt--workload_choice--stateful_service--advertise_options--advertise_choice--advertise_on_public--advertise_choice--multi_ports--ports--advertise_choice--http_loadbalancer--route_choice--specific_routes--routes--choice--redirect_route--incoming_port))
 - `route_redirect` (Attributes) route_redirect Send redirect response (see [below for nested schema](#nestedatt--workload_choice--stateful_service--advertise_options--advertise_choice--advertise_on_public--advertise_choice--multi_ports--ports--advertise_choice--http_loadbalancer--route_choice--specific_routes--routes--choice--redirect_route--route_redirect))
 
@@ -7657,7 +7657,7 @@ Required:
 
 Optional:
 
-- `http_method` (List of String) <br>**Allowed Values (choose one):** `["COPY", "ANY", "GET", "POST", "CONNECT", "OPTIONS", "PATCH", "HEAD", "PUT", "DELETE", "TRACE"]`
+- `http_method` (List of String) <br>**Allowed Values (choose one):** `["DELETE", "CONNECT", "OPTIONS", "ANY", "GET", "TRACE", "PATCH", "COPY", "HEAD", "POST", "PUT"]`
 
 <a id="nestedatt--workload_choice--stateful_service--advertise_options--advertise_choice--advertise_on_public--advertise_choice--multi_ports--ports--advertise_choice--http_loadbalancer--route_choice--specific_routes--routes--choice--simple_route--host_rewrite_params_choice"></a>
 ### Nested Schema for `workload_choice.stateful_service.advertise_options.advertise_choice.advertise_on_public.advertise_choice.multi_ports.ports.advertise_choice.http_loadbalancer.route_choice.specific_routes.routes.choice.simple_route.host_rewrite_params_choice`
@@ -7721,7 +7721,7 @@ Required:
 
 Optional:
 
-- `protocol` (List of String) <br>**Allowed Values (choose one):** `["PROTOCOL_HTTP2", "PROTOCOL_TLS_WITH_SNI", "PROTOCOL_UDP", "PROTOCOL_TCP", "PROTOCOL_HTTP"]`
+- `protocol` (List of String) <br>**Allowed Values (choose one):** `["PROTOCOL_TCP", "PROTOCOL_HTTP", "PROTOCOL_HTTP2", "PROTOCOL_TLS_WITH_SNI", "PROTOCOL_UDP"]`
 
 <a id="nestedatt--workload_choice--stateful_service--advertise_options--advertise_choice--advertise_on_public--advertise_choice--multi_ports--ports--port--info--target_port_choice"></a>
 ### Nested Schema for `workload_choice.stateful_service.advertise_options.advertise_choice.advertise_on_public.advertise_choice.multi_ports.ports.port.info.target_port_choice`
@@ -7786,7 +7786,7 @@ Optional:
 
 Optional:
 
-- `port` (Number) <br>**Default:** `80`
+- `port` (Number) HTTP port to listen HTTP port to Listen.
 - `port_ranges` (String) <br>**Validation:** `Length LengthBetween(1, 512)`
 
 
@@ -7824,7 +7824,7 @@ Optional:
 
 Optional:
 
-- `port` (Number) <br>**Default:** `443`
+- `port` (Number) HTTPS port to listen HTTPS port to Listen.
 - `port_ranges` (String) <br>**Validation:** `Length LengthBetween(1, 512)`
 
 
@@ -7971,8 +7971,8 @@ Required:
 
 Optional:
 
-- `max_version` (List of String) <br>**Allowed Values (choose one):** `["TLS_AUTO", "TLSv1_0", "TLSv1_1", "TLSv1_2", "TLSv1_3"]`
-- `min_version` (List of String) <br>**Allowed Values (choose one):** `["TLSv1_3", "TLS_AUTO", "TLSv1_0", "TLSv1_1", "TLSv1_2"]`
+- `max_version` (List of String) <br>**Allowed Values (choose one):** `["TLSv1_2", "TLSv1_3", "TLS_AUTO", "TLSv1_0", "TLSv1_1"]`
+- `min_version` (List of String) <br>**Allowed Values (choose one):** `["TLS_AUTO", "TLSv1_0", "TLSv1_1", "TLSv1_2", "TLSv1_3"]`
 
 
 
@@ -8068,7 +8068,7 @@ Optional:
 
 Required:
 
-- `xfcc_header_elements` (List of String) <br>**Valid Options:** `["XFCC_DNS", "XFCC_NONE", "XFCC_CERT", "XFCC_CHAIN", "XFCC_SUBJECT", "XFCC_URI"]` (Multiple selection allowed)
+- `xfcc_header_elements` (List of String) <br>**Valid Options:** `["XFCC_CHAIN", "XFCC_SUBJECT", "XFCC_URI", "XFCC_DNS", "XFCC_NONE", "XFCC_CERT"]` (Multiple selection allowed)
 
 
 
@@ -8174,7 +8174,7 @@ Required:
 
 Optional:
 
-- `max_version` (List of String) <br>**Allowed Values (choose one):** `["TLSv1_0", "TLSv1_1", "TLSv1_2", "TLSv1_3", "TLS_AUTO"]`
+- `max_version` (List of String) <br>**Allowed Values (choose one):** `["TLSv1_3", "TLS_AUTO", "TLSv1_0", "TLSv1_1", "TLSv1_2"]`
 - `min_version` (List of String) <br>**Allowed Values (choose one):** `["TLS_AUTO", "TLSv1_0", "TLSv1_1", "TLSv1_2", "TLSv1_3"]`
 
 
@@ -8454,7 +8454,7 @@ Optional:
 
 Optional:
 
-- `port` (Number) <br>**Default:** `443`
+- `port` (Number) HTTPS port to listen HTTPS port to Listen.
 - `port_ranges` (String) <br>**Validation:** `Length LengthBetween(1, 512)`
 
 
@@ -8495,8 +8495,8 @@ Required:
 
 Optional:
 
-- `max_version` (List of String) <br>**Allowed Values (choose one):** `["TLS_AUTO", "TLSv1_0", "TLSv1_1", "TLSv1_2", "TLSv1_3"]`
-- `min_version` (List of String) <br>**Allowed Values (choose one):** `["TLSv1_1", "TLSv1_2", "TLSv1_3", "TLS_AUTO", "TLSv1_0"]`
+- `max_version` (List of String) <br>**Allowed Values (choose one):** `["TLSv1_2", "TLSv1_3", "TLS_AUTO", "TLSv1_0", "TLSv1_1"]`
+- `min_version` (List of String) <br>**Allowed Values (choose one):** `["TLS_AUTO", "TLSv1_0", "TLSv1_1", "TLSv1_2", "TLSv1_3"]`
 
 
 
@@ -8594,7 +8594,7 @@ Required:
 Optional:
 
 - `headers` (Attributes List) headers List of (key, value) headers (see [below for nested schema](#nestedatt--workload_choice--stateful_service--advertise_options--advertise_choice--advertise_on_public--advertise_choice--port--advertise_choice--http_loadbalancer--route_choice--specific_routes--routes--choice--direct_response_route--headers))
-- `http_method` (List of String) <br>**Allowed Values (choose one):** `["DELETE", "TRACE", "COPY", "ANY", "GET", "POST", "CONNECT", "OPTIONS", "PATCH", "HEAD", "PUT"]`
+- `http_method` (List of String) <br>**Allowed Values (choose one):** `["ANY", "GET", "TRACE", "PATCH", "COPY", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS"]`
 - `incoming_port` (Attributes) incoming_port The port on which the request is received (see [below for nested schema](#nestedatt--workload_choice--stateful_service--advertise_options--advertise_choice--advertise_on_public--advertise_choice--port--advertise_choice--http_loadbalancer--route_choice--specific_routes--routes--choice--direct_response_route--incoming_port))
 - `route_direct_response` (Attributes) route_direct_response Send direct response (see [below for nested schema](#nestedatt--workload_choice--stateful_service--advertise_options--advertise_choice--advertise_on_public--advertise_choice--port--advertise_choice--http_loadbalancer--route_choice--specific_routes--routes--choice--direct_response_route--route_direct_response))
 
@@ -8677,7 +8677,7 @@ Required:
 Optional:
 
 - `headers` (Attributes List) headers List of (key, value) headers (see [below for nested schema](#nestedatt--workload_choice--stateful_service--advertise_options--advertise_choice--advertise_on_public--advertise_choice--port--advertise_choice--http_loadbalancer--route_choice--specific_routes--routes--choice--redirect_route--headers))
-- `http_method` (List of String) <br>**Allowed Values (choose one):** `["HEAD", "PUT", "DELETE", "TRACE", "COPY", "ANY", "GET", "POST", "CONNECT", "OPTIONS", "PATCH"]`
+- `http_method` (List of String) <br>**Allowed Values (choose one):** `["PUT", "DELETE", "CONNECT", "OPTIONS", "ANY", "GET", "TRACE", "PATCH", "COPY", "HEAD", "POST"]`
 - `incoming_port` (Attributes) incoming_port The port on which the request is received (see [below for nested schema](#nestedatt--workload_choice--stateful_service--advertise_options--advertise_choice--advertise_on_public--advertise_choice--port--advertise_choice--http_loadbalancer--route_choice--specific_routes--routes--choice--redirect_route--incoming_port))
 - `route_redirect` (Attributes) route_redirect Send redirect response (see [below for nested schema](#nestedatt--workload_choice--stateful_service--advertise_options--advertise_choice--advertise_on_public--advertise_choice--port--advertise_choice--http_loadbalancer--route_choice--specific_routes--routes--choice--redirect_route--route_redirect))
 
@@ -8782,7 +8782,7 @@ Required:
 
 Optional:
 
-- `http_method` (List of String) <br>**Allowed Values (choose one):** `["HEAD", "PUT", "DELETE", "TRACE", "COPY", "ANY", "GET", "POST", "CONNECT", "OPTIONS", "PATCH"]`
+- `http_method` (List of String) <br>**Allowed Values (choose one):** `["TRACE", "PATCH", "COPY", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "ANY", "GET"]`
 
 <a id="nestedatt--workload_choice--stateful_service--advertise_options--advertise_choice--advertise_on_public--advertise_choice--port--advertise_choice--http_loadbalancer--route_choice--specific_routes--routes--choice--simple_route--host_rewrite_params_choice"></a>
 ### Nested Schema for `workload_choice.stateful_service.advertise_options.advertise_choice.advertise_on_public.advertise_choice.port.advertise_choice.http_loadbalancer.route_choice.specific_routes.routes.choice.simple_route.host_rewrite_params_choice`
@@ -8845,7 +8845,7 @@ Required:
 
 Optional:
 
-- `protocol` (List of String) <br>**Allowed Values (choose one):** `["PROTOCOL_UDP", "PROTOCOL_TCP", "PROTOCOL_HTTP", "PROTOCOL_HTTP2", "PROTOCOL_TLS_WITH_SNI"]`
+- `protocol` (List of String) <br>**Allowed Values (choose one):** `["PROTOCOL_TCP", "PROTOCOL_HTTP", "PROTOCOL_HTTP2", "PROTOCOL_TLS_WITH_SNI", "PROTOCOL_UDP"]`
 
 <a id="nestedatt--workload_choice--stateful_service--advertise_options--advertise_choice--advertise_on_public--advertise_choice--port--port--info--target_port_choice"></a>
 ### Nested Schema for `workload_choice.stateful_service.advertise_options.advertise_choice.advertise_on_public.advertise_choice.port.port.info.target_port_choice`
@@ -8890,7 +8890,7 @@ Required:
 
 Optional:
 
-- `pull_policy` (List of String) <br>**Allowed Values (choose one):** `["IMAGE_PULL_POLICY_NEVER", "IMAGE_PULL_POLICY_DEFAULT", "IMAGE_PULL_POLICY_IF_NOT_PRESENT", "IMAGE_PULL_POLICY_ALWAYS"]`
+- `pull_policy` (List of String) <br>**Allowed Values (choose one):** `["IMAGE_PULL_POLICY_DEFAULT", "IMAGE_PULL_POLICY_IF_NOT_PRESENT", "IMAGE_PULL_POLICY_ALWAYS", "IMAGE_PULL_POLICY_NEVER"]`
 
 <a id="nestedatt--workload_choice--stateful_service--containers--image--registry_choice"></a>
 ### Nested Schema for `workload_choice.stateful_service.containers.image.registry_choice`
@@ -8922,7 +8922,7 @@ Optional:
 
 - `custom_flavor` (Attributes) Custom Container resources based on Workload Flavor (see [below for nested schema](#nestedatt--workload_choice--stateful_service--containers--flavor_choice--custom_flavor))
 - `default_flavor` (Boolean) Default Container resources based on default workload flavor of the Virtual Kubernetes
-- `flavor` (List of String) <br>**Allowed Values (choose one):** `["CONTAINER_FLAVOR_TYPE_LARGE", "CONTAINER_FLAVOR_TYPE_TINY", "CONTAINER_FLAVOR_TYPE_MEDIUM"]`
+- `flavor` (List of String) <br>**Allowed Values (choose one):** `["CONTAINER_FLAVOR_TYPE_TINY", "CONTAINER_FLAVOR_TYPE_MEDIUM", "CONTAINER_FLAVOR_TYPE_LARGE"]`
 
 <a id="nestedatt--workload_choice--stateful_service--containers--flavor_choice--custom_flavor"></a>
 ### Nested Schema for `workload_choice.stateful_service.containers.flavor_choice.custom_flavor`
@@ -9249,7 +9249,7 @@ Required:
 
 Optional:
 
-- `mode` (List of String) <br>**Allowed Values (choose one):** `["VOLUME_MOUNT_READ_ONLY", "VOLUME_MOUNT_READ_WRITE"]`
+- `mode` (List of String) <br>**Allowed Values (choose one):** `["VOLUME_MOUNT_READ_WRITE", "VOLUME_MOUNT_READ_ONLY"]`
 - `sub_path` (String) <br>**Validation:** `Length LengthAtMost(256)`
 
 
@@ -9285,7 +9285,7 @@ Optional:
 
 Optional:
 
-- `num_replicas` (Number) <br>**Default:** `1`
+- `num_replicas` (Number) Number of Replicas Number of replicas of service to spawn per site
 - `scale_to_zero` (Boolean) Scale down to zero Set number of replicas of service to spawn per site to zero
 
 
@@ -9342,7 +9342,7 @@ Required:
 
 Optional:
 
-- `mode` (List of String) <br>**Allowed Values (choose one):** `["VOLUME_MOUNT_READ_ONLY", "VOLUME_MOUNT_READ_WRITE"]`
+- `mode` (List of String) <br>**Allowed Values (choose one):** `["VOLUME_MOUNT_READ_WRITE", "VOLUME_MOUNT_READ_ONLY"]`
 - `sub_path` (String) <br>**Validation:** `Length LengthAtMost(256)`
 
 
@@ -9408,7 +9408,7 @@ Required:
 
 Optional:
 
-- `mode` (List of String) <br>**Allowed Values (choose one):** `["VOLUME_MOUNT_READ_ONLY", "VOLUME_MOUNT_READ_WRITE"]`
+- `mode` (List of String) <br>**Allowed Values (choose one):** `["VOLUME_MOUNT_READ_WRITE", "VOLUME_MOUNT_READ_ONLY"]`
 - `sub_path` (String) <br>**Validation:** `Length LengthAtMost(256)`
 
 
@@ -9446,4 +9446,5 @@ Optional:
 
 - `create` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 - `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
 - `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).

@@ -16,13 +16,11 @@ resource "f5xc_forward_proxy_policy" "example" {
   name      = "example_forward_proxy_policy"
   namespace = "example_namespace"
   proxy_choice = {
-    proxy_label_selector = {
-      proxy_label_selector = "example_proxy_label_selector"
-    }
+    drp_http_connect = true
   }
   rule_choice = {
-    allow_list = {
-      allow_list = "example_allow_list"
+    deny_list = {
+      deny_list = "example_deny_list"
     }
   }
 }
@@ -270,7 +268,7 @@ Required:
 
 Required:
 
-- `action` (List of String) <br>**Allowed Values (choose one):** `["LAST_POLICY", "GOTO_POLICY", "DENY", "ALLOW", "NEXT_POLICY_SET", "NEXT_POLICY"]`
+- `action` (List of String) <br>**Allowed Values (choose one):** `["DENY", "ALLOW", "NEXT_POLICY_SET", "NEXT_POLICY", "LAST_POLICY", "GOTO_POLICY"]`
 - `destination_choice` (Attributes) Destination Choice Destinations of the proxy connections (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--destination_choice))
 - `metadata` (Attributes) metadata Common attributes for the rule including name and description. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--metadata))
 - `source_choice` (Attributes) Choose Source Select source for proxy policy. Source can be a particular endpoint or set of endpoints. (see [below for nested schema](#nestedatt--rule_choice--rule_list--rules--source_choice))
@@ -414,7 +412,7 @@ Optional:
 
 Required:
 
-- `url_categories` (List of String) <br>**Valid Options:** `["REAL_ESTATE", "AUCTIONS", "STREAMING_MEDIA", "REFERENCE_AND_RESEARCH", "PAY_TO_SURF", "BOT_NETS", "PARKED_DOMAINS", "DEAD_SITES", "SHAREWARE_AND_FREEWARE", "MARIJUANA", "SPORTS", "FINANCIAL_SERVICES", "ABUSED_DRUGS", "ADULT_AND_PORNOGRAPHY", "SOCIAL_NETWORKING", "TRAINING_AND_TOOLS", "JOB_SEARCH", "PEER_TO_PEER", "INTERNET_COMMUNICATIONS", "QUESTIONABLE", "GROSS", "HEALTH_AND_MEDICINE", "OPEN_HTTP_PROXIES", "RECREATION_AND_HOBBIES", "TRANSLATION", "HATE_AND_RACISM", "VIOLENCE", "MUSIC", "NEWS_AND_MEDIA", "ABORTION", "DYNAMICALLY_GENERATED_CONTENT", "FASHION_AND_BEAUTY", "MILITARY", "INDIVIDUAL_STOCK_ADVICE_AND_TOOLS", "GAMES", "SOCIETY", "SWIMSUITS_AND_INTIMATE_APPAREL", "CHEATING", "GOVERNMENT", "IMAGE_AND_VIDEO_SEARCH", "GAMBLING", "PHILOSOPHY_AND_POLITICAL_ADVOCACY", "WEAPONS", "CONFIRMED_SPAM_SOURCES", "SHOPPING", "LEGAL", "LOCAL_INFORMATION", "HUNTING_AND_FISHING", "PROXY_AVOIDANCE_AND_ANONYMIZERS", "MOTOR_VEHICLES", "UNCATEGORIZED", "RELIGION", "ENTERTAINMENT_AND_ARTS", "ALCOHOL_AND_TOBACCO", "WEB_HOSTING", "COMPUTER_AND_INTERNET_INFO", "DATING", "PHISHING_AND_OTHER_FRAUDS", "NUDITY", "WEB_BASED_EMAIL", "PERSONAL_STORAGE", "CONTENT_DELIVERY_NETWORKS", "SPAM_URLS", "UNCONFIRMED_SPAM_SOURCES", "SEX_EDUCATION", "KEYLOGGERS_AND_MONITORING", "HOME_AND_GARDEN", "WEB_ADVERTISEMENTS", "SPYWARE_AND_ADWARE", "CULT_AND_OCCULT", "PERSONAL_SITES_AND_BLOGS", "EDUCATIONAL_INSTITUTIONS", "ONLINE_GREETING_CARDS", "KIDS", "SEARCH_ENGINES", "INTERNET_PORTALS", "COMPUTER_AND_INTERNET_SECURITY", "BUSINESS_AND_ECONOMY", "TRAVEL", "HACKING", "MALWARE_SITES", "PRIVATE_IP_ADDRESSES", "ILLEGAL"]` (Multiple selection allowed)
+- `url_categories` (List of String) <br>**Valid Options:** `["ONLINE_GREETING_CARDS", "QUESTIONABLE", "WEB_ADVERTISEMENTS", "BOT_NETS", "TRAINING_AND_TOOLS", "LEGAL", "HEALTH_AND_MEDICINE", "RECREATION_AND_HOBBIES", "COMPUTER_AND_INTERNET_INFO", "GAMBLING", "PAY_TO_SURF", "WEB_BASED_EMAIL", "ILLEGAL", "DEAD_SITES", "ENTERTAINMENT_AND_ARTS", "UNCATEGORIZED", "HUNTING_AND_FISHING", "SPORTS", "GOVERNMENT", "IMAGE_AND_VIDEO_SEARCH", "ADULT_AND_PORNOGRAPHY", "TRANSLATION", "ABORTION", "UNCONFIRMED_SPAM_SOURCES", "ALCOHOL_AND_TOBACCO", "SHAREWARE_AND_FREEWARE", "HACKING", "KEYLOGGERS_AND_MONITORING", "CONTENT_DELIVERY_NETWORKS", "INDIVIDUAL_STOCK_ADVICE_AND_TOOLS", "GAMES", "CHEATING", "DYNAMICALLY_GENERATED_CONTENT", "GROSS", "COMPUTER_AND_INTERNET_SECURITY", "SWIMSUITS_AND_INTIMATE_APPAREL", "TRAVEL", "DATING", "LOCAL_INFORMATION", "VIOLENCE", "INTERNET_PORTALS", "MALWARE_SITES", "PROXY_AVOIDANCE_AND_ANONYMIZERS", "SPAM_URLS", "BUSINESS_AND_ECONOMY", "SHOPPING", "SOCIAL_NETWORKING", "EDUCATIONAL_INSTITUTIONS", "PHISHING_AND_OTHER_FRAUDS", "INTERNET_COMMUNICATIONS", "PRIVATE_IP_ADDRESSES", "HOME_AND_GARDEN", "SEX_EDUCATION", "STREAMING_MEDIA", "REFERENCE_AND_RESEARCH", "PEER_TO_PEER", "MARIJUANA", "KIDS", "PERSONAL_STORAGE", "FINANCIAL_SERVICES", "AUCTIONS", "SEARCH_ENGINES", "NEWS_AND_MEDIA", "OPEN_HTTP_PROXIES", "FASHION_AND_BEAUTY", "REAL_ESTATE", "MILITARY", "HATE_AND_RACISM", "MUSIC", "ABUSED_DRUGS", "SOCIETY", "SPYWARE_AND_ADWARE", "CONFIRMED_SPAM_SOURCES", "PARKED_DOMAINS", "MOTOR_VEHICLES", "WEB_HOSTING", "CULT_AND_OCCULT", "RELIGION", "NUDITY", "PERSONAL_SITES_AND_BLOGS", "JOB_SEARCH", "PHILOSOPHY_AND_POLITICAL_ADVOCACY", "WEAPONS"]` (Multiple selection allowed)
 
 
 
@@ -572,4 +570,5 @@ Optional:
 
 - `create` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 - `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
 - `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).

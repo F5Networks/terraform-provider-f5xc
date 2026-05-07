@@ -111,23 +111,6 @@ func (v *ValidateCreateSpecType) CustomAuthTypesValidationRuleHandler(rules map[
 
 	return validatorFn, nil
 }
-func (v *ValidateCreateSpecType) UserDefinedApiDiscoveryPolicyValidationRuleHandler(rules map[string]string) (db.ValidatorFunc, error) {
-	reqdValidatorFn, err := db.NewMessageValidationRuleHandler(rules)
-	if err != nil {
-		return nil, errors.Wrap(err, "MessageValidationRuleHandler for user_defined_api_discovery_policy")
-	}
-	validatorFn := func(ctx context.Context, val interface{}, opts ...db.ValidateOpt) error {
-		if err := reqdValidatorFn(ctx, val, opts...); err != nil {
-			return err
-		}
-		if err := UserDefinedApiDiscoveryPolicyValidator().Validate(ctx, val, opts...); err != nil {
-			return err
-		}
-		return nil
-	}
-
-	return validatorFn, nil
-}
 
 func (v *ValidateCreateSpecType) Validate(ctx context.Context, pm interface{}, opts ...db.ValidateOpt) error {
 	m, ok := pm.(*CreateSpecType)
@@ -178,17 +161,7 @@ var DefaultCreateSpecTypeValidator = func() *ValidateCreateSpecType {
 		panic(errMsg)
 	}
 	v.FldValidators["custom_auth_types"] = vFn
-
-	vrhUserDefinedApiDiscoveryPolicy := v.UserDefinedApiDiscoveryPolicyValidationRuleHandler
-	rulesUserDefinedApiDiscoveryPolicy := map[string]string{
-		"ves.io.schema.rules.message.required": "true",
-	}
-	vFn, err = vrhUserDefinedApiDiscoveryPolicy(rulesUserDefinedApiDiscoveryPolicy)
-	if err != nil {
-		errMsg := fmt.Sprintf("ValidationRuleHandler for CreateSpecType.user_defined_api_discovery_policy: %s", err)
-		panic(errMsg)
-	}
-	v.FldValidators["user_defined_api_discovery_policy"] = vFn
+	v.FldValidators["user_defined_api_discovery_policy"] = UserDefinedApiDiscoveryPolicyValidator().Validate
 
 	return v
 }()
@@ -639,23 +612,6 @@ func (v *ValidateGetSpecType) CustomAuthTypesValidationRuleHandler(rules map[str
 
 	return validatorFn, nil
 }
-func (v *ValidateGetSpecType) UserDefinedApiDiscoveryPolicyValidationRuleHandler(rules map[string]string) (db.ValidatorFunc, error) {
-	reqdValidatorFn, err := db.NewMessageValidationRuleHandler(rules)
-	if err != nil {
-		return nil, errors.Wrap(err, "MessageValidationRuleHandler for user_defined_api_discovery_policy")
-	}
-	validatorFn := func(ctx context.Context, val interface{}, opts ...db.ValidateOpt) error {
-		if err := reqdValidatorFn(ctx, val, opts...); err != nil {
-			return err
-		}
-		if err := UserDefinedApiDiscoveryPolicyValidator().Validate(ctx, val, opts...); err != nil {
-			return err
-		}
-		return nil
-	}
-
-	return validatorFn, nil
-}
 
 func (v *ValidateGetSpecType) Validate(ctx context.Context, pm interface{}, opts ...db.ValidateOpt) error {
 	m, ok := pm.(*GetSpecType)
@@ -706,17 +662,7 @@ var DefaultGetSpecTypeValidator = func() *ValidateGetSpecType {
 		panic(errMsg)
 	}
 	v.FldValidators["custom_auth_types"] = vFn
-
-	vrhUserDefinedApiDiscoveryPolicy := v.UserDefinedApiDiscoveryPolicyValidationRuleHandler
-	rulesUserDefinedApiDiscoveryPolicy := map[string]string{
-		"ves.io.schema.rules.message.required": "true",
-	}
-	vFn, err = vrhUserDefinedApiDiscoveryPolicy(rulesUserDefinedApiDiscoveryPolicy)
-	if err != nil {
-		errMsg := fmt.Sprintf("ValidationRuleHandler for GetSpecType.user_defined_api_discovery_policy: %s", err)
-		panic(errMsg)
-	}
-	v.FldValidators["user_defined_api_discovery_policy"] = vFn
+	v.FldValidators["user_defined_api_discovery_policy"] = UserDefinedApiDiscoveryPolicyValidator().Validate
 
 	return v
 }()
@@ -812,23 +758,6 @@ func (v *ValidateGlobalSpecType) CustomAuthTypesValidationRuleHandler(rules map[
 
 	return validatorFn, nil
 }
-func (v *ValidateGlobalSpecType) UserDefinedApiDiscoveryPolicyValidationRuleHandler(rules map[string]string) (db.ValidatorFunc, error) {
-	reqdValidatorFn, err := db.NewMessageValidationRuleHandler(rules)
-	if err != nil {
-		return nil, errors.Wrap(err, "MessageValidationRuleHandler for user_defined_api_discovery_policy")
-	}
-	validatorFn := func(ctx context.Context, val interface{}, opts ...db.ValidateOpt) error {
-		if err := reqdValidatorFn(ctx, val, opts...); err != nil {
-			return err
-		}
-		if err := UserDefinedApiDiscoveryPolicyValidator().Validate(ctx, val, opts...); err != nil {
-			return err
-		}
-		return nil
-	}
-
-	return validatorFn, nil
-}
 
 func (v *ValidateGlobalSpecType) Validate(ctx context.Context, pm interface{}, opts ...db.ValidateOpt) error {
 	m, ok := pm.(*GlobalSpecType)
@@ -879,17 +808,7 @@ var DefaultGlobalSpecTypeValidator = func() *ValidateGlobalSpecType {
 		panic(errMsg)
 	}
 	v.FldValidators["custom_auth_types"] = vFn
-
-	vrhUserDefinedApiDiscoveryPolicy := v.UserDefinedApiDiscoveryPolicyValidationRuleHandler
-	rulesUserDefinedApiDiscoveryPolicy := map[string]string{
-		"ves.io.schema.rules.message.required": "true",
-	}
-	vFn, err = vrhUserDefinedApiDiscoveryPolicy(rulesUserDefinedApiDiscoveryPolicy)
-	if err != nil {
-		errMsg := fmt.Sprintf("ValidationRuleHandler for GlobalSpecType.user_defined_api_discovery_policy: %s", err)
-		panic(errMsg)
-	}
-	v.FldValidators["user_defined_api_discovery_policy"] = vFn
+	v.FldValidators["user_defined_api_discovery_policy"] = UserDefinedApiDiscoveryPolicyValidator().Validate
 
 	return v
 }()
@@ -1177,23 +1096,6 @@ func (v *ValidateReplaceSpecType) CustomAuthTypesValidationRuleHandler(rules map
 
 	return validatorFn, nil
 }
-func (v *ValidateReplaceSpecType) UserDefinedApiDiscoveryPolicyValidationRuleHandler(rules map[string]string) (db.ValidatorFunc, error) {
-	reqdValidatorFn, err := db.NewMessageValidationRuleHandler(rules)
-	if err != nil {
-		return nil, errors.Wrap(err, "MessageValidationRuleHandler for user_defined_api_discovery_policy")
-	}
-	validatorFn := func(ctx context.Context, val interface{}, opts ...db.ValidateOpt) error {
-		if err := reqdValidatorFn(ctx, val, opts...); err != nil {
-			return err
-		}
-		if err := UserDefinedApiDiscoveryPolicyValidator().Validate(ctx, val, opts...); err != nil {
-			return err
-		}
-		return nil
-	}
-
-	return validatorFn, nil
-}
 
 func (v *ValidateReplaceSpecType) Validate(ctx context.Context, pm interface{}, opts ...db.ValidateOpt) error {
 	m, ok := pm.(*ReplaceSpecType)
@@ -1244,17 +1146,7 @@ var DefaultReplaceSpecTypeValidator = func() *ValidateReplaceSpecType {
 		panic(errMsg)
 	}
 	v.FldValidators["custom_auth_types"] = vFn
-
-	vrhUserDefinedApiDiscoveryPolicy := v.UserDefinedApiDiscoveryPolicyValidationRuleHandler
-	rulesUserDefinedApiDiscoveryPolicy := map[string]string{
-		"ves.io.schema.rules.message.required": "true",
-	}
-	vFn, err = vrhUserDefinedApiDiscoveryPolicy(rulesUserDefinedApiDiscoveryPolicy)
-	if err != nil {
-		errMsg := fmt.Sprintf("ValidationRuleHandler for ReplaceSpecType.user_defined_api_discovery_policy: %s", err)
-		panic(errMsg)
-	}
-	v.FldValidators["user_defined_api_discovery_policy"] = vFn
+	v.FldValidators["user_defined_api_discovery_policy"] = UserDefinedApiDiscoveryPolicyValidator().Validate
 
 	return v
 }()

@@ -13,12 +13,10 @@ IkePhase2Profile resource
 
 ```terraform
 resource "f5xc_ike_phase2_profile" "example" {
-  namespace = "example_namespace"
   name      = "example_ike_phase2_profile"
+  namespace = "example_namespace"
   ike_key_lifetime = {
-    ike_keylifetime_hours = {
-      ike_keylifetime_hours = "example_ike_keylifetime_hours"
-    }
+    use_default_keylifetime = true
   }
 }
 ```
@@ -37,9 +35,9 @@ resource "f5xc_ike_phase2_profile" "example" {
 ### Optional
 
 - `annotations` (Map of String) annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.
-- `authentication_algos` (List of String) <br>**Valid Options:** `["AUTH_ALG_DEFAULT", "SHA256_HMAC", "SHA384_HMAC", "SHA512_HMAC", "AUTH_ALG_NONE"]` (Multiple selection allowed)<br>**Default:** `AUTH_ALG_NONE`
+- `authentication_algos` (List of String) <br>**Valid Options:** `["SHA512_HMAC", "AUTH_ALG_NONE", "AUTH_ALG_DEFAULT", "SHA256_HMAC", "SHA384_HMAC"]` (Multiple selection allowed)<br>**Default:** `AUTH_ALG_NONE`
 - `description` (String) description Human readable description for the object
-- `encryption_algos` (List of String) <br>**Valid Options:** `["AES192_CBC", "AES256_CBC", "TRIPLE_DES_CBC", "AES128_GCM", "AES192_GCM", "AES256_GCM", "ENC_ALG_DEFAULT", "AES128_CBC"]` (Multiple selection allowed)<br>**Default:** `AES256_GCM`
+- `encryption_algos` (List of String) <br>**Valid Options:** `["AES128_CBC", "AES192_CBC", "AES256_CBC", "TRIPLE_DES_CBC", "AES128_GCM", "AES192_GCM", "AES256_GCM", "ENC_ALG_DEFAULT"]` (Multiple selection allowed)<br>**Default:** `AES256_GCM`
 - `labels` (Map of String) labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression
 - `pfs_mode_choice` (Attributes) Perfect Forward Secrecy (PFS) Configure Perfect Forward Secrecy for this tunnel (see [below for nested schema](#nestedatt--pfs_mode_choice))
 - `timeouts` (Attributes) (see [below for nested schema](#nestedatt--timeouts))
@@ -87,7 +85,7 @@ Optional:
 
 Optional:
 
-- `dh_groups` (List of String) <br>**Valid Options:** `["DH_GROUP_14", "DH_GROUP_15", "DH_GROUP_16", "DH_GROUP_17", "DH_GROUP_18", "DH_GROUP_19", "DH_GROUP_20", "DH_GROUP_26", "DH_GROUP_DEFAULT", "DH_GROUP_21"]` (Multiple selection allowed)<br>**Default:** `DH_GROUP_19`
+- `dh_groups` (List of String) <br>**Valid Options:** `["DH_GROUP_DEFAULT", "DH_GROUP_19", "DH_GROUP_20", "DH_GROUP_14", "DH_GROUP_15", "DH_GROUP_16", "DH_GROUP_17", "DH_GROUP_18", "DH_GROUP_21", "DH_GROUP_26"]` (Multiple selection allowed)<br>**Default:** `DH_GROUP_19`
 
 
 
@@ -98,4 +96,5 @@ Optional:
 
 - `create` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 - `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
 - `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).

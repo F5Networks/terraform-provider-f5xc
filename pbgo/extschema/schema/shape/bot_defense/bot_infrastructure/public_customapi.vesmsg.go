@@ -613,6 +613,12 @@ func (v *ValidateDeployPoliciesRequest) Validate(ctx context.Context, pm interfa
 			}
 		}
 	}
+	if fv, exists := v.FldValidators["ti_package_metadata"]; exists {
+		vOpts := append(opts, db.WithValidateField("ti_package_metadata"))
+		if err := fv(ctx, m.GetTiPackageMetadata(), vOpts...); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -651,6 +657,7 @@ var DefaultDeployPoliciesRequestValidator = func() *ValidateDeployPoliciesReques
 	}
 	v.FldValidators["name"] = vFn
 	v.FldValidators["policy_metadata"] = DeployPolicyMetadataValidator().Validate
+	v.FldValidators["ti_package_metadata"] = TIPackageMetadataValidator().Validate
 
 	return v
 }()
@@ -1257,6 +1264,14 @@ func (v *ValidateDeploymentHistoryData) CommentsValidationRuleHandler(rules map[
 
 	return validatorFn, nil
 }
+func (v *ValidateDeploymentHistoryData) PolicyIdValidationRuleHandler(rules map[string]string) (db.ValidatorFunc, error) {
+	validatorFn, err := db.NewStringValidationRuleHandler(rules)
+	if err != nil {
+		return nil, errors.Wrap(err, "ValidationRuleHandler for policy_id")
+	}
+
+	return validatorFn, nil
+}
 
 func (v *ValidateDeploymentHistoryData) Validate(ctx context.Context, pm interface{}, opts ...db.ValidateOpt) error {
 	m, ok := pm.(*DeploymentHistoryData)
@@ -1302,6 +1317,18 @@ func (v *ValidateDeploymentHistoryData) Validate(ctx context.Context, pm interfa
 			}
 		}
 	}
+	if fv, exists := v.FldValidators["generated_link"]; exists {
+		vOpts := append(opts, db.WithValidateField("generated_link"))
+		if err := fv(ctx, m.GetGeneratedLink(), vOpts...); err != nil {
+			return err
+		}
+	}
+	if fv, exists := v.FldValidators["policy_id"]; exists {
+		vOpts := append(opts, db.WithValidateField("policy_id"))
+		if err := fv(ctx, m.GetPolicyId(), vOpts...); err != nil {
+			return err
+		}
+	}
 	if fv, exists := v.FldValidators["policy_metadata"]; exists {
 		vOpts := append(opts, db.WithValidateField("policy_metadata"))
 		for idx, item := range m.GetPolicyMetadata() {
@@ -1314,6 +1341,12 @@ func (v *ValidateDeploymentHistoryData) Validate(ctx context.Context, pm interfa
 	if fv, exists := v.FldValidators["status"]; exists {
 		vOpts := append(opts, db.WithValidateField("status"))
 		if err := fv(ctx, m.GetStatus(), vOpts...); err != nil {
+			return err
+		}
+	}
+	if fv, exists := v.FldValidators["ti_package_name"]; exists {
+		vOpts := append(opts, db.WithValidateField("ti_package_name"))
+		if err := fv(ctx, m.GetTiPackageName(), vOpts...); err != nil {
 			return err
 		}
 	}
@@ -1347,6 +1380,17 @@ var DefaultDeploymentHistoryDataValidator = func() *ValidateDeploymentHistoryDat
 		panic(errMsg)
 	}
 	v.FldValidators["comments"] = vFn
+
+	vrhPolicyId := v.PolicyIdValidationRuleHandler
+	rulesPolicyId := map[string]string{
+		"ves.io.schema.rules.string.min_len": "1",
+	}
+	vFn, err = vrhPolicyId(rulesPolicyId)
+	if err != nil {
+		errMsg := fmt.Sprintf("ValidationRuleHandler for DeploymentHistoryData.policy_id: %s", err)
+		panic(errMsg)
+	}
+	v.FldValidators["policy_id"] = vFn
 	v.FldValidators["policy_metadata"] = DeployPolicyMetadataValidator().Validate
 
 	return v
@@ -1955,4 +1999,138 @@ var DefaultRollbackCertificateToDefaultRequestValidator = func() *ValidateRollba
 
 func RollbackCertificateToDefaultRequestValidator() db.Validator {
 	return DefaultRollbackCertificateToDefaultRequestValidator
+}
+
+// augmented methods on protoc/std generated struct
+
+func (m *TIPackageMetadata) ToJSON() (string, error) {
+	return codec.ToJSON(m)
+}
+
+func (m *TIPackageMetadata) ToYAML() (string, error) {
+	return codec.ToYAML(m)
+}
+
+func (m *TIPackageMetadata) DeepCopy() *TIPackageMetadata {
+	if m == nil {
+		return nil
+	}
+	ser, err := m.Marshal()
+	if err != nil {
+		return nil
+	}
+	c := &TIPackageMetadata{}
+	err = c.Unmarshal(ser)
+	if err != nil {
+		return nil
+	}
+	return c
+}
+
+func (m *TIPackageMetadata) DeepCopyProto() proto.Message {
+	if m == nil {
+		return nil
+	}
+	return m.DeepCopy()
+}
+
+func (m *TIPackageMetadata) Validate(ctx context.Context, opts ...db.ValidateOpt) error {
+	return TIPackageMetadataValidator().Validate(ctx, m, opts...)
+}
+
+type ValidateTIPackageMetadata struct {
+	FldValidators map[string]db.ValidatorFunc
+}
+
+func (v *ValidateTIPackageMetadata) NameValidationRuleHandler(rules map[string]string) (db.ValidatorFunc, error) {
+	validatorFn, err := db.NewStringValidationRuleHandler(rules)
+	if err != nil {
+		return nil, errors.Wrap(err, "ValidationRuleHandler for name")
+	}
+
+	return validatorFn, nil
+}
+func (v *ValidateTIPackageMetadata) IdValidationRuleHandler(rules map[string]string) (db.ValidatorFunc, error) {
+	validatorFn, err := db.NewStringValidationRuleHandler(rules)
+	if err != nil {
+		return nil, errors.Wrap(err, "ValidationRuleHandler for id")
+	}
+
+	return validatorFn, nil
+}
+
+func (v *ValidateTIPackageMetadata) Validate(ctx context.Context, pm interface{}, opts ...db.ValidateOpt) error {
+	m, ok := pm.(*TIPackageMetadata)
+	if !ok {
+		switch t := pm.(type) {
+		case nil:
+			return nil
+		default:
+			return fmt.Errorf("Expected type *TIPackageMetadata got type %s", t)
+		}
+	}
+	if m == nil {
+		return nil
+	}
+	if fv, exists := v.FldValidators["id"]; exists {
+		vOpts := append(opts, db.WithValidateField("id"))
+		if err := fv(ctx, m.GetId(), vOpts...); err != nil {
+			return err
+		}
+	}
+	if fv, exists := v.FldValidators["name"]; exists {
+		vOpts := append(opts, db.WithValidateField("name"))
+		if err := fv(ctx, m.GetName(), vOpts...); err != nil {
+			return err
+		}
+	}
+	if fv, exists := v.FldValidators["version"]; exists {
+		vOpts := append(opts, db.WithValidateField("version"))
+		if err := fv(ctx, m.GetVersion(), vOpts...); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// Well-known symbol for default validator implementation
+var DefaultTIPackageMetadataValidator = func() *ValidateTIPackageMetadata {
+	v := &ValidateTIPackageMetadata{FldValidators: map[string]db.ValidatorFunc{}}
+	var (
+		err error
+		vFn db.ValidatorFunc
+	)
+	_, _ = err, vFn
+	vFnMap := map[string]db.ValidatorFunc{}
+	_ = vFnMap
+
+	vrhName := v.NameValidationRuleHandler
+	rulesName := map[string]string{
+		"ves.io.schema.rules.message.required": "true",
+		"ves.io.schema.rules.string.min_len":   "1",
+	}
+	vFn, err = vrhName(rulesName)
+	if err != nil {
+		errMsg := fmt.Sprintf("ValidationRuleHandler for TIPackageMetadata.name: %s", err)
+		panic(errMsg)
+	}
+	v.FldValidators["name"] = vFn
+
+	vrhId := v.IdValidationRuleHandler
+	rulesId := map[string]string{
+		"ves.io.schema.rules.message.required": "true",
+		"ves.io.schema.rules.string.min_len":   "1",
+	}
+	vFn, err = vrhId(rulesId)
+	if err != nil {
+		errMsg := fmt.Sprintf("ValidationRuleHandler for TIPackageMetadata.id: %s", err)
+		panic(errMsg)
+	}
+	v.FldValidators["id"] = vFn
+
+	return v
+}()
+
+func TIPackageMetadataValidator() db.Validator {
+	return DefaultTIPackageMetadataValidator
 }

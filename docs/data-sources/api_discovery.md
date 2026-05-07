@@ -119,6 +119,7 @@ Read-Only:
 Read-Only:
 
 - `http_header_criteria` (Attributes) http_header_criteria (see [below for nested schema](#nestedatt--user_defined_api_discovery_policy--discovery_rules--rule_properties--criteria_choice--http_header_criteria))
+- `pattern` (String) pattern Patterns are matched against the request path to identify endpoints by path structure, file extension, or version prefix. Endpoints that match this pattern are affected by the rule.
 
 <a id="nestedatt--user_defined_api_discovery_policy--discovery_rules--rule_properties--criteria_choice--http_header_criteria"></a>
 ### Nested Schema for `user_defined_api_discovery_policy.discovery_rules.rule_properties.criteria_choice.http_header_criteria`

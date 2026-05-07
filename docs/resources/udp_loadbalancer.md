@@ -28,7 +28,7 @@ resource "f5xc_udp_loadbalancer" "example" {
     service_policies_from_namespace = true
   }
   advertise_choice = {
-    do_not_advertise = true
+    advertise_on_public_default_vip = true
   }
 }
 ```
@@ -198,7 +198,7 @@ Read-Only:
 
 Required:
 
-- `network` (List of String) <br>**Allowed Values (choose one):** `["SITE_NETWORK_INSIDE", "SITE_NETWORK_OUTSIDE", "SITE_NETWORK_OUTSIDE_WITH_INTERNET_VIP", "SITE_NETWORK_SERVICE", "SITE_NETWORK_IP_FABRIC", "SITE_NETWORK_INSIDE_AND_OUTSIDE", "SITE_NETWORK_INSIDE_AND_OUTSIDE_WITH_INTERNET_VIP"]`
+- `network` (List of String) <br>**Allowed Values (choose one):** `["SITE_NETWORK_INSIDE_AND_OUTSIDE_WITH_INTERNET_VIP", "SITE_NETWORK_INSIDE", "SITE_NETWORK_OUTSIDE", "SITE_NETWORK_OUTSIDE_WITH_INTERNET_VIP", "SITE_NETWORK_SERVICE", "SITE_NETWORK_IP_FABRIC", "SITE_NETWORK_INSIDE_AND_OUTSIDE"]`
 - `site` (Attributes) Site Reference to site object (see [below for nested schema](#nestedatt--advertise_choice--advertise_custom--advertise_where--choice--site--site))
 
 Optional:
@@ -309,7 +309,7 @@ Optional:
 
 Required:
 
-- `network` (List of String) <br>**Allowed Values (choose one):** `["SITE_NETWORK_OUTSIDE_WITH_INTERNET_VIP", "SITE_NETWORK_SERVICE", "SITE_NETWORK_IP_FABRIC", "SITE_NETWORK_INSIDE_AND_OUTSIDE", "SITE_NETWORK_INSIDE_AND_OUTSIDE_WITH_INTERNET_VIP", "SITE_NETWORK_INSIDE", "SITE_NETWORK_OUTSIDE"]`
+- `network` (List of String) <br>**Allowed Values (choose one):** `["SITE_NETWORK_INSIDE_AND_OUTSIDE_WITH_INTERNET_VIP", "SITE_NETWORK_INSIDE", "SITE_NETWORK_OUTSIDE", "SITE_NETWORK_OUTSIDE_WITH_INTERNET_VIP", "SITE_NETWORK_SERVICE", "SITE_NETWORK_IP_FABRIC", "SITE_NETWORK_INSIDE_AND_OUTSIDE"]`
 - `virtual_site` (Attributes) Virtual Site Reference to virtual site object (see [below for nested schema](#nestedatt--advertise_choice--advertise_custom--advertise_where--choice--virtual_site--virtual_site))
 
 <a id="nestedatt--advertise_choice--advertise_custom--advertise_where--choice--virtual_site--virtual_site"></a>
@@ -535,7 +535,7 @@ Read-Only:
 Optional:
 
 - `site_name` (String) Site Name Site Name where Internet VIP is installed
-- `site_network_type` (List of String) <br>**Allowed Values (choose one):** `["SITE_NETWORK_INSIDE_AND_OUTSIDE_WITH_INTERNET_VIP", "SITE_NETWORK_INSIDE", "SITE_NETWORK_OUTSIDE", "SITE_NETWORK_OUTSIDE_WITH_INTERNET_VIP", "SITE_NETWORK_SERVICE", "SITE_NETWORK_IP_FABRIC", "SITE_NETWORK_INSIDE_AND_OUTSIDE"]`
+- `site_network_type` (List of String) <br>**Allowed Values (choose one):** `["SITE_NETWORK_INSIDE_AND_OUTSIDE", "SITE_NETWORK_INSIDE_AND_OUTSIDE_WITH_INTERNET_VIP", "SITE_NETWORK_INSIDE", "SITE_NETWORK_OUTSIDE", "SITE_NETWORK_OUTSIDE_WITH_INTERNET_VIP", "SITE_NETWORK_SERVICE", "SITE_NETWORK_IP_FABRIC"]`
 - `status` (Attributes) Internet VIP Status Detailed status for internet VIP (see [below for nested schema](#nestedatt--internet_vip_info--status))
 
 <a id="nestedatt--internet_vip_info--status"></a>
@@ -633,4 +633,5 @@ Optional:
 
 - `create` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 - `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
 - `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).

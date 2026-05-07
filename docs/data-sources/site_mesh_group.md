@@ -15,8 +15,8 @@ The `f5xc_site_mesh_group` data source allows you to retrieve information about 
 
 ```terraform
 data "f5xc_site_mesh_group" "example" {
-  namespace = "example_namespace"
   name      = "example_site_mesh_group"
+  namespace = "example_namespace"
 }
 ```
 

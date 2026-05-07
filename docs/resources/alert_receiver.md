@@ -16,8 +16,8 @@ resource "f5xc_alert_receiver" "example" {
   name      = "example_alert_receiver"
   namespace = "example_namespace"
   receiver = {
-    slack = {
-      slack = "example_slack"
+    email = {
+      email = "example_email"
     }
   }
 }
@@ -398,8 +398,8 @@ Required:
 
 Optional:
 
-- `max_version` (List of String) <br>**Allowed Values (choose one):** `["TLSv1_2", "TLSv1_3", "TLS_AUTO", "TLSv1_0", "TLSv1_1"]`
-- `min_version` (List of String) <br>**Allowed Values (choose one):** `["TLSv1_0", "TLSv1_1", "TLSv1_2", "TLSv1_3", "TLS_AUTO"]`
+- `max_version` (List of String) <br>**Allowed Values (choose one):** `["TLS_AUTO", "TLSv1_0", "TLSv1_1", "TLSv1_2", "TLSv1_3"]`
+- `min_version` (List of String) <br>**Allowed Values (choose one):** `["TLSv1_3", "TLS_AUTO", "TLSv1_0", "TLSv1_1", "TLSv1_2"]`
 
 <a id="nestedatt--receiver_choice--webhook--http_config--tls_choice--use_tls--server_validation_choice"></a>
 ### Nested Schema for `receiver_choice.webhook.http_config.tls_choice.use_tls.server_validation_choice`
@@ -502,4 +502,5 @@ Optional:
 
 - `create` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 - `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
 - `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).

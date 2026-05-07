@@ -15,8 +15,8 @@ The `f5xc_nat_policy` data source allows you to retrieve information about an ex
 
 ```terraform
 data "f5xc_nat_policy" "example" {
-  name      = "example_nat_policy"
   namespace = "example_namespace"
+  name      = "example_nat_policy"
 }
 ```
 

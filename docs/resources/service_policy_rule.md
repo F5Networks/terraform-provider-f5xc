@@ -15,22 +15,20 @@ ServicePolicyRule resource
 resource "f5xc_service_policy_rule" "example" {
   name      = "example_service_policy_rule"
   namespace = "example_namespace"
-  action    = ["ENUM_VALUE"]
-  ip_choice = {
-    ip_prefix_list = {
-      ip_prefix_list = "example_ip_prefix_list"
-    }
-  }
   asn_choice = {
     any_asn = true
   }
-  client_choice = {
-    any_client = true
-  }
+  action = ["ENUM_VALUE"]
   waf_action = {
     action_type = {
       none = true
     }
+  }
+  client_choice = {
+    any_client = true
+  }
+  ip_choice = {
+    any_ip = true
   }
 }
 ```
@@ -42,7 +40,7 @@ resource "f5xc_service_policy_rule" "example" {
 
 ### Required
 
-- `action` (List of String) <br>**Allowed Values (choose one):** `["NEXT_POLICY_SET", "NEXT_POLICY", "LAST_POLICY", "GOTO_POLICY", "DENY", "ALLOW"]`
+- `action` (List of String) <br>**Allowed Values (choose one):** `["LAST_POLICY", "GOTO_POLICY", "DENY", "ALLOW", "NEXT_POLICY_SET", "NEXT_POLICY"]`
 - `asn_choice` (Attributes) asn choice Match the 4-byte origin Autonomous System Number for the source IPv4 address of the request. The origin ASN for the request is obtained by performing a lookup for the source IPv4 Address in a GeoIP DB. (see [below for nested schema](#nestedatt--asn_choice))
 - `client_choice` (Attributes) client choice Select clients for which the rule will be applied. (see [below for nested schema](#nestedatt--client_choice))
 - `ip_choice` (Attributes) ip choice Match source IP address of the request (see [below for nested schema](#nestedatt--ip_choice))
@@ -152,7 +150,7 @@ Required:
 
 Required:
 
-- `ip_threat_categories` (List of String) <br>**Valid Options:** `["SPAM_SOURCES", "WEB_ATTACKS", "BOTNETS", "SCANNERS", "PHISHING", "PROXY", "MOBILE_THREATS", "TOR_PROXY", "WINDOWS_EXPLOITS", "REPUTATION", "DENIAL_OF_SERVICE", "NETWORK"]` (Multiple selection allowed)
+- `ip_threat_categories` (List of String) <br>**Valid Options:** `["PROXY", "DENIAL_OF_SERVICE", "WINDOWS_EXPLOITS", "SCANNERS", "PHISHING", "MOBILE_THREATS", "TOR_PROXY", "NETWORK", "SPAM_SOURCES", "WEB_ATTACKS", "BOTNETS", "REPUTATION"]` (Multiple selection allowed)
 
 
 
@@ -232,8 +230,8 @@ Optional:
 
 Required:
 
-- `context` (List of String) <br>**Allowed Values (choose one):** `["CONTEXT_BODY", "CONTEXT_REQUEST", "CONTEXT_RESPONSE", "CONTEXT_PARAMETER", "CONTEXT_HEADER", "CONTEXT_URI", "CONTEXT_ANY", "CONTEXT_COOKIE", "CONTEXT_URL"]`
-- `exclude_attack_type` (List of String) <br>**Allowed Values (choose one):** `["ATTACK_TYPE_DENIAL_OF_SERVICE", "ATTACK_TYPE_REMOTE_FILE_INCLUDE", "ATTACK_TYPE_XPATH_INJECTION", "ATTACK_TYPE_NONE", "ATTACK_TYPE_TROJAN_BACKDOOR_SPYWARE", "ATTACK_TYPE_VULNERABILITY_SCAN", "ATTACK_TYPE_ABUSE_OF_FUNCTIONALITY", "ATTACK_TYPE_BUFFER_OVERFLOW", "ATTACK_TYPE_PREDICTABLE_RESOURCE_LOCATION", "ATTACK_TYPE_HTTP_RESPONSE_SPLITTING", "ATTACK_TYPE_AUTHENTICATION_AUTHORIZATION_ATTACKS", "ATTACK_TYPE_DIRECTORY_INDEXING", "ATTACK_TYPE_PATH_TRAVERSAL", "ATTACK_TYPE_LDAP_INJECTION", "ATTACK_TYPE_SERVER_SIDE_CODE_INJECTION", "ATTACK_TYPE_SQL_INJECTION", "ATTACK_TYPE_CROSS_SITE_SCRIPTING", "ATTACK_TYPE_HTTP_PARSER_ATTACK", "ATTACK_TYPE_INFORMATION_LEAKAGE", "ATTACK_TYPE_NON_BROWSER_CLIENT", "ATTACK_TYPE_DETECTION_EVASION", "ATTACK_TYPE_SESSION_HIJACKING", "ATTACK_TYPE_FORCEFUL_BROWSING", "ATTACK_TYPE_MALICIOUS_FILE_UPLOAD", "ATTACK_TYPE_GRAPHQL_PARSER_ATTACK", "ATTACK_TYPE_OTHER_APPLICATION_ATTACKS", "ATTACK_TYPE_COMMAND_EXECUTION"]`
+- `context` (List of String) <br>**Allowed Values (choose one):** `["CONTEXT_BODY", "CONTEXT_REQUEST", "CONTEXT_RESPONSE", "CONTEXT_PARAMETER", "CONTEXT_URL", "CONTEXT_HEADER", "CONTEXT_COOKIE", "CONTEXT_URI", "CONTEXT_ANY"]`
+- `exclude_attack_type` (List of String) <br>**Allowed Values (choose one):** `["ATTACK_TYPE_HTTP_RESPONSE_SPLITTING", "ATTACK_TYPE_FORCEFUL_BROWSING", "ATTACK_TYPE_INFORMATION_LEAKAGE", "ATTACK_TYPE_NON_BROWSER_CLIENT", "ATTACK_TYPE_DETECTION_EVASION", "ATTACK_TYPE_VULNERABILITY_SCAN", "ATTACK_TYPE_ABUSE_OF_FUNCTIONALITY", "ATTACK_TYPE_BUFFER_OVERFLOW", "ATTACK_TYPE_PREDICTABLE_RESOURCE_LOCATION", "ATTACK_TYPE_COMMAND_EXECUTION", "ATTACK_TYPE_LDAP_INJECTION", "ATTACK_TYPE_SERVER_SIDE_CODE_INJECTION", "ATTACK_TYPE_SQL_INJECTION", "ATTACK_TYPE_CROSS_SITE_SCRIPTING", "ATTACK_TYPE_SESSION_HIJACKING", "ATTACK_TYPE_REMOTE_FILE_INCLUDE", "ATTACK_TYPE_GRAPHQL_PARSER_ATTACK", "ATTACK_TYPE_OTHER_APPLICATION_ATTACKS", "ATTACK_TYPE_TROJAN_BACKDOOR_SPYWARE", "ATTACK_TYPE_DENIAL_OF_SERVICE", "ATTACK_TYPE_MALICIOUS_FILE_UPLOAD", "ATTACK_TYPE_NONE", "ATTACK_TYPE_AUTHENTICATION_AUTHORIZATION_ATTACKS", "ATTACK_TYPE_DIRECTORY_INDEXING", "ATTACK_TYPE_PATH_TRAVERSAL", "ATTACK_TYPE_XPATH_INJECTION", "ATTACK_TYPE_HTTP_PARSER_ATTACK"]`
 
 Optional:
 
@@ -253,7 +251,7 @@ Required:
 
 Required:
 
-- `context` (List of String) <br>**Allowed Values (choose one):** `["CONTEXT_COOKIE", "CONTEXT_URL", "CONTEXT_BODY", "CONTEXT_REQUEST", "CONTEXT_RESPONSE", "CONTEXT_PARAMETER", "CONTEXT_HEADER", "CONTEXT_URI", "CONTEXT_ANY"]`
+- `context` (List of String) <br>**Allowed Values (choose one):** `["CONTEXT_HEADER", "CONTEXT_COOKIE", "CONTEXT_URI", "CONTEXT_ANY", "CONTEXT_BODY", "CONTEXT_REQUEST", "CONTEXT_RESPONSE", "CONTEXT_PARAMETER", "CONTEXT_URL"]`
 - `signature_id` (Number) SignatureID The allowed values for signature id are 0 and in the range of 200000001-299999999. 0 implies that all signatures will be excluded for the specified context.
 
 Optional:
@@ -266,8 +264,8 @@ Optional:
 
 Required:
 
-- `context` (List of String) <br>**Allowed Values (choose one):** `["CONTEXT_BODY", "CONTEXT_REQUEST", "CONTEXT_RESPONSE", "CONTEXT_PARAMETER", "CONTEXT_HEADER", "CONTEXT_URI", "CONTEXT_ANY", "CONTEXT_COOKIE", "CONTEXT_URL"]`
-- `exclude_violation` (List of String) <br>**Allowed Values (choose one):** `["VIOL_EVASION_APACHE_WHITESPACE", "VIOL_COOKIE_MODIFIED", "VIOL_ASM_COOKIE_MODIFIED", "VIOL_HTTP_PROTOCOL_MULTIPLE_HOST_HEADERS", "VIOL_HTTP_PROTOCOL_CONTENT_LENGTH_SHOULD_BE_A_POSITIVE_NUMBER", "VIOL_EVASION_DIRECTORY_TRAVERSALS", "VIOL_MALFORMED_REQUEST", "VIOL_HTTP_PROTOCOL_BODY_IN_GET_OR_HEAD_REQUEST", "VIOL_FILE_UPLOAD", "VIOL_HTTP_PROTOCOL_BAD_HOST_HEADER_VALUE", "VIOL_HTTP_PROTOCOL_BAD_MULTIPART_FORMDATA_REQUEST_PARSING", "VIOL_GRAPHQL_MALFORMED", "VIOL_XML_MALFORMED", "VIOL_HTTP_PROTOCOL_NULL_IN_REQUEST", "VIOL_HTTP_PROTOCOL_BAD_HTTP_VERSION", "VIOL_EVASION_IIS_BACKSLASHES", "VIOL_ENCODING", "VIOL_JSON_MALFORMED", "VIOL_HTTP_PROTOCOL_NO_HOST_HEADER_IN_HTTP_1_1_REQUEST", "VIOL_HTTP_PROTOCOL_HIGH_ASCII_CHARACTERS_IN_HEADERS", "VIOL_NONE", "VIOL_HTTP_RESPONSE_STATUS", "VIOL_REQUEST_MAX_LENGTH", "VIOL_FILE_UPLOAD_IN_BODY", "VIOL_HTTP_PROTOCOL_BAD_MULTIPART_PARAMETERS_PARSING", "VIOL_EVASION_MULTIPLE_DECODING", "VIOL_EVASION_BAD_UNESCAPE", "VIOL_COOKIE_MALFORMED", "VIOL_METHOD", "VIOL_MANDATORY_HEADER", "VIOL_HTTP_PROTOCOL_CRLF_CHARACTERS_BEFORE_REQUEST_START", "VIOL_GRAPHQL_FORMAT", "VIOL_GRAPHQL_INTROSPECTION_QUERY", "VIOL_HTTP_PROTOCOL_UNPARSABLE_REQUEST_CONTENT", "VIOL_HTTP_PROTOCOL_SEVERAL_CONTENT_LENGTH_HEADERS", "VIOL_DATA_GUARD", "VIOL_EVASION_IIS_UNICODE_CODEPOINTS", "VIOL_FILETYPE", "VIOL_EVASION_PERCENT_U_DECODING", "VIOL_EVASION_BARE_BYTE_DECODING"]`
+- `context` (List of String) <br>**Allowed Values (choose one):** `["CONTEXT_ANY", "CONTEXT_BODY", "CONTEXT_REQUEST", "CONTEXT_RESPONSE", "CONTEXT_PARAMETER", "CONTEXT_URL", "CONTEXT_HEADER", "CONTEXT_COOKIE", "CONTEXT_URI"]`
+- `exclude_violation` (List of String) <br>**Allowed Values (choose one):** `["VIOL_GRAPHQL_MALFORMED", "VIOL_FILE_UPLOAD_IN_BODY", "VIOL_HTTP_PROTOCOL_UNPARSABLE_REQUEST_CONTENT", "VIOL_DATA_GUARD", "VIOL_COOKIE_MODIFIED", "VIOL_HTTP_PROTOCOL_HIGH_ASCII_CHARACTERS_IN_HEADERS", "VIOL_FILETYPE", "VIOL_XML_MALFORMED", "VIOL_HTTP_PROTOCOL_BAD_HTTP_VERSION", "VIOL_HTTP_PROTOCOL_BAD_MULTIPART_PARAMETERS_PARSING", "VIOL_HTTP_PROTOCOL_CONTENT_LENGTH_SHOULD_BE_A_POSITIVE_NUMBER", "VIOL_EVASION_DIRECTORY_TRAVERSALS", "VIOL_MALFORMED_REQUEST", "VIOL_GRAPHQL_FORMAT", "VIOL_METHOD", "VIOL_REQUEST_MAX_LENGTH", "VIOL_FILE_UPLOAD", "VIOL_EVASION_BAD_UNESCAPE", "VIOL_GRAPHQL_INTROSPECTION_QUERY", "VIOL_HTTP_RESPONSE_STATUS", "VIOL_ASM_COOKIE_MODIFIED", "VIOL_EVASION_MULTIPLE_DECODING", "VIOL_EVASION_APACHE_WHITESPACE", "VIOL_EVASION_IIS_BACKSLASHES", "VIOL_ENCODING", "VIOL_MANDATORY_HEADER", "VIOL_HTTP_PROTOCOL_MULTIPLE_HOST_HEADERS", "VIOL_EVASION_IIS_UNICODE_CODEPOINTS", "VIOL_HTTP_PROTOCOL_BODY_IN_GET_OR_HEAD_REQUEST", "VIOL_JSON_MALFORMED", "VIOL_EVASION_PERCENT_U_DECODING", "VIOL_HTTP_PROTOCOL_BAD_MULTIPART_FORMDATA_REQUEST_PARSING", "VIOL_HTTP_PROTOCOL_CRLF_CHARACTERS_BEFORE_REQUEST_START", "VIOL_HTTP_PROTOCOL_NO_HOST_HEADER_IN_HTTP_1_1_REQUEST", "VIOL_HTTP_PROTOCOL_SEVERAL_CONTENT_LENGTH_HEADERS", "VIOL_EVASION_BARE_BYTE_DECODING", "VIOL_NONE", "VIOL_HTTP_PROTOCOL_BAD_HOST_HEADER_VALUE", "VIOL_HTTP_PROTOCOL_NULL_IN_REQUEST", "VIOL_COOKIE_MALFORMED"]`
 
 Optional:
 
@@ -317,7 +315,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["TRIM_LEFT", "TRANSFORMER_NONE", "LOWER_CASE", "UPPER_CASE", "URL_DECODE", "TRIM_RIGHT", "TRIM", "BASE64_DECODE", "NORMALIZE_PATH", "REMOVE_WHITESPACE"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["NORMALIZE_PATH", "REMOVE_WHITESPACE", "LOWER_CASE", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "UPPER_CASE", "BASE64_DECODE"]` (Multiple selection allowed)
 
 
 
@@ -329,7 +327,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["UPPER_CASE", "URL_DECODE", "TRIM_RIGHT", "TRIM", "BASE64_DECODE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_LEFT", "TRANSFORMER_NONE", "LOWER_CASE"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["BASE64_DECODE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "LOWER_CASE", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "UPPER_CASE"]` (Multiple selection allowed)
 
 
 <a id="nestedatt--bot_action"></a>
@@ -377,7 +375,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["REMOVE_WHITESPACE", "TRIM_LEFT", "TRANSFORMER_NONE", "LOWER_CASE", "UPPER_CASE", "URL_DECODE", "TRIM_RIGHT", "TRIM", "BASE64_DECODE", "NORMALIZE_PATH"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["TRANSFORMER_NONE", "UPPER_CASE", "BASE64_DECODE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "LOWER_CASE", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM"]` (Multiple selection allowed)
 
 
 
@@ -419,7 +417,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["TRANSFORMER_NONE", "LOWER_CASE", "UPPER_CASE", "URL_DECODE", "TRIM_RIGHT", "TRIM", "BASE64_DECODE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_LEFT"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["LOWER_CASE", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "UPPER_CASE", "BASE64_DECODE", "NORMALIZE_PATH", "REMOVE_WHITESPACE"]` (Multiple selection allowed)
 
 
 
@@ -430,7 +428,7 @@ Optional:
 Optional:
 
 - `invert_matcher` (Boolean) <br>**Default:** `false`
-- `methods` (List of String) <br>**Valid Options:** `["ANY", "GET", "POST", "CONNECT", "OPTIONS", "PATCH", "HEAD", "PUT", "DELETE", "TRACE", "COPY"]` (Multiple selection allowed)
+- `methods` (List of String) <br>**Valid Options:** `["ANY", "GET", "TRACE", "PATCH", "COPY", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS"]` (Multiple selection allowed)
 
 
 <a id="nestedatt--jwt_claims"></a>
@@ -461,7 +459,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["BASE64_DECODE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_LEFT", "TRANSFORMER_NONE", "LOWER_CASE", "UPPER_CASE", "URL_DECODE", "TRIM_RIGHT", "TRIM"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["TRIM", "TRANSFORMER_NONE", "UPPER_CASE", "BASE64_DECODE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "LOWER_CASE", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT"]` (Multiple selection allowed)
 
 
 
@@ -502,7 +500,7 @@ Optional:
 - `prefix_values` (List of String) prefix values A list of path prefix values to match the input HTTP path against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input HTTP path against.
 - `suffix_values` (List of String) Suffix values A list of path suffix values to match the input HTTP path against.
-- `transformers` (List of String) <br>**Valid Options:** `["BASE64_DECODE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_LEFT", "TRANSFORMER_NONE", "LOWER_CASE", "UPPER_CASE", "URL_DECODE", "TRIM_RIGHT", "TRIM"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["LOWER_CASE", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "UPPER_CASE", "BASE64_DECODE", "NORMALIZE_PATH", "REMOVE_WHITESPACE"]` (Multiple selection allowed)
 
 
 <a id="nestedatt--port_matcher"></a>
@@ -545,7 +543,7 @@ Optional:
 
 - `exact_values` (List of String) exact values A list of exact values to match the input against.
 - `regex_values` (List of String) regex values A list of regular expressions to match the input against.
-- `transformers` (List of String) <br>**Valid Options:** `["UPPER_CASE", "URL_DECODE", "TRIM_RIGHT", "TRIM", "BASE64_DECODE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "TRIM_LEFT", "TRANSFORMER_NONE", "LOWER_CASE"]` (Multiple selection allowed)
+- `transformers` (List of String) <br>**Valid Options:** `["BASE64_DECODE", "NORMALIZE_PATH", "REMOVE_WHITESPACE", "LOWER_CASE", "URL_DECODE", "TRIM_LEFT", "TRIM_RIGHT", "TRIM", "TRANSFORMER_NONE", "UPPER_CASE"]` (Multiple selection allowed)
 
 
 
@@ -574,7 +572,7 @@ Required:
 
 Optional:
 
-- `max_cookie_count_exceeds` (Number) <br>**Default:** `40`
+- `max_cookie_count_exceeds` (Number) max_cookie_count_exceeds
 - `max_cookie_count_none` (Boolean) max_cookie_count_none
 
 
@@ -583,7 +581,7 @@ Optional:
 
 Optional:
 
-- `max_cookie_key_size_exceeds` (Number) <br>**Default:** `64`
+- `max_cookie_key_size_exceeds` (Number) max_cookie_key_size_exceeds
 - `max_cookie_key_size_none` (Boolean) max_cookie_key_size_none
 
 
@@ -592,7 +590,7 @@ Optional:
 
 Optional:
 
-- `max_cookie_value_size_exceeds` (Number) <br>**Default:** `4096`
+- `max_cookie_value_size_exceeds` (Number) max_cookie_value_size_exceeds
 - `max_cookie_value_size_none` (Boolean) max_cookie_value_size_none
 
 
@@ -601,7 +599,7 @@ Optional:
 
 Optional:
 
-- `max_header_count_exceeds` (Number) <br>**Default:** `20`
+- `max_header_count_exceeds` (Number) max_header_count_exceeds
 - `max_header_count_none` (Boolean) max_header_count_none
 
 
@@ -610,7 +608,7 @@ Optional:
 
 Optional:
 
-- `max_header_key_size_exceeds` (Number) <br>**Default:** `32`
+- `max_header_key_size_exceeds` (Number) max_header_key_size_exceeds
 - `max_header_key_size_none` (Boolean) max_header_key_size_none
 
 
@@ -619,7 +617,7 @@ Optional:
 
 Optional:
 
-- `max_header_value_size_exceeds` (Number) <br>**Default:** `1024`
+- `max_header_value_size_exceeds` (Number) max_header_value_size_exceeds
 - `max_header_value_size_none` (Boolean) max_header_value_size_none
 
 
@@ -637,7 +635,7 @@ Optional:
 
 Optional:
 
-- `max_parameter_name_size_exceeds` (Number) <br>**Default:** `64`
+- `max_parameter_name_size_exceeds` (Number) max_parameter_name_size_exceeds
 - `max_parameter_name_size_none` (Boolean) max_parameter_name_size_none
 
 
@@ -646,7 +644,7 @@ Optional:
 
 Optional:
 
-- `max_parameter_value_size_exceeds` (Number) <br>**Default:** `1000`
+- `max_parameter_value_size_exceeds` (Number) max_parameter_value_size_exceeds
 - `max_parameter_value_size_none` (Boolean) max_parameter_value_size_none
 
 
@@ -655,7 +653,7 @@ Optional:
 
 Optional:
 
-- `max_query_size_exceeds` (Number) <br>**Default:** `4096`
+- `max_query_size_exceeds` (Number) max_query_size_exceeds
 - `max_query_size_none` (Boolean) max_query_size_none
 
 
@@ -664,7 +662,7 @@ Optional:
 
 Optional:
 
-- `max_request_line_size_exceeds` (Number) <br>**Default:** `4096`
+- `max_request_line_size_exceeds` (Number) max_query_size_exceeds
 - `max_request_line_size_none` (Boolean) max_request_line_size_none
 
 
@@ -673,7 +671,7 @@ Optional:
 
 Optional:
 
-- `max_request_size_exceeds` (Number) <br>**Default:** `32768`
+- `max_request_size_exceeds` (Number) max_request_size_exceeds
 - `max_request_size_none` (Boolean) max_request_size_none
 
 
@@ -682,7 +680,7 @@ Optional:
 
 Optional:
 
-- `max_url_size_exceeds` (Number) <br>**Default:** `4096`
+- `max_url_size_exceeds` (Number) max_url_size_exceeds
 - `max_url_size_none` (Boolean) max_url_size_none
 
 
@@ -764,6 +762,7 @@ Optional:
 
 - `create` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 - `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
 - `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
 
@@ -788,6 +787,6 @@ Optional:
 
 Optional:
 
-- `classes` (List of String) <br>**Valid Options:** `["TROLDESH", "TOFSEE", "TORRENTLOCKER", "TRICKBOT", "ANY_MALICIOUS_FINGERPRINT", "ADWARE", "ADWIND", "DRIDEX", "GOOTKIT", "GOZI", "JBIFROST", "QUAKBOT", "TLS_FINGERPRINT_NONE", "RANSOMWARE"]` (Multiple selection allowed)
+- `classes` (List of String) <br>**Valid Options:** `["RANSOMWARE", "TROLDESH", "ADWIND", "DRIDEX", "GOZI", "TOFSEE", "TORRENTLOCKER", "TRICKBOT", "TLS_FINGERPRINT_NONE", "ANY_MALICIOUS_FINGERPRINT", "ADWARE", "GOOTKIT", "JBIFROST", "QUAKBOT"]` (Multiple selection allowed)
 - `exact_values` (List of String) exact values A list of exact TLS JA3 fingerprints to match the input TLS JA3 fingerprint against.
 - `excluded_values` (List of String) excluded values A list of TLS JA3 fingerprints to be excluded when matching the input TLS JA3 fingerprint. This can be used to skip known false positives when using one or more known TLS fingerprint classes in the enclosing matcher.

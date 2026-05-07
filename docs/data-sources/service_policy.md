@@ -15,8 +15,8 @@ The `f5xc_service_policy` data source allows you to retrieve information about a
 
 ```terraform
 data "f5xc_service_policy" "example" {
-  namespace = "example_namespace"
   name      = "example_service_policy"
+  namespace = "example_namespace"
 }
 ```
 

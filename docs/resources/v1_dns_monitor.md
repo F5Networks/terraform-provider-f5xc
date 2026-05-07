@@ -13,19 +13,19 @@ V1DnsMonitor resource
 
 ```terraform
 resource "f5xc_v1_dns_monitor" "example" {
-  namespace = "example_namespace"
   name      = "example_v1_dns_monitor"
-  domain    = "example_v1_dns_monitor"
+  namespace = "example_namespace"
   on_failure_to_choice = {
-    on_failure_to_any = true
+    on_failure_to_all = true
   }
+  domain = "example_v1_dns_monitor"
   interval_choice = {
-    interval_1_min = true
+    interval_1_hour = true
   }
   external_sources = [{
     source_choice = {
-      aws = {
-        aws = "example_aws"
+      f5xc = {
+        f5xc = "example_f5xc"
       }
     }
   }]
@@ -145,7 +145,7 @@ Optional:
 
 Required:
 
-- `eval_period` (List of String) <br>**Allowed Values (choose one):** `["EVAL_PERIOD_3_MINS", "EVAL_PERIOD_5_MINS", "EVAL_PERIOD_10_MINS", "EVAL_PERIOD_15_MINS"]`
+- `eval_period` (List of String) <br>**Allowed Values (choose one):** `["EVAL_PERIOD_10_MINS", "EVAL_PERIOD_15_MINS", "EVAL_PERIOD_3_MINS", "EVAL_PERIOD_5_MINS"]`
 - `std_dev_val` (List of String) <br>**Allowed Values (choose one):** `["STD_DEV_VAL_3", "STD_DEV_VAL_4", "STD_DEV_VAL_5", "STD_DEV_VAL_6"]`
 
 
@@ -163,7 +163,7 @@ Optional:
 
 Required:
 
-- `eval_period` (List of String) <br>**Allowed Values (choose one):** `["EVAL_PERIOD_10_MINS", "EVAL_PERIOD_15_MINS", "EVAL_PERIOD_3_MINS", "EVAL_PERIOD_5_MINS"]`
+- `eval_period` (List of String) <br>**Allowed Values (choose one):** `["EVAL_PERIOD_3_MINS", "EVAL_PERIOD_5_MINS", "EVAL_PERIOD_10_MINS", "EVAL_PERIOD_15_MINS"]`
 
 Optional:
 
@@ -184,7 +184,7 @@ Optional:
 
 Required:
 
-- `eval_period` (List of String) <br>**Allowed Values (choose one):** `["EVAL_PERIOD_15_MINS", "EVAL_PERIOD_3_MINS", "EVAL_PERIOD_5_MINS", "EVAL_PERIOD_10_MINS"]`
+- `eval_period` (List of String) <br>**Allowed Values (choose one):** `["EVAL_PERIOD_3_MINS", "EVAL_PERIOD_5_MINS", "EVAL_PERIOD_10_MINS", "EVAL_PERIOD_15_MINS"]`
 
 Optional:
 
@@ -212,4 +212,5 @@ Optional:
 
 - `create` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 - `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
 - `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).

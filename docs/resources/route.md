@@ -442,7 +442,7 @@ Required:
 
 Optional:
 
-- `javascript_location` (List of String) <br>**Allowed Values (choose one):** `["AFTER_HEAD", "AFTER_TITLE_END", "BEFORE_SCRIPT"]`
+- `javascript_location` (List of String) <br>**Allowed Values (choose one):** `["AFTER_TITLE_END", "BEFORE_SCRIPT", "AFTER_HEAD"]`
 
 <a id="nestedatt--routes--bot_defense_javascript_injection_choice--bot_defense_javascript_injection--javascript_tags"></a>
 ### Nested Schema for `routes.bot_defense_javascript_injection_choice.bot_defense_javascript_injection.javascript_tags`
@@ -460,7 +460,7 @@ Optional:
 
 Optional:
 
-- `javascript_tag` (List of String) <br>**Allowed Values (choose one):** `["JS_ATTR_API_URL", "JS_ATTR_API_PATH", "JS_ATTR_ASYNC", "JS_ATTR_DEFER", "JS_ATTR_ID", "JS_ATTR_CID", "JS_ATTR_CN", "JS_ATTR_API_DOMAIN"]`
+- `javascript_tag` (List of String) <br>**Allowed Values (choose one):** `["JS_ATTR_CN", "JS_ATTR_API_DOMAIN", "JS_ATTR_API_URL", "JS_ATTR_API_PATH", "JS_ATTR_ASYNC", "JS_ATTR_DEFER", "JS_ATTR_ID", "JS_ATTR_CID"]`
 - `tag_value` (String) TagValue Add the tag attribute value.
 
 
@@ -473,7 +473,7 @@ Optional:
 Optional:
 
 - `headers` (Attributes List) headers List of (key, value) headers (see [below for nested schema](#nestedatt--routes--match--headers))
-- `http_method` (List of String) <br>**Allowed Values (choose one):** `["GET", "POST", "CONNECT", "OPTIONS", "PATCH", "HEAD", "PUT", "DELETE", "TRACE", "COPY", "ANY"]`
+- `http_method` (List of String) <br>**Allowed Values (choose one):** `["HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "ANY", "GET", "TRACE", "PATCH", "COPY"]`
 - `incoming_port` (Attributes) incoming_port The port on which the request is received (see [below for nested schema](#nestedatt--routes--match--incoming_port))
 - `path` (Attributes) path URI path of route (see [below for nested schema](#nestedatt--routes--match--path))
 - `query_params` (Attributes List) query_params List of (key, value) query parameters (see [below for nested schema](#nestedatt--routes--match--query_params))
@@ -740,7 +740,7 @@ Optional:
 Optional:
 
 - `ignore_max_age` (Boolean) ignore_max_age Ignore max age attribute
-- `max_age_value` (Number) <br>**Default:** `86400`
+- `max_age_value` (Number) add_max_age Add max age attribute
 
 
 <a id="nestedatt--routes--response_cookies_to_add--partitioned_choice"></a>
@@ -983,4 +983,5 @@ Optional:
 
 - `create` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 - `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
 - `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).

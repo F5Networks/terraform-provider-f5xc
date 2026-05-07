@@ -15,8 +15,8 @@ The `f5xc_alert_policy` data source allows you to retrieve information about an 
 
 ```terraform
 data "f5xc_alert_policy" "example" {
-  name      = "example_alert_policy"
   namespace = "example_namespace"
+  name      = "example_alert_policy"
 }
 ```
 

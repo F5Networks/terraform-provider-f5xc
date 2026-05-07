@@ -13,25 +13,25 @@ OriginPool resource
 
 ```terraform
 resource "f5xc_origin_pool" "example" {
-  namespace = "example_namespace"
   name      = "example_origin_pool"
+  namespace = "example_namespace"
+  origin_servers = [{
+    choice = {
+      k8s_service = {
+        k8s_service = "example_k8s_service"
+      }
+    }
+  }]
   tls_choice = {
     use_tls = {
       use_tls = "example_use_tls"
     }
   }
-  port_choice = {
-    port = 1
-  }
-  origin_servers = [{
-    choice = {
-      private_name = {
-        private_name = "example_private_name"
-      }
-    }
-  }]
   loadbalancer_algorithm = ["ENUM_VALUE"]
   endpoint_selection     = ["ENUM_VALUE"]
+  port_choice = {
+    automatic_port = true
+  }
 }
 ```
 
@@ -628,7 +628,7 @@ Optional:
 
 - `automatic_port` (Boolean) Automatic selection of endpoint port Automatic selection of port for endpoint For Consul and Classic BIG-IP service discovery, port will be discovered as part of service discovery. For other origin server types, port will be automatically set as 443 if TLS is enabled at Origin Pool and 80 if TLS is disabled
 - `lb_port` (Boolean) Same as Loadbalancer port Endpoint port is selected based on loadbalancer port
-- `port` (Number) <br>**Default:** `443`
+- `port` (Number) Port Endpoint service is available on this port
 
 
 <a id="nestedatt--tls_choice"></a>
@@ -657,7 +657,7 @@ Optional:
 
 - `default_session_key_caching` (Boolean) Default Session Key Caching Default session key caching. Only one session key will be cached.
 - `disable_session_key_caching` (Boolean) Disable Session Key Caching Disable session key caching. This will disable TLS session resumption.
-- `max_session_keys` (Number) <br>**Default:** `2`
+- `max_session_keys` (Number) Max Session Keys Cached Number of session keys that are cached.
 
 
 <a id="nestedatt--tls_choice--use_tls--mtls_choice"></a>
@@ -842,7 +842,7 @@ Required:
 Optional:
 
 - `max_version` (List of String) <br>**Allowed Values (choose one):** `["TLSv1_1", "TLSv1_2", "TLSv1_3", "TLS_AUTO", "TLSv1_0"]`
-- `min_version` (List of String) <br>**Allowed Values (choose one):** `["TLSv1_0", "TLSv1_1", "TLSv1_2", "TLSv1_3", "TLS_AUTO"]`
+- `min_version` (List of String) <br>**Allowed Values (choose one):** `["TLSv1_3", "TLS_AUTO", "TLSv1_0", "TLSv1_1", "TLSv1_2"]`
 
 
 
@@ -885,7 +885,7 @@ Optional:
 - `connection_limit` (Number) <br>**Default:** `1024`
 - `max_requests` (Number) <br>**Default:** `1024`
 - `pending_requests` (Number) <br>**Default:** `1024`
-- `priority` (List of String) <br>**Allowed Values (choose one):** `["HIGH", "DEFAULT"]`
+- `priority` (List of String) <br>**Allowed Values (choose one):** `["DEFAULT", "HIGH"]`
 - `retries` (Number) <br>**Default:** `1024`
 
 
@@ -940,7 +940,7 @@ Optional:
 
 Optional:
 
-- `max_requests_per_connection` (Number) <br>**Default:** `1000`
+- `max_requests_per_connection` (Number) Maximum Requests Per Connection Sets the maximum number of requests allowed per connection to the origin server. Enter a value >=1 to define the request limit per connection.
 - `no_request_limit_per_connection` (Boolean) Disable the max requests per connection option This option disables the maximum requests per connection limit. When selected, no limit is enforced, and connections can handle unlimited requests.
 
 
@@ -971,7 +971,7 @@ Optional:
 Optional:
 
 - `no_panic_threshold` (Boolean) Disable panic threshold Disable panic threshold. Only healthy endpoints are considered for load balancing.
-- `panic_threshold` (Number) <br>**Default:** `25`
+- `panic_threshold` (Number) Panic threshold Configure a threshold (percentage of unhealthy endpoints) below which all endpoints will be considered for load balancing ignoring its health status.
 
 
 <a id="nestedatt--advanced_options--subset_choice"></a>
@@ -1067,6 +1067,7 @@ Optional:
 
 - `create` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 - `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
 - `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 
 

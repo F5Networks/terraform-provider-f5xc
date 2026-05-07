@@ -15,13 +15,8 @@ InfraprotectAsnPrefix resource
 resource "f5xc_infraprotect_asn_prefix" "example" {
   namespace = "example_namespace"
   name      = "example_infraprotect_asn_prefix"
-  asn = {
-    name      = "example_infraprotect_asn_prefix"
-    namespace = "example_namespace"
-  }
-  prefix = "example_infraprotect_asn_prefix"
   review_type = {
-    review_type_grace = true
+    review_type_pending = true
   }
   irr_status = {
     irr_status_unverified = true
@@ -29,6 +24,11 @@ resource "f5xc_infraprotect_asn_prefix" "example" {
   rpki_status = {
     rpki_status_unverified = true
   }
+  asn = {
+    name      = "example_infraprotect_asn_prefix"
+    namespace = "example_namespace"
+  }
+  prefix = "example_infraprotect_asn_prefix"
 }
 ```
 
@@ -112,4 +112,5 @@ Optional:
 
 - `create` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).
 - `delete` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Setting a timeout for a Delete operation is only applicable if changes are saved into state before the destroy operation occurs.
+- `read` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours). Read operations occur during any refresh or planning operation when refresh is enabled.
 - `update` (String) A string that can be [parsed as a duration](https://pkg.go.dev/time#ParseDuration) consisting of numbers and unit suffixes, such as "30s" or "2h45m". Valid time units are "s" (seconds), "m" (minutes), "h" (hours).

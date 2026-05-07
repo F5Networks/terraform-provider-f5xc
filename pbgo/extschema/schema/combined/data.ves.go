@@ -12969,6 +12969,11 @@ func GetSchemaData(mdr *svcfw.MDRegistry) {
 	fInfo = svcfw.NewFileInfo("ves.io/schema/shape/bot_defense/public_customapi.proto")
 	pInfo.FilesInfo["ves.io/schema/shape/bot_defense/public_customapi.proto"] = fInfo
 	aInfo = svcfw.NewAPIInfo("CustomAPI", "CUSTOM_PUBLIC", "", false)
+	rpcInfo = svcfw.NewRPCInfo("GetArtifactRegistryToken", "ves.io.schema.shape.bot_defense.GetArtifactRegistryTokenReq", true, false)
+	rpcInfo.RestMappings = map[string][]string{"GET": []string{"/public/namespaces/{namespace}/artifact-registry-token"}}
+
+	aInfo.RPCsInfo[svcfw.RPCName("GetArtifactRegistryToken")] = rpcInfo
+	mdr.RPCIdx["ves.io.schema.shape.bot_defense.CustomAPI.GetArtifactRegistryToken"] = rpcInfo
 	rpcInfo = svcfw.NewRPCInfo("SuggestValues", "ves.io.schema.shape.bot_defense.SuggestValuesReq", true, false)
 	rpcInfo.RestMappings = map[string][]string{"POST": []string{"/public/namespaces/{namespace}/suggest-values"}}
 
@@ -13690,6 +13695,11 @@ func GetSchemaData(mdr *svcfw.MDRegistry) {
 
 	aInfo.RPCsInfo[svcfw.RPCName("BulkDeleteDomains")] = rpcInfo
 	mdr.RPCIdx["ves.io.schema.shape.client_side_defense.CustomAPI.BulkDeleteDomains"] = rpcInfo
+	rpcInfo = svcfw.NewRPCInfo("CreateReport", "ves.io.schema.shape.client_side_defense.CreateReportRequest", false, false)
+	rpcInfo.RestMappings = map[string][]string{"POST": []string{"/public/namespaces/{namespace}/reports"}}
+
+	aInfo.RPCsInfo[svcfw.RPCName("CreateReport")] = rpcInfo
+	mdr.RPCIdx["ves.io.schema.shape.client_side_defense.CustomAPI.CreateReport"] = rpcInfo
 	rpcInfo = svcfw.NewRPCInfo("DeleteScriptJustification", "ves.io.schema.shape.client_side_defense.DeleteScriptJustificationRequest", false, false)
 	rpcInfo.RestMappings = map[string][]string{"DELETE": []string{"/public/namespaces/{namespace}/script/justification/{justification_id}"}}
 
@@ -13705,6 +13715,11 @@ func GetSchemaData(mdr *svcfw.MDRegistry) {
 
 	aInfo.RPCsInfo[svcfw.RPCName("GetDomainDetails")] = rpcInfo
 	mdr.RPCIdx["ves.io.schema.shape.client_side_defense.CustomAPI.GetDomainDetails"] = rpcInfo
+	rpcInfo = svcfw.NewRPCInfo("GetDownloadReportPresignedUrl", "ves.io.schema.shape.client_side_defense.GetDownloadReportPresignedUrlRequest", false, false)
+	rpcInfo.RestMappings = map[string][]string{"GET": []string{"/public/namespaces/{namespace}/reports/metadata/{job_id}/download"}}
+
+	aInfo.RPCsInfo[svcfw.RPCName("GetDownloadReportPresignedUrl")] = rpcInfo
+	mdr.RPCIdx["ves.io.schema.shape.client_side_defense.CustomAPI.GetDownloadReportPresignedUrl"] = rpcInfo
 	rpcInfo = svcfw.NewRPCInfo("GetFormField", "ves.io.schema.shape.client_side_defense.GetFormFieldRequest", false, false)
 	rpcInfo.RestMappings = map[string][]string{"GET": []string{"/public/namespaces/{namespace}/formFields/{id}"}}
 
@@ -13780,6 +13795,11 @@ func GetSchemaData(mdr *svcfw.MDRegistry) {
 
 	aInfo.RPCsInfo[svcfw.RPCName("ListNetworkInteractionsByScript")] = rpcInfo
 	mdr.RPCIdx["ves.io.schema.shape.client_side_defense.CustomAPI.ListNetworkInteractionsByScript"] = rpcInfo
+	rpcInfo = svcfw.NewRPCInfo("ListReportsWithHistory", "ves.io.schema.shape.client_side_defense.ListReportsWithHistoryRequest", false, false)
+	rpcInfo.RestMappings = map[string][]string{"GET": []string{"/public/namespaces/{namespace}/reports-history"}}
+
+	aInfo.RPCsInfo[svcfw.RPCName("ListReportsWithHistory")] = rpcInfo
+	mdr.RPCIdx["ves.io.schema.shape.client_side_defense.CustomAPI.ListReportsWithHistory"] = rpcInfo
 	rpcInfo = svcfw.NewRPCInfo("ListScripts", "ves.io.schema.shape.client_side_defense.ListScriptsRequest", false, false)
 	rpcInfo.RestMappings = map[string][]string{"POST": []string{"/public/namespaces/{namespace}/scripts"}}
 

@@ -7,33 +7,42 @@ on:
     tags:
       - 'v*'
   workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release Tag (z. B. v0.3.1 - leer lassen für aktuellen Ref)'
+        required: false
+        default: ''
 
 jobs:
-  goreleaser:
-    name: GoReleaser
-    runs-on: self-hosted
-    # Ensure variables like GOPRIVATE are available for the build
-    env:
-      GOPRIVATE: "gopkg.volterra.us,gitlab.com/f5/*"
-      GOTOOLCHAIN: auto
-      GIT_TERMINAL_PROMPT: "0"
   sync-release:
     name: Sync GitLab Binaries to GitHub Release
     runs-on: ubuntu-latest
     permissions:
       contents: write
+
     steps:
+      - name: Determine Release Tag
+        id: vars
+        run: |
+          if [ -n "${{ inputs.tag }}" ]; then
+            echo "tag=${{ inputs.tag }}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          fi
+
       - name: Download binaries from GitLab Package Registry
         env:
           GITLAB_USER: ${{ secrets.GITLAB_DEPLOY_TOKEN_USERNAME }}
           GITLAB_TOKEN: ${{ secrets.GITLAB_DEPLOY_TOKEN_PASSWORD }}
-          TAG: ${{ github.ref_name }}
+          TAG: ${{ steps.vars.outputs.tag }}
           # URL-encoded path of f5/volterra/ves.io/terraform-provider-f5xc
           GITLAB_PROJECT: "f5%2Fvolterra%2Fves.io%2Fterraform-provider-f5xc"
           PACKAGE_NAME: "terraform-provider-f5xc"
         run: |
           mkdir -p dist
           BASE_URL="https://gitlab.com/api/v4/projects/${GITLAB_PROJECT}/packages/generic/${PACKAGE_NAME}/${TAG}"
+
+          echo "Downloading binaries for tag: ${TAG}..."
 
           BINARIES=(
             "terraform-provider-f5xc_linux_amd64"
@@ -44,7 +53,9 @@ jobs:
 
           for FILENAME in "${BINARIES[@]}"; do
             echo "Downloading ${FILENAME}..."
+            # Authentifizierung über Deploy Token Header oder Basic Auth
             curl --fail -sSL \
+              --header "DEPLOY-TOKEN: ${GITLAB_TOKEN}" \
               -u "${GITLAB_USER}:${GITLAB_TOKEN}" \
               -o "dist/${FILENAME}" \
               "${BASE_URL}/${FILENAME}"
@@ -53,6 +64,7 @@ jobs:
       - name: Create GitHub Release and upload assets
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ steps.vars.outputs.tag }}
           files: dist/*
           generate_release_notes: true
         env:

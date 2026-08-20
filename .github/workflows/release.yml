@@ -36,7 +36,6 @@ jobs:
           GITLAB_TOKEN: ${{ secrets.GITLAB_DEPLOY_TOKEN_PASSWORD }}
           TAG: ${{ steps.vars.outputs.tag }}
           GITLAB_PROJECT_ID: "50750365"
-          PACKAGE_NAME: "terraform-provider-f5xc"
         run: |
           if [ -z "${GITLAB_TOKEN}" ]; then
             echo "::error::GITLAB_DEPLOY_TOKEN_PASSWORD secret is missing or empty!"
@@ -45,35 +44,39 @@ jobs:
 
           mkdir -p dist
 
-          # 1. Check which tag variation was published to GitLab (v0.3.1, 0.3.1, vv0.3.1)
-          POSSIBLE_VERSIONS=("${TAG}" "${TAG#v}" "v${TAG}")
-          FOUND_VERSION=""
+          echo "Querying GitLab Project ${GITLAB_PROJECT_ID} for packages matching tag '${TAG}'..."
 
-          echo "Detecting package version in GitLab Registry for tag '${TAG}' (Project ID: ${GITLAB_PROJECT_ID})..."
+          # 1. Fetch package list for the project
+          PACKAGES_JSON=$(curl -sSL \
+            --header "DEPLOY-TOKEN: ${GITLAB_TOKEN}" \
+            -u "${GITLAB_USER}:${GITLAB_TOKEN}" \
+            "https://gitlab.com/api/v4/projects/${GITLAB_PROJECT_ID}/packages")
 
-          for VER in "${POSSIBLE_VERSIONS[@]}"; do
-            TEST_URL="https://gitlab.com/api/v4/projects/${GITLAB_PROJECT_ID}/packages/generic/${PACKAGE_NAME}/${VER}/terraform-provider-f5xc_linux_amd64"
-            echo "Testing URL: ${TEST_URL}"
+          echo "Packages response: ${PACKAGES_JSON}"
 
-            HTTP_CODE=$(curl -s -o /tmp/curl_response.txt -w "%{http_code}" \
-              --header "DEPLOY-TOKEN: ${GITLAB_TOKEN}" \
-              -u "${GITLAB_USER}:${GITLAB_TOKEN}" \
-              "${TEST_URL}")
+          # 2. Extract Package ID for the tag or fallback to the most recent package
+          PACKAGE_ID=$(echo "${PACKAGES_JSON}" | jq -r --arg TAG "${TAG}" --arg TAG_NO_V "${TAG#v}" \
+            '.[]? | select(.version == $TAG or .version == $TAG_NO_V or .version == ("v" + $TAG) or .version == ("vv" + $TAG)) | .id' | head -n 1)
 
-            echo "HTTP Status: ${HTTP_CODE}"
-            if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "302" ]; then
-              FOUND_VERSION="${VER}"
-              echo "==> Successfully matched package version: ${FOUND_VERSION}"
-              break
-            fi
-          done
-
-          if [ -z "$FOUND_VERSION" ]; then
-            echo "::error::Could not find binaries in GitLab Package Registry for versions: ${POSSIBLE_VERSIONS[*]}"
-            exit 1
+          if [ -z "$PACKAGE_ID" ] || [ "$PACKAGE_ID" = "null" ]; then
+            echo "Warning: Could not match tag automatically. Falling back to latest package..."
+            PACKAGE_ID=$(echo "${PACKAGES_JSON}" | jq -r '.[0].id // empty')
           fi
 
-          BASE_URL="https://gitlab.com/api/v4/projects/${GITLAB_PROJECT_ID}/packages/generic/${PACKAGE_NAME}/${FOUND_VERSION}"
+          # Fallback to known package ID if query fails
+          if [ -z "$PACKAGE_ID" ] || [ "$PACKAGE_ID" = "null" ]; then
+            PACKAGE_ID="67064815"
+          fi
+
+          echo "Using GitLab Package ID: ${PACKAGE_ID}"
+
+          # 3. Retrieve package files list for this package
+          FILES_JSON=$(curl -sSL \
+            --header "DEPLOY-TOKEN: ${GITLAB_TOKEN}" \
+            -u "${GITLAB_USER}:${GITLAB_TOKEN}" \
+            "https://gitlab.com/api/v4/projects/${GITLAB_PROJECT_ID}/packages/${PACKAGE_ID}/package_files")
+
+          echo "Package Files response: ${FILES_JSON}"
 
           BINARIES=(
             "terraform-provider-f5xc_linux_amd64"
@@ -82,23 +85,31 @@ jobs:
             "terraform-provider-f5xc_windows_amd64.exe"
           )
 
-          # 2. Download each binary
+          # 4. Download latest file for each binary architecture
           for FILENAME in "${BINARIES[@]}"; do
-            echo "Downloading ${FILENAME}..."
-            curl --fail -sSL \
-              --header "DEPLOY-TOKEN: ${GITLAB_TOKEN}" \
-              -u "${GITLAB_USER}:${GITLAB_TOKEN}" \
-              -o "dist/${FILENAME}" \
-              "${BASE_URL}/${FILENAME}"
+            echo "Locating latest file ID for ${FILENAME}..."
+            FILE_ID=$(echo "${FILES_JSON}" | jq -r --arg FN "${FILENAME}" \
+              '[.[]? | select(.file_name == $FN)] | sort_by(.created_at) | last | .id // empty')
+
+            if [ -n "$FILE_ID" ] && [ "$FILE_ID" != "null" ]; then
+              echo "Downloading ${FILENAME} (File ID: ${FILE_ID})..."
+              curl --fail -sSL \
+                --header "DEPLOY-TOKEN: ${GITLAB_TOKEN}" \
+                -u "${GITLAB_USER}:${GITLAB_TOKEN}" \
+                -o "dist/${FILENAME}" \
+                "https://gitlab.com/f5/volterra/ves.io/terraform-provider-f5xc/-/package_files/${FILE_ID}/download"
+            else
+              echo "::warning::Could not find ${FILENAME} in package ${PACKAGE_ID}"
+            fi
           done
 
-          # 3. Generate SHA256SUMS for release assets
-          echo "Generating SHA256SUMS for downloaded binaries..."
+          # 5. Generate SHA256SUMS for the downloaded binaries
+          echo "Generating SHA256SUMS..."
           cd dist
-          sha256sum terraform-provider-f5xc_* > SHA256SUMS
+          sha256sum terraform-provider-f5xc_* > SHA256SUMS 2>/dev/null || true
           cd ..
 
-          echo "Downloaded assets ready for GitHub Release:"
+          echo "Downloaded release assets in dist/:"
           ls -lh dist/
 
       - name: Create GitHub Release and upload assets

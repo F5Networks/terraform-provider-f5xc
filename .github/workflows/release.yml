@@ -32,6 +32,7 @@ jobs:
 
       - name: Download binaries from GitLab Package Registry
         env:
+          GITLAB_USER: ${{ secrets.GITLAB_DEPLOY_TOKEN_USERNAME }}
           GITLAB_TOKEN: ${{ secrets.GITLAB_DEPLOY_TOKEN_PASSWORD }}
           TAG: ${{ steps.vars.outputs.tag }}
           # URL-encoded path of f5/volterra/ves.io/terraform-provider-f5xc
@@ -45,26 +46,39 @@ jobs:
 
           mkdir -p dist
 
-          echo "Searching GitLab Package Registry for tag: ${TAG}..."
+          # 1. Test different possible version strings in GitLab (v0.3.1, 0.3.1, vv0.3.1)
+          POSSIBLE_VERSIONS=("${TAG}" "${TAG#v}" "v${TAG}")
+          FOUND_VERSION=""
 
-          # 1. Fetch package ID for this tag/version from GitLab API
-          PACKAGE_ID=$(curl -sSL --header "DEPLOY-TOKEN: ${GITLAB_TOKEN}" \
-            "https://gitlab.com/api/v4/projects/${GITLAB_PROJECT}/packages?package_name=${PACKAGE_NAME}" \
-            | jq -r --arg TAG "${TAG}" --arg TAG_NO_V "${TAG#v}" \
-              '.[] | select(.version == $TAG or .version == $TAG_NO_V or .version == ("v" + $TAG) or .version == ("vv" + $TAG)) | .id' | head -n 1)
+          echo "Detecting package version in GitLab Registry for tag '${TAG}'..."
 
-          if [ -z "$PACKAGE_ID" ] || [ "$PACKAGE_ID" = "null" ]; then
-            echo "::error::Could not find package ID for tag ${TAG} in GitLab Package Registry!"
+          for VER in "${POSSIBLE_VERSIONS[@]}"; do
+            TEST_URL="https://gitlab.com/api/v4/projects/${GITLAB_PROJECT}/packages/generic/${PACKAGE_NAME}/${VER}/terraform-provider-f5xc_linux_amd64"
+            echo "Testing URL: ${TEST_URL}"
+
+            # Check HTTP status code
+            HTTP_CODE=$(curl -s -o /tmp/curl_test_response.txt -w "%{http_code}" \
+              --header "DEPLOY-TOKEN: ${GITLAB_TOKEN}" \
+              -u "${GITLAB_USER}:${GITLAB_TOKEN}" \
+              "${TEST_URL}")
+
+            echo "HTTP Status: ${HTTP_CODE}"
+            if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "302" ]; then
+              FOUND_VERSION="${VER}"
+              echo "==> Successfully found package version: ${FOUND_VERSION}"
+              break
+            else
+              echo "Response: $(cat /tmp/curl_test_response.txt)"
+            fi
+          done
+
+          if [ -z "$FOUND_VERSION" ]; then
+            echo "::error::Could not find binaries under any tag variation (${POSSIBLE_VERSIONS[*]}). Please check credentials and package path."
             exit 1
           fi
 
-          echo "Found GitLab Package ID: ${PACKAGE_ID}"
+          BASE_URL="https://gitlab.com/api/v4/projects/${GITLAB_PROJECT}/packages/generic/${PACKAGE_NAME}/${FOUND_VERSION}"
 
-          # 2. Get list of all package files for this package
-          FILES_JSON=$(curl -sSL --header "DEPLOY-TOKEN: ${GITLAB_TOKEN}" \
-            "https://gitlab.com/api/v4/projects/${GITLAB_PROJECT}/packages/${PACKAGE_ID}/package_files")
-
-          # 3. Target binary filenames
           BINARIES=(
             "terraform-provider-f5xc_linux_amd64"
             "terraform-provider-f5xc_darwin_amd64"
@@ -73,33 +87,21 @@ jobs:
           )
 
           for FILENAME in "${BINARIES[@]}"; do
-            echo "Locating latest file ID for ${FILENAME}..."
-            # Pick the most recently created file ID for this filename
-            FILE_ID=$(echo "${FILES_JSON}" | jq -r --arg FN "${FILENAME}" \
-              '[.[] | select(.file_name == $FN)] | sort_by(.created_at) | last | .id')
-
-            if [ -n "$FILE_ID" ] && [ "$FILE_ID" != "null" ]; then
-              echo "Downloading ${FILENAME} (File ID: ${FILE_ID})..."
-              curl --fail -sSL \
-                --header "DEPLOY-TOKEN: ${GITLAB_TOKEN}" \
-                -o "dist/${FILENAME}" \
-                "https://gitlab.com/api/v4/projects/${GITLAB_PROJECT}/packages/generic/${PACKAGE_NAME}/${TAG}/${FILENAME}" \
-                || curl --fail -sSL \
-                --header "DEPLOY-TOKEN: ${GITLAB_TOKEN}" \
-                -o "dist/${FILENAME}" \
-                "https://gitlab.com/f5/volterra/ves.io/terraform-provider-f5xc/-/package_files/${FILE_ID}/download"
-            else
-              echo "::warning::File ${FILENAME} not found in package ${PACKAGE_ID}"
-            fi
+            echo "Downloading ${FILENAME}..."
+            curl --fail -sSL \
+              --header "DEPLOY-TOKEN: ${GITLAB_TOKEN}" \
+              -u "${GITLAB_USER}:${GITLAB_TOKEN}" \
+              -o "dist/${FILENAME}" \
+              "${BASE_URL}/${FILENAME}"
           done
 
-          # 4. Generate SHA256SUMS for the downloaded binaries
-          echo "Generating SHA256SUMS for downloaded binaries..."
+          # 2. Generate SHA256SUMS for downloaded assets
+          echo "Generating SHA256SUMS..."
           cd dist
           sha256sum terraform-provider-f5xc_* > SHA256SUMS 2>/dev/null || true
           cd ..
 
-          echo "Listing downloaded assets in dist/:"
+          echo "Downloaded assets ready for release:"
           ls -lh dist/
 
       - name: Create GitHub Release and upload assets

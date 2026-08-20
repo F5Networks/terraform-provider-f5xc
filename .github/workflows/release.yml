@@ -39,6 +39,11 @@ jobs:
           GITLAB_PROJECT: "f5%2Fvolterra%2Fves.io%2Fterraform-provider-f5xc"
           PACKAGE_NAME: "terraform-provider-f5xc"
         run: |
+          if [ -z "${GITLAB_TOKEN}" ]; then
+            echo "::error::GITLAB_DEPLOY_TOKEN_PASSWORD secret is missing or empty!"
+            exit 1
+          fi
+
           mkdir -p dist
           BASE_URL="https://gitlab.com/api/v4/projects/${GITLAB_PROJECT}/packages/generic/${PACKAGE_NAME}/${TAG}"
 
@@ -52,14 +57,28 @@ jobs:
           )
 
           for FILENAME in "${BINARIES[@]}"; do
-            echo "Downloading ${FILENAME}..."
-            # Authenticate via Deploy Token header or basic auth
+            echo "Fetching ${FILENAME}..."
             curl --fail -sSL \
               --header "DEPLOY-TOKEN: ${GITLAB_TOKEN}" \
-              -u "${GITLAB_USER}:${GITLAB_TOKEN}" \
               -o "dist/${FILENAME}" \
               "${BASE_URL}/${FILENAME}"
           done
+
+          # Optional: Also try to download SHA256SUMS if GitLab generated one
+          curl -sSL --header "DEPLOY-TOKEN: ${GITLAB_TOKEN}" \
+            -o "dist/SHA256SUMS" \
+            "${BASE_URL}/SHA256SUMS" || true
+
+          # If no SHA256SUMS file was in GitLab, generate it now
+          if [ ! -s "dist/SHA256SUMS" ]; then
+            echo "Generating SHA256SUMS for downloaded binaries..."
+            cd dist
+            sha256sum terraform-provider-f5xc_* > SHA256SUMS
+            cd ..
+          fi
+
+          echo "Listing downloaded assets:"
+          ls -la dist/
 
       - name: Create GitHub Release and upload assets
         uses: softprops/action-gh-release@v2

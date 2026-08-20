@@ -35,7 +35,6 @@ jobs:
           GITLAB_USER: ${{ secrets.GITLAB_DEPLOY_TOKEN_USERNAME }}
           GITLAB_TOKEN: ${{ secrets.GITLAB_DEPLOY_TOKEN_PASSWORD }}
           TAG: ${{ steps.vars.outputs.tag }}
-          # URL-encoded path of f5/volterra/ves.io/terraform-provider-f5xc
           GITLAB_PROJECT: "f5%2Fvolterra%2Fves.io%2Fterraform-provider-f5xc"
           PACKAGE_NAME: "terraform-provider-f5xc"
         run: |
@@ -64,12 +63,11 @@ jobs:
               "${BASE_URL}/${FILENAME}"
           done
 
-          # Optional: Also try to download SHA256SUMS if GitLab generated one
+          # Check if SHA256SUMS was uploaded to GitLab or generate it locally
           curl -sSL --header "DEPLOY-TOKEN: ${GITLAB_TOKEN}" \
             -o "dist/SHA256SUMS" \
             "${BASE_URL}/SHA256SUMS" || true
 
-          # If no SHA256SUMS file was in GitLab, generate it now
           if [ ! -s "dist/SHA256SUMS" ]; then
             echo "Generating SHA256SUMS for downloaded binaries..."
             cd dist

@@ -32,10 +32,10 @@ jobs:
 
       - name: Download binaries from GitLab Package Registry
         env:
-          GITLAB_USER: ${{ secrets.GITLAB_DEPLOY_TOKEN_USERNAME }}
           GITLAB_TOKEN: ${{ secrets.GITLAB_DEPLOY_TOKEN_PASSWORD }}
           TAG: ${{ steps.vars.outputs.tag }}
           GITLAB_PROJECT_ID: "50750365"
+          PACKAGE_NAME: "terraform-provider-f5xc"
         run: |
           if [ -z "${GITLAB_TOKEN}" ]; then
             echo "::error::GITLAB_DEPLOY_TOKEN_PASSWORD secret is missing or empty!"
@@ -43,40 +43,9 @@ jobs:
           fi
 
           mkdir -p dist
+          BASE_URL="https://gitlab.com/api/v4/projects/${GITLAB_PROJECT_ID}/packages/generic/${PACKAGE_NAME}/${TAG}"
 
-          echo "Querying GitLab Project ${GITLAB_PROJECT_ID} for packages matching tag '${TAG}'..."
-
-          # 1. Fetch package list for the project
-          PACKAGES_JSON=$(curl -sSL \
-            --header "DEPLOY-TOKEN: ${GITLAB_TOKEN}" \
-            -u "${GITLAB_USER}:${GITLAB_TOKEN}" \
-            "https://gitlab.com/api/v4/projects/${GITLAB_PROJECT_ID}/packages")
-
-          echo "Packages response: ${PACKAGES_JSON}"
-
-          # 2. Extract Package ID for the tag or fallback to the most recent package
-          PACKAGE_ID=$(echo "${PACKAGES_JSON}" | jq -r --arg TAG "${TAG}" --arg TAG_NO_V "${TAG#v}" \
-            '.[]? | select(.version == $TAG or .version == $TAG_NO_V or .version == ("v" + $TAG) or .version == ("vv" + $TAG)) | .id' | head -n 1)
-
-          if [ -z "$PACKAGE_ID" ] || [ "$PACKAGE_ID" = "null" ]; then
-            echo "Warning: Could not match tag automatically. Falling back to latest package..."
-            PACKAGE_ID=$(echo "${PACKAGES_JSON}" | jq -r '.[0].id // empty')
-          fi
-
-          # Fallback to known package ID if query fails
-          if [ -z "$PACKAGE_ID" ] || [ "$PACKAGE_ID" = "null" ]; then
-            PACKAGE_ID="67064815"
-          fi
-
-          echo "Using GitLab Package ID: ${PACKAGE_ID}"
-
-          # 3. Retrieve package files list for this package
-          FILES_JSON=$(curl -sSL \
-            --header "DEPLOY-TOKEN: ${GITLAB_TOKEN}" \
-            -u "${GITLAB_USER}:${GITLAB_TOKEN}" \
-            "https://gitlab.com/api/v4/projects/${GITLAB_PROJECT_ID}/packages/${PACKAGE_ID}/package_files")
-
-          echo "Package Files response: ${FILES_JSON}"
+          echo "Downloading pre-built binaries for tag: ${TAG}..."
 
           BINARIES=(
             "terraform-provider-f5xc_linux_amd64"
@@ -85,31 +54,21 @@ jobs:
             "terraform-provider-f5xc_windows_amd64.exe"
           )
 
-          # 4. Download latest file for each binary architecture
           for FILENAME in "${BINARIES[@]}"; do
-            echo "Locating latest file ID for ${FILENAME}..."
-            FILE_ID=$(echo "${FILES_JSON}" | jq -r --arg FN "${FILENAME}" \
-              '[.[]? | select(.file_name == $FN)] | sort_by(.created_at) | last | .id // empty')
-
-            if [ -n "$FILE_ID" ] && [ "$FILE_ID" != "null" ]; then
-              echo "Downloading ${FILENAME} (File ID: ${FILE_ID})..."
-              curl --fail -sSL \
-                --header "DEPLOY-TOKEN: ${GITLAB_TOKEN}" \
-                -u "${GITLAB_USER}:${GITLAB_TOKEN}" \
-                -o "dist/${FILENAME}" \
-                "https://gitlab.com/f5/volterra/ves.io/terraform-provider-f5xc/-/package_files/${FILE_ID}/download"
-            else
-              echo "::warning::Could not find ${FILENAME} in package ${PACKAGE_ID}"
-            fi
+            echo "Fetching ${FILENAME}..."
+            curl --fail -sSL \
+              --header "DEPLOY-TOKEN: ${GITLAB_TOKEN}" \
+              -o "dist/${FILENAME}" \
+              "${BASE_URL}/${FILENAME}"
           done
 
-          # 5. Generate SHA256SUMS for the downloaded binaries
+          # Generate SHA256 checksums for the downloaded release assets
           echo "Generating SHA256SUMS..."
           cd dist
-          sha256sum terraform-provider-f5xc_* > SHA256SUMS 2>/dev/null || true
+          sha256sum terraform-provider-f5xc_* > SHA256SUMS
           cd ..
 
-          echo "Downloaded release assets in dist/:"
+          echo "Listing downloaded assets in dist/:"
           ls -lh dist/
 
       - name: Create GitHub Release and upload assets

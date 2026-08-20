@@ -35,8 +35,7 @@ jobs:
           GITLAB_USER: ${{ secrets.GITLAB_DEPLOY_TOKEN_USERNAME }}
           GITLAB_TOKEN: ${{ secrets.GITLAB_DEPLOY_TOKEN_PASSWORD }}
           TAG: ${{ steps.vars.outputs.tag }}
-          # URL-encoded path of f5/volterra/ves.io/terraform-provider-f5xc
-          GITLAB_PROJECT: "f5%2Fvolterra%2Fves.io%2Fterraform-provider-f5xc"
+          GITLAB_PROJECT_ID: "50750365"
           PACKAGE_NAME: "terraform-provider-f5xc"
         run: |
           if [ -z "${GITLAB_TOKEN}" ]; then
@@ -46,18 +45,17 @@ jobs:
 
           mkdir -p dist
 
-          # 1. Test different possible version strings in GitLab (v0.3.1, 0.3.1, vv0.3.1)
+          # 1. Check which tag variation was published to GitLab (v0.3.1, 0.3.1, vv0.3.1)
           POSSIBLE_VERSIONS=("${TAG}" "${TAG#v}" "v${TAG}")
           FOUND_VERSION=""
 
-          echo "Detecting package version in GitLab Registry for tag '${TAG}'..."
+          echo "Detecting package version in GitLab Registry for tag '${TAG}' (Project ID: ${GITLAB_PROJECT_ID})..."
 
           for VER in "${POSSIBLE_VERSIONS[@]}"; do
-            TEST_URL="https://gitlab.com/api/v4/projects/${GITLAB_PROJECT}/packages/generic/${PACKAGE_NAME}/${VER}/terraform-provider-f5xc_linux_amd64"
+            TEST_URL="https://gitlab.com/api/v4/projects/${GITLAB_PROJECT_ID}/packages/generic/${PACKAGE_NAME}/${VER}/terraform-provider-f5xc_linux_amd64"
             echo "Testing URL: ${TEST_URL}"
 
-            # Check HTTP status code
-            HTTP_CODE=$(curl -s -o /tmp/curl_test_response.txt -w "%{http_code}" \
+            HTTP_CODE=$(curl -s -o /tmp/curl_response.txt -w "%{http_code}" \
               --header "DEPLOY-TOKEN: ${GITLAB_TOKEN}" \
               -u "${GITLAB_USER}:${GITLAB_TOKEN}" \
               "${TEST_URL}")
@@ -65,19 +63,17 @@ jobs:
             echo "HTTP Status: ${HTTP_CODE}"
             if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "302" ]; then
               FOUND_VERSION="${VER}"
-              echo "==> Successfully found package version: ${FOUND_VERSION}"
+              echo "==> Successfully matched package version: ${FOUND_VERSION}"
               break
-            else
-              echo "Response: $(cat /tmp/curl_test_response.txt)"
             fi
           done
 
           if [ -z "$FOUND_VERSION" ]; then
-            echo "::error::Could not find binaries under any tag variation (${POSSIBLE_VERSIONS[*]}). Please check credentials and package path."
+            echo "::error::Could not find binaries in GitLab Package Registry for versions: ${POSSIBLE_VERSIONS[*]}"
             exit 1
           fi
 
-          BASE_URL="https://gitlab.com/api/v4/projects/${GITLAB_PROJECT}/packages/generic/${PACKAGE_NAME}/${FOUND_VERSION}"
+          BASE_URL="https://gitlab.com/api/v4/projects/${GITLAB_PROJECT_ID}/packages/generic/${PACKAGE_NAME}/${FOUND_VERSION}"
 
           BINARIES=(
             "terraform-provider-f5xc_linux_amd64"
@@ -86,6 +82,7 @@ jobs:
             "terraform-provider-f5xc_windows_amd64.exe"
           )
 
+          # 2. Download each binary
           for FILENAME in "${BINARIES[@]}"; do
             echo "Downloading ${FILENAME}..."
             curl --fail -sSL \
@@ -95,13 +92,13 @@ jobs:
               "${BASE_URL}/${FILENAME}"
           done
 
-          # 2. Generate SHA256SUMS for downloaded assets
-          echo "Generating SHA256SUMS..."
+          # 3. Generate SHA256SUMS for release assets
+          echo "Generating SHA256SUMS for downloaded binaries..."
           cd dist
-          sha256sum terraform-provider-f5xc_* > SHA256SUMS 2>/dev/null || true
+          sha256sum terraform-provider-f5xc_* > SHA256SUMS
           cd ..
 
-          echo "Downloaded assets ready for release:"
+          echo "Downloaded assets ready for GitHub Release:"
           ls -lh dist/
 
       - name: Create GitHub Release and upload assets

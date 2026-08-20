@@ -1689,10 +1689,7 @@ var APISwaggerJSON string = `{
         "description": "advertise_policy object controls how and where a service represented by a given virtual_host object is advertised to consumers.\nBasic concept is a service is made available to consumers in a given virtual_network/site/region(RE).\n\nA Service is available to consumers in a given network if there is VIP allocated in the given network and some host is listening on given service port.\nSo the problem of configuring VIP and Service port is made possible by advertise policy.\nThere three things to be decided\n\n* Network\n* VIP\n* Protocol and Port\n\nNetwork is decided by a concrete network reference\nNetwork can be inferred automatically based on site and network type\nNetwork can be inferred automatically based on all site selected by virtual site and network type\n\nVIP can be automatically allocated by the system  or configured.\nMost of the time VIP is the interface IP of the Application gateway in the given network.\n\nEach advertise policy may have its own VIP, TLS parameters, and (Protocol, port) configured or assigned by system.\nA Advertise Policy can be shared by many Virtual Hosts. A Virtual Host can refer to many Advertise policies.",
         "version": "version not set"
     },
-    "schemes": [
-        "http",
-        "https"
-    ],
+    "schemes": null,
     "consumes": [
         "application/json"
     ],
@@ -1759,6 +1756,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1851,6 +1854,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1951,6 +1960,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2068,6 +2083,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2171,6 +2192,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2264,6 +2291,7 @@ var APISwaggerJSON string = `{
             "description": "advertise_policy object controls how and where a service represented by a given virtual_host object is advertised to consumers.",
             "title": "Create advertise policy",
             "x-displayname": "Create Advertise Policy",
+            "x-ves-oneof-field-address_type": "[\"dualstack\",\"ipv4\",\"ipv6\"]",
             "x-ves-oneof-field-port_choice": "[\"port\",\"port_ranges\"]",
             "x-ves-proto-message": "ves.io.schema.advertise_policy.CreateSpecType",
             "properties": {
@@ -2275,6 +2303,21 @@ var APISwaggerJSON string = `{
                     "x-ves-validation-rules": {
                         "ves.io.schema.rules.string.ip": "true"
                     }
+                },
+                "dualstack": {
+                    "description": "Exclusive with [ipv4 ipv6]\n Advertise on both IPv4 and IPv6 simultaneously.",
+                    "$ref": "#/definitions/ioschemaEmpty",
+                    "x-displayname": "Dual Stack"
+                },
+                "ipv4": {
+                    "description": "Exclusive with [dualstack ipv6]\n Advertise on IPv4 only.",
+                    "$ref": "#/definitions/ioschemaEmpty",
+                    "x-displayname": "IPv4"
+                },
+                "ipv6": {
+                    "description": "Exclusive with [dualstack ipv4]\n Advertise on IPv6 only.",
+                    "$ref": "#/definitions/ioschemaEmpty",
+                    "x-displayname": "IPv6"
                 },
                 "port": {
                     "type": "integer",
@@ -2320,7 +2363,6 @@ var APISwaggerJSON string = `{
                 "skip_xff_append": {
                     "type": "boolean",
                     "description": " If set, the loadbalancer will not append the remote address to the x-forwarded-for HTTP header.\n\nExample: - \"true\"-",
-                    "format": "boolean",
                     "x-displayname": "Disable X-Forwarded-For Header",
                     "x-ves-example": "true"
                 },
@@ -2347,7 +2389,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Fail the delete operation if this object is being referred by other objects",
                     "title": "fail_if_referred",
-                    "format": "boolean",
                     "x-displayname": "Fail-If-Referred"
                 },
                 "name": {
@@ -2461,6 +2502,7 @@ var APISwaggerJSON string = `{
             "description": "Get advertise_policy read a given object from storage backend for metadata.namespace",
             "title": "Get advertise policy",
             "x-displayname": "Get Advertise Policy",
+            "x-ves-oneof-field-address_type": "[\"dualstack\",\"ipv4\",\"ipv6\"]",
             "x-ves-oneof-field-port_choice": "[\"port\",\"port_ranges\"]",
             "x-ves-proto-message": "ves.io.schema.advertise_policy.GetSpecType",
             "properties": {
@@ -2472,6 +2514,21 @@ var APISwaggerJSON string = `{
                     "x-ves-validation-rules": {
                         "ves.io.schema.rules.string.ip": "true"
                     }
+                },
+                "dualstack": {
+                    "description": "Exclusive with [ipv4 ipv6]\n Advertise on both IPv4 and IPv6 simultaneously.",
+                    "$ref": "#/definitions/ioschemaEmpty",
+                    "x-displayname": "Dual Stack"
+                },
+                "ipv4": {
+                    "description": "Exclusive with [dualstack ipv6]\n Advertise on IPv4 only.",
+                    "$ref": "#/definitions/ioschemaEmpty",
+                    "x-displayname": "IPv4"
+                },
+                "ipv6": {
+                    "description": "Exclusive with [dualstack ipv4]\n Advertise on IPv6 only.",
+                    "$ref": "#/definitions/ioschemaEmpty",
+                    "x-displayname": "IPv6"
                 },
                 "port": {
                     "type": "integer",
@@ -2517,7 +2574,6 @@ var APISwaggerJSON string = `{
                 "skip_xff_append": {
                     "type": "boolean",
                     "description": " If set, the loadbalancer will not append the remote address to the x-forwarded-for HTTP header.\n\nExample: - \"true\"-",
-                    "format": "boolean",
                     "x-displayname": "Disable X-Forwarded-For Header",
                     "x-ves-example": "true"
                 },
@@ -2583,7 +2639,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true indicates advertise_policy is administratively disabled",
                     "title": "disabled",
-                    "format": "boolean",
                     "x-displayname": "Disabled"
                 },
                 "get_spec": {
@@ -2710,6 +2765,7 @@ var APISwaggerJSON string = `{
             "description": "advertise_policy object controls how and where a service represented by a given virtual_host object is advertised to consumers.",
             "title": "Replace advertise policy",
             "x-displayname": "Replace Advertise Policy",
+            "x-ves-oneof-field-address_type": "[\"dualstack\",\"ipv4\",\"ipv6\"]",
             "x-ves-oneof-field-port_choice": "[\"port\",\"port_ranges\"]",
             "x-ves-proto-message": "ves.io.schema.advertise_policy.ReplaceSpecType",
             "properties": {
@@ -2721,6 +2777,21 @@ var APISwaggerJSON string = `{
                     "x-ves-validation-rules": {
                         "ves.io.schema.rules.string.ip": "true"
                     }
+                },
+                "dualstack": {
+                    "description": "Exclusive with [ipv4 ipv6]\n Advertise on both IPv4 and IPv6 simultaneously.",
+                    "$ref": "#/definitions/ioschemaEmpty",
+                    "x-displayname": "Dual Stack"
+                },
+                "ipv4": {
+                    "description": "Exclusive with [dualstack ipv6]\n Advertise on IPv4 only.",
+                    "$ref": "#/definitions/ioschemaEmpty",
+                    "x-displayname": "IPv4"
+                },
+                "ipv6": {
+                    "description": "Exclusive with [dualstack ipv4]\n Advertise on IPv6 only.",
+                    "$ref": "#/definitions/ioschemaEmpty",
+                    "x-displayname": "IPv6"
                 },
                 "port": {
                     "type": "integer",
@@ -2766,7 +2837,6 @@ var APISwaggerJSON string = `{
                 "skip_xff_append": {
                     "type": "boolean",
                     "description": " If set, the loadbalancer will not append the remote address to the x-forwarded-for HTTP header.\n\nExample: - \"true\"-",
-                    "format": "boolean",
                     "x-displayname": "Disable X-Forwarded-For Header",
                     "x-ves-example": "true"
                 },
@@ -2844,6 +2914,27 @@ var APISwaggerJSON string = `{
                     "type": "string",
                     "description": "Must be a valid serialized protocol buffer of the above specified type.",
                     "format": "byte"
+                }
+            }
+        },
+        "runtimeError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/protobufAny"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
                 }
             }
         },
@@ -3229,7 +3320,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "labels": {
@@ -3293,7 +3383,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable",
                     "x-ves-example": "true"
                 },
@@ -3403,7 +3492,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "labels": {
@@ -3564,7 +3652,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Indicate whether mars deems this object to be stale via graceful restart timer information",
                     "title": "vtrp_stale",
-                    "format": "boolean",
                     "x-displayname": "VTRP Stale"
                 }
             }
@@ -3846,7 +3933,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " When True, skip verification of hostname i.e. CN/Subject Alt Name of certificate\n is not matched to the connecting hostname",
                     "title": "skip_hostname_verification",
-                    "format": "boolean",
                     "x-displayname": "Skip verification of hostname"
                 },
                 "trusted_ca": {
@@ -4015,7 +4101,7 @@ var APISwaggerJSON string = `{
         },
         "schemaVirtualNetworkType": {
             "type": "string",
-            "description": "Different types of virtual networks understood by the system\n\nVirtual-network of type VIRTUAL_NETWORK_SITE_LOCAL provides connectivity to public (outside) network.\nThis is an insecure network and is connected to public internet via NAT Gateways/firwalls\nVirtual-network of this type is local to every site. Two virtual networks of this type on different\nsites are neither related nor connected.\n\nConstraints:\nThere can be atmost one virtual network of this type in a given site.\nThis network type is supported on CE sites. This network is created automatically and present on all sites\nVirtual-network of type VIRTUAL_NETWORK_SITE_LOCAL_INSIDE is a private network inside site.\nIt is a secure network and is not connected to public network.\nVirtual-network of this type is local to every site. Two virtual networks of this type on different\nsites are neither related nor connected.\n\nConstraints:\nThere can be atmost one virtual network of this type in a given site.\nThis network type is supported on CE sites. This network is created during provisioning of site\nUser defined per-site virtual network. Scope of this virtual network is limited to the site.\nThis is not yet supported\nVirtual-network of type VIRTUAL_NETWORK_PUBLIC directly conects to the public internet.\nVirtual-network of this type is local to every site. Two virtual networks of this type on different sites are neither related nor connected.\n\nConstraints:\nThere can be atmost one virtual network of this type in a given site.\nThis network type is supported on RE sites only\nIt is an internally created by the system. They must not be created by user\nVirtual Neworks with global scope across different sites in F5XC domain.\nAn example global virtual-network called \"AIN Network\" is created for every tenant.\nfor volterra fabric\n\nConstraints:\nIt is currently only supported as internally created by the system.\nvK8s service network for a given tenant. Used to advertise a virtual host only to vk8s pods for that tenant\nConstraints:\nIt is an internally created by the system. Must not be created by user\nVER internal network for the site. It can only be used for virtual hosts with SMA_PROXY type proxy\nConstraints:\nIt is an internally created by the system. Must not be created by user\nVirtual-network of type VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE represents both\nVIRTUAL_NETWORK_SITE_LOCAL and VIRTUAL_NETWORK_SITE_LOCAL_INSIDE\n\nConstraints:\nThis network type is only meaningful in an advertise policy\nWhen virtual-network of type VIRTUAL_NETWORK_IP_AUTO is selected for\nan endpoint, VER will try to determine the network based on the provided\nIP address\n\nConstraints:\nThis network type is only meaningful in an endpoint\n\nVoltADN Private Network is used on volterra RE(s) to connect to customer private networks\nThis network is created by opening a support ticket\n\nThis network is per site srv6 network\nVER IP Fabric network for the site.\nThis Virtual network type is used for exposing virtual host on IP Fabric network on the VER site or\nfor endpoint in IP Fabric network\nConstraints:\nIt is an internally created by the system. Must not be created by user\nNetwork internally created for a segment\nConstraints:\nIt is an internally created by the system. Must not be created by user\nVirtual-network of type VIRTUAL_NETWORK_MANAGEMENT is used for management purposes",
+            "description": "Different types of virtual networks understood by the system\n\nVirtual-network of type VIRTUAL_NETWORK_SITE_LOCAL provides connectivity to public (outside) network.\nThis is an insecure network and is connected to public internet via NAT Gateways/firwalls\nVirtual-network of this type is local to every site. Two virtual networks of this type on different\nsites are neither related nor connected.\n\nConstraints:\nThere can be atmost one virtual network of this type in a given site.\nThis network type is supported on CE sites. This network is created automatically and present on all sites\nVirtual-network of type VIRTUAL_NETWORK_SITE_LOCAL_INSIDE is a private network inside site.\nIt is a secure network and is not connected to public network.\nVirtual-network of this type is local to every site. Two virtual networks of this type on different\nsites are neither related nor connected.\n\nConstraints:\nThere can be atmost one virtual network of this type in a given site.\nThis network type is supported on CE sites. This network is created during provisioning of site\nUser defined per-site virtual network. Scope of this virtual network is limited to the site.\nThis is not yet supported\nVirtual-network of type VIRTUAL_NETWORK_PUBLIC directly conects to the public internet.\nVirtual-network of this type is local to every site. Two virtual networks of this type on different sites are neither related nor connected.\n\nConstraints:\nThere can be atmost one virtual network of this type in a given site.\nThis network type is supported on RE sites only\nIt is an internally created by the system. They must not be created by user\nVirtual Neworks with global scope across different sites in F5XC domain.\nAn example global virtual-network called \"AIN Network\" is created for every tenant.\nfor volterra fabric\n\nConstraints:\nIt is currently only supported as internally created by the system.\nvK8s service network for a given tenant. Used to advertise a virtual host only to vk8s pods for that tenant\nConstraints:\nIt is an internally created by the system. Must not be created by user\nVER internal network for the site. It can only be used for virtual hosts with SMA_PROXY type proxy\nConstraints:\nIt is an internally created by the system. Must not be created by user\nVirtual-network of type VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE represents both\nVIRTUAL_NETWORK_SITE_LOCAL and VIRTUAL_NETWORK_SITE_LOCAL_INSIDE\n\nConstraints:\nThis network type is only meaningful in an advertise policy\nWhen virtual-network of type VIRTUAL_NETWORK_IP_AUTO is selected for\nan endpoint, VER will try to determine the network based on the provided\nIP address\n\nConstraints:\nThis network type is only meaningful in an endpoint\n\nVoltADN Private Network is used on volterra RE(s) to connect to customer private networks\nThis network is created by opening a support ticket\n\nThis network is per site srv6 network\nVER IP Fabric network for the site.\nThis Virtual network type is used for exposing virtual host on IP Fabric network on the VER site or\nfor endpoint in IP Fabric network\nConstraints:\nIt is an internally created by the system. Must not be created by user\nVirtual-network of type VIRTUAL_NETWORK_SEGMENT for segment interface\nVirtual-network of type VIRTUAL_NETWORK_MANAGEMENT is used for management purposes",
             "title": "VirtualNetworkType",
             "enum": [
                 "VIRTUAL_NETWORK_SITE_LOCAL",

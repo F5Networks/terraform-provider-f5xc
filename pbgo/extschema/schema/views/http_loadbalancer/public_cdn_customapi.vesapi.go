@@ -586,10 +586,7 @@ var CDNCustomAPISwaggerJSON string = `{
         "description": "HTTP Load Balancer view defines a required parameters that can be used in CRUD, to create and manage HTTP Load Balancer.\nIt can be used to create HTTP Load Balancer and HTTPS Load Balancer.",
         "version": "version not set"
     },
-    "schemes": [
-        "http",
-        "https"
-    ],
+    "schemes": null,
     "consumes": [
         "application/json"
     ],
@@ -656,6 +653,12 @@ var CDNCustomAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -749,6 +752,12 @@ var CDNCustomAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -840,6 +849,12 @@ var CDNCustomAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1128,7 +1143,6 @@ var CDNCustomAPISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Cache Hard Purge\n\nExample: - true-",
                     "title": "Hard Purge",
-                    "format": "boolean",
                     "x-displayname": "Cache Hard Purge"
                 },
                 "purge_time": {
@@ -1287,6 +1301,27 @@ var CDNCustomAPISwaggerJSON string = `{
                     "type": "string",
                     "description": "Must be a valid serialized protocol buffer of the above specified type.",
                     "format": "byte"
+                }
+            }
+        },
+        "runtimeError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/protobufAny"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
                 }
             }
         },

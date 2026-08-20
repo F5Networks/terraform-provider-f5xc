@@ -1686,13 +1686,10 @@ var APISwaggerJSON string = `{
     "swagger": "2.0",
     "info": {
         "title": "Application type object",
-        "description": "App Type object defines a application profile type from an advanced monitoring/security point of view.\nAn App type is a set of (micro) services that interact with one another and function as an application.\nServices can be made members of a particular AppType set by adding label ves.io/app_type=app_type.metadata.name to services.\nApp type object is the profile for one such application label. One can define various AI/ML features that can\nbe enabled for a given application in this object. All services in a given namespace that are labeled with\nsame ves.io/app_type label are assumed to be a single application. In a different namespace as two different\ninstances of same application.\napp_type object is recommended per tenant and present only in shared namespace.\nThis way AI/ML modeled developed for a given application can be shared across namespaces or deployments.\napp_setting object can be used to enable a app_type monitoring profile in a given namespace.",
+        "description": "App Type object defines a application profile type from an advanced monitoring/security point of view.\nAn App type is a set of (micro) services that interact with one another and function as an application.\nServices can be made members of a particular AppType set by adding label ves.io/app_type=app_type.metadata.name to services.\nApp type object is the profile for one such application label. One can define various advanced security features that can\nbe enabled for a given application in this object. All services in a given namespace that are labeled with\nsame ves.io/app_type label are assumed to be a single application. In a different namespace as two different\ninstances of same application.\napp_type object is recommended per tenant and present only in shared namespace.\nThis way advanced security modeled developed for a given application can be shared across namespaces or deployments.\napp_setting object can be used to enable a app_type monitoring profile in a given namespace.",
         "version": "version not set"
     },
-    "schemes": [
-        "http",
-        "https"
-    ],
+    "schemes": null,
     "consumes": [
         "application/json"
     ],
@@ -1759,6 +1756,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1851,6 +1854,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1951,6 +1960,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2068,6 +2083,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2170,6 +2191,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2333,7 +2360,7 @@ var APISwaggerJSON string = `{
                 },
                 "features": {
                     "type": "array",
-                    "description": " List of various AI/ML features enabled\n\nValidation Rules:\n  ves.io.schema.rules.repeated.unique: true\n",
+                    "description": " List of various advanced security features enabled\n\nValidation Rules:\n  ves.io.schema.rules.repeated.unique: true\n",
                     "items": {
                         "$ref": "#/definitions/app_typeFeature"
                     },
@@ -2476,7 +2503,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Fail the delete operation if this object is being referred by other objects",
                     "title": "fail_if_referred",
-                    "format": "boolean",
                     "x-displayname": "Fail-If-Referred"
                 },
                 "name": {
@@ -2527,7 +2553,7 @@ var APISwaggerJSON string = `{
                     "description": " Feature type to be enabled\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n",
                     "title": "Enable type of Feature",
                     "$ref": "#/definitions/app_typeFeatureType",
-                    "x-displayname": "AI/ML Feature Type",
+                    "x-displayname": "Advanced Security Feature Type",
                     "x-ves-required": "true",
                     "x-ves-validation-rules": {
                         "ves.io.schema.rules.message.required": "true"
@@ -2537,7 +2563,7 @@ var APISwaggerJSON string = `{
         },
         "app_typeFeatureType": {
             "type": "string",
-            "description": "Enumeration for AI/ML features supported\n\nAPI Discovery enables generation of model for various API interactions between services of App type.\nEnable analysis of timeseries for various metric collected like requests, errors, latency etc.\nEnable anomaly detection per API request, i.e. the probability density function (PDF) charts generation for API endpoints\nEnable user behavior analysis",
+            "description": "Enumeration for advanced security features supported\n\nAPI Discovery enables generation of model for various API interactions between services of App type.\nEnable analysis of timeseries for various metric collected like requests, errors, latency etc.\nEnable anomaly detection per API request, i.e. the probability density function (PDF) charts generation for API endpoints\nEnable user behavior analysis",
             "title": "FeatureType",
             "enum": [
                 "BUSINESS_LOGIC_MARKUP",
@@ -2546,7 +2572,7 @@ var APISwaggerJSON string = `{
                 "USER_BEHAVIOR_ANALYSIS"
             ],
             "default": "BUSINESS_LOGIC_MARKUP",
-            "x-displayname": "AI/ML Features",
+            "x-displayname": "Advanced Security Features",
             "x-ves-proto-enum": "ves.io.schema.app_type.FeatureType"
         },
         "app_typeGetResponse": {
@@ -2653,7 +2679,7 @@ var APISwaggerJSON string = `{
                 },
                 "features": {
                     "type": "array",
-                    "description": " List of various AI/ML features enabled\n\nValidation Rules:\n  ves.io.schema.rules.repeated.unique: true\n",
+                    "description": " List of various advanced security features enabled\n\nValidation Rules:\n  ves.io.schema.rules.repeated.unique: true\n",
                     "items": {
                         "$ref": "#/definitions/app_typeFeature"
                     },
@@ -2748,7 +2774,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true indicates app_type is administratively disabled",
                     "title": "disabled",
-                    "format": "boolean",
                     "x-displayname": "Disabled"
                 },
                 "get_spec": {
@@ -2859,7 +2884,7 @@ var APISwaggerJSON string = `{
                 },
                 "features": {
                     "type": "array",
-                    "description": " List of various AI/ML features enabled\n\nValidation Rules:\n  ves.io.schema.rules.repeated.unique: true\n",
+                    "description": " List of various advanced security features enabled\n\nValidation Rules:\n  ves.io.schema.rules.repeated.unique: true\n",
                     "items": {
                         "$ref": "#/definitions/app_typeFeature"
                     },
@@ -2962,6 +2987,27 @@ var APISwaggerJSON string = `{
                     "type": "string",
                     "description": "Must be a valid serialized protocol buffer of the above specified type.",
                     "format": "byte"
+                }
+            }
+        },
+        "runtimeError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/protobufAny"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
                 }
             }
         },
@@ -3152,8 +3198,7 @@ var APISwaggerJSON string = `{
                 "disable": {
                     "type": "boolean",
                     "description": "x-displayName: \"Disable\"\nx-example: \"true\"\nA value of true will administratively disable the object that corresponds to the containing message.",
-                    "title": "disable",
-                    "format": "boolean"
+                    "title": "disable"
                 },
                 "name": {
                     "type": "string",
@@ -3196,7 +3241,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "labels": {
@@ -3260,7 +3304,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable",
                     "x-ves-example": "true"
                 },
@@ -3370,7 +3413,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "labels": {
@@ -3456,7 +3498,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Indicate whether mars deems this object to be stale via graceful restart timer information",
                     "title": "vtrp_stale",
-                    "format": "boolean",
                     "x-displayname": "VTRP Stale"
                 }
             }

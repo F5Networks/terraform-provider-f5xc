@@ -11,9 +11,16 @@ package namespace
 import (
 	context "context"
 	fmt "fmt"
+	io "io"
+	math "math"
+	math_bits "math/bits"
+	reflect "reflect"
+	strings "strings"
+
 	_ "github.com/gogo/googleapis/google/api"
 	_ "github.com/gogo/protobuf/gogoproto"
 	proto "github.com/gogo/protobuf/proto"
+	github_com_gogo_protobuf_sortkeys "github.com/gogo/protobuf/sortkeys"
 	golang_proto "github.com/golang/protobuf/proto"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
@@ -22,11 +29,6 @@ import (
 	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/vesenv"
 	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views"
 	virtual_host "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/virtual_host"
-	io "io"
-	math "math"
-	math_bits "math/bits"
-	reflect "reflect"
-	strings "strings"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -66,6 +68,11 @@ type ApiEndpointsStatsNSReq struct {
 	// List of Virtual Hosts types for current request
 	// If the list is empty or not provided, it will return stats for all virtual hosts under the requested namespace.
 	VhostsTypesFilter []virtual_host.VirtualHostType `protobuf:"varint,3,rep,packed,name=vhosts_types_filter,json=vhostsTypesFilter,proto3,enum=ves.io.schema.virtual_host.VirtualHostType" json:"vhosts_types_filter,omitempty"`
+	// Include Stats per Virtual Host
+	//
+	// x-displayName: "Include Stats per Virtual Host"
+	// Flag to include stats per virtual host
+	IncludePerVhostStats bool `protobuf:"varint,4,opt,name=include_per_vhost_stats,json=includePerVhostStats,proto3" json:"include_per_vhost_stats,omitempty"`
 }
 
 func (m *ApiEndpointsStatsNSReq) Reset()      { *m = ApiEndpointsStatsNSReq{} }
@@ -121,6 +128,13 @@ func (m *ApiEndpointsStatsNSReq) GetVhostsTypesFilter() []virtual_host.VirtualHo
 	return nil
 }
 
+func (m *ApiEndpointsStatsNSReq) GetIncludePerVhostStats() bool {
+	if m != nil {
+		return m.IncludePerVhostStats
+	}
+	return false
+}
+
 // Api Endpoints stats all namespaces request
 //
 // x-displayName: "Api Endpoints Stats All Namespaces Request"
@@ -132,6 +146,11 @@ type ApiEndpointsStatsAllNSReq struct {
 	// x-example: "shared"
 	// Namespace of the App type for current request
 	Namespace string `protobuf:"bytes,1,opt,name=namespace,proto3" json:"namespace,omitempty"`
+	// Include Stats per Virtual Host
+	//
+	// x-displayName: "Include Stats per Virtual Host"
+	// Flag to include stats per virtual host
+	IncludePerVhostStats bool `protobuf:"varint,2,opt,name=include_per_vhost_stats,json=includePerVhostStats,proto3" json:"include_per_vhost_stats,omitempty"`
 }
 
 func (m *ApiEndpointsStatsAllNSReq) Reset()      { *m = ApiEndpointsStatsAllNSReq{} }
@@ -173,36 +192,51 @@ func (m *ApiEndpointsStatsAllNSReq) GetNamespace() string {
 	return ""
 }
 
-// Api Endpoints stats Response
+func (m *ApiEndpointsStatsAllNSReq) GetIncludePerVhostStats() bool {
+	if m != nil {
+		return m.IncludePerVhostStats
+	}
+	return false
+}
+
+// API Endpoints Stats Response
 //
-// x-displayName: "Api Endpoints Stats Response"
-// Response shape for GET API endpoints Stats.
+// x-displayName: "API Endpoints Stats Response"
+// Response shape for GET API endpoints stats
 type ApiEndpointsStatsNSRsp struct {
-	// number of endpoints
+	// Number of Endpoints
 	//
 	// x-displayName: "Total Endpoints"
-	// total endpoints
-	TotalEndpoints int32 `protobuf:"varint,1,opt,name=total_endpoints,json=totalEndpoints,proto3" json:"total_endpoints,omitempty"`
-	// number of discovered endpoints
+	// Total endpoints
+	TotalEndpoints int32 `protobuf:"varint,1,opt,name=total_endpoints,json=totalEndpoints,proto3" json:"total_endpoints,omitempty"` // Deprecated: Do not use.
+	// Number of Discovered Endpoints
 	//
 	// x-displayName: "Discovered"
-	// number of endpoints that categorized as discover
-	Discovered int32 `protobuf:"varint,2,opt,name=discovered,proto3" json:"discovered,omitempty"`
-	// number of inventory endpoints
+	// Number of endpoints that are categorized as discovered
+	Discovered int32 `protobuf:"varint,2,opt,name=discovered,proto3" json:"discovered,omitempty"` // Deprecated: Do not use.
+	// Number of Inventory Endpoints
 	//
 	// x-displayName: "Inventory"
-	// number of endpoints that categorized as inventory
-	Inventory int32 `protobuf:"varint,3,opt,name=inventory,proto3" json:"inventory,omitempty"`
-	// number of shadow endpoints
+	// Number of endpoints that are categorized as inventory
+	Inventory int32 `protobuf:"varint,3,opt,name=inventory,proto3" json:"inventory,omitempty"` // Deprecated: Do not use.
+	// Number of Shadow Endpoints
 	//
 	// x-displayName: "Shadow"
-	// number of endpoints that categorized as shadow
-	Shadow int32 `protobuf:"varint,4,opt,name=shadow,proto3" json:"shadow,omitempty"`
-	// number of pii endpoints
+	// Number of endpoints that are categorized as shadow
+	Shadow int32 `protobuf:"varint,4,opt,name=shadow,proto3" json:"shadow,omitempty"` // Deprecated: Do not use.
+	// Number of PII Endpoints
 	//
 	// x-displayName: "PII Detected"
-	//number of endpoints that detected with pii
-	PiiDetected int32 `protobuf:"varint,5,opt,name=pii_detected,json=piiDetected,proto3" json:"pii_detected,omitempty"`
+	// Number of endpoints that are detected with PII
+	PiiDetected int32 `protobuf:"varint,5,opt,name=pii_detected,json=piiDetected,proto3" json:"pii_detected,omitempty"` // Deprecated: Do not use.
+	// Aggregated API Endpoints Stats
+	//
+	// x-displayName: "Aggregated API Endpoints Stats"
+	AggApiepStats *ApiEndpointsStats `protobuf:"bytes,6,opt,name=agg_apiep_stats,json=aggApiepStats,proto3" json:"agg_apiep_stats,omitempty"`
+	// API Endpoints Stats per Virtual Host Type
+	//
+	// x-displayName: "API Endpoints Stats per Virtual Host Type"
+	PerVhostTypeApiepStats map[string]*ApiEndpointsStatsList `protobuf:"bytes,7,rep,name=per_vhost_type_apiep_stats,json=perVhostTypeApiepStats,proto3" json:"per_vhost_type_apiep_stats,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 }
 
 func (m *ApiEndpointsStatsNSRsp) Reset()      { *m = ApiEndpointsStatsNSRsp{} }
@@ -237,6 +271,7 @@ func (m *ApiEndpointsStatsNSRsp) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_ApiEndpointsStatsNSRsp proto.InternalMessageInfo
 
+// Deprecated: Do not use.
 func (m *ApiEndpointsStatsNSRsp) GetTotalEndpoints() int32 {
 	if m != nil {
 		return m.TotalEndpoints
@@ -244,6 +279,7 @@ func (m *ApiEndpointsStatsNSRsp) GetTotalEndpoints() int32 {
 	return 0
 }
 
+// Deprecated: Do not use.
 func (m *ApiEndpointsStatsNSRsp) GetDiscovered() int32 {
 	if m != nil {
 		return m.Discovered
@@ -251,6 +287,7 @@ func (m *ApiEndpointsStatsNSRsp) GetDiscovered() int32 {
 	return 0
 }
 
+// Deprecated: Do not use.
 func (m *ApiEndpointsStatsNSRsp) GetInventory() int32 {
 	if m != nil {
 		return m.Inventory
@@ -258,6 +295,7 @@ func (m *ApiEndpointsStatsNSRsp) GetInventory() int32 {
 	return 0
 }
 
+// Deprecated: Do not use.
 func (m *ApiEndpointsStatsNSRsp) GetShadow() int32 {
 	if m != nil {
 		return m.Shadow
@@ -265,11 +303,195 @@ func (m *ApiEndpointsStatsNSRsp) GetShadow() int32 {
 	return 0
 }
 
+// Deprecated: Do not use.
 func (m *ApiEndpointsStatsNSRsp) GetPiiDetected() int32 {
 	if m != nil {
 		return m.PiiDetected
 	}
 	return 0
+}
+
+func (m *ApiEndpointsStatsNSRsp) GetAggApiepStats() *ApiEndpointsStats {
+	if m != nil {
+		return m.AggApiepStats
+	}
+	return nil
+}
+
+func (m *ApiEndpointsStatsNSRsp) GetPerVhostTypeApiepStats() map[string]*ApiEndpointsStatsList {
+	if m != nil {
+		return m.PerVhostTypeApiepStats
+	}
+	return nil
+}
+
+// API Endpoints Stats
+//
+// x-displayName: "API Endpoints Stats"
+type ApiEndpointsStats struct {
+	// Number of Endpoints
+	//
+	// x-displayName: "Total Endpoints"
+	// Total endpoints
+	TotalEndpoints int32 `protobuf:"varint,1,opt,name=total_endpoints,json=totalEndpoints,proto3" json:"total_endpoints,omitempty"`
+	// Number of Discovered Endpoints
+	//
+	// x-displayName: "Discovered"
+	// Number of endpoints that are categorized as discovered
+	Discovered int32 `protobuf:"varint,2,opt,name=discovered,proto3" json:"discovered,omitempty"`
+	// Number of Inventory Endpoints
+	//
+	// x-displayName: "Inventory"
+	// Number of endpoints that are categorized as inventory
+	Inventory int32 `protobuf:"varint,3,opt,name=inventory,proto3" json:"inventory,omitempty"`
+	// Number of Shadow Endpoints
+	//
+	// x-displayName: "Shadow"
+	// Number of endpoints that are categorized as shadow
+	Shadow int32 `protobuf:"varint,4,opt,name=shadow,proto3" json:"shadow,omitempty"`
+	// Number of PII Endpoints
+	//
+	// x-displayName: "PII Detected"
+	// Number of endpoints that are detected with PII
+	PiiDetected int32 `protobuf:"varint,5,opt,name=pii_detected,json=piiDetected,proto3" json:"pii_detected,omitempty"`
+	// Namespace
+	//
+	// x-displayName: "Namespace"
+	Namespace string `protobuf:"bytes,6,opt,name=namespace,proto3" json:"namespace,omitempty"`
+	// Virtual Host
+	//
+	// x-displayName: "Virtual Host"
+	VirtualHost string `protobuf:"bytes,7,opt,name=virtual_host,json=virtualHost,proto3" json:"virtual_host,omitempty"`
+}
+
+func (m *ApiEndpointsStats) Reset()      { *m = ApiEndpointsStats{} }
+func (*ApiEndpointsStats) ProtoMessage() {}
+func (*ApiEndpointsStats) Descriptor() ([]byte, []int) {
+	return fileDescriptor_0d03a36da3cd3d47, []int{3}
+}
+func (m *ApiEndpointsStats) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ApiEndpointsStats) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ApiEndpointsStats.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ApiEndpointsStats) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ApiEndpointsStats.Merge(m, src)
+}
+func (m *ApiEndpointsStats) XXX_Size() int {
+	return m.Size()
+}
+func (m *ApiEndpointsStats) XXX_DiscardUnknown() {
+	xxx_messageInfo_ApiEndpointsStats.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ApiEndpointsStats proto.InternalMessageInfo
+
+func (m *ApiEndpointsStats) GetTotalEndpoints() int32 {
+	if m != nil {
+		return m.TotalEndpoints
+	}
+	return 0
+}
+
+func (m *ApiEndpointsStats) GetDiscovered() int32 {
+	if m != nil {
+		return m.Discovered
+	}
+	return 0
+}
+
+func (m *ApiEndpointsStats) GetInventory() int32 {
+	if m != nil {
+		return m.Inventory
+	}
+	return 0
+}
+
+func (m *ApiEndpointsStats) GetShadow() int32 {
+	if m != nil {
+		return m.Shadow
+	}
+	return 0
+}
+
+func (m *ApiEndpointsStats) GetPiiDetected() int32 {
+	if m != nil {
+		return m.PiiDetected
+	}
+	return 0
+}
+
+func (m *ApiEndpointsStats) GetNamespace() string {
+	if m != nil {
+		return m.Namespace
+	}
+	return ""
+}
+
+func (m *ApiEndpointsStats) GetVirtualHost() string {
+	if m != nil {
+		return m.VirtualHost
+	}
+	return ""
+}
+
+// API Endpoints Stats List
+//
+// x-displayName: "API Endpoints Stats List"
+type ApiEndpointsStatsList struct {
+	// List of API Endpoints Stats
+	//
+	// x-displayName: "List of API Endpoints Stats"
+	ApiepStatsList []*ApiEndpointsStats `protobuf:"bytes,1,rep,name=apiep_stats_list,json=apiepStatsList,proto3" json:"apiep_stats_list,omitempty"`
+}
+
+func (m *ApiEndpointsStatsList) Reset()      { *m = ApiEndpointsStatsList{} }
+func (*ApiEndpointsStatsList) ProtoMessage() {}
+func (*ApiEndpointsStatsList) Descriptor() ([]byte, []int) {
+	return fileDescriptor_0d03a36da3cd3d47, []int{4}
+}
+func (m *ApiEndpointsStatsList) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ApiEndpointsStatsList) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ApiEndpointsStatsList.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ApiEndpointsStatsList) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ApiEndpointsStatsList.Merge(m, src)
+}
+func (m *ApiEndpointsStatsList) XXX_Size() int {
+	return m.Size()
+}
+func (m *ApiEndpointsStatsList) XXX_DiscardUnknown() {
+	xxx_messageInfo_ApiEndpointsStatsList.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ApiEndpointsStatsList proto.InternalMessageInfo
+
+func (m *ApiEndpointsStatsList) GetApiepStatsList() []*ApiEndpointsStats {
+	if m != nil {
+		return m.ApiepStatsList
+	}
+	return nil
 }
 
 func init() {
@@ -279,6 +501,12 @@ func init() {
 	golang_proto.RegisterType((*ApiEndpointsStatsAllNSReq)(nil), "ves.io.schema.namespace.ApiEndpointsStatsAllNSReq")
 	proto.RegisterType((*ApiEndpointsStatsNSRsp)(nil), "ves.io.schema.namespace.ApiEndpointsStatsNSRsp")
 	golang_proto.RegisterType((*ApiEndpointsStatsNSRsp)(nil), "ves.io.schema.namespace.ApiEndpointsStatsNSRsp")
+	proto.RegisterMapType((map[string]*ApiEndpointsStatsList)(nil), "ves.io.schema.namespace.ApiEndpointsStatsNSRsp.PerVhostTypeApiepStatsEntry")
+	golang_proto.RegisterMapType((map[string]*ApiEndpointsStatsList)(nil), "ves.io.schema.namespace.ApiEndpointsStatsNSRsp.PerVhostTypeApiepStatsEntry")
+	proto.RegisterType((*ApiEndpointsStats)(nil), "ves.io.schema.namespace.ApiEndpointsStats")
+	golang_proto.RegisterType((*ApiEndpointsStats)(nil), "ves.io.schema.namespace.ApiEndpointsStats")
+	proto.RegisterType((*ApiEndpointsStatsList)(nil), "ves.io.schema.namespace.ApiEndpointsStatsList")
+	golang_proto.RegisterType((*ApiEndpointsStatsList)(nil), "ves.io.schema.namespace.ApiEndpointsStatsList")
 }
 
 func init() {
@@ -289,59 +517,80 @@ func init() {
 }
 
 var fileDescriptor_0d03a36da3cd3d47 = []byte{
-	// 827 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x95, 0x4d, 0x8f, 0xdb, 0x44,
-	0x18, 0xc7, 0x33, 0x49, 0x13, 0x88, 0x69, 0x8b, 0x30, 0x55, 0x71, 0xc3, 0x6a, 0x48, 0xbd, 0x12,
-	0x2c, 0xa5, 0xb6, 0x51, 0x78, 0x53, 0xb9, 0x6d, 0x79, 0xad, 0x04, 0x05, 0x65, 0x51, 0x0f, 0x5c,
-	0xac, 0x89, 0xfd, 0xc4, 0x99, 0xe2, 0x78, 0xa6, 0x9e, 0xb1, 0x77, 0x23, 0x84, 0x84, 0x96, 0x2f,
-	0x80, 0xe0, 0x4b, 0xf0, 0x11, 0x50, 0x7b, 0xd9, 0x1b, 0x3d, 0xa1, 0x55, 0x39, 0x50, 0x6e, 0xac,
-	0xc3, 0x01, 0x6e, 0x8b, 0xc4, 0x07, 0x40, 0x9e, 0x38, 0x2f, 0xce, 0x26, 0xea, 0xee, 0x6d, 0xe6,
-	0x79, 0xfe, 0xcf, 0xcb, 0x6f, 0x3c, 0xf3, 0x58, 0x7b, 0x3b, 0x05, 0x61, 0x53, 0xe6, 0x08, 0x6f,
-	0x00, 0x43, 0xe2, 0x44, 0x64, 0x08, 0x82, 0x13, 0x0f, 0x1c, 0x9e, 0xf4, 0x42, 0xea, 0xb9, 0x5e,
-	0x22, 0x24, 0x1b, 0x12, 0x4e, 0x5d, 0x22, 0x24, 0xc4, 0x74, 0xcf, 0xe6, 0x31, 0x93, 0x4c, 0x7f,
-	0x61, 0x12, 0x67, 0x4f, 0xe2, 0xec, 0x59, 0x5c, 0xcb, 0x0a, 0xa8, 0x1c, 0x24, 0x3d, 0xdb, 0x63,
-	0x43, 0x27, 0x60, 0x01, 0x73, 0x94, 0xbe, 0x97, 0xf4, 0xd5, 0x4e, 0x6d, 0xd4, 0x6a, 0x92, 0xa7,
-	0xb5, 0x11, 0x30, 0x16, 0x84, 0xe0, 0x10, 0x4e, 0x1d, 0x12, 0x45, 0x4c, 0x12, 0x49, 0x59, 0x24,
-	0x0a, 0xef, 0xe6, 0xba, 0xee, 0xe4, 0x88, 0xc3, 0x54, 0xf4, 0x62, 0x59, 0xc4, 0xf8, 0x62, 0x86,
-	0x2b, 0x65, 0xe7, 0x62, 0xdc, 0x46, 0xd9, 0x95, 0x92, 0x90, 0xfa, 0x44, 0x42, 0xe1, 0x35, 0x97,
-	0xbc, 0x20, 0x20, 0x4a, 0x97, 0x92, 0xb7, 0x97, 0x34, 0x14, 0x76, 0xdd, 0xb2, 0xe2, 0xa5, 0x93,
-	0x0a, 0x51, 0x6a, 0xe2, 0xe5, 0x65, 0x41, 0x2c, 0x13, 0x12, 0xba, 0x03, 0x26, 0xe4, 0xa2, 0xce,
-	0x7c, 0x84, 0xb4, 0xcb, 0xdb, 0x9c, 0x7e, 0x10, 0xf9, 0x9c, 0xd1, 0x48, 0x8a, 0x1d, 0x49, 0xa4,
-	0xb8, 0xbd, 0xd3, 0x85, 0x7b, 0xfa, 0x86, 0xd6, 0x9c, 0x1d, 0x8c, 0x51, 0x6d, 0xa3, 0xad, 0x66,
-	0x77, 0x6e, 0xd0, 0x37, 0xb5, 0x0b, 0x69, 0x9e, 0x4d, 0xb8, 0x7d, 0x1a, 0x4a, 0x88, 0x0d, 0xd4,
-	0xae, 0x6d, 0x35, 0xbb, 0xe7, 0x27, 0xc6, 0x0f, 0x95, 0x4d, 0x4f, 0xb4, 0xe7, 0x0b, 0x91, 0xaa,
-	0x39, 0x95, 0xd6, 0xda, 0xb5, 0xad, 0x8b, 0x9d, 0xd7, 0xec, 0xf2, 0xb7, 0x5e, 0xec, 0xd1, 0xbe,
-	0x33, 0xd9, 0x7c, 0xcc, 0x84, 0xfc, 0x62, 0xc4, 0xe1, 0xa6, 0x71, 0xff, 0x9f, 0x83, 0x5a, 0x73,
-	0x1f, 0x35, 0x5a, 0xe7, 0x50, 0xe3, 0xa9, 0xa7, 0xf3, 0x5d, 0xfd, 0x07, 0x54, 0x35, 0x50, 0xf7,
-	0xb9, 0x49, 0x85, 0x5c, 0x55, 0x94, 0x35, 0x6f, 0x68, 0x57, 0x4e, 0x30, 0x6d, 0x87, 0xe1, 0x0a,
-	0x2c, 0xb4, 0x84, 0x65, 0xde, 0x5f, 0x73, 0x1e, 0x82, 0xeb, 0xaf, 0x68, 0xcf, 0x4a, 0x26, 0x49,
-	0xe8, 0xc2, 0xd4, 0xa9, 0xc2, 0xeb, 0xdd, 0x8b, 0xca, 0x3c, 0x0b, 0xd1, 0xb1, 0xa6, 0xf9, 0x54,
-	0x78, 0x2c, 0x85, 0x18, 0x7c, 0x75, 0x72, 0xf5, 0xee, 0x82, 0x25, 0xef, 0x80, 0x46, 0x29, 0x44,
-	0x92, 0xc5, 0x23, 0xa3, 0xa6, 0xdc, 0x73, 0x83, 0x7e, 0x59, 0x6b, 0x88, 0x01, 0xf1, 0xd9, 0xae,
-	0x71, 0x4e, 0xb9, 0x8a, 0x9d, 0x7e, 0x55, 0x3b, 0xcf, 0x29, 0x75, 0x7d, 0x90, 0xe0, 0x49, 0xf0,
-	0x8d, 0xba, 0xf2, 0x3e, 0xc3, 0x29, 0x7d, 0xbf, 0x30, 0x75, 0xfe, 0xad, 0x6b, 0x97, 0x6e, 0x4f,
-	0x51, 0x3e, 0xfd, 0xe4, 0x3d, 0xf5, 0xc6, 0xb6, 0x3f, 0xbf, 0xa5, 0xff, 0x8e, 0xb4, 0x0b, 0x3b,
-	0x49, 0x10, 0x80, 0x90, 0x77, 0x48, 0x98, 0x80, 0xd0, 0x5f, 0xb5, 0xd7, 0x3c, 0x34, 0xbb, 0xa4,
-	0xeb, 0xc2, 0xbd, 0xd6, 0xb5, 0xd3, 0x4a, 0x05, 0x37, 0xd9, 0xc3, 0x9f, 0xab, 0x28, 0xfb, 0xc5,
-	0xc8, 0xef, 0xb5, 0x45, 0x99, 0x15, 0x40, 0x04, 0x31, 0x09, 0xad, 0x18, 0x88, 0x7f, 0xbd, 0xdd,
-	0x7f, 0x6b, 0xcf, 0xb3, 0x76, 0x09, 0xe1, 0x16, 0xf1, 0x53, 0x12, 0x79, 0xe0, 0x5b, 0x43, 0x16,
-	0x51, 0xc9, 0xe2, 0xfd, 0xdf, 0xfe, 0xfa, 0xb1, 0xda, 0x31, 0xad, 0x62, 0x3c, 0xcc, 0x5f, 0xa4,
-	0x70, 0xbe, 0x9e, 0xad, 0xbf, 0x71, 0xc4, 0xa4, 0xa0, 0x95, 0xaa, 0x8a, 0xef, 0xa2, 0x6b, 0xfa,
-	0x1f, 0x48, 0xbb, 0xf4, 0x11, 0xc8, 0x13, 0x9f, 0x4c, 0x77, 0xd6, 0x76, 0xbd, 0xfa, 0xba, 0xb7,
-	0xce, 0x16, 0x20, 0xb8, 0xe9, 0x16, 0xac, 0xad, 0x39, 0x96, 0x90, 0x24, 0xf2, 0x49, 0x5c, 0xc6,
-	0x7a, 0xc7, 0xec, 0x3c, 0x01, 0x2b, 0x1f, 0x83, 0xb3, 0x4b, 0xe5, 0x88, 0xbc, 0x44, 0xce, 0xf6,
-	0x1f, 0xd2, 0xae, 0xae, 0x62, 0xcb, 0xaf, 0xf2, 0x2c, 0x91, 0xde, 0x39, 0x7d, 0xdf, 0xd3, 0x37,
-	0x70, 0x76, 0xd6, 0xbb, 0x05, 0xeb, 0xe6, 0x0a, 0x56, 0x12, 0x86, 0x56, 0x24, 0x2c, 0x9f, 0x88,
-	0x41, 0x8f, 0x91, 0xd8, 0x57, 0xd0, 0x37, 0xcc, 0x37, 0x57, 0x40, 0x8b, 0x91, 0x90, 0x30, 0x5c,
-	0xe2, 0x25, 0x61, 0xe8, 0x46, 0xc2, 0x9d, 0x62, 0xb7, 0xae, 0x1f, 0x3c, 0x40, 0xb5, 0x47, 0x0f,
-	0x10, 0x5e, 0xd7, 0xe3, 0x67, 0xbd, 0xbb, 0xe0, 0xc9, 0xfd, 0x5f, 0x8d, 0xea, 0xeb, 0xe8, 0xe6,
-	0x77, 0xe8, 0xf0, 0x08, 0x57, 0x1e, 0x1f, 0xe1, 0xca, 0xf1, 0x11, 0x46, 0xdf, 0x66, 0x18, 0xfd,
-	0x94, 0x61, 0xf4, 0x30, 0xc3, 0xe8, 0x30, 0xc3, 0xe8, 0xcf, 0x0c, 0xa3, 0xbf, 0x33, 0x5c, 0x39,
-	0xce, 0x30, 0xfa, 0x7e, 0x8c, 0x2b, 0x07, 0x63, 0x8c, 0x0e, 0xc7, 0xb8, 0xf2, 0x78, 0x8c, 0x2b,
-	0x5f, 0xde, 0x0a, 0x18, 0xff, 0x2a, 0xb0, 0x53, 0x96, 0x0f, 0x8d, 0x98, 0xd8, 0x89, 0x70, 0xd4,
-	0xa2, 0xcf, 0xe2, 0xa1, 0xc5, 0x63, 0x96, 0x52, 0x1f, 0x62, 0x2b, 0x27, 0x76, 0x78, 0x2f, 0x60,
-	0x0e, 0xec, 0xc9, 0x62, 0x9c, 0x2e, 0xff, 0x37, 0x7a, 0x0d, 0x35, 0x4d, 0xdf, 0xf8, 0x3f, 0x00,
-	0x00, 0xff, 0xff, 0x38, 0xf0, 0xb2, 0xf2, 0xf7, 0x06, 0x00, 0x00,
+	// 1160 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x56, 0xcd, 0x73, 0xdb, 0xc4,
+	0x1b, 0xf6, 0xda, 0x3f, 0x27, 0xcd, 0x3a, 0xfd, 0xd2, 0xaf, 0xa4, 0xae, 0x9b, 0x11, 0x8a, 0x33,
+	0x03, 0x26, 0x44, 0x12, 0x63, 0x28, 0x1f, 0xbd, 0x25, 0xfd, 0xcc, 0x34, 0x84, 0xe2, 0x64, 0x72,
+	0xe0, 0x22, 0xd6, 0xd2, 0x46, 0xde, 0x56, 0xd6, 0x6e, 0xb4, 0x6b, 0x27, 0xa6, 0xe3, 0x19, 0x26,
+	0x1c, 0x38, 0xc2, 0x94, 0x23, 0xff, 0x00, 0x7f, 0x02, 0x43, 0x2f, 0xb9, 0xd1, 0x13, 0x93, 0x81,
+	0x03, 0xe5, 0x46, 0x14, 0x0e, 0x70, 0x2b, 0x33, 0x0c, 0x67, 0x46, 0xeb, 0x4f, 0xd9, 0x4e, 0x9c,
+	0xdc, 0x24, 0xbd, 0xcf, 0xfb, 0x3e, 0xfb, 0xec, 0x3e, 0xef, 0xea, 0x85, 0xef, 0xd6, 0x31, 0x37,
+	0x08, 0x35, 0xb9, 0x5d, 0xc1, 0x55, 0x64, 0xfa, 0xa8, 0x8a, 0x39, 0x43, 0x36, 0x36, 0x59, 0xad,
+	0xec, 0x11, 0xdb, 0xb2, 0x6b, 0x5c, 0xd0, 0x2a, 0x62, 0xc4, 0x42, 0x5c, 0xe0, 0x80, 0xec, 0x1a,
+	0x2c, 0xa0, 0x82, 0x2a, 0x57, 0x5b, 0x79, 0x46, 0x2b, 0xcf, 0xe8, 0xe6, 0xe5, 0x74, 0x97, 0x88,
+	0x4a, 0xad, 0x6c, 0xd8, 0xb4, 0x6a, 0xba, 0xd4, 0xa5, 0xa6, 0xc4, 0x97, 0x6b, 0x5b, 0xf2, 0x4d,
+	0xbe, 0xc8, 0xa7, 0x56, 0x9d, 0xdc, 0xac, 0x4b, 0xa9, 0xeb, 0x61, 0x13, 0x31, 0x62, 0x22, 0xdf,
+	0xa7, 0x02, 0x09, 0x42, 0x7d, 0xde, 0x8e, 0xce, 0x1f, 0xb7, 0x3a, 0xd1, 0x60, 0xb8, 0x03, 0xba,
+	0x1e, 0x07, 0x51, 0xd6, 0x5f, 0xe1, 0x5a, 0x3c, 0xd8, 0x9f, 0x37, 0x1b, 0x0f, 0xd5, 0x91, 0x47,
+	0x1c, 0x24, 0x70, 0x3b, 0x9a, 0x1f, 0x88, 0x62, 0x8e, 0xfd, 0xfa, 0x40, 0x71, 0x6d, 0x00, 0x43,
+	0xf0, 0x8e, 0x15, 0x47, 0xbc, 0x3a, 0x8c, 0xe0, 0xb1, 0x45, 0xbc, 0x36, 0x08, 0x08, 0x44, 0x0d,
+	0x79, 0x56, 0x85, 0x72, 0xd1, 0x8f, 0xcb, 0x7f, 0x95, 0x84, 0x33, 0x4b, 0x8c, 0xdc, 0xf1, 0x1d,
+	0x46, 0x89, 0x2f, 0xf8, 0xba, 0x40, 0x82, 0xaf, 0xad, 0x97, 0xf0, 0xb6, 0x32, 0x0b, 0xa7, 0xba,
+	0x1b, 0x93, 0x4d, 0x6a, 0xa0, 0x30, 0x55, 0xea, 0x7d, 0x50, 0xe6, 0xe1, 0xf9, 0x7a, 0x54, 0x8d,
+	0x5b, 0x5b, 0xc4, 0x13, 0x38, 0xc8, 0x02, 0x2d, 0x55, 0x98, 0x2a, 0x4d, 0xb7, 0x3e, 0xde, 0x95,
+	0xdf, 0x94, 0x27, 0xf0, 0xff, 0x6d, 0x90, 0xe4, 0xec, 0x40, 0x53, 0x5a, 0xaa, 0x70, 0xa1, 0xf8,
+	0xa6, 0x11, 0x3f, 0xeb, 0xfe, 0x35, 0x1a, 0x9b, 0xad, 0x97, 0xfb, 0x94, 0x8b, 0x8d, 0x06, 0xc3,
+	0xcb, 0xea, 0x0f, 0x7f, 0xed, 0xa7, 0x2e, 0x3e, 0x05, 0xd3, 0x79, 0xb8, 0x07, 0x26, 0x73, 0x69,
+	0x30, 0x31, 0x79, 0x2e, 0x13, 0x7d, 0x4b, 0x3f, 0x05, 0xc9, 0x2c, 0x28, 0x5d, 0x6e, 0xf1, 0x44,
+	0xd8, 0x0e, 0xf9, 0x0d, 0x78, 0x95, 0xf8, 0xb6, 0x57, 0x73, 0xb0, 0xc5, 0x70, 0x60, 0x49, 0x80,
+	0xc5, 0x23, 0x7d, 0xd9, 0xff, 0x69, 0xa0, 0x70, 0xae, 0x74, 0xa5, 0x1d, 0x7e, 0x88, 0x83, 0xcd,
+	0x28, 0x28, 0xb5, 0xe7, 0x19, 0xbc, 0x36, 0xb4, 0x21, 0x4b, 0x9e, 0x37, 0x62, 0x4f, 0xc0, 0xe0,
+	0x9e, 0x9c, 0xc0, 0x98, 0x3c, 0x81, 0xf1, 0xdb, 0xc9, 0xd1, 0x67, 0xc0, 0x99, 0xf2, 0x19, 0xbc,
+	0x28, 0xa8, 0x40, 0x9e, 0x85, 0x3b, 0x41, 0xc9, 0x9a, 0x5e, 0xfe, 0x38, 0x6c, 0xae, 0x6e, 0x54,
+	0x08, 0xd7, 0x08, 0xd7, 0x1c, 0xcc, 0x02, 0x6c, 0x23, 0x81, 0x9d, 0x45, 0x8d, 0x79, 0x18, 0x71,
+	0xac, 0xd5, 0x38, 0xd6, 0x06, 0x12, 0xb5, 0x9a, 0xef, 0xe0, 0x40, 0x43, 0xae, 0x6b, 0x21, 0x46,
+	0x30, 0x6b, 0x2d, 0x4c, 0x23, 0x3e, 0x17, 0x18, 0x39, 0x59, 0x50, 0xba, 0x20, 0x13, 0xba, 0xab,
+	0x50, 0x3c, 0x08, 0x1d, 0xc2, 0x6d, 0x5a, 0xc7, 0x01, 0x76, 0xa4, 0x80, 0xf4, 0xf2, 0x6a, 0xd8,
+	0xbc, 0x37, 0x86, 0xb6, 0x97, 0x33, 0x96, 0xb1, 0xaf, 0xbe, 0x42, 0xe0, 0x14, 0xf1, 0xeb, 0xd8,
+	0x17, 0x34, 0x68, 0x64, 0x53, 0x92, 0xec, 0x41, 0xd8, 0xbc, 0x3b, 0x86, 0xac, 0x9b, 0x32, 0x96,
+	0xab, 0x57, 0x5d, 0xf9, 0x14, 0x4e, 0xf0, 0x0a, 0x72, 0xe8, 0x8e, 0xf4, 0x41, 0x7a, 0xf9, 0x7e,
+	0xd8, 0xbc, 0x35, 0x86, 0xa7, 0x85, 0x1f, 0x4b, 0xd2, 0xae, 0xab, 0x6c, 0xc3, 0x69, 0x46, 0x88,
+	0xe5, 0x60, 0x81, 0x6d, 0x81, 0x9d, 0x6c, 0x5a, 0xf2, 0xac, 0x85, 0xcd, 0x95, 0x31, 0x3c, 0xfd,
+	0x59, 0x63, 0xd9, 0x32, 0x8c, 0x90, 0xdb, 0x6d, 0xb0, 0x52, 0x82, 0x17, 0x07, 0x90, 0xd9, 0x09,
+	0x0d, 0x14, 0x32, 0xc5, 0x05, 0xe3, 0x98, 0x2b, 0xd5, 0x18, 0xf2, 0x5c, 0xe9, 0x3c, 0x72, 0xdd,
+	0xa5, 0xa8, 0x82, 0x7c, 0x55, 0xbe, 0x04, 0x30, 0xd7, 0x33, 0x72, 0xd4, 0xc2, 0xb1, 0xfa, 0x93,
+	0x5a, 0xaa, 0x90, 0x29, 0x3e, 0x38, 0x7d, 0x7d, 0xe9, 0x69, 0xa3, 0x63, 0xfe, 0xa8, 0x57, 0x7b,
+	0x64, 0x77, 0x7c, 0x11, 0x34, 0x4a, 0x33, 0x6c, 0x64, 0x30, 0xd7, 0x80, 0xd7, 0x4f, 0x48, 0x53,
+	0x2e, 0xc1, 0xd4, 0x63, 0xdc, 0x68, 0x37, 0x64, 0xf4, 0xa8, 0xdc, 0x86, 0xe9, 0x3a, 0xf2, 0x6a,
+	0xad, 0x8b, 0x2b, 0x53, 0x34, 0x4e, 0xbf, 0xc8, 0x55, 0xc2, 0x45, 0xa9, 0x95, 0x7c, 0x33, 0xf9,
+	0x3e, 0xc8, 0xff, 0x0b, 0xe0, 0xe5, 0x21, 0x90, 0xf2, 0xfa, 0x31, 0x8d, 0x39, 0xd4, 0x45, 0xea,
+	0x70, 0x17, 0xc5, 0x7c, 0x3f, 0x3b, 0xe4, 0xfb, 0x7e, 0xab, 0xce, 0xc4, 0xad, 0xda, 0x35, 0xd8,
+	0xdc, 0x28, 0x83, 0xc5, 0x0d, 0x11, 0xbb, 0xaa, 0x26, 0x06, 0xaf, 0xaa, 0x39, 0x38, 0xdd, 0x7f,
+	0xdf, 0x66, 0x27, 0x25, 0x20, 0x53, 0xef, 0x5d, 0xbb, 0xf9, 0x2a, 0x7c, 0x65, 0xe4, 0xe6, 0x28,
+	0x1b, 0xf0, 0x52, 0x9f, 0x0d, 0x2c, 0x8f, 0x70, 0x21, 0x6f, 0xff, 0xb3, 0x79, 0xed, 0x02, 0xea,
+	0x1e, 0x62, 0x54, 0xb5, 0xf8, 0x77, 0x1a, 0x5e, 0x59, 0xeb, 0xe0, 0x3f, 0x5c, 0xbd, 0x25, 0x07,
+	0x84, 0xa5, 0x87, 0x2b, 0xca, 0xaf, 0x00, 0x9e, 0x5f, 0xaf, 0xb9, 0x2e, 0xe6, 0x62, 0x33, 0x3a,
+	0x15, 0xae, 0xbc, 0x71, 0x2c, 0x4d, 0x0c, 0x57, 0xc2, 0xdb, 0xb9, 0x85, 0xd3, 0x42, 0x39, 0xcb,
+	0xd3, 0xe7, 0xdf, 0x27, 0x41, 0xf8, 0x63, 0x36, 0xfa, 0x29, 0xeb, 0x84, 0xea, 0x2e, 0xf6, 0x71,
+	0x80, 0x3c, 0x3d, 0xc0, 0xc8, 0x59, 0xd4, 0xb6, 0x6e, 0xec, 0xda, 0xfa, 0x0e, 0x42, 0x4c, 0x47,
+	0x4e, 0x1d, 0xf9, 0x36, 0x76, 0xf4, 0x2a, 0xf5, 0x89, 0xa0, 0xc1, 0xde, 0x2f, 0x7f, 0x7c, 0x93,
+	0x2c, 0xe6, 0xf5, 0xf6, 0x6c, 0xd3, 0x1b, 0x27, 0xb8, 0xf9, 0xa4, 0xfb, 0xdc, 0x34, 0x79, 0x8b,
+	0x50, 0x97, 0xd6, 0xe2, 0x37, 0xc1, 0x82, 0xf2, 0x1b, 0x80, 0x57, 0xee, 0x61, 0x31, 0xec, 0x2e,
+	0xf3, 0x4c, 0x3d, 0x85, 0xb7, 0x73, 0xe6, 0x19, 0x9b, 0x30, 0x6f, 0xb5, 0xb5, 0xe6, 0x7a, 0xb2,
+	0xb8, 0x40, 0xbe, 0x83, 0x82, 0xb8, 0xac, 0xf7, 0xf2, 0xc5, 0x31, 0xb2, 0xa2, 0x19, 0xae, 0xdb,
+	0x04, 0xa6, 0xb4, 0x44, 0xa4, 0xed, 0x1f, 0x00, 0xe7, 0x46, 0x69, 0x8b, 0x7e, 0xa5, 0xdd, 0x42,
+	0x4a, 0xf1, 0xf4, 0xeb, 0xee, 0xfc, 0x83, 0xcf, 0xae, 0xf5, 0x51, 0x5b, 0xeb, 0xfc, 0x08, 0xad,
+	0xc8, 0xf3, 0x74, 0x9f, 0xeb, 0x0e, 0xe2, 0x95, 0x32, 0x45, 0x81, 0x23, 0x45, 0x7f, 0x90, 0x7f,
+	0x67, 0x84, 0x68, 0xde, 0xe0, 0x02, 0x57, 0x07, 0xf4, 0x22, 0xcf, 0xb3, 0x7c, 0x6e, 0x75, 0x64,
+	0xe7, 0x16, 0xf7, 0x9f, 0x81, 0xd4, 0xcf, 0xcf, 0x80, 0x7a, 0xdc, 0x1a, 0x3f, 0x2a, 0x3f, 0xc2,
+	0xb6, 0xd8, 0xfb, 0x29, 0x9b, 0x7c, 0x0b, 0x2c, 0x7f, 0x01, 0x0e, 0x0e, 0xd5, 0xc4, 0x8b, 0x43,
+	0x35, 0xf1, 0xf2, 0x50, 0x05, 0x9f, 0x87, 0x2a, 0xf8, 0x2e, 0x54, 0xc1, 0xf3, 0x50, 0x05, 0x07,
+	0xa1, 0x0a, 0x7e, 0x0f, 0x55, 0xf0, 0x67, 0xa8, 0x26, 0x5e, 0x86, 0x2a, 0xf8, 0xfa, 0x48, 0x4d,
+	0xec, 0x1f, 0xa9, 0xe0, 0xe0, 0x48, 0x4d, 0xbc, 0x38, 0x52, 0x13, 0x9f, 0xac, 0xb8, 0x94, 0x3d,
+	0x76, 0x8d, 0x3a, 0x8d, 0x66, 0x9d, 0x00, 0x19, 0x35, 0x6e, 0xca, 0x87, 0x2d, 0x1a, 0x54, 0x75,
+	0x16, 0xd0, 0x3a, 0x71, 0x70, 0xa0, 0x47, 0x8a, 0x4d, 0x56, 0x76, 0xa9, 0x89, 0x77, 0x45, 0x7b,
+	0x16, 0x1c, 0x1c, 0x7a, 0xcb, 0x13, 0x72, 0x14, 0x7c, 0xfb, 0xbf, 0x00, 0x00, 0x00, 0xff, 0xff,
+	0x66, 0x09, 0x21, 0xb2, 0xb4, 0x0b, 0x00, 0x00,
 }
 
 func (this *ApiEndpointsStatsNSReq) Equal(that interface{}) bool {
@@ -382,6 +631,9 @@ func (this *ApiEndpointsStatsNSReq) Equal(that interface{}) bool {
 			return false
 		}
 	}
+	if this.IncludePerVhostStats != that1.IncludePerVhostStats {
+		return false
+	}
 	return true
 }
 func (this *ApiEndpointsStatsAllNSReq) Equal(that interface{}) bool {
@@ -404,6 +656,9 @@ func (this *ApiEndpointsStatsAllNSReq) Equal(that interface{}) bool {
 		return false
 	}
 	if this.Namespace != that1.Namespace {
+		return false
+	}
+	if this.IncludePerVhostStats != that1.IncludePerVhostStats {
 		return false
 	}
 	return true
@@ -442,17 +697,100 @@ func (this *ApiEndpointsStatsNSRsp) Equal(that interface{}) bool {
 	if this.PiiDetected != that1.PiiDetected {
 		return false
 	}
+	if !this.AggApiepStats.Equal(that1.AggApiepStats) {
+		return false
+	}
+	if len(this.PerVhostTypeApiepStats) != len(that1.PerVhostTypeApiepStats) {
+		return false
+	}
+	for i := range this.PerVhostTypeApiepStats {
+		if !this.PerVhostTypeApiepStats[i].Equal(that1.PerVhostTypeApiepStats[i]) {
+			return false
+		}
+	}
+	return true
+}
+func (this *ApiEndpointsStats) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ApiEndpointsStats)
+	if !ok {
+		that2, ok := that.(ApiEndpointsStats)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.TotalEndpoints != that1.TotalEndpoints {
+		return false
+	}
+	if this.Discovered != that1.Discovered {
+		return false
+	}
+	if this.Inventory != that1.Inventory {
+		return false
+	}
+	if this.Shadow != that1.Shadow {
+		return false
+	}
+	if this.PiiDetected != that1.PiiDetected {
+		return false
+	}
+	if this.Namespace != that1.Namespace {
+		return false
+	}
+	if this.VirtualHost != that1.VirtualHost {
+		return false
+	}
+	return true
+}
+func (this *ApiEndpointsStatsList) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ApiEndpointsStatsList)
+	if !ok {
+		that2, ok := that.(ApiEndpointsStatsList)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if len(this.ApiepStatsList) != len(that1.ApiepStatsList) {
+		return false
+	}
+	for i := range this.ApiepStatsList {
+		if !this.ApiepStatsList[i].Equal(that1.ApiepStatsList[i]) {
+			return false
+		}
+	}
 	return true
 }
 func (this *ApiEndpointsStatsNSReq) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 7)
+	s := make([]string, 0, 8)
 	s = append(s, "&namespace.ApiEndpointsStatsNSReq{")
 	s = append(s, "Namespace: "+fmt.Sprintf("%#v", this.Namespace)+",\n")
 	s = append(s, "VhostsFilter: "+fmt.Sprintf("%#v", this.VhostsFilter)+",\n")
 	s = append(s, "VhostsTypesFilter: "+fmt.Sprintf("%#v", this.VhostsTypesFilter)+",\n")
+	s = append(s, "IncludePerVhostStats: "+fmt.Sprintf("%#v", this.IncludePerVhostStats)+",\n")
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
@@ -460,9 +798,10 @@ func (this *ApiEndpointsStatsAllNSReq) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 5)
+	s := make([]string, 0, 6)
 	s = append(s, "&namespace.ApiEndpointsStatsAllNSReq{")
 	s = append(s, "Namespace: "+fmt.Sprintf("%#v", this.Namespace)+",\n")
+	s = append(s, "IncludePerVhostStats: "+fmt.Sprintf("%#v", this.IncludePerVhostStats)+",\n")
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
@@ -470,13 +809,57 @@ func (this *ApiEndpointsStatsNSRsp) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 9)
+	s := make([]string, 0, 11)
 	s = append(s, "&namespace.ApiEndpointsStatsNSRsp{")
 	s = append(s, "TotalEndpoints: "+fmt.Sprintf("%#v", this.TotalEndpoints)+",\n")
 	s = append(s, "Discovered: "+fmt.Sprintf("%#v", this.Discovered)+",\n")
 	s = append(s, "Inventory: "+fmt.Sprintf("%#v", this.Inventory)+",\n")
 	s = append(s, "Shadow: "+fmt.Sprintf("%#v", this.Shadow)+",\n")
 	s = append(s, "PiiDetected: "+fmt.Sprintf("%#v", this.PiiDetected)+",\n")
+	if this.AggApiepStats != nil {
+		s = append(s, "AggApiepStats: "+fmt.Sprintf("%#v", this.AggApiepStats)+",\n")
+	}
+	keysForPerVhostTypeApiepStats := make([]string, 0, len(this.PerVhostTypeApiepStats))
+	for k, _ := range this.PerVhostTypeApiepStats {
+		keysForPerVhostTypeApiepStats = append(keysForPerVhostTypeApiepStats, k)
+	}
+	github_com_gogo_protobuf_sortkeys.Strings(keysForPerVhostTypeApiepStats)
+	mapStringForPerVhostTypeApiepStats := "map[string]*ApiEndpointsStatsList{"
+	for _, k := range keysForPerVhostTypeApiepStats {
+		mapStringForPerVhostTypeApiepStats += fmt.Sprintf("%#v: %#v,", k, this.PerVhostTypeApiepStats[k])
+	}
+	mapStringForPerVhostTypeApiepStats += "}"
+	if this.PerVhostTypeApiepStats != nil {
+		s = append(s, "PerVhostTypeApiepStats: "+mapStringForPerVhostTypeApiepStats+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *ApiEndpointsStats) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 11)
+	s = append(s, "&namespace.ApiEndpointsStats{")
+	s = append(s, "TotalEndpoints: "+fmt.Sprintf("%#v", this.TotalEndpoints)+",\n")
+	s = append(s, "Discovered: "+fmt.Sprintf("%#v", this.Discovered)+",\n")
+	s = append(s, "Inventory: "+fmt.Sprintf("%#v", this.Inventory)+",\n")
+	s = append(s, "Shadow: "+fmt.Sprintf("%#v", this.Shadow)+",\n")
+	s = append(s, "PiiDetected: "+fmt.Sprintf("%#v", this.PiiDetected)+",\n")
+	s = append(s, "Namespace: "+fmt.Sprintf("%#v", this.Namespace)+",\n")
+	s = append(s, "VirtualHost: "+fmt.Sprintf("%#v", this.VirtualHost)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *ApiEndpointsStatsList) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 5)
+	s = append(s, "&namespace.ApiEndpointsStatsList{")
+	if this.ApiepStatsList != nil {
+		s = append(s, "ApiepStatsList: "+fmt.Sprintf("%#v", this.ApiepStatsList)+",\n")
+	}
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
@@ -685,6 +1068,16 @@ func (m *ApiEndpointsStatsNSReq) MarshalToSizedBuffer(dAtA []byte) (int, error) 
 	_ = i
 	var l int
 	_ = l
+	if m.IncludePerVhostStats {
+		i--
+		if m.IncludePerVhostStats {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x20
+	}
 	if len(m.VhostsTypesFilter) > 0 {
 		dAtA2 := make([]byte, len(m.VhostsTypesFilter)*10)
 		var j1 int
@@ -742,6 +1135,16 @@ func (m *ApiEndpointsStatsAllNSReq) MarshalToSizedBuffer(dAtA []byte) (int, erro
 	_ = i
 	var l int
 	_ = l
+	if m.IncludePerVhostStats {
+		i--
+		if m.IncludePerVhostStats {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x10
+	}
 	if len(m.Namespace) > 0 {
 		i -= len(m.Namespace)
 		copy(dAtA[i:], m.Namespace)
@@ -772,6 +1175,44 @@ func (m *ApiEndpointsStatsNSRsp) MarshalToSizedBuffer(dAtA []byte) (int, error) 
 	_ = i
 	var l int
 	_ = l
+	if len(m.PerVhostTypeApiepStats) > 0 {
+		for k := range m.PerVhostTypeApiepStats {
+			v := m.PerVhostTypeApiepStats[k]
+			baseI := i
+			if v != nil {
+				{
+					size, err := v.MarshalToSizedBuffer(dAtA[:i])
+					if err != nil {
+						return 0, err
+					}
+					i -= size
+					i = encodeVarintPublicCustomapiAsterix(dAtA, i, uint64(size))
+				}
+				i--
+				dAtA[i] = 0x12
+			}
+			i -= len(k)
+			copy(dAtA[i:], k)
+			i = encodeVarintPublicCustomapiAsterix(dAtA, i, uint64(len(k)))
+			i--
+			dAtA[i] = 0xa
+			i = encodeVarintPublicCustomapiAsterix(dAtA, i, uint64(baseI-i))
+			i--
+			dAtA[i] = 0x3a
+		}
+	}
+	if m.AggApiepStats != nil {
+		{
+			size, err := m.AggApiepStats.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintPublicCustomapiAsterix(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x32
+	}
 	if m.PiiDetected != 0 {
 		i = encodeVarintPublicCustomapiAsterix(dAtA, i, uint64(m.PiiDetected))
 		i--
@@ -796,6 +1237,105 @@ func (m *ApiEndpointsStatsNSRsp) MarshalToSizedBuffer(dAtA []byte) (int, error) 
 		i = encodeVarintPublicCustomapiAsterix(dAtA, i, uint64(m.TotalEndpoints))
 		i--
 		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *ApiEndpointsStats) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ApiEndpointsStats) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ApiEndpointsStats) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.VirtualHost) > 0 {
+		i -= len(m.VirtualHost)
+		copy(dAtA[i:], m.VirtualHost)
+		i = encodeVarintPublicCustomapiAsterix(dAtA, i, uint64(len(m.VirtualHost)))
+		i--
+		dAtA[i] = 0x3a
+	}
+	if len(m.Namespace) > 0 {
+		i -= len(m.Namespace)
+		copy(dAtA[i:], m.Namespace)
+		i = encodeVarintPublicCustomapiAsterix(dAtA, i, uint64(len(m.Namespace)))
+		i--
+		dAtA[i] = 0x32
+	}
+	if m.PiiDetected != 0 {
+		i = encodeVarintPublicCustomapiAsterix(dAtA, i, uint64(m.PiiDetected))
+		i--
+		dAtA[i] = 0x28
+	}
+	if m.Shadow != 0 {
+		i = encodeVarintPublicCustomapiAsterix(dAtA, i, uint64(m.Shadow))
+		i--
+		dAtA[i] = 0x20
+	}
+	if m.Inventory != 0 {
+		i = encodeVarintPublicCustomapiAsterix(dAtA, i, uint64(m.Inventory))
+		i--
+		dAtA[i] = 0x18
+	}
+	if m.Discovered != 0 {
+		i = encodeVarintPublicCustomapiAsterix(dAtA, i, uint64(m.Discovered))
+		i--
+		dAtA[i] = 0x10
+	}
+	if m.TotalEndpoints != 0 {
+		i = encodeVarintPublicCustomapiAsterix(dAtA, i, uint64(m.TotalEndpoints))
+		i--
+		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *ApiEndpointsStatsList) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ApiEndpointsStatsList) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ApiEndpointsStatsList) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.ApiepStatsList) > 0 {
+		for iNdEx := len(m.ApiepStatsList) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.ApiepStatsList[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintPublicCustomapiAsterix(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0xa
+		}
 	}
 	return len(dAtA) - i, nil
 }
@@ -834,6 +1374,9 @@ func (m *ApiEndpointsStatsNSReq) Size() (n int) {
 		}
 		n += 1 + sovPublicCustomapiAsterix(uint64(l)) + l
 	}
+	if m.IncludePerVhostStats {
+		n += 2
+	}
 	return n
 }
 
@@ -846,6 +1389,9 @@ func (m *ApiEndpointsStatsAllNSReq) Size() (n int) {
 	l = len(m.Namespace)
 	if l > 0 {
 		n += 1 + l + sovPublicCustomapiAsterix(uint64(l))
+	}
+	if m.IncludePerVhostStats {
+		n += 2
 	}
 	return n
 }
@@ -871,6 +1417,70 @@ func (m *ApiEndpointsStatsNSRsp) Size() (n int) {
 	if m.PiiDetected != 0 {
 		n += 1 + sovPublicCustomapiAsterix(uint64(m.PiiDetected))
 	}
+	if m.AggApiepStats != nil {
+		l = m.AggApiepStats.Size()
+		n += 1 + l + sovPublicCustomapiAsterix(uint64(l))
+	}
+	if len(m.PerVhostTypeApiepStats) > 0 {
+		for k, v := range m.PerVhostTypeApiepStats {
+			_ = k
+			_ = v
+			l = 0
+			if v != nil {
+				l = v.Size()
+				l += 1 + sovPublicCustomapiAsterix(uint64(l))
+			}
+			mapEntrySize := 1 + len(k) + sovPublicCustomapiAsterix(uint64(len(k))) + l
+			n += mapEntrySize + 1 + sovPublicCustomapiAsterix(uint64(mapEntrySize))
+		}
+	}
+	return n
+}
+
+func (m *ApiEndpointsStats) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.TotalEndpoints != 0 {
+		n += 1 + sovPublicCustomapiAsterix(uint64(m.TotalEndpoints))
+	}
+	if m.Discovered != 0 {
+		n += 1 + sovPublicCustomapiAsterix(uint64(m.Discovered))
+	}
+	if m.Inventory != 0 {
+		n += 1 + sovPublicCustomapiAsterix(uint64(m.Inventory))
+	}
+	if m.Shadow != 0 {
+		n += 1 + sovPublicCustomapiAsterix(uint64(m.Shadow))
+	}
+	if m.PiiDetected != 0 {
+		n += 1 + sovPublicCustomapiAsterix(uint64(m.PiiDetected))
+	}
+	l = len(m.Namespace)
+	if l > 0 {
+		n += 1 + l + sovPublicCustomapiAsterix(uint64(l))
+	}
+	l = len(m.VirtualHost)
+	if l > 0 {
+		n += 1 + l + sovPublicCustomapiAsterix(uint64(l))
+	}
+	return n
+}
+
+func (m *ApiEndpointsStatsList) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.ApiepStatsList) > 0 {
+		for _, e := range m.ApiepStatsList {
+			l = e.Size()
+			n += 1 + l + sovPublicCustomapiAsterix(uint64(l))
+		}
+	}
 	return n
 }
 
@@ -888,6 +1498,7 @@ func (this *ApiEndpointsStatsNSReq) String() string {
 		`VhostsFilter:` + fmt.Sprintf("%v", this.VhostsFilter) + `,`,
 		`Namespace:` + fmt.Sprintf("%v", this.Namespace) + `,`,
 		`VhostsTypesFilter:` + fmt.Sprintf("%v", this.VhostsTypesFilter) + `,`,
+		`IncludePerVhostStats:` + fmt.Sprintf("%v", this.IncludePerVhostStats) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -898,6 +1509,7 @@ func (this *ApiEndpointsStatsAllNSReq) String() string {
 	}
 	s := strings.Join([]string{`&ApiEndpointsStatsAllNSReq{`,
 		`Namespace:` + fmt.Sprintf("%v", this.Namespace) + `,`,
+		`IncludePerVhostStats:` + fmt.Sprintf("%v", this.IncludePerVhostStats) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -906,12 +1518,55 @@ func (this *ApiEndpointsStatsNSRsp) String() string {
 	if this == nil {
 		return "nil"
 	}
+	keysForPerVhostTypeApiepStats := make([]string, 0, len(this.PerVhostTypeApiepStats))
+	for k, _ := range this.PerVhostTypeApiepStats {
+		keysForPerVhostTypeApiepStats = append(keysForPerVhostTypeApiepStats, k)
+	}
+	github_com_gogo_protobuf_sortkeys.Strings(keysForPerVhostTypeApiepStats)
+	mapStringForPerVhostTypeApiepStats := "map[string]*ApiEndpointsStatsList{"
+	for _, k := range keysForPerVhostTypeApiepStats {
+		mapStringForPerVhostTypeApiepStats += fmt.Sprintf("%v: %v,", k, this.PerVhostTypeApiepStats[k])
+	}
+	mapStringForPerVhostTypeApiepStats += "}"
 	s := strings.Join([]string{`&ApiEndpointsStatsNSRsp{`,
 		`TotalEndpoints:` + fmt.Sprintf("%v", this.TotalEndpoints) + `,`,
 		`Discovered:` + fmt.Sprintf("%v", this.Discovered) + `,`,
 		`Inventory:` + fmt.Sprintf("%v", this.Inventory) + `,`,
 		`Shadow:` + fmt.Sprintf("%v", this.Shadow) + `,`,
 		`PiiDetected:` + fmt.Sprintf("%v", this.PiiDetected) + `,`,
+		`AggApiepStats:` + strings.Replace(this.AggApiepStats.String(), "ApiEndpointsStats", "ApiEndpointsStats", 1) + `,`,
+		`PerVhostTypeApiepStats:` + mapStringForPerVhostTypeApiepStats + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ApiEndpointsStats) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ApiEndpointsStats{`,
+		`TotalEndpoints:` + fmt.Sprintf("%v", this.TotalEndpoints) + `,`,
+		`Discovered:` + fmt.Sprintf("%v", this.Discovered) + `,`,
+		`Inventory:` + fmt.Sprintf("%v", this.Inventory) + `,`,
+		`Shadow:` + fmt.Sprintf("%v", this.Shadow) + `,`,
+		`PiiDetected:` + fmt.Sprintf("%v", this.PiiDetected) + `,`,
+		`Namespace:` + fmt.Sprintf("%v", this.Namespace) + `,`,
+		`VirtualHost:` + fmt.Sprintf("%v", this.VirtualHost) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ApiEndpointsStatsList) String() string {
+	if this == nil {
+		return "nil"
+	}
+	repeatedStringForApiepStatsList := "[]*ApiEndpointsStats{"
+	for _, f := range this.ApiepStatsList {
+		repeatedStringForApiepStatsList += strings.Replace(f.String(), "ApiEndpointsStats", "ApiEndpointsStats", 1) + ","
+	}
+	repeatedStringForApiepStatsList += "}"
+	s := strings.Join([]string{`&ApiEndpointsStatsList{`,
+		`ApiepStatsList:` + repeatedStringForApiepStatsList + `,`,
 		`}`,
 	}, "")
 	return s
@@ -1086,16 +1741,33 @@ func (m *ApiEndpointsStatsNSReq) Unmarshal(dAtA []byte) error {
 			} else {
 				return fmt.Errorf("proto: wrong wireType = %d for field VhostsTypesFilter", wireType)
 			}
+		case 4:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field IncludePerVhostStats", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapiAsterix
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.IncludePerVhostStats = bool(v != 0)
 		default:
 			iNdEx = preIndex
 			skippy, err := skipPublicCustomapiAsterix(dAtA[iNdEx:])
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicCustomapiAsterix
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicCustomapiAsterix
 			}
 			if (iNdEx + skippy) > l {
@@ -1171,16 +1843,33 @@ func (m *ApiEndpointsStatsAllNSReq) Unmarshal(dAtA []byte) error {
 			}
 			m.Namespace = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field IncludePerVhostStats", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapiAsterix
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.IncludePerVhostStats = bool(v != 0)
 		default:
 			iNdEx = preIndex
 			skippy, err := skipPublicCustomapiAsterix(dAtA[iNdEx:])
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicCustomapiAsterix
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicCustomapiAsterix
 			}
 			if (iNdEx + skippy) > l {
@@ -1319,16 +2008,471 @@ func (m *ApiEndpointsStatsNSRsp) Unmarshal(dAtA []byte) error {
 					break
 				}
 			}
+		case 6:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AggApiepStats", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapiAsterix
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthPublicCustomapiAsterix
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapiAsterix
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.AggApiepStats == nil {
+				m.AggApiepStats = &ApiEndpointsStats{}
+			}
+			if err := m.AggApiepStats.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 7:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field PerVhostTypeApiepStats", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapiAsterix
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthPublicCustomapiAsterix
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapiAsterix
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.PerVhostTypeApiepStats == nil {
+				m.PerVhostTypeApiepStats = make(map[string]*ApiEndpointsStatsList)
+			}
+			var mapkey string
+			var mapvalue *ApiEndpointsStatsList
+			for iNdEx < postIndex {
+				entryPreIndex := iNdEx
+				var wire uint64
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return ErrIntOverflowPublicCustomapiAsterix
+					}
+					if iNdEx >= l {
+						return io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					wire |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				fieldNum := int32(wire >> 3)
+				if fieldNum == 1 {
+					var stringLenmapkey uint64
+					for shift := uint(0); ; shift += 7 {
+						if shift >= 64 {
+							return ErrIntOverflowPublicCustomapiAsterix
+						}
+						if iNdEx >= l {
+							return io.ErrUnexpectedEOF
+						}
+						b := dAtA[iNdEx]
+						iNdEx++
+						stringLenmapkey |= uint64(b&0x7F) << shift
+						if b < 0x80 {
+							break
+						}
+					}
+					intStringLenmapkey := int(stringLenmapkey)
+					if intStringLenmapkey < 0 {
+						return ErrInvalidLengthPublicCustomapiAsterix
+					}
+					postStringIndexmapkey := iNdEx + intStringLenmapkey
+					if postStringIndexmapkey < 0 {
+						return ErrInvalidLengthPublicCustomapiAsterix
+					}
+					if postStringIndexmapkey > l {
+						return io.ErrUnexpectedEOF
+					}
+					mapkey = string(dAtA[iNdEx:postStringIndexmapkey])
+					iNdEx = postStringIndexmapkey
+				} else if fieldNum == 2 {
+					var mapmsglen int
+					for shift := uint(0); ; shift += 7 {
+						if shift >= 64 {
+							return ErrIntOverflowPublicCustomapiAsterix
+						}
+						if iNdEx >= l {
+							return io.ErrUnexpectedEOF
+						}
+						b := dAtA[iNdEx]
+						iNdEx++
+						mapmsglen |= int(b&0x7F) << shift
+						if b < 0x80 {
+							break
+						}
+					}
+					if mapmsglen < 0 {
+						return ErrInvalidLengthPublicCustomapiAsterix
+					}
+					postmsgIndex := iNdEx + mapmsglen
+					if postmsgIndex < 0 {
+						return ErrInvalidLengthPublicCustomapiAsterix
+					}
+					if postmsgIndex > l {
+						return io.ErrUnexpectedEOF
+					}
+					mapvalue = &ApiEndpointsStatsList{}
+					if err := mapvalue.Unmarshal(dAtA[iNdEx:postmsgIndex]); err != nil {
+						return err
+					}
+					iNdEx = postmsgIndex
+				} else {
+					iNdEx = entryPreIndex
+					skippy, err := skipPublicCustomapiAsterix(dAtA[iNdEx:])
+					if err != nil {
+						return err
+					}
+					if (skippy < 0) || (iNdEx+skippy) < 0 {
+						return ErrInvalidLengthPublicCustomapiAsterix
+					}
+					if (iNdEx + skippy) > postIndex {
+						return io.ErrUnexpectedEOF
+					}
+					iNdEx += skippy
+				}
+			}
+			m.PerVhostTypeApiepStats[mapkey] = mapvalue
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipPublicCustomapiAsterix(dAtA[iNdEx:])
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicCustomapiAsterix
 			}
-			if (iNdEx + skippy) < 0 {
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ApiEndpointsStats) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowPublicCustomapiAsterix
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ApiEndpointsStats: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ApiEndpointsStats: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field TotalEndpoints", wireType)
+			}
+			m.TotalEndpoints = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapiAsterix
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.TotalEndpoints |= int32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Discovered", wireType)
+			}
+			m.Discovered = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapiAsterix
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Discovered |= int32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Inventory", wireType)
+			}
+			m.Inventory = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapiAsterix
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Inventory |= int32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 4:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Shadow", wireType)
+			}
+			m.Shadow = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapiAsterix
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Shadow |= int32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 5:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field PiiDetected", wireType)
+			}
+			m.PiiDetected = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapiAsterix
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.PiiDetected |= int32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 6:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Namespace", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapiAsterix
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicCustomapiAsterix
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapiAsterix
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Namespace = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 7:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field VirtualHost", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapiAsterix
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicCustomapiAsterix
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapiAsterix
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.VirtualHost = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipPublicCustomapiAsterix(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthPublicCustomapiAsterix
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ApiEndpointsStatsList) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowPublicCustomapiAsterix
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ApiEndpointsStatsList: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ApiEndpointsStatsList: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ApiepStatsList", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicCustomapiAsterix
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthPublicCustomapiAsterix
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicCustomapiAsterix
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ApiepStatsList = append(m.ApiepStatsList, &ApiEndpointsStats{})
+			if err := m.ApiepStatsList[len(m.ApiepStatsList)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipPublicCustomapiAsterix(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicCustomapiAsterix
 			}
 			if (iNdEx + skippy) > l {

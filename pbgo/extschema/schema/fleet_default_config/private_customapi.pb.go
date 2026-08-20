@@ -8,6 +8,12 @@ package fleet_default_config
 import (
 	context "context"
 	fmt "fmt"
+	io "io"
+	math "math"
+	math_bits "math/bits"
+	reflect "reflect"
+	strings "strings"
+
 	_ "github.com/gogo/googleapis/google/api"
 	_ "github.com/gogo/protobuf/gogoproto"
 	proto "github.com/gogo/protobuf/proto"
@@ -17,11 +23,6 @@ import (
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
 	schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
-	io "io"
-	math "math"
-	math_bits "math/bits"
-	reflect "reflect"
-	strings "strings"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -1421,10 +1422,7 @@ func (m *GetDefaultFleetConfigRequest) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPrivateCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPrivateCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -1538,10 +1536,7 @@ func (m *GetDefaultFleetConfigResponse) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPrivateCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPrivateCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -1681,10 +1676,7 @@ func (m *FleetDefaultConfigDependencyMapReq) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPrivateCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPrivateCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -1768,10 +1760,7 @@ func (m *FDCRefList) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPrivateCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPrivateCustomapi
 			}
 			if (iNdEx + skippy) > l {
@@ -1933,7 +1922,7 @@ func (m *FleetDefaultConfigDependencyMapRsp) Unmarshal(dAtA []byte) error {
 					if err != nil {
 						return err
 					}
-					if skippy < 0 {
+					if (skippy < 0) || (iNdEx+skippy) < 0 {
 						return ErrInvalidLengthPrivateCustomapi
 					}
 					if (iNdEx + skippy) > postIndex {
@@ -1950,10 +1939,7 @@ func (m *FleetDefaultConfigDependencyMapRsp) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPrivateCustomapi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPrivateCustomapi
 			}
 			if (iNdEx + skippy) > l {

@@ -30,47 +30,47 @@ type DataSourceF5XCIkePhase1Profile struct {
 }
 
 type IkePhase1ProfileGlobalSpecTypeIkeKeyLifetimeChoice struct {
-	UseDefaultKeylifetime types.Bool   `tfsdk:"use_default_keylifetime"`
-	IkeKeylifetimeMinutes types.Object `tfsdk:"ike_keylifetime_minutes"`
 	IkeKeylifetimeHours   types.Object `tfsdk:"ike_keylifetime_hours"`
-}
-
-type IkePhase1ProfileGlobalSpecTypeIkeKeylifetimeMinutes struct {
-	Duration types.Int64 `tfsdk:"duration"`
+	IkeKeylifetimeMinutes types.Object `tfsdk:"ike_keylifetime_minutes"`
+	UseDefaultKeylifetime types.Bool   `tfsdk:"use_default_keylifetime"`
 }
 
 type IkePhase1ProfileGlobalSpecTypeIkeKeylifetimeHours struct {
 	Duration types.Int64 `tfsdk:"duration"`
 }
 
-type IkePhase1ProfileGlobalSpecTypeIkeReauthTimeoutChoice struct {
-	ReauthTimeoutHours types.Object `tfsdk:"reauth_timeout_hours"`
-	ReauthTimeoutDays  types.Object `tfsdk:"reauth_timeout_days"`
-	ReauthDisabled     types.Bool   `tfsdk:"reauth_disabled"`
+type IkePhase1ProfileGlobalSpecTypeIkeKeylifetimeMinutes struct {
+	Duration types.Int64 `tfsdk:"duration"`
 }
 
-type IkePhase1ProfileGlobalSpecTypeReauthTimeoutHours struct {
-	Duration types.Int64 `tfsdk:"duration"`
+type IkePhase1ProfileGlobalSpecTypeIkeReauthTimeoutChoice struct {
+	ReauthDisabled     types.Bool   `tfsdk:"reauth_disabled"`
+	ReauthTimeoutDays  types.Object `tfsdk:"reauth_timeout_days"`
+	ReauthTimeoutHours types.Object `tfsdk:"reauth_timeout_hours"`
 }
 
 type IkePhase1ProfileGlobalSpecTypeReauthTimeoutDays struct {
 	Duration types.Int64 `tfsdk:"duration"`
 }
 
+type IkePhase1ProfileGlobalSpecTypeReauthTimeoutHours struct {
+	Duration types.Int64 `tfsdk:"duration"`
+}
+
 // DataSourceF5XCIkePhase1ProfileModel describes the resource data model.
 type DataSourceF5XCIkePhase1ProfileModel struct {
-	Labels                 types.Map      `tfsdk:"labels"`
 	Annotations            types.Map      `tfsdk:"annotations"`
 	Description            types.String   `tfsdk:"description"`
+	Labels                 types.Map      `tfsdk:"labels"`
 	Name                   types.String   `tfsdk:"name"`
 	Namespace              types.String   `tfsdk:"namespace"`
 	Uid                    types.String   `tfsdk:"uid"`
 	AuthenticationAlgos    types.List     `tfsdk:"authentication_algos"`
-	Prf                    types.List     `tfsdk:"prf"`
 	DhGroup                types.List     `tfsdk:"dh_group"`
+	EncryptionAlgos        types.List     `tfsdk:"encryption_algos"`
 	IkeKeyLifetimeChoice   types.Object   `tfsdk:"ike_key_lifetime_choice"`
 	IkeReauthTimeoutChoice types.Object   `tfsdk:"ike_reauth_timeout_choice"`
-	EncryptionAlgos        types.List     `tfsdk:"encryption_algos"`
+	Prf                    types.List     `tfsdk:"prf"`
 	Timeouts               timeouts.Value `tfsdk:"timeouts"`
 }
 
@@ -78,19 +78,13 @@ type DataSourceF5XCIkePhase1ProfileModel struct {
 // Attribute map for RequiredOneOfField --> IkeKeyLifetime
 var IkePhase1ProfileIkeKeyLifetimeModelAttributeMap = map[string]attr.Type{
 
-	"use_default_keylifetime": types.BoolType,
-	"ike_keylifetime_minutes": types.ObjectType{
-		AttrTypes: IkePhase1ProfileIkeKeyLifetimeIkeKeylifetimeMinutesModelAttributeMap,
-	},
 	"ike_keylifetime_hours": types.ObjectType{
 		AttrTypes: IkePhase1ProfileIkeKeyLifetimeIkeKeylifetimeHoursModelAttributeMap,
 	},
-}
-
-// Attribute map for PointerOfOneOfField --> IkeKeylifetimeMinutes
-var IkePhase1ProfileIkeKeyLifetimeIkeKeylifetimeMinutesModelAttributeMap = map[string]attr.Type{
-
-	"duration": types.Int64Type,
+	"ike_keylifetime_minutes": types.ObjectType{
+		AttrTypes: IkePhase1ProfileIkeKeyLifetimeIkeKeylifetimeMinutesModelAttributeMap,
+	},
+	"use_default_keylifetime": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> IkeKeylifetimeHours
@@ -99,26 +93,32 @@ var IkePhase1ProfileIkeKeyLifetimeIkeKeylifetimeHoursModelAttributeMap = map[str
 	"duration": types.Int64Type,
 }
 
-// Attribute map for RequiredOneOfField --> IkeReauthTimeout
-var IkePhase1ProfileIkeReauthTimeoutModelAttributeMap = map[string]attr.Type{
-
-	"reauth_timeout_hours": types.ObjectType{
-		AttrTypes: IkePhase1ProfileIkeReauthTimeoutReauthTimeoutHoursModelAttributeMap,
-	},
-	"reauth_timeout_days": types.ObjectType{
-		AttrTypes: IkePhase1ProfileIkeReauthTimeoutReauthTimeoutDaysModelAttributeMap,
-	},
-	"reauth_disabled": types.BoolType,
-}
-
-// Attribute map for PointerOfOneOfField --> ReauthTimeoutHours
-var IkePhase1ProfileIkeReauthTimeoutReauthTimeoutHoursModelAttributeMap = map[string]attr.Type{
+// Attribute map for PointerOfOneOfField --> IkeKeylifetimeMinutes
+var IkePhase1ProfileIkeKeyLifetimeIkeKeylifetimeMinutesModelAttributeMap = map[string]attr.Type{
 
 	"duration": types.Int64Type,
 }
 
+// Attribute map for RequiredOneOfField --> IkeReauthTimeout
+var IkePhase1ProfileIkeReauthTimeoutModelAttributeMap = map[string]attr.Type{
+
+	"reauth_disabled": types.BoolType,
+	"reauth_timeout_days": types.ObjectType{
+		AttrTypes: IkePhase1ProfileIkeReauthTimeoutReauthTimeoutDaysModelAttributeMap,
+	},
+	"reauth_timeout_hours": types.ObjectType{
+		AttrTypes: IkePhase1ProfileIkeReauthTimeoutReauthTimeoutHoursModelAttributeMap,
+	},
+}
+
 // Attribute map for PointerOfOneOfField --> ReauthTimeoutDays
 var IkePhase1ProfileIkeReauthTimeoutReauthTimeoutDaysModelAttributeMap = map[string]attr.Type{
+
+	"duration": types.Int64Type,
+}
+
+// Attribute map for PointerOfOneOfField --> ReauthTimeoutHours
+var IkePhase1ProfileIkeReauthTimeoutReauthTimeoutHoursModelAttributeMap = map[string]attr.Type{
 
 	"duration": types.Int64Type,
 }
@@ -137,17 +137,10 @@ func (d *DataSourceF5XCIkePhase1Profile) Metadata(ctx context.Context, request d
 func (r *DataSourceF5XCIkePhase1Profile) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "IkePhase1Profile data source",
-		Description:         "IkePhase1Profile data source",
+		MarkdownDescription: "GetRequest is used to get different forms of a ike_phase1_profile This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of ike_phase1_profile) etc. can be fetched",
+		Description:         "GetRequest is used to get different forms of a ike_phase1_profile This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of ike_phase1_profile) etc. can be fetched",
 
 		Attributes: map[string]schema.Attribute{
-			"labels": schema.MapAttribute{
-				Description: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
 			"annotations": schema.MapAttribute{
 				Description: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
 				Required:    false,
@@ -160,6 +153,13 @@ func (r *DataSourceF5XCIkePhase1Profile) Schema(ctx context.Context, request dat
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
+			},
+			"labels": schema.MapAttribute{
+				Description: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				ElementType: types.StringType,
 			},
 			"name": schema.StringAttribute{
 				Description: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
@@ -186,15 +186,15 @@ func (r *DataSourceF5XCIkePhase1Profile) Schema(ctx context.Context, request dat
 				Computed:    true,
 				ElementType: types.StringType,
 			},
-			"prf": schema.ListAttribute{
-				Description: "PseudoRandomFunction Select PseudoRandomFunction for IKE SA.",
+			"dh_group": schema.ListAttribute{
+				Description: "Diffie Hellman Groups Choose the acceptable Diffie Hellman (DH) Group or Groups that you are willing to accept as part of this profile.",
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
 				ElementType: types.StringType,
 			},
-			"dh_group": schema.ListAttribute{
-				Description: "Diffie Hellman Groups Choose the acceptable Diffie Hellman (DH) Group or Groups that you are willing to accept as part of this profile.",
+			"encryption_algos": schema.ListAttribute{
+				Description: "Encryption Algorithms Choose one or more encryption algorithms.",
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
@@ -206,11 +206,19 @@ func (r *DataSourceF5XCIkePhase1Profile) Schema(ctx context.Context, request dat
 				Optional:    false,
 				Computed:    true,
 				Attributes: map[string]schema.Attribute{
-					"use_default_keylifetime": schema.BoolAttribute{
-						Description: "Default Use default key lifetime (4Hrs)",
+					"ike_keylifetime_hours": schema.SingleNestedAttribute{
+						Description: "Hours Set IKE Key Lifetime in Hours",
 						Required:    false,
 						Optional:    false,
 						Computed:    true,
+						Attributes: map[string]schema.Attribute{
+							"duration": schema.Int64Attribute{
+								Description: "Duration",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
+						},
 					},
 					"ike_keylifetime_minutes": schema.SingleNestedAttribute{
 						Description: "Minutes Set IKE Key Lifetime in minutes",
@@ -226,19 +234,11 @@ func (r *DataSourceF5XCIkePhase1Profile) Schema(ctx context.Context, request dat
 							},
 						},
 					},
-					"ike_keylifetime_hours": schema.SingleNestedAttribute{
-						Description: "Hours Set IKE Key Lifetime in Hours",
+					"use_default_keylifetime": schema.BoolAttribute{
+						Description: "Default Use default key lifetime (4Hrs)",
 						Required:    false,
 						Optional:    false,
 						Computed:    true,
-						Attributes: map[string]schema.Attribute{
-							"duration": schema.Int64Attribute{
-								Description: "Duration",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-							},
-						},
 					},
 				},
 			},
@@ -248,19 +248,11 @@ func (r *DataSourceF5XCIkePhase1Profile) Schema(ctx context.Context, request dat
 				Optional:    false,
 				Computed:    true,
 				Attributes: map[string]schema.Attribute{
-					"reauth_timeout_hours": schema.SingleNestedAttribute{
-						Description: "Hours Set Reauthentication timeout in Hours",
+					"reauth_disabled": schema.BoolAttribute{
+						Description: "Disabled The default is not use IKE reauthentication.",
 						Required:    false,
 						Optional:    false,
 						Computed:    true,
-						Attributes: map[string]schema.Attribute{
-							"duration": schema.Int64Attribute{
-								Description: "Duration",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-							},
-						},
 					},
 					"reauth_timeout_days": schema.SingleNestedAttribute{
 						Description: "Days Set Reauthentication timeout in Days",
@@ -276,16 +268,24 @@ func (r *DataSourceF5XCIkePhase1Profile) Schema(ctx context.Context, request dat
 							},
 						},
 					},
-					"reauth_disabled": schema.BoolAttribute{
-						Description: "Disabled The default is not use IKE reauthentication.",
+					"reauth_timeout_hours": schema.SingleNestedAttribute{
+						Description: "Hours Set Reauthentication timeout in Hours",
 						Required:    false,
 						Optional:    false,
 						Computed:    true,
+						Attributes: map[string]schema.Attribute{
+							"duration": schema.Int64Attribute{
+								Description: "Duration",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
+						},
 					},
 				},
 			},
-			"encryption_algos": schema.ListAttribute{
-				Description: "Encryption Algorithms Choose one or more encryption algorithms.",
+			"prf": schema.ListAttribute{
+				Description: "PseudoRandomFunction Select PseudoRandomFunction for IKE SA.",
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
@@ -338,15 +338,14 @@ func (d *DataSourceF5XCIkePhase1Profile) Read(ctx context.Context, request datas
 		return
 	}
 
-	readTimeout, diags := data.Timeouts.Read(ctx, duration)
-	response.Diagnostics.Append(diags...)
+	readTimeout, readDiags := data.Timeouts.Read(ctx, duration)
+	response.Diagnostics.Append(readDiags...)
 	if response.Diagnostics.HasError() {
 		return
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
-
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_views_ike_phase1_profile.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
@@ -361,24 +360,6 @@ func (d *DataSourceF5XCIkePhase1Profile) Read(ctx context.Context, request datas
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
-
-	// data SpecToModelRoot Meta MapOfStringField --> Labels
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// Assign the typed map to the model
-		data.Labels = labelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil and the model has no value: set an explicit Null map to avoid
-		// DynamicPseudoType errors. If the model already contains a value (e.g. labels were set
-		// but the API did not echo them back in the response), preserve the existing value to prevent
-		// "Provider produced inconsistent result after apply" errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
 
 	// data SpecToModelRoot Meta MapOfStringField --> Annotations
 	if metaData.GetAnnotations() != nil {
@@ -401,6 +382,24 @@ func (d *DataSourceF5XCIkePhase1Profile) Read(ctx context.Context, request datas
 	// data SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
 
+	// data SpecToModelRoot Meta MapOfStringField --> Labels
+	if metaData.GetLabels() != nil {
+		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
+		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+		response.Diagnostics.Append(labelsDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		// Assign the typed map to the model
+		data.Labels = labelsMap
+	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
+		// API returned nil and the model has no value: set an explicit Null map to avoid
+		// DynamicPseudoType errors. If the model already contains a value (e.g. labels were set
+		// but the API did not echo them back in the response), preserve the existing value to prevent
+		// "Provider produced inconsistent result after apply" errors.
+		data.Labels = types.MapNull(types.StringType)
+	}
+
 	// data SpecToModelRoot Meta RequiredStringField --> Name
 	data.Name = types.StringValue(metaData.GetName())
 
@@ -411,57 +410,63 @@ func (d *DataSourceF5XCIkePhase1Profile) Read(ctx context.Context, request datas
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
 	// data SpecToModelRoot RequiredArrayOfEnumField --> AuthenticationAlgos
-	if len(specData.GetAuthenticationAlgos()) > 0 {
-		authenticationAlgosStrings := make([]string, 0, len(specData.GetAuthenticationAlgos()))
-		for _, v := range specData.GetAuthenticationAlgos() {
-			if strVal, exists := ves_io_schema.AuthenticationAlgorithm_name[int32(v)]; exists {
-				authenticationAlgosStrings = append(authenticationAlgosStrings, strVal)
+	{
+		if len(specData.GetAuthenticationAlgos()) > 0 {
+			authenticationAlgosStrings := make([]string, 0, len(specData.GetAuthenticationAlgos()))
+			for _, v := range specData.GetAuthenticationAlgos() {
+				if strVal, exists := ves_io_schema.AuthenticationAlgorithm_name[int32(v)]; exists {
+					authenticationAlgosStrings = append(authenticationAlgosStrings, strVal)
+				}
 			}
-		}
-		listValue, diags := types.ListValueFrom(ctx, types.StringType, authenticationAlgosStrings)
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.AuthenticationAlgos = listValue
-	} else {
-		data.AuthenticationAlgos = types.ListNull(types.StringType)
-	}
-
-	// data SpecToModelRoot RequiredArrayOfEnumField --> Prf
-	if len(specData.GetPrf()) > 0 {
-		prfStrings := make([]string, 0, len(specData.GetPrf()))
-		for _, v := range specData.GetPrf() {
-			if strVal, exists := ves_io_schema.PseudoRandomFunction_name[int32(v)]; exists {
-				prfStrings = append(prfStrings, strVal)
+			listValue, listDiags := types.ListValueFrom(ctx, types.StringType, authenticationAlgosStrings)
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
 			}
+			data.AuthenticationAlgos = listValue
+		} else {
+			data.AuthenticationAlgos = types.ListNull(types.StringType)
 		}
-		listValue, diags := types.ListValueFrom(ctx, types.StringType, prfStrings)
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Prf = listValue
-	} else {
-		data.Prf = types.ListNull(types.StringType)
 	}
 
 	// data SpecToModelRoot RequiredArrayOfEnumField --> DhGroup
-	if len(specData.GetDhGroup()) > 0 {
-		dhGroupStrings := make([]string, 0, len(specData.GetDhGroup()))
-		for _, v := range specData.GetDhGroup() {
-			if strVal, exists := ves_io_schema.DHGroup_name[int32(v)]; exists {
-				dhGroupStrings = append(dhGroupStrings, strVal)
+	{
+		if len(specData.GetDhGroup()) > 0 {
+			dhGroupStrings := make([]string, 0, len(specData.GetDhGroup()))
+			for _, v := range specData.GetDhGroup() {
+				if strVal, exists := ves_io_schema.DHGroup_name[int32(v)]; exists {
+					dhGroupStrings = append(dhGroupStrings, strVal)
+				}
 			}
+			listValue, listDiags := types.ListValueFrom(ctx, types.StringType, dhGroupStrings)
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			data.DhGroup = listValue
+		} else {
+			data.DhGroup = types.ListNull(types.StringType)
 		}
-		listValue, diags := types.ListValueFrom(ctx, types.StringType, dhGroupStrings)
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
+	}
+
+	// data SpecToModelRoot RequiredArrayOfEnumField --> EncryptionAlgos
+	{
+		if len(specData.GetEncryptionAlgos()) > 0 {
+			encryptionAlgosStrings := make([]string, 0, len(specData.GetEncryptionAlgos()))
+			for _, v := range specData.GetEncryptionAlgos() {
+				if strVal, exists := ves_io_schema.EncryptionAlgorithm_name[int32(v)]; exists {
+					encryptionAlgosStrings = append(encryptionAlgosStrings, strVal)
+				}
+			}
+			listValue, listDiags := types.ListValueFrom(ctx, types.StringType, encryptionAlgosStrings)
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			data.EncryptionAlgos = listValue
+		} else {
+			data.EncryptionAlgos = types.ListNull(types.StringType)
 		}
-		data.DhGroup = listValue
-	} else {
-		data.DhGroup = types.ListNull(types.StringType)
 	}
 
 	// data SpecToModelRoot RequiredOneOfField --> IkeKeyLifetime
@@ -478,52 +483,21 @@ func (d *DataSourceF5XCIkePhase1Profile) Read(ctx context.Context, request datas
 
 		// Recursively call the nested template to process the oneof choices.
 
-		// data specToModelNested BoolOfOneOfPointerField --> UseDefaultKeylifetime
-		_, isUseDefaultKeylifetime := ikeKeyLifetimeChoiceChoices.(*ves_io_schema_views_ike_phase1_profile.GlobalSpecType_UseDefaultKeylifetime)
-
-		if isUseDefaultKeylifetime {
-			ikeKeyLifetimeChoiceChoicesModel.UseDefaultKeylifetime = types.BoolValue(true)
-		} else {
-			ikeKeyLifetimeChoiceChoicesModel.UseDefaultKeylifetime = types.BoolNull()
-		}
-
-		// data specToModelNested PointerOfOneOfField --> IkeKeylifetimeMinutes
-		// <no value>
-		// false
-		{
-			ikeKeylifetimeMinutesOptions, isIkeKeylifetimeMinutes := ikeKeyLifetimeChoiceChoices.(*ves_io_schema_views_ike_phase1_profile.GlobalSpecType_IkeKeylifetimeMinutes)
-			ikeKeylifetimeMinutesAttributeMap := make(map[string]attr.Value)
-
-			if isIkeKeylifetimeMinutes && ikeKeylifetimeMinutesOptions != nil {
-
-				// data specToModelNested UintField --> Duration
-				ikeKeylifetimeMinutesAttributeMap["duration"] = types.Int64Value(int64(ikeKeylifetimeMinutesOptions.IkeKeylifetimeMinutes.GetDuration()))
-
-				ikeKeylifetimeMinutesObj, diags := types.ObjectValue(IkePhase1ProfileIkeKeyLifetimeIkeKeylifetimeMinutesModelAttributeMap, ikeKeylifetimeMinutesAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				ikeKeyLifetimeChoiceChoicesModel.IkeKeylifetimeMinutes = ikeKeylifetimeMinutesObj
-			} else {
-				ikeKeyLifetimeChoiceChoicesModel.IkeKeylifetimeMinutes = types.ObjectNull(IkePhase1ProfileIkeKeyLifetimeIkeKeylifetimeMinutesModelAttributeMap)
-			}
-		}
-
 		// data specToModelNested PointerOfOneOfField --> IkeKeylifetimeHours
 		// <no value>
 		// false
 		{
-			ikeKeylifetimeHoursOptions, isIkeKeylifetimeHours := ikeKeyLifetimeChoiceChoices.(*ves_io_schema_views_ike_phase1_profile.GlobalSpecType_IkeKeylifetimeHours)
+			ikeKeylifetimeHoursOptionsWrapper, isIkeKeylifetimeHours := ikeKeyLifetimeChoiceChoices.(*ves_io_schema_views_ike_phase1_profile.GlobalSpecType_IkeKeylifetimeHours)
 			ikeKeylifetimeHoursAttributeMap := make(map[string]attr.Value)
 
-			if isIkeKeylifetimeHours && ikeKeylifetimeHoursOptions != nil {
+			if isIkeKeylifetimeHours && ikeKeylifetimeHoursOptionsWrapper != nil && ikeKeylifetimeHoursOptionsWrapper.IkeKeylifetimeHours != nil {
+				ikeKeylifetimeHoursElement := ikeKeylifetimeHoursOptionsWrapper.IkeKeylifetimeHours
 
 				// data specToModelNested UintField --> Duration
-				ikeKeylifetimeHoursAttributeMap["duration"] = types.Int64Value(int64(ikeKeylifetimeHoursOptions.IkeKeylifetimeHours.GetDuration()))
+				ikeKeylifetimeHoursAttributeMap["duration"] = types.Int64Value(int64(ikeKeylifetimeHoursElement.GetDuration()))
 
-				ikeKeylifetimeHoursObj, diags := types.ObjectValue(IkePhase1ProfileIkeKeyLifetimeIkeKeylifetimeHoursModelAttributeMap, ikeKeylifetimeHoursAttributeMap)
-				response.Diagnostics.Append(diags...)
+				ikeKeylifetimeHoursObj, ikeKeylifetimeHoursObjDiags := types.ObjectValue(IkePhase1ProfileIkeKeyLifetimeIkeKeylifetimeHoursModelAttributeMap, ikeKeylifetimeHoursAttributeMap)
+				response.Diagnostics.Append(ikeKeylifetimeHoursObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -533,19 +507,54 @@ func (d *DataSourceF5XCIkePhase1Profile) Read(ctx context.Context, request datas
 			}
 		}
 
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		ikeKeyLifetimeChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			IkePhase1ProfileIkeKeyLifetimeModelAttributeMap,
-			ikeKeyLifetimeChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
+		// data specToModelNested PointerOfOneOfField --> IkeKeylifetimeMinutes
+		// <no value>
+		// false
+		{
+			ikeKeylifetimeMinutesOptionsWrapper, isIkeKeylifetimeMinutes := ikeKeyLifetimeChoiceChoices.(*ves_io_schema_views_ike_phase1_profile.GlobalSpecType_IkeKeylifetimeMinutes)
+			ikeKeylifetimeMinutesAttributeMap := make(map[string]attr.Value)
+
+			if isIkeKeylifetimeMinutes && ikeKeylifetimeMinutesOptionsWrapper != nil && ikeKeylifetimeMinutesOptionsWrapper.IkeKeylifetimeMinutes != nil {
+				ikeKeylifetimeMinutesElement := ikeKeylifetimeMinutesOptionsWrapper.IkeKeylifetimeMinutes
+
+				// data specToModelNested UintField --> Duration
+				ikeKeylifetimeMinutesAttributeMap["duration"] = types.Int64Value(int64(ikeKeylifetimeMinutesElement.GetDuration()))
+
+				ikeKeylifetimeMinutesObj, ikeKeylifetimeMinutesObjDiags := types.ObjectValue(IkePhase1ProfileIkeKeyLifetimeIkeKeylifetimeMinutesModelAttributeMap, ikeKeylifetimeMinutesAttributeMap)
+				response.Diagnostics.Append(ikeKeylifetimeMinutesObjDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				ikeKeyLifetimeChoiceChoicesModel.IkeKeylifetimeMinutes = ikeKeylifetimeMinutesObj
+			} else {
+				ikeKeyLifetimeChoiceChoicesModel.IkeKeylifetimeMinutes = types.ObjectNull(IkePhase1ProfileIkeKeyLifetimeIkeKeylifetimeMinutesModelAttributeMap)
+			}
 		}
 
-		// Assign the final object to the root data model.
-		data.IkeKeyLifetimeChoice = ikeKeyLifetimeChoiceObj
+		// data specToModelNested BoolOfOneOfPointerField --> UseDefaultKeylifetime
+		_, isUseDefaultKeylifetime := ikeKeyLifetimeChoiceChoices.(*ves_io_schema_views_ike_phase1_profile.GlobalSpecType_UseDefaultKeylifetime)
+
+		if isUseDefaultKeylifetime {
+			ikeKeyLifetimeChoiceChoicesModel.UseDefaultKeylifetime = types.BoolValue(true)
+		} else {
+			ikeKeyLifetimeChoiceChoicesModel.UseDefaultKeylifetime = types.BoolNull()
+		}
+
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			ikeKeyLifetimeChoiceObj, oneofDiags := utils.GoStructToObjectValue(
+				ctx,
+				IkePhase1ProfileIkeKeyLifetimeModelAttributeMap,
+				ikeKeyLifetimeChoiceChoicesModel,
+			)
+			if oneofDiags.HasError() {
+				response.Diagnostics.Append(oneofDiags...)
+				return
+			}
+
+			// Assign the final object to the root data model.
+			data.IkeKeyLifetimeChoice = ikeKeyLifetimeChoiceObj
+		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		data.IkeKeyLifetimeChoice = types.ObjectNull(IkePhase1ProfileIkeKeyLifetimeModelAttributeMap)
@@ -565,52 +574,6 @@ func (d *DataSourceF5XCIkePhase1Profile) Read(ctx context.Context, request datas
 
 		// Recursively call the nested template to process the oneof choices.
 
-		// data specToModelNested PointerOfOneOfField --> ReauthTimeoutHours
-		// <no value>
-		// false
-		{
-			reauthTimeoutHoursOptions, isReauthTimeoutHours := ikeReauthTimeoutChoiceChoices.(*ves_io_schema_views_ike_phase1_profile.GlobalSpecType_ReauthTimeoutHours)
-			reauthTimeoutHoursAttributeMap := make(map[string]attr.Value)
-
-			if isReauthTimeoutHours && reauthTimeoutHoursOptions != nil {
-
-				// data specToModelNested UintField --> Duration
-				reauthTimeoutHoursAttributeMap["duration"] = types.Int64Value(int64(reauthTimeoutHoursOptions.ReauthTimeoutHours.GetDuration()))
-
-				reauthTimeoutHoursObj, diags := types.ObjectValue(IkePhase1ProfileIkeReauthTimeoutReauthTimeoutHoursModelAttributeMap, reauthTimeoutHoursAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				ikeReauthTimeoutChoiceChoicesModel.ReauthTimeoutHours = reauthTimeoutHoursObj
-			} else {
-				ikeReauthTimeoutChoiceChoicesModel.ReauthTimeoutHours = types.ObjectNull(IkePhase1ProfileIkeReauthTimeoutReauthTimeoutHoursModelAttributeMap)
-			}
-		}
-
-		// data specToModelNested PointerOfOneOfField --> ReauthTimeoutDays
-		// <no value>
-		// false
-		{
-			reauthTimeoutDaysOptions, isReauthTimeoutDays := ikeReauthTimeoutChoiceChoices.(*ves_io_schema_views_ike_phase1_profile.GlobalSpecType_ReauthTimeoutDays)
-			reauthTimeoutDaysAttributeMap := make(map[string]attr.Value)
-
-			if isReauthTimeoutDays && reauthTimeoutDaysOptions != nil {
-
-				// data specToModelNested UintField --> Duration
-				reauthTimeoutDaysAttributeMap["duration"] = types.Int64Value(int64(reauthTimeoutDaysOptions.ReauthTimeoutDays.GetDuration()))
-
-				reauthTimeoutDaysObj, diags := types.ObjectValue(IkePhase1ProfileIkeReauthTimeoutReauthTimeoutDaysModelAttributeMap, reauthTimeoutDaysAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				ikeReauthTimeoutChoiceChoicesModel.ReauthTimeoutDays = reauthTimeoutDaysObj
-			} else {
-				ikeReauthTimeoutChoiceChoicesModel.ReauthTimeoutDays = types.ObjectNull(IkePhase1ProfileIkeReauthTimeoutReauthTimeoutDaysModelAttributeMap)
-			}
-		}
-
 		// data specToModelNested BoolOfOneOfPointerField --> ReauthDisabled
 		_, isReauthDisabled := ikeReauthTimeoutChoiceChoices.(*ves_io_schema_views_ike_phase1_profile.GlobalSpecType_ReauthDisabled)
 
@@ -620,44 +583,96 @@ func (d *DataSourceF5XCIkePhase1Profile) Read(ctx context.Context, request datas
 			ikeReauthTimeoutChoiceChoicesModel.ReauthDisabled = types.BoolNull()
 		}
 
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		ikeReauthTimeoutChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			IkePhase1ProfileIkeReauthTimeoutModelAttributeMap,
-			ikeReauthTimeoutChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
+		// data specToModelNested PointerOfOneOfField --> ReauthTimeoutDays
+		// <no value>
+		// false
+		{
+			reauthTimeoutDaysOptionsWrapper, isReauthTimeoutDays := ikeReauthTimeoutChoiceChoices.(*ves_io_schema_views_ike_phase1_profile.GlobalSpecType_ReauthTimeoutDays)
+			reauthTimeoutDaysAttributeMap := make(map[string]attr.Value)
+
+			if isReauthTimeoutDays && reauthTimeoutDaysOptionsWrapper != nil && reauthTimeoutDaysOptionsWrapper.ReauthTimeoutDays != nil {
+				reauthTimeoutDaysElement := reauthTimeoutDaysOptionsWrapper.ReauthTimeoutDays
+
+				// data specToModelNested UintField --> Duration
+				reauthTimeoutDaysAttributeMap["duration"] = types.Int64Value(int64(reauthTimeoutDaysElement.GetDuration()))
+
+				reauthTimeoutDaysObj, reauthTimeoutDaysObjDiags := types.ObjectValue(IkePhase1ProfileIkeReauthTimeoutReauthTimeoutDaysModelAttributeMap, reauthTimeoutDaysAttributeMap)
+				response.Diagnostics.Append(reauthTimeoutDaysObjDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				ikeReauthTimeoutChoiceChoicesModel.ReauthTimeoutDays = reauthTimeoutDaysObj
+			} else {
+				ikeReauthTimeoutChoiceChoicesModel.ReauthTimeoutDays = types.ObjectNull(IkePhase1ProfileIkeReauthTimeoutReauthTimeoutDaysModelAttributeMap)
+			}
 		}
 
-		// Assign the final object to the root data model.
-		data.IkeReauthTimeoutChoice = ikeReauthTimeoutChoiceObj
+		// data specToModelNested PointerOfOneOfField --> ReauthTimeoutHours
+		// <no value>
+		// false
+		{
+			reauthTimeoutHoursOptionsWrapper, isReauthTimeoutHours := ikeReauthTimeoutChoiceChoices.(*ves_io_schema_views_ike_phase1_profile.GlobalSpecType_ReauthTimeoutHours)
+			reauthTimeoutHoursAttributeMap := make(map[string]attr.Value)
+
+			if isReauthTimeoutHours && reauthTimeoutHoursOptionsWrapper != nil && reauthTimeoutHoursOptionsWrapper.ReauthTimeoutHours != nil {
+				reauthTimeoutHoursElement := reauthTimeoutHoursOptionsWrapper.ReauthTimeoutHours
+
+				// data specToModelNested UintField --> Duration
+				reauthTimeoutHoursAttributeMap["duration"] = types.Int64Value(int64(reauthTimeoutHoursElement.GetDuration()))
+
+				reauthTimeoutHoursObj, reauthTimeoutHoursObjDiags := types.ObjectValue(IkePhase1ProfileIkeReauthTimeoutReauthTimeoutHoursModelAttributeMap, reauthTimeoutHoursAttributeMap)
+				response.Diagnostics.Append(reauthTimeoutHoursObjDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				ikeReauthTimeoutChoiceChoicesModel.ReauthTimeoutHours = reauthTimeoutHoursObj
+			} else {
+				ikeReauthTimeoutChoiceChoicesModel.ReauthTimeoutHours = types.ObjectNull(IkePhase1ProfileIkeReauthTimeoutReauthTimeoutHoursModelAttributeMap)
+			}
+		}
+
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			ikeReauthTimeoutChoiceObj, oneofDiags := utils.GoStructToObjectValue(
+				ctx,
+				IkePhase1ProfileIkeReauthTimeoutModelAttributeMap,
+				ikeReauthTimeoutChoiceChoicesModel,
+			)
+			if oneofDiags.HasError() {
+				response.Diagnostics.Append(oneofDiags...)
+				return
+			}
+
+			// Assign the final object to the root data model.
+			data.IkeReauthTimeoutChoice = ikeReauthTimeoutChoiceObj
+		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		data.IkeReauthTimeoutChoice = types.ObjectNull(IkePhase1ProfileIkeReauthTimeoutModelAttributeMap)
 	}
 
-	// data SpecToModelRoot RequiredArrayOfEnumField --> EncryptionAlgos
-	if len(specData.GetEncryptionAlgos()) > 0 {
-		encryptionAlgosStrings := make([]string, 0, len(specData.GetEncryptionAlgos()))
-		for _, v := range specData.GetEncryptionAlgos() {
-			if strVal, exists := ves_io_schema.EncryptionAlgorithm_name[int32(v)]; exists {
-				encryptionAlgosStrings = append(encryptionAlgosStrings, strVal)
+	// data SpecToModelRoot RequiredArrayOfEnumField --> Prf
+	{
+		if len(specData.GetPrf()) > 0 {
+			prfStrings := make([]string, 0, len(specData.GetPrf()))
+			for _, v := range specData.GetPrf() {
+				if strVal, exists := ves_io_schema.PseudoRandomFunction_name[int32(v)]; exists {
+					prfStrings = append(prfStrings, strVal)
+				}
 			}
+			listValue, listDiags := types.ListValueFrom(ctx, types.StringType, prfStrings)
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			data.Prf = listValue
+		} else {
+			data.Prf = types.ListNull(types.StringType)
 		}
-		listValue, diags := types.ListValueFrom(ctx, types.StringType, encryptionAlgosStrings)
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.EncryptionAlgos = listValue
-	} else {
-		data.EncryptionAlgos = types.ListNull(types.StringType)
 	}
 
 	// Set state to fully populated data
-	diags = response.State.Set(ctx, &data)
+	diags := response.State.Set(ctx, &data)
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return

@@ -1423,10 +1423,7 @@ var APISwaggerJSON string = `{
         "title": "ves.io/schema/fleet/crudapi/api.proto",
         "version": "version not set"
     },
-    "schemes": [
-        "http",
-        "https"
-    ],
+    "schemes": null,
     "consumes": [
         "application/json"
     ],
@@ -1492,6 +1489,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -1505,8 +1508,7 @@ var APISwaggerJSON string = `{
                         "name": "all_backrefs",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     },
                     {
                         "name": "backref_types",
@@ -1523,8 +1525,7 @@ var APISwaggerJSON string = `{
                         "description": "in case of ref-by-name whether to report referred's uid.",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     }
                 ],
                 "tags": [
@@ -1591,6 +1592,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1666,6 +1673,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1757,6 +1770,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -1805,16 +1824,14 @@ var APISwaggerJSON string = `{
                         "description": "Get the resource_version associated with the list.",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     },
                     {
                         "name": "include_referred_id",
                         "description": "in case of ref-by-name whether to report referred's uid.",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     },
                     {
                         "name": "page_start",
@@ -1897,6 +1914,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -1931,7 +1954,16 @@ var APISwaggerJSON string = `{
                     "200": {
                         "description": "A successful response.(streaming responses)",
                         "schema": {
-                            "$ref": "#/x-stream-definitions/crudapiObjectListRsp"
+                            "type": "object",
+                            "title": "Stream result of crudapiObjectListRsp",
+                            "properties": {
+                                "error": {
+                                    "$ref": "#/definitions/runtimeStreamError"
+                                },
+                                "result": {
+                                    "$ref": "#/definitions/crudapiObjectListRsp"
+                                }
+                            }
                         }
                     },
                     "401": {
@@ -1981,6 +2013,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2029,16 +2067,14 @@ var APISwaggerJSON string = `{
                         "description": "Get the resource_version associated with the list.",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     },
                     {
                         "name": "include_referred_id",
                         "description": "in case of ref-by-name whether to report referred's uid.",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     },
                     {
                         "name": "page_start",
@@ -2128,6 +2164,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2141,8 +2183,7 @@ var APISwaggerJSON string = `{
                         "name": "all_backrefs",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     },
                     {
                         "name": "backref_types",
@@ -2159,8 +2200,7 @@ var APISwaggerJSON string = `{
                         "description": "in case of ref-by-name whether to report referred's uid.",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     }
                 ],
                 "tags": [
@@ -2235,6 +2275,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2283,16 +2329,14 @@ var APISwaggerJSON string = `{
                         "description": "Get the resource_version associated with the list.",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     },
                     {
                         "name": "include_referred_id",
                         "description": "in case of ref-by-name whether to report referred's uid.",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     },
                     {
                         "name": "page_start",
@@ -2382,6 +2426,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2456,6 +2506,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2546,6 +2602,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2870,6 +2932,16 @@ var APISwaggerJSON string = `{
                 "disable": {
                     "description": "x-displayName: \"Disabled\"\nDisables the BGP routing policy",
                     "title": "disable",
+                    "$ref": "#/definitions/schemaEmpty"
+                },
+                "ebgp_multihop_disabled": {
+                    "description": "x-displayName: \"Disabled\"\neBGP multihop is disabled. Single-hop BFD (port 3784) is used and\nebgp-multihop is not configured on the BGP speaker.",
+                    "title": "ebgp_multihop_disabled",
+                    "$ref": "#/definitions/schemaEmpty"
+                },
+                "ebgp_multihop_enabled": {
+                    "description": "x-displayName: \"Enabled\"\neBGP multihop is enabled (default). The BGP speaker allows non-directly-connected peers\nand BFD runs in multihop mode (port 4784).",
+                    "title": "ebgp_multihop_enabled",
                     "$ref": "#/definitions/schemaEmpty"
                 },
                 "external": {
@@ -3345,12 +3417,12 @@ var APISwaggerJSON string = `{
                     "x-displayname": "DNS"
                 },
                 "network_type": {
-                    "description": " Site Local VRF on which this service will be disabled\n\nValidation Rules:\n  ves.io.schema.rules.enum.in: [0,1,13]\n",
+                    "description": " Site Local VRF on which this service will be disabled\n\nValidation Rules:\n  ves.io.schema.rules.enum.in: [0,1,12,13]\n",
                     "title": "network_type",
                     "$ref": "#/definitions/schemaVirtualNetworkType",
                     "x-displayname": "Site Local VRF",
                     "x-ves-validation-rules": {
-                        "ves.io.schema.rules.enum.in": "[0,1,13]"
+                        "ves.io.schema.rules.enum.in": "[0,1,12,13]"
                     }
                 },
                 "ssh": {
@@ -3633,7 +3705,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Enable/Disable attachment preemption!",
                     "title": "Disable Preempt Attachments",
-                    "format": "boolean",
                     "x-displayname": "Disable Preempt Attachments"
                 },
                 "flash_arrays": {
@@ -3768,7 +3839,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Enable/Disable FlashBlade snapshots",
                     "title": "Enable Snapshot Directory",
-                    "format": "boolean",
                     "x-displayname": "Enable Snapshot Directory"
                 },
                 "export_rules": {
@@ -4006,7 +4076,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Allow volume expansion.",
                     "title": "Allow Volume Expansion",
-                    "format": "boolean",
                     "x-displayname": "Allow Volume Expansion"
                 },
                 "custom_storage": {
@@ -4019,7 +4088,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Make this storage class default storage class for the K8s cluster",
                     "title": "Default Storage Class",
-                    "format": "boolean",
                     "x-displayname": "Default Storage Class"
                 },
                 "description": {
@@ -4341,7 +4409,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Enable NetApp volume encryption.\n\nExample: - \"false\"-",
                     "title": "Enable Encryption",
-                    "format": "boolean",
                     "x-displayname": "Enable Encryption",
                     "x-ves-example": "false"
                 },
@@ -4381,7 +4448,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Access to the .snapshot directory.",
                     "title": "Access to Snapshot Directory",
-                    "format": "boolean",
                     "x-displayname": "Access to Snapshot Directory"
                 },
                 "snapshot_policy": {
@@ -4412,7 +4478,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Split a clone from its parent upon creation.\n\nExample: - \"false\"-",
                     "title": "Split on Clone",
-                    "format": "boolean",
                     "x-displayname": "Split on Clone",
                     "x-ves-example": "false"
                 },
@@ -4622,7 +4687,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Indicates that the volume should enable deduplication.\n\nExample: - \"true\"-",
                     "title": "dedupeEnabled",
-                    "format": "boolean",
                     "x-displayname": "dedupeEnabled",
                     "x-ves-example": "true"
                 },
@@ -4641,7 +4705,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Indicates the backing Nimble volume (including snapshots) should be destroyed when the PVC is deleted\n\nExample: - \"false\"-",
                     "title": "destroyOnDelete",
-                    "format": "boolean",
                     "x-displayname": "destroyOnDelete",
                     "x-ves-example": "false"
                 },
@@ -4649,7 +4712,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Indicates that the volume should be encrypted.\n\nExample: - \"false\"-",
                     "title": "encrypted",
-                    "format": "boolean",
                     "x-displayname": "encrypted",
                     "x-ves-example": "false"
                 },
@@ -4739,7 +4801,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Indicates that a snapshot of the volume should be synced to the replication partner each time it is detached from a node.\n\nExample: - \"false\"-",
                     "title": "syncOnDetach",
-                    "format": "boolean",
                     "x-displayname": "syncOnDetach",
                     "x-ves-example": "false"
                 },
@@ -4747,7 +4808,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Indicates that the volume should be thick provisioned.\n\nExample: - \"false\"-",
                     "title": "thick",
-                    "format": "boolean",
                     "x-displayname": "thick",
                     "x-ves-example": "false"
                 }
@@ -4920,7 +4980,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Enable automatic export policy creation and updating",
                     "title": "Auto Export Policy",
-                    "format": "boolean",
                     "x-displayname": "Auto Export Policy"
                 },
                 "backend_name": {
@@ -5413,14 +5472,12 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " This option is to enable/disable the csi topology feature for pso-csi",
                     "title": "Enable Storage Topology",
-                    "format": "boolean",
                     "x-displayname": "Enable Storage Topology"
                 },
                 "enable_strict_topology": {
                     "type": "boolean",
                     "description": " This option is to enable/disable the strict csi topology feature for pso-csi",
                     "title": "Enable Strict Topology",
-                    "format": "boolean",
                     "x-displayname": "Enable Strict Topology"
                 }
             }
@@ -5555,6 +5612,27 @@ var APISwaggerJSON string = `{
                     "type": "string",
                     "description": "Must be a valid serialized protocol buffer of the above specified type.",
                     "format": "byte"
+                }
+            }
+        },
+        "runtimeError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/protobufAny"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
                 }
             }
         },
@@ -5705,6 +5783,27 @@ var APISwaggerJSON string = `{
                 }
             }
         },
+        "schemaDualStackAddressType": {
+            "type": "object",
+            "description": "DualStackAddressType represents both IPv4 and IPv6 together.",
+            "title": "Dualstack IPv4 and IPv6 Address",
+            "x-displayname": "Dualstack Address",
+            "x-ves-proto-message": "ves.io.schema.DualStackAddressType",
+            "properties": {
+                "ipv4": {
+                    "description": " IPv4 Address",
+                    "title": "IPv4 Address",
+                    "$ref": "#/definitions/schemaIpv4AddressType",
+                    "x-displayname": "IPv4 Address"
+                },
+                "ipv6": {
+                    "description": " IPv6 Address",
+                    "title": "IPv6 Address",
+                    "$ref": "#/definitions/schemaIpv6AddressType",
+                    "x-displayname": "IPv6 Address"
+                }
+            }
+        },
         "schemaEmpty": {
             "type": "object",
             "description": "This can be used for messages where no values are needed",
@@ -5757,17 +5856,23 @@ var APISwaggerJSON string = `{
             "title": "IP Address",
             "x-displayname": "IP Address",
             "x-ves-displayorder": "3",
-            "x-ves-oneof-field-ver": "[\"ipv4\",\"ipv6\"]",
+            "x-ves-oneof-field-ver": "[\"dual_stack\",\"ipv4\",\"ipv6\"]",
             "x-ves-proto-message": "ves.io.schema.IpAddressType",
             "properties": {
+                "dual_stack": {
+                    "description": "Exclusive with [ipv4 ipv6]\n Both IPv4 and IPv6 addresses are specified together",
+                    "title": "Dual-stack Address (IPv4 + IPv6)",
+                    "$ref": "#/definitions/schemaDualStackAddressType",
+                    "x-displayname": "Dual-stack Address"
+                },
                 "ipv4": {
-                    "description": "Exclusive with [ipv6]\n IPv4 Address",
+                    "description": "Exclusive with [dual_stack ipv6]\n IPv4 Address",
                     "title": "IPv4 Address",
                     "$ref": "#/definitions/schemaIpv4AddressType",
                     "x-displayname": "IPv4 Address"
                 },
                 "ipv6": {
-                    "description": "Exclusive with [ipv4]\n IPv6 Address",
+                    "description": "Exclusive with [dual_stack ipv4]\n IPv6 Address",
                     "title": "IPv6 ADDRESS",
                     "$ref": "#/definitions/schemaIpv6AddressType",
                     "x-displayname": "IPv6 Address"
@@ -5915,8 +6020,7 @@ var APISwaggerJSON string = `{
                 "disable": {
                     "type": "boolean",
                     "description": "x-displayName: \"Disable\"\nx-example: \"true\"\nA value of true will administratively disable the object that corresponds to the containing message.",
-                    "title": "disable",
-                    "format": "boolean"
+                    "title": "disable"
                 },
                 "name": {
                     "type": "string",
@@ -6007,7 +6111,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable",
                     "x-ves-example": "true"
                 },
@@ -6200,7 +6303,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Indicate whether mars deems this object to be stale via graceful restart timer information",
                     "title": "vtrp_stale",
-                    "format": "boolean",
                     "x-displayname": "VTRP Stale"
                 }
             }
@@ -6364,7 +6466,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " This should be set to true If VES/SRE operator wants to suppress an object from being\n presented to business-logic of a daemon(e.g. due to bad-form/issue-causing Object).\n This is meant only to be used in temporary situations for operational continuity till\n a fix is rolled out in business-logic.\n\nExample: - \"true\"-",
                     "title": "sre_disable",
-                    "format": "boolean",
                     "x-displayname": "SRE Disable",
                     "x-ves-example": "true"
                 },
@@ -6399,7 +6500,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Indicate whether mars deems this object to be stale via graceful restart timer information",
                     "title": "vtrp_stale",
-                    "format": "boolean",
                     "x-displayname": "VTRP Stale"
                 }
             }
@@ -6476,7 +6576,7 @@ var APISwaggerJSON string = `{
         },
         "schemaVirtualNetworkType": {
             "type": "string",
-            "description": "Different types of virtual networks understood by the system\n\nVirtual-network of type VIRTUAL_NETWORK_SITE_LOCAL provides connectivity to public (outside) network.\nThis is an insecure network and is connected to public internet via NAT Gateways/firwalls\nVirtual-network of this type is local to every site. Two virtual networks of this type on different\nsites are neither related nor connected.\n\nConstraints:\nThere can be atmost one virtual network of this type in a given site.\nThis network type is supported on CE sites. This network is created automatically and present on all sites\nVirtual-network of type VIRTUAL_NETWORK_SITE_LOCAL_INSIDE is a private network inside site.\nIt is a secure network and is not connected to public network.\nVirtual-network of this type is local to every site. Two virtual networks of this type on different\nsites are neither related nor connected.\n\nConstraints:\nThere can be atmost one virtual network of this type in a given site.\nThis network type is supported on CE sites. This network is created during provisioning of site\nUser defined per-site virtual network. Scope of this virtual network is limited to the site.\nThis is not yet supported\nVirtual-network of type VIRTUAL_NETWORK_PUBLIC directly conects to the public internet.\nVirtual-network of this type is local to every site. Two virtual networks of this type on different sites are neither related nor connected.\n\nConstraints:\nThere can be atmost one virtual network of this type in a given site.\nThis network type is supported on RE sites only\nIt is an internally created by the system. They must not be created by user\nVirtual Neworks with global scope across different sites in F5XC domain.\nAn example global virtual-network called \"AIN Network\" is created for every tenant.\nfor volterra fabric\n\nConstraints:\nIt is currently only supported as internally created by the system.\nvK8s service network for a given tenant. Used to advertise a virtual host only to vk8s pods for that tenant\nConstraints:\nIt is an internally created by the system. Must not be created by user\nVER internal network for the site. It can only be used for virtual hosts with SMA_PROXY type proxy\nConstraints:\nIt is an internally created by the system. Must not be created by user\nVirtual-network of type VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE represents both\nVIRTUAL_NETWORK_SITE_LOCAL and VIRTUAL_NETWORK_SITE_LOCAL_INSIDE\n\nConstraints:\nThis network type is only meaningful in an advertise policy\nWhen virtual-network of type VIRTUAL_NETWORK_IP_AUTO is selected for\nan endpoint, VER will try to determine the network based on the provided\nIP address\n\nConstraints:\nThis network type is only meaningful in an endpoint\n\nVoltADN Private Network is used on volterra RE(s) to connect to customer private networks\nThis network is created by opening a support ticket\n\nThis network is per site srv6 network\nVER IP Fabric network for the site.\nThis Virtual network type is used for exposing virtual host on IP Fabric network on the VER site or\nfor endpoint in IP Fabric network\nConstraints:\nIt is an internally created by the system. Must not be created by user\nNetwork internally created for a segment\nConstraints:\nIt is an internally created by the system. Must not be created by user\nVirtual-network of type VIRTUAL_NETWORK_MANAGEMENT is used for management purposes",
+            "description": "Different types of virtual networks understood by the system\n\nVirtual-network of type VIRTUAL_NETWORK_SITE_LOCAL provides connectivity to public (outside) network.\nThis is an insecure network and is connected to public internet via NAT Gateways/firwalls\nVirtual-network of this type is local to every site. Two virtual networks of this type on different\nsites are neither related nor connected.\n\nConstraints:\nThere can be atmost one virtual network of this type in a given site.\nThis network type is supported on CE sites. This network is created automatically and present on all sites\nVirtual-network of type VIRTUAL_NETWORK_SITE_LOCAL_INSIDE is a private network inside site.\nIt is a secure network and is not connected to public network.\nVirtual-network of this type is local to every site. Two virtual networks of this type on different\nsites are neither related nor connected.\n\nConstraints:\nThere can be atmost one virtual network of this type in a given site.\nThis network type is supported on CE sites. This network is created during provisioning of site\nUser defined per-site virtual network. Scope of this virtual network is limited to the site.\nThis is not yet supported\nVirtual-network of type VIRTUAL_NETWORK_PUBLIC directly conects to the public internet.\nVirtual-network of this type is local to every site. Two virtual networks of this type on different sites are neither related nor connected.\n\nConstraints:\nThere can be atmost one virtual network of this type in a given site.\nThis network type is supported on RE sites only\nIt is an internally created by the system. They must not be created by user\nVirtual Neworks with global scope across different sites in F5XC domain.\nAn example global virtual-network called \"AIN Network\" is created for every tenant.\nfor volterra fabric\n\nConstraints:\nIt is currently only supported as internally created by the system.\nvK8s service network for a given tenant. Used to advertise a virtual host only to vk8s pods for that tenant\nConstraints:\nIt is an internally created by the system. Must not be created by user\nVER internal network for the site. It can only be used for virtual hosts with SMA_PROXY type proxy\nConstraints:\nIt is an internally created by the system. Must not be created by user\nVirtual-network of type VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE represents both\nVIRTUAL_NETWORK_SITE_LOCAL and VIRTUAL_NETWORK_SITE_LOCAL_INSIDE\n\nConstraints:\nThis network type is only meaningful in an advertise policy\nWhen virtual-network of type VIRTUAL_NETWORK_IP_AUTO is selected for\nan endpoint, VER will try to determine the network based on the provided\nIP address\n\nConstraints:\nThis network type is only meaningful in an endpoint\n\nVoltADN Private Network is used on volterra RE(s) to connect to customer private networks\nThis network is created by opening a support ticket\n\nThis network is per site srv6 network\nVER IP Fabric network for the site.\nThis Virtual network type is used for exposing virtual host on IP Fabric network on the VER site or\nfor endpoint in IP Fabric network\nConstraints:\nIt is an internally created by the system. Must not be created by user\nVirtual-network of type VIRTUAL_NETWORK_SEGMENT for segment interface\nVirtual-network of type VIRTUAL_NETWORK_MANAGEMENT is used for management purposes",
             "title": "VirtualNetworkType",
             "enum": [
                 "VIRTUAL_NETWORK_SITE_LOCAL",
@@ -6633,7 +6733,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Enable default fleet config, It must be set for storage config and gpu config",
                     "title": "Enable default fleet config download",
-                    "format": "boolean",
                     "x-displayname": "Enable Default Fleet Config Download"
                 },
                 "enable_gpu": {
@@ -7095,19 +7194,5 @@ var APISwaggerJSON string = `{
         }
     },
     "x-displayname": "",
-    "x-stream-definitions": {
-        "crudapiObjectListRsp": {
-            "properties": {
-                "error": {
-                    "$ref": "#/definitions/runtimeStreamError"
-                },
-                "result": {
-                    "$ref": "#/definitions/crudapiObjectListRsp"
-                }
-            },
-            "title": "Stream result of crudapiObjectListRsp",
-            "type": "object"
-        }
-    },
     "x-ves-proto-file": "ves.io/schema/fleet/crudapi/api.proto"
 }`

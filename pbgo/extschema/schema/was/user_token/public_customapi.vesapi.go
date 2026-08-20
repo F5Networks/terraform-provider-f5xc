@@ -289,10 +289,7 @@ var CustomAPISwaggerJSON string = `{
         "description": "Use this API to get one time user token to connect to Web App Scanning Service",
         "version": "version not set"
     },
-    "schemes": [
-        "http",
-        "https"
-    ],
+    "schemes": null,
     "consumes": [
         "application/json"
     ],
@@ -360,6 +357,12 @@ var CustomAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "tags": [
@@ -377,6 +380,39 @@ var CustomAPISwaggerJSON string = `{
         }
     },
     "definitions": {
+        "protobufAny": {
+            "type": "object",
+            "properties": {
+                "type_url": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string",
+                    "format": "byte"
+                }
+            }
+        },
+        "runtimeError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/protobufAny"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
         "user_tokenGetUserTokenResponse": {
             "type": "object",
             "description": "Response body of token to connect to the Web App Scanning Service",

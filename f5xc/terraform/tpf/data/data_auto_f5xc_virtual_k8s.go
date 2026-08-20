@@ -36,25 +36,25 @@ type VirtualK8SGlobalSpecTypeServiceIsolationChoice struct {
 
 // DataSourceF5XCVirtualK8SModel describes the resource data model.
 type DataSourceF5XCVirtualK8SModel struct {
+	Annotations            types.Map      `tfsdk:"annotations"`
 	Description            types.String   `tfsdk:"description"`
+	Labels                 types.Map      `tfsdk:"labels"`
 	Name                   types.String   `tfsdk:"name"`
 	Namespace              types.String   `tfsdk:"namespace"`
 	Uid                    types.String   `tfsdk:"uid"`
-	Labels                 types.Map      `tfsdk:"labels"`
-	Annotations            types.Map      `tfsdk:"annotations"`
-	VsiteRefs              types.List     `tfsdk:"vsite_refs"`
-	ServiceIsolationChoice types.Object   `tfsdk:"service_isolation_choice"`
 	DefaultFlavorRef       types.Object   `tfsdk:"default_flavor_ref"`
+	ServiceIsolationChoice types.Object   `tfsdk:"service_isolation_choice"`
+	VsiteRefs              types.List     `tfsdk:"vsite_refs"`
 	Timeouts               timeouts.Value `tfsdk:"timeouts"`
 }
 
 // --- Attribute Maps for Nested Structs ---
-// Attribute map for ArrayOfPointerField --> VsiteRefs
-var VirtualK8sVsiteRefsObjectRefModelAttributeMap = map[string]attr.Type{
+// Attribute map for PointerField --> DefaultFlavorRef
+var VirtualK8sDefaultFlavorRefModelAttributeMap = map[string]attr.Type{
 
 	"name":      types.StringType,
-	"tenant":    types.StringType,
 	"namespace": types.StringType,
+	"tenant":    types.StringType,
 }
 
 // Attribute map for OneOfField --> ServiceIsolationChoice
@@ -64,12 +64,12 @@ var VirtualK8sServiceIsolationChoiceModelAttributeMap = map[string]attr.Type{
 	"isolated": types.BoolType,
 }
 
-// Attribute map for PointerField --> DefaultFlavorRef
-var VirtualK8sDefaultFlavorRefModelAttributeMap = map[string]attr.Type{
+// Attribute map for ArrayOfPointerField --> VsiteRefs
+var VirtualK8sVsiteRefsObjectRefModelAttributeMap = map[string]attr.Type{
 
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
 	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
 }
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -86,15 +86,29 @@ func (d *DataSourceF5XCVirtualK8S) Metadata(ctx context.Context, request datasou
 func (r *DataSourceF5XCVirtualK8S) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "VirtualK8S data source",
-		Description:         "VirtualK8S data source",
+		MarkdownDescription: "GetRequest is used to get different forms of a virtual_k8s This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of virtual_k8s) etc. can be fetched",
+		Description:         "GetRequest is used to get different forms of a virtual_k8s This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of virtual_k8s) etc. can be fetched",
 
 		Attributes: map[string]schema.Attribute{
+			"annotations": schema.MapAttribute{
+				Description: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				ElementType: types.StringType,
+			},
 			"description": schema.StringAttribute{
 				Description: "description Human readable description for the object",
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
+			},
+			"labels": schema.MapAttribute{
+				Description: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				ElementType: types.StringType,
 			},
 			"name": schema.StringAttribute{
 				Description: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
@@ -114,45 +128,29 @@ func (r *DataSourceF5XCVirtualK8S) Schema(ctx context.Context, request datasourc
 				Optional:    false,
 				Computed:    true,
 			},
-			"labels": schema.MapAttribute{
-				Description: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+			"default_flavor_ref": schema.SingleNestedAttribute{
+				Description: "Default Workload Flavor Default workfload flavor for all workloads launched in this Virtual K8s",
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
-				ElementType: types.StringType,
-			},
-			"annotations": schema.MapAttribute{
-				Description: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
-			"vsite_refs": schema.ListNestedAttribute{
-				Description: "vsite_refs Reference to virtual-sites Default virtual-site of the Virtual K8s object. If no virtual-site is specified in the Kubernetes API resource object annotations via ves.io/virtual-sites, then this virtual-site is used select sites on which to instantiate the Kubernetes API resource object",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-						"name": schema.StringAttribute{
-							Description: "",
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-						},
-						"tenant": schema.StringAttribute{
-							Description: "",
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-						},
-						"namespace": schema.StringAttribute{
-							Description: "",
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-						},
+				Attributes: map[string]schema.Attribute{
+					"name": schema.StringAttribute{
+						Description: "",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
+					"namespace": schema.StringAttribute{
+						Description: "",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
+					"tenant": schema.StringAttribute{
+						Description: "",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
 					},
 				},
 			},
@@ -176,29 +174,31 @@ func (r *DataSourceF5XCVirtualK8S) Schema(ctx context.Context, request datasourc
 					},
 				},
 			},
-			"default_flavor_ref": schema.SingleNestedAttribute{
-				Description: "Default Workload Flavor Default workfload flavor for all workloads launched in this Virtual K8s",
+			"vsite_refs": schema.ListNestedAttribute{
+				Description: "vsite_refs Reference to virtual-sites Default virtual-site of the Virtual K8s object. If no virtual-site is specified in the Kubernetes API resource object annotations via ves.io/virtual-sites, then this virtual-site is used select sites on which to instantiate the Kubernetes API resource object",
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
-				Attributes: map[string]schema.Attribute{
-					"tenant": schema.StringAttribute{
-						Description: "",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-					},
-					"namespace": schema.StringAttribute{
-						Description: "",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-					},
-					"name": schema.StringAttribute{
-						Description: "",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"name": schema.StringAttribute{
+							Description: "",
+							Required:    false,
+							Optional:    false,
+							Computed:    true,
+						},
+						"namespace": schema.StringAttribute{
+							Description: "",
+							Required:    false,
+							Optional:    false,
+							Computed:    true,
+						},
+						"tenant": schema.StringAttribute{
+							Description: "",
+							Required:    false,
+							Optional:    false,
+							Computed:    true,
+						},
 					},
 				},
 			},
@@ -249,15 +249,14 @@ func (d *DataSourceF5XCVirtualK8S) Read(ctx context.Context, request datasource.
 		return
 	}
 
-	readTimeout, diags := data.Timeouts.Read(ctx, duration)
-	response.Diagnostics.Append(diags...)
+	readTimeout, readDiags := data.Timeouts.Read(ctx, duration)
+	response.Diagnostics.Append(readDiags...)
 	if response.Diagnostics.HasError() {
 		return
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
-
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_virtual_k8s.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
@@ -272,36 +271,6 @@ func (d *DataSourceF5XCVirtualK8S) Read(ctx context.Context, request datasource.
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
-
-	// data SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
-
-	// data SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
-
-	// data SpecToModelRoot Meta RequiredStringField --> Namespace
-	data.Namespace = types.StringValue(metaData.GetNamespace())
-
-	// data SpecToModelRoot Meta StringField --> Uid
-	data.Uid = types.StringValue(systemMetaData.GetUid())
-
-	// data SpecToModelRoot Meta MapOfStringField --> Labels
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// Assign the typed map to the model
-		data.Labels = labelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil and the model has no value: set an explicit Null map to avoid
-		// DynamicPseudoType errors. If the model already contains a value (e.g. labels were set
-		// but the API did not echo them back in the response), preserve the existing value to prevent
-		// "Provider produced inconsistent result after apply" errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
 
 	// data SpecToModelRoot Meta MapOfStringField --> Annotations
 	if metaData.GetAnnotations() != nil {
@@ -321,58 +290,74 @@ func (d *DataSourceF5XCVirtualK8S) Read(ctx context.Context, request datasource.
 		data.Annotations = types.MapNull(types.StringType)
 	}
 
-	// data SpecToModelRoot ArrayOfPointerField --> VsiteRefs
-	if len(specData.VsiteRefs) > 0 {
-		vsiteRefsElements := make([]ObjectRefTypeModel, 0, len(specData.VsiteRefs))
+	// data SpecToModelRoot Meta StringField --> Description
+	data.Description = types.StringValue(metaData.GetDescription())
 
-		for _, vsiteRefsElement := range specData.VsiteRefs {
-			objectRefTypeModelModel := ObjectRefTypeModel{}
-
-			// data specToModelNested RequiredStringField --> Name
-			if vsiteRefsElement.GetName() != "" {
-				objectRefTypeModelModel.Name = types.StringValue(vsiteRefsElement.GetName())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Name = types.StringNull()
-			}
-
-			// data specToModelNested StringField --> Tenant
-			if vsiteRefsElement.GetTenant() != "" {
-				objectRefTypeModelModel.Tenant = types.StringValue(vsiteRefsElement.GetTenant())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Tenant = types.StringNull()
-			}
-
-			// data specToModelNested RequiredStringField --> Namespace
-			if vsiteRefsElement.GetNamespace() != "" {
-				objectRefTypeModelModel.Namespace = types.StringValue(vsiteRefsElement.GetNamespace())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Namespace = types.StringNull()
-			}
-
-			vsiteRefsElements = append(vsiteRefsElements, objectRefTypeModelModel)
-		}
-
-		vsiteRefsList, diags := utils.GoStructSliceToListValue(
-			ctx,
-			VirtualK8sVsiteRefsObjectRefModelAttributeMap,
-			vsiteRefsElements,
-		)
-
-		response.Diagnostics.Append(diags...)
+	// data SpecToModelRoot Meta MapOfStringField --> Labels
+	if metaData.GetLabels() != nil {
+		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
+		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+		response.Diagnostics.Append(labelsDiags...)
 		if response.Diagnostics.HasError() {
 			return
 		}
+		// Assign the typed map to the model
+		data.Labels = labelsMap
+	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
+		// API returned nil and the model has no value: set an explicit Null map to avoid
+		// DynamicPseudoType errors. If the model already contains a value (e.g. labels were set
+		// but the API did not echo them back in the response), preserve the existing value to prevent
+		// "Provider produced inconsistent result after apply" errors.
+		data.Labels = types.MapNull(types.StringType)
+	}
 
-		data.VsiteRefs = vsiteRefsList
-	} else {
-		var vsiteRefsObjectType = basetypes.ObjectType{
-			AttrTypes: VirtualK8sVsiteRefsObjectRefModelAttributeMap,
+	// data SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
+
+	// data SpecToModelRoot Meta RequiredStringField --> Namespace
+	data.Namespace = types.StringValue(metaData.GetNamespace())
+
+	// data SpecToModelRoot Meta StringField --> Uid
+	data.Uid = types.StringValue(systemMetaData.GetUid())
+
+	// data SpecToModelRoot PointerField --> DefaultFlavorRef
+	if specData.GetDefaultFlavorRef() != nil {
+		var objectRefTypeModelModel = &ObjectRefTypeModel{}
+		defaultFlavorRefElement := specData.GetDefaultFlavorRef()
+
+		// data specToModelNested RequiredStringField --> Name
+		if defaultFlavorRefElement.GetName() != "" {
+			objectRefTypeModelModel.Name = types.StringValue(defaultFlavorRefElement.GetName())
+		} else {
+			// Empty string, set to null
+			objectRefTypeModelModel.Name = types.StringNull()
 		}
-		nullVsiteRefsList := basetypes.NewListNull(vsiteRefsObjectType)
-		data.VsiteRefs = nullVsiteRefsList
+
+		// data specToModelNested RequiredStringField --> Namespace
+		if defaultFlavorRefElement.GetNamespace() != "" {
+			objectRefTypeModelModel.Namespace = types.StringValue(defaultFlavorRefElement.GetNamespace())
+		} else {
+			// Empty string, set to null
+			objectRefTypeModelModel.Namespace = types.StringNull()
+		}
+
+		// data specToModelNested StringField --> Tenant
+		if defaultFlavorRefElement.GetTenant() != "" {
+			objectRefTypeModelModel.Tenant = types.StringValue(defaultFlavorRefElement.GetTenant())
+		} else {
+			// Empty string, set to null
+			objectRefTypeModelModel.Tenant = types.StringNull()
+		}
+
+		defaultFlavorRefObj, defaultFlavorRefDiags := utils.GoStructToObjectValue(
+			ctx,
+			VirtualK8sDefaultFlavorRefModelAttributeMap,
+			objectRefTypeModelModel,
+		)
+		response.Diagnostics.Append(defaultFlavorRefDiags...)
+		data.DefaultFlavorRef = defaultFlavorRefObj
+	} else {
+		data.DefaultFlavorRef = types.ObjectNull(VirtualK8sDefaultFlavorRefModelAttributeMap)
 	}
 
 	// data SpecToModelRoot OneOfField --> ServiceIsolationChoice
@@ -408,68 +393,83 @@ func (d *DataSourceF5XCVirtualK8S) Read(ctx context.Context, request datasource.
 		}
 
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		serviceIsolationChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			VirtualK8sServiceIsolationChoiceModelAttributeMap,
-			serviceIsolationChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
+		{
+			serviceIsolationChoiceObj, oneofDiags := utils.GoStructToObjectValue(
+				ctx,
+				VirtualK8sServiceIsolationChoiceModelAttributeMap,
+				serviceIsolationChoiceChoicesModel,
+			)
+			if oneofDiags.HasError() {
+				response.Diagnostics.Append(oneofDiags...)
+				return
+			}
 
-		// Assign the final object to the root data model.
-		data.ServiceIsolationChoice = serviceIsolationChoiceObj
+			// Assign the final object to the root data model.
+			data.ServiceIsolationChoice = serviceIsolationChoiceObj
+		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		data.ServiceIsolationChoice = types.ObjectNull(VirtualK8sServiceIsolationChoiceModelAttributeMap)
 	}
 
-	// data SpecToModelRoot PointerField --> DefaultFlavorRef
-	if specData.GetDefaultFlavorRef() != nil {
-		var objectRefTypeModelModel = &ObjectRefTypeModel{}
-		defaultFlavorRefElement := specData.GetDefaultFlavorRef()
+	// data SpecToModelRoot ArrayOfPointerField --> VsiteRefs
+	if len(specData.GetVsiteRefs()) > 0 {
+		vsiteRefsElements := make([]ObjectRefTypeModel, 0, len(specData.GetVsiteRefs()))
 
-		// data specToModelNested StringField --> Tenant
-		if defaultFlavorRefElement.GetTenant() != "" {
-			objectRefTypeModelModel.Tenant = types.StringValue(defaultFlavorRefElement.GetTenant())
-		} else {
-			// Empty string, set to null
-			objectRefTypeModelModel.Tenant = types.StringNull()
+		for _, vsiteRefsElement := range specData.GetVsiteRefs() {
+			objectRefTypeModelModel := ObjectRefTypeModel{}
+
+			// data specToModelNested RequiredStringField --> Name
+			if vsiteRefsElement.GetName() != "" {
+				objectRefTypeModelModel.Name = types.StringValue(vsiteRefsElement.GetName())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Name = types.StringNull()
+			}
+
+			// data specToModelNested RequiredStringField --> Namespace
+			if vsiteRefsElement.GetNamespace() != "" {
+				objectRefTypeModelModel.Namespace = types.StringValue(vsiteRefsElement.GetNamespace())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Namespace = types.StringNull()
+			}
+
+			// data specToModelNested StringField --> Tenant
+			if vsiteRefsElement.GetTenant() != "" {
+				objectRefTypeModelModel.Tenant = types.StringValue(vsiteRefsElement.GetTenant())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Tenant = types.StringNull()
+			}
+
+			vsiteRefsElements = append(vsiteRefsElements, objectRefTypeModelModel)
 		}
 
-		// data specToModelNested RequiredStringField --> Namespace
-		if defaultFlavorRefElement.GetNamespace() != "" {
-			objectRefTypeModelModel.Namespace = types.StringValue(defaultFlavorRefElement.GetNamespace())
-		} else {
-			// Empty string, set to null
-			objectRefTypeModelModel.Namespace = types.StringNull()
-		}
+		{
+			vsiteRefsList, listDiags := utils.GoStructSliceToListValue(
+				ctx,
+				VirtualK8sVsiteRefsObjectRefModelAttributeMap,
+				vsiteRefsElements,
+			)
 
-		// data specToModelNested RequiredStringField --> Name
-		if defaultFlavorRefElement.GetName() != "" {
-			objectRefTypeModelModel.Name = types.StringValue(defaultFlavorRefElement.GetName())
-		} else {
-			// Empty string, set to null
-			objectRefTypeModelModel.Name = types.StringNull()
-		}
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
 
-		defaultFlavorRefObj, defaultFlavorRefDiags := utils.GoStructToObjectValue(
-			ctx,
-			VirtualK8sDefaultFlavorRefModelAttributeMap,
-			objectRefTypeModelModel,
-		)
-		response.Diagnostics.Append(defaultFlavorRefDiags...)
-		if response.Diagnostics.HasError() {
-			return
+			data.VsiteRefs = vsiteRefsList
 		}
-		data.DefaultFlavorRef = defaultFlavorRefObj
 	} else {
-		data.DefaultFlavorRef = types.ObjectNull(VirtualK8sDefaultFlavorRefModelAttributeMap)
+		var vsiteRefsObjectType = basetypes.ObjectType{
+			AttrTypes: VirtualK8sVsiteRefsObjectRefModelAttributeMap,
+		}
+		nullVsiteRefsList := basetypes.NewListNull(vsiteRefsObjectType)
+		data.VsiteRefs = nullVsiteRefsList
 	}
 
 	// Set state to fully populated data
-	diags = response.State.Set(ctx, &data)
+	diags := response.State.Set(ctx, &data)
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return

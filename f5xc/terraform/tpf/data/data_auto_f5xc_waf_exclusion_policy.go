@@ -34,17 +34,22 @@ type DataSourceF5XCWafExclusionPolicy struct {
 
 type WafExclusionPolicyPolicySimpleWafExclusionRule struct {
 	DomainChoice                   types.Object      `tfsdk:"domain_choice"`
-	PathChoice                     types.Object      `tfsdk:"path_choice"`
-	Methods                        types.List        `tfsdk:"methods"`
 	ExpirationTimestamp            timetypes.RFC3339 `tfsdk:"expiration_timestamp"`
 	Metadata                       types.Object      `tfsdk:"metadata"`
+	Methods                        types.List        `tfsdk:"methods"`
+	PathChoice                     types.Object      `tfsdk:"path_choice"`
 	WafAdvancedConfigurationChoice types.Object      `tfsdk:"waf_advanced_configuration_choice"`
 }
 
 type WafExclusionPolicySimpleWafExclusionRuleDomainChoice struct {
+	AnyDomain   types.Bool   `tfsdk:"any_domain"`
 	ExactValue  types.String `tfsdk:"exact_value"`
 	SuffixValue types.String `tfsdk:"suffix_value"`
-	AnyDomain   types.Bool   `tfsdk:"any_domain"`
+}
+
+type WafExclusionPolicyMessageMetaType struct {
+	Description types.String `tfsdk:"description"`
+	Name        types.String `tfsdk:"name"`
 }
 
 type WafExclusionPolicySimpleWafExclusionRulePathChoice struct {
@@ -53,53 +58,48 @@ type WafExclusionPolicySimpleWafExclusionRulePathChoice struct {
 	PathRegex  types.String `tfsdk:"path_regex"`
 }
 
-type WafExclusionPolicyMessageMetaType struct {
-	Name        types.String `tfsdk:"name"`
-	Description types.String `tfsdk:"description"`
-}
-
 type WafExclusionPolicySimpleWafExclusionRuleWafAdvancedConfigurationChoice struct {
 	AppFirewallDetectionControl types.Object `tfsdk:"app_firewall_detection_control"`
 	WafSkipProcessing           types.Bool   `tfsdk:"waf_skip_processing"`
 }
 
 type WafExclusionPolicySimpleWafExclusionRuleAppFirewallDetectionControl struct {
-	ExcludeSignatureContexts  types.List `tfsdk:"exclude_signature_contexts"`
-	ExcludeViolationContexts  types.List `tfsdk:"exclude_violation_contexts"`
 	ExcludeAttackTypeContexts types.List `tfsdk:"exclude_attack_type_contexts"`
 	ExcludeBotNameContexts    types.List `tfsdk:"exclude_bot_name_contexts"`
-}
-
-type WafExclusionPolicyPolicyAppFirewallSignatureContext struct {
-	SignatureId types.Int64  `tfsdk:"signature_id"`
-	Context     types.List   `tfsdk:"context"`
-	ContextName types.String `tfsdk:"context_name"`
-}
-
-type WafExclusionPolicyPolicyAppFirewallViolationContext struct {
-	ExcludeViolation types.List   `tfsdk:"exclude_violation"`
-	Context          types.List   `tfsdk:"context"`
-	ContextName      types.String `tfsdk:"context_name"`
+	ExcludeSignatureContexts  types.List `tfsdk:"exclude_signature_contexts"`
+	ExcludeViolationContexts  types.List `tfsdk:"exclude_violation_contexts"`
 }
 
 type WafExclusionPolicyPolicyAppFirewallAttackTypeContext struct {
+	Context           types.List   `tfsdk:"context"`
 	ContextName       types.String `tfsdk:"context_name"`
 	ExcludeAttackType types.List   `tfsdk:"exclude_attack_type"`
-	Context           types.List   `tfsdk:"context"`
 }
 
 type WafExclusionPolicyPolicyBotNameContext struct {
 	BotName types.String `tfsdk:"bot_name"`
 }
 
+type WafExclusionPolicyPolicyAppFirewallSignatureContext struct {
+	Context     types.List   `tfsdk:"context"`
+	ContextName types.String `tfsdk:"context_name"`
+	SignatureId types.Int64  `tfsdk:"signature_id"`
+}
+
+type WafExclusionPolicyPolicyAppFirewallViolationContext struct {
+	Context          types.List   `tfsdk:"context"`
+	ContextName      types.String `tfsdk:"context_name"`
+	ExcludeViolation types.List   `tfsdk:"exclude_violation"`
+}
+
 // DataSourceF5XCWafExclusionPolicyModel describes the resource data model.
 type DataSourceF5XCWafExclusionPolicyModel struct {
+	Annotations       types.Map      `tfsdk:"annotations"`
+	Description       types.String   `tfsdk:"description"`
+	Labels            types.Map      `tfsdk:"labels"`
 	Name              types.String   `tfsdk:"name"`
 	Namespace         types.String   `tfsdk:"namespace"`
 	Uid               types.String   `tfsdk:"uid"`
-	Labels            types.Map      `tfsdk:"labels"`
-	Annotations       types.Map      `tfsdk:"annotations"`
-	Description       types.String   `tfsdk:"description"`
 	WafExclusionRules types.List     `tfsdk:"waf_exclusion_rules"`
 	Timeouts          timeouts.Value `tfsdk:"timeouts"`
 }
@@ -111,16 +111,16 @@ var WafExclusionPolicyWafExclusionRulesModelAttributeMap = map[string]attr.Type{
 	"domain_choice": types.ObjectType{
 		AttrTypes: WafExclusionPolicyWafExclusionRulesDomainChoiceModelAttributeMap,
 	},
-	"path_choice": types.ObjectType{
-		AttrTypes: WafExclusionPolicyWafExclusionRulesPathChoiceModelAttributeMap,
+	"expiration_timestamp": timetypes.RFC3339Type{}, "metadata": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"description": types.StringType,
+			"name":        types.StringType},
 	},
 	"methods": types.ListType{
 		ElemType: types.StringType,
 	},
-	"expiration_timestamp": timetypes.RFC3339Type{}, "metadata": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"name":        types.StringType,
-			"description": types.StringType},
+	"path_choice": types.ObjectType{
+		AttrTypes: WafExclusionPolicyWafExclusionRulesPathChoiceModelAttributeMap,
 	},
 	"waf_advanced_configuration_choice": types.ObjectType{
 		AttrTypes: WafExclusionPolicyWafExclusionRulesWafAdvancedConfigurationModelAttributeMap,
@@ -130,9 +130,16 @@ var WafExclusionPolicyWafExclusionRulesModelAttributeMap = map[string]attr.Type{
 // Attribute map for RequiredOneOfField --> DomainChoice
 var WafExclusionPolicyWafExclusionRulesDomainChoiceModelAttributeMap = map[string]attr.Type{
 
+	"any_domain":   types.BoolType,
 	"exact_value":  types.StringType,
 	"suffix_value": types.StringType,
-	"any_domain":   types.BoolType,
+}
+
+// Attribute map for RequiredPointerField --> Metadata
+var WafExclusionPolicyWafExclusionRulesMetadataModelAttributeMap = map[string]attr.Type{
+
+	"description": types.StringType,
+	"name":        types.StringType,
 }
 
 // Attribute map for RequiredOneOfField --> PathChoice
@@ -141,13 +148,6 @@ var WafExclusionPolicyWafExclusionRulesPathChoiceModelAttributeMap = map[string]
 	"any_path":    types.BoolType,
 	"path_prefix": types.StringType,
 	"path_regex":  types.StringType,
-}
-
-// Attribute map for RequiredPointerField --> Metadata
-var WafExclusionPolicyWafExclusionRulesMetadataModelAttributeMap = map[string]attr.Type{
-
-	"name":        types.StringType,
-	"description": types.StringType,
 }
 
 // Attribute map for OneOfField --> WafAdvancedConfiguration
@@ -162,41 +162,15 @@ var WafExclusionPolicyWafExclusionRulesWafAdvancedConfigurationModelAttributeMap
 // Attribute map for PointerOfOneOfField --> AppFirewallDetectionControl
 var WafExclusionPolicyWafExclusionRulesWafAdvancedConfigurationAppFirewallDetectionControlModelAttributeMap = map[string]attr.Type{
 
-	"exclude_signature_contexts": types.ListType{
-		ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-
-				"signature_id": types.Int64Type,
-				"context": types.ListType{
-					ElemType: types.StringType,
-				},
-				"context_name": types.StringType,
-			},
-		},
-	},
-	"exclude_violation_contexts": types.ListType{
-		ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-
-				"exclude_violation": types.ListType{
-					ElemType: types.StringType,
-				},
-				"context": types.ListType{
-					ElemType: types.StringType,
-				},
-				"context_name": types.StringType,
-			},
-		},
-	},
 	"exclude_attack_type_contexts": types.ListType{
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
 
-				"context_name": types.StringType,
-				"exclude_attack_type": types.ListType{
+				"context": types.ListType{
 					ElemType: types.StringType,
 				},
-				"context": types.ListType{
+				"context_name": types.StringType,
+				"exclude_attack_type": types.ListType{
 					ElemType: types.StringType,
 				},
 			},
@@ -210,38 +184,42 @@ var WafExclusionPolicyWafExclusionRulesWafAdvancedConfigurationAppFirewallDetect
 			},
 		},
 	},
-}
+	"exclude_signature_contexts": types.ListType{
+		ElemType: types.ObjectType{
+			AttrTypes: map[string]attr.Type{
 
-// Attribute map for ArrayOfPointerField --> ExcludeSignatureContexts
-var WafExclusionPolicyWafExclusionRulesWafAdvancedConfigurationAppFirewallDetectionControlExcludeSignatureContextsModelAttributeMap = map[string]attr.Type{
-
-	"signature_id": types.Int64Type,
-	"context": types.ListType{
-		ElemType: types.StringType,
+				"context": types.ListType{
+					ElemType: types.StringType,
+				},
+				"context_name": types.StringType,
+				"signature_id": types.Int64Type,
+			},
+		},
 	},
-	"context_name": types.StringType,
-}
+	"exclude_violation_contexts": types.ListType{
+		ElemType: types.ObjectType{
+			AttrTypes: map[string]attr.Type{
 
-// Attribute map for ArrayOfPointerField --> ExcludeViolationContexts
-var WafExclusionPolicyWafExclusionRulesWafAdvancedConfigurationAppFirewallDetectionControlExcludeViolationContextsModelAttributeMap = map[string]attr.Type{
-
-	"exclude_violation": types.ListType{
-		ElemType: types.StringType,
+				"context": types.ListType{
+					ElemType: types.StringType,
+				},
+				"context_name": types.StringType,
+				"exclude_violation": types.ListType{
+					ElemType: types.StringType,
+				},
+			},
+		},
 	},
-	"context": types.ListType{
-		ElemType: types.StringType,
-	},
-	"context_name": types.StringType,
 }
 
 // Attribute map for ArrayOfPointerField --> ExcludeAttackTypeContexts
 var WafExclusionPolicyWafExclusionRulesWafAdvancedConfigurationAppFirewallDetectionControlExcludeAttackTypeContextsModelAttributeMap = map[string]attr.Type{
 
-	"context_name": types.StringType,
-	"exclude_attack_type": types.ListType{
+	"context": types.ListType{
 		ElemType: types.StringType,
 	},
-	"context": types.ListType{
+	"context_name": types.StringType,
+	"exclude_attack_type": types.ListType{
 		ElemType: types.StringType,
 	},
 }
@@ -250,6 +228,28 @@ var WafExclusionPolicyWafExclusionRulesWafAdvancedConfigurationAppFirewallDetect
 var WafExclusionPolicyWafExclusionRulesWafAdvancedConfigurationAppFirewallDetectionControlExcludeBotNameContextsModelAttributeMap = map[string]attr.Type{
 
 	"bot_name": types.StringType,
+}
+
+// Attribute map for ArrayOfPointerField --> ExcludeSignatureContexts
+var WafExclusionPolicyWafExclusionRulesWafAdvancedConfigurationAppFirewallDetectionControlExcludeSignatureContextsModelAttributeMap = map[string]attr.Type{
+
+	"context": types.ListType{
+		ElemType: types.StringType,
+	},
+	"context_name": types.StringType,
+	"signature_id": types.Int64Type,
+}
+
+// Attribute map for ArrayOfPointerField --> ExcludeViolationContexts
+var WafExclusionPolicyWafExclusionRulesWafAdvancedConfigurationAppFirewallDetectionControlExcludeViolationContextsModelAttributeMap = map[string]attr.Type{
+
+	"context": types.ListType{
+		ElemType: types.StringType,
+	},
+	"context_name": types.StringType,
+	"exclude_violation": types.ListType{
+		ElemType: types.StringType,
+	},
 }
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -266,10 +266,30 @@ func (d *DataSourceF5XCWafExclusionPolicy) Metadata(ctx context.Context, request
 func (r *DataSourceF5XCWafExclusionPolicy) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "WafExclusionPolicy data source",
-		Description:         "WafExclusionPolicy data source",
+		MarkdownDescription: "GetRequest is used to get different forms of a waf_exclusion_policy This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of waf_exclusion_policy) etc. can be fetched",
+		Description:         "GetRequest is used to get different forms of a waf_exclusion_policy This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of waf_exclusion_policy) etc. can be fetched",
 
 		Attributes: map[string]schema.Attribute{
+			"annotations": schema.MapAttribute{
+				Description: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				ElementType: types.StringType,
+			},
+			"description": schema.StringAttribute{
+				Description: "description Human readable description for the object",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+			},
+			"labels": schema.MapAttribute{
+				Description: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				ElementType: types.StringType,
+			},
 			"name": schema.StringAttribute{
 				Description: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
 				Required:    false,
@@ -288,26 +308,6 @@ func (r *DataSourceF5XCWafExclusionPolicy) Schema(ctx context.Context, request d
 				Optional:    false,
 				Computed:    true,
 			},
-			"labels": schema.MapAttribute{
-				Description: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
-			"annotations": schema.MapAttribute{
-				Description: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
-			"description": schema.StringAttribute{
-				Description: "description Human readable description for the object",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-			},
 			"waf_exclusion_rules": schema.ListNestedAttribute{
 				Description: "WAF Exclusion Rules An ordered list of rules.",
 				Required:    false,
@@ -321,6 +321,12 @@ func (r *DataSourceF5XCWafExclusionPolicy) Schema(ctx context.Context, request d
 							Optional:    false,
 							Computed:    true,
 							Attributes: map[string]schema.Attribute{
+								"any_domain": schema.BoolAttribute{
+									Description: "Any domain Apply this WAF exclusion rule for any domain",
+									Required:    false,
+									Optional:    false,
+									Computed:    true,
+								},
 								"exact_value": schema.StringAttribute{
 									Description: "exact value Exact domain name",
 									Required:    false,
@@ -333,13 +339,41 @@ func (r *DataSourceF5XCWafExclusionPolicy) Schema(ctx context.Context, request d
 									Optional:    false,
 									Computed:    true,
 								},
-								"any_domain": schema.BoolAttribute{
-									Description: "Any domain Apply this WAF exclusion rule for any domain",
+							},
+						},
+						"expiration_timestamp": schema.StringAttribute{
+							Description: "expiration timestamp The expiration_timestamp is the RFC 3339 format timestamp at which the containing rule is considered to be logically expired. The rule continues to exist in the configuration but is not applied anymore.",
+							CustomType:  timetypes.RFC3339Type{},
+							Required:    false,
+							Optional:    false,
+							Computed:    true,
+						},
+						"metadata": schema.SingleNestedAttribute{
+							Description: "metadata Common attributes for the rule including name and description.",
+							Required:    false,
+							Optional:    false,
+							Computed:    true,
+							Attributes: map[string]schema.Attribute{
+								"description": schema.StringAttribute{
+									Description: "description Human readable description.",
+									Required:    false,
+									Optional:    false,
+									Computed:    true,
+								},
+								"name": schema.StringAttribute{
+									Description: "name This is the name of the message. The value of name has to follow DNS-1035 format.",
 									Required:    false,
 									Optional:    false,
 									Computed:    true,
 								},
 							},
+						},
+						"methods": schema.ListAttribute{
+							Description: "Methods methods to be matched",
+							ElementType: types.StringType,
+							Required:    false,
+							Optional:    false,
+							Computed:    true,
 						},
 						"path_choice": schema.SingleNestedAttribute{
 							Description: "Path Path to be matched",
@@ -367,40 +401,6 @@ func (r *DataSourceF5XCWafExclusionPolicy) Schema(ctx context.Context, request d
 								},
 							},
 						},
-						"methods": schema.ListAttribute{
-							Description: "Methods methods to be matched",
-							ElementType: types.StringType,
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-						},
-						"expiration_timestamp": schema.StringAttribute{
-							Description: "expiration timestamp The expiration_timestamp is the RFC 3339 format timestamp at which the containing rule is considered to be logically expired. The rule continues to exist in the configuration but is not applied anymore.",
-							CustomType:  timetypes.RFC3339Type{},
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-						},
-						"metadata": schema.SingleNestedAttribute{
-							Description: "metadata Common attributes for the rule including name and description.",
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-							Attributes: map[string]schema.Attribute{
-								"name": schema.StringAttribute{
-									Description: "name This is the name of the message. The value of name has to follow DNS-1035 format.",
-									Required:    false,
-									Optional:    false,
-									Computed:    true,
-								},
-								"description": schema.StringAttribute{
-									Description: "description Human readable description.",
-									Required:    false,
-									Optional:    false,
-									Computed:    true,
-								},
-							},
-						},
 						"waf_advanced_configuration_choice": schema.SingleNestedAttribute{
 							Description: "WAF Exclusion Rule Action WAF Exclusion Rule action to be enforced if the input request matches the rule.",
 							Required:    false,
@@ -413,65 +413,6 @@ func (r *DataSourceF5XCWafExclusionPolicy) Schema(ctx context.Context, request d
 									Optional:    false,
 									Computed:    true,
 									Attributes: map[string]schema.Attribute{
-										"exclude_signature_contexts": schema.ListNestedAttribute{
-											Description: "Exclude Signature Contexts Signature IDs to be excluded for the defined match criteria",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-											NestedObject: schema.NestedAttributeObject{
-												Attributes: map[string]schema.Attribute{
-													"signature_id": schema.Int64Attribute{
-														Description: "SignatureID The allowed values for signature id are 0 and in the range of 200000001-299999999. 0 implies that all signatures will be excluded for the specified context.",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
-													"context": schema.ListAttribute{
-														Description: "Context",
-														ElementType: types.StringType,
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
-													"context_name": schema.StringAttribute{
-														Description: "Context Name Relevant only for contexts: Header, Cookie and Parameter. Name of the Context that the WAF Exclusion Rules will check. Wildcard matching can be used by prefixing or suffixing the context name with an wildcard asterisk (*).",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
-												},
-											},
-										},
-										"exclude_violation_contexts": schema.ListNestedAttribute{
-											Description: "Exclude Violation Contexts Violations to be excluded for the defined match criteria",
-											Required:    false,
-											Optional:    false,
-											Computed:    true,
-											NestedObject: schema.NestedAttributeObject{
-												Attributes: map[string]schema.Attribute{
-													"exclude_violation": schema.ListAttribute{
-														Description: "ViolationType",
-														ElementType: types.StringType,
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
-													"context": schema.ListAttribute{
-														Description: "Context",
-														ElementType: types.StringType,
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
-													"context_name": schema.StringAttribute{
-														Description: "Context Name Relevant only for contexts: Header, Cookie and Parameter. Name of the Context that the WAF Exclusion Rules will check. Wildcard matching can be used by prefixing or suffixing the context name with an wildcard asterisk (*).",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
-												},
-											},
-										},
 										"exclude_attack_type_contexts": schema.ListNestedAttribute{
 											Description: "Exclude Attack Types Contexts Attack Types to be excluded for the defined match criteria",
 											Required:    false,
@@ -479,6 +420,13 @@ func (r *DataSourceF5XCWafExclusionPolicy) Schema(ctx context.Context, request d
 											Computed:    true,
 											NestedObject: schema.NestedAttributeObject{
 												Attributes: map[string]schema.Attribute{
+													"context": schema.ListAttribute{
+														Description: "Context",
+														ElementType: types.StringType,
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+													},
 													"context_name": schema.StringAttribute{
 														Description: "Context Name Relevant only for contexts: Header, Cookie and Parameter. Name of the Context that the WAF Exclusion Rules will check. Wildcard matching can be used by prefixing or suffixing the context name with an wildcard asterisk (*).",
 														Required:    false,
@@ -487,13 +435,6 @@ func (r *DataSourceF5XCWafExclusionPolicy) Schema(ctx context.Context, request d
 													},
 													"exclude_attack_type": schema.ListAttribute{
 														Description: "AttackType",
-														ElementType: types.StringType,
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
-													"context": schema.ListAttribute{
-														Description: "Context",
 														ElementType: types.StringType,
 														Required:    false,
 														Optional:    false,
@@ -511,6 +452,65 @@ func (r *DataSourceF5XCWafExclusionPolicy) Schema(ctx context.Context, request d
 												Attributes: map[string]schema.Attribute{
 													"bot_name": schema.StringAttribute{
 														Description: "BotName",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+													},
+												},
+											},
+										},
+										"exclude_signature_contexts": schema.ListNestedAttribute{
+											Description: "Exclude Signature Contexts Signature IDs to be excluded for the defined match criteria",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+											NestedObject: schema.NestedAttributeObject{
+												Attributes: map[string]schema.Attribute{
+													"context": schema.ListAttribute{
+														Description: "Context",
+														ElementType: types.StringType,
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+													},
+													"context_name": schema.StringAttribute{
+														Description: "Context Name Relevant only for contexts: Header, Cookie and Parameter. Name of the Context that the WAF Exclusion Rules will check. Wildcard matching can be used by prefixing or suffixing the context name with an wildcard asterisk (*).",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+													},
+													"signature_id": schema.Int64Attribute{
+														Description: "SignatureID The allowed values for signature id are 0 and in the range of 200000001-299999999. 0 implies that all signatures will be excluded for the specified context.",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+													},
+												},
+											},
+										},
+										"exclude_violation_contexts": schema.ListNestedAttribute{
+											Description: "Exclude Violation Contexts Violations to be excluded for the defined match criteria",
+											Required:    false,
+											Optional:    false,
+											Computed:    true,
+											NestedObject: schema.NestedAttributeObject{
+												Attributes: map[string]schema.Attribute{
+													"context": schema.ListAttribute{
+														Description: "Context",
+														ElementType: types.StringType,
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+													},
+													"context_name": schema.StringAttribute{
+														Description: "Context Name Relevant only for contexts: Header, Cookie and Parameter. Name of the Context that the WAF Exclusion Rules will check. Wildcard matching can be used by prefixing or suffixing the context name with an wildcard asterisk (*).",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+													},
+													"exclude_violation": schema.ListAttribute{
+														Description: "ViolationType",
+														ElementType: types.StringType,
 														Required:    false,
 														Optional:    false,
 														Computed:    true,
@@ -578,15 +578,14 @@ func (d *DataSourceF5XCWafExclusionPolicy) Read(ctx context.Context, request dat
 		return
 	}
 
-	readTimeout, diags := data.Timeouts.Read(ctx, duration)
-	response.Diagnostics.Append(diags...)
+	readTimeout, readDiags := data.Timeouts.Read(ctx, duration)
+	response.Diagnostics.Append(readDiags...)
 	if response.Diagnostics.HasError() {
 		return
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
-
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_waf_exclusion_policy.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
@@ -601,33 +600,6 @@ func (d *DataSourceF5XCWafExclusionPolicy) Read(ctx context.Context, request dat
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
-
-	// data SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
-
-	// data SpecToModelRoot Meta RequiredStringField --> Namespace
-	data.Namespace = types.StringValue(metaData.GetNamespace())
-
-	// data SpecToModelRoot Meta StringField --> Uid
-	data.Uid = types.StringValue(systemMetaData.GetUid())
-
-	// data SpecToModelRoot Meta MapOfStringField --> Labels
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// Assign the typed map to the model
-		data.Labels = labelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil and the model has no value: set an explicit Null map to avoid
-		// DynamicPseudoType errors. If the model already contains a value (e.g. labels were set
-		// but the API did not echo them back in the response), preserve the existing value to prevent
-		// "Provider produced inconsistent result after apply" errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
 
 	// data SpecToModelRoot Meta MapOfStringField --> Annotations
 	if metaData.GetAnnotations() != nil {
@@ -650,10 +622,37 @@ func (d *DataSourceF5XCWafExclusionPolicy) Read(ctx context.Context, request dat
 	// data SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
 
-	// data SpecToModelRoot RequiredArrayOfPointerField --> WafExclusionRules
-	wafExclusionRulesElementsSpectToModel := make([]WafExclusionPolicyPolicySimpleWafExclusionRule, 0, len(specData.WafExclusionRules))
+	// data SpecToModelRoot Meta MapOfStringField --> Labels
+	if metaData.GetLabels() != nil {
+		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
+		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+		response.Diagnostics.Append(labelsDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		// Assign the typed map to the model
+		data.Labels = labelsMap
+	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
+		// API returned nil and the model has no value: set an explicit Null map to avoid
+		// DynamicPseudoType errors. If the model already contains a value (e.g. labels were set
+		// but the API did not echo them back in the response), preserve the existing value to prevent
+		// "Provider produced inconsistent result after apply" errors.
+		data.Labels = types.MapNull(types.StringType)
+	}
 
-	for _, wafExclusionRulesElement := range specData.WafExclusionRules {
+	// data SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
+
+	// data SpecToModelRoot Meta RequiredStringField --> Namespace
+	data.Namespace = types.StringValue(metaData.GetNamespace())
+
+	// data SpecToModelRoot Meta StringField --> Uid
+	data.Uid = types.StringValue(systemMetaData.GetUid())
+
+	// data SpecToModelRoot RequiredArrayOfPointerField --> WafExclusionRules
+	wafExclusionRulesElementsSpectToModel := make([]WafExclusionPolicyPolicySimpleWafExclusionRule, 0, len(specData.GetWafExclusionRules()))
+
+	for _, wafExclusionRulesElement := range specData.GetWafExclusionRules() {
 		wafExclusionPolicyPolicySimpleWafExclusionRuleModel := WafExclusionPolicyPolicySimpleWafExclusionRule{}
 
 		// data specToModelNested RequiredOneOfField --> DomainChoice
@@ -667,6 +666,15 @@ func (d *DataSourceF5XCWafExclusionPolicy) Read(ctx context.Context, request dat
 			wafExclusionRulesdomainChoiceChoices := wafExclusionRulesElement.GetDomainChoice()
 
 			// Process nested choices, populating the temporary attribute map
+
+			// data specToModelNested BoolOfOneOfPointerField --> AnyDomain
+			_, isAnyDomain := wafExclusionRulesdomainChoiceChoices.(*ves_io_schema_policy.SimpleWafExclusionRule_AnyDomain)
+
+			if isAnyDomain {
+				wafExclusionRulesdomainChoiceChoicesAttributeMap["any_domain"] = types.BoolValue(true)
+			} else {
+				wafExclusionRulesdomainChoiceChoicesAttributeMap["any_domain"] = types.BoolNull()
+			}
 
 			// data specToModelNested StringOfOneOfField --> ExactValue
 			exactValueItem, isExactValue := wafExclusionRulesdomainChoiceChoices.(*ves_io_schema_policy.SimpleWafExclusionRule_ExactValue)
@@ -688,15 +696,6 @@ func (d *DataSourceF5XCWafExclusionPolicy) Read(ctx context.Context, request dat
 				wafExclusionRulesdomainChoiceChoicesAttributeMap["suffix_value"] = types.StringNull()
 			}
 
-			// data specToModelNested BoolOfOneOfPointerField --> AnyDomain
-			_, isAnyDomain := wafExclusionRulesdomainChoiceChoices.(*ves_io_schema_policy.SimpleWafExclusionRule_AnyDomain)
-
-			if isAnyDomain {
-				wafExclusionRulesdomainChoiceChoicesAttributeMap["any_domain"] = types.BoolValue(true)
-			} else {
-				wafExclusionRulesdomainChoiceChoicesAttributeMap["any_domain"] = types.BoolNull()
-			}
-
 			// --- End of Choices ---
 
 			// Create the final ObjectValue for this OneOf field
@@ -714,6 +713,73 @@ func (d *DataSourceF5XCWafExclusionPolicy) Read(ctx context.Context, request dat
 		} else {
 			// The OneOf field is nil in the source spec, so set the Terraform object to null.
 			wafExclusionPolicyPolicySimpleWafExclusionRuleModel.DomainChoice = types.ObjectNull(WafExclusionPolicyWafExclusionRulesDomainChoiceModelAttributeMap)
+		}
+
+		// data specToModelNested TimeStampField --> ExpirationTimestamp
+		if wafExclusionRulesElement.GetExpirationTimestamp() != nil {
+			wafExclusionPolicyPolicySimpleWafExclusionRuleModel.ExpirationTimestamp = timetypes.NewRFC3339ProtobufPointerValue(wafExclusionRulesElement.GetExpirationTimestamp())
+		} else {
+			wafExclusionPolicyPolicySimpleWafExclusionRuleModel.ExpirationTimestamp = timetypes.NewRFC3339Null()
+		}
+
+		// data specToModelNested RequiredPointerField --> Metadata
+		if wafExclusionRulesElement.GetMetadata() != nil {
+			// Create the nested Go struct
+			wafExclusionPolicyMessageMetaTypeModel := &WafExclusionPolicyMessageMetaType{}
+			metadataElement := wafExclusionRulesElement.GetMetadata()
+
+			// Recursively populate the nested struct
+
+			// data specToModelNested StringField --> Description
+			if metadataElement.GetDescription() != "" {
+				wafExclusionPolicyMessageMetaTypeModel.Description = types.StringValue(metadataElement.GetDescription())
+			} else {
+				// Empty string, set to null
+				wafExclusionPolicyMessageMetaTypeModel.Description = types.StringNull()
+			}
+
+			// data specToModelNested RequiredStringField --> Name
+			if metadataElement.GetName() != "" {
+				wafExclusionPolicyMessageMetaTypeModel.Name = types.StringValue(metadataElement.GetName())
+			} else {
+				// Empty string, set to null
+				wafExclusionPolicyMessageMetaTypeModel.Name = types.StringNull()
+			}
+
+			// This field needs to be converted to a types.ObjectValue before assignment.
+			wafExclusionPolicyMessageMetaTypeModelObj, objDiags := types.ObjectValueFrom(ctx, WafExclusionPolicyWafExclusionRulesMetadataModelAttributeMap, wafExclusionPolicyMessageMetaTypeModel)
+			response.Diagnostics.Append(objDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			wafExclusionPolicyPolicySimpleWafExclusionRuleModel.Metadata = wafExclusionPolicyMessageMetaTypeModelObj
+
+		} else {
+			// The source field is nil (e.g. redacted by the API).
+			// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
+			// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
+			// here because the API may always return a non-nil struct (with REDACTED values) for this
+			// field, making this else-branch unreachable. The child OneOf handles the actual healing.
+			// The target is a types.Object, so we use types.ObjectNull.
+			wafExclusionPolicyPolicySimpleWafExclusionRuleModel.Metadata = types.ObjectNull(WafExclusionPolicyWafExclusionRulesMetadataModelAttributeMap)
+		}
+
+		// data SpecToModelNested ArrayOfEnumField --> Methods
+		if len(wafExclusionRulesElement.GetMethods()) > 0 {
+			methodsStrings := make([]string, 0, len(wafExclusionRulesElement.GetMethods()))
+			for _, v := range wafExclusionRulesElement.GetMethods() {
+				if strVal, exists := ves_io_schema.HttpMethod_name[int32(v)]; exists {
+					methodsStrings = append(methodsStrings, strVal)
+				}
+			}
+			listValue, listDiags := types.ListValueFrom(ctx, types.StringType, methodsStrings)
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			wafExclusionPolicyPolicySimpleWafExclusionRuleModel.Methods = listValue
+		} else {
+			wafExclusionPolicyPolicySimpleWafExclusionRuleModel.Methods = types.ListNull(types.StringType)
 		}
 
 		// data specToModelNested RequiredOneOfField --> PathChoice
@@ -776,73 +842,6 @@ func (d *DataSourceF5XCWafExclusionPolicy) Read(ctx context.Context, request dat
 			wafExclusionPolicyPolicySimpleWafExclusionRuleModel.PathChoice = types.ObjectNull(WafExclusionPolicyWafExclusionRulesPathChoiceModelAttributeMap)
 		}
 
-		// data SpecToModelNested ArrayOfEnumField --> Methods
-		if len(wafExclusionRulesElement.GetMethods()) > 0 {
-			methodsStrings := make([]string, 0, len(wafExclusionRulesElement.GetMethods()))
-			for _, v := range wafExclusionRulesElement.GetMethods() {
-				if strVal, exists := ves_io_schema.HttpMethod_name[int32(v)]; exists {
-					methodsStrings = append(methodsStrings, strVal)
-				}
-			}
-			listValue, diags := types.ListValueFrom(ctx, types.StringType, methodsStrings)
-			response.Diagnostics.Append(diags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			wafExclusionPolicyPolicySimpleWafExclusionRuleModel.Methods = listValue
-		} else {
-			wafExclusionPolicyPolicySimpleWafExclusionRuleModel.Methods = types.ListNull(types.StringType)
-		}
-
-		// data specToModelNested TimeStampField --> ExpirationTimestamp
-		if wafExclusionRulesElement.GetExpirationTimestamp() != nil {
-			wafExclusionPolicyPolicySimpleWafExclusionRuleModel.ExpirationTimestamp = timetypes.NewRFC3339ProtobufPointerValue(wafExclusionRulesElement.GetExpirationTimestamp())
-		} else {
-			wafExclusionPolicyPolicySimpleWafExclusionRuleModel.ExpirationTimestamp = timetypes.NewRFC3339Null()
-		}
-
-		// data specToModelNested RequiredPointerField --> Metadata
-		if wafExclusionRulesElement.GetMetadata() != nil {
-			// Create the nested Go struct
-			wafExclusionPolicyMessageMetaTypeModel := &WafExclusionPolicyMessageMetaType{}
-			metadataElement := wafExclusionRulesElement.GetMetadata()
-
-			// Recursively populate the nested struct
-
-			// data specToModelNested RequiredStringField --> Name
-			if metadataElement.GetName() != "" {
-				wafExclusionPolicyMessageMetaTypeModel.Name = types.StringValue(metadataElement.GetName())
-			} else {
-				// Empty string, set to null
-				wafExclusionPolicyMessageMetaTypeModel.Name = types.StringNull()
-			}
-
-			// data specToModelNested StringField --> Description
-			if metadataElement.GetDescription() != "" {
-				wafExclusionPolicyMessageMetaTypeModel.Description = types.StringValue(metadataElement.GetDescription())
-			} else {
-				// Empty string, set to null
-				wafExclusionPolicyMessageMetaTypeModel.Description = types.StringNull()
-			}
-
-			// This field needs to be converted to a types.ObjectValue before assignment.
-			wafExclusionPolicyMessageMetaTypeModelObj, diags := types.ObjectValueFrom(ctx, WafExclusionPolicyWafExclusionRulesMetadataModelAttributeMap, wafExclusionPolicyMessageMetaTypeModel)
-			response.Diagnostics.Append(diags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-			wafExclusionPolicyPolicySimpleWafExclusionRuleModel.Metadata = wafExclusionPolicyMessageMetaTypeModelObj
-
-		} else {
-			// The source field is nil (e.g. redacted by the API).
-			// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
-			// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
-			// here because the API may always return a non-nil struct (with REDACTED values) for this
-			// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-			// The target is a types.Object, so we use types.ObjectNull.
-			wafExclusionPolicyPolicySimpleWafExclusionRuleModel.Metadata = types.ObjectNull(WafExclusionPolicyWafExclusionRulesMetadataModelAttributeMap)
-		}
-
 		// data specToModelNested OneOfField --> WafAdvancedConfiguration
 		if wafExclusionRulesElement.GetWafAdvancedConfiguration() != nil {
 			// Create a temporary attribute map for the choices within this OneOf
@@ -858,28 +857,122 @@ func (d *DataSourceF5XCWafExclusionPolicy) Read(ctx context.Context, request dat
 			// <no value>
 			// false
 			{
-				appFirewallDetectionControlOptions, isAppFirewallDetectionControl := wafExclusionRuleswafAdvancedConfigurationChoiceChoices.(*ves_io_schema_policy.SimpleWafExclusionRule_AppFirewallDetectionControl)
+				appFirewallDetectionControlOptionsWrapper, isAppFirewallDetectionControl := wafExclusionRuleswafAdvancedConfigurationChoiceChoices.(*ves_io_schema_policy.SimpleWafExclusionRule_AppFirewallDetectionControl)
 				appFirewallDetectionControlAttributeMap := make(map[string]attr.Value)
 
-				if isAppFirewallDetectionControl && appFirewallDetectionControlOptions != nil {
+				if isAppFirewallDetectionControl && appFirewallDetectionControlOptionsWrapper != nil && appFirewallDetectionControlOptionsWrapper.AppFirewallDetectionControl != nil {
+					appFirewallDetectionControlElement := appFirewallDetectionControlOptionsWrapper.AppFirewallDetectionControl
 
-					// data specToModelNested ArrayOfPointerField --> ExcludeSignatureContexts
-					if len(appFirewallDetectionControlOptions.AppFirewallDetectionControl.GetExcludeSignatureContexts()) > 0 {
+					// data specToModelNested ArrayOfPointerField --> ExcludeAttackTypeContexts
+					if len(appFirewallDetectionControlElement.GetExcludeAttackTypeContexts()) > 0 {
 						// Step 1: Always create a slice of model structs from the spec data.
 						// This slice serves as an intermediate representation.
-						excludeSignatureContextsElements := make([]WafExclusionPolicyPolicyAppFirewallSignatureContext, 0, len(appFirewallDetectionControlOptions.AppFirewallDetectionControl.GetExcludeSignatureContexts()))
-						for _, excludeSignatureContextsElement := range appFirewallDetectionControlOptions.AppFirewallDetectionControl.GetExcludeSignatureContexts() {
-							wafExclusionPolicyPolicyAppFirewallSignatureContextModel := WafExclusionPolicyPolicyAppFirewallSignatureContext{}
+						excludeAttackTypeContextsElements := make([]WafExclusionPolicyPolicyAppFirewallAttackTypeContext, 0, len(appFirewallDetectionControlElement.GetExcludeAttackTypeContexts()))
+						for _, excludeAttackTypeContextsElement := range appFirewallDetectionControlElement.GetExcludeAttackTypeContexts() {
+							wafExclusionPolicyPolicyAppFirewallAttackTypeContextModel := WafExclusionPolicyPolicyAppFirewallAttackTypeContext{}
 
-							// data specToModelNested RequiredUintField --> SignatureId
-							wafExclusionPolicyPolicyAppFirewallSignatureContextModel.SignatureId = types.Int64Value(int64(excludeSignatureContextsElement.GetSignatureId()))
+							// data specToModelNested RequiredEnumField --> Context
+							if excludeAttackTypeContextsElement.GetContext().String() != "" {
+								stringValue := types.StringValue(excludeAttackTypeContextsElement.GetContext().String())
+								stringSlice := []types.String{stringValue}
+								listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+								response.Diagnostics.Append(listDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								wafExclusionPolicyPolicyAppFirewallAttackTypeContextModel.Context = listValue
+							} else {
+								wafExclusionPolicyPolicyAppFirewallAttackTypeContextModel.Context = types.ListNull(types.StringType)
+							}
+
+							// data specToModelNested StringField --> ContextName
+							if excludeAttackTypeContextsElement.GetContextName() != "" {
+								wafExclusionPolicyPolicyAppFirewallAttackTypeContextModel.ContextName = types.StringValue(excludeAttackTypeContextsElement.GetContextName())
+							} else {
+								// Empty string, set to null
+								wafExclusionPolicyPolicyAppFirewallAttackTypeContextModel.ContextName = types.StringNull()
+							}
+
+							// data specToModelNested RequiredEnumField --> ExcludeAttackType
+							if excludeAttackTypeContextsElement.GetExcludeAttackType().String() != "" {
+								stringValue := types.StringValue(excludeAttackTypeContextsElement.GetExcludeAttackType().String())
+								stringSlice := []types.String{stringValue}
+								listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+								response.Diagnostics.Append(listDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								wafExclusionPolicyPolicyAppFirewallAttackTypeContextModel.ExcludeAttackType = listValue
+							} else {
+								wafExclusionPolicyPolicyAppFirewallAttackTypeContextModel.ExcludeAttackType = types.ListNull(types.StringType)
+							}
+
+							excludeAttackTypeContextsElements = append(excludeAttackTypeContextsElements, wafExclusionPolicyPolicyAppFirewallAttackTypeContextModel)
+						}
+						// CASE 1: The target field is a `types.List` or an attribute map.
+						// The intermediate slice of structs must be converted to a `types.ListValue`.
+						excludeAttackTypeContextsListValue, listDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: WafExclusionPolicyWafExclusionRulesWafAdvancedConfigurationAppFirewallDetectionControlExcludeAttackTypeContextsModelAttributeMap}, excludeAttackTypeContextsElements)
+						response.Diagnostics.Append(listDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						appFirewallDetectionControlAttributeMap["exclude_attack_type_contexts"] = excludeAttackTypeContextsListValue
+
+					} else {
+						// The source list is empty or nil.
+						// CASE 1: The target field is a `types.List` or an attribute map.
+						// Assign a null `types.ListValue`.
+						appFirewallDetectionControlAttributeMap["exclude_attack_type_contexts"] = types.ListNull(types.ObjectType{AttrTypes: WafExclusionPolicyWafExclusionRulesWafAdvancedConfigurationAppFirewallDetectionControlExcludeAttackTypeContextsModelAttributeMap})
+					}
+
+					// data specToModelNested ArrayOfPointerField --> ExcludeBotNameContexts
+					if len(appFirewallDetectionControlElement.GetExcludeBotNameContexts()) > 0 {
+						// Step 1: Always create a slice of model structs from the spec data.
+						// This slice serves as an intermediate representation.
+						excludeBotNameContextsElements := make([]WafExclusionPolicyPolicyBotNameContext, 0, len(appFirewallDetectionControlElement.GetExcludeBotNameContexts()))
+						for _, excludeBotNameContextsElement := range appFirewallDetectionControlElement.GetExcludeBotNameContexts() {
+							wafExclusionPolicyPolicyBotNameContextModel := WafExclusionPolicyPolicyBotNameContext{}
+
+							// data specToModelNested RequiredStringField --> BotName
+							if excludeBotNameContextsElement.GetBotName() != "" {
+								wafExclusionPolicyPolicyBotNameContextModel.BotName = types.StringValue(excludeBotNameContextsElement.GetBotName())
+							} else {
+								// Empty string, set to null
+								wafExclusionPolicyPolicyBotNameContextModel.BotName = types.StringNull()
+							}
+
+							excludeBotNameContextsElements = append(excludeBotNameContextsElements, wafExclusionPolicyPolicyBotNameContextModel)
+						}
+						// CASE 1: The target field is a `types.List` or an attribute map.
+						// The intermediate slice of structs must be converted to a `types.ListValue`.
+						excludeBotNameContextsListValue, listDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: WafExclusionPolicyWafExclusionRulesWafAdvancedConfigurationAppFirewallDetectionControlExcludeBotNameContextsModelAttributeMap}, excludeBotNameContextsElements)
+						response.Diagnostics.Append(listDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						appFirewallDetectionControlAttributeMap["exclude_bot_name_contexts"] = excludeBotNameContextsListValue
+
+					} else {
+						// The source list is empty or nil.
+						// CASE 1: The target field is a `types.List` or an attribute map.
+						// Assign a null `types.ListValue`.
+						appFirewallDetectionControlAttributeMap["exclude_bot_name_contexts"] = types.ListNull(types.ObjectType{AttrTypes: WafExclusionPolicyWafExclusionRulesWafAdvancedConfigurationAppFirewallDetectionControlExcludeBotNameContextsModelAttributeMap})
+					}
+
+					// data specToModelNested ArrayOfPointerField --> ExcludeSignatureContexts
+					if len(appFirewallDetectionControlElement.GetExcludeSignatureContexts()) > 0 {
+						// Step 1: Always create a slice of model structs from the spec data.
+						// This slice serves as an intermediate representation.
+						excludeSignatureContextsElements := make([]WafExclusionPolicyPolicyAppFirewallSignatureContext, 0, len(appFirewallDetectionControlElement.GetExcludeSignatureContexts()))
+						for _, excludeSignatureContextsElement := range appFirewallDetectionControlElement.GetExcludeSignatureContexts() {
+							wafExclusionPolicyPolicyAppFirewallSignatureContextModel := WafExclusionPolicyPolicyAppFirewallSignatureContext{}
 
 							// data specToModelNested RequiredEnumField --> Context
 							if excludeSignatureContextsElement.GetContext().String() != "" {
 								stringValue := types.StringValue(excludeSignatureContextsElement.GetContext().String())
 								stringSlice := []types.String{stringValue}
-								listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-								response.Diagnostics.Append(diags...)
+								listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+								response.Diagnostics.Append(listDiags...)
 								if response.Diagnostics.HasError() {
 									return
 								}
@@ -896,12 +989,15 @@ func (d *DataSourceF5XCWafExclusionPolicy) Read(ctx context.Context, request dat
 								wafExclusionPolicyPolicyAppFirewallSignatureContextModel.ContextName = types.StringNull()
 							}
 
+							// data specToModelNested RequiredUintField --> SignatureId
+							wafExclusionPolicyPolicyAppFirewallSignatureContextModel.SignatureId = types.Int64Value(int64(excludeSignatureContextsElement.GetSignatureId()))
+
 							excludeSignatureContextsElements = append(excludeSignatureContextsElements, wafExclusionPolicyPolicyAppFirewallSignatureContextModel)
 						}
 						// CASE 1: The target field is a `types.List` or an attribute map.
 						// The intermediate slice of structs must be converted to a `types.ListValue`.
-						excludeSignatureContextsListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: WafExclusionPolicyWafExclusionRulesWafAdvancedConfigurationAppFirewallDetectionControlExcludeSignatureContextsModelAttributeMap}, excludeSignatureContextsElements)
-						response.Diagnostics.Append(diags...)
+						excludeSignatureContextsListValue, listDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: WafExclusionPolicyWafExclusionRulesWafAdvancedConfigurationAppFirewallDetectionControlExcludeSignatureContextsModelAttributeMap}, excludeSignatureContextsElements)
+						response.Diagnostics.Append(listDiags...)
 						if response.Diagnostics.HasError() {
 							return
 						}
@@ -915,33 +1011,19 @@ func (d *DataSourceF5XCWafExclusionPolicy) Read(ctx context.Context, request dat
 					}
 
 					// data specToModelNested ArrayOfPointerField --> ExcludeViolationContexts
-					if len(appFirewallDetectionControlOptions.AppFirewallDetectionControl.GetExcludeViolationContexts()) > 0 {
+					if len(appFirewallDetectionControlElement.GetExcludeViolationContexts()) > 0 {
 						// Step 1: Always create a slice of model structs from the spec data.
 						// This slice serves as an intermediate representation.
-						excludeViolationContextsElements := make([]WafExclusionPolicyPolicyAppFirewallViolationContext, 0, len(appFirewallDetectionControlOptions.AppFirewallDetectionControl.GetExcludeViolationContexts()))
-						for _, excludeViolationContextsElement := range appFirewallDetectionControlOptions.AppFirewallDetectionControl.GetExcludeViolationContexts() {
+						excludeViolationContextsElements := make([]WafExclusionPolicyPolicyAppFirewallViolationContext, 0, len(appFirewallDetectionControlElement.GetExcludeViolationContexts()))
+						for _, excludeViolationContextsElement := range appFirewallDetectionControlElement.GetExcludeViolationContexts() {
 							wafExclusionPolicyPolicyAppFirewallViolationContextModel := WafExclusionPolicyPolicyAppFirewallViolationContext{}
-
-							// data specToModelNested RequiredEnumField --> ExcludeViolation
-							if excludeViolationContextsElement.GetExcludeViolation().String() != "" {
-								stringValue := types.StringValue(excludeViolationContextsElement.GetExcludeViolation().String())
-								stringSlice := []types.String{stringValue}
-								listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								wafExclusionPolicyPolicyAppFirewallViolationContextModel.ExcludeViolation = listValue
-							} else {
-								wafExclusionPolicyPolicyAppFirewallViolationContextModel.ExcludeViolation = types.ListNull(types.StringType)
-							}
 
 							// data specToModelNested RequiredEnumField --> Context
 							if excludeViolationContextsElement.GetContext().String() != "" {
 								stringValue := types.StringValue(excludeViolationContextsElement.GetContext().String())
 								stringSlice := []types.String{stringValue}
-								listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-								response.Diagnostics.Append(diags...)
+								listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+								response.Diagnostics.Append(listDiags...)
 								if response.Diagnostics.HasError() {
 									return
 								}
@@ -958,12 +1040,26 @@ func (d *DataSourceF5XCWafExclusionPolicy) Read(ctx context.Context, request dat
 								wafExclusionPolicyPolicyAppFirewallViolationContextModel.ContextName = types.StringNull()
 							}
 
+							// data specToModelNested RequiredEnumField --> ExcludeViolation
+							if excludeViolationContextsElement.GetExcludeViolation().String() != "" {
+								stringValue := types.StringValue(excludeViolationContextsElement.GetExcludeViolation().String())
+								stringSlice := []types.String{stringValue}
+								listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+								response.Diagnostics.Append(listDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								wafExclusionPolicyPolicyAppFirewallViolationContextModel.ExcludeViolation = listValue
+							} else {
+								wafExclusionPolicyPolicyAppFirewallViolationContextModel.ExcludeViolation = types.ListNull(types.StringType)
+							}
+
 							excludeViolationContextsElements = append(excludeViolationContextsElements, wafExclusionPolicyPolicyAppFirewallViolationContextModel)
 						}
 						// CASE 1: The target field is a `types.List` or an attribute map.
 						// The intermediate slice of structs must be converted to a `types.ListValue`.
-						excludeViolationContextsListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: WafExclusionPolicyWafExclusionRulesWafAdvancedConfigurationAppFirewallDetectionControlExcludeViolationContextsModelAttributeMap}, excludeViolationContextsElements)
-						response.Diagnostics.Append(diags...)
+						excludeViolationContextsListValue, listDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: WafExclusionPolicyWafExclusionRulesWafAdvancedConfigurationAppFirewallDetectionControlExcludeViolationContextsModelAttributeMap}, excludeViolationContextsElements)
+						response.Diagnostics.Append(listDiags...)
 						if response.Diagnostics.HasError() {
 							return
 						}
@@ -976,104 +1072,8 @@ func (d *DataSourceF5XCWafExclusionPolicy) Read(ctx context.Context, request dat
 						appFirewallDetectionControlAttributeMap["exclude_violation_contexts"] = types.ListNull(types.ObjectType{AttrTypes: WafExclusionPolicyWafExclusionRulesWafAdvancedConfigurationAppFirewallDetectionControlExcludeViolationContextsModelAttributeMap})
 					}
 
-					// data specToModelNested ArrayOfPointerField --> ExcludeAttackTypeContexts
-					if len(appFirewallDetectionControlOptions.AppFirewallDetectionControl.GetExcludeAttackTypeContexts()) > 0 {
-						// Step 1: Always create a slice of model structs from the spec data.
-						// This slice serves as an intermediate representation.
-						excludeAttackTypeContextsElements := make([]WafExclusionPolicyPolicyAppFirewallAttackTypeContext, 0, len(appFirewallDetectionControlOptions.AppFirewallDetectionControl.GetExcludeAttackTypeContexts()))
-						for _, excludeAttackTypeContextsElement := range appFirewallDetectionControlOptions.AppFirewallDetectionControl.GetExcludeAttackTypeContexts() {
-							wafExclusionPolicyPolicyAppFirewallAttackTypeContextModel := WafExclusionPolicyPolicyAppFirewallAttackTypeContext{}
-
-							// data specToModelNested StringField --> ContextName
-							if excludeAttackTypeContextsElement.GetContextName() != "" {
-								wafExclusionPolicyPolicyAppFirewallAttackTypeContextModel.ContextName = types.StringValue(excludeAttackTypeContextsElement.GetContextName())
-							} else {
-								// Empty string, set to null
-								wafExclusionPolicyPolicyAppFirewallAttackTypeContextModel.ContextName = types.StringNull()
-							}
-
-							// data specToModelNested RequiredEnumField --> ExcludeAttackType
-							if excludeAttackTypeContextsElement.GetExcludeAttackType().String() != "" {
-								stringValue := types.StringValue(excludeAttackTypeContextsElement.GetExcludeAttackType().String())
-								stringSlice := []types.String{stringValue}
-								listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								wafExclusionPolicyPolicyAppFirewallAttackTypeContextModel.ExcludeAttackType = listValue
-							} else {
-								wafExclusionPolicyPolicyAppFirewallAttackTypeContextModel.ExcludeAttackType = types.ListNull(types.StringType)
-							}
-
-							// data specToModelNested RequiredEnumField --> Context
-							if excludeAttackTypeContextsElement.GetContext().String() != "" {
-								stringValue := types.StringValue(excludeAttackTypeContextsElement.GetContext().String())
-								stringSlice := []types.String{stringValue}
-								listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								wafExclusionPolicyPolicyAppFirewallAttackTypeContextModel.Context = listValue
-							} else {
-								wafExclusionPolicyPolicyAppFirewallAttackTypeContextModel.Context = types.ListNull(types.StringType)
-							}
-
-							excludeAttackTypeContextsElements = append(excludeAttackTypeContextsElements, wafExclusionPolicyPolicyAppFirewallAttackTypeContextModel)
-						}
-						// CASE 1: The target field is a `types.List` or an attribute map.
-						// The intermediate slice of structs must be converted to a `types.ListValue`.
-						excludeAttackTypeContextsListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: WafExclusionPolicyWafExclusionRulesWafAdvancedConfigurationAppFirewallDetectionControlExcludeAttackTypeContextsModelAttributeMap}, excludeAttackTypeContextsElements)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						appFirewallDetectionControlAttributeMap["exclude_attack_type_contexts"] = excludeAttackTypeContextsListValue
-
-					} else {
-						// The source list is empty or nil.
-						// CASE 1: The target field is a `types.List` or an attribute map.
-						// Assign a null `types.ListValue`.
-						appFirewallDetectionControlAttributeMap["exclude_attack_type_contexts"] = types.ListNull(types.ObjectType{AttrTypes: WafExclusionPolicyWafExclusionRulesWafAdvancedConfigurationAppFirewallDetectionControlExcludeAttackTypeContextsModelAttributeMap})
-					}
-
-					// data specToModelNested ArrayOfPointerField --> ExcludeBotNameContexts
-					if len(appFirewallDetectionControlOptions.AppFirewallDetectionControl.GetExcludeBotNameContexts()) > 0 {
-						// Step 1: Always create a slice of model structs from the spec data.
-						// This slice serves as an intermediate representation.
-						excludeBotNameContextsElements := make([]WafExclusionPolicyPolicyBotNameContext, 0, len(appFirewallDetectionControlOptions.AppFirewallDetectionControl.GetExcludeBotNameContexts()))
-						for _, excludeBotNameContextsElement := range appFirewallDetectionControlOptions.AppFirewallDetectionControl.GetExcludeBotNameContexts() {
-							wafExclusionPolicyPolicyBotNameContextModel := WafExclusionPolicyPolicyBotNameContext{}
-
-							// data specToModelNested RequiredStringField --> BotName
-							if excludeBotNameContextsElement.GetBotName() != "" {
-								wafExclusionPolicyPolicyBotNameContextModel.BotName = types.StringValue(excludeBotNameContextsElement.GetBotName())
-							} else {
-								// Empty string, set to null
-								wafExclusionPolicyPolicyBotNameContextModel.BotName = types.StringNull()
-							}
-
-							excludeBotNameContextsElements = append(excludeBotNameContextsElements, wafExclusionPolicyPolicyBotNameContextModel)
-						}
-						// CASE 1: The target field is a `types.List` or an attribute map.
-						// The intermediate slice of structs must be converted to a `types.ListValue`.
-						excludeBotNameContextsListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: WafExclusionPolicyWafExclusionRulesWafAdvancedConfigurationAppFirewallDetectionControlExcludeBotNameContextsModelAttributeMap}, excludeBotNameContextsElements)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						appFirewallDetectionControlAttributeMap["exclude_bot_name_contexts"] = excludeBotNameContextsListValue
-
-					} else {
-						// The source list is empty or nil.
-						// CASE 1: The target field is a `types.List` or an attribute map.
-						// Assign a null `types.ListValue`.
-						appFirewallDetectionControlAttributeMap["exclude_bot_name_contexts"] = types.ListNull(types.ObjectType{AttrTypes: WafExclusionPolicyWafExclusionRulesWafAdvancedConfigurationAppFirewallDetectionControlExcludeBotNameContextsModelAttributeMap})
-					}
-
-					appFirewallDetectionControlObj, diags := types.ObjectValue(WafExclusionPolicyWafExclusionRulesWafAdvancedConfigurationAppFirewallDetectionControlModelAttributeMap, appFirewallDetectionControlAttributeMap)
-					response.Diagnostics.Append(diags...)
+					appFirewallDetectionControlObj, appFirewallDetectionControlObjDiags := types.ObjectValue(WafExclusionPolicyWafExclusionRulesWafAdvancedConfigurationAppFirewallDetectionControlModelAttributeMap, appFirewallDetectionControlAttributeMap)
+					response.Diagnostics.Append(appFirewallDetectionControlObjDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
@@ -1114,21 +1114,23 @@ func (d *DataSourceF5XCWafExclusionPolicy) Read(ctx context.Context, request dat
 		wafExclusionRulesElementsSpectToModel = append(wafExclusionRulesElementsSpectToModel, wafExclusionPolicyPolicySimpleWafExclusionRuleModel)
 	}
 
-	wafExclusionRulesList, diags := utils.GoStructSliceToListValue(
-		ctx,
-		WafExclusionPolicyWafExclusionRulesModelAttributeMap,
-		wafExclusionRulesElementsSpectToModel,
-	)
+	{
+		wafExclusionRulesList, listDiags := utils.GoStructSliceToListValue(
+			ctx,
+			WafExclusionPolicyWafExclusionRulesModelAttributeMap,
+			wafExclusionRulesElementsSpectToModel,
+		)
 
-	response.Diagnostics.Append(diags...)
-	if response.Diagnostics.HasError() {
-		return
+		response.Diagnostics.Append(listDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+
+		data.WafExclusionRules = wafExclusionRulesList
 	}
 
-	data.WafExclusionRules = wafExclusionRulesList
-
 	// Set state to fully populated data
-	diags = response.State.Set(ctx, &data)
+	diags := response.State.Set(ctx, &data)
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return

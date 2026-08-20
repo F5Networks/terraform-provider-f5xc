@@ -1689,10 +1689,7 @@ var APISwaggerJSON string = `{
         "description": "route object is used to configuring L7 routing decision. route is made of three things\n1. Match condition for incoming request\n2. Actions to take if match is true\n3. Whether custom java script processing is enabled for this route match.",
         "version": "version not set"
     },
-    "schemes": [
-        "http",
-        "https"
-    ],
+    "schemes": null,
     "consumes": [
         "application/json"
     ],
@@ -1759,6 +1756,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1851,6 +1854,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1951,6 +1960,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2068,6 +2083,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2171,6 +2192,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2245,7 +2272,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Invert the result of the match to detect missing header or non-matching value",
                     "title": "invert_match",
-                    "format": "boolean",
                     "x-displayname": "NOT of match"
                 },
                 "name": {
@@ -2268,18 +2294,16 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": "Exclusive with [exact regex]\n If true, check for presence of header",
                     "title": "presence",
-                    "format": "boolean",
                     "x-displayname": "Presence"
                 },
                 "regex": {
                     "type": "string",
-                    "description": "Exclusive with [exact presence]\n Regex match of the header value in re2 format\n\nValidation Rules:\n  ves.io.schema.rules.string.max_bytes: 256\n  ves.io.schema.rules.string.not_empty: true\n  ves.io.schema.rules.string.regex: true\n",
+                    "description": "Exclusive with [exact presence]\n Regex match of the header value in re2 format\n\nValidation Rules:\n  ves.io.schema.rules.string.max_bytes: 256\n  ves.io.schema.rules.string.regex: true\n",
                     "title": "regex",
                     "maxLength": 256,
                     "x-displayname": "Regex",
                     "x-ves-validation-rules": {
                         "ves.io.schema.rules.string.max_bytes": "256",
-                        "ves.io.schema.rules.string.not_empty": "true",
                         "ves.io.schema.rules.string.regex": "true"
                     }
                 }
@@ -2703,7 +2727,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Fail the delete operation if this object is being referred by other objects",
                     "title": "fail_if_referred",
-                    "format": "boolean",
                     "x-displayname": "Fail-If-Referred"
                 },
                 "name": {
@@ -2843,14 +2866,12 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": "Exclusive with [cookie header_name]\n Hash based on source IP address\n\nExample: - true-",
                     "title": "Source IP",
-                    "format": "boolean",
                     "x-displayname": "Source IP"
                 },
                 "terminal": {
                     "type": "boolean",
                     "description": " Specify if its a terminal policy\n\nExample: - true-",
                     "title": "terminal",
-                    "format": "boolean",
                     "x-displayname": "Terminal"
                 }
             }
@@ -2956,7 +2977,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true indicates route is administratively disabled",
                     "title": "disabled",
-                    "format": "boolean",
                     "x-displayname": "Disabled"
                 },
                 "get_spec": {
@@ -3188,7 +3208,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": "Exclusive with [host_rewrite]\n Indicates that during forwarding, the host header will be swapped with the hostname\n of the upstream host chosen by the cluster\n\nExample: - true-",
                     "title": "Auto Host Rewrite",
-                    "format": "boolean",
                     "x-displayname": "Automatic Host Rewrite"
                 },
                 "buffer_policy": {
@@ -3497,7 +3516,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " disables append of x-volterra-location = \u003cre-site-name\u003e at route level, if it is configured at\n virtual-host level. This configuration is ignored on CE sites.\n\nExample: - true-",
                     "title": "disable_location_add",
-                    "format": "boolean",
                     "x-displayname": "Disable Location Addition"
                 },
                 "inherited_bot_defense_javascript_injection": {
@@ -3705,7 +3723,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": "Exclusive with []\n disable service policy at route level, if it is configured at virtual-host level\n\nExample: - true-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 }
             }
@@ -3721,7 +3738,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Specifies that the HTTP client connection to this route is allowed to upgrade to\n a SPDY connection\n\nExample: - true-",
                     "title": "use_spdy",
-                    "format": "boolean",
                     "x-displayname": "Use SPDY"
                 }
             }
@@ -3850,8 +3866,28 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Specifies that the HTTP client connection to this route is allowed to upgrade to\n a WebSocket connection\n\nExample: - true-",
                     "title": "use_websocket",
-                    "format": "boolean",
                     "x-displayname": "Use Websocket"
+                }
+            }
+        },
+        "runtimeError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/protobufAny"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
                 }
             }
         },
@@ -3926,7 +3962,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Disable buffering for a particular route. This is useful when virtual-host\n has buffering, but we need to disable it on a specific route.\n The value of this field is ignored for virtual-host",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "max_request_bytes": {
@@ -4054,7 +4089,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Should the value be overwritten? If true, the value is overwritten to existing values.\n Default value is do not overwrite",
                     "title": "overwrite",
-                    "format": "boolean",
                     "x-displayname": "Overwrite"
                 },
                 "secret_value": {
@@ -4087,7 +4121,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Specifies whether the resource allows credentials",
                     "title": "allow_credentials",
-                    "format": "boolean",
                     "x-displayname": "Allow Credentials"
                 },
                 "allow_headers": {
@@ -4150,7 +4183,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Disable the CorsPolicy for a particular route. This is useful when\n virtual-host has CorsPolicy, but we need to disable it on a specific route.\n The value of this field is ignored for virtual-host",
                     "title": "disabled",
-                    "format": "boolean",
                     "x-displayname": "Disabled"
                 },
                 "expose_headers": {
@@ -4340,7 +4372,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Should the value be appended? If true, the value is appended to existing values.\n Default value is do not append",
                     "title": "append",
-                    "format": "boolean",
                     "x-displayname": "Append"
                 },
                 "name": {
@@ -4468,7 +4499,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "labels": {
@@ -4532,7 +4562,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable",
                     "x-ves-example": "true"
                 },
@@ -4598,7 +4627,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "labels": {
@@ -5014,7 +5042,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Should the value be overwritten? If true, the value is overwritten to existing values.\n Default value is do not overwrite",
                     "title": "overwrite",
-                    "format": "boolean",
                     "x-displayname": "Overwrite"
                 },
                 "samesite_lax": {
@@ -5110,7 +5137,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Indicate whether mars deems this object to be stale via graceful restart timer information",
                     "title": "vtrp_stale",
-                    "format": "boolean",
                     "x-displayname": "VTRP Stale"
                 }
             }

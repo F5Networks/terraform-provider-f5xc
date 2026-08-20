@@ -114,6 +114,14 @@ func (c *NamespaceCustomAPIGrpcClient) doRPCNetworkingInventory(ctx context.Cont
 	rsp, err := c.grpcClient.NetworkingInventory(ctx, req, opts...)
 	return rsp, err
 }
+func (c *NamespaceCustomAPIGrpcClient) doRPCOIDCOAuthDiscovery(ctx context.Context, yamlReq string, opts ...grpc.CallOption) (proto.Message, error) {
+	req := &OIDCOAuthDiscoveryReq{}
+	if err := codec.FromYAML(yamlReq, req); err != nil {
+		return nil, fmt.Errorf("YAML Request %s is not of type *ves.io.schema.namespace.OIDCOAuthDiscoveryReq", yamlReq)
+	}
+	rsp, err := c.grpcClient.OIDCOAuthDiscovery(ctx, req, opts...)
+	return rsp, err
+}
 func (c *NamespaceCustomAPIGrpcClient) doRPCSetActiveAlertPolicies(ctx context.Context, yamlReq string, opts ...grpc.CallOption) (proto.Message, error) {
 	req := &SetActiveAlertPoliciesRequest{}
 	if err := codec.FromYAML(yamlReq, req); err != nil {
@@ -211,6 +219,7 @@ func NewNamespaceCustomAPIGrpcClient(cc *grpc.ClientConn) server.CustomClient {
 	rpcFns["GetActiveServicePolicies"] = ccl.doRPCGetActiveServicePolicies
 	rpcFns["GetFastACLsForInternetVIPs"] = ccl.doRPCGetFastACLsForInternetVIPs
 	rpcFns["NetworkingInventory"] = ccl.doRPCNetworkingInventory
+	rpcFns["OIDCOAuthDiscovery"] = ccl.doRPCOIDCOAuthDiscovery
 	rpcFns["SetActiveAlertPolicies"] = ccl.doRPCSetActiveAlertPolicies
 	rpcFns["SetActiveNetworkPolicies"] = ccl.doRPCSetActiveNetworkPolicies
 	rpcFns["SetActiveServicePolicies"] = ccl.doRPCSetActiveServicePolicies
@@ -1057,6 +1066,89 @@ func (c *NamespaceCustomAPIRestClient) doRPCNetworkingInventory(ctx context.Cont
 	}
 	return pbRsp, nil
 }
+func (c *NamespaceCustomAPIRestClient) doRPCOIDCOAuthDiscovery(ctx context.Context, callOpts *server.CustomCallOpts) (proto.Message, error) {
+	if callOpts.URI == "" {
+		return nil, fmt.Errorf("Error, URI should be specified, got empty")
+	}
+	url := fmt.Sprintf("%s%s", c.baseURL, callOpts.URI)
+
+	yamlReq := callOpts.YAMLReq
+	req := &OIDCOAuthDiscoveryReq{}
+	if err := codec.FromYAML(yamlReq, req); err != nil {
+		return nil, fmt.Errorf("YAML Request %s is not of type *ves.io.schema.namespace.OIDCOAuthDiscoveryReq: %s", yamlReq, err)
+	}
+
+	var hReq *http.Request
+	hm := strings.ToLower(callOpts.HTTPMethod)
+	switch hm {
+	case "post", "put":
+		jsn, err := codec.ToJSON(req, codec.ToWithUseProtoFieldName())
+		if err != nil {
+			return nil, errors.Wrap(err, "Custom RestClient converting YAML to JSON")
+		}
+		var op string
+		if hm == "post" {
+			op = http.MethodPost
+		} else {
+			op = http.MethodPut
+		}
+		newReq, err := http.NewRequest(op, url, bytes.NewBuffer([]byte(jsn)))
+		if err != nil {
+			return nil, errors.Wrapf(err, "Creating new HTTP %s request for custom API", op)
+		}
+		hReq = newReq
+	case "get":
+		newReq, err := http.NewRequest(http.MethodGet, url, nil)
+		if err != nil {
+			return nil, errors.Wrap(err, "Creating new HTTP GET request for custom API")
+		}
+		hReq = newReq
+		q := hReq.URL.Query()
+		_ = q
+		q.Add("namespace", fmt.Sprintf("%v", req.Namespace))
+		q.Add("openid_cfg_uri", fmt.Sprintf("%v", req.OpenidCfgUri))
+		q.Add("trusted_ca", fmt.Sprintf("%v", req.TrustedCa))
+
+		hReq.URL.RawQuery += q.Encode()
+	case "delete":
+		newReq, err := http.NewRequest(http.MethodDelete, url, nil)
+		if err != nil {
+			return nil, errors.Wrap(err, "Creating new HTTP DELETE request for custom API")
+		}
+		hReq = newReq
+	default:
+		return nil, fmt.Errorf("Error, invalid/empty HTTPMethod(%s) specified, should be POST|DELETE|GET", callOpts.HTTPMethod)
+	}
+	hReq = hReq.WithContext(ctx)
+	hReq.Header.Set("Content-Type", "application/json")
+	client.AddHdrsToReq(callOpts.Headers, hReq)
+
+	rsp, err := c.client.Do(hReq)
+	if err != nil {
+		return nil, errors.Wrap(err, "Custom API RestClient")
+	}
+	defer rsp.Body.Close()
+
+	// checking whether the status code is a successful status code (2xx series)
+	if rsp.StatusCode < 200 || rsp.StatusCode > 299 {
+		body, err := io.ReadAll(rsp.Body)
+		return nil, fmt.Errorf("Unsuccessful custom API %s on %s, status code %d, body %s, err %s", callOpts.HTTPMethod, callOpts.URI, rsp.StatusCode, body, err)
+	}
+
+	body, err := io.ReadAll(rsp.Body)
+	if err != nil {
+		return nil, errors.Wrap(err, "Custom API RestClient read body")
+	}
+	pbRsp := &OIDCOAuthDiscoveryResp{}
+	if err := codec.FromJSON(string(body), pbRsp); err != nil {
+		return nil, errors.Wrapf(err, "JSON Response %s is not of type *ves.io.schema.namespace.OIDCOAuthDiscoveryResp", body)
+	}
+	if callOpts.OutCallResponse != nil {
+		callOpts.OutCallResponse.ProtoMsg = pbRsp
+		callOpts.OutCallResponse.JSON = string(body)
+	}
+	return pbRsp, nil
+}
 func (c *NamespaceCustomAPIRestClient) doRPCSetActiveAlertPolicies(ctx context.Context, callOpts *server.CustomCallOpts) (proto.Message, error) {
 	if callOpts.URI == "" {
 		return nil, fmt.Errorf("Error, URI should be specified, got empty")
@@ -1677,6 +1769,7 @@ func NewNamespaceCustomAPIRestClient(baseURL string, hc http.Client) server.Cust
 	rpcFns["GetActiveServicePolicies"] = ccl.doRPCGetActiveServicePolicies
 	rpcFns["GetFastACLsForInternetVIPs"] = ccl.doRPCGetFastACLsForInternetVIPs
 	rpcFns["NetworkingInventory"] = ccl.doRPCNetworkingInventory
+	rpcFns["OIDCOAuthDiscovery"] = ccl.doRPCOIDCOAuthDiscovery
 	rpcFns["SetActiveAlertPolicies"] = ccl.doRPCSetActiveAlertPolicies
 	rpcFns["SetActiveNetworkPolicies"] = ccl.doRPCSetActiveNetworkPolicies
 	rpcFns["SetActiveServicePolicies"] = ccl.doRPCSetActiveServicePolicies
@@ -1734,6 +1827,10 @@ func (c *namespaceCustomAPIInprocClient) GetFastACLsForInternetVIPs(ctx context.
 func (c *namespaceCustomAPIInprocClient) NetworkingInventory(ctx context.Context, in *NetworkingInventoryRequest, opts ...grpc.CallOption) (*NetworkingInventoryResponse, error) {
 	ctx = server.ContextWithRpcFQN(ctx, "ves.io.schema.namespace.NamespaceCustomAPI.NetworkingInventory")
 	return c.NamespaceCustomAPIServer.NetworkingInventory(ctx, in)
+}
+func (c *namespaceCustomAPIInprocClient) OIDCOAuthDiscovery(ctx context.Context, in *OIDCOAuthDiscoveryReq, opts ...grpc.CallOption) (*OIDCOAuthDiscoveryResp, error) {
+	ctx = server.ContextWithRpcFQN(ctx, "ves.io.schema.namespace.NamespaceCustomAPI.OIDCOAuthDiscovery")
+	return c.NamespaceCustomAPIServer.OIDCOAuthDiscovery(ctx, in)
 }
 func (c *namespaceCustomAPIInprocClient) SetActiveAlertPolicies(ctx context.Context, in *SetActiveAlertPoliciesRequest, opts ...grpc.CallOption) (*SetActiveAlertPoliciesResponse, error) {
 	ctx = server.ContextWithRpcFQN(ctx, "ves.io.schema.namespace.NamespaceCustomAPI.SetActiveAlertPolicies")
@@ -2265,6 +2362,57 @@ func (s *namespaceCustomAPISrv) NetworkingInventory(ctx context.Context, in *Net
 
 	return rsp, nil
 }
+func (s *namespaceCustomAPISrv) OIDCOAuthDiscovery(ctx context.Context, in *OIDCOAuthDiscoveryReq) (*OIDCOAuthDiscoveryResp, error) {
+	ah := s.svc.GetAPIHandler("ves.io.schema.namespace.NamespaceCustomAPI")
+	cah, ok := ah.(NamespaceCustomAPIServer)
+	if !ok {
+		return nil, fmt.Errorf("ah %v is not of type *NamespaceCustomAPIServer", ah)
+	}
+
+	var (
+		rsp *OIDCOAuthDiscoveryResp
+		err error
+	)
+
+	bodyFields := svcfw.GenAuditReqBodyFields(ctx, s.svc, "ves.io.schema.namespace.OIDCOAuthDiscoveryReq", in)
+	defer func() {
+		if len(bodyFields) > 0 {
+			server.ExtendAPIAudit(ctx, svcfw.PublicAPIBodyLog.Uid, bodyFields)
+		}
+		userMsg := "The 'NamespaceCustomAPI.OIDCOAuthDiscovery' operation on 'namespace'"
+		if err == nil {
+			userMsg += " was successfully performed."
+		} else {
+			userMsg += " failed to be performed."
+		}
+		server.AddUserMsgToAPIAudit(ctx, userMsg)
+	}()
+	if err := s.svc.CustomAPIProcessDRef(ctx, in); err != nil {
+		return nil, err
+	}
+
+	if err := svcfw.FillOneofDefaultChoice(ctx, s.svc, in); err != nil {
+		err = server.MaybePublicRestError(ctx, errors.Wrapf(err, "Filling oneof default choice"))
+		return nil, server.GRPCStatusFromError(err).Err()
+	}
+
+	if s.svc.Config().EnableAPIValidation {
+		if rvFn := s.svc.GetRPCValidator("ves.io.schema.namespace.NamespaceCustomAPI.OIDCOAuthDiscovery"); rvFn != nil {
+			if verr := rvFn(ctx, in); verr != nil {
+				err = server.MaybePublicRestError(ctx, errors.Wrapf(verr, "Validating Request"))
+				return nil, server.GRPCStatusFromError(err).Err()
+			}
+		}
+	}
+
+	rsp, err = cah.OIDCOAuthDiscovery(ctx, in)
+	if err != nil {
+		return rsp, server.GRPCStatusFromError(server.MaybePublicRestError(ctx, err)).Err()
+	}
+	bodyFields = append(bodyFields, svcfw.GenAuditRspBodyFields(ctx, s.svc, "ves.io.schema.namespace.OIDCOAuthDiscoveryResp", rsp)...)
+
+	return rsp, nil
+}
 func (s *namespaceCustomAPISrv) SetActiveAlertPolicies(ctx context.Context, in *SetActiveAlertPoliciesRequest) (*SetActiveAlertPoliciesResponse, error) {
 	ah := s.svc.GetAPIHandler("ves.io.schema.namespace.NamespaceCustomAPI")
 	cah, ok := ah.(NamespaceCustomAPIServer)
@@ -2625,10 +2773,7 @@ var NamespaceCustomAPISwaggerJSON string = `{
         "description": "APIs in this file are custom APIs on namespace object served by akar",
         "version": "version not set"
     },
-    "schemes": [
-        "http",
-        "https"
-    ],
+    "schemes": null,
     "consumes": [
         "application/json"
     ],
@@ -2695,6 +2840,12 @@ var NamespaceCustomAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2780,6 +2931,12 @@ var NamespaceCustomAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2863,6 +3020,12 @@ var NamespaceCustomAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2948,6 +3111,12 @@ var NamespaceCustomAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -3031,6 +3200,12 @@ var NamespaceCustomAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -3116,6 +3291,12 @@ var NamespaceCustomAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -3194,6 +3375,12 @@ var NamespaceCustomAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -3287,6 +3474,12 @@ var NamespaceCustomAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -3365,6 +3558,12 @@ var NamespaceCustomAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -3458,6 +3657,12 @@ var NamespaceCustomAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -3536,6 +3741,12 @@ var NamespaceCustomAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -3629,6 +3840,12 @@ var NamespaceCustomAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -3720,6 +3937,12 @@ var NamespaceCustomAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -3813,6 +4036,12 @@ var NamespaceCustomAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -3892,6 +4121,12 @@ var NamespaceCustomAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -3920,6 +4155,104 @@ var NamespaceCustomAPISwaggerJSON string = `{
                     "url": "https://docs.cloud.f5.com/docs-v2/platform/reference/api-ref/ves-io-schema-namespace-namespacecustomapi-setfastaclsforinternetvips"
                 },
                 "x-ves-proto-rpc": "ves.io.schema.namespace.NamespaceCustomAPI.SetFastACLsForInternetVIPs"
+            },
+            "x-displayname": "NamespaceCustomAPI",
+            "x-ves-proto-service": "ves.io.schema.namespace.NamespaceCustomAPI",
+            "x-ves-proto-service-type": "CUSTOM_PUBLIC"
+        },
+        "/public/namespaces/{namespace}/oidc_oauth_discovery": {
+            "post": {
+                "summary": "OIDC OAuth Discovery",
+                "description": "OIDCOAuthDiscovery fetches OAuth provider and JWT metadata from the OpenID configuration URI and stores it.",
+                "operationId": "ves.io.schema.namespace.NamespaceCustomAPI.OIDCOAuthDiscovery",
+                "responses": {
+                    "200": {
+                        "description": "A successful response.",
+                        "schema": {
+                            "$ref": "#/definitions/namespaceOIDCOAuthDiscoveryResp"
+                        }
+                    },
+                    "401": {
+                        "description": "Returned when operation is not authorized",
+                        "schema": {
+                            "format": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "Returned when there is no permission to access resource",
+                        "schema": {
+                            "format": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Returned when resource is not found",
+                        "schema": {
+                            "format": "string"
+                        }
+                    },
+                    "409": {
+                        "description": "Returned when operation on resource is conflicting with current value",
+                        "schema": {
+                            "format": "string"
+                        }
+                    },
+                    "429": {
+                        "description": "Returned when operation has been rejected as it is happening too frequently",
+                        "schema": {
+                            "format": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Returned when server encountered an error in processing API",
+                        "schema": {
+                            "format": "string"
+                        }
+                    },
+                    "503": {
+                        "description": "Returned when service is unavailable temporarily",
+                        "schema": {
+                            "format": "string"
+                        }
+                    },
+                    "504": {
+                        "description": "Returned when server timed out processing request",
+                        "schema": {
+                            "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "namespace",
+                        "description": "namespace\n\nx-example: \"ns1\"\nNamespace to scope the request.",
+                        "in": "path",
+                        "required": true,
+                        "type": "string",
+                        "x-displayname": "Namespace"
+                    },
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/namespaceOIDCOAuthDiscoveryReq"
+                        }
+                    }
+                ],
+                "tags": [
+                    "NamespaceCustomAPI"
+                ],
+                "externalDocs": {
+                    "description": "Examples of this operation",
+                    "url": "https://docs.cloud.f5.com/docs-v2/platform/reference/api-ref/ves-io-schema-namespace-namespacecustomapi-oidcoauthdiscovery"
+                },
+                "x-ves-proto-rpc": "ves.io.schema.namespace.NamespaceCustomAPI.OIDCOAuthDiscovery"
             },
             "x-displayname": "NamespaceCustomAPI",
             "x-ves-proto-service": "ves.io.schema.namespace.NamespaceCustomAPI",
@@ -3983,6 +4316,12 @@ var NamespaceCustomAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -4075,6 +4414,12 @@ var NamespaceCustomAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -4462,14 +4807,12 @@ var NamespaceCustomAPISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Filter results with BIGIP Virtual Server with API Discovery",
                     "title": "API Discovery",
-                    "format": "boolean",
                     "x-displayname": "API Discovery"
                 },
                 "waf_configured": {
                     "type": "boolean",
                     "description": " Filter results with BIGIP Virtual Server with WAF configured",
                     "title": "WAF",
-                    "format": "boolean",
                     "x-displayname": "WAF"
                 }
             }
@@ -4651,7 +4994,6 @@ var NamespaceCustomAPISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " The response should contain the default values for a new object",
                     "title": "defaults",
-                    "format": "boolean",
                     "x-displayname": "Request Defaults"
                 },
                 "field_path": {
@@ -4790,231 +5132,198 @@ var NamespaceCustomAPISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Filter results with HTTP loadbalancers with API Definition",
                     "title": "API Definition",
-                    "format": "boolean",
                     "x-displayname": "API Definition"
                 },
                 "api_discovery": {
                     "type": "boolean",
                     "description": " Filter results with HTTP loadbalancers with API Discovery",
                     "title": "API Discovery",
-                    "format": "boolean",
                     "x-displayname": "API Discovery"
                 },
                 "api_protection": {
                     "type": "boolean",
                     "description": " Filter results with HTTP loadbalancers with API Protection configured",
                     "title": "API Protection",
-                    "format": "boolean",
                     "x-displayname": "API Protection"
                 },
                 "api_schema_validation": {
                     "type": "boolean",
                     "description": " Filter results with HTTP loadbalancers with API Schema Validation",
                     "title": "API Schema Validation",
-                    "format": "boolean",
                     "x-displayname": "API Schema Validation"
                 },
                 "bot_protection": {
                     "type": "boolean",
                     "description": " Filter results with HTTP loadbalancers with Bot Protection configured",
                     "title": "Bot Protection",
-                    "format": "boolean",
                     "x-displayname": "Bot Protection"
                 },
                 "client_blocking": {
                     "type": "boolean",
                     "description": " Filter results with HTTP loadbalancers with Client Blocking",
                     "title": "Client Blocking",
-                    "format": "boolean",
                     "x-displayname": "Client Blocking"
                 },
                 "client_side_defense": {
                     "type": "boolean",
                     "description": " Filter results with HTTP loadbalancers with Client Side Defense configured",
                     "title": "Client Side Defense",
-                    "format": "boolean",
                     "x-displayname": "Client Side Defense"
                 },
                 "cookie_protection": {
                     "type": "boolean",
                     "description": " Filter results with HTTP loadbalancers with Cookie Protection",
                     "title": "Cookie Protection",
-                    "format": "boolean",
                     "x-displayname": "Cookie Protection"
                 },
                 "cors_policy": {
                     "type": "boolean",
                     "description": " Filter results with HTTP loadbalancers with CORS Policy",
                     "title": "CORS Policy",
-                    "format": "boolean",
                     "x-displayname": "CORS Policy"
                 },
                 "csrf_protection": {
                     "type": "boolean",
                     "description": " Filter results with HTTP loadbalancers with CSRF Protection",
                     "title": "CSRF Protection",
-                    "format": "boolean",
                     "x-displayname": "CSRF Protection"
                 },
                 "data_guard": {
                     "type": "boolean",
                     "description": " Filter results with HTTP loadbalancers with Data Guard",
                     "title": "Data Guard",
-                    "format": "boolean",
                     "x-displayname": "Data Guard"
                 },
                 "ddos_auto_mitigation": {
                     "type": "boolean",
                     "description": " Filter results with HTTP loadbalancers with L7 DDoS Auto Mitigation enabled",
                     "title": "L7 DDoS Auto Mitigation",
-                    "format": "boolean",
                     "x-displayname": "L7 DDoS Auto Mitigation"
                 },
                 "ddos_mitigation": {
                     "type": "boolean",
                     "description": " Filter results with HTTP loadbalancers with DDoS Mitigation Rules configured",
                     "title": "DDoS Mitigation Rules",
-                    "format": "boolean",
                     "x-displayname": "DDoS Mitigation Rules"
                 },
                 "ddos_protection": {
                     "type": "boolean",
                     "description": " Filter results with HTTP loadbalancers with L7 DDoS detection enabled",
                     "title": "L7 DDoS Detection",
-                    "format": "boolean",
                     "x-displayname": "L7 DDoS Detection"
                 },
                 "default_loadbalancer": {
                     "type": "boolean",
                     "description": " Filter results with HTTP loadbalancers with Default Loadbalancer",
                     "title": "Default Loadbalancer",
-                    "format": "boolean",
                     "x-displayname": "Default Loadbalancer"
                 },
                 "graph_ql_inspection": {
                     "type": "boolean",
                     "description": " Filter results with HTTP loadbalancers with GraphQL Inspection",
                     "title": "GraphQL Inspection",
-                    "format": "boolean",
                     "x-displayname": "GraphQL Inspection"
                 },
                 "http_only": {
                     "type": "boolean",
                     "description": " Filter results with HTTP only loadbalancers",
                     "title": "HTTP Only",
-                    "format": "boolean",
                     "x-displayname": "HTTP Only"
                 },
                 "ip_reputation": {
                     "type": "boolean",
                     "description": " Filter results with HTTP loadbalancers with IP Reputation configured",
                     "title": "IP Reputation",
-                    "format": "boolean",
                     "x-displayname": "IP Reputation"
                 },
                 "malicious_user_detection": {
                     "type": "boolean",
                     "description": " Filter results with HTTP loadbalancers with Malicious User Detection configured",
                     "title": "Malicious User Detection",
-                    "format": "boolean",
                     "x-displayname": "Malicious User Detection"
                 },
                 "malicious_user_mitigation": {
                     "type": "boolean",
                     "description": " Filter results with HTTP loadbalancers with Malicious User Mitigation",
                     "title": "Malicious User Mitigation",
-                    "format": "boolean",
                     "x-displayname": "Malicious User Mitigation"
                 },
                 "malware_protection": {
                     "type": "boolean",
                     "description": " Filter results with HTTP loadbalancers with Malware Protection",
                     "title": "Malware Protection",
-                    "format": "boolean",
                     "x-displayname": "Malware Protection"
                 },
                 "mutual_tls": {
                     "type": "boolean",
                     "description": " Filter results with HTTP loadbalancers with mTLS",
                     "title": "mTLS",
-                    "format": "boolean",
                     "x-displayname": "mTLS"
                 },
                 "namespace_service_policy": {
                     "type": "boolean",
                     "description": " Filter results with HTTP loadbalancers with Namespace Service Policy configured",
                     "title": "Namespace Service Policy",
-                    "format": "boolean",
                     "x-displayname": "Namespace Service Policy"
                 },
                 "origin_server_subset": {
                     "type": "boolean",
                     "description": " Filter results with HTTP loadbalancers with Origin Server Subset",
                     "title": "Origin Server Subset",
-                    "format": "boolean",
                     "x-displayname": "Origin Server Subset"
                 },
                 "private_advertisement": {
                     "type": "boolean",
                     "description": " Filter results with HTTP loadbalancers advertised privately",
                     "title": "Private Advertisement",
-                    "format": "boolean",
                     "x-displayname": "Private Advertisement"
                 },
                 "public_advertisment": {
                     "type": "boolean",
                     "description": " Filter results with HTTP loadbalancers advertised publicly",
                     "title": "Public Advertisement",
-                    "format": "boolean",
                     "x-displayname": "Public Advertisement"
                 },
                 "routes": {
                     "type": "boolean",
                     "description": " Filter results with HTTP loadbalancers with Routes",
                     "title": "Routes",
-                    "format": "boolean",
                     "x-displayname": "Routes"
                 },
                 "service_policy": {
                     "type": "boolean",
                     "description": " Filter results with HTTP loadbalancers with Service Policy configured",
                     "title": "Service Policy",
-                    "format": "boolean",
                     "x-displayname": "Service Policy"
                 },
                 "slow_ddos_mitigation": {
                     "type": "boolean",
                     "description": " Filter results with HTTP loadbalancers with Slow DDoS Mitigation",
                     "title": "Slow DDoS Mitigation",
-                    "format": "boolean",
                     "x-displayname": "Slow DDoS Mitigation"
                 },
                 "trusted_client": {
                     "type": "boolean",
                     "description": " Filter results with HTTP loadbalancers with Trusted Client",
                     "title": "Trusted Client",
-                    "format": "boolean",
                     "x-displayname": "Trusted Client"
                 },
                 "trusted_client_ip_headers": {
                     "type": "boolean",
                     "description": " Filter results with HTTP loadbalancers with Trusted Client IP Headers",
                     "title": "Trusted Client IP Headers",
-                    "format": "boolean",
                     "x-displayname": "Trusted Client IP Headers"
                 },
                 "waf": {
                     "type": "boolean",
                     "description": " Filter results with HTTP loadbalancers with WAF configured",
                     "title": "WAF",
-                    "format": "boolean",
                     "x-displayname": "WAF"
                 },
                 "waf_exclusion": {
                     "type": "boolean",
                     "description": " Filter results with HTTP loadbalancers with WAF Exclusion",
                     "title": "WAF Exclusion",
-                    "format": "boolean",
                     "x-displayname": "WAF Exclusion"
                 }
             }
@@ -5486,14 +5795,12 @@ var NamespaceCustomAPISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Filter results with NGINX One Server with specificed API Discovery enablement state",
                     "title": "API Discovery",
-                    "format": "boolean",
                     "x-displayname": "API Discovery"
                 },
                 "waf_configured": {
                     "type": "boolean",
                     "description": " Filter results with NGINX One Server with specified WAF enablement state",
                     "title": "WAF",
-                    "format": "boolean",
                     "x-displayname": "WAF"
                 }
             }
@@ -5612,7 +5919,6 @@ var NamespaceCustomAPISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Specifies if security logging is enabled",
                     "title": "security_log_enabled",
-                    "format": "boolean",
                     "x-displayname": "WAF Log Enabled"
                 },
                 "waf_security_log_file_names": {
@@ -5681,6 +5987,84 @@ var NamespaceCustomAPISwaggerJSON string = `{
                     "title": "Sites",
                     "format": "int64",
                     "x-displayname": "Sites"
+                }
+            }
+        },
+        "namespaceOIDCOAuthDiscoveryReq": {
+            "type": "object",
+            "description": "Request payload for OIDC/OAuth discovery lookup.",
+            "title": "OIDCOAuthDiscoveryReq",
+            "x-displayname": "OIDC OAuth Discovery Request",
+            "x-ves-proto-message": "ves.io.schema.namespace.OIDCOAuthDiscoveryReq",
+            "properties": {
+                "namespace": {
+                    "type": "string",
+                    "description": " Namespace to scope the request.\n\nExample: - \"ns1\"-",
+                    "title": "namespace",
+                    "x-displayname": "Namespace",
+                    "x-ves-example": "ns1"
+                },
+                "openid_cfg_uri": {
+                    "type": "string",
+                    "description": " OpenID provider metadata URI.\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n  ves.io.schema.rules.string.uri_ref: true\n",
+                    "title": "openid_cfg_uri",
+                    "x-displayname": "OpenID Configuration URI",
+                    "x-ves-required": "true",
+                    "x-ves-validation-rules": {
+                        "ves.io.schema.rules.message.required": "true",
+                        "ves.io.schema.rules.string.uri_ref": "true"
+                    }
+                },
+                "trusted_ca": {
+                    "description": " Optional reference to Root CA Certificate object used for TLS verification when fetching OpenID metadata.",
+                    "title": "trusted_ca",
+                    "$ref": "#/definitions/schemaviewsObjectRefType",
+                    "x-displayname": "Root CA Certificate"
+                }
+            }
+        },
+        "namespaceOIDCOAuthDiscoveryResp": {
+            "type": "object",
+            "description": "Discovery response containing UI-required provider details.",
+            "title": "OIDCOAuthDiscoveryResp",
+            "x-displayname": "OIDC OAuth Discovery Response",
+            "x-ves-proto-message": "ves.io.schema.namespace.OIDCOAuthDiscoveryResp",
+            "properties": {
+                "authentication_uri": {
+                    "type": "string",
+                    "description": " OAuth 2.0 authorization endpoint URI.",
+                    "title": "authentication_uri",
+                    "x-displayname": "Authentication URI"
+                },
+                "auto_jwt_config_name": {
+                    "description": " Reference to oauth_jwt_config created for this provider",
+                    "title": "auto_jwt_config_name",
+                    "$ref": "#/definitions/schemaviewsObjectRefType",
+                    "x-displayname": "Auto JWT Config"
+                },
+                "introspect_uri": {
+                    "type": "string",
+                    "description": " OAuth 2.0 token introspection endpoint URI.",
+                    "title": "introspect",
+                    "x-displayname": "Introspect URI"
+                },
+                "token_uri": {
+                    "type": "string",
+                    "description": " OAuth 2.0 token endpoint URI.",
+                    "title": "token_uri",
+                    "x-displayname": "Token URI"
+                },
+                "token_validation_scope_uri": {
+                    "type": "string",
+                    "description": " Scope used when validating tokens against the provider.",
+                    "title": "token_validation_scope_uri",
+                    "x-displayname": "Token Validation Scope URI"
+                },
+                "userinfo_request_uri": {
+                    "type": "string",
+                    "description": " OpenID Connect UserInfo endpoint URI.",
+                    "title": "userinfo_request_uri",
+                    "x-displayname": "UserInfo Request URI"
                 }
             }
         },
@@ -5911,35 +6295,30 @@ var NamespaceCustomAPISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Filter results with TCP loadbalancers with Namespace Service Policy configured",
                     "title": "Namespace Service Policy",
-                    "format": "boolean",
                     "x-displayname": "Namespace Service Policy"
                 },
                 "private_advertisement": {
                     "type": "boolean",
                     "description": " Filter results with TCP loadbalancers advertised privately",
                     "title": "Private Advertisement",
-                    "format": "boolean",
                     "x-displayname": "Private Advertisement"
                 },
                 "public_advertisment": {
                     "type": "boolean",
                     "description": " Filter results with TCP loadbalancers advertised publicly",
                     "title": "Public Advertisement",
-                    "format": "boolean",
                     "x-displayname": "Public Advertisement"
                 },
                 "service_policy": {
                     "type": "boolean",
                     "description": " Filter results with TCP loadbalancers with Service Policy configured",
                     "title": "Service Policy",
-                    "format": "boolean",
                     "x-displayname": "Service Policy"
                 },
                 "tls_encryption": {
                     "type": "boolean",
                     "description": " Filter results with TCP loadbalancers with TLS Encryption configured",
                     "title": "TLS Encryption",
-                    "format": "boolean",
                     "x-displayname": "TLS Encryption"
                 }
             }
@@ -6065,7 +6444,6 @@ var NamespaceCustomAPISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Filter results with Third Party Application with API Discovery",
                     "title": "API Discovery",
-                    "format": "boolean",
                     "x-displayname": "API Discovery"
                 }
             }
@@ -6127,28 +6505,24 @@ var NamespaceCustomAPISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Filter results with UDP loadbalancers with Namespace Service Policy configured",
                     "title": "Namespace Service Policy",
-                    "format": "boolean",
                     "x-displayname": "Namespace Service Policy"
                 },
                 "private_advertisement": {
                     "type": "boolean",
                     "description": " Filter results with UDP loadbalancers advertised privately",
                     "title": "Private Advertisement",
-                    "format": "boolean",
                     "x-displayname": "Private Advertisement"
                 },
                 "public_advertisment": {
                     "type": "boolean",
                     "description": " Filter results with UDP loadbalancers advertised publicly",
                     "title": "Public Advertisement",
-                    "format": "boolean",
                     "x-displayname": "Public Advertisement"
                 },
                 "service_policy": {
                     "type": "boolean",
                     "description": " Filter results with UDP loadbalancers with Service Policy configured",
                     "title": "Service Policy",
-                    "format": "boolean",
                     "x-displayname": "Service Policy"
                 }
             }
@@ -6276,7 +6650,6 @@ var NamespaceCustomAPISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " API result.",
                     "title": "result",
-                    "format": "boolean",
                     "x-displayname": "Result"
                 }
             }
@@ -6328,7 +6701,6 @@ var NamespaceCustomAPISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " This will set true if validation is successful on value",
                     "title": "success",
-                    "format": "boolean",
                     "x-displayname": "Success"
                 },
                 "validation_results": {
@@ -6374,12 +6746,26 @@ var NamespaceCustomAPISwaggerJSON string = `{
                     "format": "int64",
                     "x-displayname": "HTTP Count"
                 },
+                "https_count": {
+                    "type": "integer",
+                    "description": " Number of virtual servers with client SSL profile attached",
+                    "title": "HTTPS Count",
+                    "format": "int64",
+                    "x-displayname": "HTTPS Count"
+                },
                 "irules_count": {
                     "type": "integer",
                     "description": " Number of iRules configured",
                     "title": "iRules Count",
                     "format": "int64",
                     "x-displayname": "iRules Count"
+                },
+                "traffic_policy_count": {
+                    "type": "integer",
+                    "description": " Number of virtual servers with traffic policy configured",
+                    "title": "Traffic Policy Count",
+                    "format": "int64",
+                    "x-displayname": "Traffic Policy Count"
                 },
                 "virtual_server_specs": {
                     "description": " Detailed specifications of Virtual Servers",
@@ -6472,21 +6858,18 @@ var NamespaceCustomAPISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Filter results with HTTP only loadbalancers",
                     "title": "HTTP Only",
-                    "format": "boolean",
                     "x-displayname": "HTTP Only"
                 },
                 "irules": {
                     "type": "boolean",
                     "description": " Filter results with Virtual Services with IRules configured",
                     "title": "IRules",
-                    "format": "boolean",
                     "x-displayname": "IRules"
                 },
                 "traffic_policy": {
                     "type": "boolean",
                     "description": " Filter results with Virtual Services with Traffic Policy enabled",
                     "title": "Traffic Policy Enabled",
-                    "format": "boolean",
                     "x-displayname": "Traffic Policy Enabled"
                 }
             }
@@ -6503,6 +6886,27 @@ var NamespaceCustomAPISwaggerJSON string = `{
                     "type": "string",
                     "description": "Must be a valid serialized protocol buffer of the above specified type.",
                     "format": "byte"
+                }
+            }
+        },
+        "runtimeError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/protobufAny"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
                 }
             }
         },

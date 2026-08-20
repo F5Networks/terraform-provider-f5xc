@@ -34,16 +34,23 @@ type DataSourceF5XCVirtualNetwork struct {
 	client *client.APIClient
 }
 
+type VirtualNetworkCreateSpecTypeNetworkChoice struct {
+	GlobalNetwork          types.Bool `tfsdk:"global_network"`
+	LegacyType             types.List `tfsdk:"legacy_type"`
+	SiteLocalInsideNetwork types.Bool `tfsdk:"site_local_inside_network"`
+	SiteLocalNetwork       types.Bool `tfsdk:"site_local_network"`
+}
+
 type VirtualNetworkVirtualNetworkStaticRouteViewType struct {
+	Attrs         types.List   `tfsdk:"attrs"`
 	IpPrefixes    types.List   `tfsdk:"ip_prefixes"`
 	NextHopChoice types.Object `tfsdk:"next_hop_choice"`
-	Attrs         types.List   `tfsdk:"attrs"`
 }
 
 type VirtualNetworkStaticRouteViewTypeNextHopChoice struct {
+	DefaultGateway types.Bool   `tfsdk:"default_gateway"`
 	IpAddress      types.String `tfsdk:"ip_address"`
 	NodeInterface  types.Object `tfsdk:"node_interface"`
-	DefaultGateway types.Bool   `tfsdk:"default_gateway"`
 }
 
 type VirtualNetworkStaticRouteViewTypeNodeInterface struct {
@@ -51,70 +58,74 @@ type VirtualNetworkStaticRouteViewTypeNodeInterface struct {
 }
 
 type VirtualNetworkNodeInterfaceInfo struct {
-	Node      types.String `tfsdk:"node"`
 	Interface types.List   `tfsdk:"interface"`
+	Node      types.String `tfsdk:"node"`
 }
 
 type VirtualNetworkVirtualNetworkStaticV6RouteViewType struct {
+	Attrs         types.List   `tfsdk:"attrs"`
 	IpPrefixes    types.List   `tfsdk:"ip_prefixes"`
 	NextHopChoice types.Object `tfsdk:"next_hop_choice"`
-	Attrs         types.List   `tfsdk:"attrs"`
 }
 
 type VirtualNetworkStaticV6RouteViewTypeNextHopChoice struct {
-	NodeInterface  types.Object `tfsdk:"node_interface"`
 	DefaultGateway types.Bool   `tfsdk:"default_gateway"`
 	IpAddress      types.String `tfsdk:"ip_address"`
+	NodeInterface  types.Object `tfsdk:"node_interface"`
 }
 
 type VirtualNetworkStaticV6RouteViewTypeNodeInterface struct {
 	List types.List `tfsdk:"list"`
 }
 
-type VirtualNetworkCreateSpecTypeNetworkChoice struct {
-	SiteLocalInsideNetwork types.Bool `tfsdk:"site_local_inside_network"`
-	LegacyType             types.List `tfsdk:"legacy_type"`
-	GlobalNetwork          types.Bool `tfsdk:"global_network"`
-	SiteLocalNetwork       types.Bool `tfsdk:"site_local_network"`
-}
-
 // DataSourceF5XCVirtualNetworkModel describes the resource data model.
 type DataSourceF5XCVirtualNetworkModel struct {
+	Annotations    types.Map      `tfsdk:"annotations"`
+	Description    types.String   `tfsdk:"description"`
+	Labels         types.Map      `tfsdk:"labels"`
 	Name           types.String   `tfsdk:"name"`
 	Namespace      types.String   `tfsdk:"namespace"`
 	Uid            types.String   `tfsdk:"uid"`
-	Labels         types.Map      `tfsdk:"labels"`
-	Annotations    types.Map      `tfsdk:"annotations"`
-	Description    types.String   `tfsdk:"description"`
+	NetworkChoice  types.Object   `tfsdk:"network_choice"`
 	StaticRoutes   types.List     `tfsdk:"static_routes"`
 	StaticV6Routes types.List     `tfsdk:"static_v6_routes"`
-	NetworkChoice  types.Object   `tfsdk:"network_choice"`
 	Timeouts       timeouts.Value `tfsdk:"timeouts"`
 }
 
 // --- Attribute Maps for Nested Structs ---
+// Attribute map for RequiredOneOfField --> NetworkChoice
+var VirtualNetworkNetworkChoiceModelAttributeMap = map[string]attr.Type{
+
+	"global_network": types.BoolType,
+	"legacy_type": types.ListType{
+		ElemType: types.StringType,
+	},
+	"site_local_inside_network": types.BoolType,
+	"site_local_network":        types.BoolType,
+}
+
 // Attribute map for ArrayOfPointerField --> StaticRoutes
 var VirtualNetworkStaticRoutesModelAttributeMap = map[string]attr.Type{
 
+	"attrs": types.ListType{
+		ElemType: types.StringType,
+	},
 	"ip_prefixes": types.ListType{
 		ElemType: types.StringType,
 	},
 	"next_hop_choice": types.ObjectType{
 		AttrTypes: VirtualNetworkStaticRoutesNextHopChoiceModelAttributeMap,
 	},
-	"attrs": types.ListType{
-		ElemType: types.StringType,
-	},
 }
 
 // Attribute map for RequiredOneOfField --> NextHopChoice
 var VirtualNetworkStaticRoutesNextHopChoiceModelAttributeMap = map[string]attr.Type{
 
-	"ip_address": types.StringType,
+	"default_gateway": types.BoolType,
+	"ip_address":      types.StringType,
 	"node_interface": types.ObjectType{
 		AttrTypes: VirtualNetworkStaticRoutesNextHopChoiceNodeInterfaceModelAttributeMap,
 	},
-	"default_gateway": types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> NodeInterface
@@ -124,68 +135,68 @@ var VirtualNetworkStaticRoutesNextHopChoiceNodeInterfaceModelAttributeMap = map[
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
 
-				"node": types.StringType,
 				"interface": types.ListType{
 					ElemType: types.ObjectType{
 						AttrTypes: map[string]attr.Type{
 
 							"name":      types.StringType,
-							"tenant":    types.StringType,
 							"namespace": types.StringType,
+							"tenant":    types.StringType,
 						},
 					},
 				},
+				"node": types.StringType,
 			},
 		},
 	},
 }
 
 // Attribute map for ArrayOfPointerField --> List
-var VirtualNetworkListObjectRefModelAttributeMap = map[string]attr.Type{
+var VirtualNetworkStaticRoutesNextHopChoiceNodeInterfaceListModelAttributeMap = map[string]attr.Type{
 
-	"node": types.StringType,
 	"interface": types.ListType{
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
 
 				"name":      types.StringType,
-				"tenant":    types.StringType,
 				"namespace": types.StringType,
+				"tenant":    types.StringType,
 			},
 		},
 	},
+	"node": types.StringType,
 }
 
 // Attribute map for ArrayOfPointerField --> Interface
 var VirtualNetworkInterfaceObjectRefModelAttributeMap = map[string]attr.Type{
 
 	"name":      types.StringType,
-	"tenant":    types.StringType,
 	"namespace": types.StringType,
+	"tenant":    types.StringType,
 }
 
 // Attribute map for ArrayOfPointerField --> StaticV6Routes
 var VirtualNetworkStaticV6RoutesModelAttributeMap = map[string]attr.Type{
 
+	"attrs": types.ListType{
+		ElemType: types.StringType,
+	},
 	"ip_prefixes": types.ListType{
 		ElemType: types.StringType,
 	},
 	"next_hop_choice": types.ObjectType{
 		AttrTypes: VirtualNetworkStaticV6RoutesNextHopChoiceModelAttributeMap,
 	},
-	"attrs": types.ListType{
-		ElemType: types.StringType,
-	},
 }
 
 // Attribute map for RequiredOneOfField --> NextHopChoice
 var VirtualNetworkStaticV6RoutesNextHopChoiceModelAttributeMap = map[string]attr.Type{
 
+	"default_gateway": types.BoolType,
+	"ip_address":      types.StringType,
 	"node_interface": types.ObjectType{
 		AttrTypes: VirtualNetworkStaticV6RoutesNextHopChoiceNodeInterfaceModelAttributeMap,
 	},
-	"default_gateway": types.BoolType,
-	"ip_address":      types.StringType,
 }
 
 // Attribute map for PointerOfOneOfField --> NodeInterface
@@ -195,31 +206,36 @@ var VirtualNetworkStaticV6RoutesNextHopChoiceNodeInterfaceModelAttributeMap = ma
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
 
-				"node": types.StringType,
 				"interface": types.ListType{
 					ElemType: types.ObjectType{
 						AttrTypes: map[string]attr.Type{
 
-							"namespace": types.StringType,
 							"name":      types.StringType,
+							"namespace": types.StringType,
 							"tenant":    types.StringType,
 						},
 					},
 				},
+				"node": types.StringType,
 			},
 		},
 	},
 }
 
-// Attribute map for RequiredOneOfField --> NetworkChoice
-var VirtualNetworkNetworkChoiceModelAttributeMap = map[string]attr.Type{
+// Attribute map for ArrayOfPointerField --> List
+var VirtualNetworkStaticV6RoutesNextHopChoiceNodeInterfaceListModelAttributeMap = map[string]attr.Type{
 
-	"site_local_inside_network": types.BoolType,
-	"legacy_type": types.ListType{
-		ElemType: types.StringType,
+	"interface": types.ListType{
+		ElemType: types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+
+				"name":      types.StringType,
+				"namespace": types.StringType,
+				"tenant":    types.StringType,
+			},
+		},
 	},
-	"global_network":     types.BoolType,
-	"site_local_network": types.BoolType,
+	"node": types.StringType,
 }
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -236,10 +252,30 @@ func (d *DataSourceF5XCVirtualNetwork) Metadata(ctx context.Context, request dat
 func (r *DataSourceF5XCVirtualNetwork) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "VirtualNetwork data source",
-		Description:         "VirtualNetwork data source",
+		MarkdownDescription: "GetRequest is used to get different forms of a virtual_network This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of virtual_network) etc. can be fetched",
+		Description:         "GetRequest is used to get different forms of a virtual_network This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of virtual_network) etc. can be fetched",
 
 		Attributes: map[string]schema.Attribute{
+			"annotations": schema.MapAttribute{
+				Description: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				ElementType: types.StringType,
+			},
+			"description": schema.StringAttribute{
+				Description: "description Human readable description for the object",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+			},
+			"labels": schema.MapAttribute{
+				Description: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				ElementType: types.StringType,
+			},
 			"name": schema.StringAttribute{
 				Description: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
 				Required:    false,
@@ -258,25 +294,38 @@ func (r *DataSourceF5XCVirtualNetwork) Schema(ctx context.Context, request datas
 				Optional:    false,
 				Computed:    true,
 			},
-			"labels": schema.MapAttribute{
-				Description: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+			"network_choice": schema.SingleNestedAttribute{
+				Description: "Network Type Choice Select network type, Global, inside or outside",
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
-				ElementType: types.StringType,
-			},
-			"annotations": schema.MapAttribute{
-				Description: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
-			"description": schema.StringAttribute{
-				Description: "description Human readable description for the object",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
+				Attributes: map[string]schema.Attribute{
+					"global_network": schema.BoolAttribute{
+						Description: "Global Network Global network can extend to multiple sites.",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
+					"legacy_type": schema.ListAttribute{
+						Description: "Legacy Network config Type of virtual network",
+						ElementType: types.StringType,
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
+					"site_local_inside_network": schema.BoolAttribute{
+						Description: "Site Local Inside Network Site local Inside network, also known as inside network",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
+					"site_local_network": schema.BoolAttribute{
+						Description: "Site Local Network (outside) Site local network, also known as outside network",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
+				},
 			},
 			"static_routes": schema.ListNestedAttribute{
 				Description: "static_routes List of static routes on the virtual network",
@@ -285,6 +334,13 @@ func (r *DataSourceF5XCVirtualNetwork) Schema(ctx context.Context, request datas
 				Computed:    true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
+						"attrs": schema.ListAttribute{
+							Description: "Attributes List of attributes that control forwarding, dynamic routing and control plane (host) reachability",
+							ElementType: types.StringType,
+							Required:    false,
+							Optional:    false,
+							Computed:    true,
+						},
 						"ip_prefixes": schema.ListAttribute{
 							Description: "IP Prefixes List of route prefixes that have common next hop and attributes",
 							ElementType: types.StringType,
@@ -298,6 +354,12 @@ func (r *DataSourceF5XCVirtualNetwork) Schema(ctx context.Context, request datas
 							Optional:    false,
 							Computed:    true,
 							Attributes: map[string]schema.Attribute{
+								"default_gateway": schema.BoolAttribute{
+									Description: "Default Gateway Traffic matching the ip prefixes is sent to the default gateway",
+									Required:    false,
+									Optional:    false,
+									Computed:    true,
+								},
 								"ip_address": schema.StringAttribute{
 									Description: "IP Address Traffic matching the ip prefixes is sent to this IP Address",
 									Required:    false,
@@ -317,12 +379,6 @@ func (r *DataSourceF5XCVirtualNetwork) Schema(ctx context.Context, request datas
 											Computed:    true,
 											NestedObject: schema.NestedAttributeObject{
 												Attributes: map[string]schema.Attribute{
-													"node": schema.StringAttribute{
-														Description: "Node Node name on this site",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
 													"interface": schema.ListNestedAttribute{
 														Description: "Interface Interface reference on this node",
 														Required:    false,
@@ -336,13 +392,13 @@ func (r *DataSourceF5XCVirtualNetwork) Schema(ctx context.Context, request datas
 																	Optional:    false,
 																	Computed:    true,
 																},
-																"tenant": schema.StringAttribute{
+																"namespace": schema.StringAttribute{
 																	Description: "",
 																	Required:    false,
 																	Optional:    false,
 																	Computed:    true,
 																},
-																"namespace": schema.StringAttribute{
+																"tenant": schema.StringAttribute{
 																	Description: "",
 																	Required:    false,
 																	Optional:    false,
@@ -351,25 +407,18 @@ func (r *DataSourceF5XCVirtualNetwork) Schema(ctx context.Context, request datas
 															},
 														},
 													},
+													"node": schema.StringAttribute{
+														Description: "Node Node name on this site",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+													},
 												},
 											},
 										},
 									},
 								},
-								"default_gateway": schema.BoolAttribute{
-									Description: "Default Gateway Traffic matching the ip prefixes is sent to the default gateway",
-									Required:    false,
-									Optional:    false,
-									Computed:    true,
-								},
 							},
-						},
-						"attrs": schema.ListAttribute{
-							Description: "Attributes List of attributes that control forwarding, dynamic routing and control plane (host) reachability",
-							ElementType: types.StringType,
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
 						},
 					},
 				},
@@ -381,6 +430,13 @@ func (r *DataSourceF5XCVirtualNetwork) Schema(ctx context.Context, request datas
 				Computed:    true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
+						"attrs": schema.ListAttribute{
+							Description: "Attributes List of attributes that control forwarding, dynamic routing and control plane (host) reachability",
+							ElementType: types.StringType,
+							Required:    false,
+							Optional:    false,
+							Computed:    true,
+						},
 						"ip_prefixes": schema.ListAttribute{
 							Description: "IPv6 Prefixes List of IPv6 route prefixes that have common next hop and attributes",
 							ElementType: types.StringType,
@@ -394,6 +450,18 @@ func (r *DataSourceF5XCVirtualNetwork) Schema(ctx context.Context, request datas
 							Optional:    false,
 							Computed:    true,
 							Attributes: map[string]schema.Attribute{
+								"default_gateway": schema.BoolAttribute{
+									Description: "Default Gateway Traffic matching the ip prefixes is sent to the default gateway",
+									Required:    false,
+									Optional:    false,
+									Computed:    true,
+								},
+								"ip_address": schema.StringAttribute{
+									Description: "IP Address Traffic matching the ip prefixes is sent to this IP Address",
+									Required:    false,
+									Optional:    false,
+									Computed:    true,
+								},
 								"node_interface": schema.SingleNestedAttribute{
 									Description: "Node Interface Traffic matching the ip prefixes is sent to this interface",
 									Required:    false,
@@ -407,12 +475,6 @@ func (r *DataSourceF5XCVirtualNetwork) Schema(ctx context.Context, request datas
 											Computed:    true,
 											NestedObject: schema.NestedAttributeObject{
 												Attributes: map[string]schema.Attribute{
-													"node": schema.StringAttribute{
-														Description: "Node Node name on this site",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
 													"interface": schema.ListNestedAttribute{
 														Description: "Interface Interface reference on this node",
 														Required:    false,
@@ -420,13 +482,13 @@ func (r *DataSourceF5XCVirtualNetwork) Schema(ctx context.Context, request datas
 														Computed:    true,
 														NestedObject: schema.NestedAttributeObject{
 															Attributes: map[string]schema.Attribute{
-																"namespace": schema.StringAttribute{
+																"name": schema.StringAttribute{
 																	Description: "",
 																	Required:    false,
 																	Optional:    false,
 																	Computed:    true,
 																},
-																"name": schema.StringAttribute{
+																"namespace": schema.StringAttribute{
 																	Description: "",
 																	Required:    false,
 																	Optional:    false,
@@ -441,65 +503,19 @@ func (r *DataSourceF5XCVirtualNetwork) Schema(ctx context.Context, request datas
 															},
 														},
 													},
+													"node": schema.StringAttribute{
+														Description: "Node Node name on this site",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+													},
 												},
 											},
 										},
 									},
 								},
-								"default_gateway": schema.BoolAttribute{
-									Description: "Default Gateway Traffic matching the ip prefixes is sent to the default gateway",
-									Required:    false,
-									Optional:    false,
-									Computed:    true,
-								},
-								"ip_address": schema.StringAttribute{
-									Description: "IP Address Traffic matching the ip prefixes is sent to this IP Address",
-									Required:    false,
-									Optional:    false,
-									Computed:    true,
-								},
 							},
 						},
-						"attrs": schema.ListAttribute{
-							Description: "Attributes List of attributes that control forwarding, dynamic routing and control plane (host) reachability",
-							ElementType: types.StringType,
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-						},
-					},
-				},
-			},
-			"network_choice": schema.SingleNestedAttribute{
-				Description: "Network Type Choice Select network type, Global, inside or outside",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				Attributes: map[string]schema.Attribute{
-					"site_local_inside_network": schema.BoolAttribute{
-						Description: "Site Local Inside Network Site local Inside network, also known as inside network",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-					},
-					"legacy_type": schema.ListAttribute{
-						Description: "Legacy Network config Type of virtual network",
-						ElementType: types.StringType,
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-					},
-					"global_network": schema.BoolAttribute{
-						Description: "Global Network Global network can extend to multiple sites.",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-					},
-					"site_local_network": schema.BoolAttribute{
-						Description: "Site Local Network (outside) Site local network, also known as outside network",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
 					},
 				},
 			},
@@ -550,15 +566,14 @@ func (d *DataSourceF5XCVirtualNetwork) Read(ctx context.Context, request datasou
 		return
 	}
 
-	readTimeout, diags := data.Timeouts.Read(ctx, duration)
-	response.Diagnostics.Append(diags...)
+	readTimeout, readDiags := data.Timeouts.Read(ctx, duration)
+	response.Diagnostics.Append(readDiags...)
 	if response.Diagnostics.HasError() {
 		return
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
-
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_virtual_network.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
@@ -604,33 +619,6 @@ func (d *DataSourceF5XCVirtualNetwork) Read(ctx context.Context, request datasou
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
-	// data SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
-
-	// data SpecToModelRoot Meta RequiredStringField --> Namespace
-	data.Namespace = types.StringValue(metaData.GetNamespace())
-
-	// data SpecToModelRoot Meta StringField --> Uid
-	data.Uid = types.StringValue(systemMetaData.GetUid())
-
-	// data SpecToModelRoot Meta MapOfStringField --> Labels
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// Assign the typed map to the model
-		data.Labels = labelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil and the model has no value: set an explicit Null map to avoid
-		// DynamicPseudoType errors. If the model already contains a value (e.g. labels were set
-		// but the API did not echo them back in the response), preserve the existing value to prevent
-		// "Provider produced inconsistent result after apply" errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
-
 	// data SpecToModelRoot Meta MapOfStringField --> Annotations
 	if metaData.GetAnnotations() != nil {
 		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
@@ -652,455 +640,32 @@ func (d *DataSourceF5XCVirtualNetwork) Read(ctx context.Context, request datasou
 	// data SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
 
-	// data SpecToModelRoot ArrayOfPointerField --> StaticRoutes
-	if len(specData.StaticRoutes) > 0 {
-		staticRoutesElements := make([]VirtualNetworkVirtualNetworkStaticRouteViewType, 0, len(specData.StaticRoutes))
-
-		for _, staticRoutesElement := range specData.StaticRoutes {
-			virtualNetworkVirtualNetworkStaticRouteViewTypeModel := VirtualNetworkVirtualNetworkStaticRouteViewType{}
-
-			// data specToModelNested RequiredArrayOfStringField --> IpPrefixes
-			if len(staticRoutesElement.GetIpPrefixes()) > 0 {
-				listValue, diags := types.ListValueFrom(ctx, types.StringType, staticRoutesElement.GetIpPrefixes())
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				virtualNetworkVirtualNetworkStaticRouteViewTypeModel.IpPrefixes = listValue
-			} else {
-				virtualNetworkVirtualNetworkStaticRouteViewTypeModel.IpPrefixes = types.ListNull(types.StringType)
-			}
-
-			// data specToModelNested RequiredOneOfField --> NextHopChoice
-			// CreateSpecType
-			// CreateSpecType: GetNextHopChoice() returns the oneof interface value.
-			if staticRoutesElement.GetNextHopChoice() != nil {
-				// Create a temporary attribute map for the choices within this OneOf
-				staticRoutesnextHopChoiceChoicesAttributeMap := make(map[string]attr.Value)
-				// For CreateSpecType the getter returns the oneof interface (not a concrete type).
-				// Only needed when the OneOf flavour is not boolOnly (boolOnly fields use BoolOfOneOfPointerField which does not require a type assertion).
-				staticRoutesnextHopChoiceChoices := staticRoutesElement.GetNextHopChoice()
-
-				// Process nested choices, populating the temporary attribute map
-
-				// data specToModelNested StringOfOneOfField --> IpAddress
-				ipAddressItem, isIpAddress := staticRoutesnextHopChoiceChoices.(*ves_io_schema_virtual_network.StaticRouteViewType_IpAddress)
-
-				if isIpAddress {
-					staticRoutesnextHopChoiceChoicesAttributeMap["ip_address"] = types.StringValue(string(ipAddressItem.IpAddress))
-				} else {
-					// Empty string, set to null
-					staticRoutesnextHopChoiceChoicesAttributeMap["ip_address"] = types.StringNull()
-				}
-
-				// data specToModelNested PointerOfOneOfField --> NodeInterface
-				// CreateSpecType
-				// true
-				{
-					nodeInterfaceOptions, isNodeInterface := staticRoutesnextHopChoiceChoices.(*ves_io_schema_virtual_network.StaticRouteViewType_NodeInterface)
-					nodeInterfaceAttributeMap := make(map[string]attr.Value)
-
-					if isNodeInterface && nodeInterfaceOptions != nil {
-
-						// data specToModelNested ArrayOfPointerField --> List
-						if len(nodeInterfaceOptions.NodeInterface.GetList()) > 0 {
-							// Step 1: Always create a slice of model structs from the spec data.
-							// This slice serves as an intermediate representation.
-							listElements := make([]VirtualNetworkNodeInterfaceInfo, 0, len(nodeInterfaceOptions.NodeInterface.GetList()))
-							for _, listElement := range nodeInterfaceOptions.NodeInterface.GetList() {
-								virtualNetworkNodeInterfaceInfoModel := VirtualNetworkNodeInterfaceInfo{}
-
-								// data specToModelNested StringField --> Node
-								if listElement.GetNode() != "" {
-									virtualNetworkNodeInterfaceInfoModel.Node = types.StringValue(listElement.GetNode())
-								} else {
-									// Empty string, set to null
-									virtualNetworkNodeInterfaceInfoModel.Node = types.StringNull()
-								}
-
-								// data specToModelNested ArrayOfPointerField --> Interface
-								if len(listElement.GetInterface()) > 0 {
-									// Step 1: Always create a slice of model structs from the spec data.
-									// This slice serves as an intermediate representation.
-									interfaceElements := make([]ObjectRefTypeModel, 0, len(listElement.GetInterface()))
-									for _, interfaceElement := range listElement.GetInterface() {
-										objectRefTypeModelModel := ObjectRefTypeModel{}
-
-										// data specToModelNested RequiredStringField --> Name
-										if interfaceElement.GetName() != "" {
-											objectRefTypeModelModel.Name = types.StringValue(interfaceElement.GetName())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Name = types.StringNull()
-										}
-
-										// data specToModelNested StringField --> Tenant
-										if interfaceElement.GetTenant() != "" {
-											objectRefTypeModelModel.Tenant = types.StringValue(interfaceElement.GetTenant())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Tenant = types.StringNull()
-										}
-
-										// data specToModelNested RequiredStringField --> Namespace
-										if interfaceElement.GetNamespace() != "" {
-											objectRefTypeModelModel.Namespace = types.StringValue(interfaceElement.GetNamespace())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Namespace = types.StringNull()
-										}
-
-										interfaceElements = append(interfaceElements, objectRefTypeModelModel)
-									}
-									// CASE 1: The target field is a `types.List` or an attribute map.
-									// The intermediate slice of structs must be converted to a `types.ListValue`.
-									interfaceListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: VirtualNetworkInterfaceObjectRefModelAttributeMap}, interfaceElements)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									virtualNetworkNodeInterfaceInfoModel.Interface = interfaceListValue
-
-								} else {
-									// The source list is empty or nil.
-									// CASE 1: The target field is a `types.List` or an attribute map.
-									// Assign a null `types.ListValue`.
-									virtualNetworkNodeInterfaceInfoModel.Interface = types.ListNull(types.ObjectType{AttrTypes: VirtualNetworkInterfaceObjectRefModelAttributeMap})
-								}
-
-								listElements = append(listElements, virtualNetworkNodeInterfaceInfoModel)
-							}
-							// CASE 1: The target field is a `types.List` or an attribute map.
-							// The intermediate slice of structs must be converted to a `types.ListValue`.
-							listListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: VirtualNetworkListObjectRefModelAttributeMap}, listElements)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							nodeInterfaceAttributeMap["list"] = listListValue
-
-						} else {
-							// The source list is empty or nil.
-							// CASE 1: The target field is a `types.List` or an attribute map.
-							// Assign a null `types.ListValue`.
-							nodeInterfaceAttributeMap["list"] = types.ListNull(types.ObjectType{AttrTypes: VirtualNetworkListObjectRefModelAttributeMap})
-						}
-
-						nodeInterfaceObj, diags := types.ObjectValue(VirtualNetworkStaticRoutesNextHopChoiceNodeInterfaceModelAttributeMap, nodeInterfaceAttributeMap)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						staticRoutesnextHopChoiceChoicesAttributeMap["node_interface"] = nodeInterfaceObj
-					} else {
-						staticRoutesnextHopChoiceChoicesAttributeMap["node_interface"] = types.ObjectNull(VirtualNetworkStaticRoutesNextHopChoiceNodeInterfaceModelAttributeMap)
-					}
-				}
-
-				// data specToModelNested BoolOfOneOfPointerField --> DefaultGateway
-				var defaultGatewayInMap bool
-
-				if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-					if _, found := gcSpec["default_gateway"]; found {
-						defaultGatewayInMap = true
-					}
-				}
-
-				if !defaultGatewayInMap {
-					if _, found := rawSpecMap["default_gateway"]; found {
-						defaultGatewayInMap = true
-					}
-				}
-
-				if defaultGatewayInMap || staticRoutesElement.GetDefaultGateway() != nil {
-					staticRoutesnextHopChoiceChoicesAttributeMap["default_gateway"] = types.BoolValue(true)
-				} else {
-					staticRoutesnextHopChoiceChoicesAttributeMap["default_gateway"] = types.BoolNull()
-				}
-
-				// --- End of Choices ---
-
-				// Create the final ObjectValue for this OneOf field
-				finalObj, staticRoutesnextHopChoiceChoicesObjDiags := types.ObjectValue(
-					VirtualNetworkStaticRoutesNextHopChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-					staticRoutesnextHopChoiceChoicesAttributeMap,
-				)
-				response.Diagnostics.Append(staticRoutesnextHopChoiceChoicesObjDiags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// Assign the final object to the correct place (either the root model or a parent's attribute map)
-				virtualNetworkVirtualNetworkStaticRouteViewTypeModel.NextHopChoice = finalObj
-			} else {
-				virtualNetworkVirtualNetworkStaticRouteViewTypeModel.NextHopChoice = types.ObjectNull(VirtualNetworkStaticRoutesNextHopChoiceModelAttributeMap)
-			}
-
-			// data SpecToModelNested ArrayOfEnumField --> Attrs
-			if len(staticRoutesElement.GetAttrs()) > 0 {
-				attrsStrings := make([]string, 0, len(staticRoutesElement.GetAttrs()))
-				for _, v := range staticRoutesElement.GetAttrs() {
-					if strVal, exists := ves_io_schema.RouteAttrType_name[int32(v)]; exists {
-						attrsStrings = append(attrsStrings, strVal)
-					}
-				}
-				listValue, diags := types.ListValueFrom(ctx, types.StringType, attrsStrings)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				virtualNetworkVirtualNetworkStaticRouteViewTypeModel.Attrs = listValue
-			} else {
-				virtualNetworkVirtualNetworkStaticRouteViewTypeModel.Attrs = types.ListNull(types.StringType)
-			}
-
-			staticRoutesElements = append(staticRoutesElements, virtualNetworkVirtualNetworkStaticRouteViewTypeModel)
-		}
-
-		staticRoutesList, diags := utils.GoStructSliceToListValue(
-			ctx,
-			VirtualNetworkStaticRoutesModelAttributeMap,
-			staticRoutesElements,
-		)
-
-		response.Diagnostics.Append(diags...)
+	// data SpecToModelRoot Meta MapOfStringField --> Labels
+	if metaData.GetLabels() != nil {
+		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
+		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+		response.Diagnostics.Append(labelsDiags...)
 		if response.Diagnostics.HasError() {
 			return
 		}
-
-		data.StaticRoutes = staticRoutesList
-	} else {
-		var staticRoutesObjectType = basetypes.ObjectType{
-			AttrTypes: VirtualNetworkStaticRoutesModelAttributeMap,
-		}
-		nullStaticRoutesList := basetypes.NewListNull(staticRoutesObjectType)
-		data.StaticRoutes = nullStaticRoutesList
+		// Assign the typed map to the model
+		data.Labels = labelsMap
+	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
+		// API returned nil and the model has no value: set an explicit Null map to avoid
+		// DynamicPseudoType errors. If the model already contains a value (e.g. labels were set
+		// but the API did not echo them back in the response), preserve the existing value to prevent
+		// "Provider produced inconsistent result after apply" errors.
+		data.Labels = types.MapNull(types.StringType)
 	}
 
-	// data SpecToModelRoot ArrayOfPointerField --> StaticV6Routes
-	if len(specData.StaticV6Routes) > 0 {
-		staticV6RoutesElements := make([]VirtualNetworkVirtualNetworkStaticV6RouteViewType, 0, len(specData.StaticV6Routes))
+	// data SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
 
-		for _, staticV6RoutesElement := range specData.StaticV6Routes {
-			virtualNetworkVirtualNetworkStaticV6RouteViewTypeModel := VirtualNetworkVirtualNetworkStaticV6RouteViewType{}
+	// data SpecToModelRoot Meta RequiredStringField --> Namespace
+	data.Namespace = types.StringValue(metaData.GetNamespace())
 
-			// data specToModelNested RequiredArrayOfStringField --> IpPrefixes
-			if len(staticV6RoutesElement.GetIpPrefixes()) > 0 {
-				listValue, diags := types.ListValueFrom(ctx, types.StringType, staticV6RoutesElement.GetIpPrefixes())
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				virtualNetworkVirtualNetworkStaticV6RouteViewTypeModel.IpPrefixes = listValue
-			} else {
-				virtualNetworkVirtualNetworkStaticV6RouteViewTypeModel.IpPrefixes = types.ListNull(types.StringType)
-			}
-
-			// data specToModelNested RequiredOneOfField --> NextHopChoice
-			// CreateSpecType
-			// CreateSpecType: GetNextHopChoice() returns the oneof interface value.
-			if staticV6RoutesElement.GetNextHopChoice() != nil {
-				// Create a temporary attribute map for the choices within this OneOf
-				staticV6RoutesnextHopChoiceChoicesAttributeMap := make(map[string]attr.Value)
-				// For CreateSpecType the getter returns the oneof interface (not a concrete type).
-				// Only needed when the OneOf flavour is not boolOnly (boolOnly fields use BoolOfOneOfPointerField which does not require a type assertion).
-				staticV6RoutesnextHopChoiceChoices := staticV6RoutesElement.GetNextHopChoice()
-
-				// Process nested choices, populating the temporary attribute map
-
-				// data specToModelNested PointerOfOneOfField --> NodeInterface
-				// CreateSpecType
-				// true
-				{
-					nodeInterfaceOptions, isNodeInterface := staticV6RoutesnextHopChoiceChoices.(*ves_io_schema_virtual_network.StaticV6RouteViewType_NodeInterface)
-					nodeInterfaceAttributeMap := make(map[string]attr.Value)
-
-					if isNodeInterface && nodeInterfaceOptions != nil {
-
-						// data specToModelNested ArrayOfPointerField --> List
-						if len(nodeInterfaceOptions.NodeInterface.GetList()) > 0 {
-							// Step 1: Always create a slice of model structs from the spec data.
-							// This slice serves as an intermediate representation.
-							listElements := make([]VirtualNetworkNodeInterfaceInfo, 0, len(nodeInterfaceOptions.NodeInterface.GetList()))
-							for _, listElement := range nodeInterfaceOptions.NodeInterface.GetList() {
-								virtualNetworkNodeInterfaceInfoModel := VirtualNetworkNodeInterfaceInfo{}
-
-								// data specToModelNested StringField --> Node
-								if listElement.GetNode() != "" {
-									virtualNetworkNodeInterfaceInfoModel.Node = types.StringValue(listElement.GetNode())
-								} else {
-									// Empty string, set to null
-									virtualNetworkNodeInterfaceInfoModel.Node = types.StringNull()
-								}
-
-								// data specToModelNested ArrayOfPointerField --> Interface
-								if len(listElement.GetInterface()) > 0 {
-									// Step 1: Always create a slice of model structs from the spec data.
-									// This slice serves as an intermediate representation.
-									interfaceElements := make([]ObjectRefTypeModel, 0, len(listElement.GetInterface()))
-									for _, interfaceElement := range listElement.GetInterface() {
-										objectRefTypeModelModel := ObjectRefTypeModel{}
-
-										// data specToModelNested RequiredStringField --> Namespace
-										if interfaceElement.GetNamespace() != "" {
-											objectRefTypeModelModel.Namespace = types.StringValue(interfaceElement.GetNamespace())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Namespace = types.StringNull()
-										}
-
-										// data specToModelNested RequiredStringField --> Name
-										if interfaceElement.GetName() != "" {
-											objectRefTypeModelModel.Name = types.StringValue(interfaceElement.GetName())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Name = types.StringNull()
-										}
-
-										// data specToModelNested StringField --> Tenant
-										if interfaceElement.GetTenant() != "" {
-											objectRefTypeModelModel.Tenant = types.StringValue(interfaceElement.GetTenant())
-										} else {
-											// Empty string, set to null
-											objectRefTypeModelModel.Tenant = types.StringNull()
-										}
-
-										interfaceElements = append(interfaceElements, objectRefTypeModelModel)
-									}
-									// CASE 1: The target field is a `types.List` or an attribute map.
-									// The intermediate slice of structs must be converted to a `types.ListValue`.
-									interfaceListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: VirtualNetworkInterfaceObjectRefModelAttributeMap}, interfaceElements)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									virtualNetworkNodeInterfaceInfoModel.Interface = interfaceListValue
-
-								} else {
-									// The source list is empty or nil.
-									// CASE 1: The target field is a `types.List` or an attribute map.
-									// Assign a null `types.ListValue`.
-									virtualNetworkNodeInterfaceInfoModel.Interface = types.ListNull(types.ObjectType{AttrTypes: VirtualNetworkInterfaceObjectRefModelAttributeMap})
-								}
-
-								listElements = append(listElements, virtualNetworkNodeInterfaceInfoModel)
-							}
-							// CASE 1: The target field is a `types.List` or an attribute map.
-							// The intermediate slice of structs must be converted to a `types.ListValue`.
-							listListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: VirtualNetworkListObjectRefModelAttributeMap}, listElements)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							nodeInterfaceAttributeMap["list"] = listListValue
-
-						} else {
-							// The source list is empty or nil.
-							// CASE 1: The target field is a `types.List` or an attribute map.
-							// Assign a null `types.ListValue`.
-							nodeInterfaceAttributeMap["list"] = types.ListNull(types.ObjectType{AttrTypes: VirtualNetworkListObjectRefModelAttributeMap})
-						}
-
-						nodeInterfaceObj, diags := types.ObjectValue(VirtualNetworkStaticV6RoutesNextHopChoiceNodeInterfaceModelAttributeMap, nodeInterfaceAttributeMap)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-						staticV6RoutesnextHopChoiceChoicesAttributeMap["node_interface"] = nodeInterfaceObj
-					} else {
-						staticV6RoutesnextHopChoiceChoicesAttributeMap["node_interface"] = types.ObjectNull(VirtualNetworkStaticV6RoutesNextHopChoiceNodeInterfaceModelAttributeMap)
-					}
-				}
-
-				// data specToModelNested BoolOfOneOfPointerField --> DefaultGateway
-				var defaultGatewayInMap bool
-
-				if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-					if _, found := gcSpec["default_gateway"]; found {
-						defaultGatewayInMap = true
-					}
-				}
-
-				if !defaultGatewayInMap {
-					if _, found := rawSpecMap["default_gateway"]; found {
-						defaultGatewayInMap = true
-					}
-				}
-
-				if defaultGatewayInMap || staticV6RoutesElement.GetDefaultGateway() != nil {
-					staticV6RoutesnextHopChoiceChoicesAttributeMap["default_gateway"] = types.BoolValue(true)
-				} else {
-					staticV6RoutesnextHopChoiceChoicesAttributeMap["default_gateway"] = types.BoolNull()
-				}
-
-				// data specToModelNested StringOfOneOfField --> IpAddress
-				ipAddressItem, isIpAddress := staticV6RoutesnextHopChoiceChoices.(*ves_io_schema_virtual_network.StaticV6RouteViewType_IpAddress)
-
-				if isIpAddress {
-					staticV6RoutesnextHopChoiceChoicesAttributeMap["ip_address"] = types.StringValue(string(ipAddressItem.IpAddress))
-				} else {
-					// Empty string, set to null
-					staticV6RoutesnextHopChoiceChoicesAttributeMap["ip_address"] = types.StringNull()
-				}
-
-				// --- End of Choices ---
-
-				// Create the final ObjectValue for this OneOf field
-				finalObj, staticV6RoutesnextHopChoiceChoicesObjDiags := types.ObjectValue(
-					VirtualNetworkStaticV6RoutesNextHopChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-					staticV6RoutesnextHopChoiceChoicesAttributeMap,
-				)
-				response.Diagnostics.Append(staticV6RoutesnextHopChoiceChoicesObjDiags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// Assign the final object to the correct place (either the root model or a parent's attribute map)
-				virtualNetworkVirtualNetworkStaticV6RouteViewTypeModel.NextHopChoice = finalObj
-			} else {
-				virtualNetworkVirtualNetworkStaticV6RouteViewTypeModel.NextHopChoice = types.ObjectNull(VirtualNetworkStaticV6RoutesNextHopChoiceModelAttributeMap)
-			}
-
-			// data SpecToModelNested ArrayOfEnumField --> Attrs
-			if len(staticV6RoutesElement.GetAttrs()) > 0 {
-				attrsStrings := make([]string, 0, len(staticV6RoutesElement.GetAttrs()))
-				for _, v := range staticV6RoutesElement.GetAttrs() {
-					if strVal, exists := ves_io_schema.RouteAttrType_name[int32(v)]; exists {
-						attrsStrings = append(attrsStrings, strVal)
-					}
-				}
-				listValue, diags := types.ListValueFrom(ctx, types.StringType, attrsStrings)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				virtualNetworkVirtualNetworkStaticV6RouteViewTypeModel.Attrs = listValue
-			} else {
-				virtualNetworkVirtualNetworkStaticV6RouteViewTypeModel.Attrs = types.ListNull(types.StringType)
-			}
-
-			staticV6RoutesElements = append(staticV6RoutesElements, virtualNetworkVirtualNetworkStaticV6RouteViewTypeModel)
-		}
-
-		staticV6RoutesList, diags := utils.GoStructSliceToListValue(
-			ctx,
-			VirtualNetworkStaticV6RoutesModelAttributeMap,
-			staticV6RoutesElements,
-		)
-
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-
-		data.StaticV6Routes = staticV6RoutesList
-	} else {
-		var staticV6RoutesObjectType = basetypes.ObjectType{
-			AttrTypes: VirtualNetworkStaticV6RoutesModelAttributeMap,
-		}
-		nullStaticV6RoutesList := basetypes.NewListNull(staticV6RoutesObjectType)
-		data.StaticV6Routes = nullStaticV6RoutesList
-	}
+	// data SpecToModelRoot Meta StringField --> Uid
+	data.Uid = types.StringValue(systemMetaData.GetUid())
 
 	// data SpecToModelRoot RequiredOneOfField --> NetworkChoice
 	// true
@@ -1113,11 +678,11 @@ func (d *DataSourceF5XCVirtualNetwork) Read(ctx context.Context, request datasou
 
 	// 1. Check for the choice inside a 'gc_spec' map, which is a common pattern in GET responses.
 	if gcSpec, gcSpecOk := rawSpecMap["gc_spec"].(map[string]interface{}); gcSpecOk {
-		if _, ok := gcSpec["site_local_inside_network"]; ok {
+		if _, ok := gcSpec["global_network"]; ok {
 			oneofNetworkChoicePresent = true
 		} else if _, ok := gcSpec["legacy_type"]; ok {
 			oneofNetworkChoicePresent = true
-		} else if _, ok := gcSpec["global_network"]; ok {
+		} else if _, ok := gcSpec["site_local_inside_network"]; ok {
 			oneofNetworkChoicePresent = true
 		} else if _, ok := gcSpec["site_local_network"]; ok {
 			oneofNetworkChoicePresent = true
@@ -1126,11 +691,11 @@ func (d *DataSourceF5XCVirtualNetwork) Read(ctx context.Context, request datasou
 
 	// 2. If not found in 'gc_spec', check for the choice at the top level of the spec.
 	if !oneofNetworkChoicePresent {
-		if _, ok := rawSpecMap["site_local_inside_network"]; ok {
+		if _, ok := rawSpecMap["global_network"]; ok {
 			oneofNetworkChoicePresent = true
 		} else if _, ok := rawSpecMap["legacy_type"]; ok {
 			oneofNetworkChoicePresent = true
-		} else if _, ok := rawSpecMap["global_network"]; ok {
+		} else if _, ok := rawSpecMap["site_local_inside_network"]; ok {
 			oneofNetworkChoicePresent = true
 		} else if _, ok := rawSpecMap["site_local_network"]; ok {
 			oneofNetworkChoicePresent = true
@@ -1138,7 +703,8 @@ func (d *DataSourceF5XCVirtualNetwork) Read(ctx context.Context, request datasou
 	}
 
 	if oneofNetworkChoicePresent {
-		// For custom JSON resolution with complex pointer types, get the choice from the raw spec map.
+		// Define a variable for the spec choices to be passed down to nested templates.
+		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
 		networkChoiceChoices := rawSpecMap["network_choice"]
 
 		// The model struct that will be populated by the nested template.
@@ -1146,25 +712,26 @@ func (d *DataSourceF5XCVirtualNetwork) Read(ctx context.Context, request datasou
 
 		// Recursively call the nested template to process the oneof choices.
 
-		// data specToModelNested BoolOfOneOfPointerField --> SiteLocalInsideNetwork
-		var siteLocalInsideNetworkInMap bool
+		// data specToModelNested BoolOfOneOfPointerField --> GlobalNetwork
+		var globalNetworkInMap bool
 
 		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["site_local_inside_network"]; found {
-				siteLocalInsideNetworkInMap = true
+			if _, found := gcSpec["global_network"]; found {
+				globalNetworkInMap = true
 			}
 		}
 
-		if !siteLocalInsideNetworkInMap {
-			if _, found := rawSpecMap["site_local_inside_network"]; found {
-				siteLocalInsideNetworkInMap = true
+		if !globalNetworkInMap {
+			if _, found := rawSpecMap["global_network"]; found {
+				globalNetworkInMap = true
 			}
 		}
 
-		if siteLocalInsideNetworkInMap || specData.GetSiteLocalInsideNetwork() != nil {
-			networkChoiceChoicesModel.SiteLocalInsideNetwork = types.BoolValue(true)
+		_, isGlobalNetworkForBool := networkChoiceChoices.(*ves_io_schema_virtual_network.CreateSpecType_GlobalNetwork)
+		if globalNetworkInMap || isGlobalNetworkForBool {
+			networkChoiceChoicesModel.GlobalNetwork = types.BoolValue(true)
 		} else {
-			networkChoiceChoicesModel.SiteLocalInsideNetwork = types.BoolNull()
+			networkChoiceChoicesModel.GlobalNetwork = types.BoolNull()
 		}
 
 		// data specToModelNested EnumOfOneOfField --> LegacyType
@@ -1197,8 +764,8 @@ func (d *DataSourceF5XCVirtualNetwork) Read(ctx context.Context, request datasou
 				legacyTypeTfStr := types.StringValue(legacyTypeEnumValue)
 				legacyTypeSlice := []types.String{legacyTypeTfStr}
 
-				legacyTypeList, diags := types.ListValueFrom(ctx, types.StringType, legacyTypeSlice)
-				response.Diagnostics.Append(diags...)
+				legacyTypeList, listDiags := types.ListValueFrom(ctx, types.StringType, legacyTypeSlice)
+				response.Diagnostics.Append(listDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -1208,25 +775,26 @@ func (d *DataSourceF5XCVirtualNetwork) Read(ctx context.Context, request datasou
 			}
 		}
 
-		// data specToModelNested BoolOfOneOfPointerField --> GlobalNetwork
-		var globalNetworkInMap bool
+		// data specToModelNested BoolOfOneOfPointerField --> SiteLocalInsideNetwork
+		var siteLocalInsideNetworkInMap bool
 
 		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
-			if _, found := gcSpec["global_network"]; found {
-				globalNetworkInMap = true
+			if _, found := gcSpec["site_local_inside_network"]; found {
+				siteLocalInsideNetworkInMap = true
 			}
 		}
 
-		if !globalNetworkInMap {
-			if _, found := rawSpecMap["global_network"]; found {
-				globalNetworkInMap = true
+		if !siteLocalInsideNetworkInMap {
+			if _, found := rawSpecMap["site_local_inside_network"]; found {
+				siteLocalInsideNetworkInMap = true
 			}
 		}
 
-		if globalNetworkInMap || specData.GetGlobalNetwork() != nil {
-			networkChoiceChoicesModel.GlobalNetwork = types.BoolValue(true)
+		_, isSiteLocalInsideNetworkForBool := networkChoiceChoices.(*ves_io_schema_virtual_network.CreateSpecType_SiteLocalInsideNetwork)
+		if siteLocalInsideNetworkInMap || isSiteLocalInsideNetworkForBool {
+			networkChoiceChoicesModel.SiteLocalInsideNetwork = types.BoolValue(true)
 		} else {
-			networkChoiceChoicesModel.GlobalNetwork = types.BoolNull()
+			networkChoiceChoicesModel.SiteLocalInsideNetwork = types.BoolNull()
 		}
 
 		// data specToModelNested BoolOfOneOfPointerField --> SiteLocalNetwork
@@ -1244,32 +812,495 @@ func (d *DataSourceF5XCVirtualNetwork) Read(ctx context.Context, request datasou
 			}
 		}
 
-		if siteLocalNetworkInMap || specData.GetSiteLocalNetwork() != nil {
+		_, isSiteLocalNetworkForBool := networkChoiceChoices.(*ves_io_schema_virtual_network.CreateSpecType_SiteLocalNetwork)
+		if siteLocalNetworkInMap || isSiteLocalNetworkForBool {
 			networkChoiceChoicesModel.SiteLocalNetwork = types.BoolValue(true)
 		} else {
 			networkChoiceChoicesModel.SiteLocalNetwork = types.BoolNull()
 		}
 
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		networkChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			VirtualNetworkNetworkChoiceModelAttributeMap,
-			networkChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
+		{
+			networkChoiceObj, oneofDiags := utils.GoStructToObjectValue(
+				ctx,
+				VirtualNetworkNetworkChoiceModelAttributeMap,
+				networkChoiceChoicesModel,
+			)
+			if oneofDiags.HasError() {
+				response.Diagnostics.Append(oneofDiags...)
+				return
+			}
 
-		// Assign the final object to the root data model.
-		data.NetworkChoice = networkChoiceObj
+			// Assign the final object to the root data model.
+			data.NetworkChoice = networkChoiceObj
+		}
 	} else {
 		// The oneof field is not present in the API response, so set the Terraform object to null.
 		data.NetworkChoice = types.ObjectNull(VirtualNetworkNetworkChoiceModelAttributeMap)
 	}
 
+	// data SpecToModelRoot ArrayOfPointerField --> StaticRoutes
+	if len(specData.GetStaticRoutes()) > 0 {
+		staticRoutesElements := make([]VirtualNetworkVirtualNetworkStaticRouteViewType, 0, len(specData.GetStaticRoutes()))
+
+		for _, staticRoutesElement := range specData.GetStaticRoutes() {
+			virtualNetworkVirtualNetworkStaticRouteViewTypeModel := VirtualNetworkVirtualNetworkStaticRouteViewType{}
+
+			// data SpecToModelNested ArrayOfEnumField --> Attrs
+			if len(staticRoutesElement.GetAttrs()) > 0 {
+				attrsStrings := make([]string, 0, len(staticRoutesElement.GetAttrs()))
+				for _, v := range staticRoutesElement.GetAttrs() {
+					if strVal, exists := ves_io_schema.RouteAttrType_name[int32(v)]; exists {
+						attrsStrings = append(attrsStrings, strVal)
+					}
+				}
+				listValue, listDiags := types.ListValueFrom(ctx, types.StringType, attrsStrings)
+				response.Diagnostics.Append(listDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				virtualNetworkVirtualNetworkStaticRouteViewTypeModel.Attrs = listValue
+			} else {
+				virtualNetworkVirtualNetworkStaticRouteViewTypeModel.Attrs = types.ListNull(types.StringType)
+			}
+
+			// data specToModelNested RequiredArrayOfStringField --> IpPrefixes
+			if len(staticRoutesElement.GetIpPrefixes()) > 0 {
+				listValue, listDiags := types.ListValueFrom(ctx, types.StringType, staticRoutesElement.GetIpPrefixes())
+				response.Diagnostics.Append(listDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				virtualNetworkVirtualNetworkStaticRouteViewTypeModel.IpPrefixes = listValue
+			} else {
+				virtualNetworkVirtualNetworkStaticRouteViewTypeModel.IpPrefixes = types.ListNull(types.StringType)
+			}
+
+			// data specToModelNested RequiredOneOfField --> NextHopChoice
+			// CreateSpecType
+			// CreateSpecType: GetNextHopChoice() returns the oneof interface value.
+			if staticRoutesElement.GetNextHopChoice() != nil {
+				// Create a temporary attribute map for the choices within this OneOf
+				staticRoutesnextHopChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+				// Define a variable for the spec choices to be passed down to nested templates.
+				// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+				staticRoutesnextHopChoiceChoices := staticRoutesElement.GetNextHopChoice()
+
+				// Process nested choices, populating the temporary attribute map
+
+				// data specToModelNested BoolOfOneOfPointerField --> DefaultGateway
+				var defaultGatewayInMap bool
+
+				if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+					if _, found := gcSpec["default_gateway"]; found {
+						defaultGatewayInMap = true
+					}
+				}
+
+				if !defaultGatewayInMap {
+					if _, found := rawSpecMap["default_gateway"]; found {
+						defaultGatewayInMap = true
+					}
+				}
+
+				_, isDefaultGatewayForBool := staticRoutesnextHopChoiceChoices.(*ves_io_schema_virtual_network.StaticRouteViewType_DefaultGateway)
+				if defaultGatewayInMap || isDefaultGatewayForBool {
+					staticRoutesnextHopChoiceChoicesAttributeMap["default_gateway"] = types.BoolValue(true)
+				} else {
+					staticRoutesnextHopChoiceChoicesAttributeMap["default_gateway"] = types.BoolNull()
+				}
+
+				// data specToModelNested StringOfOneOfField --> IpAddress
+				ipAddressItem, isIpAddress := staticRoutesnextHopChoiceChoices.(*ves_io_schema_virtual_network.StaticRouteViewType_IpAddress)
+
+				if isIpAddress {
+					staticRoutesnextHopChoiceChoicesAttributeMap["ip_address"] = types.StringValue(string(ipAddressItem.IpAddress))
+				} else {
+					// Empty string, set to null
+					staticRoutesnextHopChoiceChoicesAttributeMap["ip_address"] = types.StringNull()
+				}
+
+				// data specToModelNested PointerOfOneOfField --> NodeInterface
+				// CreateSpecType
+				// true
+				{
+					nodeInterfaceOptionsWrapper, isNodeInterface := staticRoutesnextHopChoiceChoices.(*ves_io_schema_virtual_network.StaticRouteViewType_NodeInterface)
+					nodeInterfaceAttributeMap := make(map[string]attr.Value)
+
+					if isNodeInterface && nodeInterfaceOptionsWrapper != nil && nodeInterfaceOptionsWrapper.NodeInterface != nil {
+						nodeInterfaceElement := nodeInterfaceOptionsWrapper.NodeInterface
+
+						// data specToModelNested ArrayOfPointerField --> List
+						if len(nodeInterfaceElement.GetList()) > 0 {
+							// Step 1: Always create a slice of model structs from the spec data.
+							// This slice serves as an intermediate representation.
+							listElements := make([]VirtualNetworkNodeInterfaceInfo, 0, len(nodeInterfaceElement.GetList()))
+							for _, listElement := range nodeInterfaceElement.GetList() {
+								virtualNetworkNodeInterfaceInfoModel := VirtualNetworkNodeInterfaceInfo{}
+
+								// data specToModelNested ArrayOfPointerField --> Interface
+								if len(listElement.GetInterface()) > 0 {
+									// Step 1: Always create a slice of model structs from the spec data.
+									// This slice serves as an intermediate representation.
+									interfaceElements := make([]ObjectRefTypeModel, 0, len(listElement.GetInterface()))
+									for _, interfaceElement := range listElement.GetInterface() {
+										objectRefTypeModelModel := ObjectRefTypeModel{}
+
+										// data specToModelNested RequiredStringField --> Name
+										if interfaceElement.GetName() != "" {
+											objectRefTypeModelModel.Name = types.StringValue(interfaceElement.GetName())
+										} else {
+											// Empty string, set to null
+											objectRefTypeModelModel.Name = types.StringNull()
+										}
+
+										// data specToModelNested RequiredStringField --> Namespace
+										if interfaceElement.GetNamespace() != "" {
+											objectRefTypeModelModel.Namespace = types.StringValue(interfaceElement.GetNamespace())
+										} else {
+											// Empty string, set to null
+											objectRefTypeModelModel.Namespace = types.StringNull()
+										}
+
+										// data specToModelNested StringField --> Tenant
+										if interfaceElement.GetTenant() != "" {
+											objectRefTypeModelModel.Tenant = types.StringValue(interfaceElement.GetTenant())
+										} else {
+											// Empty string, set to null
+											objectRefTypeModelModel.Tenant = types.StringNull()
+										}
+
+										interfaceElements = append(interfaceElements, objectRefTypeModelModel)
+									}
+									// CASE 1: The target field is a `types.List` or an attribute map.
+									// The intermediate slice of structs must be converted to a `types.ListValue`.
+									interfaceListValue, listDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: VirtualNetworkInterfaceObjectRefModelAttributeMap}, interfaceElements)
+									response.Diagnostics.Append(listDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									virtualNetworkNodeInterfaceInfoModel.Interface = interfaceListValue
+
+								} else {
+									// The source list is empty or nil.
+									// CASE 1: The target field is a `types.List` or an attribute map.
+									// Assign a null `types.ListValue`.
+									virtualNetworkNodeInterfaceInfoModel.Interface = types.ListNull(types.ObjectType{AttrTypes: VirtualNetworkInterfaceObjectRefModelAttributeMap})
+								}
+
+								// data specToModelNested StringField --> Node
+								if listElement.GetNode() != "" {
+									virtualNetworkNodeInterfaceInfoModel.Node = types.StringValue(listElement.GetNode())
+								} else {
+									// Empty string, set to null
+									virtualNetworkNodeInterfaceInfoModel.Node = types.StringNull()
+								}
+
+								listElements = append(listElements, virtualNetworkNodeInterfaceInfoModel)
+							}
+							// CASE 1: The target field is a `types.List` or an attribute map.
+							// The intermediate slice of structs must be converted to a `types.ListValue`.
+							listListValue, listDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: VirtualNetworkStaticRoutesNextHopChoiceNodeInterfaceListModelAttributeMap}, listElements)
+							response.Diagnostics.Append(listDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							nodeInterfaceAttributeMap["list"] = listListValue
+
+						} else {
+							// The source list is empty or nil.
+							// CASE 1: The target field is a `types.List` or an attribute map.
+							// Assign a null `types.ListValue`.
+							nodeInterfaceAttributeMap["list"] = types.ListNull(types.ObjectType{AttrTypes: VirtualNetworkStaticRoutesNextHopChoiceNodeInterfaceListModelAttributeMap})
+						}
+
+						nodeInterfaceObj, nodeInterfaceObjDiags := types.ObjectValue(VirtualNetworkStaticRoutesNextHopChoiceNodeInterfaceModelAttributeMap, nodeInterfaceAttributeMap)
+						response.Diagnostics.Append(nodeInterfaceObjDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						staticRoutesnextHopChoiceChoicesAttributeMap["node_interface"] = nodeInterfaceObj
+					} else {
+						staticRoutesnextHopChoiceChoicesAttributeMap["node_interface"] = types.ObjectNull(VirtualNetworkStaticRoutesNextHopChoiceNodeInterfaceModelAttributeMap)
+					}
+				}
+
+				// --- End of Choices ---
+
+				// Create the final ObjectValue for this OneOf field
+				finalObj, staticRoutesnextHopChoiceChoicesObjDiags := types.ObjectValue(
+					VirtualNetworkStaticRoutesNextHopChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+					staticRoutesnextHopChoiceChoicesAttributeMap,
+				)
+				response.Diagnostics.Append(staticRoutesnextHopChoiceChoicesObjDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				// Assign the final object to the correct place (either the root model or a parent's attribute map)
+				virtualNetworkVirtualNetworkStaticRouteViewTypeModel.NextHopChoice = finalObj
+			} else {
+				virtualNetworkVirtualNetworkStaticRouteViewTypeModel.NextHopChoice = types.ObjectNull(VirtualNetworkStaticRoutesNextHopChoiceModelAttributeMap)
+			}
+
+			staticRoutesElements = append(staticRoutesElements, virtualNetworkVirtualNetworkStaticRouteViewTypeModel)
+		}
+
+		{
+			staticRoutesList, listDiags := utils.GoStructSliceToListValue(
+				ctx,
+				VirtualNetworkStaticRoutesModelAttributeMap,
+				staticRoutesElements,
+			)
+
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			data.StaticRoutes = staticRoutesList
+		}
+	} else {
+		var staticRoutesObjectType = basetypes.ObjectType{
+			AttrTypes: VirtualNetworkStaticRoutesModelAttributeMap,
+		}
+		nullStaticRoutesList := basetypes.NewListNull(staticRoutesObjectType)
+		data.StaticRoutes = nullStaticRoutesList
+	}
+
+	// data SpecToModelRoot ArrayOfPointerField --> StaticV6Routes
+	if len(specData.GetStaticV6Routes()) > 0 {
+		staticV6RoutesElements := make([]VirtualNetworkVirtualNetworkStaticV6RouteViewType, 0, len(specData.GetStaticV6Routes()))
+
+		for _, staticV6RoutesElement := range specData.GetStaticV6Routes() {
+			virtualNetworkVirtualNetworkStaticV6RouteViewTypeModel := VirtualNetworkVirtualNetworkStaticV6RouteViewType{}
+
+			// data SpecToModelNested ArrayOfEnumField --> Attrs
+			if len(staticV6RoutesElement.GetAttrs()) > 0 {
+				attrsStrings := make([]string, 0, len(staticV6RoutesElement.GetAttrs()))
+				for _, v := range staticV6RoutesElement.GetAttrs() {
+					if strVal, exists := ves_io_schema.RouteAttrType_name[int32(v)]; exists {
+						attrsStrings = append(attrsStrings, strVal)
+					}
+				}
+				listValue, listDiags := types.ListValueFrom(ctx, types.StringType, attrsStrings)
+				response.Diagnostics.Append(listDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				virtualNetworkVirtualNetworkStaticV6RouteViewTypeModel.Attrs = listValue
+			} else {
+				virtualNetworkVirtualNetworkStaticV6RouteViewTypeModel.Attrs = types.ListNull(types.StringType)
+			}
+
+			// data specToModelNested RequiredArrayOfStringField --> IpPrefixes
+			if len(staticV6RoutesElement.GetIpPrefixes()) > 0 {
+				listValue, listDiags := types.ListValueFrom(ctx, types.StringType, staticV6RoutesElement.GetIpPrefixes())
+				response.Diagnostics.Append(listDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				virtualNetworkVirtualNetworkStaticV6RouteViewTypeModel.IpPrefixes = listValue
+			} else {
+				virtualNetworkVirtualNetworkStaticV6RouteViewTypeModel.IpPrefixes = types.ListNull(types.StringType)
+			}
+
+			// data specToModelNested RequiredOneOfField --> NextHopChoice
+			// CreateSpecType
+			// CreateSpecType: GetNextHopChoice() returns the oneof interface value.
+			if staticV6RoutesElement.GetNextHopChoice() != nil {
+				// Create a temporary attribute map for the choices within this OneOf
+				staticV6RoutesnextHopChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+				// Define a variable for the spec choices to be passed down to nested templates.
+				// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+				staticV6RoutesnextHopChoiceChoices := staticV6RoutesElement.GetNextHopChoice()
+
+				// Process nested choices, populating the temporary attribute map
+
+				// data specToModelNested BoolOfOneOfPointerField --> DefaultGateway
+				var defaultGatewayInMap bool
+
+				if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+					if _, found := gcSpec["default_gateway"]; found {
+						defaultGatewayInMap = true
+					}
+				}
+
+				if !defaultGatewayInMap {
+					if _, found := rawSpecMap["default_gateway"]; found {
+						defaultGatewayInMap = true
+					}
+				}
+
+				_, isDefaultGatewayForBool := staticV6RoutesnextHopChoiceChoices.(*ves_io_schema_virtual_network.StaticV6RouteViewType_DefaultGateway)
+				if defaultGatewayInMap || isDefaultGatewayForBool {
+					staticV6RoutesnextHopChoiceChoicesAttributeMap["default_gateway"] = types.BoolValue(true)
+				} else {
+					staticV6RoutesnextHopChoiceChoicesAttributeMap["default_gateway"] = types.BoolNull()
+				}
+
+				// data specToModelNested StringOfOneOfField --> IpAddress
+				ipAddressItem, isIpAddress := staticV6RoutesnextHopChoiceChoices.(*ves_io_schema_virtual_network.StaticV6RouteViewType_IpAddress)
+
+				if isIpAddress {
+					staticV6RoutesnextHopChoiceChoicesAttributeMap["ip_address"] = types.StringValue(string(ipAddressItem.IpAddress))
+				} else {
+					// Empty string, set to null
+					staticV6RoutesnextHopChoiceChoicesAttributeMap["ip_address"] = types.StringNull()
+				}
+
+				// data specToModelNested PointerOfOneOfField --> NodeInterface
+				// CreateSpecType
+				// true
+				{
+					nodeInterfaceOptionsWrapper, isNodeInterface := staticV6RoutesnextHopChoiceChoices.(*ves_io_schema_virtual_network.StaticV6RouteViewType_NodeInterface)
+					nodeInterfaceAttributeMap := make(map[string]attr.Value)
+
+					if isNodeInterface && nodeInterfaceOptionsWrapper != nil && nodeInterfaceOptionsWrapper.NodeInterface != nil {
+						nodeInterfaceElement := nodeInterfaceOptionsWrapper.NodeInterface
+
+						// data specToModelNested ArrayOfPointerField --> List
+						if len(nodeInterfaceElement.GetList()) > 0 {
+							// Step 1: Always create a slice of model structs from the spec data.
+							// This slice serves as an intermediate representation.
+							listElements := make([]VirtualNetworkNodeInterfaceInfo, 0, len(nodeInterfaceElement.GetList()))
+							for _, listElement := range nodeInterfaceElement.GetList() {
+								virtualNetworkNodeInterfaceInfoModel := VirtualNetworkNodeInterfaceInfo{}
+
+								// data specToModelNested ArrayOfPointerField --> Interface
+								if len(listElement.GetInterface()) > 0 {
+									// Step 1: Always create a slice of model structs from the spec data.
+									// This slice serves as an intermediate representation.
+									interfaceElements := make([]ObjectRefTypeModel, 0, len(listElement.GetInterface()))
+									for _, interfaceElement := range listElement.GetInterface() {
+										objectRefTypeModelModel := ObjectRefTypeModel{}
+
+										// data specToModelNested RequiredStringField --> Name
+										if interfaceElement.GetName() != "" {
+											objectRefTypeModelModel.Name = types.StringValue(interfaceElement.GetName())
+										} else {
+											// Empty string, set to null
+											objectRefTypeModelModel.Name = types.StringNull()
+										}
+
+										// data specToModelNested RequiredStringField --> Namespace
+										if interfaceElement.GetNamespace() != "" {
+											objectRefTypeModelModel.Namespace = types.StringValue(interfaceElement.GetNamespace())
+										} else {
+											// Empty string, set to null
+											objectRefTypeModelModel.Namespace = types.StringNull()
+										}
+
+										// data specToModelNested StringField --> Tenant
+										if interfaceElement.GetTenant() != "" {
+											objectRefTypeModelModel.Tenant = types.StringValue(interfaceElement.GetTenant())
+										} else {
+											// Empty string, set to null
+											objectRefTypeModelModel.Tenant = types.StringNull()
+										}
+
+										interfaceElements = append(interfaceElements, objectRefTypeModelModel)
+									}
+									// CASE 1: The target field is a `types.List` or an attribute map.
+									// The intermediate slice of structs must be converted to a `types.ListValue`.
+									interfaceListValue, listDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: VirtualNetworkInterfaceObjectRefModelAttributeMap}, interfaceElements)
+									response.Diagnostics.Append(listDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									virtualNetworkNodeInterfaceInfoModel.Interface = interfaceListValue
+
+								} else {
+									// The source list is empty or nil.
+									// CASE 1: The target field is a `types.List` or an attribute map.
+									// Assign a null `types.ListValue`.
+									virtualNetworkNodeInterfaceInfoModel.Interface = types.ListNull(types.ObjectType{AttrTypes: VirtualNetworkInterfaceObjectRefModelAttributeMap})
+								}
+
+								// data specToModelNested StringField --> Node
+								if listElement.GetNode() != "" {
+									virtualNetworkNodeInterfaceInfoModel.Node = types.StringValue(listElement.GetNode())
+								} else {
+									// Empty string, set to null
+									virtualNetworkNodeInterfaceInfoModel.Node = types.StringNull()
+								}
+
+								listElements = append(listElements, virtualNetworkNodeInterfaceInfoModel)
+							}
+							// CASE 1: The target field is a `types.List` or an attribute map.
+							// The intermediate slice of structs must be converted to a `types.ListValue`.
+							listListValue, listDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: VirtualNetworkStaticV6RoutesNextHopChoiceNodeInterfaceListModelAttributeMap}, listElements)
+							response.Diagnostics.Append(listDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							nodeInterfaceAttributeMap["list"] = listListValue
+
+						} else {
+							// The source list is empty or nil.
+							// CASE 1: The target field is a `types.List` or an attribute map.
+							// Assign a null `types.ListValue`.
+							nodeInterfaceAttributeMap["list"] = types.ListNull(types.ObjectType{AttrTypes: VirtualNetworkStaticV6RoutesNextHopChoiceNodeInterfaceListModelAttributeMap})
+						}
+
+						nodeInterfaceObj, nodeInterfaceObjDiags := types.ObjectValue(VirtualNetworkStaticV6RoutesNextHopChoiceNodeInterfaceModelAttributeMap, nodeInterfaceAttributeMap)
+						response.Diagnostics.Append(nodeInterfaceObjDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						staticV6RoutesnextHopChoiceChoicesAttributeMap["node_interface"] = nodeInterfaceObj
+					} else {
+						staticV6RoutesnextHopChoiceChoicesAttributeMap["node_interface"] = types.ObjectNull(VirtualNetworkStaticV6RoutesNextHopChoiceNodeInterfaceModelAttributeMap)
+					}
+				}
+
+				// --- End of Choices ---
+
+				// Create the final ObjectValue for this OneOf field
+				finalObj, staticV6RoutesnextHopChoiceChoicesObjDiags := types.ObjectValue(
+					VirtualNetworkStaticV6RoutesNextHopChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+					staticV6RoutesnextHopChoiceChoicesAttributeMap,
+				)
+				response.Diagnostics.Append(staticV6RoutesnextHopChoiceChoicesObjDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				// Assign the final object to the correct place (either the root model or a parent's attribute map)
+				virtualNetworkVirtualNetworkStaticV6RouteViewTypeModel.NextHopChoice = finalObj
+			} else {
+				virtualNetworkVirtualNetworkStaticV6RouteViewTypeModel.NextHopChoice = types.ObjectNull(VirtualNetworkStaticV6RoutesNextHopChoiceModelAttributeMap)
+			}
+
+			staticV6RoutesElements = append(staticV6RoutesElements, virtualNetworkVirtualNetworkStaticV6RouteViewTypeModel)
+		}
+
+		{
+			staticV6RoutesList, listDiags := utils.GoStructSliceToListValue(
+				ctx,
+				VirtualNetworkStaticV6RoutesModelAttributeMap,
+				staticV6RoutesElements,
+			)
+
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			data.StaticV6Routes = staticV6RoutesList
+		}
+	} else {
+		var staticV6RoutesObjectType = basetypes.ObjectType{
+			AttrTypes: VirtualNetworkStaticV6RoutesModelAttributeMap,
+		}
+		nullStaticV6RoutesList := basetypes.NewListNull(staticV6RoutesObjectType)
+		data.StaticV6Routes = nullStaticV6RoutesList
+	}
+
 	// Set state to fully populated data
-	diags = response.State.Set(ctx, &data)
+	diags := response.State.Set(ctx, &data)
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return

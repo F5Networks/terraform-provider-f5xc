@@ -1689,10 +1689,7 @@ var APISwaggerJSON string = `{
         "description": "A data_type is defined by a set of rules. these rules include the patterns for which that data type will be detected.\nA data type also includes information like it's related compliances weather is sensitive data and is it also pii.\nA data type is either predefined - defined in system. or custom - defined by the user.",
         "version": "version not set"
     },
-    "schemes": [
-        "http",
-        "https"
-    ],
+    "schemes": null,
     "consumes": [
         "application/json"
     ],
@@ -1759,6 +1756,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1851,6 +1854,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1951,6 +1960,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2068,6 +2083,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2170,6 +2191,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2311,13 +2338,11 @@ var APISwaggerJSON string = `{
                 "is_pii": {
                     "type": "boolean",
                     "description": " Select this option to classify the custom data type as personally identifiable information (PII)",
-                    "format": "boolean",
                     "x-displayname": "Mark as PII"
                 },
                 "is_sensitive_data": {
                     "type": "boolean",
                     "description": " Select this option to classify the custom data type as sensitive, enabling detection of API vulnerabilities related to this data type.",
-                    "format": "boolean",
                     "x-displayname": "Mark as Sensitive Data"
                 },
                 "rules": {
@@ -2351,7 +2376,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Fail the delete operation if this object is being referred by other objects",
                     "title": "fail_if_referred",
-                    "format": "boolean",
                     "x-displayname": "Fail-If-Referred"
                 },
                 "name": {
@@ -2539,13 +2563,11 @@ var APISwaggerJSON string = `{
                 "is_pii": {
                     "type": "boolean",
                     "description": " Select this option to classify the custom data type as personally identifiable information (PII)",
-                    "format": "boolean",
                     "x-displayname": "Mark as PII"
                 },
                 "is_sensitive_data": {
                     "type": "boolean",
                     "description": " Select this option to classify the custom data type as sensitive, enabling detection of API vulnerabilities related to this data type.",
-                    "format": "boolean",
                     "x-displayname": "Mark as Sensitive Data"
                 },
                 "rules": {
@@ -2652,7 +2674,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true indicates data_type is administratively disabled",
                     "title": "disabled",
-                    "format": "boolean",
                     "x-displayname": "Disabled"
                 },
                 "get_spec": {
@@ -2793,13 +2814,11 @@ var APISwaggerJSON string = `{
                 "is_pii": {
                     "type": "boolean",
                     "description": " Select this option to classify the custom data type as personally identifiable information (PII)",
-                    "format": "boolean",
                     "x-displayname": "Mark as PII"
                 },
                 "is_sensitive_data": {
                     "type": "boolean",
                     "description": " Select this option to classify the custom data type as sensitive, enabling detection of API vulnerabilities related to this data type.",
-                    "format": "boolean",
                     "x-displayname": "Mark as Sensitive Data"
                 },
                 "rules": {
@@ -2913,6 +2932,27 @@ var APISwaggerJSON string = `{
                     "type": "string",
                     "description": "Must be a valid serialized protocol buffer of the above specified type.",
                     "format": "byte"
+                }
+            }
+        },
+        "runtimeError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/protobufAny"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
                 }
             }
         },
@@ -3091,7 +3131,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "labels": {
@@ -3155,7 +3194,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable",
                     "x-ves-example": "true"
                 },
@@ -3265,7 +3303,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "labels": {
@@ -3351,7 +3388,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Indicate whether mars deems this object to be stale via graceful restart timer information",
                     "title": "vtrp_stale",
-                    "format": "boolean",
                     "x-displayname": "VTRP Stale"
                 }
             }

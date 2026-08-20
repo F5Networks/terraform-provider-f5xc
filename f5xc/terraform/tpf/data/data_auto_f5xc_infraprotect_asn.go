@@ -29,24 +29,24 @@ type DataSourceF5XCInfraprotectAsn struct {
 }
 
 type InfraprotectAsnGlobalSpecTypeBgpSessionChoice struct {
-	BgpSessionEnabled  types.Bool `tfsdk:"bgp_session_enabled"`
 	BgpSessionDisabled types.Bool `tfsdk:"bgp_session_disabled"`
+	BgpSessionEnabled  types.Bool `tfsdk:"bgp_session_enabled"`
 }
 
 type InfraprotectAsnGlobalSpecTypeReviewTypeChoice struct {
-	ReviewTypePending  types.Bool `tfsdk:"review_type_pending"`
 	ReviewTypeApproved types.Bool `tfsdk:"review_type_approved"`
+	ReviewTypePending  types.Bool `tfsdk:"review_type_pending"`
 	ReviewTypeRejected types.Bool `tfsdk:"review_type_rejected"`
 }
 
 // DataSourceF5XCInfraprotectAsnModel describes the resource data model.
 type DataSourceF5XCInfraprotectAsnModel struct {
+	Annotations      types.Map      `tfsdk:"annotations"`
 	Description      types.String   `tfsdk:"description"`
+	Labels           types.Map      `tfsdk:"labels"`
 	Name             types.String   `tfsdk:"name"`
 	Namespace        types.String   `tfsdk:"namespace"`
 	Uid              types.String   `tfsdk:"uid"`
-	Labels           types.Map      `tfsdk:"labels"`
-	Annotations      types.Map      `tfsdk:"annotations"`
 	Asn              types.Int64    `tfsdk:"asn"`
 	BgpSessionChoice types.Object   `tfsdk:"bgp_session_choice"`
 	ReviewTypeChoice types.Object   `tfsdk:"review_type_choice"`
@@ -57,15 +57,15 @@ type DataSourceF5XCInfraprotectAsnModel struct {
 // Attribute map for RequiredOneOfField --> BgpSession
 var InfraprotectAsnBgpSessionModelAttributeMap = map[string]attr.Type{
 
-	"bgp_session_enabled":  types.BoolType,
 	"bgp_session_disabled": types.BoolType,
+	"bgp_session_enabled":  types.BoolType,
 }
 
 // Attribute map for RequiredOneOfField --> ReviewType
 var InfraprotectAsnReviewTypeModelAttributeMap = map[string]attr.Type{
 
-	"review_type_pending":  types.BoolType,
 	"review_type_approved": types.BoolType,
+	"review_type_pending":  types.BoolType,
 	"review_type_rejected": types.BoolType,
 }
 
@@ -83,15 +83,29 @@ func (d *DataSourceF5XCInfraprotectAsn) Metadata(ctx context.Context, request da
 func (r *DataSourceF5XCInfraprotectAsn) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "InfraprotectAsn data source",
-		Description:         "InfraprotectAsn data source",
+		MarkdownDescription: "GetRequest is used to get different forms of a infraprotect_asn This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of infraprotect_asn) etc. can be fetched",
+		Description:         "GetRequest is used to get different forms of a infraprotect_asn This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of infraprotect_asn) etc. can be fetched",
 
 		Attributes: map[string]schema.Attribute{
+			"annotations": schema.MapAttribute{
+				Description: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				ElementType: types.StringType,
+			},
 			"description": schema.StringAttribute{
 				Description: "description Human readable description for the object",
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
+			},
+			"labels": schema.MapAttribute{
+				Description: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				ElementType: types.StringType,
 			},
 			"name": schema.StringAttribute{
 				Description: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
@@ -111,20 +125,6 @@ func (r *DataSourceF5XCInfraprotectAsn) Schema(ctx context.Context, request data
 				Optional:    false,
 				Computed:    true,
 			},
-			"labels": schema.MapAttribute{
-				Description: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
-			"annotations": schema.MapAttribute{
-				Description: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
 			"asn": schema.Int64Attribute{
 				Description: "ASN 2-byte or 4-byte Autonomous System Number (ASN)",
 				Required:    false,
@@ -137,14 +137,14 @@ func (r *DataSourceF5XCInfraprotectAsn) Schema(ctx context.Context, request data
 				Optional:    false,
 				Computed:    true,
 				Attributes: map[string]schema.Attribute{
-					"bgp_session_enabled": schema.BoolAttribute{
-						Description: "BGP Sessions Enabled BGP Sessions Enabled",
+					"bgp_session_disabled": schema.BoolAttribute{
+						Description: "BGP Sessions Not Enabled BGP Sessions Not Enabled",
 						Required:    false,
 						Optional:    false,
 						Computed:    true,
 					},
-					"bgp_session_disabled": schema.BoolAttribute{
-						Description: "BGP Sessions Not Enabled BGP Sessions Not Enabled",
+					"bgp_session_enabled": schema.BoolAttribute{
+						Description: "BGP Sessions Enabled BGP Sessions Enabled",
 						Required:    false,
 						Optional:    false,
 						Computed:    true,
@@ -157,14 +157,14 @@ func (r *DataSourceF5XCInfraprotectAsn) Schema(ctx context.Context, request data
 				Optional:    false,
 				Computed:    true,
 				Attributes: map[string]schema.Attribute{
-					"review_type_pending": schema.BoolAttribute{
-						Description: "Pending Pending",
+					"review_type_approved": schema.BoolAttribute{
+						Description: "Approved Approved",
 						Required:    false,
 						Optional:    false,
 						Computed:    true,
 					},
-					"review_type_approved": schema.BoolAttribute{
-						Description: "Approved Approved",
+					"review_type_pending": schema.BoolAttribute{
+						Description: "Pending Pending",
 						Required:    false,
 						Optional:    false,
 						Computed:    true,
@@ -224,15 +224,14 @@ func (d *DataSourceF5XCInfraprotectAsn) Read(ctx context.Context, request dataso
 		return
 	}
 
-	readTimeout, diags := data.Timeouts.Read(ctx, duration)
-	response.Diagnostics.Append(diags...)
+	readTimeout, readDiags := data.Timeouts.Read(ctx, duration)
+	response.Diagnostics.Append(readDiags...)
 	if response.Diagnostics.HasError() {
 		return
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
-
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_infraprotect_asn.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
@@ -248,17 +247,26 @@ func (d *DataSourceF5XCInfraprotectAsn) Read(ctx context.Context, request dataso
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
+	// data SpecToModelRoot Meta MapOfStringField --> Annotations
+	if metaData.GetAnnotations() != nil {
+		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
+		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+		response.Diagnostics.Append(annotationsDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		// Assign the typed map to the model
+		data.Annotations = annotationsMap
+	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
+		// API returned nil and the model has no value: set an explicit Null map to avoid
+		// DynamicPseudoType errors. If the model already contains a value (e.g. labels were set
+		// but the API did not echo them back in the response), preserve the existing value to prevent
+		// "Provider produced inconsistent result after apply" errors.
+		data.Annotations = types.MapNull(types.StringType)
+	}
+
 	// data SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
-
-	// data SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
-
-	// data SpecToModelRoot Meta RequiredStringField --> Namespace
-	data.Namespace = types.StringValue(metaData.GetNamespace())
-
-	// data SpecToModelRoot Meta StringField --> Uid
-	data.Uid = types.StringValue(systemMetaData.GetUid())
 
 	// data SpecToModelRoot Meta MapOfStringField --> Labels
 	if metaData.GetLabels() != nil {
@@ -278,23 +286,14 @@ func (d *DataSourceF5XCInfraprotectAsn) Read(ctx context.Context, request dataso
 		data.Labels = types.MapNull(types.StringType)
 	}
 
-	// data SpecToModelRoot Meta MapOfStringField --> Annotations
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// Assign the typed map to the model
-		data.Annotations = annotationsMap
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil and the model has no value: set an explicit Null map to avoid
-		// DynamicPseudoType errors. If the model already contains a value (e.g. labels were set
-		// but the API did not echo them back in the response), preserve the existing value to prevent
-		// "Provider produced inconsistent result after apply" errors.
-		data.Annotations = types.MapNull(types.StringType)
-	}
+	// data SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
+
+	// data SpecToModelRoot Meta RequiredStringField --> Namespace
+	data.Namespace = types.StringValue(metaData.GetNamespace())
+
+	// data SpecToModelRoot Meta StringField --> Uid
+	data.Uid = types.StringValue(systemMetaData.GetUid())
 
 	// data SpecToModelRoot RequiredUintField --> Asn
 	asnValue := specData.GetAsn()
@@ -316,15 +315,6 @@ func (d *DataSourceF5XCInfraprotectAsn) Read(ctx context.Context, request dataso
 
 		// Recursively call the nested template to process the oneof choices.
 
-		// data specToModelNested BoolOfOneOfPointerField --> BgpSessionEnabled
-		_, isBgpSessionEnabled := bgpSessionChoiceChoices.(*ves_io_schema_infraprotect_asn.GlobalSpecType_BgpSessionEnabled)
-
-		if isBgpSessionEnabled {
-			bgpSessionChoiceChoicesModel.BgpSessionEnabled = types.BoolValue(true)
-		} else {
-			bgpSessionChoiceChoicesModel.BgpSessionEnabled = types.BoolNull()
-		}
-
 		// data specToModelNested BoolOfOneOfPointerField --> BgpSessionDisabled
 		_, isBgpSessionDisabled := bgpSessionChoiceChoices.(*ves_io_schema_infraprotect_asn.GlobalSpecType_BgpSessionDisabled)
 
@@ -334,19 +324,30 @@ func (d *DataSourceF5XCInfraprotectAsn) Read(ctx context.Context, request dataso
 			bgpSessionChoiceChoicesModel.BgpSessionDisabled = types.BoolNull()
 		}
 
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		bgpSessionChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			InfraprotectAsnBgpSessionModelAttributeMap,
-			bgpSessionChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
+		// data specToModelNested BoolOfOneOfPointerField --> BgpSessionEnabled
+		_, isBgpSessionEnabled := bgpSessionChoiceChoices.(*ves_io_schema_infraprotect_asn.GlobalSpecType_BgpSessionEnabled)
+
+		if isBgpSessionEnabled {
+			bgpSessionChoiceChoicesModel.BgpSessionEnabled = types.BoolValue(true)
+		} else {
+			bgpSessionChoiceChoicesModel.BgpSessionEnabled = types.BoolNull()
 		}
 
-		// Assign the final object to the root data model.
-		data.BgpSessionChoice = bgpSessionChoiceObj
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			bgpSessionChoiceObj, oneofDiags := utils.GoStructToObjectValue(
+				ctx,
+				InfraprotectAsnBgpSessionModelAttributeMap,
+				bgpSessionChoiceChoicesModel,
+			)
+			if oneofDiags.HasError() {
+				response.Diagnostics.Append(oneofDiags...)
+				return
+			}
+
+			// Assign the final object to the root data model.
+			data.BgpSessionChoice = bgpSessionChoiceObj
+		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		data.BgpSessionChoice = types.ObjectNull(InfraprotectAsnBgpSessionModelAttributeMap)
@@ -366,15 +367,6 @@ func (d *DataSourceF5XCInfraprotectAsn) Read(ctx context.Context, request dataso
 
 		// Recursively call the nested template to process the oneof choices.
 
-		// data specToModelNested BoolOfOneOfPointerField --> ReviewTypePending
-		_, isReviewTypePending := reviewTypeChoiceChoices.(*ves_io_schema_infraprotect_asn.GlobalSpecType_ReviewTypePending)
-
-		if isReviewTypePending {
-			reviewTypeChoiceChoicesModel.ReviewTypePending = types.BoolValue(true)
-		} else {
-			reviewTypeChoiceChoicesModel.ReviewTypePending = types.BoolNull()
-		}
-
 		// data specToModelNested BoolOfOneOfPointerField --> ReviewTypeApproved
 		_, isReviewTypeApproved := reviewTypeChoiceChoices.(*ves_io_schema_infraprotect_asn.GlobalSpecType_ReviewTypeApproved)
 
@@ -382,6 +374,15 @@ func (d *DataSourceF5XCInfraprotectAsn) Read(ctx context.Context, request dataso
 			reviewTypeChoiceChoicesModel.ReviewTypeApproved = types.BoolValue(true)
 		} else {
 			reviewTypeChoiceChoicesModel.ReviewTypeApproved = types.BoolNull()
+		}
+
+		// data specToModelNested BoolOfOneOfPointerField --> ReviewTypePending
+		_, isReviewTypePending := reviewTypeChoiceChoices.(*ves_io_schema_infraprotect_asn.GlobalSpecType_ReviewTypePending)
+
+		if isReviewTypePending {
+			reviewTypeChoiceChoicesModel.ReviewTypePending = types.BoolValue(true)
+		} else {
+			reviewTypeChoiceChoicesModel.ReviewTypePending = types.BoolNull()
 		}
 
 		// data specToModelNested BoolOfOneOfPointerField --> ReviewTypeRejected
@@ -394,25 +395,27 @@ func (d *DataSourceF5XCInfraprotectAsn) Read(ctx context.Context, request dataso
 		}
 
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		reviewTypeChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			InfraprotectAsnReviewTypeModelAttributeMap,
-			reviewTypeChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
+		{
+			reviewTypeChoiceObj, oneofDiags := utils.GoStructToObjectValue(
+				ctx,
+				InfraprotectAsnReviewTypeModelAttributeMap,
+				reviewTypeChoiceChoicesModel,
+			)
+			if oneofDiags.HasError() {
+				response.Diagnostics.Append(oneofDiags...)
+				return
+			}
 
-		// Assign the final object to the root data model.
-		data.ReviewTypeChoice = reviewTypeChoiceObj
+			// Assign the final object to the root data model.
+			data.ReviewTypeChoice = reviewTypeChoiceObj
+		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		data.ReviewTypeChoice = types.ObjectNull(InfraprotectAsnReviewTypeModelAttributeMap)
 	}
 
 	// Set state to fully populated data
-	diags = response.State.Set(ctx, &data)
+	diags := response.State.Set(ctx, &data)
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return

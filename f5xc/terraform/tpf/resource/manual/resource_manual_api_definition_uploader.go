@@ -10,8 +10,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
-	"github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
@@ -27,21 +28,6 @@ type ResourceF5XCApiDefinitionUploader struct {
 	client *client.APIClient
 }
 
-/*
-{
-	"metadata": {
-		"namespace": "default",
-		"name": "test125",
-		"version": "v1-25-10-25",
-		"url": "https://playground.console.ves.volterra.io/api/object_store/namespaces/default/stored_objects/swagger/test125/v1-25-10-25",
-		"description": "test125",
-		"creation_timestamp": "2025-10-25T00:14:03.146654614Z",
-		"no_attributes": {}
-  	},
-  	"string_value": ""
-}
-*/
-
 type ResourceF5XCApiDefinitionUploaderMetadataModel struct {
 	Url               types.String `tfsdk:"url"`
 	Name              types.String `tfsdk:"name"`
@@ -56,9 +42,11 @@ type ResourceF5XCApiDefinitionUploaderModel struct {
 	Status      types.String                                   `tfsdk:"status"`
 	Metadata    ResourceF5XCApiDefinitionUploaderMetadataModel `tfsdk:"metadata"`
 	StringValue types.String                                   `tfsdk:"string_value"`
+	Timeouts    timeouts.Value                                 `tfsdk:"timeouts"`
 }
 
-type ResourceF5XCApiDefinitionUploaderMetadataApiModel struct {
+// apiDefinitionUploaderMetadataResponse is the metadata section of the API response payload.
+type apiDefinitionUploaderMetadataResponse struct {
 	Url               string `json:"url"`
 	Name              string `json:"name"`
 	Version           string `json:"version"`
@@ -67,16 +55,18 @@ type ResourceF5XCApiDefinitionUploaderMetadataApiModel struct {
 	CreationTimestamp string `json:"creationTimestamp"`
 }
 
-// ResourceF5XCApiDefinitionUploaderApiModel describes the API data model.
-type ResourceF5XCApiDefinitionUploaderApiModel struct {
-	Status      string                                            `json:"status"`
-	Metadata    ResourceF5XCApiDefinitionUploaderMetadataApiModel `json:"metadata"`
-	StringValue string                                            `json:"string_value"`
+// apiDefinitionUploaderResponse is the full API response payload (includes Status, unlike the request model in client.go).
+type apiDefinitionUploaderResponse struct {
+	Status      string                                `json:"status"`
+	Metadata    apiDefinitionUploaderMetadataResponse `json:"metadata"`
+	StringValue string                                `json:"string_value"`
 }
 
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &ResourceF5XCApiDefinitionUploader{}
-var _ resource.ResourceWithImportState = &ResourceF5XCApiDefinitionUploader{}
+var _ resource.ResourceWithConfigure = &ResourceF5XCApiDefinitionUploader{}
+var _ resource.ResourceWithModifyPlan = &ResourceF5XCApiDefinitionUploader{}
+var _ resource.ResourceWithValidateConfig = &ResourceF5XCApiDefinitionUploader{}
 
 func NewResourceF5XCApiDefinitionUploader() resource.Resource {
 	return &ResourceF5XCApiDefinitionUploader{}
@@ -153,6 +143,12 @@ func (r *ResourceF5XCApiDefinitionUploader) Schema(ctx context.Context, request 
 				Optional:    false,
 				Computed:    false,
 			},
+			"timeouts": timeouts.Attributes(ctx, timeouts.Opts{
+				Create: true, // activate timeouts.create
+				Update: true, // activate timeouts.update (false for CRLD resources)
+				Delete: true, // activate timeouts.delete
+				Read:   true, // activate timeouts.read
+			}),
 		},
 	}
 }
@@ -177,6 +173,41 @@ func (r *ResourceF5XCApiDefinitionUploader) Configure(ctx context.Context, reque
 
 }
 
+// ValidateConfig implements resource.ResourceWithValidateConfig
+func (r *ResourceF5XCApiDefinitionUploader) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var data ResourceF5XCApiDefinitionUploaderModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+}
+
+// ModifyPlan implements resource.ResourceWithModifyPlan
+func (r *ResourceF5XCApiDefinitionUploader) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	if req.Plan.Raw.IsNull() {
+		resp.Diagnostics.AddWarning(
+			"Resource Destruction",
+			"This will permanently delete the API Definition from F5 XC.",
+		)
+		return
+	}
+
+	if req.State.Raw.IsNull() {
+		var plan ResourceF5XCApiDefinitionUploaderModel
+		resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+
+		if plan.Metadata.Name.IsUnknown() {
+			resp.Diagnostics.AddWarning(
+				"Unknown Resource Name",
+				"The resource name is not yet known. This may affect planning for dependent resources.",
+			)
+		}
+	}
+}
+
 func (r *ResourceF5XCApiDefinitionUploader) Create(ctx context.Context, request resource.CreateRequest, response *resource.CreateResponse) {
 	var data ResourceF5XCApiDefinitionUploaderModel
 
@@ -188,22 +219,45 @@ func (r *ResourceF5XCApiDefinitionUploader) Create(ctx context.Context, request 
 		return
 	}
 
-	// Convert from Terraform data model into API data model
-	createReqMetadata := ResourceF5XCApiDefinitionUploaderMetadataApiModel{
+	duration, err := time.ParseDuration("10m0s")
+	if err != nil {
+		response.Diagnostics.AddError(
+			"Invalid Duration Format",
+			fmt.Sprintf("Could not parse 'timeout' value %q: %s. "+
+				"Please use a valid Go duration string like '10m', '1h30m' or '30s'.",
+				"10m0s", err.Error()),
+		)
+		return
+	}
+
+	createTimeout, diags := data.Timeouts.Create(ctx, duration)
+	response.Diagnostics.Append(diags...)
+	if response.Diagnostics.HasError() {
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(ctx, createTimeout)
+	defer cancel()
+
+	// Convert from Terraform data model into API request model (client.go types, no Status field)
+	createReqMetadata := client.ResourceF5XCApiDefinitionUploaderMetadataApiResponse{
 		Name:        data.Metadata.Name.ValueString(),
 		Namespace:   data.Metadata.Namespace.ValueString(),
 		Description: data.Metadata.Description.ValueString(),
 	}
 
-	// Convert from Terraform data model into API data model
-	createReq := ResourceF5XCApiDefinitionUploaderApiModel{
+	// Convert from Terraform data model into API request model
+	createReq := client.ResourceF5XCApiDefinitionUploaderApiModel{
 		Metadata:    createReqMetadata,
 		StringValue: data.StringValue.ValueString(),
 	}
 
 	httpReqBody, err := json.Marshal(createReq)
-
-	if response.Diagnostics.HasError() {
+	if err != nil {
+		response.Diagnostics.AddError(
+			"Serialization Error",
+			fmt.Sprintf("Unable to serialize request body: %s", err.Error()),
+		)
 		return
 	}
 
@@ -222,7 +276,7 @@ func (r *ResourceF5XCApiDefinitionUploader) Create(ctx context.Context, request 
 		return
 	}
 
-	var createResp ResourceF5XCApiDefinitionUploaderApiModel
+	var createResp apiDefinitionUploaderResponse
 	err = json.NewDecoder(bytes.NewBuffer(httpResp)).Decode(&createResp)
 
 	if err != nil {
@@ -233,10 +287,6 @@ func (r *ResourceF5XCApiDefinitionUploader) Create(ctx context.Context, request 
 				"JSON Error: "+err.Error(),
 		)
 
-		return
-	}
-
-	if response.Diagnostics.HasError() {
 		return
 	}
 
@@ -265,6 +315,26 @@ func (r *ResourceF5XCApiDefinitionUploader) Read(ctx context.Context, request re
 		return
 	}
 
+	duration, err := time.ParseDuration("10m0s")
+	if err != nil {
+		response.Diagnostics.AddError(
+			"Invalid Duration Format",
+			fmt.Sprintf("Could not parse 'timeout' value %q: %s. "+
+				"Please use a valid Go duration string like '10m', '1h30m' or '30s'.",
+				"10m0s", err.Error()),
+		)
+		return
+	}
+
+	readTimeout, diags := data.Timeouts.Read(ctx, duration)
+	response.Diagnostics.Append(diags...)
+	if response.Diagnostics.HasError() {
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(ctx, readTimeout)
+	defer cancel()
+
 	httpResp, err := r.client.RestClient.Execute(ctx, http.MethodGet, data.Metadata.Url.ValueString(), nil)
 	if err != nil {
 		response.Diagnostics.AddError(
@@ -273,7 +343,7 @@ func (r *ResourceF5XCApiDefinitionUploader) Read(ctx context.Context, request re
 		return
 	}
 
-	var readResp ResourceF5XCApiDefinitionUploaderApiModel
+	var readResp apiDefinitionUploaderResponse
 	err = json.NewDecoder(bytes.NewBuffer(httpResp)).Decode(&readResp)
 
 	if err != nil {
@@ -284,10 +354,6 @@ func (r *ResourceF5XCApiDefinitionUploader) Read(ctx context.Context, request re
 				"JSON Error: "+err.Error(),
 		)
 
-		return
-	}
-
-	if response.Diagnostics.HasError() {
 		return
 	}
 
@@ -304,8 +370,7 @@ func (r *ResourceF5XCApiDefinitionUploader) Read(ctx context.Context, request re
 }
 
 func (r *ResourceF5XCApiDefinitionUploader) Update(ctx context.Context, request resource.UpdateRequest, response *resource.UpdateResponse) {
-	//Update is a replace and read operation
-
+	// Update is a replace and read operation
 	var data ResourceF5XCApiDefinitionUploaderModel
 
 	// Read Terraform plan data into the model
@@ -314,6 +379,26 @@ func (r *ResourceF5XCApiDefinitionUploader) Update(ctx context.Context, request 
 	if response.Diagnostics.HasError() {
 		return
 	}
+
+	duration, err := time.ParseDuration("10m0s")
+	if err != nil {
+		response.Diagnostics.AddError(
+			"Invalid Duration Format",
+			fmt.Sprintf("Could not parse 'timeout' value %q: %s. "+
+				"Please use a valid Go duration string like '10m', '1h30m' or '30s'.",
+				"10m0s", err.Error()),
+		)
+		return
+	}
+
+	updateTimeout, diags := data.Timeouts.Update(ctx, duration)
+	response.Diagnostics.Append(diags...)
+	if response.Diagnostics.HasError() {
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(ctx, updateTimeout)
+	defer cancel()
 
 	// Save updated data into Terraform state
 	response.Diagnostics.Append(response.State.Set(ctx, &data)...)
@@ -329,29 +414,31 @@ func (r *ResourceF5XCApiDefinitionUploader) Delete(ctx context.Context, request 
 		return
 	}
 
-	httpResp, err := r.client.RestClient.Execute(ctx, http.MethodDelete, data.Metadata.Url.ValueString(), nil)
+	duration, err := time.ParseDuration("10m0s")
+	if err != nil {
+		response.Diagnostics.AddError(
+			"Invalid Duration Format",
+			fmt.Sprintf("Could not parse 'timeout' value %q: %s. "+
+				"Please use a valid Go duration string like '10m', '1h30m' or '30s'.",
+				"10m0s", err.Error()),
+		)
+		return
+	}
+
+	deleteTimeout, diags := data.Timeouts.Delete(ctx, duration)
+	response.Diagnostics.Append(diags...)
+	if response.Diagnostics.HasError() {
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(ctx, deleteTimeout)
+	defer cancel()
+
+	_, err = r.client.RestClient.Execute(ctx, http.MethodDelete, data.Metadata.Url.ValueString(), nil)
 	if err != nil {
 		response.Diagnostics.AddError(
 			"Client Error", fmt.Sprintf("Unable to delete %s, got error: %s", "Api definition uploader", err),
 		)
 		return
 	}
-
-	var deleteResp ResourceF5XCApiDefinitionUploaderApiModel
-	err = json.NewDecoder(bytes.NewBuffer(httpResp)).Decode(&deleteResp)
-
-	if err != nil {
-		response.Diagnostics.AddError(
-			"Unable to Read Resource",
-			"An unexpected error occurred while parsing the resource creation response. "+
-				"Please report this issue to the provider developers.\n\n"+
-				"JSON Error: "+err.Error(),
-		)
-
-		return
-	}
-}
-
-func (r *ResourceF5XCApiDefinitionUploader) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

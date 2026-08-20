@@ -5,15 +5,16 @@ package pbgo
 
 import (
 	fmt "fmt"
-	_ "github.com/gogo/protobuf/gogoproto"
-	proto "github.com/gogo/protobuf/proto"
-	types "github.com/gogo/protobuf/types"
-	schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	io "io"
 	math "math"
 	math_bits "math/bits"
 	reflect "reflect"
 	strings "strings"
+
+	_ "github.com/gogo/protobuf/gogoproto"
+	proto "github.com/gogo/protobuf/proto"
+	types "github.com/gogo/protobuf/types"
+	schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -750,10 +751,7 @@ func (m *Conf) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthTerraformProviderF5Xc
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthTerraformProviderF5Xc
 			}
 			if (iNdEx + skippy) > l {

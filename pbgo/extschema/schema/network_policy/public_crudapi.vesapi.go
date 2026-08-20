@@ -1689,10 +1689,7 @@ var APISwaggerJSON string = `{
         "description": "Network Policy is applied to all IP packets to and from a given endpoint (called \"local_endpoint\").\n\nLocal endpoint can be,\n\n prefix : list of ip prefixes representing local endpoint\n\n prefix_selector: Prefix selector is more convenient way of representing a set of IP Address. Prefix label selector selects all ip prefixes that have labels that match configured label expression.\n\nLabel preference\n  An IP Address or IP Prefix is assigned with labels based on following rules in decreasing order of preference,\n\n   Labels from the interface for the address\n   Labels from POD or Service for the address\n   Labels from Virtual Network for the address\n   Labels from Namespace for the address\n\nNetwork Policy Rules are applied from local_endpoint point of view. Egress rules are applied for packets transmitted from local_endpoint to endpoint specified in network policy rule. Ingress rules are applied for packets received on local_endpoint from endpoint specified in network policy rule\n\nExamples of local_endpoint are, containers, hosts on site-local or site-local-inside network\n\nPrefix selector labels (BNF grammar):\n\n \u003cselector-syntax\u003e         ::= \u003crequirement\u003e | \u003crequirement\u003e \",\" \u003cselector-syntax\u003e\n\n \u003crequirement\u003e             ::= [!] KEY [ \u003cset-based-restriction\u003e | \u003cexact-match-restriction\u003e ]\n\n \u003cset-based-restriction\u003e   ::= \"\" | \u003cinclusion-exclusion\u003e \u003cvalue-set\u003e\n\n \u003cinclusion-exclusion\u003e     ::= \u003cinclusion\u003e | \u003cexclusion\u003e\n\n \u003cexclusion\u003e               ::= \"notin\"\n\n \u003cinclusion\u003e               ::= \"in\"\n\n \u003cvalue-set\u003e               ::= \"(\" \u003cvalues\u003e \")\"\n\n \u003cvalues\u003e                  ::= VALUE | VALUE \",\" \u003cvalues\u003e\n\n \u003cexact-match-restriction\u003e ::= [\"=\"|\"==\"|\"!=\"] VALUE\n\nKEY is a sequence of one or more characters. Max length is 63 characters. VALUE is a sequence of zero or more characters \"([A-Za-z0-9_-\\.])\". Max length is 63 characters. Delimiter is white space: (' ', '\\t')\n\nx-example: \"app == web, site in (abc, xyz)\"\n\nNote:\n\n (1) Inclusion - \" in \" - denotes that the KEY exists and is equal to any of the VALUE's in its requirement\n\n (2) Exclusion - \" notin \" - denotes that the KEY is not equal to any of the VALUE's in its requirement or does not exist\n\n (3) The empty string is a valid VALUE\n\n (4) A requirement with just a KEY - as in \"y\" above - denotes that the KEY exists and can be any VALUE.\n\n (5) A requirement with just !KEY requires that the KEY not exist.",
         "version": "version not set"
     },
-    "schemes": [
-        "http",
-        "https"
-    ],
+    "schemes": null,
     "consumes": [
         "application/json"
     ],
@@ -1759,6 +1756,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1851,6 +1854,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1951,6 +1960,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2068,6 +2083,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2170,6 +2191,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2354,7 +2381,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Fail the delete operation if this object is being referred by other objects",
                     "title": "fail_if_referred",
-                    "format": "boolean",
                     "x-displayname": "Fail-If-Referred"
                 },
                 "name": {
@@ -2593,7 +2619,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true indicates network_policy is administratively disabled",
                     "title": "disabled",
-                    "format": "boolean",
                     "x-displayname": "Disabled"
                 },
                 "get_spec": {
@@ -2957,6 +2982,27 @@ var APISwaggerJSON string = `{
                 }
             }
         },
+        "runtimeError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/protobufAny"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
         "schemaConditionType": {
             "type": "object",
             "description": "Conditions are used in the object status to describe the current state of the\nobject, e.g. Ready, Succeeded, etc.",
@@ -3246,7 +3292,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "labels": {
@@ -3310,7 +3355,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable",
                     "x-ves-example": "true"
                 },
@@ -3376,7 +3420,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "labels": {
@@ -3462,7 +3505,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Indicate whether mars deems this object to be stale via graceful restart timer information",
                     "title": "vtrp_stale",
-                    "format": "boolean",
                     "x-displayname": "VTRP Stale"
                 }
             }

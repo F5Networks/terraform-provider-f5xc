@@ -29,26 +29,18 @@
 //     First create:
 //     Config={keyA:valueA} → plan={keyA:valueA} (Terraform Core enforces this for
 //     Optional+Computed when config is known) → apply: API returns
-//     {keyA:valueA, ves.io/provider:azure} → specToModel merges plan+API →
-//     state={keyA:valueA, ves.io/provider:azure} ✓
-//     BUT: plan was {keyA:valueA} and result is {keyA:valueA, ves.io/provider:azure}
-//     → "Provider produced inconsistent result after apply" ✗
+//     {keyA:valueA, ves.io/provider:azure} → specToModel stores only config value →
+//     state={keyA:valueA} ✓ (backend keys picked up on next Read)
 //
-//     This is the fundamental Terraform constraint: for Optional+Computed attributes,
-//     Terraform Core does NOT allow the plan to be Unknown when config has a known
-//     value. Therefore, on first create with user labels, we cannot defer the
-//     consistency check — the apply result MUST match the plan exactly.
-//
-//     Solution for first create (state=null, config=known):
-//     Plan = config value. specToModel returns exactly the config value (ignores
-//     backend-injected keys). State = config value only. Backend keys are lost.
-//
-//     Solution for updates (state=known, config=known):
-//     Plan = prior state value (which already contains the merged user+backend labels
-//     from the previous apply). specToModel returns the merged API response.
-//     State = merged user+backend labels. ✓
-//     This works because Terraform Core allows the plan to differ from config for
-//     Computed attributes — the plan just cannot be Unknown when config is known.
+//     Update (state already contains merged user+backend labels):
+//     Config={keyA:valueB} (user changed a value), State={keyA:valueA, ves.io/provider:azure}
+//     Plan = prior state = {keyA:valueA, ves.io/provider:azure}.
+//     Update handler sends {keyA:valueB} to API (reads Config for user-intent labels).
+//     API returns {keyA:valueB, ves.io/provider:azure}.
+//     specToModel overwrites data.Labels with API response, but template restores
+//     data.Labels = planLabels (= prior state) before State.Set → state={keyA:valueA, ves.io/provider:azure} ✓
+//     apply_result == plan == prior state → Terraform Core happy ✓
+//     Next Read: stores full API response → state={keyA:valueB, ves.io/provider:azure} ✓
 //
 // # Label ownership scenarios
 //
@@ -60,25 +52,26 @@
 //
 // # Summary of plan modifier logic
 //
-// | Config  | State        | Plan result                | Behavior                                                       |
-// |---------|--------------|----------------------------|----------------------------------------------------------------|
-// | Unknown | any          | unchanged                  | Interpolation guard — do not touch plan                        |
-// | null    | null         | null                       | Re-apply, no labels at all — keep plan null, no diff           |
-// | null    | null (first) | Unknown                    | First create, no labels — defer to allow backend injection     |
-// | null    | known        | Unknown                    | Update, user removed all labels                                |
-// | known   | null/unknown | config                     | First create; Terraform Core requires plan=config              |
-// | known   | known        | config ∪ state["ves.io/*"] | Update: user key deletions respected, backend keys preserved   |
-//
+// | Config  | State        | Plan result              | Behavior                                                       |
+// |---------|--------------|--------------------------|----------------------------------------------------------------|
+// | Unknown | any          | unchanged                | Interpolation guard — do not touch plan                        |
+// | null    | null         | null                     | Re-apply, no labels at all — keep plan null, no diff           |
+// | null    | null (first) | Unknown                  | First create, no labels — defer to allow backend injection     |
+// | null    | known        | Unknown                  | Update, user removed all labels                                |
+// | known   | null/unknown | config                   | First create; Terraform Core requires plan=config              |
+// | known   | known        | prior state              | Update: plan=state; Update handler reads Config for API req    |
+// | Config  | State        | Plan result  | Behavior                                                                   |
 
 package mapmergemodifier
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 var _ planmodifier.Map = MapMergeModifier{} // Ensure MapMergeModifier implements the planmodifier.Map interface
@@ -95,11 +88,11 @@ func New() planmodifier.Map {
 // Description returns a human-readable description of the modifier.
 func (m MapMergeModifier) Description(_ context.Context) string {
 	return "Handles Optional+Computed map attributes where the backend may inject extra key/value pairs " +
-		"(e.g. 'ves.io/provider'). When config is null, marks the plan as Unknown to allow backend-injected " +
-		"keys to be stored in state. When config is known and prior state is known (update), uses the prior " +
-		"state as the plan value so that merged user+backend labels are preserved across updates. " +
-		"On first create with user labels, the plan equals the config value and backend-injected keys " +
-		"are not stored in state until the next update."
+		"(e.g. 'ves.io/config-propagation-destination'). When config is null, marks the plan as Unknown to " +
+		"allow backend-injected keys to be stored in state. When config is known and state is known " +
+		"(update), plan=prior state so Terraform Core's constraint is satisfied and backend-injected keys " +
+		"are preserved. The Update handler reads user-intent labels from Config (not Plan) to send to the " +
+		"API, and restores the plan value before storing state so apply_result == plan."
 }
 
 // MarkdownDescription returns a Markdown description of the modifier.
@@ -112,14 +105,31 @@ func (m MapMergeModifier) MarkdownDescription(ctx context.Context) string {
 // Decision table:
 //
 //	config=unknown              → plan=unchanged (interpolation guard)
-//	config=null,  state=null   → plan=null     (re-apply with no labels — no diff)
+//	config=null,  state=null    → plan=null     (re-apply with no labels — no diff)
 //	config=null,  state=unknown → plan=Unknown  (first create, no labels — allow backend injection)
-//	config=null,  state=known  → plan=Unknown  (update, user removed all labels)
-//	config=known, state=null   → plan=config   (first create with user labels)
-//	config=known, state=known  → plan=config ∪ state["ves.io/*"]
-//	                             (update: user key deletions are respected,
-//	                              backend-injected keys are preserved)
+//	config=null,  state=known   → plan=Unknown  (update, user removed all labels)
+//	config=known, state=null    → plan=config   (first create with user labels)
+//	config=known, state=known   → plan=config ∪ ves.io/* backend keys from prior state
+//	                             (update: reflects user changes + preserves backend-injected keys)
+//	config=known, state=known   → plan=prior state
+//	                             (update: Terraform Core requires plan = config or prior state;
+//	                              plan=prior state always satisfies this and preserves backend-injected keys.
+//	                              Update handler reads Config for API request.
+//	                              Template restores plan value before State.Set. After apply,
+//	                              Read captures full API response in state.)
 func (m MapMergeModifier) PlanModifyMap(ctx context.Context, req planmodifier.MapRequest, resp *planmodifier.MapResponse) {
+	tflog.Debug(ctx, "MapMergeModifier: ENTER",
+		map[string]interface{}{
+			"config_null":    req.ConfigValue.IsNull(),
+			"config_unknown": req.ConfigValue.IsUnknown(),
+			"config_value":   fmt.Sprintf("%v", req.ConfigValue),
+			"state_null":     req.StateValue.IsNull(),
+			"state_unknown":  req.StateValue.IsUnknown(),
+			"state_value":    fmt.Sprintf("%v", req.StateValue),
+			"plan_null":      req.PlanValue.IsNull(),
+			"plan_unknown":   req.PlanValue.IsUnknown(),
+			"plan_value":     fmt.Sprintf("%v", req.PlanValue),
+		})
 	// Guard: if the config value is Unknown (e.g. an interpolation that has not been
 	// resolved yet), do not modify the plan. Changing the plan during interpolation
 	// can cause incorrect diffs. This mirrors the behavior of UseStateForUnknown.
@@ -129,7 +139,7 @@ func (m MapMergeModifier) PlanModifyMap(ctx context.Context, req planmodifier.Ma
 
 	// Case: config is null (user has not configured any labels).
 	if req.ConfigValue.IsNull() {
-		// Sub-case: state is also null — neither the user nor the backend has set any
+		// Subcase: state is also null — neither the user nor the backend has set any
 		// labels. This happens on a re-apply after a previous apply where the API
 		// returned no labels. Keep the plan as null so Terraform sees no diff and
 		// does not show "+ labels = (known after apply)".
@@ -138,7 +148,7 @@ func (m MapMergeModifier) PlanModifyMap(ctx context.Context, req planmodifier.Ma
 			return
 		}
 
-		// Sub-case: state is unknown (first create) or state is known (update where
+		// Subcase: state is unknown (first create) or state is known (update where
 		// the user removed all labels). Mark the plan as Unknown so Terraform defers
 		// the element-level consistency check until after apply. This allows
 		// backend-injected labels to be stored in state without causing
@@ -155,9 +165,6 @@ func (m MapMergeModifier) PlanModifyMap(ctx context.Context, req planmodifier.Ma
 	// invalid plan: planned value does not match config value".
 	// The framework may have already set the plan to Unknown (its default for
 	// Computed attributes), so we must explicitly set the plan to the config value.
-	// The specToModel logic will return exactly the config value so the apply
-	// result matches the plan. Backend-injected keys are not stored in state on
-	// first create; they will be picked up by the Read handler on the next refresh.
 	if req.StateValue.IsNull() || req.StateValue.IsUnknown() {
 		resp.PlanValue = req.ConfigValue
 		return
@@ -165,31 +172,56 @@ func (m MapMergeModifier) PlanModifyMap(ctx context.Context, req planmodifier.Ma
 
 	// Case: config is known, state is known (update with user labels).
 	//
-	// Build the merged plan:
-	//   1. Start with all keys from the current config (= current user intent).
-	//      This correctly drops any user key that was removed from the HCL.
-	//   2. Add all keys from the prior state that have the "ves.io/" prefix.
-	//      These are backend-injected labels that must be preserved across updates.
+	// Terraform Core enforces: plan MUST equal config OR prior state. No hybrid.
+	// We use a conditional strategy:
+	//   - If user-intent keys (non-ves.io/) in config match prior state exactly
+	//     → plan = prior state (preserves backend-injected keys, no diff)
+	//   - If user changed/added/removed any key
+	//     → plan = config (satisfies TF Core constraint)
 	//
-	// Result: user key deletions are visible in the plan, backend keys are retained.
-	merged := make(map[string]attr.Value, len(req.ConfigValue.Elements())+len(req.StateValue.Elements()))
+	// When plan = config and user changed labels, the plan output may show
+	// backend-injected keys as "will be removed". This is cosmetically imperfect
+	// but harmless — after Apply+Read, the keys reappear in state.
 
-	// Step 1: all user-configured keys (current config is authoritative for user keys).
-	for k, v := range req.ConfigValue.Elements() {
-		merged[k] = v
-	}
+	stateElems := req.StateValue.Elements()
+	configElems := req.ConfigValue.Elements()
 
-	// Step 2: backend-injected keys from prior state (identified by "ves.io/" prefix).
-	for k, v := range req.StateValue.Elements() {
+	// Check if user-intent keys in config match prior state exactly.
+	// We ignore backend-injected keys (ves.io/ prefix) in prior state.
+	configMatchesPrior := true
+
+	// 1. Every non-backend key in prior state must exist in config with same value.
+	for k, v := range stateElems {
 		if strings.HasPrefix(k, "ves.io/") {
-			merged[k] = v
+			continue // skip backend-injected keys
+		}
+		cv, exists := configElems[k]
+		if !exists || !cv.Equal(v) {
+			configMatchesPrior = false
+			break
 		}
 	}
 
-	mergedMap, diags := types.MapValue(types.StringType, merged)
-	if diags.HasError() {
-		resp.Diagnostics.Append(diags...)
+	// 2. Config must have no extra keys beyond prior's user keys.
+	if configMatchesPrior {
+		for k := range configElems {
+			if _, exists := stateElems[k]; !exists {
+				configMatchesPrior = false
+				break
+			}
+		}
+	}
+
+	if configMatchesPrior {
+		// No user change → keep prior state (includes backend-injected keys).
+		// plan == prior state → TF Core accepts.
+		tflog.Debug(ctx, "MapMergeModifier: user keys unchanged, plan = prior state")
+		resp.PlanValue = req.StateValue
 		return
 	}
-	resp.PlanValue = mergedMap
+
+	// User changed labels → plan must equal config exactly.
+	// Backend-injected keys will be re-added by Read handler after Apply.
+	tflog.Debug(ctx, "MapMergeModifier: user keys changed, plan = config")
+	resp.PlanValue = req.ConfigValue
 }

@@ -5,16 +5,17 @@ package views
 
 import (
 	fmt "fmt"
-	_ "github.com/gogo/protobuf/gogoproto"
-	proto "github.com/gogo/protobuf/proto"
-	golang_proto "github.com/golang/protobuf/proto"
-	schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	io "io"
 	math "math"
 	math_bits "math/bits"
 	reflect "reflect"
 	strconv "strconv"
 	strings "strings"
+
+	_ "github.com/gogo/protobuf/gogoproto"
+	proto "github.com/gogo/protobuf/proto"
+	golang_proto "github.com/golang/protobuf/proto"
+	schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -960,7 +961,7 @@ type SMSv2InterfaceOptions struct {
 	// x-displayName: "Maximum Packet Size (MTU)"
 	// x-example: "1450"
 	// Maximum packet size (Maximum Transfer Unit) of the interface
-	// When configured, mtu must be between 512 and 16384
+	// When configured, mtu must be between 512 and 8000
 	// Set through Secure mesh V2 options
 	Mtu uint32 `protobuf:"varint,1,opt,name=mtu,proto3" json:"mtu,omitempty"`
 	// Use for Site to Site Connectivity
@@ -15459,10 +15460,7 @@ func (m *AWSVPCParamsType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthSiteTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthSiteTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -15579,10 +15577,7 @@ func (m *AWSVPCchoiceType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthSiteTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthSiteTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -15696,10 +15691,7 @@ func (m *CloudSubnetParamType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthSiteTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthSiteTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -15813,10 +15805,7 @@ func (m *SegmentSubnetType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthSiteTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthSiteTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -15933,10 +15922,7 @@ func (m *CloudSubnetType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthSiteTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthSiteTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -16222,10 +16208,7 @@ func (m *AWSSubnetIdsType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthSiteTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthSiteTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -16371,10 +16354,7 @@ func (m *AWSSubnetInfoType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthSiteTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthSiteTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -16511,10 +16491,7 @@ func (m *AWSVPCOneInterfaceNodeType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthSiteTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthSiteTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -16757,10 +16734,7 @@ func (m *AWSVPCTwoInterfaceNodeType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthSiteTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthSiteTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -16921,10 +16895,7 @@ func (m *SMSv2InterfaceOptions) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthSiteTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthSiteTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -17073,10 +17044,7 @@ func (m *AzureVnetParamsType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthSiteTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthSiteTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -17260,10 +17228,7 @@ func (m *AzureVnetType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthSiteTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthSiteTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -17383,10 +17348,7 @@ func (m *AzureVnetChoiceType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthSiteTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthSiteTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -17535,10 +17497,7 @@ func (m *AzureSubnetType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthSiteTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthSiteTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -17655,10 +17614,7 @@ func (m *AzureSpecialSubnetType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthSiteTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthSiteTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -17778,10 +17734,7 @@ func (m *AzureSubnetChoiceType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthSiteTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthSiteTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -17936,10 +17889,7 @@ func (m *AzureSubnetChoiceWithAutoType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthSiteTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthSiteTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -18076,10 +18026,7 @@ func (m *AzureVnetOneInterfaceNodeType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthSiteTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthSiteTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -18222,10 +18169,7 @@ func (m *AzureVnetOneInterfaceNodeARType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthSiteTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthSiteTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -18398,10 +18342,7 @@ func (m *AzureVnetTwoInterfaceNodeType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthSiteTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthSiteTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -18580,10 +18521,7 @@ func (m *AzureVnetTwoInterfaceNodeARType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthSiteTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthSiteTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -18665,10 +18603,7 @@ func (m *GCPVPCNetworkParamsType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthSiteTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthSiteTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -18738,10 +18673,7 @@ func (m *GCPVPCNetworkAutogenerateParamsType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthSiteTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthSiteTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -18893,10 +18825,7 @@ func (m *GCPVPCNetworkType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthSiteTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthSiteTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -18978,10 +18907,7 @@ func (m *GCPSubnetType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthSiteTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthSiteTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -19095,10 +19021,7 @@ func (m *GCPSubnetParamsType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthSiteTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthSiteTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -19253,10 +19176,7 @@ func (m *GCPVPCNetworkChoiceType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthSiteTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthSiteTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -19376,10 +19296,7 @@ func (m *GCPVPCSubnetChoiceType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthSiteTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthSiteTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -19496,10 +19413,7 @@ func (m *SiteStaticRoutesType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthSiteTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthSiteTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -19583,10 +19497,7 @@ func (m *SiteStaticRoutesListType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthSiteTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthSiteTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -19776,10 +19687,7 @@ func (m *GlobalNetworkConnectionType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthSiteTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthSiteTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -19863,10 +19771,7 @@ func (m *GlobalNetworkConnectionListType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthSiteTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthSiteTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -20091,10 +19996,7 @@ func (m *AllowedVIPPorts) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthSiteTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthSiteTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -20176,10 +20078,7 @@ func (m *CustomPorts) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthSiteTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthSiteTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -20299,10 +20198,7 @@ func (m *OfflineSurvivabilityModeType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthSiteTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthSiteTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -20471,10 +20367,7 @@ func (m *DCGWBGPPeerType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthSiteTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthSiteTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -20623,10 +20516,7 @@ func (m *VifRegionConfig) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthSiteTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthSiteTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -20812,10 +20702,7 @@ func (m *HostedVIFConfigType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthSiteTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthSiteTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -20971,10 +20858,7 @@ func (m *PrivateConnectConfigType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthSiteTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthSiteTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -21248,10 +21132,7 @@ func (m *DirectConnectConfigType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthSiteTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthSiteTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -21333,10 +21214,7 @@ func (m *CloudLinkADNType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthSiteTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthSiteTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -21469,10 +21347,7 @@ func (m *DirectConnectInfo) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthSiteTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthSiteTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -21554,10 +21429,7 @@ func (m *AWSNATGatewaychoiceType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthSiteTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthSiteTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -21639,10 +21511,7 @@ func (m *AWSVirtualPrivateGatewaychoiceType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthSiteTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthSiteTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -21756,10 +21625,7 @@ func (m *SecurityGroupType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthSiteTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthSiteTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -21877,10 +21743,7 @@ func (m *PrivateConnectivityType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthSiteTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthSiteTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -21981,10 +21844,7 @@ func (m *SiteCloudLinkType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthSiteTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthSiteTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -22130,10 +21990,7 @@ func (m *SiteError) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthSiteTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthSiteTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -22313,10 +22170,7 @@ func (m *UpdateSiteErrorRequest) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthSiteTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthSiteTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -22366,10 +22220,7 @@ func (m *UpdateSiteErrorResponse) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthSiteTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthSiteTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -22483,10 +22334,7 @@ func (m *ValidateConfigRequest) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthSiteTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthSiteTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -22536,10 +22384,7 @@ func (m *ValidateConfigResponse) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthSiteTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthSiteTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -22621,10 +22466,7 @@ func (m *AWSDiskEncryption) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthSiteTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthSiteTypes
 			}
 			if (iNdEx + skippy) > l {

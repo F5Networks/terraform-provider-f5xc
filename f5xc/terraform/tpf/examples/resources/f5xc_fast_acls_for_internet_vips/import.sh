@@ -1,0 +1,1 @@
+terraform import f5xc_fast_acls_for_internet_vips.example <namespace>

@@ -29,6 +29,17 @@ type DataSourceF5XCSiteMeshGroup struct {
 	client *client.APIClient
 }
 
+type SiteMeshGroupGlobalSpecTypeBfdChoice struct {
+	BfdDisabled types.Bool   `tfsdk:"bfd_disabled"`
+	BfdEnabled  types.Object `tfsdk:"bfd_enabled"`
+}
+
+type SiteMeshGroupGlobalSpecTypeBfdEnabled struct {
+	Multiplier                   types.Int64 `tfsdk:"multiplier"`
+	ReceiveIntervalMilliseconds  types.Int64 `tfsdk:"receive_interval_milliseconds"`
+	TransmitIntervalMilliseconds types.Int64 `tfsdk:"transmit_interval_milliseconds"`
+}
+
 type SiteMeshGroupGlobalSpecTypeMeshChoice struct {
 	FullMesh  types.Object `tfsdk:"full_mesh"`
 	HubMesh   types.Object `tfsdk:"hub_mesh"`
@@ -40,8 +51,8 @@ type SiteMeshGroupGlobalSpecTypeFullMesh struct {
 }
 
 type SiteMeshGroupFullMeshGroupTypeFullMeshChoice struct {
-	DataPlaneMesh           types.Bool `tfsdk:"data_plane_mesh"`
 	ControlAndDataPlaneMesh types.Bool `tfsdk:"control_and_data_plane_mesh"`
+	DataPlaneMesh           types.Bool `tfsdk:"data_plane_mesh"`
 }
 
 type SiteMeshGroupGlobalSpecTypeHubMesh struct {
@@ -49,8 +60,8 @@ type SiteMeshGroupGlobalSpecTypeHubMesh struct {
 }
 
 type SiteMeshGroupHubFullMeshGroupTypeHubFullMeshChoice struct {
-	DataPlaneMesh           types.Bool `tfsdk:"data_plane_mesh"`
 	ControlAndDataPlaneMesh types.Bool `tfsdk:"control_and_data_plane_mesh"`
+	DataPlaneMesh           types.Bool `tfsdk:"data_plane_mesh"`
 }
 
 type SiteMeshGroupGlobalSpecTypeSpokeMesh struct {
@@ -59,48 +70,46 @@ type SiteMeshGroupGlobalSpecTypeSpokeMesh struct {
 }
 
 type SiteMeshGroupSpokeMeshGroupTypeSpokeHubMeshChoice struct {
-	DataPlaneMesh           types.Bool `tfsdk:"data_plane_mesh"`
 	ControlAndDataPlaneMesh types.Bool `tfsdk:"control_and_data_plane_mesh"`
+	DataPlaneMesh           types.Bool `tfsdk:"data_plane_mesh"`
 }
 
 type SiteMeshGroupGlobalSpecTypeReFallbackChoice struct {
-	EnableReFallback  types.Bool `tfsdk:"enable_re_fallback"`
 	DisableReFallback types.Bool `tfsdk:"disable_re_fallback"`
-}
-
-type SiteMeshGroupGlobalSpecTypeBfdChoice struct {
-	BfdEnabled  types.Object `tfsdk:"bfd_enabled"`
-	BfdDisabled types.Bool   `tfsdk:"bfd_disabled"`
-}
-
-type SiteMeshGroupGlobalSpecTypeBfdEnabled struct {
-	TransmitIntervalMilliseconds types.Int64 `tfsdk:"transmit_interval_milliseconds"`
-	ReceiveIntervalMilliseconds  types.Int64 `tfsdk:"receive_interval_milliseconds"`
-	Multiplier                   types.Int64 `tfsdk:"multiplier"`
+	EnableReFallback  types.Bool `tfsdk:"enable_re_fallback"`
 }
 
 // DataSourceF5XCSiteMeshGroupModel describes the resource data model.
 type DataSourceF5XCSiteMeshGroupModel struct {
-	Namespace        types.String   `tfsdk:"namespace"`
-	Uid              types.String   `tfsdk:"uid"`
-	Labels           types.Map      `tfsdk:"labels"`
 	Annotations      types.Map      `tfsdk:"annotations"`
 	Description      types.String   `tfsdk:"description"`
+	Labels           types.Map      `tfsdk:"labels"`
 	Name             types.String   `tfsdk:"name"`
-	VirtualSite      types.List     `tfsdk:"virtual_site"`
+	Namespace        types.String   `tfsdk:"namespace"`
+	Uid              types.String   `tfsdk:"uid"`
+	BfdChoice        types.Object   `tfsdk:"bfd_choice"`
 	MeshChoice       types.Object   `tfsdk:"mesh_choice"`
 	ReFallbackChoice types.Object   `tfsdk:"re_fallback_choice"`
-	BfdChoice        types.Object   `tfsdk:"bfd_choice"`
+	VirtualSite      types.List     `tfsdk:"virtual_site"`
 	Timeouts         timeouts.Value `tfsdk:"timeouts"`
 }
 
 // --- Attribute Maps for Nested Structs ---
-// Attribute map for ArrayOfPointerField --> VirtualSite
-var SiteMeshGroupVirtualSiteObjectRefModelAttributeMap = map[string]attr.Type{
+// Attribute map for RequiredOneOfField --> BfdChoice
+var SiteMeshGroupBfdChoiceModelAttributeMap = map[string]attr.Type{
 
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
-	"name":      types.StringType,
+	"bfd_disabled": types.BoolType,
+	"bfd_enabled": types.ObjectType{
+		AttrTypes: SiteMeshGroupBfdChoiceBfdEnabledModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> BfdEnabled
+var SiteMeshGroupBfdChoiceBfdEnabledModelAttributeMap = map[string]attr.Type{
+
+	"multiplier":                     types.Int64Type,
+	"receive_interval_milliseconds":  types.Int64Type,
+	"transmit_interval_milliseconds": types.Int64Type,
 }
 
 // Attribute map for OneOfField --> MeshChoice
@@ -128,8 +137,8 @@ var SiteMeshGroupMeshChoiceFullMeshModelAttributeMap = map[string]attr.Type{
 // Attribute map for OneOfField --> FullMeshChoice
 var SiteMeshGroupMeshChoiceFullMeshFullMeshChoiceModelAttributeMap = map[string]attr.Type{
 
-	"data_plane_mesh":             types.BoolType,
 	"control_and_data_plane_mesh": types.BoolType,
+	"data_plane_mesh":             types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> HubMesh
@@ -143,17 +152,17 @@ var SiteMeshGroupMeshChoiceHubMeshModelAttributeMap = map[string]attr.Type{
 // Attribute map for OneOfField --> HubFullMeshChoice
 var SiteMeshGroupMeshChoiceHubMeshHubFullMeshChoiceModelAttributeMap = map[string]attr.Type{
 
-	"data_plane_mesh":             types.BoolType,
 	"control_and_data_plane_mesh": types.BoolType,
+	"data_plane_mesh":             types.BoolType,
 }
 
 // Attribute map for PointerOfOneOfField --> SpokeMesh
 var SiteMeshGroupMeshChoiceSpokeMeshModelAttributeMap = map[string]attr.Type{
 	"hub_mesh_group": types.ObjectType{
 		AttrTypes: map[string]attr.Type{
-			"tenant":    types.StringType,
+			"name":      types.StringType,
 			"namespace": types.StringType,
-			"name":      types.StringType},
+			"tenant":    types.StringType},
 	},
 	"spoke_hub_mesh_choice": types.ObjectType{
 		AttrTypes: SiteMeshGroupMeshChoiceSpokeMeshSpokeHubMeshChoiceModelAttributeMap,
@@ -163,40 +172,31 @@ var SiteMeshGroupMeshChoiceSpokeMeshModelAttributeMap = map[string]attr.Type{
 // Attribute map for RequiredPointerField --> HubMeshGroup
 var SiteMeshGroupMeshChoiceSpokeMeshHubMeshGroupModelAttributeMap = map[string]attr.Type{
 
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
 	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
 }
 
 // Attribute map for OneOfField --> SpokeHubMeshChoice
 var SiteMeshGroupMeshChoiceSpokeMeshSpokeHubMeshChoiceModelAttributeMap = map[string]attr.Type{
 
-	"data_plane_mesh":             types.BoolType,
 	"control_and_data_plane_mesh": types.BoolType,
+	"data_plane_mesh":             types.BoolType,
 }
 
 // Attribute map for RequiredOneOfField --> ReFallback
 var SiteMeshGroupReFallbackModelAttributeMap = map[string]attr.Type{
 
-	"enable_re_fallback":  types.BoolType,
 	"disable_re_fallback": types.BoolType,
+	"enable_re_fallback":  types.BoolType,
 }
 
-// Attribute map for RequiredOneOfField --> BfdChoice
-var SiteMeshGroupBfdChoiceModelAttributeMap = map[string]attr.Type{
+// Attribute map for ArrayOfPointerField --> VirtualSite
+var SiteMeshGroupVirtualSiteObjectRefModelAttributeMap = map[string]attr.Type{
 
-	"bfd_enabled": types.ObjectType{
-		AttrTypes: SiteMeshGroupBfdChoiceBfdEnabledModelAttributeMap,
-	},
-	"bfd_disabled": types.BoolType,
-}
-
-// Attribute map for PointerOfOneOfField --> BfdEnabled
-var SiteMeshGroupBfdChoiceBfdEnabledModelAttributeMap = map[string]attr.Type{
-
-	"transmit_interval_milliseconds": types.Int64Type,
-	"receive_interval_milliseconds":  types.Int64Type,
-	"multiplier":                     types.Int64Type,
+	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
 }
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -213,29 +213,10 @@ func (d *DataSourceF5XCSiteMeshGroup) Metadata(ctx context.Context, request data
 func (r *DataSourceF5XCSiteMeshGroup) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "SiteMeshGroup data source",
-		Description:         "SiteMeshGroup data source",
+		MarkdownDescription: "GetRequest is used to get different forms of a site_mesh_group This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of site_mesh_group) etc. can be fetched",
+		Description:         "GetRequest is used to get different forms of a site_mesh_group This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of site_mesh_group) etc. can be fetched",
 
 		Attributes: map[string]schema.Attribute{
-			"namespace": schema.StringAttribute{
-				Description: "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
-				Required:    false,
-				Optional:    true,
-				Computed:    true,
-			},
-			"uid": schema.StringAttribute{
-				Description: "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-			},
-			"labels": schema.MapAttribute{
-				Description: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
 			"annotations": schema.MapAttribute{
 				Description: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
 				Required:    false,
@@ -249,36 +230,67 @@ func (r *DataSourceF5XCSiteMeshGroup) Schema(ctx context.Context, request dataso
 				Optional:    false,
 				Computed:    true,
 			},
+			"labels": schema.MapAttribute{
+				Description: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				ElementType: types.StringType,
+			},
 			"name": schema.StringAttribute{
 				Description: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
 				Required:    false,
 				Optional:    true,
 				Computed:    true,
 			},
-			"virtual_site": schema.ListNestedAttribute{
-				Description: "virtual_site Set of sites for which this mesh group config is valid. If 'Type' is Spoke, then it gives set of spoke sites. If 'Type' is Hub, then it gives set of hub sites. If 'Type' is Full Mesh, then it gives set of sites that are connected in full mesh.",
+			"namespace": schema.StringAttribute{
+				Description: "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
+				Required:    false,
+				Optional:    true,
+				Computed:    true,
+			},
+			"uid": schema.StringAttribute{
+				Description: "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-						"tenant": schema.StringAttribute{
-							Description: "",
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-						},
-						"namespace": schema.StringAttribute{
-							Description: "",
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-						},
-						"name": schema.StringAttribute{
-							Description: "",
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
+			},
+			"bfd_choice": schema.SingleNestedAttribute{
+				Description: "BFD Choice Options for enabling or disabling BFD for the Site Mesh Group. BFD is used for fast failure detection.",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				Attributes: map[string]schema.Attribute{
+					"bfd_disabled": schema.BoolAttribute{
+						Description: "BFD Disabled Disable BFD (Bi-directional Forwarding Detection) for the Site Mesh Group.",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
+					"bfd_enabled": schema.SingleNestedAttribute{
+						Description: "BFD Enabled Enable BFD (Bi-directional Forwarding Detection) for the Site Mesh Group.",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+						Attributes: map[string]schema.Attribute{
+							"multiplier": schema.Int64Attribute{
+								Description: "Multiplier Specify Number of missed packets to bring session down'",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
+							"receive_interval_milliseconds": schema.Int64Attribute{
+								Description: "Receive Interval in milliseconds BFD receive interval timer, in milliseconds",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
+							"transmit_interval_milliseconds": schema.Int64Attribute{
+								Description: "Transmit Interval in milliseconds BFD transmit interval timer, in milliseconds",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
 						},
 					},
 				},
@@ -301,14 +313,14 @@ func (r *DataSourceF5XCSiteMeshGroup) Schema(ctx context.Context, request dataso
 								Optional:    false,
 								Computed:    true,
 								Attributes: map[string]schema.Attribute{
-									"data_plane_mesh": schema.BoolAttribute{
-										Description: "Data Plane Mesh Full Mesh of data plane tunnels across sites",
+									"control_and_data_plane_mesh": schema.BoolAttribute{
+										Description: "Control and Data Plane Mesh Full mesh of data plane tunnels across sites and control plane peering across sites",
 										Required:    false,
 										Optional:    false,
 										Computed:    true,
 									},
-									"control_and_data_plane_mesh": schema.BoolAttribute{
-										Description: "Control and Data Plane Mesh Full mesh of data plane tunnels across sites and control plane peering across sites",
+									"data_plane_mesh": schema.BoolAttribute{
+										Description: "Data Plane Mesh Full Mesh of data plane tunnels across sites",
 										Required:    false,
 										Optional:    false,
 										Computed:    true,
@@ -329,14 +341,14 @@ func (r *DataSourceF5XCSiteMeshGroup) Schema(ctx context.Context, request dataso
 								Optional:    false,
 								Computed:    true,
 								Attributes: map[string]schema.Attribute{
-									"data_plane_mesh": schema.BoolAttribute{
-										Description: "Data Plane Mesh Hub Full Mesh of data plane tunnels across sites",
+									"control_and_data_plane_mesh": schema.BoolAttribute{
+										Description: "Control and Data Plane Mesh Hub Full mesh of data plane tunnels across sites and control plane peering across sites",
 										Required:    false,
 										Optional:    false,
 										Computed:    true,
 									},
-									"control_and_data_plane_mesh": schema.BoolAttribute{
-										Description: "Control and Data Plane Mesh Hub Full mesh of data plane tunnels across sites and control plane peering across sites",
+									"data_plane_mesh": schema.BoolAttribute{
+										Description: "Data Plane Mesh Hub Full Mesh of data plane tunnels across sites",
 										Required:    false,
 										Optional:    false,
 										Computed:    true,
@@ -357,7 +369,7 @@ func (r *DataSourceF5XCSiteMeshGroup) Schema(ctx context.Context, request dataso
 								Optional:    false,
 								Computed:    true,
 								Attributes: map[string]schema.Attribute{
-									"tenant": schema.StringAttribute{
+									"name": schema.StringAttribute{
 										Description: "",
 										Required:    false,
 										Optional:    false,
@@ -369,7 +381,7 @@ func (r *DataSourceF5XCSiteMeshGroup) Schema(ctx context.Context, request dataso
 										Optional:    false,
 										Computed:    true,
 									},
-									"name": schema.StringAttribute{
+									"tenant": schema.StringAttribute{
 										Description: "",
 										Required:    false,
 										Optional:    false,
@@ -383,14 +395,14 @@ func (r *DataSourceF5XCSiteMeshGroup) Schema(ctx context.Context, request dataso
 								Optional:    false,
 								Computed:    true,
 								Attributes: map[string]schema.Attribute{
-									"data_plane_mesh": schema.BoolAttribute{
-										Description: "Data Plane Mesh Mesh of data plane tunnels to the hub site/s",
+									"control_and_data_plane_mesh": schema.BoolAttribute{
+										Description: "Control and Data Plane Mesh Mesh of data plane tunnels to the hub site/s and control plane peering with the hub site/s",
 										Required:    false,
 										Optional:    false,
 										Computed:    true,
 									},
-									"control_and_data_plane_mesh": schema.BoolAttribute{
-										Description: "Control and Data Plane Mesh Mesh of data plane tunnels to the hub site/s and control plane peering with the hub site/s",
+									"data_plane_mesh": schema.BoolAttribute{
+										Description: "Data Plane Mesh Mesh of data plane tunnels to the hub site/s",
 										Required:    false,
 										Optional:    false,
 										Computed:    true,
@@ -407,57 +419,45 @@ func (r *DataSourceF5XCSiteMeshGroup) Schema(ctx context.Context, request dataso
 				Optional:    false,
 				Computed:    true,
 				Attributes: map[string]schema.Attribute{
-					"enable_re_fallback": schema.BoolAttribute{
-						Description: "enable Enable RE Fallback connectivity when SMG fails",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-					},
 					"disable_re_fallback": schema.BoolAttribute{
 						Description: "disable Disable RE Fallback connectivity when SMG fails",
 						Required:    false,
 						Optional:    false,
 						Computed:    true,
 					},
+					"enable_re_fallback": schema.BoolAttribute{
+						Description: "enable Enable RE Fallback connectivity when SMG fails",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
 				},
 			},
-			"bfd_choice": schema.SingleNestedAttribute{
-				Description: "BFD Choice Options for enabling or disabling BFD for the Site Mesh Group. BFD is used for fast failure detection.",
+			"virtual_site": schema.ListNestedAttribute{
+				Description: "virtual_site Set of sites for which this mesh group config is valid. If 'Type' is Spoke, then it gives set of spoke sites. If 'Type' is Hub, then it gives set of hub sites. If 'Type' is Full Mesh, then it gives set of sites that are connected in full mesh.",
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
-				Attributes: map[string]schema.Attribute{
-					"bfd_enabled": schema.SingleNestedAttribute{
-						Description: "BFD Enabled Enable BFD (Bi-directional Forwarding Detection) for the Site Mesh Group.",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-						Attributes: map[string]schema.Attribute{
-							"transmit_interval_milliseconds": schema.Int64Attribute{
-								Description: "Transmit Interval in milliseconds BFD transmit interval timer, in milliseconds",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-							},
-							"receive_interval_milliseconds": schema.Int64Attribute{
-								Description: "Receive Interval in milliseconds BFD receive interval timer, in milliseconds",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-							},
-							"multiplier": schema.Int64Attribute{
-								Description: "Multiplier Specify Number of missed packets to bring session down'",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-							},
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"name": schema.StringAttribute{
+							Description: "",
+							Required:    false,
+							Optional:    false,
+							Computed:    true,
 						},
-					},
-					"bfd_disabled": schema.BoolAttribute{
-						Description: "BFD Disabled Disable BFD (Bi-directional Forwarding Detection) for the Site Mesh Group.",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
+						"namespace": schema.StringAttribute{
+							Description: "",
+							Required:    false,
+							Optional:    false,
+							Computed:    true,
+						},
+						"tenant": schema.StringAttribute{
+							Description: "",
+							Required:    false,
+							Optional:    false,
+							Computed:    true,
+						},
 					},
 				},
 			},
@@ -508,15 +508,14 @@ func (d *DataSourceF5XCSiteMeshGroup) Read(ctx context.Context, request datasour
 		return
 	}
 
-	readTimeout, diags := data.Timeouts.Read(ctx, duration)
-	response.Diagnostics.Append(diags...)
+	readTimeout, readDiags := data.Timeouts.Read(ctx, duration)
+	response.Diagnostics.Append(readDiags...)
 	if response.Diagnostics.HasError() {
 		return
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
-
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_site_mesh_group.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
@@ -531,30 +530,6 @@ func (d *DataSourceF5XCSiteMeshGroup) Read(ctx context.Context, request datasour
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
-
-	// data SpecToModelRoot Meta RequiredStringField --> Namespace
-	data.Namespace = types.StringValue(metaData.GetNamespace())
-
-	// data SpecToModelRoot Meta StringField --> Uid
-	data.Uid = types.StringValue(systemMetaData.GetUid())
-
-	// data SpecToModelRoot Meta MapOfStringField --> Labels
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// Assign the typed map to the model
-		data.Labels = labelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil and the model has no value: set an explicit Null map to avoid
-		// DynamicPseudoType errors. If the model already contains a value (e.g. labels were set
-		// but the API did not echo them back in the response), preserve the existing value to prevent
-		// "Provider produced inconsistent result after apply" errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
 
 	// data SpecToModelRoot Meta MapOfStringField --> Annotations
 	if metaData.GetAnnotations() != nil {
@@ -577,61 +552,104 @@ func (d *DataSourceF5XCSiteMeshGroup) Read(ctx context.Context, request datasour
 	// data SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
 
-	// data SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
-
-	// data SpecToModelRoot ArrayOfPointerField --> VirtualSite
-	if len(specData.VirtualSite) > 0 {
-		virtualSiteElements := make([]ObjectRefTypeModel, 0, len(specData.VirtualSite))
-
-		for _, virtualSiteElement := range specData.VirtualSite {
-			objectRefTypeModelModel := ObjectRefTypeModel{}
-
-			// data specToModelNested StringField --> Tenant
-			if virtualSiteElement.GetTenant() != "" {
-				objectRefTypeModelModel.Tenant = types.StringValue(virtualSiteElement.GetTenant())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Tenant = types.StringNull()
-			}
-
-			// data specToModelNested RequiredStringField --> Namespace
-			if virtualSiteElement.GetNamespace() != "" {
-				objectRefTypeModelModel.Namespace = types.StringValue(virtualSiteElement.GetNamespace())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Namespace = types.StringNull()
-			}
-
-			// data specToModelNested RequiredStringField --> Name
-			if virtualSiteElement.GetName() != "" {
-				objectRefTypeModelModel.Name = types.StringValue(virtualSiteElement.GetName())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Name = types.StringNull()
-			}
-
-			virtualSiteElements = append(virtualSiteElements, objectRefTypeModelModel)
-		}
-
-		virtualSiteList, diags := utils.GoStructSliceToListValue(
-			ctx,
-			SiteMeshGroupVirtualSiteObjectRefModelAttributeMap,
-			virtualSiteElements,
-		)
-
-		response.Diagnostics.Append(diags...)
+	// data SpecToModelRoot Meta MapOfStringField --> Labels
+	if metaData.GetLabels() != nil {
+		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
+		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+		response.Diagnostics.Append(labelsDiags...)
 		if response.Diagnostics.HasError() {
 			return
 		}
+		// Assign the typed map to the model
+		data.Labels = labelsMap
+	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
+		// API returned nil and the model has no value: set an explicit Null map to avoid
+		// DynamicPseudoType errors. If the model already contains a value (e.g. labels were set
+		// but the API did not echo them back in the response), preserve the existing value to prevent
+		// "Provider produced inconsistent result after apply" errors.
+		data.Labels = types.MapNull(types.StringType)
+	}
 
-		data.VirtualSite = virtualSiteList
-	} else {
-		var virtualSiteObjectType = basetypes.ObjectType{
-			AttrTypes: SiteMeshGroupVirtualSiteObjectRefModelAttributeMap,
+	// data SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
+
+	// data SpecToModelRoot Meta RequiredStringField --> Namespace
+	data.Namespace = types.StringValue(metaData.GetNamespace())
+
+	// data SpecToModelRoot Meta StringField --> Uid
+	data.Uid = types.StringValue(systemMetaData.GetUid())
+
+	// data SpecToModelRoot RequiredOneOfField --> BfdChoice
+	// false
+	// true
+	// This resource uses standard struct-based resolution.
+	if specData.GetBfdChoice() != nil {
+		// Define a variable for the spec choices to be passed down to nested templates.
+		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+		bfdChoiceChoices := specData.GetBfdChoice()
+
+		// The model struct that will be populated by the nested template.
+		var bfdChoiceChoicesModel = &SiteMeshGroupGlobalSpecTypeBfdChoice{}
+
+		// Recursively call the nested template to process the oneof choices.
+
+		// data specToModelNested BoolOfOneOfPointerField --> BfdDisabled
+		_, isBfdDisabled := bfdChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_BfdDisabled)
+
+		if isBfdDisabled {
+			bfdChoiceChoicesModel.BfdDisabled = types.BoolValue(true)
+		} else {
+			bfdChoiceChoicesModel.BfdDisabled = types.BoolNull()
 		}
-		nullVirtualSiteList := basetypes.NewListNull(virtualSiteObjectType)
-		data.VirtualSite = nullVirtualSiteList
+
+		// data specToModelNested PointerOfOneOfField --> BfdEnabled
+		// <no value>
+		// false
+		{
+			bfdEnabledOptionsWrapper, isBfdEnabled := bfdChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_BfdEnabled)
+			bfdEnabledAttributeMap := make(map[string]attr.Value)
+
+			if isBfdEnabled && bfdEnabledOptionsWrapper != nil && bfdEnabledOptionsWrapper.BfdEnabled != nil {
+				bfdEnabledElement := bfdEnabledOptionsWrapper.BfdEnabled
+
+				// data specToModelNested RequiredUintField --> Multiplier
+				bfdEnabledAttributeMap["multiplier"] = types.Int64Value(int64(bfdEnabledElement.GetMultiplier()))
+
+				// data specToModelNested RequiredUintField --> ReceiveIntervalMilliseconds
+				bfdEnabledAttributeMap["receive_interval_milliseconds"] = types.Int64Value(int64(bfdEnabledElement.GetReceiveIntervalMilliseconds()))
+
+				// data specToModelNested RequiredUintField --> TransmitIntervalMilliseconds
+				bfdEnabledAttributeMap["transmit_interval_milliseconds"] = types.Int64Value(int64(bfdEnabledElement.GetTransmitIntervalMilliseconds()))
+
+				bfdEnabledObj, bfdEnabledObjDiags := types.ObjectValue(SiteMeshGroupBfdChoiceBfdEnabledModelAttributeMap, bfdEnabledAttributeMap)
+				response.Diagnostics.Append(bfdEnabledObjDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				bfdChoiceChoicesModel.BfdEnabled = bfdEnabledObj
+			} else {
+				bfdChoiceChoicesModel.BfdEnabled = types.ObjectNull(SiteMeshGroupBfdChoiceBfdEnabledModelAttributeMap)
+			}
+		}
+
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			bfdChoiceObj, oneofDiags := utils.GoStructToObjectValue(
+				ctx,
+				SiteMeshGroupBfdChoiceModelAttributeMap,
+				bfdChoiceChoicesModel,
+			)
+			if oneofDiags.HasError() {
+				response.Diagnostics.Append(oneofDiags...)
+				return
+			}
+
+			// Assign the final object to the root data model.
+			data.BfdChoice = bfdChoiceObj
+		}
+	} else {
+		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		data.BfdChoice = types.ObjectNull(SiteMeshGroupBfdChoiceModelAttributeMap)
 	}
 
 	// data SpecToModelRoot OneOfField --> MeshChoice
@@ -652,30 +670,22 @@ func (d *DataSourceF5XCSiteMeshGroup) Read(ctx context.Context, request datasour
 		// <no value>
 		// false
 		{
-			fullMeshOptions, isFullMesh := meshChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_FullMesh)
+			fullMeshOptionsWrapper, isFullMesh := meshChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_FullMesh)
 			fullMeshAttributeMap := make(map[string]attr.Value)
 
-			if isFullMesh && fullMeshOptions != nil {
+			if isFullMesh && fullMeshOptionsWrapper != nil && fullMeshOptionsWrapper.FullMesh != nil {
+				fullMeshElement := fullMeshOptionsWrapper.FullMesh
 
 				// data specToModelNested OneOfField --> FullMeshChoice
-				if fullMeshOptions.FullMesh.GetFullMeshChoice() != nil {
+				if fullMeshElement.GetFullMeshChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					fullMeshfullMeshChoiceChoicesAttributeMap := make(map[string]attr.Value)
 
 					// Define a variable for the spec choices to be passed down to nested templates.
 					// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-					fullMeshfullMeshChoiceChoices := fullMeshOptions.FullMesh.GetFullMeshChoice()
+					fullMeshfullMeshChoiceChoices := fullMeshElement.GetFullMeshChoice()
 
 					// Process nested choices, populating the temporary attribute map
-
-					// data specToModelNested BoolOfOneOfPointerField --> DataPlaneMesh
-					_, isDataPlaneMesh := fullMeshfullMeshChoiceChoices.(*ves_io_schema_site_mesh_group.FullMeshGroupType_DataPlaneMesh)
-
-					if isDataPlaneMesh {
-						fullMeshfullMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolValue(true)
-					} else {
-						fullMeshfullMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolNull()
-					}
 
 					// data specToModelNested BoolOfOneOfPointerField --> ControlAndDataPlaneMesh
 					_, isControlAndDataPlaneMesh := fullMeshfullMeshChoiceChoices.(*ves_io_schema_site_mesh_group.FullMeshGroupType_ControlAndDataPlaneMesh)
@@ -684,6 +694,15 @@ func (d *DataSourceF5XCSiteMeshGroup) Read(ctx context.Context, request datasour
 						fullMeshfullMeshChoiceChoicesAttributeMap["control_and_data_plane_mesh"] = types.BoolValue(true)
 					} else {
 						fullMeshfullMeshChoiceChoicesAttributeMap["control_and_data_plane_mesh"] = types.BoolNull()
+					}
+
+					// data specToModelNested BoolOfOneOfPointerField --> DataPlaneMesh
+					_, isDataPlaneMesh := fullMeshfullMeshChoiceChoices.(*ves_io_schema_site_mesh_group.FullMeshGroupType_DataPlaneMesh)
+
+					if isDataPlaneMesh {
+						fullMeshfullMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolValue(true)
+					} else {
+						fullMeshfullMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolNull()
 					}
 
 					// --- End of Choices ---
@@ -705,8 +724,8 @@ func (d *DataSourceF5XCSiteMeshGroup) Read(ctx context.Context, request datasour
 					fullMeshAttributeMap["full_mesh_choice"] = types.ObjectNull(SiteMeshGroupMeshChoiceFullMeshFullMeshChoiceModelAttributeMap)
 				}
 
-				fullMeshObj, diags := types.ObjectValue(SiteMeshGroupMeshChoiceFullMeshModelAttributeMap, fullMeshAttributeMap)
-				response.Diagnostics.Append(diags...)
+				fullMeshObj, fullMeshObjDiags := types.ObjectValue(SiteMeshGroupMeshChoiceFullMeshModelAttributeMap, fullMeshAttributeMap)
+				response.Diagnostics.Append(fullMeshObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -720,30 +739,22 @@ func (d *DataSourceF5XCSiteMeshGroup) Read(ctx context.Context, request datasour
 		// <no value>
 		// false
 		{
-			hubMeshOptions, isHubMesh := meshChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_HubMesh)
+			hubMeshOptionsWrapper, isHubMesh := meshChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_HubMesh)
 			hubMeshAttributeMap := make(map[string]attr.Value)
 
-			if isHubMesh && hubMeshOptions != nil {
+			if isHubMesh && hubMeshOptionsWrapper != nil && hubMeshOptionsWrapper.HubMesh != nil {
+				hubMeshElement := hubMeshOptionsWrapper.HubMesh
 
 				// data specToModelNested OneOfField --> HubFullMeshChoice
-				if hubMeshOptions.HubMesh.GetHubFullMeshChoice() != nil {
+				if hubMeshElement.GetHubFullMeshChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					hubMeshhubFullMeshChoiceChoicesAttributeMap := make(map[string]attr.Value)
 
 					// Define a variable for the spec choices to be passed down to nested templates.
 					// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-					hubMeshhubFullMeshChoiceChoices := hubMeshOptions.HubMesh.GetHubFullMeshChoice()
+					hubMeshhubFullMeshChoiceChoices := hubMeshElement.GetHubFullMeshChoice()
 
 					// Process nested choices, populating the temporary attribute map
-
-					// data specToModelNested BoolOfOneOfPointerField --> DataPlaneMesh
-					_, isDataPlaneMesh := hubMeshhubFullMeshChoiceChoices.(*ves_io_schema_site_mesh_group.HubFullMeshGroupType_DataPlaneMesh)
-
-					if isDataPlaneMesh {
-						hubMeshhubFullMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolValue(true)
-					} else {
-						hubMeshhubFullMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolNull()
-					}
 
 					// data specToModelNested BoolOfOneOfPointerField --> ControlAndDataPlaneMesh
 					_, isControlAndDataPlaneMesh := hubMeshhubFullMeshChoiceChoices.(*ves_io_schema_site_mesh_group.HubFullMeshGroupType_ControlAndDataPlaneMesh)
@@ -752,6 +763,15 @@ func (d *DataSourceF5XCSiteMeshGroup) Read(ctx context.Context, request datasour
 						hubMeshhubFullMeshChoiceChoicesAttributeMap["control_and_data_plane_mesh"] = types.BoolValue(true)
 					} else {
 						hubMeshhubFullMeshChoiceChoicesAttributeMap["control_and_data_plane_mesh"] = types.BoolNull()
+					}
+
+					// data specToModelNested BoolOfOneOfPointerField --> DataPlaneMesh
+					_, isDataPlaneMesh := hubMeshhubFullMeshChoiceChoices.(*ves_io_schema_site_mesh_group.HubFullMeshGroupType_DataPlaneMesh)
+
+					if isDataPlaneMesh {
+						hubMeshhubFullMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolValue(true)
+					} else {
+						hubMeshhubFullMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolNull()
 					}
 
 					// --- End of Choices ---
@@ -773,8 +793,8 @@ func (d *DataSourceF5XCSiteMeshGroup) Read(ctx context.Context, request datasour
 					hubMeshAttributeMap["hub_full_mesh_choice"] = types.ObjectNull(SiteMeshGroupMeshChoiceHubMeshHubFullMeshChoiceModelAttributeMap)
 				}
 
-				hubMeshObj, diags := types.ObjectValue(SiteMeshGroupMeshChoiceHubMeshModelAttributeMap, hubMeshAttributeMap)
-				response.Diagnostics.Append(diags...)
+				hubMeshObj, hubMeshObjDiags := types.ObjectValue(SiteMeshGroupMeshChoiceHubMeshModelAttributeMap, hubMeshAttributeMap)
+				response.Diagnostics.Append(hubMeshObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -788,25 +808,26 @@ func (d *DataSourceF5XCSiteMeshGroup) Read(ctx context.Context, request datasour
 		// <no value>
 		// false
 		{
-			spokeMeshOptions, isSpokeMesh := meshChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_SpokeMesh)
+			spokeMeshOptionsWrapper, isSpokeMesh := meshChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_SpokeMesh)
 			spokeMeshAttributeMap := make(map[string]attr.Value)
 
-			if isSpokeMesh && spokeMeshOptions != nil {
+			if isSpokeMesh && spokeMeshOptionsWrapper != nil && spokeMeshOptionsWrapper.SpokeMesh != nil {
+				spokeMeshElement := spokeMeshOptionsWrapper.SpokeMesh
 
 				// data specToModelNested RequiredPointerField --> HubMeshGroup
-				if spokeMeshOptions.SpokeMesh.GetHubMeshGroup() != nil {
+				if spokeMeshElement.GetHubMeshGroup() != nil {
 					// Create the nested Go struct
 					objectRefTypeModelModel := &ObjectRefTypeModel{}
-					hubMeshGroupElement := spokeMeshOptions.SpokeMesh.GetHubMeshGroup()
+					hubMeshGroupElement := spokeMeshElement.GetHubMeshGroup()
 
 					// Recursively populate the nested struct
 
-					// data specToModelNested StringField --> Tenant
-					if hubMeshGroupElement.GetTenant() != "" {
-						objectRefTypeModelModel.Tenant = types.StringValue(hubMeshGroupElement.GetTenant())
+					// data specToModelNested RequiredStringField --> Name
+					if hubMeshGroupElement.GetName() != "" {
+						objectRefTypeModelModel.Name = types.StringValue(hubMeshGroupElement.GetName())
 					} else {
 						// Empty string, set to null
-						objectRefTypeModelModel.Tenant = types.StringNull()
+						objectRefTypeModelModel.Name = types.StringNull()
 					}
 
 					// data specToModelNested RequiredStringField --> Namespace
@@ -817,17 +838,17 @@ func (d *DataSourceF5XCSiteMeshGroup) Read(ctx context.Context, request datasour
 						objectRefTypeModelModel.Namespace = types.StringNull()
 					}
 
-					// data specToModelNested RequiredStringField --> Name
-					if hubMeshGroupElement.GetName() != "" {
-						objectRefTypeModelModel.Name = types.StringValue(hubMeshGroupElement.GetName())
+					// data specToModelNested StringField --> Tenant
+					if hubMeshGroupElement.GetTenant() != "" {
+						objectRefTypeModelModel.Tenant = types.StringValue(hubMeshGroupElement.GetTenant())
 					} else {
 						// Empty string, set to null
-						objectRefTypeModelModel.Name = types.StringNull()
+						objectRefTypeModelModel.Tenant = types.StringNull()
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					objectRefTypeModelModelObj, diags := types.ObjectValueFrom(ctx, SiteMeshGroupMeshChoiceSpokeMeshHubMeshGroupModelAttributeMap, objectRefTypeModelModel)
-					response.Diagnostics.Append(diags...)
+					objectRefTypeModelModelObj, objDiags := types.ObjectValueFrom(ctx, SiteMeshGroupMeshChoiceSpokeMeshHubMeshGroupModelAttributeMap, objectRefTypeModelModel)
+					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
@@ -844,24 +865,15 @@ func (d *DataSourceF5XCSiteMeshGroup) Read(ctx context.Context, request datasour
 				}
 
 				// data specToModelNested OneOfField --> SpokeHubMeshChoice
-				if spokeMeshOptions.SpokeMesh.GetSpokeHubMeshChoice() != nil {
+				if spokeMeshElement.GetSpokeHubMeshChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					spokeMeshspokeHubMeshChoiceChoicesAttributeMap := make(map[string]attr.Value)
 
 					// Define a variable for the spec choices to be passed down to nested templates.
 					// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-					spokeMeshspokeHubMeshChoiceChoices := spokeMeshOptions.SpokeMesh.GetSpokeHubMeshChoice()
+					spokeMeshspokeHubMeshChoiceChoices := spokeMeshElement.GetSpokeHubMeshChoice()
 
 					// Process nested choices, populating the temporary attribute map
-
-					// data specToModelNested BoolOfOneOfPointerField --> DataPlaneMesh
-					_, isDataPlaneMesh := spokeMeshspokeHubMeshChoiceChoices.(*ves_io_schema_site_mesh_group.SpokeMeshGroupType_DataPlaneMesh)
-
-					if isDataPlaneMesh {
-						spokeMeshspokeHubMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolValue(true)
-					} else {
-						spokeMeshspokeHubMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolNull()
-					}
 
 					// data specToModelNested BoolOfOneOfPointerField --> ControlAndDataPlaneMesh
 					_, isControlAndDataPlaneMesh := spokeMeshspokeHubMeshChoiceChoices.(*ves_io_schema_site_mesh_group.SpokeMeshGroupType_ControlAndDataPlaneMesh)
@@ -870,6 +882,15 @@ func (d *DataSourceF5XCSiteMeshGroup) Read(ctx context.Context, request datasour
 						spokeMeshspokeHubMeshChoiceChoicesAttributeMap["control_and_data_plane_mesh"] = types.BoolValue(true)
 					} else {
 						spokeMeshspokeHubMeshChoiceChoicesAttributeMap["control_and_data_plane_mesh"] = types.BoolNull()
+					}
+
+					// data specToModelNested BoolOfOneOfPointerField --> DataPlaneMesh
+					_, isDataPlaneMesh := spokeMeshspokeHubMeshChoiceChoices.(*ves_io_schema_site_mesh_group.SpokeMeshGroupType_DataPlaneMesh)
+
+					if isDataPlaneMesh {
+						spokeMeshspokeHubMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolValue(true)
+					} else {
+						spokeMeshspokeHubMeshChoiceChoicesAttributeMap["data_plane_mesh"] = types.BoolNull()
 					}
 
 					// --- End of Choices ---
@@ -891,8 +912,8 @@ func (d *DataSourceF5XCSiteMeshGroup) Read(ctx context.Context, request datasour
 					spokeMeshAttributeMap["spoke_hub_mesh_choice"] = types.ObjectNull(SiteMeshGroupMeshChoiceSpokeMeshSpokeHubMeshChoiceModelAttributeMap)
 				}
 
-				spokeMeshObj, diags := types.ObjectValue(SiteMeshGroupMeshChoiceSpokeMeshModelAttributeMap, spokeMeshAttributeMap)
-				response.Diagnostics.Append(diags...)
+				spokeMeshObj, spokeMeshObjDiags := types.ObjectValue(SiteMeshGroupMeshChoiceSpokeMeshModelAttributeMap, spokeMeshAttributeMap)
+				response.Diagnostics.Append(spokeMeshObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -903,18 +924,20 @@ func (d *DataSourceF5XCSiteMeshGroup) Read(ctx context.Context, request datasour
 		}
 
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		meshChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			SiteMeshGroupMeshChoiceModelAttributeMap,
-			meshChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
+		{
+			meshChoiceObj, oneofDiags := utils.GoStructToObjectValue(
+				ctx,
+				SiteMeshGroupMeshChoiceModelAttributeMap,
+				meshChoiceChoicesModel,
+			)
+			if oneofDiags.HasError() {
+				response.Diagnostics.Append(oneofDiags...)
+				return
+			}
 
-		// Assign the final object to the root data model.
-		data.MeshChoice = meshChoiceObj
+			// Assign the final object to the root data model.
+			data.MeshChoice = meshChoiceObj
+		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		data.MeshChoice = types.ObjectNull(SiteMeshGroupMeshChoiceModelAttributeMap)
@@ -934,15 +957,6 @@ func (d *DataSourceF5XCSiteMeshGroup) Read(ctx context.Context, request datasour
 
 		// Recursively call the nested template to process the oneof choices.
 
-		// data specToModelNested BoolOfOneOfPointerField --> EnableReFallback
-		_, isEnableReFallback := reFallbackChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_EnableReFallback)
-
-		if isEnableReFallback {
-			reFallbackChoiceChoicesModel.EnableReFallback = types.BoolValue(true)
-		} else {
-			reFallbackChoiceChoicesModel.EnableReFallback = types.BoolNull()
-		}
-
 		// data specToModelNested BoolOfOneOfPointerField --> DisableReFallback
 		_, isDisableReFallback := reFallbackChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_DisableReFallback)
 
@@ -952,96 +966,93 @@ func (d *DataSourceF5XCSiteMeshGroup) Read(ctx context.Context, request datasour
 			reFallbackChoiceChoicesModel.DisableReFallback = types.BoolNull()
 		}
 
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		reFallbackChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			SiteMeshGroupReFallbackModelAttributeMap,
-			reFallbackChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
+		// data specToModelNested BoolOfOneOfPointerField --> EnableReFallback
+		_, isEnableReFallback := reFallbackChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_EnableReFallback)
+
+		if isEnableReFallback {
+			reFallbackChoiceChoicesModel.EnableReFallback = types.BoolValue(true)
+		} else {
+			reFallbackChoiceChoicesModel.EnableReFallback = types.BoolNull()
 		}
 
-		// Assign the final object to the root data model.
-		data.ReFallbackChoice = reFallbackChoiceObj
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			reFallbackChoiceObj, oneofDiags := utils.GoStructToObjectValue(
+				ctx,
+				SiteMeshGroupReFallbackModelAttributeMap,
+				reFallbackChoiceChoicesModel,
+			)
+			if oneofDiags.HasError() {
+				response.Diagnostics.Append(oneofDiags...)
+				return
+			}
+
+			// Assign the final object to the root data model.
+			data.ReFallbackChoice = reFallbackChoiceObj
+		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		data.ReFallbackChoice = types.ObjectNull(SiteMeshGroupReFallbackModelAttributeMap)
 	}
 
-	// data SpecToModelRoot RequiredOneOfField --> BfdChoice
-	// false
-	// true
-	// This resource uses standard struct-based resolution.
-	if specData.GetBfdChoice() != nil {
-		// Define a variable for the spec choices to be passed down to nested templates.
-		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-		bfdChoiceChoices := specData.GetBfdChoice()
+	// data SpecToModelRoot ArrayOfPointerField --> VirtualSite
+	if len(specData.GetVirtualSite()) > 0 {
+		virtualSiteElements := make([]ObjectRefTypeModel, 0, len(specData.GetVirtualSite()))
 
-		// The model struct that will be populated by the nested template.
-		var bfdChoiceChoicesModel = &SiteMeshGroupGlobalSpecTypeBfdChoice{}
+		for _, virtualSiteElement := range specData.GetVirtualSite() {
+			objectRefTypeModelModel := ObjectRefTypeModel{}
 
-		// Recursively call the nested template to process the oneof choices.
-
-		// data specToModelNested PointerOfOneOfField --> BfdEnabled
-		// <no value>
-		// false
-		{
-			bfdEnabledOptions, isBfdEnabled := bfdChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_BfdEnabled)
-			bfdEnabledAttributeMap := make(map[string]attr.Value)
-
-			if isBfdEnabled && bfdEnabledOptions != nil {
-
-				// data specToModelNested RequiredUintField --> TransmitIntervalMilliseconds
-				bfdEnabledAttributeMap["transmit_interval_milliseconds"] = types.Int64Value(int64(bfdEnabledOptions.BfdEnabled.GetTransmitIntervalMilliseconds()))
-
-				// data specToModelNested RequiredUintField --> ReceiveIntervalMilliseconds
-				bfdEnabledAttributeMap["receive_interval_milliseconds"] = types.Int64Value(int64(bfdEnabledOptions.BfdEnabled.GetReceiveIntervalMilliseconds()))
-
-				// data specToModelNested RequiredUintField --> Multiplier
-				bfdEnabledAttributeMap["multiplier"] = types.Int64Value(int64(bfdEnabledOptions.BfdEnabled.GetMultiplier()))
-
-				bfdEnabledObj, diags := types.ObjectValue(SiteMeshGroupBfdChoiceBfdEnabledModelAttributeMap, bfdEnabledAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				bfdChoiceChoicesModel.BfdEnabled = bfdEnabledObj
+			// data specToModelNested RequiredStringField --> Name
+			if virtualSiteElement.GetName() != "" {
+				objectRefTypeModelModel.Name = types.StringValue(virtualSiteElement.GetName())
 			} else {
-				bfdChoiceChoicesModel.BfdEnabled = types.ObjectNull(SiteMeshGroupBfdChoiceBfdEnabledModelAttributeMap)
+				// Empty string, set to null
+				objectRefTypeModelModel.Name = types.StringNull()
 			}
+
+			// data specToModelNested RequiredStringField --> Namespace
+			if virtualSiteElement.GetNamespace() != "" {
+				objectRefTypeModelModel.Namespace = types.StringValue(virtualSiteElement.GetNamespace())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Namespace = types.StringNull()
+			}
+
+			// data specToModelNested StringField --> Tenant
+			if virtualSiteElement.GetTenant() != "" {
+				objectRefTypeModelModel.Tenant = types.StringValue(virtualSiteElement.GetTenant())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Tenant = types.StringNull()
+			}
+
+			virtualSiteElements = append(virtualSiteElements, objectRefTypeModelModel)
 		}
 
-		// data specToModelNested BoolOfOneOfPointerField --> BfdDisabled
-		_, isBfdDisabled := bfdChoiceChoices.(*ves_io_schema_site_mesh_group.GlobalSpecType_BfdDisabled)
+		{
+			virtualSiteList, listDiags := utils.GoStructSliceToListValue(
+				ctx,
+				SiteMeshGroupVirtualSiteObjectRefModelAttributeMap,
+				virtualSiteElements,
+			)
 
-		if isBfdDisabled {
-			bfdChoiceChoicesModel.BfdDisabled = types.BoolValue(true)
-		} else {
-			bfdChoiceChoicesModel.BfdDisabled = types.BoolNull()
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			data.VirtualSite = virtualSiteList
 		}
-
-		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		bfdChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			SiteMeshGroupBfdChoiceModelAttributeMap,
-			bfdChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
-
-		// Assign the final object to the root data model.
-		data.BfdChoice = bfdChoiceObj
 	} else {
-		// The oneof field is nil in the source spec, so set the Terraform object to null.
-		data.BfdChoice = types.ObjectNull(SiteMeshGroupBfdChoiceModelAttributeMap)
+		var virtualSiteObjectType = basetypes.ObjectType{
+			AttrTypes: SiteMeshGroupVirtualSiteObjectRefModelAttributeMap,
+		}
+		nullVirtualSiteList := basetypes.NewListNull(virtualSiteObjectType)
+		data.VirtualSite = nullVirtualSiteList
 	}
 
 	// Set state to fully populated data
-	diags = response.State.Set(ctx, &data)
+	diags := response.State.Set(ctx, &data)
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return

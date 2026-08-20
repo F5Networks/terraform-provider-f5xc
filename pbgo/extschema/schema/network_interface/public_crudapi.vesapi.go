@@ -1689,10 +1689,7 @@ var APISwaggerJSON string = `{
         "description": "Network Interface object represents the configuration of a network device in a fleet of\nF5XC Customer Edge sites. The following properties can be configured in this object:\n\n   IP address allocation scheme of the network interface (dhcp or static). Virtual Network of this network interface, Whether to run a DHCP server on this interface\n\n      Subnet to use for allocation\n\n      Default gateway\n\n      DNS server\n\n Interfaces belonging to site local inside and site local outside networks have to be configured as part of\n bootstrap configuration. This configuration can be done in two ways:\n\n     during site registration and is bundled as part of certified hardware image.\n\n     configured locally on the CE via Sia application\n\n Interfaces corresponding to these local interfaces can be configured in the global configuration. Label\n assignments for the local interfaces can be done in the global network interface configuration. Also, DHCP\n can be still be configured on site local inside network interface configuration, so that dynamic address is\n obtained and used.\n\n When DHCP address assignment (server) is enabled in the Network interface, external clients can get their addresses\n assigned from the configured subnet. The local interface can also get a dynamic address from the same pool if DHCP\n client is enabled in the network interface. Gateway and DNS servers for such clients can be external addresses or\n addresses internally allocated from the same subnet or may be disabled.\n\n Note that DHCP client and server configuration are independent. A Network interface may have DHCP client configured\n and DHCP server disabled, if an external DHCP server is used.\n\n Currently, DHCP client should always be enabled, setting static address on a network interface is not supported.\n\n If this Network interface is for primary network device (site local), then it has to be configured only as\n DHCP assigned address. This interface will be used to reach volterra cloud for registration. Virtual network\n of this interface has to be site local network. If there are multiple interfaces and multiple virtual\n networks, then site local interface has to be in the outside network.\n\n If network has Network interface with DHCP address assignment configured, then default gateway and DNS server\n for this network will be taken from DHCP response. Having multiple interfaces in a network giving default route\n can cause bad routing decisions. In case of site local network, DNS and default gateway response from primary\n interface will be used.",
         "version": "version not set"
     },
-    "schemes": [
-        "http",
-        "https"
-    ],
+    "schemes": null,
     "consumes": [
         "application/json"
     ],
@@ -1759,6 +1756,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1851,6 +1854,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1951,6 +1960,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2068,6 +2083,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2170,6 +2191,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2761,13 +2788,13 @@ var APISwaggerJSON string = `{
                 },
                 "mtu": {
                     "type": "integer",
-                    "description": " Maximum packet size (Maximum Transfer Unit) of the interface\n When configured, mtu must be between 512 and 16384\n\nExample: - \"1450\"-\n\nValidation Rules:\n  ves.io.schema.rules.uint32.ranges: 0,512-16384\n",
+                    "description": " Maximum packet size (Maximum Transfer Unit) of the interface\n When configured, mtu must be between 512 and 8000\n\nExample: - \"1450\"-\n\nValidation Rules:\n  ves.io.schema.rules.uint32.ranges: 0,512-8000\n",
                     "title": "Maximum Packet Size (MTU)",
                     "format": "int64",
                     "x-displayname": "Maximum Packet Size (MTU)",
                     "x-ves-example": "1450",
                     "x-ves-validation-rules": {
-                        "ves.io.schema.rules.uint32.ranges": "0,512-16384"
+                        "ves.io.schema.rules.uint32.ranges": "0,512-8000"
                     }
                 },
                 "node": {
@@ -2833,13 +2860,13 @@ var APISwaggerJSON string = `{
                 },
                 "mtu": {
                     "type": "integer",
-                    "description": " Maximum packet size (Maximum Transfer Unit) of the interface\n When configured, mtu must be between 512 and 16384\n\nExample: - \"1450\"-\n\nValidation Rules:\n  ves.io.schema.rules.uint32.ranges: 0,512-16384\n",
+                    "description": " Maximum packet size (Maximum Transfer Unit) of the interface\n When configured, mtu must be between 512 and 8000\n\nExample: - \"1450\"-\n\nValidation Rules:\n  ves.io.schema.rules.uint32.ranges: 0,512-8000\n",
                     "title": "Maximum Packet Size (MTU)",
                     "format": "int64",
                     "x-displayname": "Maximum Packet Size (MTU)",
                     "x-ves-example": "1450",
                     "x-ves-validation-rules": {
-                        "ves.io.schema.rules.uint32.ranges": "0,512-16384"
+                        "ves.io.schema.rules.uint32.ranges": "0,512-8000"
                     }
                 },
                 "node": {
@@ -2867,7 +2894,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Fail the delete operation if this object is being referred by other objects",
                     "title": "fail_if_referred",
-                    "format": "boolean",
                     "x-displayname": "Fail-If-Referred"
                 },
                 "name": {
@@ -2959,13 +2985,13 @@ var APISwaggerJSON string = `{
                 },
                 "mtu": {
                     "type": "integer",
-                    "description": " Maximum packet size (Maximum Transfer Unit) of the interface\n When configured, mtu must be between 512 and 16384\n\nExample: - \"1450\"-\n\nValidation Rules:\n  ves.io.schema.rules.uint32.ranges: 0,512-16384\n",
+                    "description": " Maximum packet size (Maximum Transfer Unit) of the interface\n When configured, mtu must be between 512 and 8000\n\nExample: - \"1450\"-\n\nValidation Rules:\n  ves.io.schema.rules.uint32.ranges: 0,512-8000\n",
                     "title": "Maximum Packet Size (MTU)",
                     "format": "int64",
                     "x-displayname": "Maximum Packet Size (MTU)",
                     "x-ves-example": "1450",
                     "x-ves-validation-rules": {
-                        "ves.io.schema.rules.uint32.ranges": "0,512-16384"
+                        "ves.io.schema.rules.uint32.ranges": "0,512-8000"
                     }
                 },
                 "no_ipv6_address": {
@@ -3240,7 +3266,6 @@ var APISwaggerJSON string = `{
                 "is_primary": {
                     "type": "boolean",
                     "description": " This interface is primary interface",
-                    "format": "boolean",
                     "x-displayname": "Primary Interface"
                 },
                 "layer2_interface": {
@@ -3267,12 +3292,12 @@ var APISwaggerJSON string = `{
                 },
                 "mtu": {
                     "type": "integer",
-                    "description": " Maximum Transfer Unit (Max packet length) of the interface\n When configured, mtu must be between 512 and 16384\n\nExample: - \"0\"-\n\nValidation Rules:\n  ves.io.schema.rules.uint32.ranges: 0,512-16384\n",
+                    "description": " Maximum Transfer Unit (Max packet length) of the interface\n When configured, mtu must be between 512 and 8000\n\nExample: - \"0\"-\n\nValidation Rules:\n  ves.io.schema.rules.uint32.ranges: 0,512-8000\n",
                     "format": "int64",
                     "x-displayname": "MTU",
                     "x-ves-example": "0",
                     "x-ves-validation-rules": {
-                        "ves.io.schema.rules.uint32.ranges": "0,512-16384"
+                        "ves.io.schema.rules.uint32.ranges": "0,512-8000"
                     }
                 },
                 "priority": {
@@ -3432,7 +3457,7 @@ var APISwaggerJSON string = `{
             "properties": {
                 "dns_list": {
                     "type": "array",
-                    "description": " List of IPV6 Addresses acting as Dns servers\n\nExample: - \"2001::11\"-\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n  ves.io.schema.rules.repeated.max_items: 4\n  ves.io.schema.rules.repeated.min_items: 1\n  ves.io.schema.rules.repeated.unique: true\n  ves.io.schema.rules.string.ipv6: true\n",
+                    "description": " List of IPV6 Addresses acting as Dns servers\n\nExample: - \"2001::11\"-\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n  ves.io.schema.rules.repeated.items.string.ipv6: true\n  ves.io.schema.rules.repeated.max_items: 4\n  ves.io.schema.rules.repeated.min_items: 1\n  ves.io.schema.rules.repeated.unique: true\n",
                     "title": "Dns List",
                     "minItems": 1,
                     "maxItems": 4,
@@ -3444,10 +3469,10 @@ var APISwaggerJSON string = `{
                     "x-ves-required": "true",
                     "x-ves-validation-rules": {
                         "ves.io.schema.rules.message.required": "true",
+                        "ves.io.schema.rules.repeated.items.string.ipv6": "true",
                         "ves.io.schema.rules.repeated.max_items": "4",
                         "ves.io.schema.rules.repeated.min_items": "1",
-                        "ves.io.schema.rules.repeated.unique": "true",
-                        "ves.io.schema.rules.string.ipv6": "true"
+                        "ves.io.schema.rules.repeated.unique": "true"
                     }
                 }
             }
@@ -3693,13 +3718,13 @@ var APISwaggerJSON string = `{
                 },
                 "mtu": {
                     "type": "integer",
-                    "description": " Maximum Transfer Unit (Max packet length) of the interface\n When configured, mtu must be between 512 and 16384\n\nExample: - \"0\"-\n\nValidation Rules:\n  ves.io.schema.rules.uint32.ranges: 0,512-16384\n",
+                    "description": " Maximum Transfer Unit (Max packet length) of the interface\n When configured, mtu must be between 512 and 8000\n\nExample: - \"0\"-\n\nValidation Rules:\n  ves.io.schema.rules.uint32.ranges: 0,512-8000\n",
                     "title": "Mtu",
                     "format": "int64",
                     "x-displayname": "MTU",
                     "x-ves-example": "0",
                     "x-ves-validation-rules": {
-                        "ves.io.schema.rules.uint32.ranges": "0,512-16384"
+                        "ves.io.schema.rules.uint32.ranges": "0,512-8000"
                     }
                 },
                 "priority": {
@@ -3831,7 +3856,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true indicates network_interface is administratively disabled",
                     "title": "disabled",
-                    "format": "boolean",
                     "x-displayname": "Disabled"
                 },
                 "get_spec": {
@@ -4301,13 +4325,13 @@ var APISwaggerJSON string = `{
             "properties": {
                 "mtu": {
                     "type": "integer",
-                    "description": " Maximum packet size (Maximum Transfer Unit) of the interface\n When configured, mtu must be between 512 and 16384\n\nExample: - \"1450\"-\n\nValidation Rules:\n  ves.io.schema.rules.uint32.ranges: 0,512-16384\n",
+                    "description": " Maximum packet size (Maximum Transfer Unit) of the interface\n When configured, mtu must be between 512 and 8000\n\nExample: - \"1450\"-\n\nValidation Rules:\n  ves.io.schema.rules.uint32.ranges: 0,512-8000\n",
                     "title": "Maximum Packet Size (MTU)",
                     "format": "int64",
                     "x-displayname": "Maximum Packet Size (MTU)",
                     "x-ves-example": "1450",
                     "x-ves-validation-rules": {
-                        "ves.io.schema.rules.uint32.ranges": "0,512-16384"
+                        "ves.io.schema.rules.uint32.ranges": "0,512-8000"
                     }
                 },
                 "node": {
@@ -4380,6 +4404,27 @@ var APISwaggerJSON string = `{
                     "type": "string",
                     "description": "Must be a valid serialized protocol buffer of the above specified type.",
                     "format": "byte"
+                }
+            }
+        },
+        "runtimeError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/protobufAny"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
                 }
             }
         },
@@ -4607,7 +4652,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "labels": {
@@ -4671,7 +4715,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable",
                     "x-ves-example": "true"
                 },
@@ -4737,7 +4780,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "labels": {
@@ -4823,7 +4865,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Indicate whether mars deems this object to be stale via graceful restart timer information",
                     "title": "vtrp_stale",
-                    "format": "boolean",
                     "x-displayname": "VTRP Stale"
                 }
             }

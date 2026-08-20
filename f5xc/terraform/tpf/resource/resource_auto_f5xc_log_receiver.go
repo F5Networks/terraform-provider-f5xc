@@ -9,6 +9,7 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"regexp"
 	"strings"
 	"time"
 
@@ -21,20 +22,23 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 
-	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+
+	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/defaultvaluemodifier"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
-	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/atmostoneofvalidator"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -44,7 +48,6 @@ import (
 
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_log_receiver "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/log_receiver"
-	ves_io_schema_virtual_network "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/virtual_network"
 )
 
 // ResourceF5XCLogReceiver defines the resource implementation.
@@ -52,95 +55,95 @@ type ResourceF5XCLogReceiver struct {
 	client *client.APIClient
 }
 
-type LogReceiverGlobalSpecTypeLogReceiverChoice struct {
+type LogReceiverLogReceiverChoice struct {
 	Syslog types.Object `tfsdk:"syslog"`
 }
 
-type LogReceiverGlobalSpecTypeSyslog struct {
-	ModeChoice   types.Object `tfsdk:"mode_choice"`
+type LogReceiverSyslog struct {
 	FormatChoice types.Object `tfsdk:"format_choice"`
+	ModeChoice   types.Object `tfsdk:"mode_choice"`
 }
 
-type LogReceiverSyslogReceiverModeChoice struct {
-	UdpServer types.Object `tfsdk:"udp_server"`
+type LogReceiverFormatChoice struct {
+	SyslogRfc5424 types.Int64 `tfsdk:"syslog_rfc5424"`
+}
+
+type LogReceiverModeChoice struct {
 	TcpServer types.Object `tfsdk:"tcp_server"`
 	TlsServer types.Object `tfsdk:"tls_server"`
+	UdpServer types.Object `tfsdk:"udp_server"`
 }
 
-type LogReceiverSyslogReceiverUdpServer struct {
-	ServerName types.String `tfsdk:"server_name"`
+type LogReceiverTcpServer struct {
 	Port       types.Int64  `tfsdk:"port"`
+	ServerName types.String `tfsdk:"server_name"`
 }
 
-type LogReceiverSyslogReceiverTcpServer struct {
-	ServerName types.String `tfsdk:"server_name"`
-	Port       types.Int64  `tfsdk:"port"`
-}
-
-type LogReceiverSyslogReceiverTlsServer struct {
-	ServerName types.String `tfsdk:"server_name"`
-	PortChoice types.Object `tfsdk:"port_choice"`
+type LogReceiverTlsServer struct {
 	CaChoice   types.Object `tfsdk:"ca_choice"`
 	MtlsChoice types.Object `tfsdk:"mtls_choice"`
+	PortChoice types.Object `tfsdk:"port_choice"`
+	ServerName types.String `tfsdk:"server_name"`
 }
 
-type LogReceiverTLSConfigTypePortChoice struct {
-	Port                 types.Int64 `tfsdk:"port"`
-	DefaultSyslogTlsPort types.Bool  `tfsdk:"default_syslog_tls_port"`
-	DefaultHttpsPort     types.Bool  `tfsdk:"default_https_port"`
-}
-
-type LogReceiverTLSConfigTypeCaChoice struct {
-	VolterraCa   types.Bool   `tfsdk:"volterra_ca"`
+type LogReceiverCaChoice struct {
 	TrustedCaUrl types.String `tfsdk:"trusted_ca_url"`
+	VolterraCa   types.Bool   `tfsdk:"volterra_ca"`
 }
 
-type LogReceiverTLSConfigTypeMtlsChoice struct {
+type LogReceiverMtlsChoice struct {
 	MtlsDisabled types.Bool   `tfsdk:"mtls_disabled"`
 	MtlsEnable   types.Object `tfsdk:"mtls_enable"`
 }
 
-type LogReceiverTLSConfigTypeMtlsEnable struct {
-	KeyUrl      types.Object `tfsdk:"key_url"`
+type LogReceiverMtlsEnable struct {
 	Certificate types.String `tfsdk:"certificate"`
+	KeyUrl      types.Object `tfsdk:"key_url"`
 }
 
 type LogReceiverSecretType struct {
 	SecretInfoChoice types.Object `tfsdk:"secret_info_choice"`
 }
 
-type LogReceiverSecretTypeSecretInfoChoice struct {
-	ClearSecretInfo     types.Object `tfsdk:"clear_secret_info"`
+type LogReceiverSecretInfoChoice struct {
 	BlindfoldSecretInfo types.Object `tfsdk:"blindfold_secret_info"`
+	ClearSecretInfo     types.Object `tfsdk:"clear_secret_info"`
 }
 
-type LogReceiverSecretTypeClearSecretInfo struct {
+type LogReceiverBlindfoldSecretInfo struct {
+	DecryptionProvider types.String `tfsdk:"decryption_provider"`
+	Location           types.String `tfsdk:"location"`
+	StoreProvider      types.String `tfsdk:"store_provider"`
+}
+
+type LogReceiverClearSecretInfo struct {
 	Provider types.String `tfsdk:"provider"`
 	Url      types.String `tfsdk:"url"`
 }
 
-type LogReceiverSecretTypeBlindfoldSecretInfo struct {
-	DecryptionProvider types.String `tfsdk:"decryption_provider"`
-	StoreProvider      types.String `tfsdk:"store_provider"`
-	Location           types.String `tfsdk:"location"`
+type LogReceiverPortChoice struct {
+	DefaultHttpsPort     types.Bool  `tfsdk:"default_https_port"`
+	DefaultSyslogTlsPort types.Bool  `tfsdk:"default_syslog_tls_port"`
+	Port                 types.Int64 `tfsdk:"port"`
 }
 
-type LogReceiverSyslogReceiverFormatChoice struct {
-	SyslogRfc5424 types.Int64 `tfsdk:"syslog_rfc5424"`
+type LogReceiverUdpServer struct {
+	Port       types.Int64  `tfsdk:"port"`
+	ServerName types.String `tfsdk:"server_name"`
 }
 
-type LogReceiverGlobalSpecTypeWhereChoice struct {
+type LogReceiverWhereChoice struct {
 	SiteLocal types.Bool `tfsdk:"site_local"`
 }
 
 // ResourceF5XCLogReceiverModel describes the resource data model.
 type ResourceF5XCLogReceiverModel struct {
+	Annotations       types.Map      `tfsdk:"annotations"`
+	Description       types.String   `tfsdk:"description"`
+	Labels            types.Map      `tfsdk:"labels"`
 	Name              types.String   `tfsdk:"name"`
 	Namespace         types.String   `tfsdk:"namespace"`
 	Uid               types.String   `tfsdk:"uid"`
-	Labels            types.Map      `tfsdk:"labels"`
-	Annotations       types.Map      `tfsdk:"annotations"`
-	Description       types.String   `tfsdk:"description"`
 	LogReceiverChoice types.Object   `tfsdk:"log_receiver_choice"`
 	WhereChoice       types.Object   `tfsdk:"where_choice"`
 	Timeouts          timeouts.Value `tfsdk:"timeouts"`
@@ -167,70 +170,61 @@ var LogReceiverLogReceiverChoiceModelAttributeMap = map[string]attr.Type{
 // Attribute map for PointerOfOneOfField --> Syslog
 var LogReceiverLogReceiverChoiceSyslogModelAttributeMap = map[string]attr.Type{
 
-	"mode_choice": types.ObjectType{
-		AttrTypes: LogReceiverLogReceiverChoiceSyslogModeChoiceModelAttributeMap,
-	},
 	"format_choice": types.ObjectType{
 		AttrTypes: LogReceiverLogReceiverChoiceSyslogFormatChoiceModelAttributeMap,
 	},
+	"mode_choice": types.ObjectType{
+		AttrTypes: LogReceiverLogReceiverChoiceSyslogModeChoiceModelAttributeMap,
+	},
+}
+
+// Attribute map for RequiredOneOfField --> FormatChoice
+var LogReceiverLogReceiverChoiceSyslogFormatChoiceModelAttributeMap = map[string]attr.Type{
+
+	"syslog_rfc5424": types.Int64Type,
 }
 
 // Attribute map for RequiredOneOfField --> ModeChoice
 var LogReceiverLogReceiverChoiceSyslogModeChoiceModelAttributeMap = map[string]attr.Type{
 
-	"udp_server": types.ObjectType{
-		AttrTypes: LogReceiverLogReceiverChoiceSyslogModeChoiceUdpServerModelAttributeMap,
-	},
 	"tcp_server": types.ObjectType{
 		AttrTypes: LogReceiverLogReceiverChoiceSyslogModeChoiceTcpServerModelAttributeMap,
 	},
 	"tls_server": types.ObjectType{
 		AttrTypes: LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerModelAttributeMap,
 	},
-}
-
-// Attribute map for PointerOfOneOfField --> UdpServer
-var LogReceiverLogReceiverChoiceSyslogModeChoiceUdpServerModelAttributeMap = map[string]attr.Type{
-
-	"server_name": types.StringType,
-	"port":        types.Int64Type,
+	"udp_server": types.ObjectType{
+		AttrTypes: LogReceiverLogReceiverChoiceSyslogModeChoiceUdpServerModelAttributeMap,
+	},
 }
 
 // Attribute map for PointerOfOneOfField --> TcpServer
 var LogReceiverLogReceiverChoiceSyslogModeChoiceTcpServerModelAttributeMap = map[string]attr.Type{
 
-	"server_name": types.StringType,
 	"port":        types.Int64Type,
+	"server_name": types.StringType,
 }
 
 // Attribute map for PointerOfOneOfField --> TlsServer
 var LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerModelAttributeMap = map[string]attr.Type{
 
-	"server_name": types.StringType,
-	"port_choice": types.ObjectType{
-		AttrTypes: LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerPortChoiceModelAttributeMap,
-	},
 	"ca_choice": types.ObjectType{
 		AttrTypes: LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerCaChoiceModelAttributeMap,
 	},
 	"mtls_choice": types.ObjectType{
 		AttrTypes: LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceModelAttributeMap,
 	},
-}
-
-// Attribute map for RequiredOneOfField --> PortChoice
-var LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerPortChoiceModelAttributeMap = map[string]attr.Type{
-
-	"port":                    types.Int64Type,
-	"default_syslog_tls_port": types.BoolType,
-	"default_https_port":      types.BoolType,
+	"port_choice": types.ObjectType{
+		AttrTypes: LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerPortChoiceModelAttributeMap,
+	},
+	"server_name": types.StringType,
 }
 
 // Attribute map for RequiredOneOfField --> CaChoice
 var LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerCaChoiceModelAttributeMap = map[string]attr.Type{
 
-	"volterra_ca":    types.BoolType,
 	"trusted_ca_url": types.StringType,
+	"volterra_ca":    types.BoolType,
 }
 
 // Attribute map for RequiredOneOfField --> MtlsChoice
@@ -244,13 +238,13 @@ var LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceModelAttribut
 
 // Attribute map for PointerOfOneOfField --> MtlsEnable
 var LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableModelAttributeMap = map[string]attr.Type{
-	"key_url": types.ObjectType{
+
+	"certificate": types.StringType, "key_url": types.ObjectType{
 		AttrTypes: map[string]attr.Type{
 			"secret_info_choice": types.ObjectType{
 				AttrTypes: LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofModelAttributeMap,
 			}},
 	},
-	"certificate": types.StringType,
 }
 
 // Attribute map for PointerField --> KeyUrl
@@ -264,12 +258,20 @@ var LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKey
 // Attribute map for RequiredOneOfField --> SecretInfoOneof
 var LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofModelAttributeMap = map[string]attr.Type{
 
-	"clear_secret_info": types.ObjectType{
-		AttrTypes: LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap,
-	},
 	"blindfold_secret_info": types.ObjectType{
 		AttrTypes: LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofBlindfoldSecretInfoModelAttributeMap,
 	},
+	"clear_secret_info": types.ObjectType{
+		AttrTypes: LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
+var LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofBlindfoldSecretInfoModelAttributeMap = map[string]attr.Type{
+
+	"decryption_provider": types.StringType,
+	"location":            types.StringType,
+	"store_provider":      types.StringType,
 }
 
 // Attribute map for PointerOfOneOfField --> ClearSecretInfo
@@ -279,18 +281,19 @@ var LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKey
 	"url":      types.StringType,
 }
 
-// Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
-var LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofBlindfoldSecretInfoModelAttributeMap = map[string]attr.Type{
+// Attribute map for RequiredOneOfField --> PortChoice
+var LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerPortChoiceModelAttributeMap = map[string]attr.Type{
 
-	"decryption_provider": types.StringType,
-	"store_provider":      types.StringType,
-	"location":            types.StringType,
+	"default_https_port":      types.BoolType,
+	"default_syslog_tls_port": types.BoolType,
+	"port":                    types.Int64Type,
 }
 
-// Attribute map for RequiredOneOfField --> FormatChoice
-var LogReceiverLogReceiverChoiceSyslogFormatChoiceModelAttributeMap = map[string]attr.Type{
+// Attribute map for PointerOfOneOfField --> UdpServer
+var LogReceiverLogReceiverChoiceSyslogModeChoiceUdpServerModelAttributeMap = map[string]attr.Type{
 
-	"syslog_rfc5424": types.Int64Type,
+	"port":        types.Int64Type,
+	"server_name": types.StringType,
 }
 
 // Attribute map for RequiredOneOfField --> WhereChoice
@@ -310,27 +313,66 @@ func (r *ResourceF5XCLogReceiver) Metadata(ctx context.Context, request resource
 func (r *ResourceF5XCLogReceiver) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "LogReceiver resource",
-		Description:         "LogReceiver resource",
+		MarkdownDescription: "GetRequest is used to get different forms of a log_receiver This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of log_receiver) etc. can be fetched",
+		Description:         "GetRequest is used to get different forms of a log_receiver This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of log_receiver) etc. can be fetched",
 
 		Attributes: map[string]schema.Attribute{
+			"annotations": schema.MapAttribute{
+				Description:         "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
+				MarkdownDescription: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				ElementType:         types.StringType,
+				Validators: []validator.Map{
+					mapvalidator.SizeAtLeast(1),
+					mapvalidator.KeysAre(stringvalidator.LengthBetween(1, 64)),
+					mapvalidator.ValueStringsAre(stringvalidator.LengthBetween(1, 1024)),
+				},
+				PlanModifiers: []planmodifier.Map{
+					mapplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"description": schema.StringAttribute{
+				Description:         "description Human readable description for the object",
+				MarkdownDescription: "description Human readable description for the object",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				Default:             stringdefault.StaticString(""),
+				Validators: []validator.String{
+					bytesvalidator.BytesAtMost(1200),
+				},
+			},
+			"labels": schema.MapAttribute{
+				Description:         "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				MarkdownDescription: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				ElementType:         types.StringType,
+				PlanModifiers: []planmodifier.Map{
+					mapmergemodifier.New(),
+					mapplanmodifier.UseStateForUnknown(),
+				},
+			},
 			"name": schema.StringAttribute{
 				Description:         "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
-				MarkdownDescription: "",
+				MarkdownDescription: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
 			},
 			"namespace": schema.StringAttribute{
 				Description:         "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
-				MarkdownDescription: "",
+				MarkdownDescription: "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
 			},
 			"uid": schema.StringAttribute{
 				Description:         "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
-				MarkdownDescription: "",
+				MarkdownDescription: "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
 				Required:            false,
 				Optional:            false,
 				Computed:            true,
@@ -338,120 +380,76 @@ func (r *ResourceF5XCLogReceiver) Schema(ctx context.Context, request resource.S
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"labels": schema.MapAttribute{
-				Description:         "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            true,
-				ElementType:         types.StringType,
-				PlanModifiers: []planmodifier.Map{
-					mapmergemodifier.New(),
-				},
-			},
-			"annotations": schema.MapAttribute{
-				Description:         "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            false,
-				ElementType:         types.StringType,
-				Validators: []validator.Map{
-					mapvalidator.KeysAre(stringvalidator.LengthBetween(1, 64)),
-					mapvalidator.ValueStringsAre(stringvalidator.LengthBetween(1, 1024)),
-				},
-			},
-			"description": schema.StringAttribute{
-				Description:         "description Human readable description for the object",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            true,
-				Default:             stringdefault.StaticString(""),
-			},
 			"log_receiver_choice": schema.SingleNestedAttribute{
 				Description:         "Receiver Select type of log receiver",
-				MarkdownDescription: "",
+				MarkdownDescription: "Receiver Select type of log receiver",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
 				Validators: []validator.Object{
-					atmostoneofvalidator.AtMostOneOf(
+					exactlyoneofvalidator.RequiredExactlyOneOf(
 						"syslog",
 					),
 				},
 				Attributes: map[string]schema.Attribute{
 					"syslog": schema.SingleNestedAttribute{
 						Description:         "Syslog Server Stream log to syslog server",
-						MarkdownDescription: "",
+						MarkdownDescription: "Syslog Server Stream log to syslog server",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
 						Attributes: map[string]schema.Attribute{
-							"mode_choice": schema.SingleNestedAttribute{
-								Description:         "Syslog Transport Mode Select the syslog transport mode",
-								MarkdownDescription: "",
+							"format_choice": schema.SingleNestedAttribute{
+								Description:         "Syslog Format Select syslog format",
+								MarkdownDescription: "Syslog Format Select syslog format",
 								Required:            true,
 								Optional:            false,
 								Computed:            false,
 								Validators: []validator.Object{
-									atmostoneofvalidator.AtMostOneOf(
-										"udp_server",
-										"tcp_server",
-										"tls_server",
+									exactlyoneofvalidator.RequiredExactlyOneOf(
+										"syslog_rfc5424",
 									),
 								},
 								Attributes: map[string]schema.Attribute{
-									"udp_server": schema.SingleNestedAttribute{
-										Description:         "Mode UDP Syslog transport mode is UDP",
-										MarkdownDescription: "",
+									"syslog_rfc5424": schema.Int64Attribute{
+										Description:         "Syslog RFC5424 Format Select RFC5424 syslog format and maximum message length.",
+										MarkdownDescription: "Syslog RFC5424 Format Select RFC5424 syslog format and maximum message length.",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
-										Attributes: map[string]schema.Attribute{
-											"server_name": schema.StringAttribute{
-												Description:         "Server Name Server name is fully qualified domain name or IP address of the server",
-												MarkdownDescription: "<br>**Validation:** `Length LengthAtMost(256)`",
-												Required:            true,
-												Optional:            false,
-												Computed:            false,
-												Validators: []validator.String{
-													stringvalidator.LengthAtMost(256),
-												},
-											},
-											"port": schema.Int64Attribute{
-												Description:         "Port Number Port number used for communication",
-												MarkdownDescription: "<br>**Default:** `514`",
-												Required:            false,
-												Optional:            true,
-												Computed:            true,
-												Default:             int64default.StaticInt64(514),
-												Validators: []validator.Int64{
-													int64validator.Between(1, 65535),
-												},
-											},
+										Validators: []validator.Int64{
+											int64validator.Between(408, 268435456),
+										},
+										PlanModifiers: []planmodifier.Int64{
+											defaultvaluemodifier.NewDefaultValueModifierInt64(),
 										},
 									},
+								},
+							},
+							"mode_choice": schema.SingleNestedAttribute{
+								Description:         "Syslog Transport Mode Select the syslog transport mode",
+								MarkdownDescription: "Syslog Transport Mode Select the syslog transport mode",
+								Required:            true,
+								Optional:            false,
+								Computed:            false,
+								Validators: []validator.Object{
+									exactlyoneofvalidator.RequiredExactlyOneOf(
+										"tcp_server",
+										"tls_server",
+										"udp_server",
+									),
+								},
+								Attributes: map[string]schema.Attribute{
 									"tcp_server": schema.SingleNestedAttribute{
 										Description:         "Mode TCP Syslog transport mode is TCP",
-										MarkdownDescription: "",
+										MarkdownDescription: "Mode TCP Syslog transport mode is TCP",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
 										Attributes: map[string]schema.Attribute{
-											"server_name": schema.StringAttribute{
-												Description:         "Server Name Server name is fully qualified domain name or IP address of the server",
-												MarkdownDescription: "<br>**Validation:** `Length LengthAtMost(256)`",
-												Required:            true,
-												Optional:            false,
-												Computed:            false,
-												Validators: []validator.String{
-													stringvalidator.LengthAtMost(256),
-												},
-											},
 											"port": schema.Int64Attribute{
 												Description:         "Port Number Port number used for communication",
-												MarkdownDescription: "<br>**Default:** `601`",
+												MarkdownDescription: "Port Number Port number used for communication<br>**Default:** `601`",
 												Required:            false,
 												Optional:            true,
 												Computed:            true,
@@ -460,108 +458,76 @@ func (r *ResourceF5XCLogReceiver) Schema(ctx context.Context, request resource.S
 													int64validator.Between(1, 65535),
 												},
 											},
-										},
-									},
-									"tls_server": schema.SingleNestedAttribute{
-										Description:         "Mode TLS Syslog transport mode is TLS",
-										MarkdownDescription: "",
-										Required:            false,
-										Optional:            true,
-										Computed:            false,
-										Attributes: map[string]schema.Attribute{
 											"server_name": schema.StringAttribute{
-												Description:         "Server Name ServerName is passed to the server for SNI and is used in the client to check server certificates against.",
-												MarkdownDescription: "<br>**Validation:** `Length LengthAtMost(256)`",
+												Description:         "Server Name Server name is fully qualified domain name or IP address of the server",
+												MarkdownDescription: "Server Name Server name is fully qualified domain name or IP address of the server<br>**Validation:** `Length LengthAtMost(256)`",
 												Required:            true,
 												Optional:            false,
 												Computed:            false,
 												Validators: []validator.String{
 													stringvalidator.LengthAtMost(256),
-												},
-											},
-											"port_choice": schema.SingleNestedAttribute{
-												Description:         "Port Number Select port number for communication",
-												MarkdownDescription: "",
-												Required:            true,
-												Optional:            false,
-												Computed:            false,
-												Validators: []validator.Object{
-													atmostoneofvalidator.AtMostOneOf(
-														"port",
-														"default_syslog_tls_port",
-														"default_https_port",
+													stringvalidator.RegexMatches(
+														regexp.MustCompile(`(^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)*[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?$)|(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)$)|(^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$)`),
+														"must be a valid hostname or IP address",
 													),
 												},
-												Attributes: map[string]schema.Attribute{
-													"port": schema.Int64Attribute{
-														Description:         "Custom Port Number Custom port number used for communication",
-														MarkdownDescription: "",
-														Required:            false,
-														Optional:            true,
-														Computed:            false,
-													},
-													"default_syslog_tls_port": schema.BoolAttribute{
-														Description:         "Default Syslog Port Default port number for syslog TLS is 6514",
-														MarkdownDescription: "",
-														Required:            false,
-														Optional:            true,
-														Computed:            false,
-														Validators: []validator.Bool{
-															boolvalidator.Equals(true),
-														},
-													},
-													"default_https_port": schema.BoolAttribute{
-														Description:         "Default HTTPS Port Default port number for HTTPS is 443.",
-														MarkdownDescription: "",
-														Required:            false,
-														Optional:            true,
-														Computed:            false,
-														Validators: []validator.Bool{
-															boolvalidator.Equals(true),
-														},
-													},
-												},
 											},
+										},
+									},
+									"tls_server": schema.SingleNestedAttribute{
+										Description:         "Mode TLS Syslog transport mode is TLS",
+										MarkdownDescription: "Mode TLS Syslog transport mode is TLS",
+										Required:            false,
+										Optional:            true,
+										Computed:            false,
+										Attributes: map[string]schema.Attribute{
 											"ca_choice": schema.SingleNestedAttribute{
 												Description:         "Trusted CA Trusted CA for TLS server",
-												MarkdownDescription: "",
+												MarkdownDescription: "Trusted CA Trusted CA for TLS server",
 												Required:            true,
 												Optional:            false,
 												Computed:            false,
 												Validators: []validator.Object{
-													atmostoneofvalidator.AtMostOneOf(
-														"volterra_ca",
+													exactlyoneofvalidator.RequiredExactlyOneOf(
 														"trusted_ca_url",
+														"volterra_ca",
 													),
 												},
 												Attributes: map[string]schema.Attribute{
+													"trusted_ca_url": schema.StringAttribute{
+														Description:         "Server CA certificates The URL or value for trusted Server CA certificate or certificate chain Certificates in PEM format including the PEM headers.",
+														MarkdownDescription: "Server CA certificates The URL or value for trusted Server CA certificate or certificate chain Certificates in PEM format including the PEM headers.",
+														Required:            false,
+														Optional:            true,
+														Computed:            false,
+														Validators: []validator.String{
+															bytesvalidator.BytesAtMost(131072),
+															stringvalidator.RegexMatches(
+																regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
+																"must be a valid URI reference (RFC 3986)",
+															),
+														},
+													},
 													"volterra_ca": schema.BoolAttribute{
 														Description:         "Default F5XC CA Use F5XC default CA",
-														MarkdownDescription: "",
+														MarkdownDescription: "Default F5XC CA Use F5XC default CA",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
 														Validators: []validator.Bool{
 															boolvalidator.Equals(true),
 														},
-													},
-													"trusted_ca_url": schema.StringAttribute{
-														Description:         "Server CA certificates The URL or value for trusted Server CA certificate or certificate chain Certificates in PEM format including the PEM headers.",
-														MarkdownDescription: "",
-														Required:            false,
-														Optional:            true,
-														Computed:            false,
 													},
 												},
 											},
 											"mtls_choice": schema.SingleNestedAttribute{
 												Description:         "mTLS config Select to enable mTLS configuration",
-												MarkdownDescription: "",
+												MarkdownDescription: "mTLS config Select to enable mTLS configuration",
 												Required:            true,
 												Optional:            false,
 												Computed:            false,
 												Validators: []validator.Object{
-													atmostoneofvalidator.AtMostOneOf(
+													exactlyoneofvalidator.RequiredExactlyOneOf(
 														"mtls_disabled",
 														"mtls_enable",
 													),
@@ -569,7 +535,7 @@ func (r *ResourceF5XCLogReceiver) Schema(ctx context.Context, request resource.S
 												Attributes: map[string]schema.Attribute{
 													"mtls_disabled": schema.BoolAttribute{
 														Description:         "mTLS is Disabled mTLS is disabled",
-														MarkdownDescription: "",
+														MarkdownDescription: "mTLS is Disabled mTLS is disabled",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
@@ -579,82 +545,116 @@ func (r *ResourceF5XCLogReceiver) Schema(ctx context.Context, request resource.S
 													},
 													"mtls_enable": schema.SingleNestedAttribute{
 														Description:         "Enable mTLS configuration Enable mTLS configuration",
-														MarkdownDescription: "",
+														MarkdownDescription: "Enable mTLS configuration Enable mTLS configuration",
 														Required:            false,
 														Optional:            true,
 														Computed:            false,
 														Attributes: map[string]schema.Attribute{
+															"certificate": schema.StringAttribute{
+																Description:         "The TLS certificate URL. Client  certificate is PEM-encoded certificate or certificate-chain.",
+																MarkdownDescription: "The TLS certificate URL. Client  certificate is PEM-encoded certificate or certificate-chain.",
+																Required:            false,
+																Optional:            true,
+																Computed:            false,
+																Validators: []validator.String{
+																	bytesvalidator.BytesAtMost(131072),
+																	stringvalidator.RegexMatches(
+																		regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
+																		"must be a valid URI reference (RFC 3986)",
+																	),
+																},
+															},
 															"key_url": schema.SingleNestedAttribute{
 																Description:         "Private Key Client private key file containing data in PEM format including the PEM headers. The data in this key file has to match accompanying certificate. The data may be optionally secured using BlindFold.",
-																MarkdownDescription: "",
+																MarkdownDescription: "Private Key Client private key file containing data in PEM format including the PEM headers. The data in this key file has to match accompanying certificate. The data may be optionally secured using BlindFold.",
 																Required:            false,
 																Optional:            true,
 																Computed:            false,
 																Attributes: map[string]schema.Attribute{
 																	"secret_info_choice": schema.SingleNestedAttribute{
 																		Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																		MarkdownDescription: "",
+																		MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
 																		Required:            true,
 																		Optional:            false,
 																		Computed:            false,
 																		Validators: []validator.Object{
-																			atmostoneofvalidator.AtMostOneOf(
+																			exactlyoneofvalidator.RequiredExactlyOneOf(
 																				"blindfold_secret_info",
 																				"clear_secret_info",
 																			),
 																		},
 																		Attributes: map[string]schema.Attribute{
-																			"clear_secret_info": schema.SingleNestedAttribute{
-																				Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																				MarkdownDescription: "",
-																				Required:            false,
-																				Optional:            true,
-																				Computed:            false,
-																				Attributes: map[string]schema.Attribute{
-																					"provider": schema.StringAttribute{
-																						Description:         "Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
-																						MarkdownDescription: "",
-																						Required:            false,
-																						Optional:            true,
-																						Computed:            false,
-																					},
-																					"url": schema.StringAttribute{
-																						Description:         "URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.",
-																						MarkdownDescription: "",
-																						Required:            true,
-																						Optional:            false,
-																						Computed:            false,
-																						Sensitive:           true,
-																					},
-																				},
-																			},
 																			"blindfold_secret_info": schema.SingleNestedAttribute{
 																				Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																				MarkdownDescription: "",
+																				MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
 																				Required:            false,
 																				Optional:            true,
 																				Computed:            false,
 																				Attributes: map[string]schema.Attribute{
 																					"decryption_provider": schema.StringAttribute{
 																						Description:         "Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.",
-																						MarkdownDescription: "",
-																						Required:            false,
-																						Optional:            true,
-																						Computed:            false,
-																					},
-																					"store_provider": schema.StringAttribute{
-																						Description:         "Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
-																						MarkdownDescription: "",
+																						MarkdownDescription: "Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.",
 																						Required:            false,
 																						Optional:            true,
 																						Computed:            false,
 																					},
 																					"location": schema.StringAttribute{
 																						Description:         "Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location",
-																						MarkdownDescription: "",
+																						MarkdownDescription: "Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location",
 																						Required:            true,
 																						Optional:            false,
 																						Computed:            false,
+																						Validators: []validator.String{
+																							stringvalidator.RegexMatches(
+																								regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
+																								"must be a valid URI reference (RFC 3986)",
+																							),
+																						},
+																					},
+																					"store_provider": schema.StringAttribute{
+																						Description:         "Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
+																						MarkdownDescription: "Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
+																						Required:            false,
+																						Optional:            true,
+																						Computed:            false,
+																						Validators: []validator.String{
+																							stringvalidator.LengthAtLeast(1),
+																						},
+																					},
+																				},
+																			},
+																			"clear_secret_info": schema.SingleNestedAttribute{
+																				Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																				MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																				Required:            false,
+																				Optional:            true,
+																				Computed:            false,
+																				Attributes: map[string]schema.Attribute{
+																					"provider": schema.StringAttribute{
+																						Description:         "Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
+																						MarkdownDescription: "Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
+																						Required:            false,
+																						Optional:            true,
+																						Computed:            false,
+																					},
+																					"url": schema.StringAttribute{
+																						Description:         "URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.",
+																						MarkdownDescription: "URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.",
+																						Required:            true,
+																						Optional:            false,
+																						Computed:            false,
+																						Sensitive:           true,
+																						Validators: []validator.String{
+																							stringvalidator.RegexMatches(
+																								regexp.MustCompile(`^string:///[^\s]*$`),
+																								"must match pattern `^string:///[^\\s]*$`",
+																							),
+																							bytesvalidator.BytesAtMost(131072),
+																							stringvalidator.RegexMatches(
+																								regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
+																								"must be a valid URI reference (RFC 3986)",
+																							),
+																						},
 																					},
 																				},
 																			},
@@ -662,41 +662,104 @@ func (r *ResourceF5XCLogReceiver) Schema(ctx context.Context, request resource.S
 																	},
 																},
 															},
-															"certificate": schema.StringAttribute{
-																Description:         "The TLS certificate URL. Client  certificate is PEM-encoded certificate or certificate-chain.",
-																MarkdownDescription: "",
-																Required:            false,
-																Optional:            true,
-																Computed:            false,
-															},
 														},
 													},
 												},
 											},
+											"port_choice": schema.SingleNestedAttribute{
+												Description:         "Port Number Select port number for communication",
+												MarkdownDescription: "Port Number Select port number for communication",
+												Required:            true,
+												Optional:            false,
+												Computed:            false,
+												Validators: []validator.Object{
+													exactlyoneofvalidator.RequiredExactlyOneOf(
+														"default_https_port",
+														"default_syslog_tls_port",
+														"port",
+													),
+												},
+												Attributes: map[string]schema.Attribute{
+													"default_https_port": schema.BoolAttribute{
+														Description:         "Default HTTPS Port Default port number for HTTPS is 443.",
+														MarkdownDescription: "Default HTTPS Port Default port number for HTTPS is 443.",
+														Required:            false,
+														Optional:            true,
+														Computed:            false,
+														Validators: []validator.Bool{
+															boolvalidator.Equals(true),
+														},
+													},
+													"default_syslog_tls_port": schema.BoolAttribute{
+														Description:         "Default Syslog Port Default port number for syslog TLS is 6514",
+														MarkdownDescription: "Default Syslog Port Default port number for syslog TLS is 6514",
+														Required:            false,
+														Optional:            true,
+														Computed:            false,
+														Validators: []validator.Bool{
+															boolvalidator.Equals(true),
+														},
+													},
+													"port": schema.Int64Attribute{
+														Description:         "Custom Port Number Custom port number used for communication",
+														MarkdownDescription: "Custom Port Number Custom port number used for communication",
+														Required:            false,
+														Optional:            true,
+														Computed:            false,
+														Validators: []validator.Int64{
+															int64validator.Between(1, 65535),
+														},
+													},
+												},
+											},
+											"server_name": schema.StringAttribute{
+												Description:         "Server Name ServerName is passed to the server for SNI and is used in the client to check server certificates against.",
+												MarkdownDescription: "Server Name ServerName is passed to the server for SNI and is used in the client to check server certificates against.<br>**Validation:** `Length LengthAtMost(256)`",
+												Required:            true,
+												Optional:            false,
+												Computed:            false,
+												Validators: []validator.String{
+													stringvalidator.LengthAtMost(256),
+													stringvalidator.RegexMatches(
+														regexp.MustCompile(`^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)*[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?$`),
+														"must be a valid hostname (RFC 1034)",
+													),
+												},
+											},
 										},
 									},
-								},
-							},
-							"format_choice": schema.SingleNestedAttribute{
-								Description:         "Syslog Format Select syslog format",
-								MarkdownDescription: "",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
-								Validators: []validator.Object{
-									atmostoneofvalidator.AtMostOneOf(
-										"syslog_rfc5424",
-									),
-								},
-								Attributes: map[string]schema.Attribute{
-									"syslog_rfc5424": schema.Int64Attribute{
-										Description:         "Syslog RFC5424 Format Select RFC5424 syslog format and maximum message length.",
-										MarkdownDescription: "",
+									"udp_server": schema.SingleNestedAttribute{
+										Description:         "Mode UDP Syslog transport mode is UDP",
+										MarkdownDescription: "Mode UDP Syslog transport mode is UDP",
 										Required:            false,
 										Optional:            true,
 										Computed:            false,
-										PlanModifiers: []planmodifier.Int64{
-											defaultvaluemodifier.NewDefaultValueModifierInt64(),
+										Attributes: map[string]schema.Attribute{
+											"port": schema.Int64Attribute{
+												Description:         "Port Number Port number used for communication",
+												MarkdownDescription: "Port Number Port number used for communication<br>**Default:** `514`",
+												Required:            false,
+												Optional:            true,
+												Computed:            true,
+												Default:             int64default.StaticInt64(514),
+												Validators: []validator.Int64{
+													int64validator.Between(1, 65535),
+												},
+											},
+											"server_name": schema.StringAttribute{
+												Description:         "Server Name Server name is fully qualified domain name or IP address of the server",
+												MarkdownDescription: "Server Name Server name is fully qualified domain name or IP address of the server<br>**Validation:** `Length LengthAtMost(256)`",
+												Required:            true,
+												Optional:            false,
+												Computed:            false,
+												Validators: []validator.String{
+													stringvalidator.LengthAtMost(256),
+													stringvalidator.RegexMatches(
+														regexp.MustCompile(`(^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)*[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?$)|(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)$)|(^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$)`),
+														"must be a valid hostname or IP address",
+													),
+												},
+											},
 										},
 									},
 								},
@@ -707,19 +770,19 @@ func (r *ResourceF5XCLogReceiver) Schema(ctx context.Context, request resource.S
 			},
 			"where_choice": schema.SingleNestedAttribute{
 				Description:         "Where Select where the log receiver is accessible",
-				MarkdownDescription: "",
+				MarkdownDescription: "Where Select where the log receiver is accessible",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
 				Validators: []validator.Object{
-					atmostoneofvalidator.AtMostOneOf(
+					exactlyoneofvalidator.RequiredExactlyOneOf(
 						"site_local",
 					),
 				},
 				Attributes: map[string]schema.Attribute{
 					"site_local": schema.BoolAttribute{
 						Description:         "Local Site Log receiver is accessible local to the site where it is used.",
-						MarkdownDescription: "",
+						MarkdownDescription: "Local Site Log receiver is accessible local to the site where it is used.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
@@ -731,7 +794,7 @@ func (r *ResourceF5XCLogReceiver) Schema(ctx context.Context, request resource.S
 			},
 			"timeouts": timeouts.Attributes(ctx, timeouts.Opts{
 				Create: true, // activate timeouts.create
-				Update: true, // activate timeouts.update
+				Update: true, // activate timeouts.update (false for CRLD resources)
 				Delete: true, // activate timeouts.delete
 				Read:   true, // activate timeouts.read
 			}),
@@ -831,23 +894,13 @@ func (r *ResourceF5XCLogReceiver) Create(ctx context.Context, request resource.C
 
 	// Populate createReq from data model
 
-	// resource modelToMetaRoot RequiredStringField --> Name
-	if !data.Name.IsNull() && !data.Name.IsUnknown() {
-		meta.Name = string(data.Name.ValueString())
-	}
-
-	// resource modelToMetaRoot RequiredStringField --> Namespace
-	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
-		meta.Namespace = string(data.Namespace.ValueString())
-	}
-
 	// resource modelToMetaRoot MapOfStringField --> Annotations
 	if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
 		var labels map[string]string
 		diags = data.Annotations.ElementsAs(ctx, &labels, false)
 		response.Diagnostics.Append(diags...)
 		if response.Diagnostics.HasError() {
-			tflog.Error(ctx, "Failed to convert annotations from map to model")
+			tflog.Error(ctx, "Failed to convert Annotations from map to model")
 			return
 		}
 		meta.Annotations = labels
@@ -860,9 +913,33 @@ func (r *ResourceF5XCLogReceiver) Create(ctx context.Context, request resource.C
 		meta.Description = string(data.Description.ValueString())
 	}
 
+	// resource modelToMetaRoot MapOfStringField --> Labels
+	if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
+		var labels map[string]string
+		diags = data.Labels.ElementsAs(ctx, &labels, false)
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			tflog.Error(ctx, "Failed to convert Labels from map to model")
+			return
+		}
+		meta.Labels = labels
+	} else {
+		meta.Labels = nil
+	}
+
+	// resource modelToMetaRoot RequiredStringField --> Name
+	if !data.Name.IsNull() && !data.Name.IsUnknown() {
+		meta.Name = string(data.Name.ValueString())
+	}
+
+	// resource modelToMetaRoot RequiredStringField --> Namespace
+	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
+		meta.Namespace = string(data.Namespace.ValueString())
+	}
+
 	// resource modelToSpecRoot RequiredOneOfField --> LogReceiverChoice
 	if !data.LogReceiverChoice.IsNull() && !data.LogReceiverChoice.IsUnknown() {
-		logReceiverChoiceModel := LogReceiverGlobalSpecTypeLogReceiverChoice{}
+		logReceiverChoiceModel := LogReceiverLogReceiverChoice{}
 		response.Diagnostics.Append(data.LogReceiverChoice.As(ctx, &logReceiverChoiceModel, basetypes.ObjectAsOptions{})...)
 		if response.Diagnostics.HasError() {
 			return
@@ -870,8 +947,8 @@ func (r *ResourceF5XCLogReceiver) Create(ctx context.Context, request resource.C
 
 		// resource modelToSpecNested PointerOfOneOfField --> Syslog
 		if !logReceiverChoiceModel.Syslog.IsNull() && !logReceiverChoiceModel.Syslog.IsUnknown() {
-			var logReceiverGlobalSpecTypeSyslogModel LogReceiverGlobalSpecTypeSyslog
-			response.Diagnostics.Append(logReceiverChoiceModel.Syslog.As(ctx, &logReceiverGlobalSpecTypeSyslogModel, basetypes.ObjectAsOptions{})...)
+			var logReceiverSyslogModel LogReceiverSyslog
+			response.Diagnostics.Append(logReceiverChoiceModel.Syslog.As(ctx, &logReceiverSyslogModel, basetypes.ObjectAsOptions{})...)
 			if response.Diagnostics.HasError() {
 				return
 			}
@@ -879,244 +956,10 @@ func (r *ResourceF5XCLogReceiver) Create(ctx context.Context, request resource.C
 			syslogOneOfSpec.Syslog = &ves_io_schema_log_receiver.SyslogReceiver{}
 			spec.LogReceiverChoice = syslogOneOfSpec
 
-			// resource modelToSpecNested RequiredOneOfField --> ModeChoice
-			if !logReceiverGlobalSpecTypeSyslogModel.ModeChoice.IsNull() && !logReceiverGlobalSpecTypeSyslogModel.ModeChoice.IsUnknown() {
-				syslogModeChoiceModel := LogReceiverSyslogReceiverModeChoice{}
-				response.Diagnostics.Append(logReceiverGlobalSpecTypeSyslogModel.ModeChoice.As(ctx, &syslogModeChoiceModel, basetypes.ObjectAsOptions{})...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// resource modelToSpecNested PointerOfOneOfField --> UdpServer
-				if !syslogModeChoiceModel.UdpServer.IsNull() && !syslogModeChoiceModel.UdpServer.IsUnknown() {
-					var logReceiverSyslogReceiverUdpServerModel LogReceiverSyslogReceiverUdpServer
-					response.Diagnostics.Append(syslogModeChoiceModel.UdpServer.As(ctx, &logReceiverSyslogReceiverUdpServerModel, basetypes.ObjectAsOptions{})...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					udpServerOneOfSpec := &ves_io_schema_log_receiver.SyslogReceiver_UdpServer{}
-					udpServerOneOfSpec.UdpServer = &ves_io_schema_log_receiver.UDPServerConfigType{}
-					syslogOneOfSpec.Syslog.ModeChoice = udpServerOneOfSpec
-
-					// resource modelToSpecNested RequiredStringField --> ServerName
-					if !logReceiverSyslogReceiverUdpServerModel.ServerName.IsNull() && !logReceiverSyslogReceiverUdpServerModel.ServerName.IsUnknown() {
-						udpServerOneOfSpec.UdpServer.ServerName = string(logReceiverSyslogReceiverUdpServerModel.ServerName.ValueString())
-					}
-
-					// resource modelToSpecNested RequiredUintField --> Port
-					udpServerOneOfSpec.UdpServer.Port = uint32(uint32(logReceiverSyslogReceiverUdpServerModel.Port.ValueInt64()))
-
-				}
-
-				// resource modelToSpecNested PointerOfOneOfField --> TcpServer
-				if !syslogModeChoiceModel.TcpServer.IsNull() && !syslogModeChoiceModel.TcpServer.IsUnknown() {
-					var logReceiverSyslogReceiverTcpServerModel LogReceiverSyslogReceiverTcpServer
-					response.Diagnostics.Append(syslogModeChoiceModel.TcpServer.As(ctx, &logReceiverSyslogReceiverTcpServerModel, basetypes.ObjectAsOptions{})...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					tcpServerOneOfSpec := &ves_io_schema_log_receiver.SyslogReceiver_TcpServer{}
-					tcpServerOneOfSpec.TcpServer = &ves_io_schema_log_receiver.TCPServerConfigType{}
-					syslogOneOfSpec.Syslog.ModeChoice = tcpServerOneOfSpec
-
-					// resource modelToSpecNested RequiredStringField --> ServerName
-					if !logReceiverSyslogReceiverTcpServerModel.ServerName.IsNull() && !logReceiverSyslogReceiverTcpServerModel.ServerName.IsUnknown() {
-						tcpServerOneOfSpec.TcpServer.ServerName = string(logReceiverSyslogReceiverTcpServerModel.ServerName.ValueString())
-					}
-
-					// resource modelToSpecNested RequiredUintField --> Port
-					tcpServerOneOfSpec.TcpServer.Port = uint32(uint32(logReceiverSyslogReceiverTcpServerModel.Port.ValueInt64()))
-
-				}
-
-				// resource modelToSpecNested PointerOfOneOfField --> TlsServer
-				if !syslogModeChoiceModel.TlsServer.IsNull() && !syslogModeChoiceModel.TlsServer.IsUnknown() {
-					var logReceiverSyslogReceiverTlsServerModel LogReceiverSyslogReceiverTlsServer
-					response.Diagnostics.Append(syslogModeChoiceModel.TlsServer.As(ctx, &logReceiverSyslogReceiverTlsServerModel, basetypes.ObjectAsOptions{})...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					tlsServerOneOfSpec := &ves_io_schema_log_receiver.SyslogReceiver_TlsServer{}
-					tlsServerOneOfSpec.TlsServer = &ves_io_schema_log_receiver.TLSConfigType{}
-					syslogOneOfSpec.Syslog.ModeChoice = tlsServerOneOfSpec
-
-					// resource modelToSpecNested RequiredStringField --> ServerName
-					if !logReceiverSyslogReceiverTlsServerModel.ServerName.IsNull() && !logReceiverSyslogReceiverTlsServerModel.ServerName.IsUnknown() {
-						tlsServerOneOfSpec.TlsServer.ServerName = string(logReceiverSyslogReceiverTlsServerModel.ServerName.ValueString())
-					}
-
-					// resource modelToSpecNested RequiredOneOfField --> PortChoice
-					if !logReceiverSyslogReceiverTlsServerModel.PortChoice.IsNull() && !logReceiverSyslogReceiverTlsServerModel.PortChoice.IsUnknown() {
-						tlsServerPortChoiceModel := LogReceiverTLSConfigTypePortChoice{}
-						response.Diagnostics.Append(logReceiverSyslogReceiverTlsServerModel.PortChoice.As(ctx, &tlsServerPortChoiceModel, basetypes.ObjectAsOptions{})...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// resource modelToSpecNested UintOfOneOfField --> Port
-						if !tlsServerPortChoiceModel.Port.IsNull() {
-							portSpecUint := &ves_io_schema_log_receiver.TLSConfigType_Port{}
-							portSpecUint.Port = uint32(tlsServerPortChoiceModel.Port.ValueInt64())
-							tlsServerOneOfSpec.TlsServer.PortChoice = portSpecUint
-						}
-
-						// resource modelToSpecNested BoolOfOneOfPointerField --> DefaultSyslogTlsPort
-						if !tlsServerPortChoiceModel.DefaultSyslogTlsPort.IsNull() && !tlsServerPortChoiceModel.DefaultSyslogTlsPort.IsUnknown() {
-							defaultSyslogTlsPortSpecBool := &ves_io_schema_log_receiver.TLSConfigType_DefaultSyslogTlsPort{}
-							defaultSyslogTlsPortSpecBool.DefaultSyslogTlsPort = &ves_io_schema.Empty{}
-							tlsServerOneOfSpec.TlsServer.PortChoice = defaultSyslogTlsPortSpecBool
-						}
-
-						// resource modelToSpecNested BoolOfOneOfPointerField --> DefaultHttpsPort
-						if !tlsServerPortChoiceModel.DefaultHttpsPort.IsNull() && !tlsServerPortChoiceModel.DefaultHttpsPort.IsUnknown() {
-							defaultHttpsPortSpecBool := &ves_io_schema_log_receiver.TLSConfigType_DefaultHttpsPort{}
-							defaultHttpsPortSpecBool.DefaultHttpsPort = &ves_io_schema.Empty{}
-							tlsServerOneOfSpec.TlsServer.PortChoice = defaultHttpsPortSpecBool
-						}
-
-					}
-
-					// resource modelToSpecNested RequiredOneOfField --> CaChoice
-					if !logReceiverSyslogReceiverTlsServerModel.CaChoice.IsNull() && !logReceiverSyslogReceiverTlsServerModel.CaChoice.IsUnknown() {
-						tlsServerCaChoiceModel := LogReceiverTLSConfigTypeCaChoice{}
-						response.Diagnostics.Append(logReceiverSyslogReceiverTlsServerModel.CaChoice.As(ctx, &tlsServerCaChoiceModel, basetypes.ObjectAsOptions{})...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// resource modelToSpecNested BoolOfOneOfPointerField --> VolterraCa
-						if !tlsServerCaChoiceModel.VolterraCa.IsNull() && !tlsServerCaChoiceModel.VolterraCa.IsUnknown() {
-							volterraCaSpecBool := &ves_io_schema_log_receiver.TLSConfigType_VolterraCa{}
-							volterraCaSpecBool.VolterraCa = &ves_io_schema.Empty{}
-							tlsServerOneOfSpec.TlsServer.CaChoice = volterraCaSpecBool
-						}
-
-						// resource modelToSpecNested StringOfOneOfField --> TrustedCaUrl
-						if !tlsServerCaChoiceModel.TrustedCaUrl.IsNull() && !tlsServerCaChoiceModel.TrustedCaUrl.IsUnknown() {
-							trustedCaUrlSpecStr := &ves_io_schema_log_receiver.TLSConfigType_TrustedCaUrl{}
-							trustedCaUrlSpecStr.TrustedCaUrl = string(tlsServerCaChoiceModel.TrustedCaUrl.ValueString())
-							tlsServerOneOfSpec.TlsServer.CaChoice = trustedCaUrlSpecStr
-						}
-
-					}
-
-					// resource modelToSpecNested RequiredOneOfField --> MtlsChoice
-					if !logReceiverSyslogReceiverTlsServerModel.MtlsChoice.IsNull() && !logReceiverSyslogReceiverTlsServerModel.MtlsChoice.IsUnknown() {
-						tlsServerMtlsChoiceModel := LogReceiverTLSConfigTypeMtlsChoice{}
-						response.Diagnostics.Append(logReceiverSyslogReceiverTlsServerModel.MtlsChoice.As(ctx, &tlsServerMtlsChoiceModel, basetypes.ObjectAsOptions{})...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// resource modelToSpecNested BoolOfOneOfPointerField --> MtlsDisabled
-						if !tlsServerMtlsChoiceModel.MtlsDisabled.IsNull() && !tlsServerMtlsChoiceModel.MtlsDisabled.IsUnknown() {
-							mtlsDisabledSpecBool := &ves_io_schema_log_receiver.TLSConfigType_MtlsDisabled{}
-							mtlsDisabledSpecBool.MtlsDisabled = &ves_io_schema.Empty{}
-							tlsServerOneOfSpec.TlsServer.MtlsChoice = mtlsDisabledSpecBool
-						}
-
-						// resource modelToSpecNested PointerOfOneOfField --> MtlsEnable
-						if !tlsServerMtlsChoiceModel.MtlsEnable.IsNull() && !tlsServerMtlsChoiceModel.MtlsEnable.IsUnknown() {
-							var logReceiverTLSConfigTypeMtlsEnableModel LogReceiverTLSConfigTypeMtlsEnable
-							response.Diagnostics.Append(tlsServerMtlsChoiceModel.MtlsEnable.As(ctx, &logReceiverTLSConfigTypeMtlsEnableModel, basetypes.ObjectAsOptions{})...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							mtlsEnableOneOfSpec := &ves_io_schema_log_receiver.TLSConfigType_MtlsEnable{}
-							mtlsEnableOneOfSpec.MtlsEnable = &ves_io_schema_log_receiver.TLSClientConfigType{}
-							tlsServerOneOfSpec.TlsServer.MtlsChoice = mtlsEnableOneOfSpec
-
-							// resource modelToSpecNested PointerField --> KeyUrl
-							if !logReceiverTLSConfigTypeMtlsEnableModel.KeyUrl.IsNull() && !logReceiverTLSConfigTypeMtlsEnableModel.KeyUrl.IsUnknown() {
-								var keyUrlModel LogReceiverSecretType
-								response.Diagnostics.Append(logReceiverTLSConfigTypeMtlsEnableModel.KeyUrl.As(ctx, &keyUrlModel, basetypes.ObjectAsOptions{})...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-
-								keyUrlSpec := &ves_io_schema.SecretType{}
-								mtlsEnableOneOfSpec.MtlsEnable.KeyUrl = keyUrlSpec
-
-								// resource modelToSpecNested RequiredOneOfField --> SecretInfoOneof
-								if !keyUrlModel.SecretInfoChoice.IsNull() && !keyUrlModel.SecretInfoChoice.IsUnknown() {
-									keyUrlSecretInfoChoiceModel := LogReceiverSecretTypeSecretInfoChoice{}
-									response.Diagnostics.Append(keyUrlModel.SecretInfoChoice.As(ctx, &keyUrlSecretInfoChoiceModel, basetypes.ObjectAsOptions{})...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									// resource modelToSpecNested PointerOfOneOfField --> ClearSecretInfo
-									if !keyUrlSecretInfoChoiceModel.ClearSecretInfo.IsNull() && !keyUrlSecretInfoChoiceModel.ClearSecretInfo.IsUnknown() {
-										var logReceiverSecretTypeClearSecretInfoModel LogReceiverSecretTypeClearSecretInfo
-										response.Diagnostics.Append(keyUrlSecretInfoChoiceModel.ClearSecretInfo.As(ctx, &logReceiverSecretTypeClearSecretInfoModel, basetypes.ObjectAsOptions{})...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										clearSecretInfoOneOfSpec := &ves_io_schema.SecretType_ClearSecretInfo{}
-										clearSecretInfoOneOfSpec.ClearSecretInfo = &ves_io_schema.ClearSecretInfoType{}
-										keyUrlSpec.SecretInfoOneof = clearSecretInfoOneOfSpec
-
-										// resource modelToSpecNested StringField --> Provider
-										if !logReceiverSecretTypeClearSecretInfoModel.Provider.IsNull() && !logReceiverSecretTypeClearSecretInfoModel.Provider.IsUnknown() {
-											clearSecretInfoOneOfSpec.ClearSecretInfo.Provider = string(logReceiverSecretTypeClearSecretInfoModel.Provider.ValueString())
-										}
-
-										// resource modelToSpecNested RequiredStringField --> Url
-										if !logReceiverSecretTypeClearSecretInfoModel.Url.IsNull() && !logReceiverSecretTypeClearSecretInfoModel.Url.IsUnknown() {
-											clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(logReceiverSecretTypeClearSecretInfoModel.Url.ValueString())
-										}
-
-									}
-
-									// resource modelToSpecNested PointerOfOneOfField --> BlindfoldSecretInfo
-									if !keyUrlSecretInfoChoiceModel.BlindfoldSecretInfo.IsNull() && !keyUrlSecretInfoChoiceModel.BlindfoldSecretInfo.IsUnknown() {
-										var logReceiverSecretTypeBlindfoldSecretInfoModel LogReceiverSecretTypeBlindfoldSecretInfo
-										response.Diagnostics.Append(keyUrlSecretInfoChoiceModel.BlindfoldSecretInfo.As(ctx, &logReceiverSecretTypeBlindfoldSecretInfoModel, basetypes.ObjectAsOptions{})...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										blindfoldSecretInfoOneOfSpec := &ves_io_schema.SecretType_BlindfoldSecretInfo{}
-										blindfoldSecretInfoOneOfSpec.BlindfoldSecretInfo = &ves_io_schema.BlindfoldSecretInfoType{}
-										keyUrlSpec.SecretInfoOneof = blindfoldSecretInfoOneOfSpec
-
-										// resource modelToSpecNested StringField --> DecryptionProvider
-										if !logReceiverSecretTypeBlindfoldSecretInfoModel.DecryptionProvider.IsNull() && !logReceiverSecretTypeBlindfoldSecretInfoModel.DecryptionProvider.IsUnknown() {
-											blindfoldSecretInfoOneOfSpec.BlindfoldSecretInfo.DecryptionProvider = string(logReceiverSecretTypeBlindfoldSecretInfoModel.DecryptionProvider.ValueString())
-										}
-
-										// resource modelToSpecNested StringField --> StoreProvider
-										if !logReceiverSecretTypeBlindfoldSecretInfoModel.StoreProvider.IsNull() && !logReceiverSecretTypeBlindfoldSecretInfoModel.StoreProvider.IsUnknown() {
-											blindfoldSecretInfoOneOfSpec.BlindfoldSecretInfo.StoreProvider = string(logReceiverSecretTypeBlindfoldSecretInfoModel.StoreProvider.ValueString())
-										}
-
-										// resource modelToSpecNested RequiredStringField --> Location
-										if !logReceiverSecretTypeBlindfoldSecretInfoModel.Location.IsNull() && !logReceiverSecretTypeBlindfoldSecretInfoModel.Location.IsUnknown() {
-											blindfoldSecretInfoOneOfSpec.BlindfoldSecretInfo.Location = string(logReceiverSecretTypeBlindfoldSecretInfoModel.Location.ValueString())
-										}
-
-									}
-
-								}
-
-							}
-
-							// resource modelToSpecNested StringField --> Certificate
-							if !logReceiverTLSConfigTypeMtlsEnableModel.Certificate.IsNull() && !logReceiverTLSConfigTypeMtlsEnableModel.Certificate.IsUnknown() {
-								mtlsEnableOneOfSpec.MtlsEnable.Certificate = string(logReceiverTLSConfigTypeMtlsEnableModel.Certificate.ValueString())
-							}
-
-						}
-
-					}
-
-				}
-
-			}
-
 			// resource modelToSpecNested RequiredOneOfField --> FormatChoice
-			if !logReceiverGlobalSpecTypeSyslogModel.FormatChoice.IsNull() && !logReceiverGlobalSpecTypeSyslogModel.FormatChoice.IsUnknown() {
-				syslogFormatChoiceModel := LogReceiverSyslogReceiverFormatChoice{}
-				response.Diagnostics.Append(logReceiverGlobalSpecTypeSyslogModel.FormatChoice.As(ctx, &syslogFormatChoiceModel, basetypes.ObjectAsOptions{})...)
+			if !logReceiverSyslogModel.FormatChoice.IsNull() && !logReceiverSyslogModel.FormatChoice.IsUnknown() {
+				syslogFormatChoiceModel := LogReceiverFormatChoice{}
+				response.Diagnostics.Append(logReceiverSyslogModel.FormatChoice.As(ctx, &syslogFormatChoiceModel, basetypes.ObjectAsOptions{})...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -1130,13 +973,247 @@ func (r *ResourceF5XCLogReceiver) Create(ctx context.Context, request resource.C
 
 			}
 
+			// resource modelToSpecNested RequiredOneOfField --> ModeChoice
+			if !logReceiverSyslogModel.ModeChoice.IsNull() && !logReceiverSyslogModel.ModeChoice.IsUnknown() {
+				syslogModeChoiceModel := LogReceiverModeChoice{}
+				response.Diagnostics.Append(logReceiverSyslogModel.ModeChoice.As(ctx, &syslogModeChoiceModel, basetypes.ObjectAsOptions{})...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				// resource modelToSpecNested PointerOfOneOfField --> TcpServer
+				if !syslogModeChoiceModel.TcpServer.IsNull() && !syslogModeChoiceModel.TcpServer.IsUnknown() {
+					var logReceiverTcpServerModel LogReceiverTcpServer
+					response.Diagnostics.Append(syslogModeChoiceModel.TcpServer.As(ctx, &logReceiverTcpServerModel, basetypes.ObjectAsOptions{})...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					tcpServerOneOfSpec := &ves_io_schema_log_receiver.SyslogReceiver_TcpServer{}
+					tcpServerOneOfSpec.TcpServer = &ves_io_schema_log_receiver.TCPServerConfigType{}
+					syslogOneOfSpec.Syslog.ModeChoice = tcpServerOneOfSpec
+
+					// resource modelToSpecNested RequiredUintField --> Port
+					tcpServerOneOfSpec.TcpServer.Port = uint32(uint32(logReceiverTcpServerModel.Port.ValueInt64()))
+
+					// resource modelToSpecNested RequiredStringField --> ServerName
+					if !logReceiverTcpServerModel.ServerName.IsNull() && !logReceiverTcpServerModel.ServerName.IsUnknown() {
+						tcpServerOneOfSpec.TcpServer.ServerName = string(logReceiverTcpServerModel.ServerName.ValueString())
+					}
+
+				}
+
+				// resource modelToSpecNested PointerOfOneOfField --> TlsServer
+				if !syslogModeChoiceModel.TlsServer.IsNull() && !syslogModeChoiceModel.TlsServer.IsUnknown() {
+					var logReceiverTlsServerModel LogReceiverTlsServer
+					response.Diagnostics.Append(syslogModeChoiceModel.TlsServer.As(ctx, &logReceiverTlsServerModel, basetypes.ObjectAsOptions{})...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					tlsServerOneOfSpec := &ves_io_schema_log_receiver.SyslogReceiver_TlsServer{}
+					tlsServerOneOfSpec.TlsServer = &ves_io_schema_log_receiver.TLSConfigType{}
+					syslogOneOfSpec.Syslog.ModeChoice = tlsServerOneOfSpec
+
+					// resource modelToSpecNested RequiredOneOfField --> CaChoice
+					if !logReceiverTlsServerModel.CaChoice.IsNull() && !logReceiverTlsServerModel.CaChoice.IsUnknown() {
+						tlsServerCaChoiceModel := LogReceiverCaChoice{}
+						response.Diagnostics.Append(logReceiverTlsServerModel.CaChoice.As(ctx, &tlsServerCaChoiceModel, basetypes.ObjectAsOptions{})...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						// resource modelToSpecNested StringOfOneOfField --> TrustedCaUrl
+						if !tlsServerCaChoiceModel.TrustedCaUrl.IsNull() && !tlsServerCaChoiceModel.TrustedCaUrl.IsUnknown() {
+							trustedCaUrlSpecStr := &ves_io_schema_log_receiver.TLSConfigType_TrustedCaUrl{}
+							trustedCaUrlSpecStr.TrustedCaUrl = string(tlsServerCaChoiceModel.TrustedCaUrl.ValueString())
+							tlsServerOneOfSpec.TlsServer.CaChoice = trustedCaUrlSpecStr
+						}
+
+						// resource modelToSpecNested BoolOfOneOfPointerField --> VolterraCa
+						if !tlsServerCaChoiceModel.VolterraCa.IsNull() && !tlsServerCaChoiceModel.VolterraCa.IsUnknown() {
+							volterraCaSpecBool := &ves_io_schema_log_receiver.TLSConfigType_VolterraCa{}
+							volterraCaSpecBool.VolterraCa = &ves_io_schema.Empty{}
+							tlsServerOneOfSpec.TlsServer.CaChoice = volterraCaSpecBool
+						}
+
+					}
+
+					// resource modelToSpecNested RequiredOneOfField --> MtlsChoice
+					if !logReceiverTlsServerModel.MtlsChoice.IsNull() && !logReceiverTlsServerModel.MtlsChoice.IsUnknown() {
+						tlsServerMtlsChoiceModel := LogReceiverMtlsChoice{}
+						response.Diagnostics.Append(logReceiverTlsServerModel.MtlsChoice.As(ctx, &tlsServerMtlsChoiceModel, basetypes.ObjectAsOptions{})...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						// resource modelToSpecNested BoolOfOneOfPointerField --> MtlsDisabled
+						if !tlsServerMtlsChoiceModel.MtlsDisabled.IsNull() && !tlsServerMtlsChoiceModel.MtlsDisabled.IsUnknown() {
+							mtlsDisabledSpecBool := &ves_io_schema_log_receiver.TLSConfigType_MtlsDisabled{}
+							mtlsDisabledSpecBool.MtlsDisabled = &ves_io_schema.Empty{}
+							tlsServerOneOfSpec.TlsServer.MtlsChoice = mtlsDisabledSpecBool
+						}
+
+						// resource modelToSpecNested PointerOfOneOfField --> MtlsEnable
+						if !tlsServerMtlsChoiceModel.MtlsEnable.IsNull() && !tlsServerMtlsChoiceModel.MtlsEnable.IsUnknown() {
+							var logReceiverMtlsEnableModel LogReceiverMtlsEnable
+							response.Diagnostics.Append(tlsServerMtlsChoiceModel.MtlsEnable.As(ctx, &logReceiverMtlsEnableModel, basetypes.ObjectAsOptions{})...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							mtlsEnableOneOfSpec := &ves_io_schema_log_receiver.TLSConfigType_MtlsEnable{}
+							mtlsEnableOneOfSpec.MtlsEnable = &ves_io_schema_log_receiver.TLSClientConfigType{}
+							tlsServerOneOfSpec.TlsServer.MtlsChoice = mtlsEnableOneOfSpec
+
+							// resource modelToSpecNested StringField --> Certificate
+							if !logReceiverMtlsEnableModel.Certificate.IsNull() && !logReceiverMtlsEnableModel.Certificate.IsUnknown() {
+								mtlsEnableOneOfSpec.MtlsEnable.Certificate = string(logReceiverMtlsEnableModel.Certificate.ValueString())
+							}
+
+							// resource modelToSpecNested PointerField --> KeyUrl
+							if !logReceiverMtlsEnableModel.KeyUrl.IsNull() && !logReceiverMtlsEnableModel.KeyUrl.IsUnknown() {
+								var keyUrlModel LogReceiverSecretType
+								response.Diagnostics.Append(logReceiverMtlsEnableModel.KeyUrl.As(ctx, &keyUrlModel, basetypes.ObjectAsOptions{})...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+
+								keyUrlSpec := &ves_io_schema.SecretType{}
+								mtlsEnableOneOfSpec.MtlsEnable.KeyUrl = keyUrlSpec
+
+								// resource modelToSpecNested RequiredOneOfField --> SecretInfoOneof
+								if !keyUrlModel.SecretInfoChoice.IsNull() && !keyUrlModel.SecretInfoChoice.IsUnknown() {
+									keyUrlSecretInfoChoiceModel := LogReceiverSecretInfoChoice{}
+									response.Diagnostics.Append(keyUrlModel.SecretInfoChoice.As(ctx, &keyUrlSecretInfoChoiceModel, basetypes.ObjectAsOptions{})...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+
+									// resource modelToSpecNested PointerOfOneOfField --> BlindfoldSecretInfo
+									if !keyUrlSecretInfoChoiceModel.BlindfoldSecretInfo.IsNull() && !keyUrlSecretInfoChoiceModel.BlindfoldSecretInfo.IsUnknown() {
+										var logReceiverBlindfoldSecretInfoModel LogReceiverBlindfoldSecretInfo
+										response.Diagnostics.Append(keyUrlSecretInfoChoiceModel.BlindfoldSecretInfo.As(ctx, &logReceiverBlindfoldSecretInfoModel, basetypes.ObjectAsOptions{})...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										blindfoldSecretInfoOneOfSpec := &ves_io_schema.SecretType_BlindfoldSecretInfo{}
+										blindfoldSecretInfoOneOfSpec.BlindfoldSecretInfo = &ves_io_schema.BlindfoldSecretInfoType{}
+										keyUrlSpec.SecretInfoOneof = blindfoldSecretInfoOneOfSpec
+
+										// resource modelToSpecNested StringField --> DecryptionProvider
+										if !logReceiverBlindfoldSecretInfoModel.DecryptionProvider.IsNull() && !logReceiverBlindfoldSecretInfoModel.DecryptionProvider.IsUnknown() {
+											blindfoldSecretInfoOneOfSpec.BlindfoldSecretInfo.DecryptionProvider = string(logReceiverBlindfoldSecretInfoModel.DecryptionProvider.ValueString())
+										}
+
+										// resource modelToSpecNested RequiredStringField --> Location
+										if !logReceiverBlindfoldSecretInfoModel.Location.IsNull() && !logReceiverBlindfoldSecretInfoModel.Location.IsUnknown() {
+											blindfoldSecretInfoOneOfSpec.BlindfoldSecretInfo.Location = string(logReceiverBlindfoldSecretInfoModel.Location.ValueString())
+										}
+
+										// resource modelToSpecNested StringField --> StoreProvider
+										if !logReceiverBlindfoldSecretInfoModel.StoreProvider.IsNull() && !logReceiverBlindfoldSecretInfoModel.StoreProvider.IsUnknown() {
+											blindfoldSecretInfoOneOfSpec.BlindfoldSecretInfo.StoreProvider = string(logReceiverBlindfoldSecretInfoModel.StoreProvider.ValueString())
+										}
+
+									}
+
+									// resource modelToSpecNested PointerOfOneOfField --> ClearSecretInfo
+									if !keyUrlSecretInfoChoiceModel.ClearSecretInfo.IsNull() && !keyUrlSecretInfoChoiceModel.ClearSecretInfo.IsUnknown() {
+										var logReceiverClearSecretInfoModel LogReceiverClearSecretInfo
+										response.Diagnostics.Append(keyUrlSecretInfoChoiceModel.ClearSecretInfo.As(ctx, &logReceiverClearSecretInfoModel, basetypes.ObjectAsOptions{})...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										clearSecretInfoOneOfSpec := &ves_io_schema.SecretType_ClearSecretInfo{}
+										clearSecretInfoOneOfSpec.ClearSecretInfo = &ves_io_schema.ClearSecretInfoType{}
+										keyUrlSpec.SecretInfoOneof = clearSecretInfoOneOfSpec
+
+										// resource modelToSpecNested StringField --> Provider
+										if !logReceiverClearSecretInfoModel.Provider.IsNull() && !logReceiverClearSecretInfoModel.Provider.IsUnknown() {
+											clearSecretInfoOneOfSpec.ClearSecretInfo.Provider = string(logReceiverClearSecretInfoModel.Provider.ValueString())
+										}
+
+										// resource modelToSpecNested RequiredStringField --> Url
+										if !logReceiverClearSecretInfoModel.Url.IsNull() && !logReceiverClearSecretInfoModel.Url.IsUnknown() {
+											clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(logReceiverClearSecretInfoModel.Url.ValueString())
+										}
+
+									}
+
+								}
+
+							}
+
+						}
+
+					}
+
+					// resource modelToSpecNested RequiredOneOfField --> PortChoice
+					if !logReceiverTlsServerModel.PortChoice.IsNull() && !logReceiverTlsServerModel.PortChoice.IsUnknown() {
+						tlsServerPortChoiceModel := LogReceiverPortChoice{}
+						response.Diagnostics.Append(logReceiverTlsServerModel.PortChoice.As(ctx, &tlsServerPortChoiceModel, basetypes.ObjectAsOptions{})...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						// resource modelToSpecNested BoolOfOneOfPointerField --> DefaultHttpsPort
+						if !tlsServerPortChoiceModel.DefaultHttpsPort.IsNull() && !tlsServerPortChoiceModel.DefaultHttpsPort.IsUnknown() {
+							defaultHttpsPortSpecBool := &ves_io_schema_log_receiver.TLSConfigType_DefaultHttpsPort{}
+							defaultHttpsPortSpecBool.DefaultHttpsPort = &ves_io_schema.Empty{}
+							tlsServerOneOfSpec.TlsServer.PortChoice = defaultHttpsPortSpecBool
+						}
+
+						// resource modelToSpecNested BoolOfOneOfPointerField --> DefaultSyslogTlsPort
+						if !tlsServerPortChoiceModel.DefaultSyslogTlsPort.IsNull() && !tlsServerPortChoiceModel.DefaultSyslogTlsPort.IsUnknown() {
+							defaultSyslogTlsPortSpecBool := &ves_io_schema_log_receiver.TLSConfigType_DefaultSyslogTlsPort{}
+							defaultSyslogTlsPortSpecBool.DefaultSyslogTlsPort = &ves_io_schema.Empty{}
+							tlsServerOneOfSpec.TlsServer.PortChoice = defaultSyslogTlsPortSpecBool
+						}
+
+						// resource modelToSpecNested UintOfOneOfField --> Port
+						if !tlsServerPortChoiceModel.Port.IsNull() {
+							portSpecUint := &ves_io_schema_log_receiver.TLSConfigType_Port{}
+							portSpecUint.Port = uint32(tlsServerPortChoiceModel.Port.ValueInt64())
+							tlsServerOneOfSpec.TlsServer.PortChoice = portSpecUint
+						}
+
+					}
+
+					// resource modelToSpecNested RequiredStringField --> ServerName
+					if !logReceiverTlsServerModel.ServerName.IsNull() && !logReceiverTlsServerModel.ServerName.IsUnknown() {
+						tlsServerOneOfSpec.TlsServer.ServerName = string(logReceiverTlsServerModel.ServerName.ValueString())
+					}
+
+				}
+
+				// resource modelToSpecNested PointerOfOneOfField --> UdpServer
+				if !syslogModeChoiceModel.UdpServer.IsNull() && !syslogModeChoiceModel.UdpServer.IsUnknown() {
+					var logReceiverUdpServerModel LogReceiverUdpServer
+					response.Diagnostics.Append(syslogModeChoiceModel.UdpServer.As(ctx, &logReceiverUdpServerModel, basetypes.ObjectAsOptions{})...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					udpServerOneOfSpec := &ves_io_schema_log_receiver.SyslogReceiver_UdpServer{}
+					udpServerOneOfSpec.UdpServer = &ves_io_schema_log_receiver.UDPServerConfigType{}
+					syslogOneOfSpec.Syslog.ModeChoice = udpServerOneOfSpec
+
+					// resource modelToSpecNested RequiredUintField --> Port
+					udpServerOneOfSpec.UdpServer.Port = uint32(uint32(logReceiverUdpServerModel.Port.ValueInt64()))
+
+					// resource modelToSpecNested RequiredStringField --> ServerName
+					if !logReceiverUdpServerModel.ServerName.IsNull() && !logReceiverUdpServerModel.ServerName.IsUnknown() {
+						udpServerOneOfSpec.UdpServer.ServerName = string(logReceiverUdpServerModel.ServerName.ValueString())
+					}
+
+				}
+
+			}
+
 		}
 
 	}
 
 	// resource modelToSpecRoot RequiredOneOfField --> WhereChoice
 	if !data.WhereChoice.IsNull() && !data.WhereChoice.IsUnknown() {
-		whereChoiceModel := LogReceiverGlobalSpecTypeWhereChoice{}
+		whereChoiceModel := LogReceiverWhereChoice{}
 		response.Diagnostics.Append(data.WhereChoice.As(ctx, &whereChoiceModel, basetypes.ObjectAsOptions{})...)
 		if response.Diagnostics.HasError() {
 			return
@@ -1150,12 +1227,18 @@ func (r *ResourceF5XCLogReceiver) Create(ctx context.Context, request resource.C
 		}
 
 	}
+	// Strip backend-injected label keys that must not be sent in Create/Update requests.
+	// These keys are stored in state (for drift-free plans) but must be omitted from the
+	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+		delete(meta.Labels, _omitKey)
+	}
 
 	if response.Diagnostics.HasError() {
 		return
 	}
 
-	createRspType := strings.Replace(ves_io_schema_virtual_network.ObjectType, "Object", "GetResponse", 1)
+	createRspType := strings.Replace(ves_io_schema_log_receiver.ObjectType, "Object", "GetResponse", 1)
 	protoMsgType := proto.MessageType(createRspType).Elem()
 	initialProtoMsg := reflect.New(protoMsgType).Interface().(proto.Message)
 	callRsp := &server.CallResponse{
@@ -1184,6 +1267,101 @@ func (r *ResourceF5XCLogReceiver) Create(ctx context.Context, request resource.C
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
+	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		annotationsApiMap := metaData.GetAnnotations()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Annotations already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Annotations.IsUnknown() {
+			if len(annotationsApiMap) > 0 {
+				annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+				response.Diagnostics.Append(annotationsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Annotations = annotationsMap
+			} else {
+				data.Annotations = types.MapNull(types.StringType)
+			}
+		}
+		// When plan is a known map (user labels or merged prior state), leave data.Annotations
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
+	}
+
+	// resource SpecToModelRoot Meta StringField --> Description
+	data.Description = types.StringValue(metaData.GetDescription())
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		labelsApiMap := metaData.GetLabels()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Labels already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Labels.IsUnknown() {
+			if len(labelsApiMap) > 0 {
+				labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+				response.Diagnostics.Append(labelsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Labels = labelsMap
+			} else {
+				data.Labels = types.MapNull(types.StringType)
+			}
+		}
+		// When plan is a known map (user labels or merged prior state), leave data.Labels
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
+	}
+
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
 	data.Name = types.StringValue(metaData.GetName())
 
@@ -1192,87 +1370,6 @@ func (r *ResourceF5XCLogReceiver) Create(ctx context.Context, request resource.C
 
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
-
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// CREATE / UPDATE: Store the plan value as-is so the apply result matches the plan.
-		// The plan is either:
-		//   - Unknown (config=null): store the full API response.
-		//   - config value (first create with user labels): store only user labels.
-		//   - prior state (update with user+backend labels): store the merged labels.
-		// In all cases, data.Labels already holds the correct plan value
-		// except when it is Unknown — in that case we use the API response.
-		if data.Labels.IsUnknown() {
-			data.Labels = labelsMap
-		}
-		// When plan is a known map, leave data.Labels unchanged (= plan value).
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
-
-	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// CREATE / UPDATE: Store the plan value as-is so the apply result matches the plan.
-		// The plan is either:
-		//   - Unknown (config=null): store the full API response.
-		//   - config value (first create with user labels): store only user labels.
-		//   - prior state (update with user+backend labels): store the merged labels.
-		// In all cases, data.Annotations already holds the correct plan value
-		// except when it is Unknown — in that case we use the API response.
-		if data.Annotations.IsUnknown() {
-			data.Annotations = annotationsMap
-		}
-		// When plan is a known map, leave data.Annotations unchanged (= plan value).
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Annotations = types.MapNull(types.StringType)
-	}
-
-	// resource SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
 
 	// resource SpecToModelRoot RequiredOneOfField --> LogReceiverChoice
 	// false
@@ -1283,7 +1380,7 @@ func (r *ResourceF5XCLogReceiver) Create(ctx context.Context, request resource.C
 		logReceiverChoiceChoices := specData.GetLogReceiverChoice()
 
 		// The model struct that will be populated by the nested template.
-		var logReceiverChoiceChoicesModel = &LogReceiverGlobalSpecTypeLogReceiverChoice{}
+		var logReceiverChoiceChoicesModel = &LogReceiverLogReceiverChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -1291,449 +1388,20 @@ func (r *ResourceF5XCLogReceiver) Create(ctx context.Context, request resource.C
 		// GlobalSpecType
 		// false
 		{
-			syslogOptions, isSyslog := logReceiverChoiceChoices.(*ves_io_schema_log_receiver.GlobalSpecType_Syslog)
+			syslogOptionsWrapper, isSyslog := logReceiverChoiceChoices.(*ves_io_schema_log_receiver.GlobalSpecType_Syslog)
 			syslogAttributeMap := make(map[string]attr.Value)
 
-			if isSyslog && syslogOptions != nil {
-
-				// resource specToModelNested RequiredOneOfField --> ModeChoice
-				// GlobalSpecType
-				if syslogOptions.Syslog.GetModeChoice() != nil {
-					// Create a temporary attribute map for the choices within this OneOf
-					syslogmodeChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-					// Define a variable for the spec choices to be passed down to nested templates
-					syslogmodeChoiceChoices := syslogOptions.Syslog.GetModeChoice()
-
-					// Process nested choices, populating the temporary attribute map
-
-					// resource specToModelNested PointerOfOneOfField --> UdpServer
-					// GlobalSpecType
-					// false
-					{
-						udpServerOptions, isUdpServer := syslogmodeChoiceChoices.(*ves_io_schema_log_receiver.SyslogReceiver_UdpServer)
-						udpServerAttributeMap := make(map[string]attr.Value)
-
-						if isUdpServer && udpServerOptions != nil {
-
-							// resource specToModelNested RequiredStringField --> ServerName
-							if udpServerOptions.UdpServer.GetServerName() != "" {
-								udpServerAttributeMap["server_name"] = types.StringValue(udpServerOptions.UdpServer.GetServerName())
-							} else {
-								// Empty string, set to null
-								udpServerAttributeMap["server_name"] = types.StringNull()
-							}
-
-							// resource specToModelNested RequiredUintField --> Port
-							udpServerAttributeMap["port"] = types.Int64Value(int64(udpServerOptions.UdpServer.GetPort()))
-
-							udpServerObj, diags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceUdpServerModelAttributeMap, udpServerAttributeMap)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							syslogmodeChoiceChoicesAttributeMap["udp_server"] = udpServerObj
-						} else {
-							syslogmodeChoiceChoicesAttributeMap["udp_server"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceUdpServerModelAttributeMap)
-						}
-					}
-
-					// resource specToModelNested PointerOfOneOfField --> TcpServer
-					// GlobalSpecType
-					// false
-					{
-						tcpServerOptions, isTcpServer := syslogmodeChoiceChoices.(*ves_io_schema_log_receiver.SyslogReceiver_TcpServer)
-						tcpServerAttributeMap := make(map[string]attr.Value)
-
-						if isTcpServer && tcpServerOptions != nil {
-
-							// resource specToModelNested RequiredStringField --> ServerName
-							if tcpServerOptions.TcpServer.GetServerName() != "" {
-								tcpServerAttributeMap["server_name"] = types.StringValue(tcpServerOptions.TcpServer.GetServerName())
-							} else {
-								// Empty string, set to null
-								tcpServerAttributeMap["server_name"] = types.StringNull()
-							}
-
-							// resource specToModelNested RequiredUintField --> Port
-							tcpServerAttributeMap["port"] = types.Int64Value(int64(tcpServerOptions.TcpServer.GetPort()))
-
-							tcpServerObj, diags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceTcpServerModelAttributeMap, tcpServerAttributeMap)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							syslogmodeChoiceChoicesAttributeMap["tcp_server"] = tcpServerObj
-						} else {
-							syslogmodeChoiceChoicesAttributeMap["tcp_server"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTcpServerModelAttributeMap)
-						}
-					}
-
-					// resource specToModelNested PointerOfOneOfField --> TlsServer
-					// GlobalSpecType
-					// false
-					{
-						tlsServerOptions, isTlsServer := syslogmodeChoiceChoices.(*ves_io_schema_log_receiver.SyslogReceiver_TlsServer)
-						tlsServerAttributeMap := make(map[string]attr.Value)
-
-						if isTlsServer && tlsServerOptions != nil {
-
-							// resource specToModelNested RequiredStringField --> ServerName
-							if tlsServerOptions.TlsServer.GetServerName() != "" {
-								tlsServerAttributeMap["server_name"] = types.StringValue(tlsServerOptions.TlsServer.GetServerName())
-							} else {
-								// Empty string, set to null
-								tlsServerAttributeMap["server_name"] = types.StringNull()
-							}
-
-							// resource specToModelNested RequiredOneOfField --> PortChoice
-							// GlobalSpecType
-							if tlsServerOptions.TlsServer.GetPortChoice() != nil {
-								// Create a temporary attribute map for the choices within this OneOf
-								tlsServerportChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-								// Define a variable for the spec choices to be passed down to nested templates
-								tlsServerportChoiceChoices := tlsServerOptions.TlsServer.GetPortChoice()
-
-								// Process nested choices, populating the temporary attribute map
-
-								// resource specToModelNested UintOfOneOfField --> Port
-								portItem, isPort := tlsServerportChoiceChoices.(*ves_io_schema_log_receiver.TLSConfigType_Port)
-
-								if isPort {
-									tlsServerportChoiceChoicesAttributeMap["port"] = types.Int64Value(int64(portItem.Port))
-								} else {
-									// Empty uint, set to null
-									tlsServerportChoiceChoicesAttributeMap["port"] = types.Int64Null()
-								}
-
-								// resource specToModelNested BoolOfOneOfPointerField --> DefaultSyslogTlsPort
-								_, isDefaultSyslogTlsPort := tlsServerportChoiceChoices.(*ves_io_schema_log_receiver.TLSConfigType_DefaultSyslogTlsPort)
-
-								if isDefaultSyslogTlsPort {
-									tlsServerportChoiceChoicesAttributeMap["default_syslog_tls_port"] = types.BoolValue(true)
-								} else {
-									tlsServerportChoiceChoicesAttributeMap["default_syslog_tls_port"] = types.BoolNull()
-								}
-
-								// resource specToModelNested BoolOfOneOfPointerField --> DefaultHttpsPort
-								_, isDefaultHttpsPort := tlsServerportChoiceChoices.(*ves_io_schema_log_receiver.TLSConfigType_DefaultHttpsPort)
-
-								if isDefaultHttpsPort {
-									tlsServerportChoiceChoicesAttributeMap["default_https_port"] = types.BoolValue(true)
-								} else {
-									tlsServerportChoiceChoicesAttributeMap["default_https_port"] = types.BoolNull()
-								}
-
-								// --- End of Choices ---
-
-								// Create the final ObjectValue for this OneOf field
-								finalObj, tlsServerportChoiceChoicesObjDiags := types.ObjectValue(
-									LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerPortChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-									tlsServerportChoiceChoicesAttributeMap,
-								)
-								response.Diagnostics.Append(tlsServerportChoiceChoicesObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-
-								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								tlsServerAttributeMap["port_choice"] = finalObj
-							} else {
-								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								tlsServerAttributeMap["port_choice"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerPortChoiceModelAttributeMap)
-							}
-
-							// resource specToModelNested RequiredOneOfField --> CaChoice
-							// GlobalSpecType
-							if tlsServerOptions.TlsServer.GetCaChoice() != nil {
-								// Create a temporary attribute map for the choices within this OneOf
-								tlsServercaChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-								// Define a variable for the spec choices to be passed down to nested templates
-								tlsServercaChoiceChoices := tlsServerOptions.TlsServer.GetCaChoice()
-
-								// Process nested choices, populating the temporary attribute map
-
-								// resource specToModelNested BoolOfOneOfPointerField --> VolterraCa
-								_, isVolterraCa := tlsServercaChoiceChoices.(*ves_io_schema_log_receiver.TLSConfigType_VolterraCa)
-
-								if isVolterraCa {
-									tlsServercaChoiceChoicesAttributeMap["volterra_ca"] = types.BoolValue(true)
-								} else {
-									tlsServercaChoiceChoicesAttributeMap["volterra_ca"] = types.BoolNull()
-								}
-
-								// resource specToModelNested StringOfOneOfField --> TrustedCaUrl
-								trustedCaUrlItem, isTrustedCaUrl := tlsServercaChoiceChoices.(*ves_io_schema_log_receiver.TLSConfigType_TrustedCaUrl)
-
-								if isTrustedCaUrl {
-									tlsServercaChoiceChoicesAttributeMap["trusted_ca_url"] = types.StringValue(string(trustedCaUrlItem.TrustedCaUrl))
-								} else {
-									// Empty string, set to null
-									tlsServercaChoiceChoicesAttributeMap["trusted_ca_url"] = types.StringNull()
-								}
-
-								// --- End of Choices ---
-
-								// Create the final ObjectValue for this OneOf field
-								finalObj, tlsServercaChoiceChoicesObjDiags := types.ObjectValue(
-									LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerCaChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-									tlsServercaChoiceChoicesAttributeMap,
-								)
-								response.Diagnostics.Append(tlsServercaChoiceChoicesObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-
-								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								tlsServerAttributeMap["ca_choice"] = finalObj
-							} else {
-								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								tlsServerAttributeMap["ca_choice"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerCaChoiceModelAttributeMap)
-							}
-
-							// resource specToModelNested RequiredOneOfField --> MtlsChoice
-							// GlobalSpecType
-							if tlsServerOptions.TlsServer.GetMtlsChoice() != nil {
-								// Create a temporary attribute map for the choices within this OneOf
-								tlsServermtlsChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-								// Define a variable for the spec choices to be passed down to nested templates
-								tlsServermtlsChoiceChoices := tlsServerOptions.TlsServer.GetMtlsChoice()
-
-								// Process nested choices, populating the temporary attribute map
-
-								// resource specToModelNested BoolOfOneOfPointerField --> MtlsDisabled
-								_, isMtlsDisabled := tlsServermtlsChoiceChoices.(*ves_io_schema_log_receiver.TLSConfigType_MtlsDisabled)
-
-								if isMtlsDisabled {
-									tlsServermtlsChoiceChoicesAttributeMap["mtls_disabled"] = types.BoolValue(true)
-								} else {
-									tlsServermtlsChoiceChoicesAttributeMap["mtls_disabled"] = types.BoolNull()
-								}
-
-								// resource specToModelNested PointerOfOneOfField --> MtlsEnable
-								// GlobalSpecType
-								// false
-								{
-									mtlsEnableOptions, isMtlsEnable := tlsServermtlsChoiceChoices.(*ves_io_schema_log_receiver.TLSConfigType_MtlsEnable)
-									mtlsEnableAttributeMap := make(map[string]attr.Value)
-
-									if isMtlsEnable && mtlsEnableOptions != nil {
-
-										// resource specToModelNested PointerField --> KeyUrl
-										if mtlsEnableOptions.MtlsEnable.GetKeyUrl() != nil {
-											// Create the nested Go struct
-											logReceiverSecretTypeModel := &LogReceiverSecretType{}
-											keyUrlElement := mtlsEnableOptions.MtlsEnable.GetKeyUrl()
-
-											// Recursively populate the nested struct
-
-											// resource specToModelNested RequiredOneOfField --> SecretInfoOneof
-											// GlobalSpecType
-											if keyUrlElement.GetSecretInfoOneof() != nil {
-												// Create a temporary attribute map for the choices within this OneOf
-												keyUrlsecretInfoChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-												// Define a variable for the spec choices to be passed down to nested templates
-												keyUrlsecretInfoChoiceChoices := keyUrlElement.GetSecretInfoOneof()
-
-												// Process nested choices, populating the temporary attribute map
-
-												// resource specToModelNested PointerOfOneOfField --> ClearSecretInfo
-												// GlobalSpecType
-												// false
-												{
-													clearSecretInfoOptions, isClearSecretInfo := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_ClearSecretInfo)
-													clearSecretInfoAttributeMap := make(map[string]attr.Value)
-
-													if isClearSecretInfo && clearSecretInfoOptions != nil {
-
-														// resource specToModelNested StringField --> Provider
-														if clearSecretInfoOptions.ClearSecretInfo.GetProvider() != "" {
-															clearSecretInfoAttributeMap["provider"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetProvider())
-														} else {
-															// Empty string, set to null
-															clearSecretInfoAttributeMap["provider"] = types.StringNull()
-														}
-
-														// resource specToModelNested RequiredStringField --> Url
-														if clearSecretInfoOptions.ClearSecretInfo.GetUrl() != "" {
-															clearSecretInfoAttributeMap["url"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetUrl())
-														} else {
-															// Empty string, set to null
-															clearSecretInfoAttributeMap["url"] = types.StringNull()
-														}
-
-														clearSecretInfoObj, diags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap, clearSecretInfoAttributeMap)
-														response.Diagnostics.Append(diags...)
-														if response.Diagnostics.HasError() {
-															return
-														}
-														keyUrlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = clearSecretInfoObj
-													} else {
-														keyUrlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap)
-													}
-												}
-
-												// resource specToModelNested PointerOfOneOfField --> BlindfoldSecretInfo
-												// GlobalSpecType
-												// false
-												{
-													blindfoldSecretInfoOptions, isBlindfoldSecretInfo := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_BlindfoldSecretInfo)
-													blindfoldSecretInfoAttributeMap := make(map[string]attr.Value)
-
-													if isBlindfoldSecretInfo && blindfoldSecretInfoOptions != nil {
-
-														// resource specToModelNested StringField --> DecryptionProvider
-														if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider() != "" {
-															blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider())
-														} else {
-															// Empty string, set to null
-															blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringNull()
-														}
-
-														// resource specToModelNested StringField --> StoreProvider
-														if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider() != "" {
-															blindfoldSecretInfoAttributeMap["store_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider())
-														} else {
-															// Empty string, set to null
-															blindfoldSecretInfoAttributeMap["store_provider"] = types.StringNull()
-														}
-
-														// resource specToModelNested RequiredStringField --> Location
-														if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation() != "" {
-															blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation())
-														} else {
-															// Empty string, set to null
-															blindfoldSecretInfoAttributeMap["location"] = types.StringNull()
-														}
-
-														blindfoldSecretInfoObj, diags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
-														response.Diagnostics.Append(diags...)
-														if response.Diagnostics.HasError() {
-															return
-														}
-														keyUrlsecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = blindfoldSecretInfoObj
-													} else {
-														keyUrlsecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofBlindfoldSecretInfoModelAttributeMap)
-													}
-												}
-
-												// --- End of Choices ---
-
-												// Create the final ObjectValue for this OneOf field
-												finalObj, keyUrlsecretInfoChoiceChoicesObjDiags := types.ObjectValue(
-													LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofModelAttributeMap, // The attribute schema for the OneOf choices
-													keyUrlsecretInfoChoiceChoicesAttributeMap,
-												)
-												response.Diagnostics.Append(keyUrlsecretInfoChoiceChoicesObjDiags...)
-												if response.Diagnostics.HasError() {
-													return
-												}
-
-												// Assign the final object to the correct place (either the root model or a parent's attribute map)
-												logReceiverSecretTypeModel.SecretInfoChoice = finalObj
-											} else {
-												// The OneOf field is nil in the source spec, so set the Terraform object to null.
-												logReceiverSecretTypeModel.SecretInfoChoice = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofModelAttributeMap)
-											}
-
-											// This field needs to be converted to a types.ObjectValue before assignment.
-											logReceiverSecretTypeModelObj, diags := types.ObjectValueFrom(ctx, LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlModelAttributeMap, logReceiverSecretTypeModel)
-											response.Diagnostics.Append(diags...)
-											if response.Diagnostics.HasError() {
-												return
-											}
-											mtlsEnableAttributeMap["key_url"] = logReceiverSecretTypeModelObj
-
-										} else {
-											// The source field is nil (e.g. redacted by the API).
-											// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-											// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-											// because the API may always return a non-nil struct (with REDACTED values) for this field,
-											// making this else-branch unreachable. The child OneOf handles the actual healing.
-											// The target is a types.Object, so we use types.ObjectNull.
-											mtlsEnableAttributeMap["key_url"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlModelAttributeMap)
-										}
-
-										// resource specToModelNested StringField --> Certificate
-										if mtlsEnableOptions.MtlsEnable.GetCertificate() != "" {
-											mtlsEnableAttributeMap["certificate"] = types.StringValue(mtlsEnableOptions.MtlsEnable.GetCertificate())
-										} else {
-											// Empty string, set to null
-											mtlsEnableAttributeMap["certificate"] = types.StringNull()
-										}
-
-										mtlsEnableObj, diags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableModelAttributeMap, mtlsEnableAttributeMap)
-										response.Diagnostics.Append(diags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										tlsServermtlsChoiceChoicesAttributeMap["mtls_enable"] = mtlsEnableObj
-									} else {
-										tlsServermtlsChoiceChoicesAttributeMap["mtls_enable"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableModelAttributeMap)
-									}
-								}
-
-								// --- End of Choices ---
-
-								// Create the final ObjectValue for this OneOf field
-								finalObj, tlsServermtlsChoiceChoicesObjDiags := types.ObjectValue(
-									LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-									tlsServermtlsChoiceChoicesAttributeMap,
-								)
-								response.Diagnostics.Append(tlsServermtlsChoiceChoicesObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-
-								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								tlsServerAttributeMap["mtls_choice"] = finalObj
-							} else {
-								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								tlsServerAttributeMap["mtls_choice"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceModelAttributeMap)
-							}
-
-							tlsServerObj, diags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerModelAttributeMap, tlsServerAttributeMap)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							syslogmodeChoiceChoicesAttributeMap["tls_server"] = tlsServerObj
-						} else {
-							syslogmodeChoiceChoicesAttributeMap["tls_server"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerModelAttributeMap)
-						}
-					}
-
-					// --- End of Choices ---
-
-					// Create the final ObjectValue for this OneOf field
-					finalObj, syslogmodeChoiceChoicesObjDiags := types.ObjectValue(
-						LogReceiverLogReceiverChoiceSyslogModeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-						syslogmodeChoiceChoicesAttributeMap,
-					)
-					response.Diagnostics.Append(syslogmodeChoiceChoicesObjDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-
-					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-					syslogAttributeMap["mode_choice"] = finalObj
-				} else {
-					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					syslogAttributeMap["mode_choice"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceModelAttributeMap)
-				}
+			if isSyslog && syslogOptionsWrapper != nil && syslogOptionsWrapper.Syslog != nil {
+				syslogElement := syslogOptionsWrapper.Syslog
 
 				// resource specToModelNested RequiredOneOfField --> FormatChoice
 				// GlobalSpecType
-				if syslogOptions.Syslog.GetFormatChoice() != nil {
+				if syslogElement.GetFormatChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					syslogformatChoiceChoicesAttributeMap := make(map[string]attr.Value)
 
 					// Define a variable for the spec choices to be passed down to nested templates
-					syslogformatChoiceChoices := syslogOptions.Syslog.GetFormatChoice()
+					syslogformatChoiceChoices := syslogElement.GetFormatChoice()
 
 					// Process nested choices, populating the temporary attribute map
 
@@ -1766,8 +1434,444 @@ func (r *ResourceF5XCLogReceiver) Create(ctx context.Context, request resource.C
 					syslogAttributeMap["format_choice"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogFormatChoiceModelAttributeMap)
 				}
 
-				syslogObj, diags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModelAttributeMap, syslogAttributeMap)
-				response.Diagnostics.Append(diags...)
+				// resource specToModelNested RequiredOneOfField --> ModeChoice
+				// GlobalSpecType
+				if syslogElement.GetModeChoice() != nil {
+					// Create a temporary attribute map for the choices within this OneOf
+					syslogmodeChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+					// Define a variable for the spec choices to be passed down to nested templates
+					syslogmodeChoiceChoices := syslogElement.GetModeChoice()
+
+					// Process nested choices, populating the temporary attribute map
+
+					// resource specToModelNested PointerOfOneOfField --> TcpServer
+					// GlobalSpecType
+					// false
+					{
+						tcpServerOptionsWrapper, isTcpServer := syslogmodeChoiceChoices.(*ves_io_schema_log_receiver.SyslogReceiver_TcpServer)
+						tcpServerAttributeMap := make(map[string]attr.Value)
+
+						if isTcpServer && tcpServerOptionsWrapper != nil && tcpServerOptionsWrapper.TcpServer != nil {
+							tcpServerElement := tcpServerOptionsWrapper.TcpServer
+
+							// resource specToModelNested RequiredUintField --> Port
+							tcpServerAttributeMap["port"] = types.Int64Value(int64(tcpServerElement.GetPort()))
+
+							// resource specToModelNested RequiredStringField --> ServerName
+							if tcpServerElement.GetServerName() != "" {
+								tcpServerAttributeMap["server_name"] = types.StringValue(tcpServerElement.GetServerName())
+							} else {
+								// Empty string, set to null
+								tcpServerAttributeMap["server_name"] = types.StringNull()
+							}
+
+							tcpServerObj, tcpServerObjDiags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceTcpServerModelAttributeMap, tcpServerAttributeMap)
+							response.Diagnostics.Append(tcpServerObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							syslogmodeChoiceChoicesAttributeMap["tcp_server"] = tcpServerObj
+						} else {
+							syslogmodeChoiceChoicesAttributeMap["tcp_server"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTcpServerModelAttributeMap)
+						}
+					}
+
+					// resource specToModelNested PointerOfOneOfField --> TlsServer
+					// GlobalSpecType
+					// false
+					{
+						tlsServerOptionsWrapper, isTlsServer := syslogmodeChoiceChoices.(*ves_io_schema_log_receiver.SyslogReceiver_TlsServer)
+						tlsServerAttributeMap := make(map[string]attr.Value)
+
+						if isTlsServer && tlsServerOptionsWrapper != nil && tlsServerOptionsWrapper.TlsServer != nil {
+							tlsServerElement := tlsServerOptionsWrapper.TlsServer
+
+							// resource specToModelNested RequiredOneOfField --> CaChoice
+							// GlobalSpecType
+							if tlsServerElement.GetCaChoice() != nil {
+								// Create a temporary attribute map for the choices within this OneOf
+								tlsServercaChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+								// Define a variable for the spec choices to be passed down to nested templates
+								tlsServercaChoiceChoices := tlsServerElement.GetCaChoice()
+
+								// Process nested choices, populating the temporary attribute map
+
+								// resource specToModelNested StringOfOneOfField --> TrustedCaUrl
+								trustedCaUrlItem, isTrustedCaUrl := tlsServercaChoiceChoices.(*ves_io_schema_log_receiver.TLSConfigType_TrustedCaUrl)
+
+								if isTrustedCaUrl {
+									tlsServercaChoiceChoicesAttributeMap["trusted_ca_url"] = types.StringValue(string(trustedCaUrlItem.TrustedCaUrl))
+								} else {
+									// Empty string, set to null
+									tlsServercaChoiceChoicesAttributeMap["trusted_ca_url"] = types.StringNull()
+								}
+
+								// resource specToModelNested BoolOfOneOfPointerField --> VolterraCa
+								_, isVolterraCa := tlsServercaChoiceChoices.(*ves_io_schema_log_receiver.TLSConfigType_VolterraCa)
+
+								if isVolterraCa {
+									tlsServercaChoiceChoicesAttributeMap["volterra_ca"] = types.BoolValue(true)
+								} else {
+									tlsServercaChoiceChoicesAttributeMap["volterra_ca"] = types.BoolNull()
+								}
+
+								// --- End of Choices ---
+
+								// Create the final ObjectValue for this OneOf field
+								finalObj, tlsServercaChoiceChoicesObjDiags := types.ObjectValue(
+									LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerCaChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+									tlsServercaChoiceChoicesAttributeMap,
+								)
+								response.Diagnostics.Append(tlsServercaChoiceChoicesObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+
+								// Assign the final object to the correct place (either the root model or a parent's attribute map)
+								tlsServerAttributeMap["ca_choice"] = finalObj
+							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
+								tlsServerAttributeMap["ca_choice"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerCaChoiceModelAttributeMap)
+							}
+
+							// resource specToModelNested RequiredOneOfField --> MtlsChoice
+							// GlobalSpecType
+							if tlsServerElement.GetMtlsChoice() != nil {
+								// Create a temporary attribute map for the choices within this OneOf
+								tlsServermtlsChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+								// Define a variable for the spec choices to be passed down to nested templates
+								tlsServermtlsChoiceChoices := tlsServerElement.GetMtlsChoice()
+
+								// Process nested choices, populating the temporary attribute map
+
+								// resource specToModelNested BoolOfOneOfPointerField --> MtlsDisabled
+								_, isMtlsDisabled := tlsServermtlsChoiceChoices.(*ves_io_schema_log_receiver.TLSConfigType_MtlsDisabled)
+
+								if isMtlsDisabled {
+									tlsServermtlsChoiceChoicesAttributeMap["mtls_disabled"] = types.BoolValue(true)
+								} else {
+									tlsServermtlsChoiceChoicesAttributeMap["mtls_disabled"] = types.BoolNull()
+								}
+
+								// resource specToModelNested PointerOfOneOfField --> MtlsEnable
+								// GlobalSpecType
+								// false
+								{
+									mtlsEnableOptionsWrapper, isMtlsEnable := tlsServermtlsChoiceChoices.(*ves_io_schema_log_receiver.TLSConfigType_MtlsEnable)
+									mtlsEnableAttributeMap := make(map[string]attr.Value)
+
+									if isMtlsEnable && mtlsEnableOptionsWrapper != nil && mtlsEnableOptionsWrapper.MtlsEnable != nil {
+										mtlsEnableElement := mtlsEnableOptionsWrapper.MtlsEnable
+
+										// resource specToModelNested StringField --> Certificate
+										if mtlsEnableElement.GetCertificate() != "" {
+											mtlsEnableAttributeMap["certificate"] = types.StringValue(mtlsEnableElement.GetCertificate())
+										} else {
+											// Empty string, set to null
+											mtlsEnableAttributeMap["certificate"] = types.StringNull()
+										}
+
+										// resource specToModelNested PointerField --> KeyUrl
+										if mtlsEnableElement.GetKeyUrl() != nil {
+											// Create the nested Go struct
+											logReceiverSecretTypeModel := &LogReceiverSecretType{}
+											keyUrlElement := mtlsEnableElement.GetKeyUrl()
+
+											// Recursively populate the nested struct
+
+											// resource specToModelNested RequiredOneOfField --> SecretInfoOneof
+											// GlobalSpecType
+											if keyUrlElement.GetSecretInfoOneof() != nil {
+												// Create a temporary attribute map for the choices within this OneOf
+												keyUrlsecretInfoChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+												// Define a variable for the spec choices to be passed down to nested templates
+												keyUrlsecretInfoChoiceChoices := keyUrlElement.GetSecretInfoOneof()
+
+												// Process nested choices, populating the temporary attribute map
+
+												// resource specToModelNested PointerOfOneOfField --> BlindfoldSecretInfo
+												// GlobalSpecType
+												// false
+												{
+													blindfoldSecretInfoOptionsWrapper, isBlindfoldSecretInfo := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_BlindfoldSecretInfo)
+													blindfoldSecretInfoAttributeMap := make(map[string]attr.Value)
+
+													if isBlindfoldSecretInfo && blindfoldSecretInfoOptionsWrapper != nil && blindfoldSecretInfoOptionsWrapper.BlindfoldSecretInfo != nil {
+														blindfoldSecretInfoElement := blindfoldSecretInfoOptionsWrapper.BlindfoldSecretInfo
+
+														// resource specToModelNested StringField --> DecryptionProvider
+														if blindfoldSecretInfoElement.GetDecryptionProvider() != "" {
+															blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoElement.GetDecryptionProvider())
+														} else {
+															// Empty string, set to null
+															blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringNull()
+														}
+
+														// resource specToModelNested RequiredStringField --> Location
+														if blindfoldSecretInfoElement.GetLocation() != "" {
+															blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoElement.GetLocation())
+														} else {
+															// Empty string, set to null
+															blindfoldSecretInfoAttributeMap["location"] = types.StringNull()
+														}
+
+														// resource specToModelNested StringField --> StoreProvider
+														if blindfoldSecretInfoElement.GetStoreProvider() != "" {
+															blindfoldSecretInfoAttributeMap["store_provider"] = types.StringValue(blindfoldSecretInfoElement.GetStoreProvider())
+														} else {
+															// Empty string, set to null
+															blindfoldSecretInfoAttributeMap["store_provider"] = types.StringNull()
+														}
+
+														blindfoldSecretInfoObj, blindfoldSecretInfoObjDiags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
+														response.Diagnostics.Append(blindfoldSecretInfoObjDiags...)
+														if response.Diagnostics.HasError() {
+															return
+														}
+														keyUrlsecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = blindfoldSecretInfoObj
+													} else {
+														keyUrlsecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofBlindfoldSecretInfoModelAttributeMap)
+													}
+												}
+
+												// resource specToModelNested PointerOfOneOfField --> ClearSecretInfo
+												// GlobalSpecType
+												// false
+												{
+													clearSecretInfoOptionsWrapper, isClearSecretInfo := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_ClearSecretInfo)
+													clearSecretInfoAttributeMap := make(map[string]attr.Value)
+
+													if isClearSecretInfo && clearSecretInfoOptionsWrapper != nil && clearSecretInfoOptionsWrapper.ClearSecretInfo != nil {
+														clearSecretInfoElement := clearSecretInfoOptionsWrapper.ClearSecretInfo
+
+														// resource specToModelNested StringField --> Provider
+														if clearSecretInfoElement.GetProvider() != "" {
+															clearSecretInfoAttributeMap["provider"] = types.StringValue(clearSecretInfoElement.GetProvider())
+														} else {
+															// Empty string, set to null
+															clearSecretInfoAttributeMap["provider"] = types.StringNull()
+														}
+
+														// resource specToModelNested RequiredStringField --> Url
+														if clearSecretInfoElement.GetUrl() != "" {
+															clearSecretInfoAttributeMap["url"] = types.StringValue(clearSecretInfoElement.GetUrl())
+														} else {
+															// Empty string, set to null
+															clearSecretInfoAttributeMap["url"] = types.StringNull()
+														}
+
+														clearSecretInfoObj, clearSecretInfoObjDiags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap, clearSecretInfoAttributeMap)
+														response.Diagnostics.Append(clearSecretInfoObjDiags...)
+														if response.Diagnostics.HasError() {
+															return
+														}
+														keyUrlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = clearSecretInfoObj
+													} else {
+														keyUrlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap)
+													}
+												}
+
+												// --- End of Choices ---
+
+												// Create the final ObjectValue for this OneOf field
+												finalObj, keyUrlsecretInfoChoiceChoicesObjDiags := types.ObjectValue(
+													LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofModelAttributeMap, // The attribute schema for the OneOf choices
+													keyUrlsecretInfoChoiceChoicesAttributeMap,
+												)
+												response.Diagnostics.Append(keyUrlsecretInfoChoiceChoicesObjDiags...)
+												if response.Diagnostics.HasError() {
+													return
+												}
+
+												// Assign the final object to the correct place (either the root model or a parent's attribute map)
+												logReceiverSecretTypeModel.SecretInfoChoice = finalObj
+											} else {
+												// The OneOf field is nil in the source spec, so set the Terraform object to null.
+												logReceiverSecretTypeModel.SecretInfoChoice = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofModelAttributeMap)
+											}
+
+											// This field needs to be converted to a types.ObjectValue before assignment.
+											logReceiverSecretTypeModelObj, logReceiverSecretTypeModelObjDiags := types.ObjectValueFrom(ctx, LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlModelAttributeMap, logReceiverSecretTypeModel)
+											response.Diagnostics.Append(logReceiverSecretTypeModelObjDiags...)
+											if response.Diagnostics.HasError() {
+												return
+											}
+											mtlsEnableAttributeMap["key_url"] = logReceiverSecretTypeModelObj
+
+										} else {
+											// The source field is nil (e.g. redacted by the API).
+											// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
+											// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
+											// because the API may always return a non-nil struct (with REDACTED values) for this field,
+											// making this else-branch unreachable. The child OneOf handles the actual healing.
+											// The target is a types.Object, so we use types.ObjectNull.
+											mtlsEnableAttributeMap["key_url"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlModelAttributeMap)
+										}
+
+										mtlsEnableObj, mtlsEnableObjDiags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableModelAttributeMap, mtlsEnableAttributeMap)
+										response.Diagnostics.Append(mtlsEnableObjDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										tlsServermtlsChoiceChoicesAttributeMap["mtls_enable"] = mtlsEnableObj
+									} else {
+										tlsServermtlsChoiceChoicesAttributeMap["mtls_enable"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableModelAttributeMap)
+									}
+								}
+
+								// --- End of Choices ---
+
+								// Create the final ObjectValue for this OneOf field
+								finalObj, tlsServermtlsChoiceChoicesObjDiags := types.ObjectValue(
+									LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+									tlsServermtlsChoiceChoicesAttributeMap,
+								)
+								response.Diagnostics.Append(tlsServermtlsChoiceChoicesObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+
+								// Assign the final object to the correct place (either the root model or a parent's attribute map)
+								tlsServerAttributeMap["mtls_choice"] = finalObj
+							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
+								tlsServerAttributeMap["mtls_choice"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceModelAttributeMap)
+							}
+
+							// resource specToModelNested RequiredOneOfField --> PortChoice
+							// GlobalSpecType
+							if tlsServerElement.GetPortChoice() != nil {
+								// Create a temporary attribute map for the choices within this OneOf
+								tlsServerportChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+								// Define a variable for the spec choices to be passed down to nested templates
+								tlsServerportChoiceChoices := tlsServerElement.GetPortChoice()
+
+								// Process nested choices, populating the temporary attribute map
+
+								// resource specToModelNested BoolOfOneOfPointerField --> DefaultHttpsPort
+								_, isDefaultHttpsPort := tlsServerportChoiceChoices.(*ves_io_schema_log_receiver.TLSConfigType_DefaultHttpsPort)
+
+								if isDefaultHttpsPort {
+									tlsServerportChoiceChoicesAttributeMap["default_https_port"] = types.BoolValue(true)
+								} else {
+									tlsServerportChoiceChoicesAttributeMap["default_https_port"] = types.BoolNull()
+								}
+
+								// resource specToModelNested BoolOfOneOfPointerField --> DefaultSyslogTlsPort
+								_, isDefaultSyslogTlsPort := tlsServerportChoiceChoices.(*ves_io_schema_log_receiver.TLSConfigType_DefaultSyslogTlsPort)
+
+								if isDefaultSyslogTlsPort {
+									tlsServerportChoiceChoicesAttributeMap["default_syslog_tls_port"] = types.BoolValue(true)
+								} else {
+									tlsServerportChoiceChoicesAttributeMap["default_syslog_tls_port"] = types.BoolNull()
+								}
+
+								// resource specToModelNested UintOfOneOfField --> Port
+								portItem, isPort := tlsServerportChoiceChoices.(*ves_io_schema_log_receiver.TLSConfigType_Port)
+
+								if isPort {
+									tlsServerportChoiceChoicesAttributeMap["port"] = types.Int64Value(int64(portItem.Port))
+								} else {
+									// Empty uint, set to null
+									tlsServerportChoiceChoicesAttributeMap["port"] = types.Int64Null()
+								}
+
+								// --- End of Choices ---
+
+								// Create the final ObjectValue for this OneOf field
+								finalObj, tlsServerportChoiceChoicesObjDiags := types.ObjectValue(
+									LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerPortChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+									tlsServerportChoiceChoicesAttributeMap,
+								)
+								response.Diagnostics.Append(tlsServerportChoiceChoicesObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+
+								// Assign the final object to the correct place (either the root model or a parent's attribute map)
+								tlsServerAttributeMap["port_choice"] = finalObj
+							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
+								tlsServerAttributeMap["port_choice"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerPortChoiceModelAttributeMap)
+							}
+
+							// resource specToModelNested RequiredStringField --> ServerName
+							if tlsServerElement.GetServerName() != "" {
+								tlsServerAttributeMap["server_name"] = types.StringValue(tlsServerElement.GetServerName())
+							} else {
+								// Empty string, set to null
+								tlsServerAttributeMap["server_name"] = types.StringNull()
+							}
+
+							tlsServerObj, tlsServerObjDiags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerModelAttributeMap, tlsServerAttributeMap)
+							response.Diagnostics.Append(tlsServerObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							syslogmodeChoiceChoicesAttributeMap["tls_server"] = tlsServerObj
+						} else {
+							syslogmodeChoiceChoicesAttributeMap["tls_server"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerModelAttributeMap)
+						}
+					}
+
+					// resource specToModelNested PointerOfOneOfField --> UdpServer
+					// GlobalSpecType
+					// false
+					{
+						udpServerOptionsWrapper, isUdpServer := syslogmodeChoiceChoices.(*ves_io_schema_log_receiver.SyslogReceiver_UdpServer)
+						udpServerAttributeMap := make(map[string]attr.Value)
+
+						if isUdpServer && udpServerOptionsWrapper != nil && udpServerOptionsWrapper.UdpServer != nil {
+							udpServerElement := udpServerOptionsWrapper.UdpServer
+
+							// resource specToModelNested RequiredUintField --> Port
+							udpServerAttributeMap["port"] = types.Int64Value(int64(udpServerElement.GetPort()))
+
+							// resource specToModelNested RequiredStringField --> ServerName
+							if udpServerElement.GetServerName() != "" {
+								udpServerAttributeMap["server_name"] = types.StringValue(udpServerElement.GetServerName())
+							} else {
+								// Empty string, set to null
+								udpServerAttributeMap["server_name"] = types.StringNull()
+							}
+
+							udpServerObj, udpServerObjDiags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceUdpServerModelAttributeMap, udpServerAttributeMap)
+							response.Diagnostics.Append(udpServerObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							syslogmodeChoiceChoicesAttributeMap["udp_server"] = udpServerObj
+						} else {
+							syslogmodeChoiceChoicesAttributeMap["udp_server"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceUdpServerModelAttributeMap)
+						}
+					}
+
+					// --- End of Choices ---
+
+					// Create the final ObjectValue for this OneOf field
+					finalObj, syslogmodeChoiceChoicesObjDiags := types.ObjectValue(
+						LogReceiverLogReceiverChoiceSyslogModeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+						syslogmodeChoiceChoicesAttributeMap,
+					)
+					response.Diagnostics.Append(syslogmodeChoiceChoicesObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					// Assign the final object to the correct place (either the root model or a parent's attribute map)
+					syslogAttributeMap["mode_choice"] = finalObj
+				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					syslogAttributeMap["mode_choice"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceModelAttributeMap)
+				}
+
+				syslogObj, syslogObjDiags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModelAttributeMap, syslogAttributeMap)
+				response.Diagnostics.Append(syslogObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -1778,20 +1882,24 @@ func (r *ResourceF5XCLogReceiver) Create(ctx context.Context, request resource.C
 		}
 
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		logReceiverChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			LogReceiverLogReceiverChoiceModelAttributeMap,
-			logReceiverChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
+		{
+			logReceiverChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				LogReceiverLogReceiverChoiceModelAttributeMap,
+				logReceiverChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
 
-		// Assign the final object to the root data model.
-		data.LogReceiverChoice = logReceiverChoiceObj
+			// Assign the final object to the root data model.
+			data.LogReceiverChoice = logReceiverChoiceObj
+		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
+		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.LogReceiverChoice = types.ObjectNull(LogReceiverLogReceiverChoiceModelAttributeMap)
 	}
 
@@ -1804,7 +1912,7 @@ func (r *ResourceF5XCLogReceiver) Create(ctx context.Context, request resource.C
 		whereChoiceChoices := specData.GetWhereChoice()
 
 		// The model struct that will be populated by the nested template.
-		var whereChoiceChoicesModel = &LogReceiverGlobalSpecTypeWhereChoice{}
+		var whereChoiceChoicesModel = &LogReceiverWhereChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -1818,20 +1926,24 @@ func (r *ResourceF5XCLogReceiver) Create(ctx context.Context, request resource.C
 		}
 
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		whereChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			LogReceiverWhereChoiceModelAttributeMap,
-			whereChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
+		{
+			whereChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				LogReceiverWhereChoiceModelAttributeMap,
+				whereChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
 
-		// Assign the final object to the root data model.
-		data.WhereChoice = whereChoiceObj
+			// Assign the final object to the root data model.
+			data.WhereChoice = whereChoiceObj
+		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
+		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.WhereChoice = types.ObjectNull(LogReceiverWhereChoiceModelAttributeMap)
 	}
 
@@ -1877,6 +1989,7 @@ func (r *ResourceF5XCLogReceiver) Read(ctx context.Context, request resource.Rea
 
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
+	priorLogReceiverChoice := data.LogReceiverChoice
 
 	opts := []vesapi.CallOpt{
 		vesapi.WithFailIfReferred(),
@@ -1898,6 +2011,102 @@ func (r *ResourceF5XCLogReceiver) Read(ctx context.Context, request resource.Rea
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
+	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		annotationsApiMap := metaData.GetAnnotations()
+		// READ: always store the full API response (captures backend-injected keys like "ves.io/provider").
+		if len(annotationsApiMap) > 0 {
+			annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+			response.Diagnostics.Append(annotationsDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			data.Annotations = annotationsMap
+		} else {
+			data.Annotations = types.MapNull(types.StringType)
+		}
+	}
+
+	// resource SpecToModelRoot Meta StringField --> Description
+	{
+		apiValDescription := metaData.GetDescription()
+		if apiValDescription != "" {
+			data.Description = types.StringValue(apiValDescription)
+		} else {
+			var priorValDescription types.String
+			response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("description"), &priorValDescription)...)
+			if !priorValDescription.IsNull() && !priorValDescription.IsUnknown() {
+				data.Description = priorValDescription
+			} else {
+				data.Description = types.StringValue(apiValDescription)
+			}
+		}
+	}
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		labelsApiMap := metaData.GetLabels()
+		// READ: always store the full API response (captures backend-injected keys like "ves.io/provider").
+		if len(labelsApiMap) > 0 {
+			labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+			response.Diagnostics.Append(labelsDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			data.Labels = labelsMap
+		} else {
+			data.Labels = types.MapNull(types.StringType)
+		}
+	}
+
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
 	data.Name = types.StringValue(metaData.GetName())
 
@@ -1906,103 +2115,6 @@ func (r *ResourceF5XCLogReceiver) Read(ctx context.Context, request resource.Rea
 
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
-
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedLabels := make(map[string]attr.Value)
-		for k, v := range labelsMap.Elements() {
-			mergedLabels[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
-			for k, v := range data.Labels.Elements() {
-				mergedLabels[k] = v
-			}
-		}
-		mergedLabelsMap, mergedLabelsDiags := types.MapValue(types.StringType, mergedLabels)
-		response.Diagnostics.Append(mergedLabelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Labels = mergedLabelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
-
-	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedAnnotations := make(map[string]attr.Value)
-		for k, v := range annotationsMap.Elements() {
-			mergedAnnotations[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
-			for k, v := range data.Annotations.Elements() {
-				mergedAnnotations[k] = v
-			}
-		}
-		mergedAnnotationsMap, mergedAnnotationsDiags := types.MapValue(types.StringType, mergedAnnotations)
-		response.Diagnostics.Append(mergedAnnotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Annotations = mergedAnnotationsMap
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Annotations = types.MapNull(types.StringType)
-	}
-
-	// resource SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
 
 	// resource SpecToModelRoot RequiredOneOfField --> LogReceiverChoice
 	// false
@@ -2013,7 +2125,7 @@ func (r *ResourceF5XCLogReceiver) Read(ctx context.Context, request resource.Rea
 		logReceiverChoiceChoices := specData.GetLogReceiverChoice()
 
 		// The model struct that will be populated by the nested template.
-		var logReceiverChoiceChoicesModel = &LogReceiverGlobalSpecTypeLogReceiverChoice{}
+		var logReceiverChoiceChoicesModel = &LogReceiverLogReceiverChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -2021,75 +2133,86 @@ func (r *ResourceF5XCLogReceiver) Read(ctx context.Context, request resource.Rea
 		// <no value>
 		// false
 		{
-			syslogOptions, isSyslog := logReceiverChoiceChoices.(*ves_io_schema_log_receiver.GlobalSpecType_Syslog)
+			syslogOptionsWrapper, isSyslog := logReceiverChoiceChoices.(*ves_io_schema_log_receiver.GlobalSpecType_Syslog)
 			syslogAttributeMap := make(map[string]attr.Value)
 
-			if isSyslog && syslogOptions != nil {
+			if isSyslog && syslogOptionsWrapper != nil && syslogOptionsWrapper.Syslog != nil {
+				syslogElement := syslogOptionsWrapper.Syslog
+
+				// resource specToModelNested RequiredOneOfField --> FormatChoice
+				// <no value>
+				if syslogElement.GetFormatChoice() != nil {
+					// Create a temporary attribute map for the choices within this OneOf
+					syslogformatChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+					// Define a variable for the spec choices to be passed down to nested templates
+					syslogformatChoiceChoices := syslogElement.GetFormatChoice()
+
+					// Process nested choices, populating the temporary attribute map
+
+					// resource specToModelNested UintOfOneOfField --> SyslogRfc5424
+					syslogRfc5424Item, isSyslogRfc5424 := syslogformatChoiceChoices.(*ves_io_schema_log_receiver.SyslogReceiver_SyslogRfc5424)
+
+					if isSyslogRfc5424 {
+						syslogformatChoiceChoicesAttributeMap["syslog_rfc5424"] = types.Int64Value(int64(syslogRfc5424Item.SyslogRfc5424))
+					} else {
+						// Empty uint, set to null
+						syslogformatChoiceChoicesAttributeMap["syslog_rfc5424"] = types.Int64Null()
+					}
+
+					// --- End of Choices ---
+
+					// Create the final ObjectValue for this OneOf field
+					finalObj, syslogformatChoiceChoicesObjDiags := types.ObjectValue(
+						LogReceiverLogReceiverChoiceSyslogFormatChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+						syslogformatChoiceChoicesAttributeMap,
+					)
+					response.Diagnostics.Append(syslogformatChoiceChoicesObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					// Assign the final object to the correct place (either the root model or a parent's attribute map)
+					syslogAttributeMap["format_choice"] = finalObj
+				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					syslogAttributeMap["format_choice"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogFormatChoiceModelAttributeMap)
+				}
 
 				// resource specToModelNested RequiredOneOfField --> ModeChoice
 				// <no value>
-				if syslogOptions.Syslog.GetModeChoice() != nil {
+				if syslogElement.GetModeChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					syslogmodeChoiceChoicesAttributeMap := make(map[string]attr.Value)
 
 					// Define a variable for the spec choices to be passed down to nested templates
-					syslogmodeChoiceChoices := syslogOptions.Syslog.GetModeChoice()
+					syslogmodeChoiceChoices := syslogElement.GetModeChoice()
 
 					// Process nested choices, populating the temporary attribute map
-
-					// resource specToModelNested PointerOfOneOfField --> UdpServer
-					// <no value>
-					// false
-					{
-						udpServerOptions, isUdpServer := syslogmodeChoiceChoices.(*ves_io_schema_log_receiver.SyslogReceiver_UdpServer)
-						udpServerAttributeMap := make(map[string]attr.Value)
-
-						if isUdpServer && udpServerOptions != nil {
-
-							// resource specToModelNested RequiredStringField --> ServerName
-							if udpServerOptions.UdpServer.GetServerName() != "" {
-								udpServerAttributeMap["server_name"] = types.StringValue(udpServerOptions.UdpServer.GetServerName())
-							} else {
-								// Empty string, set to null
-								udpServerAttributeMap["server_name"] = types.StringNull()
-							}
-
-							// resource specToModelNested RequiredUintField --> Port
-							udpServerAttributeMap["port"] = types.Int64Value(int64(udpServerOptions.UdpServer.GetPort()))
-
-							udpServerObj, diags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceUdpServerModelAttributeMap, udpServerAttributeMap)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							syslogmodeChoiceChoicesAttributeMap["udp_server"] = udpServerObj
-						} else {
-							syslogmodeChoiceChoicesAttributeMap["udp_server"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceUdpServerModelAttributeMap)
-						}
-					}
 
 					// resource specToModelNested PointerOfOneOfField --> TcpServer
 					// <no value>
 					// false
 					{
-						tcpServerOptions, isTcpServer := syslogmodeChoiceChoices.(*ves_io_schema_log_receiver.SyslogReceiver_TcpServer)
+						tcpServerOptionsWrapper, isTcpServer := syslogmodeChoiceChoices.(*ves_io_schema_log_receiver.SyslogReceiver_TcpServer)
 						tcpServerAttributeMap := make(map[string]attr.Value)
 
-						if isTcpServer && tcpServerOptions != nil {
+						if isTcpServer && tcpServerOptionsWrapper != nil && tcpServerOptionsWrapper.TcpServer != nil {
+							tcpServerElement := tcpServerOptionsWrapper.TcpServer
+
+							// resource specToModelNested RequiredUintField --> Port
+							tcpServerAttributeMap["port"] = types.Int64Value(int64(tcpServerElement.GetPort()))
 
 							// resource specToModelNested RequiredStringField --> ServerName
-							if tcpServerOptions.TcpServer.GetServerName() != "" {
-								tcpServerAttributeMap["server_name"] = types.StringValue(tcpServerOptions.TcpServer.GetServerName())
+							if tcpServerElement.GetServerName() != "" {
+								tcpServerAttributeMap["server_name"] = types.StringValue(tcpServerElement.GetServerName())
 							} else {
 								// Empty string, set to null
 								tcpServerAttributeMap["server_name"] = types.StringNull()
 							}
 
-							// resource specToModelNested RequiredUintField --> Port
-							tcpServerAttributeMap["port"] = types.Int64Value(int64(tcpServerOptions.TcpServer.GetPort()))
-
-							tcpServerObj, diags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceTcpServerModelAttributeMap, tcpServerAttributeMap)
-							response.Diagnostics.Append(diags...)
+							tcpServerObj, tcpServerObjDiags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceTcpServerModelAttributeMap, tcpServerAttributeMap)
+							response.Diagnostics.Append(tcpServerObjDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
@@ -2103,96 +2226,22 @@ func (r *ResourceF5XCLogReceiver) Read(ctx context.Context, request resource.Rea
 					// <no value>
 					// false
 					{
-						tlsServerOptions, isTlsServer := syslogmodeChoiceChoices.(*ves_io_schema_log_receiver.SyslogReceiver_TlsServer)
+						tlsServerOptionsWrapper, isTlsServer := syslogmodeChoiceChoices.(*ves_io_schema_log_receiver.SyslogReceiver_TlsServer)
 						tlsServerAttributeMap := make(map[string]attr.Value)
 
-						if isTlsServer && tlsServerOptions != nil {
-
-							// resource specToModelNested RequiredStringField --> ServerName
-							if tlsServerOptions.TlsServer.GetServerName() != "" {
-								tlsServerAttributeMap["server_name"] = types.StringValue(tlsServerOptions.TlsServer.GetServerName())
-							} else {
-								// Empty string, set to null
-								tlsServerAttributeMap["server_name"] = types.StringNull()
-							}
-
-							// resource specToModelNested RequiredOneOfField --> PortChoice
-							// <no value>
-							if tlsServerOptions.TlsServer.GetPortChoice() != nil {
-								// Create a temporary attribute map for the choices within this OneOf
-								tlsServerportChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-								// Define a variable for the spec choices to be passed down to nested templates
-								tlsServerportChoiceChoices := tlsServerOptions.TlsServer.GetPortChoice()
-
-								// Process nested choices, populating the temporary attribute map
-
-								// resource specToModelNested UintOfOneOfField --> Port
-								portItem, isPort := tlsServerportChoiceChoices.(*ves_io_schema_log_receiver.TLSConfigType_Port)
-
-								if isPort {
-									tlsServerportChoiceChoicesAttributeMap["port"] = types.Int64Value(int64(portItem.Port))
-								} else {
-									// Empty uint, set to null
-									tlsServerportChoiceChoicesAttributeMap["port"] = types.Int64Null()
-								}
-
-								// resource specToModelNested BoolOfOneOfPointerField --> DefaultSyslogTlsPort
-								_, isDefaultSyslogTlsPort := tlsServerportChoiceChoices.(*ves_io_schema_log_receiver.TLSConfigType_DefaultSyslogTlsPort)
-
-								if isDefaultSyslogTlsPort {
-									tlsServerportChoiceChoicesAttributeMap["default_syslog_tls_port"] = types.BoolValue(true)
-								} else {
-									tlsServerportChoiceChoicesAttributeMap["default_syslog_tls_port"] = types.BoolNull()
-								}
-
-								// resource specToModelNested BoolOfOneOfPointerField --> DefaultHttpsPort
-								_, isDefaultHttpsPort := tlsServerportChoiceChoices.(*ves_io_schema_log_receiver.TLSConfigType_DefaultHttpsPort)
-
-								if isDefaultHttpsPort {
-									tlsServerportChoiceChoicesAttributeMap["default_https_port"] = types.BoolValue(true)
-								} else {
-									tlsServerportChoiceChoicesAttributeMap["default_https_port"] = types.BoolNull()
-								}
-
-								// --- End of Choices ---
-
-								// Create the final ObjectValue for this OneOf field
-								finalObj, tlsServerportChoiceChoicesObjDiags := types.ObjectValue(
-									LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerPortChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-									tlsServerportChoiceChoicesAttributeMap,
-								)
-								response.Diagnostics.Append(tlsServerportChoiceChoicesObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-
-								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								tlsServerAttributeMap["port_choice"] = finalObj
-							} else {
-								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								tlsServerAttributeMap["port_choice"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerPortChoiceModelAttributeMap)
-							}
+						if isTlsServer && tlsServerOptionsWrapper != nil && tlsServerOptionsWrapper.TlsServer != nil {
+							tlsServerElement := tlsServerOptionsWrapper.TlsServer
 
 							// resource specToModelNested RequiredOneOfField --> CaChoice
 							// <no value>
-							if tlsServerOptions.TlsServer.GetCaChoice() != nil {
+							if tlsServerElement.GetCaChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								tlsServercaChoiceChoicesAttributeMap := make(map[string]attr.Value)
 
 								// Define a variable for the spec choices to be passed down to nested templates
-								tlsServercaChoiceChoices := tlsServerOptions.TlsServer.GetCaChoice()
+								tlsServercaChoiceChoices := tlsServerElement.GetCaChoice()
 
 								// Process nested choices, populating the temporary attribute map
-
-								// resource specToModelNested BoolOfOneOfPointerField --> VolterraCa
-								_, isVolterraCa := tlsServercaChoiceChoices.(*ves_io_schema_log_receiver.TLSConfigType_VolterraCa)
-
-								if isVolterraCa {
-									tlsServercaChoiceChoicesAttributeMap["volterra_ca"] = types.BoolValue(true)
-								} else {
-									tlsServercaChoiceChoicesAttributeMap["volterra_ca"] = types.BoolNull()
-								}
 
 								// resource specToModelNested StringOfOneOfField --> TrustedCaUrl
 								trustedCaUrlItem, isTrustedCaUrl := tlsServercaChoiceChoices.(*ves_io_schema_log_receiver.TLSConfigType_TrustedCaUrl)
@@ -2202,6 +2251,15 @@ func (r *ResourceF5XCLogReceiver) Read(ctx context.Context, request resource.Rea
 								} else {
 									// Empty string, set to null
 									tlsServercaChoiceChoicesAttributeMap["trusted_ca_url"] = types.StringNull()
+								}
+
+								// resource specToModelNested BoolOfOneOfPointerField --> VolterraCa
+								_, isVolterraCa := tlsServercaChoiceChoices.(*ves_io_schema_log_receiver.TLSConfigType_VolterraCa)
+
+								if isVolterraCa {
+									tlsServercaChoiceChoicesAttributeMap["volterra_ca"] = types.BoolValue(true)
+								} else {
+									tlsServercaChoiceChoicesAttributeMap["volterra_ca"] = types.BoolNull()
 								}
 
 								// --- End of Choices ---
@@ -2225,12 +2283,12 @@ func (r *ResourceF5XCLogReceiver) Read(ctx context.Context, request resource.Rea
 
 							// resource specToModelNested RequiredOneOfField --> MtlsChoice
 							// <no value>
-							if tlsServerOptions.TlsServer.GetMtlsChoice() != nil {
+							if tlsServerElement.GetMtlsChoice() != nil {
 								// Create a temporary attribute map for the choices within this OneOf
 								tlsServermtlsChoiceChoicesAttributeMap := make(map[string]attr.Value)
 
 								// Define a variable for the spec choices to be passed down to nested templates
-								tlsServermtlsChoiceChoices := tlsServerOptions.TlsServer.GetMtlsChoice()
+								tlsServermtlsChoiceChoices := tlsServerElement.GetMtlsChoice()
 
 								// Process nested choices, populating the temporary attribute map
 
@@ -2247,16 +2305,25 @@ func (r *ResourceF5XCLogReceiver) Read(ctx context.Context, request resource.Rea
 								// <no value>
 								// false
 								{
-									mtlsEnableOptions, isMtlsEnable := tlsServermtlsChoiceChoices.(*ves_io_schema_log_receiver.TLSConfigType_MtlsEnable)
+									mtlsEnableOptionsWrapper, isMtlsEnable := tlsServermtlsChoiceChoices.(*ves_io_schema_log_receiver.TLSConfigType_MtlsEnable)
 									mtlsEnableAttributeMap := make(map[string]attr.Value)
 
-									if isMtlsEnable && mtlsEnableOptions != nil {
+									if isMtlsEnable && mtlsEnableOptionsWrapper != nil && mtlsEnableOptionsWrapper.MtlsEnable != nil {
+										mtlsEnableElement := mtlsEnableOptionsWrapper.MtlsEnable
+
+										// resource specToModelNested StringField --> Certificate
+										if mtlsEnableElement.GetCertificate() != "" {
+											mtlsEnableAttributeMap["certificate"] = types.StringValue(mtlsEnableElement.GetCertificate())
+										} else {
+											// Empty string, set to null
+											mtlsEnableAttributeMap["certificate"] = types.StringNull()
+										}
 
 										// resource specToModelNested PointerField --> KeyUrl
-										if mtlsEnableOptions.MtlsEnable.GetKeyUrl() != nil {
+										if mtlsEnableElement.GetKeyUrl() != nil {
 											// Create the nested Go struct
 											logReceiverSecretTypeModel := &LogReceiverSecretType{}
-											keyUrlElement := mtlsEnableOptions.MtlsEnable.GetKeyUrl()
+											keyUrlElement := mtlsEnableElement.GetKeyUrl()
 
 											// Recursively populate the nested struct
 
@@ -2271,83 +2338,85 @@ func (r *ResourceF5XCLogReceiver) Read(ctx context.Context, request resource.Rea
 
 												// Process nested choices, populating the temporary attribute map
 
-												// resource specToModelNested PointerOfOneOfField --> ClearSecretInfo
-												// <no value>
-												// false
-												{
-													clearSecretInfoOptions, isClearSecretInfo := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_ClearSecretInfo)
-													clearSecretInfoAttributeMap := make(map[string]attr.Value)
-
-													if isClearSecretInfo && clearSecretInfoOptions != nil {
-
-														// resource specToModelNested StringField --> Provider
-														if clearSecretInfoOptions.ClearSecretInfo.GetProvider() != "" {
-															clearSecretInfoAttributeMap["provider"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetProvider())
-														} else {
-															// Empty string, set to null
-															clearSecretInfoAttributeMap["provider"] = types.StringNull()
-														}
-
-														// resource specToModelNested RequiredStringField --> Url
-														if clearSecretInfoOptions.ClearSecretInfo.GetUrl() != "" {
-															clearSecretInfoAttributeMap["url"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetUrl())
-														} else {
-															// Empty string, set to null
-															clearSecretInfoAttributeMap["url"] = types.StringNull()
-														}
-
-														clearSecretInfoObj, diags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap, clearSecretInfoAttributeMap)
-														response.Diagnostics.Append(diags...)
-														if response.Diagnostics.HasError() {
-															return
-														}
-														keyUrlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = clearSecretInfoObj
-													} else {
-														keyUrlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap)
-													}
-												}
-
 												// resource specToModelNested PointerOfOneOfField --> BlindfoldSecretInfo
 												// <no value>
 												// false
 												{
-													blindfoldSecretInfoOptions, isBlindfoldSecretInfo := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_BlindfoldSecretInfo)
+													blindfoldSecretInfoOptionsWrapper, isBlindfoldSecretInfo := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_BlindfoldSecretInfo)
 													blindfoldSecretInfoAttributeMap := make(map[string]attr.Value)
 
-													if isBlindfoldSecretInfo && blindfoldSecretInfoOptions != nil {
+													if isBlindfoldSecretInfo && blindfoldSecretInfoOptionsWrapper != nil && blindfoldSecretInfoOptionsWrapper.BlindfoldSecretInfo != nil {
+														blindfoldSecretInfoElement := blindfoldSecretInfoOptionsWrapper.BlindfoldSecretInfo
 
 														// resource specToModelNested StringField --> DecryptionProvider
-														if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider() != "" {
-															blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider())
+														if blindfoldSecretInfoElement.GetDecryptionProvider() != "" {
+															blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoElement.GetDecryptionProvider())
 														} else {
 															// Empty string, set to null
 															blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringNull()
 														}
 
-														// resource specToModelNested StringField --> StoreProvider
-														if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider() != "" {
-															blindfoldSecretInfoAttributeMap["store_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider())
-														} else {
-															// Empty string, set to null
-															blindfoldSecretInfoAttributeMap["store_provider"] = types.StringNull()
-														}
-
 														// resource specToModelNested RequiredStringField --> Location
-														if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation() != "" {
-															blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation())
+														if blindfoldSecretInfoElement.GetLocation() != "" {
+															blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoElement.GetLocation())
 														} else {
 															// Empty string, set to null
 															blindfoldSecretInfoAttributeMap["location"] = types.StringNull()
 														}
 
-														blindfoldSecretInfoObj, diags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
-														response.Diagnostics.Append(diags...)
+														// resource specToModelNested StringField --> StoreProvider
+														if blindfoldSecretInfoElement.GetStoreProvider() != "" {
+															blindfoldSecretInfoAttributeMap["store_provider"] = types.StringValue(blindfoldSecretInfoElement.GetStoreProvider())
+														} else {
+															// Empty string, set to null
+															blindfoldSecretInfoAttributeMap["store_provider"] = types.StringNull()
+														}
+
+														blindfoldSecretInfoObj, blindfoldSecretInfoObjDiags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
+														response.Diagnostics.Append(blindfoldSecretInfoObjDiags...)
 														if response.Diagnostics.HasError() {
 															return
 														}
 														keyUrlsecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = blindfoldSecretInfoObj
 													} else {
 														keyUrlsecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofBlindfoldSecretInfoModelAttributeMap)
+													}
+												}
+
+												// resource specToModelNested PointerOfOneOfField --> ClearSecretInfo
+												// <no value>
+												// false
+												{
+													clearSecretInfoOptionsWrapper, isClearSecretInfo := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_ClearSecretInfo)
+													clearSecretInfoAttributeMap := make(map[string]attr.Value)
+
+													if isClearSecretInfo && clearSecretInfoOptionsWrapper != nil && clearSecretInfoOptionsWrapper.ClearSecretInfo != nil {
+														clearSecretInfoElement := clearSecretInfoOptionsWrapper.ClearSecretInfo
+
+														// resource specToModelNested StringField --> Provider
+														if clearSecretInfoElement.GetProvider() != "" {
+															clearSecretInfoAttributeMap["provider"] = types.StringValue(clearSecretInfoElement.GetProvider())
+														} else {
+															// Empty string, set to null
+															clearSecretInfoAttributeMap["provider"] = types.StringNull()
+														}
+
+														// resource specToModelNested RequiredStringField --> Url
+														if clearSecretInfoElement.GetUrl() != "" {
+															clearSecretInfoAttributeMap["url"] = types.StringValue(clearSecretInfoElement.GetUrl())
+														} else {
+															// Empty string, set to null
+															clearSecretInfoAttributeMap["url"] = types.StringNull()
+														}
+
+														clearSecretInfoObj, clearSecretInfoObjDiags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap, clearSecretInfoAttributeMap)
+														response.Diagnostics.Append(clearSecretInfoObjDiags...)
+														if response.Diagnostics.HasError() {
+															return
+														}
+														keyUrlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = clearSecretInfoObj
+													} else {
+														keyUrlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap)
 													}
 												}
 
@@ -2383,8 +2452,8 @@ func (r *ResourceF5XCLogReceiver) Read(ctx context.Context, request resource.Rea
 											}
 
 											// This field needs to be converted to a types.ObjectValue before assignment.
-											logReceiverSecretTypeModelObj, diags := types.ObjectValueFrom(ctx, LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlModelAttributeMap, logReceiverSecretTypeModel)
-											response.Diagnostics.Append(diags...)
+											logReceiverSecretTypeModelObj, logReceiverSecretTypeModelObjDiags := types.ObjectValueFrom(ctx, LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlModelAttributeMap, logReceiverSecretTypeModel)
+											response.Diagnostics.Append(logReceiverSecretTypeModelObjDiags...)
 											if response.Diagnostics.HasError() {
 												return
 											}
@@ -2400,16 +2469,8 @@ func (r *ResourceF5XCLogReceiver) Read(ctx context.Context, request resource.Rea
 											mtlsEnableAttributeMap["key_url"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlModelAttributeMap)
 										}
 
-										// resource specToModelNested StringField --> Certificate
-										if mtlsEnableOptions.MtlsEnable.GetCertificate() != "" {
-											mtlsEnableAttributeMap["certificate"] = types.StringValue(mtlsEnableOptions.MtlsEnable.GetCertificate())
-										} else {
-											// Empty string, set to null
-											mtlsEnableAttributeMap["certificate"] = types.StringNull()
-										}
-
-										mtlsEnableObj, diags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableModelAttributeMap, mtlsEnableAttributeMap)
-										response.Diagnostics.Append(diags...)
+										mtlsEnableObj, mtlsEnableObjDiags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableModelAttributeMap, mtlsEnableAttributeMap)
+										response.Diagnostics.Append(mtlsEnableObjDiags...)
 										if response.Diagnostics.HasError() {
 											return
 										}
@@ -2438,14 +2499,112 @@ func (r *ResourceF5XCLogReceiver) Read(ctx context.Context, request resource.Rea
 								tlsServerAttributeMap["mtls_choice"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceModelAttributeMap)
 							}
 
-							tlsServerObj, diags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerModelAttributeMap, tlsServerAttributeMap)
-							response.Diagnostics.Append(diags...)
+							// resource specToModelNested RequiredOneOfField --> PortChoice
+							// <no value>
+							if tlsServerElement.GetPortChoice() != nil {
+								// Create a temporary attribute map for the choices within this OneOf
+								tlsServerportChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+								// Define a variable for the spec choices to be passed down to nested templates
+								tlsServerportChoiceChoices := tlsServerElement.GetPortChoice()
+
+								// Process nested choices, populating the temporary attribute map
+
+								// resource specToModelNested BoolOfOneOfPointerField --> DefaultHttpsPort
+								_, isDefaultHttpsPort := tlsServerportChoiceChoices.(*ves_io_schema_log_receiver.TLSConfigType_DefaultHttpsPort)
+
+								if isDefaultHttpsPort {
+									tlsServerportChoiceChoicesAttributeMap["default_https_port"] = types.BoolValue(true)
+								} else {
+									tlsServerportChoiceChoicesAttributeMap["default_https_port"] = types.BoolNull()
+								}
+
+								// resource specToModelNested BoolOfOneOfPointerField --> DefaultSyslogTlsPort
+								_, isDefaultSyslogTlsPort := tlsServerportChoiceChoices.(*ves_io_schema_log_receiver.TLSConfigType_DefaultSyslogTlsPort)
+
+								if isDefaultSyslogTlsPort {
+									tlsServerportChoiceChoicesAttributeMap["default_syslog_tls_port"] = types.BoolValue(true)
+								} else {
+									tlsServerportChoiceChoicesAttributeMap["default_syslog_tls_port"] = types.BoolNull()
+								}
+
+								// resource specToModelNested UintOfOneOfField --> Port
+								portItem, isPort := tlsServerportChoiceChoices.(*ves_io_schema_log_receiver.TLSConfigType_Port)
+
+								if isPort {
+									tlsServerportChoiceChoicesAttributeMap["port"] = types.Int64Value(int64(portItem.Port))
+								} else {
+									// Empty uint, set to null
+									tlsServerportChoiceChoicesAttributeMap["port"] = types.Int64Null()
+								}
+
+								// --- End of Choices ---
+
+								// Create the final ObjectValue for this OneOf field
+								finalObj, tlsServerportChoiceChoicesObjDiags := types.ObjectValue(
+									LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerPortChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+									tlsServerportChoiceChoicesAttributeMap,
+								)
+								response.Diagnostics.Append(tlsServerportChoiceChoicesObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+
+								// Assign the final object to the correct place (either the root model or a parent's attribute map)
+								tlsServerAttributeMap["port_choice"] = finalObj
+							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
+								tlsServerAttributeMap["port_choice"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerPortChoiceModelAttributeMap)
+							}
+
+							// resource specToModelNested RequiredStringField --> ServerName
+							if tlsServerElement.GetServerName() != "" {
+								tlsServerAttributeMap["server_name"] = types.StringValue(tlsServerElement.GetServerName())
+							} else {
+								// Empty string, set to null
+								tlsServerAttributeMap["server_name"] = types.StringNull()
+							}
+
+							tlsServerObj, tlsServerObjDiags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerModelAttributeMap, tlsServerAttributeMap)
+							response.Diagnostics.Append(tlsServerObjDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
 							syslogmodeChoiceChoicesAttributeMap["tls_server"] = tlsServerObj
 						} else {
 							syslogmodeChoiceChoicesAttributeMap["tls_server"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerModelAttributeMap)
+						}
+					}
+
+					// resource specToModelNested PointerOfOneOfField --> UdpServer
+					// <no value>
+					// false
+					{
+						udpServerOptionsWrapper, isUdpServer := syslogmodeChoiceChoices.(*ves_io_schema_log_receiver.SyslogReceiver_UdpServer)
+						udpServerAttributeMap := make(map[string]attr.Value)
+
+						if isUdpServer && udpServerOptionsWrapper != nil && udpServerOptionsWrapper.UdpServer != nil {
+							udpServerElement := udpServerOptionsWrapper.UdpServer
+
+							// resource specToModelNested RequiredUintField --> Port
+							udpServerAttributeMap["port"] = types.Int64Value(int64(udpServerElement.GetPort()))
+
+							// resource specToModelNested RequiredStringField --> ServerName
+							if udpServerElement.GetServerName() != "" {
+								udpServerAttributeMap["server_name"] = types.StringValue(udpServerElement.GetServerName())
+							} else {
+								// Empty string, set to null
+								udpServerAttributeMap["server_name"] = types.StringNull()
+							}
+
+							udpServerObj, udpServerObjDiags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceUdpServerModelAttributeMap, udpServerAttributeMap)
+							response.Diagnostics.Append(udpServerObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							syslogmodeChoiceChoicesAttributeMap["udp_server"] = udpServerObj
+						} else {
+							syslogmodeChoiceChoicesAttributeMap["udp_server"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceUdpServerModelAttributeMap)
 						}
 					}
 
@@ -2468,48 +2627,8 @@ func (r *ResourceF5XCLogReceiver) Read(ctx context.Context, request resource.Rea
 					syslogAttributeMap["mode_choice"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceModelAttributeMap)
 				}
 
-				// resource specToModelNested RequiredOneOfField --> FormatChoice
-				// <no value>
-				if syslogOptions.Syslog.GetFormatChoice() != nil {
-					// Create a temporary attribute map for the choices within this OneOf
-					syslogformatChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-					// Define a variable for the spec choices to be passed down to nested templates
-					syslogformatChoiceChoices := syslogOptions.Syslog.GetFormatChoice()
-
-					// Process nested choices, populating the temporary attribute map
-
-					// resource specToModelNested UintOfOneOfField --> SyslogRfc5424
-					syslogRfc5424Item, isSyslogRfc5424 := syslogformatChoiceChoices.(*ves_io_schema_log_receiver.SyslogReceiver_SyslogRfc5424)
-
-					if isSyslogRfc5424 {
-						syslogformatChoiceChoicesAttributeMap["syslog_rfc5424"] = types.Int64Value(int64(syslogRfc5424Item.SyslogRfc5424))
-					} else {
-						// Empty uint, set to null
-						syslogformatChoiceChoicesAttributeMap["syslog_rfc5424"] = types.Int64Null()
-					}
-
-					// --- End of Choices ---
-
-					// Create the final ObjectValue for this OneOf field
-					finalObj, syslogformatChoiceChoicesObjDiags := types.ObjectValue(
-						LogReceiverLogReceiverChoiceSyslogFormatChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-						syslogformatChoiceChoicesAttributeMap,
-					)
-					response.Diagnostics.Append(syslogformatChoiceChoicesObjDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-
-					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-					syslogAttributeMap["format_choice"] = finalObj
-				} else {
-					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					syslogAttributeMap["format_choice"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogFormatChoiceModelAttributeMap)
-				}
-
-				syslogObj, diags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModelAttributeMap, syslogAttributeMap)
-				response.Diagnostics.Append(diags...)
+				syslogObj, syslogObjDiags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModelAttributeMap, syslogAttributeMap)
+				response.Diagnostics.Append(syslogObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -2520,20 +2639,24 @@ func (r *ResourceF5XCLogReceiver) Read(ctx context.Context, request resource.Rea
 		}
 
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		logReceiverChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			LogReceiverLogReceiverChoiceModelAttributeMap,
-			logReceiverChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
+		{
+			logReceiverChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				LogReceiverLogReceiverChoiceModelAttributeMap,
+				logReceiverChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
 
-		// Assign the final object to the root data model.
-		data.LogReceiverChoice = logReceiverChoiceObj
+			// Assign the final object to the root data model.
+			data.LogReceiverChoice = logReceiverChoiceObj
+		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
+		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.LogReceiverChoice = types.ObjectNull(LogReceiverLogReceiverChoiceModelAttributeMap)
 	}
 
@@ -2546,7 +2669,7 @@ func (r *ResourceF5XCLogReceiver) Read(ctx context.Context, request resource.Rea
 		whereChoiceChoices := specData.GetWhereChoice()
 
 		// The model struct that will be populated by the nested template.
-		var whereChoiceChoicesModel = &LogReceiverGlobalSpecTypeWhereChoice{}
+		var whereChoiceChoicesModel = &LogReceiverWhereChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -2560,21 +2683,31 @@ func (r *ResourceF5XCLogReceiver) Read(ctx context.Context, request resource.Rea
 		}
 
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		whereChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			LogReceiverWhereChoiceModelAttributeMap,
-			whereChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
+		{
+			whereChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				LogReceiverWhereChoiceModelAttributeMap,
+				whereChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
 
-		// Assign the final object to the root data model.
-		data.WhereChoice = whereChoiceObj
+			// Assign the final object to the root data model.
+			data.WhereChoice = whereChoiceObj
+		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
+		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.WhereChoice = types.ObjectNull(LogReceiverWhereChoiceModelAttributeMap)
+	}
+
+	// Restore prior state for LogReceiverChoice. The API redacts sensitive fields
+	// in GET responses. Preserve prior state to keep state consistent.
+	if !priorLogReceiverChoice.IsNull() && !priorLogReceiverChoice.IsUnknown() {
+		data.LogReceiverChoice = priorLogReceiverChoice
 	}
 
 	if response.Diagnostics.HasError() {
@@ -2595,6 +2728,26 @@ func (r *ResourceF5XCLogReceiver) Update(ctx context.Context, request resource.U
 	if response.Diagnostics.HasError() {
 		return
 	}
+	// For Optional+Computed map meta-attributes (labels, annotations), the MapMergeModifier
+	// sets the plan value to the prior state to satisfy Terraform Core's constraint
+	// (plan must equal config or prior state). We save the plan values so we can restore
+	// them after the API call — the apply result must equal the plan value.
+	// We read user-intent values from Config (not Plan) so that the API request reflects
+	// the user's actual changes (e.g. updated label values).
+	planAnnotations := data.Annotations
+	planLabels := data.Labels
+	var configData ResourceF5XCLogReceiverModel
+	response.Diagnostics.Append(request.Config.Get(ctx, &configData)...)
+	if response.Diagnostics.HasError() {
+		return
+	}
+	if !configData.Annotations.IsUnknown() {
+		data.Annotations = configData.Annotations
+	}
+	if !configData.Labels.IsUnknown() {
+		data.Labels = configData.Labels
+	}
+	planLogReceiverChoice := data.LogReceiverChoice
 
 	duration, err := time.ParseDuration("10m0s")
 	if err != nil {
@@ -2624,23 +2777,13 @@ func (r *ResourceF5XCLogReceiver) Update(ctx context.Context, request resource.U
 
 	// Populate updateReq from data model
 
-	// resource modelToMetaRoot RequiredStringField --> Name
-	if !data.Name.IsNull() && !data.Name.IsUnknown() {
-		meta.Name = string(data.Name.ValueString())
-	}
-
-	// resource modelToMetaRoot RequiredStringField --> Namespace
-	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
-		meta.Namespace = string(data.Namespace.ValueString())
-	}
-
 	// resource modelToMetaRoot MapOfStringField --> Annotations
 	if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
 		var labels map[string]string
 		diags = data.Annotations.ElementsAs(ctx, &labels, false)
 		response.Diagnostics.Append(diags...)
 		if response.Diagnostics.HasError() {
-			tflog.Error(ctx, "Failed to convert annotations from map to model")
+			tflog.Error(ctx, "Failed to convert Annotations from map to model")
 			return
 		}
 		meta.Annotations = labels
@@ -2653,9 +2796,33 @@ func (r *ResourceF5XCLogReceiver) Update(ctx context.Context, request resource.U
 		meta.Description = string(data.Description.ValueString())
 	}
 
+	// resource modelToMetaRoot MapOfStringField --> Labels
+	if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
+		var labels map[string]string
+		diags = data.Labels.ElementsAs(ctx, &labels, false)
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			tflog.Error(ctx, "Failed to convert Labels from map to model")
+			return
+		}
+		meta.Labels = labels
+	} else {
+		meta.Labels = nil
+	}
+
+	// resource modelToMetaRoot RequiredStringField --> Name
+	if !data.Name.IsNull() && !data.Name.IsUnknown() {
+		meta.Name = string(data.Name.ValueString())
+	}
+
+	// resource modelToMetaRoot RequiredStringField --> Namespace
+	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
+		meta.Namespace = string(data.Namespace.ValueString())
+	}
+
 	// resource modelToSpecRoot RequiredOneOfField --> LogReceiverChoice
 	if !data.LogReceiverChoice.IsNull() && !data.LogReceiverChoice.IsUnknown() {
-		logReceiverChoiceModel := LogReceiverGlobalSpecTypeLogReceiverChoice{}
+		logReceiverChoiceModel := LogReceiverLogReceiverChoice{}
 		response.Diagnostics.Append(data.LogReceiverChoice.As(ctx, &logReceiverChoiceModel, basetypes.ObjectAsOptions{})...)
 		if response.Diagnostics.HasError() {
 			return
@@ -2663,8 +2830,8 @@ func (r *ResourceF5XCLogReceiver) Update(ctx context.Context, request resource.U
 
 		// resource modelToSpecNested PointerOfOneOfField --> Syslog
 		if !logReceiverChoiceModel.Syslog.IsNull() && !logReceiverChoiceModel.Syslog.IsUnknown() {
-			var logReceiverGlobalSpecTypeSyslogModel LogReceiverGlobalSpecTypeSyslog
-			response.Diagnostics.Append(logReceiverChoiceModel.Syslog.As(ctx, &logReceiverGlobalSpecTypeSyslogModel, basetypes.ObjectAsOptions{})...)
+			var logReceiverSyslogModel LogReceiverSyslog
+			response.Diagnostics.Append(logReceiverChoiceModel.Syslog.As(ctx, &logReceiverSyslogModel, basetypes.ObjectAsOptions{})...)
 			if response.Diagnostics.HasError() {
 				return
 			}
@@ -2672,244 +2839,10 @@ func (r *ResourceF5XCLogReceiver) Update(ctx context.Context, request resource.U
 			syslogOneOfSpec.Syslog = &ves_io_schema_log_receiver.SyslogReceiver{}
 			spec.LogReceiverChoice = syslogOneOfSpec
 
-			// resource modelToSpecNested RequiredOneOfField --> ModeChoice
-			if !logReceiverGlobalSpecTypeSyslogModel.ModeChoice.IsNull() && !logReceiverGlobalSpecTypeSyslogModel.ModeChoice.IsUnknown() {
-				syslogModeChoiceModel := LogReceiverSyslogReceiverModeChoice{}
-				response.Diagnostics.Append(logReceiverGlobalSpecTypeSyslogModel.ModeChoice.As(ctx, &syslogModeChoiceModel, basetypes.ObjectAsOptions{})...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// resource modelToSpecNested PointerOfOneOfField --> UdpServer
-				if !syslogModeChoiceModel.UdpServer.IsNull() && !syslogModeChoiceModel.UdpServer.IsUnknown() {
-					var logReceiverSyslogReceiverUdpServerModel LogReceiverSyslogReceiverUdpServer
-					response.Diagnostics.Append(syslogModeChoiceModel.UdpServer.As(ctx, &logReceiverSyslogReceiverUdpServerModel, basetypes.ObjectAsOptions{})...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					udpServerOneOfSpec := &ves_io_schema_log_receiver.SyslogReceiver_UdpServer{}
-					udpServerOneOfSpec.UdpServer = &ves_io_schema_log_receiver.UDPServerConfigType{}
-					syslogOneOfSpec.Syslog.ModeChoice = udpServerOneOfSpec
-
-					// resource modelToSpecNested RequiredStringField --> ServerName
-					if !logReceiverSyslogReceiverUdpServerModel.ServerName.IsNull() && !logReceiverSyslogReceiverUdpServerModel.ServerName.IsUnknown() {
-						udpServerOneOfSpec.UdpServer.ServerName = string(logReceiverSyslogReceiverUdpServerModel.ServerName.ValueString())
-					}
-
-					// resource modelToSpecNested RequiredUintField --> Port
-					udpServerOneOfSpec.UdpServer.Port = uint32(uint32(logReceiverSyslogReceiverUdpServerModel.Port.ValueInt64()))
-
-				}
-
-				// resource modelToSpecNested PointerOfOneOfField --> TcpServer
-				if !syslogModeChoiceModel.TcpServer.IsNull() && !syslogModeChoiceModel.TcpServer.IsUnknown() {
-					var logReceiverSyslogReceiverTcpServerModel LogReceiverSyslogReceiverTcpServer
-					response.Diagnostics.Append(syslogModeChoiceModel.TcpServer.As(ctx, &logReceiverSyslogReceiverTcpServerModel, basetypes.ObjectAsOptions{})...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					tcpServerOneOfSpec := &ves_io_schema_log_receiver.SyslogReceiver_TcpServer{}
-					tcpServerOneOfSpec.TcpServer = &ves_io_schema_log_receiver.TCPServerConfigType{}
-					syslogOneOfSpec.Syslog.ModeChoice = tcpServerOneOfSpec
-
-					// resource modelToSpecNested RequiredStringField --> ServerName
-					if !logReceiverSyslogReceiverTcpServerModel.ServerName.IsNull() && !logReceiverSyslogReceiverTcpServerModel.ServerName.IsUnknown() {
-						tcpServerOneOfSpec.TcpServer.ServerName = string(logReceiverSyslogReceiverTcpServerModel.ServerName.ValueString())
-					}
-
-					// resource modelToSpecNested RequiredUintField --> Port
-					tcpServerOneOfSpec.TcpServer.Port = uint32(uint32(logReceiverSyslogReceiverTcpServerModel.Port.ValueInt64()))
-
-				}
-
-				// resource modelToSpecNested PointerOfOneOfField --> TlsServer
-				if !syslogModeChoiceModel.TlsServer.IsNull() && !syslogModeChoiceModel.TlsServer.IsUnknown() {
-					var logReceiverSyslogReceiverTlsServerModel LogReceiverSyslogReceiverTlsServer
-					response.Diagnostics.Append(syslogModeChoiceModel.TlsServer.As(ctx, &logReceiverSyslogReceiverTlsServerModel, basetypes.ObjectAsOptions{})...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					tlsServerOneOfSpec := &ves_io_schema_log_receiver.SyslogReceiver_TlsServer{}
-					tlsServerOneOfSpec.TlsServer = &ves_io_schema_log_receiver.TLSConfigType{}
-					syslogOneOfSpec.Syslog.ModeChoice = tlsServerOneOfSpec
-
-					// resource modelToSpecNested RequiredStringField --> ServerName
-					if !logReceiverSyslogReceiverTlsServerModel.ServerName.IsNull() && !logReceiverSyslogReceiverTlsServerModel.ServerName.IsUnknown() {
-						tlsServerOneOfSpec.TlsServer.ServerName = string(logReceiverSyslogReceiverTlsServerModel.ServerName.ValueString())
-					}
-
-					// resource modelToSpecNested RequiredOneOfField --> PortChoice
-					if !logReceiverSyslogReceiverTlsServerModel.PortChoice.IsNull() && !logReceiverSyslogReceiverTlsServerModel.PortChoice.IsUnknown() {
-						tlsServerPortChoiceModel := LogReceiverTLSConfigTypePortChoice{}
-						response.Diagnostics.Append(logReceiverSyslogReceiverTlsServerModel.PortChoice.As(ctx, &tlsServerPortChoiceModel, basetypes.ObjectAsOptions{})...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// resource modelToSpecNested UintOfOneOfField --> Port
-						if !tlsServerPortChoiceModel.Port.IsNull() {
-							portSpecUint := &ves_io_schema_log_receiver.TLSConfigType_Port{}
-							portSpecUint.Port = uint32(tlsServerPortChoiceModel.Port.ValueInt64())
-							tlsServerOneOfSpec.TlsServer.PortChoice = portSpecUint
-						}
-
-						// resource modelToSpecNested BoolOfOneOfPointerField --> DefaultSyslogTlsPort
-						if !tlsServerPortChoiceModel.DefaultSyslogTlsPort.IsNull() && !tlsServerPortChoiceModel.DefaultSyslogTlsPort.IsUnknown() {
-							defaultSyslogTlsPortSpecBool := &ves_io_schema_log_receiver.TLSConfigType_DefaultSyslogTlsPort{}
-							defaultSyslogTlsPortSpecBool.DefaultSyslogTlsPort = &ves_io_schema.Empty{}
-							tlsServerOneOfSpec.TlsServer.PortChoice = defaultSyslogTlsPortSpecBool
-						}
-
-						// resource modelToSpecNested BoolOfOneOfPointerField --> DefaultHttpsPort
-						if !tlsServerPortChoiceModel.DefaultHttpsPort.IsNull() && !tlsServerPortChoiceModel.DefaultHttpsPort.IsUnknown() {
-							defaultHttpsPortSpecBool := &ves_io_schema_log_receiver.TLSConfigType_DefaultHttpsPort{}
-							defaultHttpsPortSpecBool.DefaultHttpsPort = &ves_io_schema.Empty{}
-							tlsServerOneOfSpec.TlsServer.PortChoice = defaultHttpsPortSpecBool
-						}
-
-					}
-
-					// resource modelToSpecNested RequiredOneOfField --> CaChoice
-					if !logReceiverSyslogReceiverTlsServerModel.CaChoice.IsNull() && !logReceiverSyslogReceiverTlsServerModel.CaChoice.IsUnknown() {
-						tlsServerCaChoiceModel := LogReceiverTLSConfigTypeCaChoice{}
-						response.Diagnostics.Append(logReceiverSyslogReceiverTlsServerModel.CaChoice.As(ctx, &tlsServerCaChoiceModel, basetypes.ObjectAsOptions{})...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// resource modelToSpecNested BoolOfOneOfPointerField --> VolterraCa
-						if !tlsServerCaChoiceModel.VolterraCa.IsNull() && !tlsServerCaChoiceModel.VolterraCa.IsUnknown() {
-							volterraCaSpecBool := &ves_io_schema_log_receiver.TLSConfigType_VolterraCa{}
-							volterraCaSpecBool.VolterraCa = &ves_io_schema.Empty{}
-							tlsServerOneOfSpec.TlsServer.CaChoice = volterraCaSpecBool
-						}
-
-						// resource modelToSpecNested StringOfOneOfField --> TrustedCaUrl
-						if !tlsServerCaChoiceModel.TrustedCaUrl.IsNull() && !tlsServerCaChoiceModel.TrustedCaUrl.IsUnknown() {
-							trustedCaUrlSpecStr := &ves_io_schema_log_receiver.TLSConfigType_TrustedCaUrl{}
-							trustedCaUrlSpecStr.TrustedCaUrl = string(tlsServerCaChoiceModel.TrustedCaUrl.ValueString())
-							tlsServerOneOfSpec.TlsServer.CaChoice = trustedCaUrlSpecStr
-						}
-
-					}
-
-					// resource modelToSpecNested RequiredOneOfField --> MtlsChoice
-					if !logReceiverSyslogReceiverTlsServerModel.MtlsChoice.IsNull() && !logReceiverSyslogReceiverTlsServerModel.MtlsChoice.IsUnknown() {
-						tlsServerMtlsChoiceModel := LogReceiverTLSConfigTypeMtlsChoice{}
-						response.Diagnostics.Append(logReceiverSyslogReceiverTlsServerModel.MtlsChoice.As(ctx, &tlsServerMtlsChoiceModel, basetypes.ObjectAsOptions{})...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// resource modelToSpecNested BoolOfOneOfPointerField --> MtlsDisabled
-						if !tlsServerMtlsChoiceModel.MtlsDisabled.IsNull() && !tlsServerMtlsChoiceModel.MtlsDisabled.IsUnknown() {
-							mtlsDisabledSpecBool := &ves_io_schema_log_receiver.TLSConfigType_MtlsDisabled{}
-							mtlsDisabledSpecBool.MtlsDisabled = &ves_io_schema.Empty{}
-							tlsServerOneOfSpec.TlsServer.MtlsChoice = mtlsDisabledSpecBool
-						}
-
-						// resource modelToSpecNested PointerOfOneOfField --> MtlsEnable
-						if !tlsServerMtlsChoiceModel.MtlsEnable.IsNull() && !tlsServerMtlsChoiceModel.MtlsEnable.IsUnknown() {
-							var logReceiverTLSConfigTypeMtlsEnableModel LogReceiverTLSConfigTypeMtlsEnable
-							response.Diagnostics.Append(tlsServerMtlsChoiceModel.MtlsEnable.As(ctx, &logReceiverTLSConfigTypeMtlsEnableModel, basetypes.ObjectAsOptions{})...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							mtlsEnableOneOfSpec := &ves_io_schema_log_receiver.TLSConfigType_MtlsEnable{}
-							mtlsEnableOneOfSpec.MtlsEnable = &ves_io_schema_log_receiver.TLSClientConfigType{}
-							tlsServerOneOfSpec.TlsServer.MtlsChoice = mtlsEnableOneOfSpec
-
-							// resource modelToSpecNested PointerField --> KeyUrl
-							if !logReceiverTLSConfigTypeMtlsEnableModel.KeyUrl.IsNull() && !logReceiverTLSConfigTypeMtlsEnableModel.KeyUrl.IsUnknown() {
-								var keyUrlModel LogReceiverSecretType
-								response.Diagnostics.Append(logReceiverTLSConfigTypeMtlsEnableModel.KeyUrl.As(ctx, &keyUrlModel, basetypes.ObjectAsOptions{})...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-
-								keyUrlSpec := &ves_io_schema.SecretType{}
-								mtlsEnableOneOfSpec.MtlsEnable.KeyUrl = keyUrlSpec
-
-								// resource modelToSpecNested RequiredOneOfField --> SecretInfoOneof
-								if !keyUrlModel.SecretInfoChoice.IsNull() && !keyUrlModel.SecretInfoChoice.IsUnknown() {
-									keyUrlSecretInfoChoiceModel := LogReceiverSecretTypeSecretInfoChoice{}
-									response.Diagnostics.Append(keyUrlModel.SecretInfoChoice.As(ctx, &keyUrlSecretInfoChoiceModel, basetypes.ObjectAsOptions{})...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									// resource modelToSpecNested PointerOfOneOfField --> ClearSecretInfo
-									if !keyUrlSecretInfoChoiceModel.ClearSecretInfo.IsNull() && !keyUrlSecretInfoChoiceModel.ClearSecretInfo.IsUnknown() {
-										var logReceiverSecretTypeClearSecretInfoModel LogReceiverSecretTypeClearSecretInfo
-										response.Diagnostics.Append(keyUrlSecretInfoChoiceModel.ClearSecretInfo.As(ctx, &logReceiverSecretTypeClearSecretInfoModel, basetypes.ObjectAsOptions{})...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										clearSecretInfoOneOfSpec := &ves_io_schema.SecretType_ClearSecretInfo{}
-										clearSecretInfoOneOfSpec.ClearSecretInfo = &ves_io_schema.ClearSecretInfoType{}
-										keyUrlSpec.SecretInfoOneof = clearSecretInfoOneOfSpec
-
-										// resource modelToSpecNested StringField --> Provider
-										if !logReceiverSecretTypeClearSecretInfoModel.Provider.IsNull() && !logReceiverSecretTypeClearSecretInfoModel.Provider.IsUnknown() {
-											clearSecretInfoOneOfSpec.ClearSecretInfo.Provider = string(logReceiverSecretTypeClearSecretInfoModel.Provider.ValueString())
-										}
-
-										// resource modelToSpecNested RequiredStringField --> Url
-										if !logReceiverSecretTypeClearSecretInfoModel.Url.IsNull() && !logReceiverSecretTypeClearSecretInfoModel.Url.IsUnknown() {
-											clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(logReceiverSecretTypeClearSecretInfoModel.Url.ValueString())
-										}
-
-									}
-
-									// resource modelToSpecNested PointerOfOneOfField --> BlindfoldSecretInfo
-									if !keyUrlSecretInfoChoiceModel.BlindfoldSecretInfo.IsNull() && !keyUrlSecretInfoChoiceModel.BlindfoldSecretInfo.IsUnknown() {
-										var logReceiverSecretTypeBlindfoldSecretInfoModel LogReceiverSecretTypeBlindfoldSecretInfo
-										response.Diagnostics.Append(keyUrlSecretInfoChoiceModel.BlindfoldSecretInfo.As(ctx, &logReceiverSecretTypeBlindfoldSecretInfoModel, basetypes.ObjectAsOptions{})...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										blindfoldSecretInfoOneOfSpec := &ves_io_schema.SecretType_BlindfoldSecretInfo{}
-										blindfoldSecretInfoOneOfSpec.BlindfoldSecretInfo = &ves_io_schema.BlindfoldSecretInfoType{}
-										keyUrlSpec.SecretInfoOneof = blindfoldSecretInfoOneOfSpec
-
-										// resource modelToSpecNested StringField --> DecryptionProvider
-										if !logReceiverSecretTypeBlindfoldSecretInfoModel.DecryptionProvider.IsNull() && !logReceiverSecretTypeBlindfoldSecretInfoModel.DecryptionProvider.IsUnknown() {
-											blindfoldSecretInfoOneOfSpec.BlindfoldSecretInfo.DecryptionProvider = string(logReceiverSecretTypeBlindfoldSecretInfoModel.DecryptionProvider.ValueString())
-										}
-
-										// resource modelToSpecNested StringField --> StoreProvider
-										if !logReceiverSecretTypeBlindfoldSecretInfoModel.StoreProvider.IsNull() && !logReceiverSecretTypeBlindfoldSecretInfoModel.StoreProvider.IsUnknown() {
-											blindfoldSecretInfoOneOfSpec.BlindfoldSecretInfo.StoreProvider = string(logReceiverSecretTypeBlindfoldSecretInfoModel.StoreProvider.ValueString())
-										}
-
-										// resource modelToSpecNested RequiredStringField --> Location
-										if !logReceiverSecretTypeBlindfoldSecretInfoModel.Location.IsNull() && !logReceiverSecretTypeBlindfoldSecretInfoModel.Location.IsUnknown() {
-											blindfoldSecretInfoOneOfSpec.BlindfoldSecretInfo.Location = string(logReceiverSecretTypeBlindfoldSecretInfoModel.Location.ValueString())
-										}
-
-									}
-
-								}
-
-							}
-
-							// resource modelToSpecNested StringField --> Certificate
-							if !logReceiverTLSConfigTypeMtlsEnableModel.Certificate.IsNull() && !logReceiverTLSConfigTypeMtlsEnableModel.Certificate.IsUnknown() {
-								mtlsEnableOneOfSpec.MtlsEnable.Certificate = string(logReceiverTLSConfigTypeMtlsEnableModel.Certificate.ValueString())
-							}
-
-						}
-
-					}
-
-				}
-
-			}
-
 			// resource modelToSpecNested RequiredOneOfField --> FormatChoice
-			if !logReceiverGlobalSpecTypeSyslogModel.FormatChoice.IsNull() && !logReceiverGlobalSpecTypeSyslogModel.FormatChoice.IsUnknown() {
-				syslogFormatChoiceModel := LogReceiverSyslogReceiverFormatChoice{}
-				response.Diagnostics.Append(logReceiverGlobalSpecTypeSyslogModel.FormatChoice.As(ctx, &syslogFormatChoiceModel, basetypes.ObjectAsOptions{})...)
+			if !logReceiverSyslogModel.FormatChoice.IsNull() && !logReceiverSyslogModel.FormatChoice.IsUnknown() {
+				syslogFormatChoiceModel := LogReceiverFormatChoice{}
+				response.Diagnostics.Append(logReceiverSyslogModel.FormatChoice.As(ctx, &syslogFormatChoiceModel, basetypes.ObjectAsOptions{})...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -2923,13 +2856,247 @@ func (r *ResourceF5XCLogReceiver) Update(ctx context.Context, request resource.U
 
 			}
 
+			// resource modelToSpecNested RequiredOneOfField --> ModeChoice
+			if !logReceiverSyslogModel.ModeChoice.IsNull() && !logReceiverSyslogModel.ModeChoice.IsUnknown() {
+				syslogModeChoiceModel := LogReceiverModeChoice{}
+				response.Diagnostics.Append(logReceiverSyslogModel.ModeChoice.As(ctx, &syslogModeChoiceModel, basetypes.ObjectAsOptions{})...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				// resource modelToSpecNested PointerOfOneOfField --> TcpServer
+				if !syslogModeChoiceModel.TcpServer.IsNull() && !syslogModeChoiceModel.TcpServer.IsUnknown() {
+					var logReceiverTcpServerModel LogReceiverTcpServer
+					response.Diagnostics.Append(syslogModeChoiceModel.TcpServer.As(ctx, &logReceiverTcpServerModel, basetypes.ObjectAsOptions{})...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					tcpServerOneOfSpec := &ves_io_schema_log_receiver.SyslogReceiver_TcpServer{}
+					tcpServerOneOfSpec.TcpServer = &ves_io_schema_log_receiver.TCPServerConfigType{}
+					syslogOneOfSpec.Syslog.ModeChoice = tcpServerOneOfSpec
+
+					// resource modelToSpecNested RequiredUintField --> Port
+					tcpServerOneOfSpec.TcpServer.Port = uint32(uint32(logReceiverTcpServerModel.Port.ValueInt64()))
+
+					// resource modelToSpecNested RequiredStringField --> ServerName
+					if !logReceiverTcpServerModel.ServerName.IsNull() && !logReceiverTcpServerModel.ServerName.IsUnknown() {
+						tcpServerOneOfSpec.TcpServer.ServerName = string(logReceiverTcpServerModel.ServerName.ValueString())
+					}
+
+				}
+
+				// resource modelToSpecNested PointerOfOneOfField --> TlsServer
+				if !syslogModeChoiceModel.TlsServer.IsNull() && !syslogModeChoiceModel.TlsServer.IsUnknown() {
+					var logReceiverTlsServerModel LogReceiverTlsServer
+					response.Diagnostics.Append(syslogModeChoiceModel.TlsServer.As(ctx, &logReceiverTlsServerModel, basetypes.ObjectAsOptions{})...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					tlsServerOneOfSpec := &ves_io_schema_log_receiver.SyslogReceiver_TlsServer{}
+					tlsServerOneOfSpec.TlsServer = &ves_io_schema_log_receiver.TLSConfigType{}
+					syslogOneOfSpec.Syslog.ModeChoice = tlsServerOneOfSpec
+
+					// resource modelToSpecNested RequiredOneOfField --> CaChoice
+					if !logReceiverTlsServerModel.CaChoice.IsNull() && !logReceiverTlsServerModel.CaChoice.IsUnknown() {
+						tlsServerCaChoiceModel := LogReceiverCaChoice{}
+						response.Diagnostics.Append(logReceiverTlsServerModel.CaChoice.As(ctx, &tlsServerCaChoiceModel, basetypes.ObjectAsOptions{})...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						// resource modelToSpecNested StringOfOneOfField --> TrustedCaUrl
+						if !tlsServerCaChoiceModel.TrustedCaUrl.IsNull() && !tlsServerCaChoiceModel.TrustedCaUrl.IsUnknown() {
+							trustedCaUrlSpecStr := &ves_io_schema_log_receiver.TLSConfigType_TrustedCaUrl{}
+							trustedCaUrlSpecStr.TrustedCaUrl = string(tlsServerCaChoiceModel.TrustedCaUrl.ValueString())
+							tlsServerOneOfSpec.TlsServer.CaChoice = trustedCaUrlSpecStr
+						}
+
+						// resource modelToSpecNested BoolOfOneOfPointerField --> VolterraCa
+						if !tlsServerCaChoiceModel.VolterraCa.IsNull() && !tlsServerCaChoiceModel.VolterraCa.IsUnknown() {
+							volterraCaSpecBool := &ves_io_schema_log_receiver.TLSConfigType_VolterraCa{}
+							volterraCaSpecBool.VolterraCa = &ves_io_schema.Empty{}
+							tlsServerOneOfSpec.TlsServer.CaChoice = volterraCaSpecBool
+						}
+
+					}
+
+					// resource modelToSpecNested RequiredOneOfField --> MtlsChoice
+					if !logReceiverTlsServerModel.MtlsChoice.IsNull() && !logReceiverTlsServerModel.MtlsChoice.IsUnknown() {
+						tlsServerMtlsChoiceModel := LogReceiverMtlsChoice{}
+						response.Diagnostics.Append(logReceiverTlsServerModel.MtlsChoice.As(ctx, &tlsServerMtlsChoiceModel, basetypes.ObjectAsOptions{})...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						// resource modelToSpecNested BoolOfOneOfPointerField --> MtlsDisabled
+						if !tlsServerMtlsChoiceModel.MtlsDisabled.IsNull() && !tlsServerMtlsChoiceModel.MtlsDisabled.IsUnknown() {
+							mtlsDisabledSpecBool := &ves_io_schema_log_receiver.TLSConfigType_MtlsDisabled{}
+							mtlsDisabledSpecBool.MtlsDisabled = &ves_io_schema.Empty{}
+							tlsServerOneOfSpec.TlsServer.MtlsChoice = mtlsDisabledSpecBool
+						}
+
+						// resource modelToSpecNested PointerOfOneOfField --> MtlsEnable
+						if !tlsServerMtlsChoiceModel.MtlsEnable.IsNull() && !tlsServerMtlsChoiceModel.MtlsEnable.IsUnknown() {
+							var logReceiverMtlsEnableModel LogReceiverMtlsEnable
+							response.Diagnostics.Append(tlsServerMtlsChoiceModel.MtlsEnable.As(ctx, &logReceiverMtlsEnableModel, basetypes.ObjectAsOptions{})...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							mtlsEnableOneOfSpec := &ves_io_schema_log_receiver.TLSConfigType_MtlsEnable{}
+							mtlsEnableOneOfSpec.MtlsEnable = &ves_io_schema_log_receiver.TLSClientConfigType{}
+							tlsServerOneOfSpec.TlsServer.MtlsChoice = mtlsEnableOneOfSpec
+
+							// resource modelToSpecNested StringField --> Certificate
+							if !logReceiverMtlsEnableModel.Certificate.IsNull() && !logReceiverMtlsEnableModel.Certificate.IsUnknown() {
+								mtlsEnableOneOfSpec.MtlsEnable.Certificate = string(logReceiverMtlsEnableModel.Certificate.ValueString())
+							}
+
+							// resource modelToSpecNested PointerField --> KeyUrl
+							if !logReceiverMtlsEnableModel.KeyUrl.IsNull() && !logReceiverMtlsEnableModel.KeyUrl.IsUnknown() {
+								var keyUrlModel LogReceiverSecretType
+								response.Diagnostics.Append(logReceiverMtlsEnableModel.KeyUrl.As(ctx, &keyUrlModel, basetypes.ObjectAsOptions{})...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+
+								keyUrlSpec := &ves_io_schema.SecretType{}
+								mtlsEnableOneOfSpec.MtlsEnable.KeyUrl = keyUrlSpec
+
+								// resource modelToSpecNested RequiredOneOfField --> SecretInfoOneof
+								if !keyUrlModel.SecretInfoChoice.IsNull() && !keyUrlModel.SecretInfoChoice.IsUnknown() {
+									keyUrlSecretInfoChoiceModel := LogReceiverSecretInfoChoice{}
+									response.Diagnostics.Append(keyUrlModel.SecretInfoChoice.As(ctx, &keyUrlSecretInfoChoiceModel, basetypes.ObjectAsOptions{})...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+
+									// resource modelToSpecNested PointerOfOneOfField --> BlindfoldSecretInfo
+									if !keyUrlSecretInfoChoiceModel.BlindfoldSecretInfo.IsNull() && !keyUrlSecretInfoChoiceModel.BlindfoldSecretInfo.IsUnknown() {
+										var logReceiverBlindfoldSecretInfoModel LogReceiverBlindfoldSecretInfo
+										response.Diagnostics.Append(keyUrlSecretInfoChoiceModel.BlindfoldSecretInfo.As(ctx, &logReceiverBlindfoldSecretInfoModel, basetypes.ObjectAsOptions{})...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										blindfoldSecretInfoOneOfSpec := &ves_io_schema.SecretType_BlindfoldSecretInfo{}
+										blindfoldSecretInfoOneOfSpec.BlindfoldSecretInfo = &ves_io_schema.BlindfoldSecretInfoType{}
+										keyUrlSpec.SecretInfoOneof = blindfoldSecretInfoOneOfSpec
+
+										// resource modelToSpecNested StringField --> DecryptionProvider
+										if !logReceiverBlindfoldSecretInfoModel.DecryptionProvider.IsNull() && !logReceiverBlindfoldSecretInfoModel.DecryptionProvider.IsUnknown() {
+											blindfoldSecretInfoOneOfSpec.BlindfoldSecretInfo.DecryptionProvider = string(logReceiverBlindfoldSecretInfoModel.DecryptionProvider.ValueString())
+										}
+
+										// resource modelToSpecNested RequiredStringField --> Location
+										if !logReceiverBlindfoldSecretInfoModel.Location.IsNull() && !logReceiverBlindfoldSecretInfoModel.Location.IsUnknown() {
+											blindfoldSecretInfoOneOfSpec.BlindfoldSecretInfo.Location = string(logReceiverBlindfoldSecretInfoModel.Location.ValueString())
+										}
+
+										// resource modelToSpecNested StringField --> StoreProvider
+										if !logReceiverBlindfoldSecretInfoModel.StoreProvider.IsNull() && !logReceiverBlindfoldSecretInfoModel.StoreProvider.IsUnknown() {
+											blindfoldSecretInfoOneOfSpec.BlindfoldSecretInfo.StoreProvider = string(logReceiverBlindfoldSecretInfoModel.StoreProvider.ValueString())
+										}
+
+									}
+
+									// resource modelToSpecNested PointerOfOneOfField --> ClearSecretInfo
+									if !keyUrlSecretInfoChoiceModel.ClearSecretInfo.IsNull() && !keyUrlSecretInfoChoiceModel.ClearSecretInfo.IsUnknown() {
+										var logReceiverClearSecretInfoModel LogReceiverClearSecretInfo
+										response.Diagnostics.Append(keyUrlSecretInfoChoiceModel.ClearSecretInfo.As(ctx, &logReceiverClearSecretInfoModel, basetypes.ObjectAsOptions{})...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										clearSecretInfoOneOfSpec := &ves_io_schema.SecretType_ClearSecretInfo{}
+										clearSecretInfoOneOfSpec.ClearSecretInfo = &ves_io_schema.ClearSecretInfoType{}
+										keyUrlSpec.SecretInfoOneof = clearSecretInfoOneOfSpec
+
+										// resource modelToSpecNested StringField --> Provider
+										if !logReceiverClearSecretInfoModel.Provider.IsNull() && !logReceiverClearSecretInfoModel.Provider.IsUnknown() {
+											clearSecretInfoOneOfSpec.ClearSecretInfo.Provider = string(logReceiverClearSecretInfoModel.Provider.ValueString())
+										}
+
+										// resource modelToSpecNested RequiredStringField --> Url
+										if !logReceiverClearSecretInfoModel.Url.IsNull() && !logReceiverClearSecretInfoModel.Url.IsUnknown() {
+											clearSecretInfoOneOfSpec.ClearSecretInfo.Url = string(logReceiverClearSecretInfoModel.Url.ValueString())
+										}
+
+									}
+
+								}
+
+							}
+
+						}
+
+					}
+
+					// resource modelToSpecNested RequiredOneOfField --> PortChoice
+					if !logReceiverTlsServerModel.PortChoice.IsNull() && !logReceiverTlsServerModel.PortChoice.IsUnknown() {
+						tlsServerPortChoiceModel := LogReceiverPortChoice{}
+						response.Diagnostics.Append(logReceiverTlsServerModel.PortChoice.As(ctx, &tlsServerPortChoiceModel, basetypes.ObjectAsOptions{})...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						// resource modelToSpecNested BoolOfOneOfPointerField --> DefaultHttpsPort
+						if !tlsServerPortChoiceModel.DefaultHttpsPort.IsNull() && !tlsServerPortChoiceModel.DefaultHttpsPort.IsUnknown() {
+							defaultHttpsPortSpecBool := &ves_io_schema_log_receiver.TLSConfigType_DefaultHttpsPort{}
+							defaultHttpsPortSpecBool.DefaultHttpsPort = &ves_io_schema.Empty{}
+							tlsServerOneOfSpec.TlsServer.PortChoice = defaultHttpsPortSpecBool
+						}
+
+						// resource modelToSpecNested BoolOfOneOfPointerField --> DefaultSyslogTlsPort
+						if !tlsServerPortChoiceModel.DefaultSyslogTlsPort.IsNull() && !tlsServerPortChoiceModel.DefaultSyslogTlsPort.IsUnknown() {
+							defaultSyslogTlsPortSpecBool := &ves_io_schema_log_receiver.TLSConfigType_DefaultSyslogTlsPort{}
+							defaultSyslogTlsPortSpecBool.DefaultSyslogTlsPort = &ves_io_schema.Empty{}
+							tlsServerOneOfSpec.TlsServer.PortChoice = defaultSyslogTlsPortSpecBool
+						}
+
+						// resource modelToSpecNested UintOfOneOfField --> Port
+						if !tlsServerPortChoiceModel.Port.IsNull() {
+							portSpecUint := &ves_io_schema_log_receiver.TLSConfigType_Port{}
+							portSpecUint.Port = uint32(tlsServerPortChoiceModel.Port.ValueInt64())
+							tlsServerOneOfSpec.TlsServer.PortChoice = portSpecUint
+						}
+
+					}
+
+					// resource modelToSpecNested RequiredStringField --> ServerName
+					if !logReceiverTlsServerModel.ServerName.IsNull() && !logReceiverTlsServerModel.ServerName.IsUnknown() {
+						tlsServerOneOfSpec.TlsServer.ServerName = string(logReceiverTlsServerModel.ServerName.ValueString())
+					}
+
+				}
+
+				// resource modelToSpecNested PointerOfOneOfField --> UdpServer
+				if !syslogModeChoiceModel.UdpServer.IsNull() && !syslogModeChoiceModel.UdpServer.IsUnknown() {
+					var logReceiverUdpServerModel LogReceiverUdpServer
+					response.Diagnostics.Append(syslogModeChoiceModel.UdpServer.As(ctx, &logReceiverUdpServerModel, basetypes.ObjectAsOptions{})...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					udpServerOneOfSpec := &ves_io_schema_log_receiver.SyslogReceiver_UdpServer{}
+					udpServerOneOfSpec.UdpServer = &ves_io_schema_log_receiver.UDPServerConfigType{}
+					syslogOneOfSpec.Syslog.ModeChoice = udpServerOneOfSpec
+
+					// resource modelToSpecNested RequiredUintField --> Port
+					udpServerOneOfSpec.UdpServer.Port = uint32(uint32(logReceiverUdpServerModel.Port.ValueInt64()))
+
+					// resource modelToSpecNested RequiredStringField --> ServerName
+					if !logReceiverUdpServerModel.ServerName.IsNull() && !logReceiverUdpServerModel.ServerName.IsUnknown() {
+						udpServerOneOfSpec.UdpServer.ServerName = string(logReceiverUdpServerModel.ServerName.ValueString())
+					}
+
+				}
+
+			}
+
 		}
 
 	}
 
 	// resource modelToSpecRoot RequiredOneOfField --> WhereChoice
 	if !data.WhereChoice.IsNull() && !data.WhereChoice.IsUnknown() {
-		whereChoiceModel := LogReceiverGlobalSpecTypeWhereChoice{}
+		whereChoiceModel := LogReceiverWhereChoice{}
 		response.Diagnostics.Append(data.WhereChoice.As(ctx, &whereChoiceModel, basetypes.ObjectAsOptions{})...)
 		if response.Diagnostics.HasError() {
 			return
@@ -2942,6 +3109,12 @@ func (r *ResourceF5XCLogReceiver) Update(ctx context.Context, request resource.U
 			spec.WhereChoice = siteLocalSpecBool
 		}
 
+	}
+	// Strip backend-injected label keys that must not be sent in Create/Update requests.
+	// These keys are stored in state (for drift-free plans) but must be omitted from the
+	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+		delete(meta.Labels, _omitKey)
 	}
 
 	if response.Diagnostics.HasError() {
@@ -2978,6 +3151,101 @@ func (r *ResourceF5XCLogReceiver) Update(ctx context.Context, request resource.U
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
+	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		annotationsApiMap := metaData.GetAnnotations()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Annotations already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Annotations.IsUnknown() {
+			if len(annotationsApiMap) > 0 {
+				annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+				response.Diagnostics.Append(annotationsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Annotations = annotationsMap
+			} else {
+				data.Annotations = types.MapNull(types.StringType)
+			}
+		}
+		// When plan is a known map (user labels or merged prior state), leave data.Annotations
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
+	}
+
+	// resource SpecToModelRoot Meta StringField --> Description
+	data.Description = types.StringValue(metaData.GetDescription())
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		labelsApiMap := metaData.GetLabels()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Labels already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Labels.IsUnknown() {
+			if len(labelsApiMap) > 0 {
+				labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+				response.Diagnostics.Append(labelsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Labels = labelsMap
+			} else {
+				data.Labels = types.MapNull(types.StringType)
+			}
+		}
+		// When plan is a known map (user labels or merged prior state), leave data.Labels
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
+	}
+
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
 	data.Name = types.StringValue(metaData.GetName())
 
@@ -2986,103 +3254,6 @@ func (r *ResourceF5XCLogReceiver) Update(ctx context.Context, request resource.U
 
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
-
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedLabels := make(map[string]attr.Value)
-		for k, v := range labelsMap.Elements() {
-			mergedLabels[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
-			for k, v := range data.Labels.Elements() {
-				mergedLabels[k] = v
-			}
-		}
-		mergedLabelsMap, mergedLabelsDiags := types.MapValue(types.StringType, mergedLabels)
-		response.Diagnostics.Append(mergedLabelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Labels = mergedLabelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
-
-	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedAnnotations := make(map[string]attr.Value)
-		for k, v := range annotationsMap.Elements() {
-			mergedAnnotations[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
-			for k, v := range data.Annotations.Elements() {
-				mergedAnnotations[k] = v
-			}
-		}
-		mergedAnnotationsMap, mergedAnnotationsDiags := types.MapValue(types.StringType, mergedAnnotations)
-		response.Diagnostics.Append(mergedAnnotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Annotations = mergedAnnotationsMap
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Annotations = types.MapNull(types.StringType)
-	}
-
-	// resource SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
 
 	// resource SpecToModelRoot RequiredOneOfField --> LogReceiverChoice
 	// false
@@ -3093,7 +3264,7 @@ func (r *ResourceF5XCLogReceiver) Update(ctx context.Context, request resource.U
 		logReceiverChoiceChoices := specData.GetLogReceiverChoice()
 
 		// The model struct that will be populated by the nested template.
-		var logReceiverChoiceChoicesModel = &LogReceiverGlobalSpecTypeLogReceiverChoice{}
+		var logReceiverChoiceChoicesModel = &LogReceiverLogReceiverChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -3101,461 +3272,20 @@ func (r *ResourceF5XCLogReceiver) Update(ctx context.Context, request resource.U
 		// GlobalSpecType
 		// false
 		{
-			syslogOptions, isSyslog := logReceiverChoiceChoices.(*ves_io_schema_log_receiver.GlobalSpecType_Syslog)
+			syslogOptionsWrapper, isSyslog := logReceiverChoiceChoices.(*ves_io_schema_log_receiver.GlobalSpecType_Syslog)
 			syslogAttributeMap := make(map[string]attr.Value)
 
-			if isSyslog && syslogOptions != nil {
-
-				// resource specToModelNested RequiredOneOfField --> ModeChoice
-				// GlobalSpecType
-				if syslogOptions.Syslog.GetModeChoice() != nil {
-					// Create a temporary attribute map for the choices within this OneOf
-					syslogmodeChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-					// Define a variable for the spec choices to be passed down to nested templates
-					syslogmodeChoiceChoices := syslogOptions.Syslog.GetModeChoice()
-
-					// Process nested choices, populating the temporary attribute map
-
-					// resource specToModelNested PointerOfOneOfField --> UdpServer
-					// GlobalSpecType
-					// false
-					{
-						udpServerOptions, isUdpServer := syslogmodeChoiceChoices.(*ves_io_schema_log_receiver.SyslogReceiver_UdpServer)
-						udpServerAttributeMap := make(map[string]attr.Value)
-
-						if isUdpServer && udpServerOptions != nil {
-
-							// resource specToModelNested RequiredStringField --> ServerName
-							if udpServerOptions.UdpServer.GetServerName() != "" {
-								udpServerAttributeMap["server_name"] = types.StringValue(udpServerOptions.UdpServer.GetServerName())
-							} else {
-								// Empty string, set to null
-								udpServerAttributeMap["server_name"] = types.StringNull()
-							}
-
-							// resource specToModelNested RequiredUintField --> Port
-							udpServerAttributeMap["port"] = types.Int64Value(int64(udpServerOptions.UdpServer.GetPort()))
-
-							udpServerObj, diags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceUdpServerModelAttributeMap, udpServerAttributeMap)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							syslogmodeChoiceChoicesAttributeMap["udp_server"] = udpServerObj
-						} else {
-							syslogmodeChoiceChoicesAttributeMap["udp_server"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceUdpServerModelAttributeMap)
-						}
-					}
-
-					// resource specToModelNested PointerOfOneOfField --> TcpServer
-					// GlobalSpecType
-					// false
-					{
-						tcpServerOptions, isTcpServer := syslogmodeChoiceChoices.(*ves_io_schema_log_receiver.SyslogReceiver_TcpServer)
-						tcpServerAttributeMap := make(map[string]attr.Value)
-
-						if isTcpServer && tcpServerOptions != nil {
-
-							// resource specToModelNested RequiredStringField --> ServerName
-							if tcpServerOptions.TcpServer.GetServerName() != "" {
-								tcpServerAttributeMap["server_name"] = types.StringValue(tcpServerOptions.TcpServer.GetServerName())
-							} else {
-								// Empty string, set to null
-								tcpServerAttributeMap["server_name"] = types.StringNull()
-							}
-
-							// resource specToModelNested RequiredUintField --> Port
-							tcpServerAttributeMap["port"] = types.Int64Value(int64(tcpServerOptions.TcpServer.GetPort()))
-
-							tcpServerObj, diags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceTcpServerModelAttributeMap, tcpServerAttributeMap)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							syslogmodeChoiceChoicesAttributeMap["tcp_server"] = tcpServerObj
-						} else {
-							syslogmodeChoiceChoicesAttributeMap["tcp_server"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTcpServerModelAttributeMap)
-						}
-					}
-
-					// resource specToModelNested PointerOfOneOfField --> TlsServer
-					// GlobalSpecType
-					// false
-					{
-						tlsServerOptions, isTlsServer := syslogmodeChoiceChoices.(*ves_io_schema_log_receiver.SyslogReceiver_TlsServer)
-						tlsServerAttributeMap := make(map[string]attr.Value)
-
-						if isTlsServer && tlsServerOptions != nil {
-
-							// resource specToModelNested RequiredStringField --> ServerName
-							if tlsServerOptions.TlsServer.GetServerName() != "" {
-								tlsServerAttributeMap["server_name"] = types.StringValue(tlsServerOptions.TlsServer.GetServerName())
-							} else {
-								// Empty string, set to null
-								tlsServerAttributeMap["server_name"] = types.StringNull()
-							}
-
-							// resource specToModelNested RequiredOneOfField --> PortChoice
-							// GlobalSpecType
-							if tlsServerOptions.TlsServer.GetPortChoice() != nil {
-								// Create a temporary attribute map for the choices within this OneOf
-								tlsServerportChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-								// Define a variable for the spec choices to be passed down to nested templates
-								tlsServerportChoiceChoices := tlsServerOptions.TlsServer.GetPortChoice()
-
-								// Process nested choices, populating the temporary attribute map
-
-								// resource specToModelNested UintOfOneOfField --> Port
-								portItem, isPort := tlsServerportChoiceChoices.(*ves_io_schema_log_receiver.TLSConfigType_Port)
-
-								if isPort {
-									tlsServerportChoiceChoicesAttributeMap["port"] = types.Int64Value(int64(portItem.Port))
-								} else {
-									// Empty uint, set to null
-									tlsServerportChoiceChoicesAttributeMap["port"] = types.Int64Null()
-								}
-
-								// resource specToModelNested BoolOfOneOfPointerField --> DefaultSyslogTlsPort
-								_, isDefaultSyslogTlsPort := tlsServerportChoiceChoices.(*ves_io_schema_log_receiver.TLSConfigType_DefaultSyslogTlsPort)
-
-								if isDefaultSyslogTlsPort {
-									tlsServerportChoiceChoicesAttributeMap["default_syslog_tls_port"] = types.BoolValue(true)
-								} else {
-									tlsServerportChoiceChoicesAttributeMap["default_syslog_tls_port"] = types.BoolNull()
-								}
-
-								// resource specToModelNested BoolOfOneOfPointerField --> DefaultHttpsPort
-								_, isDefaultHttpsPort := tlsServerportChoiceChoices.(*ves_io_schema_log_receiver.TLSConfigType_DefaultHttpsPort)
-
-								if isDefaultHttpsPort {
-									tlsServerportChoiceChoicesAttributeMap["default_https_port"] = types.BoolValue(true)
-								} else {
-									tlsServerportChoiceChoicesAttributeMap["default_https_port"] = types.BoolNull()
-								}
-
-								// --- End of Choices ---
-
-								// Create the final ObjectValue for this OneOf field
-								finalObj, tlsServerportChoiceChoicesObjDiags := types.ObjectValue(
-									LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerPortChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-									tlsServerportChoiceChoicesAttributeMap,
-								)
-								response.Diagnostics.Append(tlsServerportChoiceChoicesObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-
-								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								tlsServerAttributeMap["port_choice"] = finalObj
-							} else {
-								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								tlsServerAttributeMap["port_choice"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerPortChoiceModelAttributeMap)
-							}
-
-							// resource specToModelNested RequiredOneOfField --> CaChoice
-							// GlobalSpecType
-							if tlsServerOptions.TlsServer.GetCaChoice() != nil {
-								// Create a temporary attribute map for the choices within this OneOf
-								tlsServercaChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-								// Define a variable for the spec choices to be passed down to nested templates
-								tlsServercaChoiceChoices := tlsServerOptions.TlsServer.GetCaChoice()
-
-								// Process nested choices, populating the temporary attribute map
-
-								// resource specToModelNested BoolOfOneOfPointerField --> VolterraCa
-								_, isVolterraCa := tlsServercaChoiceChoices.(*ves_io_schema_log_receiver.TLSConfigType_VolterraCa)
-
-								if isVolterraCa {
-									tlsServercaChoiceChoicesAttributeMap["volterra_ca"] = types.BoolValue(true)
-								} else {
-									tlsServercaChoiceChoicesAttributeMap["volterra_ca"] = types.BoolNull()
-								}
-
-								// resource specToModelNested StringOfOneOfField --> TrustedCaUrl
-								trustedCaUrlItem, isTrustedCaUrl := tlsServercaChoiceChoices.(*ves_io_schema_log_receiver.TLSConfigType_TrustedCaUrl)
-
-								if isTrustedCaUrl {
-									tlsServercaChoiceChoicesAttributeMap["trusted_ca_url"] = types.StringValue(string(trustedCaUrlItem.TrustedCaUrl))
-								} else {
-									// Empty string, set to null
-									tlsServercaChoiceChoicesAttributeMap["trusted_ca_url"] = types.StringNull()
-								}
-
-								// --- End of Choices ---
-
-								// Create the final ObjectValue for this OneOf field
-								finalObj, tlsServercaChoiceChoicesObjDiags := types.ObjectValue(
-									LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerCaChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-									tlsServercaChoiceChoicesAttributeMap,
-								)
-								response.Diagnostics.Append(tlsServercaChoiceChoicesObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-
-								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								tlsServerAttributeMap["ca_choice"] = finalObj
-							} else {
-								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								tlsServerAttributeMap["ca_choice"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerCaChoiceModelAttributeMap)
-							}
-
-							// resource specToModelNested RequiredOneOfField --> MtlsChoice
-							// GlobalSpecType
-							if tlsServerOptions.TlsServer.GetMtlsChoice() != nil {
-								// Create a temporary attribute map for the choices within this OneOf
-								tlsServermtlsChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-								// Define a variable for the spec choices to be passed down to nested templates
-								tlsServermtlsChoiceChoices := tlsServerOptions.TlsServer.GetMtlsChoice()
-
-								// Process nested choices, populating the temporary attribute map
-
-								// resource specToModelNested BoolOfOneOfPointerField --> MtlsDisabled
-								_, isMtlsDisabled := tlsServermtlsChoiceChoices.(*ves_io_schema_log_receiver.TLSConfigType_MtlsDisabled)
-
-								if isMtlsDisabled {
-									tlsServermtlsChoiceChoicesAttributeMap["mtls_disabled"] = types.BoolValue(true)
-								} else {
-									tlsServermtlsChoiceChoicesAttributeMap["mtls_disabled"] = types.BoolNull()
-								}
-
-								// resource specToModelNested PointerOfOneOfField --> MtlsEnable
-								// GlobalSpecType
-								// false
-								{
-									mtlsEnableOptions, isMtlsEnable := tlsServermtlsChoiceChoices.(*ves_io_schema_log_receiver.TLSConfigType_MtlsEnable)
-									mtlsEnableAttributeMap := make(map[string]attr.Value)
-
-									if isMtlsEnable && mtlsEnableOptions != nil {
-
-										// resource specToModelNested PointerField --> KeyUrl
-										if mtlsEnableOptions.MtlsEnable.GetKeyUrl() != nil {
-											// Create the nested Go struct
-											logReceiverSecretTypeModel := &LogReceiverSecretType{}
-											keyUrlElement := mtlsEnableOptions.MtlsEnable.GetKeyUrl()
-
-											// Recursively populate the nested struct
-
-											// resource specToModelNested RequiredOneOfField --> SecretInfoOneof
-											// GlobalSpecType
-											if keyUrlElement.GetSecretInfoOneof() != nil {
-												// Create a temporary attribute map for the choices within this OneOf
-												keyUrlsecretInfoChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-												// Define a variable for the spec choices to be passed down to nested templates
-												keyUrlsecretInfoChoiceChoices := keyUrlElement.GetSecretInfoOneof()
-
-												// Process nested choices, populating the temporary attribute map
-
-												// resource specToModelNested PointerOfOneOfField --> ClearSecretInfo
-												// GlobalSpecType
-												// false
-												{
-													clearSecretInfoOptions, isClearSecretInfo := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_ClearSecretInfo)
-													clearSecretInfoAttributeMap := make(map[string]attr.Value)
-
-													if isClearSecretInfo && clearSecretInfoOptions != nil {
-
-														// resource specToModelNested StringField --> Provider
-														if clearSecretInfoOptions.ClearSecretInfo.GetProvider() != "" {
-															clearSecretInfoAttributeMap["provider"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetProvider())
-														} else {
-															// Empty string, set to null
-															clearSecretInfoAttributeMap["provider"] = types.StringNull()
-														}
-
-														// resource specToModelNested RequiredStringField --> Url
-														if clearSecretInfoOptions.ClearSecretInfo.GetUrl() != "" {
-															clearSecretInfoAttributeMap["url"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetUrl())
-														} else {
-															// Empty string, set to null
-															clearSecretInfoAttributeMap["url"] = types.StringNull()
-														}
-
-														clearSecretInfoObj, diags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap, clearSecretInfoAttributeMap)
-														response.Diagnostics.Append(diags...)
-														if response.Diagnostics.HasError() {
-															return
-														}
-														keyUrlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = clearSecretInfoObj
-													} else {
-														keyUrlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap)
-													}
-												}
-
-												// resource specToModelNested PointerOfOneOfField --> BlindfoldSecretInfo
-												// GlobalSpecType
-												// false
-												{
-													blindfoldSecretInfoOptions, isBlindfoldSecretInfo := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_BlindfoldSecretInfo)
-													blindfoldSecretInfoAttributeMap := make(map[string]attr.Value)
-
-													if isBlindfoldSecretInfo && blindfoldSecretInfoOptions != nil {
-
-														// resource specToModelNested StringField --> DecryptionProvider
-														if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider() != "" {
-															blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider())
-														} else {
-															// Empty string, set to null
-															blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringNull()
-														}
-
-														// resource specToModelNested StringField --> StoreProvider
-														if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider() != "" {
-															blindfoldSecretInfoAttributeMap["store_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider())
-														} else {
-															// Empty string, set to null
-															blindfoldSecretInfoAttributeMap["store_provider"] = types.StringNull()
-														}
-
-														// resource specToModelNested RequiredStringField --> Location
-														if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation() != "" {
-															blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation())
-														} else {
-															// Empty string, set to null
-															blindfoldSecretInfoAttributeMap["location"] = types.StringNull()
-														}
-
-														blindfoldSecretInfoObj, diags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
-														response.Diagnostics.Append(diags...)
-														if response.Diagnostics.HasError() {
-															return
-														}
-														keyUrlsecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = blindfoldSecretInfoObj
-													} else {
-														keyUrlsecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofBlindfoldSecretInfoModelAttributeMap)
-													}
-												}
-
-												// --- End of Choices ---
-
-												// Create the final ObjectValue for this OneOf field
-												finalObj, keyUrlsecretInfoChoiceChoicesObjDiags := types.ObjectValue(
-													LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofModelAttributeMap, // The attribute schema for the OneOf choices
-													keyUrlsecretInfoChoiceChoicesAttributeMap,
-												)
-												response.Diagnostics.Append(keyUrlsecretInfoChoiceChoicesObjDiags...)
-												if response.Diagnostics.HasError() {
-													return
-												}
-
-												// Assign the final object to the correct place (either the root model or a parent's attribute map)
-												logReceiverSecretTypeModel.SecretInfoChoice = finalObj
-											} else {
-												// The OneOf field is nil in the source spec, so set the Terraform object to null.
-												// State Healing: The API redacted the OneOf secret field (returned nil). Restore the entire
-												// secret_info_choice object from prior Terraform state so that the model reflects what the
-												// user originally configured and Terraform does not detect a false drift.
-												{
-													savedSecretInfoChoicePath := path.Root("log_receiver_choice").AtName("syslog").AtName("mode_choice").AtName("tls_server").AtName("mtls_choice").AtName("mtls_enable").AtName("key_url").AtName("secret_info_choice")
-													var savedSecretInfoChoice types.Object
-													stateHealDiags := request.State.GetAttribute(ctx, savedSecretInfoChoicePath, &savedSecretInfoChoice)
-													if !stateHealDiags.HasError() && !savedSecretInfoChoice.IsNull() && !savedSecretInfoChoice.IsUnknown() {
-														logReceiverSecretTypeModel.SecretInfoChoice = savedSecretInfoChoice
-													} else {
-														logReceiverSecretTypeModel.SecretInfoChoice = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofModelAttributeMap)
-													}
-												}
-											}
-
-											// This field needs to be converted to a types.ObjectValue before assignment.
-											logReceiverSecretTypeModelObj, diags := types.ObjectValueFrom(ctx, LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlModelAttributeMap, logReceiverSecretTypeModel)
-											response.Diagnostics.Append(diags...)
-											if response.Diagnostics.HasError() {
-												return
-											}
-											mtlsEnableAttributeMap["key_url"] = logReceiverSecretTypeModelObj
-
-										} else {
-											// The source field is nil (e.g. redacted by the API).
-											// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
-											// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
-											// because the API may always return a non-nil struct (with REDACTED values) for this field,
-											// making this else-branch unreachable. The child OneOf handles the actual healing.
-											// The target is a types.Object, so we use types.ObjectNull.
-											mtlsEnableAttributeMap["key_url"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlModelAttributeMap)
-										}
-
-										// resource specToModelNested StringField --> Certificate
-										if mtlsEnableOptions.MtlsEnable.GetCertificate() != "" {
-											mtlsEnableAttributeMap["certificate"] = types.StringValue(mtlsEnableOptions.MtlsEnable.GetCertificate())
-										} else {
-											// Empty string, set to null
-											mtlsEnableAttributeMap["certificate"] = types.StringNull()
-										}
-
-										mtlsEnableObj, diags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableModelAttributeMap, mtlsEnableAttributeMap)
-										response.Diagnostics.Append(diags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-										tlsServermtlsChoiceChoicesAttributeMap["mtls_enable"] = mtlsEnableObj
-									} else {
-										tlsServermtlsChoiceChoicesAttributeMap["mtls_enable"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableModelAttributeMap)
-									}
-								}
-
-								// --- End of Choices ---
-
-								// Create the final ObjectValue for this OneOf field
-								finalObj, tlsServermtlsChoiceChoicesObjDiags := types.ObjectValue(
-									LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-									tlsServermtlsChoiceChoicesAttributeMap,
-								)
-								response.Diagnostics.Append(tlsServermtlsChoiceChoicesObjDiags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-
-								// Assign the final object to the correct place (either the root model or a parent's attribute map)
-								tlsServerAttributeMap["mtls_choice"] = finalObj
-							} else {
-								// The OneOf field is nil in the source spec, so set the Terraform object to null.
-								tlsServerAttributeMap["mtls_choice"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceModelAttributeMap)
-							}
-
-							tlsServerObj, diags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerModelAttributeMap, tlsServerAttributeMap)
-							response.Diagnostics.Append(diags...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-							syslogmodeChoiceChoicesAttributeMap["tls_server"] = tlsServerObj
-						} else {
-							syslogmodeChoiceChoicesAttributeMap["tls_server"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerModelAttributeMap)
-						}
-					}
-
-					// --- End of Choices ---
-
-					// Create the final ObjectValue for this OneOf field
-					finalObj, syslogmodeChoiceChoicesObjDiags := types.ObjectValue(
-						LogReceiverLogReceiverChoiceSyslogModeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-						syslogmodeChoiceChoicesAttributeMap,
-					)
-					response.Diagnostics.Append(syslogmodeChoiceChoicesObjDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-
-					// Assign the final object to the correct place (either the root model or a parent's attribute map)
-					syslogAttributeMap["mode_choice"] = finalObj
-				} else {
-					// The OneOf field is nil in the source spec, so set the Terraform object to null.
-					syslogAttributeMap["mode_choice"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceModelAttributeMap)
-				}
+			if isSyslog && syslogOptionsWrapper != nil && syslogOptionsWrapper.Syslog != nil {
+				syslogElement := syslogOptionsWrapper.Syslog
 
 				// resource specToModelNested RequiredOneOfField --> FormatChoice
 				// GlobalSpecType
-				if syslogOptions.Syslog.GetFormatChoice() != nil {
+				if syslogElement.GetFormatChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					syslogformatChoiceChoicesAttributeMap := make(map[string]attr.Value)
 
 					// Define a variable for the spec choices to be passed down to nested templates
-					syslogformatChoiceChoices := syslogOptions.Syslog.GetFormatChoice()
+					syslogformatChoiceChoices := syslogElement.GetFormatChoice()
 
 					// Process nested choices, populating the temporary attribute map
 
@@ -3588,8 +3318,444 @@ func (r *ResourceF5XCLogReceiver) Update(ctx context.Context, request resource.U
 					syslogAttributeMap["format_choice"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogFormatChoiceModelAttributeMap)
 				}
 
-				syslogObj, diags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModelAttributeMap, syslogAttributeMap)
-				response.Diagnostics.Append(diags...)
+				// resource specToModelNested RequiredOneOfField --> ModeChoice
+				// GlobalSpecType
+				if syslogElement.GetModeChoice() != nil {
+					// Create a temporary attribute map for the choices within this OneOf
+					syslogmodeChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+					// Define a variable for the spec choices to be passed down to nested templates
+					syslogmodeChoiceChoices := syslogElement.GetModeChoice()
+
+					// Process nested choices, populating the temporary attribute map
+
+					// resource specToModelNested PointerOfOneOfField --> TcpServer
+					// GlobalSpecType
+					// false
+					{
+						tcpServerOptionsWrapper, isTcpServer := syslogmodeChoiceChoices.(*ves_io_schema_log_receiver.SyslogReceiver_TcpServer)
+						tcpServerAttributeMap := make(map[string]attr.Value)
+
+						if isTcpServer && tcpServerOptionsWrapper != nil && tcpServerOptionsWrapper.TcpServer != nil {
+							tcpServerElement := tcpServerOptionsWrapper.TcpServer
+
+							// resource specToModelNested RequiredUintField --> Port
+							tcpServerAttributeMap["port"] = types.Int64Value(int64(tcpServerElement.GetPort()))
+
+							// resource specToModelNested RequiredStringField --> ServerName
+							if tcpServerElement.GetServerName() != "" {
+								tcpServerAttributeMap["server_name"] = types.StringValue(tcpServerElement.GetServerName())
+							} else {
+								// Empty string, set to null
+								tcpServerAttributeMap["server_name"] = types.StringNull()
+							}
+
+							tcpServerObj, tcpServerObjDiags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceTcpServerModelAttributeMap, tcpServerAttributeMap)
+							response.Diagnostics.Append(tcpServerObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							syslogmodeChoiceChoicesAttributeMap["tcp_server"] = tcpServerObj
+						} else {
+							syslogmodeChoiceChoicesAttributeMap["tcp_server"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTcpServerModelAttributeMap)
+						}
+					}
+
+					// resource specToModelNested PointerOfOneOfField --> TlsServer
+					// GlobalSpecType
+					// false
+					{
+						tlsServerOptionsWrapper, isTlsServer := syslogmodeChoiceChoices.(*ves_io_schema_log_receiver.SyslogReceiver_TlsServer)
+						tlsServerAttributeMap := make(map[string]attr.Value)
+
+						if isTlsServer && tlsServerOptionsWrapper != nil && tlsServerOptionsWrapper.TlsServer != nil {
+							tlsServerElement := tlsServerOptionsWrapper.TlsServer
+
+							// resource specToModelNested RequiredOneOfField --> CaChoice
+							// GlobalSpecType
+							if tlsServerElement.GetCaChoice() != nil {
+								// Create a temporary attribute map for the choices within this OneOf
+								tlsServercaChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+								// Define a variable for the spec choices to be passed down to nested templates
+								tlsServercaChoiceChoices := tlsServerElement.GetCaChoice()
+
+								// Process nested choices, populating the temporary attribute map
+
+								// resource specToModelNested StringOfOneOfField --> TrustedCaUrl
+								trustedCaUrlItem, isTrustedCaUrl := tlsServercaChoiceChoices.(*ves_io_schema_log_receiver.TLSConfigType_TrustedCaUrl)
+
+								if isTrustedCaUrl {
+									tlsServercaChoiceChoicesAttributeMap["trusted_ca_url"] = types.StringValue(string(trustedCaUrlItem.TrustedCaUrl))
+								} else {
+									// Empty string, set to null
+									tlsServercaChoiceChoicesAttributeMap["trusted_ca_url"] = types.StringNull()
+								}
+
+								// resource specToModelNested BoolOfOneOfPointerField --> VolterraCa
+								_, isVolterraCa := tlsServercaChoiceChoices.(*ves_io_schema_log_receiver.TLSConfigType_VolterraCa)
+
+								if isVolterraCa {
+									tlsServercaChoiceChoicesAttributeMap["volterra_ca"] = types.BoolValue(true)
+								} else {
+									tlsServercaChoiceChoicesAttributeMap["volterra_ca"] = types.BoolNull()
+								}
+
+								// --- End of Choices ---
+
+								// Create the final ObjectValue for this OneOf field
+								finalObj, tlsServercaChoiceChoicesObjDiags := types.ObjectValue(
+									LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerCaChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+									tlsServercaChoiceChoicesAttributeMap,
+								)
+								response.Diagnostics.Append(tlsServercaChoiceChoicesObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+
+								// Assign the final object to the correct place (either the root model or a parent's attribute map)
+								tlsServerAttributeMap["ca_choice"] = finalObj
+							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
+								tlsServerAttributeMap["ca_choice"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerCaChoiceModelAttributeMap)
+							}
+
+							// resource specToModelNested RequiredOneOfField --> MtlsChoice
+							// GlobalSpecType
+							if tlsServerElement.GetMtlsChoice() != nil {
+								// Create a temporary attribute map for the choices within this OneOf
+								tlsServermtlsChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+								// Define a variable for the spec choices to be passed down to nested templates
+								tlsServermtlsChoiceChoices := tlsServerElement.GetMtlsChoice()
+
+								// Process nested choices, populating the temporary attribute map
+
+								// resource specToModelNested BoolOfOneOfPointerField --> MtlsDisabled
+								_, isMtlsDisabled := tlsServermtlsChoiceChoices.(*ves_io_schema_log_receiver.TLSConfigType_MtlsDisabled)
+
+								if isMtlsDisabled {
+									tlsServermtlsChoiceChoicesAttributeMap["mtls_disabled"] = types.BoolValue(true)
+								} else {
+									tlsServermtlsChoiceChoicesAttributeMap["mtls_disabled"] = types.BoolNull()
+								}
+
+								// resource specToModelNested PointerOfOneOfField --> MtlsEnable
+								// GlobalSpecType
+								// false
+								{
+									mtlsEnableOptionsWrapper, isMtlsEnable := tlsServermtlsChoiceChoices.(*ves_io_schema_log_receiver.TLSConfigType_MtlsEnable)
+									mtlsEnableAttributeMap := make(map[string]attr.Value)
+
+									if isMtlsEnable && mtlsEnableOptionsWrapper != nil && mtlsEnableOptionsWrapper.MtlsEnable != nil {
+										mtlsEnableElement := mtlsEnableOptionsWrapper.MtlsEnable
+
+										// resource specToModelNested StringField --> Certificate
+										if mtlsEnableElement.GetCertificate() != "" {
+											mtlsEnableAttributeMap["certificate"] = types.StringValue(mtlsEnableElement.GetCertificate())
+										} else {
+											// Empty string, set to null
+											mtlsEnableAttributeMap["certificate"] = types.StringNull()
+										}
+
+										// resource specToModelNested PointerField --> KeyUrl
+										if mtlsEnableElement.GetKeyUrl() != nil {
+											// Create the nested Go struct
+											logReceiverSecretTypeModel := &LogReceiverSecretType{}
+											keyUrlElement := mtlsEnableElement.GetKeyUrl()
+
+											// Recursively populate the nested struct
+
+											// resource specToModelNested RequiredOneOfField --> SecretInfoOneof
+											// GlobalSpecType
+											if keyUrlElement.GetSecretInfoOneof() != nil {
+												// Create a temporary attribute map for the choices within this OneOf
+												keyUrlsecretInfoChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+												// Define a variable for the spec choices to be passed down to nested templates
+												keyUrlsecretInfoChoiceChoices := keyUrlElement.GetSecretInfoOneof()
+
+												// Process nested choices, populating the temporary attribute map
+
+												// resource specToModelNested PointerOfOneOfField --> BlindfoldSecretInfo
+												// GlobalSpecType
+												// false
+												{
+													blindfoldSecretInfoOptionsWrapper, isBlindfoldSecretInfo := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_BlindfoldSecretInfo)
+													blindfoldSecretInfoAttributeMap := make(map[string]attr.Value)
+
+													if isBlindfoldSecretInfo && blindfoldSecretInfoOptionsWrapper != nil && blindfoldSecretInfoOptionsWrapper.BlindfoldSecretInfo != nil {
+														blindfoldSecretInfoElement := blindfoldSecretInfoOptionsWrapper.BlindfoldSecretInfo
+
+														// resource specToModelNested StringField --> DecryptionProvider
+														if blindfoldSecretInfoElement.GetDecryptionProvider() != "" {
+															blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoElement.GetDecryptionProvider())
+														} else {
+															// Empty string, set to null
+															blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringNull()
+														}
+
+														// resource specToModelNested RequiredStringField --> Location
+														if blindfoldSecretInfoElement.GetLocation() != "" {
+															blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoElement.GetLocation())
+														} else {
+															// Empty string, set to null
+															blindfoldSecretInfoAttributeMap["location"] = types.StringNull()
+														}
+
+														// resource specToModelNested StringField --> StoreProvider
+														if blindfoldSecretInfoElement.GetStoreProvider() != "" {
+															blindfoldSecretInfoAttributeMap["store_provider"] = types.StringValue(blindfoldSecretInfoElement.GetStoreProvider())
+														} else {
+															// Empty string, set to null
+															blindfoldSecretInfoAttributeMap["store_provider"] = types.StringNull()
+														}
+
+														blindfoldSecretInfoObj, blindfoldSecretInfoObjDiags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
+														response.Diagnostics.Append(blindfoldSecretInfoObjDiags...)
+														if response.Diagnostics.HasError() {
+															return
+														}
+														keyUrlsecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = blindfoldSecretInfoObj
+													} else {
+														keyUrlsecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofBlindfoldSecretInfoModelAttributeMap)
+													}
+												}
+
+												// resource specToModelNested PointerOfOneOfField --> ClearSecretInfo
+												// GlobalSpecType
+												// false
+												{
+													clearSecretInfoOptionsWrapper, isClearSecretInfo := keyUrlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_ClearSecretInfo)
+													clearSecretInfoAttributeMap := make(map[string]attr.Value)
+
+													if isClearSecretInfo && clearSecretInfoOptionsWrapper != nil && clearSecretInfoOptionsWrapper.ClearSecretInfo != nil {
+														clearSecretInfoElement := clearSecretInfoOptionsWrapper.ClearSecretInfo
+
+														// resource specToModelNested StringField --> Provider
+														if clearSecretInfoElement.GetProvider() != "" {
+															clearSecretInfoAttributeMap["provider"] = types.StringValue(clearSecretInfoElement.GetProvider())
+														} else {
+															// Empty string, set to null
+															clearSecretInfoAttributeMap["provider"] = types.StringNull()
+														}
+
+														// resource specToModelNested RequiredStringField --> Url
+														if clearSecretInfoElement.GetUrl() != "" {
+															clearSecretInfoAttributeMap["url"] = types.StringValue(clearSecretInfoElement.GetUrl())
+														} else {
+															// Empty string, set to null
+															clearSecretInfoAttributeMap["url"] = types.StringNull()
+														}
+
+														clearSecretInfoObj, clearSecretInfoObjDiags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap, clearSecretInfoAttributeMap)
+														response.Diagnostics.Append(clearSecretInfoObjDiags...)
+														if response.Diagnostics.HasError() {
+															return
+														}
+														keyUrlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = clearSecretInfoObj
+													} else {
+														keyUrlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofClearSecretInfoModelAttributeMap)
+													}
+												}
+
+												// --- End of Choices ---
+
+												// Create the final ObjectValue for this OneOf field
+												finalObj, keyUrlsecretInfoChoiceChoicesObjDiags := types.ObjectValue(
+													LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofModelAttributeMap, // The attribute schema for the OneOf choices
+													keyUrlsecretInfoChoiceChoicesAttributeMap,
+												)
+												response.Diagnostics.Append(keyUrlsecretInfoChoiceChoicesObjDiags...)
+												if response.Diagnostics.HasError() {
+													return
+												}
+
+												// Assign the final object to the correct place (either the root model or a parent's attribute map)
+												logReceiverSecretTypeModel.SecretInfoChoice = finalObj
+											} else {
+												// The OneOf field is nil in the source spec, so set the Terraform object to null.
+												logReceiverSecretTypeModel.SecretInfoChoice = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlSecretInfoOneofModelAttributeMap)
+											}
+
+											// This field needs to be converted to a types.ObjectValue before assignment.
+											logReceiverSecretTypeModelObj, logReceiverSecretTypeModelObjDiags := types.ObjectValueFrom(ctx, LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlModelAttributeMap, logReceiverSecretTypeModel)
+											response.Diagnostics.Append(logReceiverSecretTypeModelObjDiags...)
+											if response.Diagnostics.HasError() {
+												return
+											}
+											mtlsEnableAttributeMap["key_url"] = logReceiverSecretTypeModelObj
+
+										} else {
+											// The source field is nil (e.g. redacted by the API).
+											// Note: When NeedsStateHealing is true for a PointerField, the healing is already handled
+											// by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted here
+											// because the API may always return a non-nil struct (with REDACTED values) for this field,
+											// making this else-branch unreachable. The child OneOf handles the actual healing.
+											// The target is a types.Object, so we use types.ObjectNull.
+											mtlsEnableAttributeMap["key_url"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableKeyUrlModelAttributeMap)
+										}
+
+										mtlsEnableObj, mtlsEnableObjDiags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableModelAttributeMap, mtlsEnableAttributeMap)
+										response.Diagnostics.Append(mtlsEnableObjDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										tlsServermtlsChoiceChoicesAttributeMap["mtls_enable"] = mtlsEnableObj
+									} else {
+										tlsServermtlsChoiceChoicesAttributeMap["mtls_enable"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceMtlsEnableModelAttributeMap)
+									}
+								}
+
+								// --- End of Choices ---
+
+								// Create the final ObjectValue for this OneOf field
+								finalObj, tlsServermtlsChoiceChoicesObjDiags := types.ObjectValue(
+									LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+									tlsServermtlsChoiceChoicesAttributeMap,
+								)
+								response.Diagnostics.Append(tlsServermtlsChoiceChoicesObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+
+								// Assign the final object to the correct place (either the root model or a parent's attribute map)
+								tlsServerAttributeMap["mtls_choice"] = finalObj
+							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
+								tlsServerAttributeMap["mtls_choice"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerMtlsChoiceModelAttributeMap)
+							}
+
+							// resource specToModelNested RequiredOneOfField --> PortChoice
+							// GlobalSpecType
+							if tlsServerElement.GetPortChoice() != nil {
+								// Create a temporary attribute map for the choices within this OneOf
+								tlsServerportChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+								// Define a variable for the spec choices to be passed down to nested templates
+								tlsServerportChoiceChoices := tlsServerElement.GetPortChoice()
+
+								// Process nested choices, populating the temporary attribute map
+
+								// resource specToModelNested BoolOfOneOfPointerField --> DefaultHttpsPort
+								_, isDefaultHttpsPort := tlsServerportChoiceChoices.(*ves_io_schema_log_receiver.TLSConfigType_DefaultHttpsPort)
+
+								if isDefaultHttpsPort {
+									tlsServerportChoiceChoicesAttributeMap["default_https_port"] = types.BoolValue(true)
+								} else {
+									tlsServerportChoiceChoicesAttributeMap["default_https_port"] = types.BoolNull()
+								}
+
+								// resource specToModelNested BoolOfOneOfPointerField --> DefaultSyslogTlsPort
+								_, isDefaultSyslogTlsPort := tlsServerportChoiceChoices.(*ves_io_schema_log_receiver.TLSConfigType_DefaultSyslogTlsPort)
+
+								if isDefaultSyslogTlsPort {
+									tlsServerportChoiceChoicesAttributeMap["default_syslog_tls_port"] = types.BoolValue(true)
+								} else {
+									tlsServerportChoiceChoicesAttributeMap["default_syslog_tls_port"] = types.BoolNull()
+								}
+
+								// resource specToModelNested UintOfOneOfField --> Port
+								portItem, isPort := tlsServerportChoiceChoices.(*ves_io_schema_log_receiver.TLSConfigType_Port)
+
+								if isPort {
+									tlsServerportChoiceChoicesAttributeMap["port"] = types.Int64Value(int64(portItem.Port))
+								} else {
+									// Empty uint, set to null
+									tlsServerportChoiceChoicesAttributeMap["port"] = types.Int64Null()
+								}
+
+								// --- End of Choices ---
+
+								// Create the final ObjectValue for this OneOf field
+								finalObj, tlsServerportChoiceChoicesObjDiags := types.ObjectValue(
+									LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerPortChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+									tlsServerportChoiceChoicesAttributeMap,
+								)
+								response.Diagnostics.Append(tlsServerportChoiceChoicesObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+
+								// Assign the final object to the correct place (either the root model or a parent's attribute map)
+								tlsServerAttributeMap["port_choice"] = finalObj
+							} else {
+								// The OneOf field is nil in the source spec, so set the Terraform object to null.
+								tlsServerAttributeMap["port_choice"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerPortChoiceModelAttributeMap)
+							}
+
+							// resource specToModelNested RequiredStringField --> ServerName
+							if tlsServerElement.GetServerName() != "" {
+								tlsServerAttributeMap["server_name"] = types.StringValue(tlsServerElement.GetServerName())
+							} else {
+								// Empty string, set to null
+								tlsServerAttributeMap["server_name"] = types.StringNull()
+							}
+
+							tlsServerObj, tlsServerObjDiags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerModelAttributeMap, tlsServerAttributeMap)
+							response.Diagnostics.Append(tlsServerObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							syslogmodeChoiceChoicesAttributeMap["tls_server"] = tlsServerObj
+						} else {
+							syslogmodeChoiceChoicesAttributeMap["tls_server"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceTlsServerModelAttributeMap)
+						}
+					}
+
+					// resource specToModelNested PointerOfOneOfField --> UdpServer
+					// GlobalSpecType
+					// false
+					{
+						udpServerOptionsWrapper, isUdpServer := syslogmodeChoiceChoices.(*ves_io_schema_log_receiver.SyslogReceiver_UdpServer)
+						udpServerAttributeMap := make(map[string]attr.Value)
+
+						if isUdpServer && udpServerOptionsWrapper != nil && udpServerOptionsWrapper.UdpServer != nil {
+							udpServerElement := udpServerOptionsWrapper.UdpServer
+
+							// resource specToModelNested RequiredUintField --> Port
+							udpServerAttributeMap["port"] = types.Int64Value(int64(udpServerElement.GetPort()))
+
+							// resource specToModelNested RequiredStringField --> ServerName
+							if udpServerElement.GetServerName() != "" {
+								udpServerAttributeMap["server_name"] = types.StringValue(udpServerElement.GetServerName())
+							} else {
+								// Empty string, set to null
+								udpServerAttributeMap["server_name"] = types.StringNull()
+							}
+
+							udpServerObj, udpServerObjDiags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModeChoiceUdpServerModelAttributeMap, udpServerAttributeMap)
+							response.Diagnostics.Append(udpServerObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							syslogmodeChoiceChoicesAttributeMap["udp_server"] = udpServerObj
+						} else {
+							syslogmodeChoiceChoicesAttributeMap["udp_server"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceUdpServerModelAttributeMap)
+						}
+					}
+
+					// --- End of Choices ---
+
+					// Create the final ObjectValue for this OneOf field
+					finalObj, syslogmodeChoiceChoicesObjDiags := types.ObjectValue(
+						LogReceiverLogReceiverChoiceSyslogModeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+						syslogmodeChoiceChoicesAttributeMap,
+					)
+					response.Diagnostics.Append(syslogmodeChoiceChoicesObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					// Assign the final object to the correct place (either the root model or a parent's attribute map)
+					syslogAttributeMap["mode_choice"] = finalObj
+				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					syslogAttributeMap["mode_choice"] = types.ObjectNull(LogReceiverLogReceiverChoiceSyslogModeChoiceModelAttributeMap)
+				}
+
+				syslogObj, syslogObjDiags := types.ObjectValue(LogReceiverLogReceiverChoiceSyslogModelAttributeMap, syslogAttributeMap)
+				response.Diagnostics.Append(syslogObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -3600,20 +3766,24 @@ func (r *ResourceF5XCLogReceiver) Update(ctx context.Context, request resource.U
 		}
 
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		logReceiverChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			LogReceiverLogReceiverChoiceModelAttributeMap,
-			logReceiverChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
+		{
+			logReceiverChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				LogReceiverLogReceiverChoiceModelAttributeMap,
+				logReceiverChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
 
-		// Assign the final object to the root data model.
-		data.LogReceiverChoice = logReceiverChoiceObj
+			// Assign the final object to the root data model.
+			data.LogReceiverChoice = logReceiverChoiceObj
+		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
+		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.LogReceiverChoice = types.ObjectNull(LogReceiverLogReceiverChoiceModelAttributeMap)
 	}
 
@@ -3626,7 +3796,7 @@ func (r *ResourceF5XCLogReceiver) Update(ctx context.Context, request resource.U
 		whereChoiceChoices := specData.GetWhereChoice()
 
 		// The model struct that will be populated by the nested template.
-		var whereChoiceChoicesModel = &LogReceiverGlobalSpecTypeWhereChoice{}
+		var whereChoiceChoicesModel = &LogReceiverWhereChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -3640,22 +3810,55 @@ func (r *ResourceF5XCLogReceiver) Update(ctx context.Context, request resource.U
 		}
 
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		whereChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			LogReceiverWhereChoiceModelAttributeMap,
-			whereChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
+		{
+			whereChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				LogReceiverWhereChoiceModelAttributeMap,
+				whereChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
 
-		// Assign the final object to the root data model.
-		data.WhereChoice = whereChoiceObj
+			// Assign the final object to the root data model.
+			data.WhereChoice = whereChoiceObj
+		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
+		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.WhereChoice = types.ObjectNull(LogReceiverWhereChoiceModelAttributeMap)
 	}
+
+	// Restore the merged value for Optional+Computed map meta-attributes.
+	// MapMergeModifier sets plan = prior state on Update so that Terraform Core's
+	// constraint (plan must equal config or prior state) is satisfied.
+	// We merge planX (prior state, contains backend-injected keys such as
+	// "ves.io/config-propagation-destination") with configData.X (user-intent values,
+	// config wins on conflict) so that:
+	//   (a) backend-injected keys from prior state are preserved in state, and
+	//   (b) user-changed values (e.g. "version":"v1" → "v2") are reflected immediately
+	//       without waiting for the next Read — fixing ImportStateVerify failures.
+	{
+		mergedMap, mergeDiags := utils.MergeStringMaps(planAnnotations, configData.Annotations)
+		response.Diagnostics.Append(mergeDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.Annotations = mergedMap
+	}
+	{
+		mergedMap, mergeDiags := utils.MergeStringMaps(planLabels, configData.Labels)
+		response.Diagnostics.Append(mergeDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.Labels = mergedMap
+	}
+	// Restore plan value for LogReceiverChoice. The API redacts sensitive fields
+	// in GET responses. Restoring the plan value ensures apply result == plan.
+	data.LogReceiverChoice = planLogReceiverChoice
 
 	// Save updated data into Terraform state
 	response.Diagnostics.Append(response.State.Set(ctx, &data)...)
@@ -3691,9 +3894,8 @@ func (r *ResourceF5XCLogReceiver) Delete(ctx context.Context, request resource.D
 	defer cancel()
 
 	// Standard Delete Logic
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
+	opts := []vesapi.CallOpt{}
+	opts = append(opts, vesapi.WithFailIfReferred())
 
 	err = r.client.DeleteObject(ctx, ves_io_schema_log_receiver.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 
@@ -3708,19 +3910,32 @@ func (r *ResourceF5XCLogReceiver) Delete(ctx context.Context, request resource.D
 		)
 		return
 	}
-}
 
+}
 func (r *ResourceF5XCLogReceiver) ImportState(ctx context.Context, req resource.ImportStateRequest, response *resource.ImportStateResponse) {
 	// Import ID format: namespace/name
 	parts := strings.Split(req.ID, "/")
-	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+	if len(parts) != 2 {
 		response.Diagnostics.AddError(
 			"Invalid Import ID",
 			fmt.Sprintf("Expected import ID format: namespace/name, got: %s", req.ID),
 		)
 		return
 	}
-
+	if parts[0] == "" {
+		response.Diagnostics.AddError(
+			"Invalid Import ID",
+			fmt.Sprintf("Expected import ID format: namespace/name, got: %s (namespace is empty)", req.ID),
+		)
+		return
+	}
 	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("namespace"), parts[0])...)
+	if parts[1] == "" {
+		response.Diagnostics.AddError(
+			"Invalid Import ID",
+			fmt.Sprintf("Expected import ID format: namespace/name, got: %s (name is empty)", req.ID),
+		)
+		return
+	}
 	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("name"), parts[1])...)
 }

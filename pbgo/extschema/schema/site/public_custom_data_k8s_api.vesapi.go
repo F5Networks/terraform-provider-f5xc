@@ -2611,10 +2611,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
         "description": "APIs to get monitoring data for K8s resources in a site.",
         "version": "version not set"
     },
-    "schemes": [
-        "http",
-        "https"
-    ],
+    "schemes": null,
     "consumes": [
         "application/json"
     ],
@@ -2681,6 +2678,12 @@ var CustomDataK8SAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2774,6 +2777,12 @@ var CustomDataK8SAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2866,6 +2875,12 @@ var CustomDataK8SAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2949,6 +2964,12 @@ var CustomDataK8SAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -3042,6 +3063,12 @@ var CustomDataK8SAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -3133,6 +3160,12 @@ var CustomDataK8SAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -3226,6 +3259,12 @@ var CustomDataK8SAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -3317,6 +3356,12 @@ var CustomDataK8SAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -3410,6 +3455,12 @@ var CustomDataK8SAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -3502,6 +3553,12 @@ var CustomDataK8SAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -3585,6 +3642,12 @@ var CustomDataK8SAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -3678,6 +3741,12 @@ var CustomDataK8SAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -3761,6 +3830,12 @@ var CustomDataK8SAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -3854,6 +3929,12 @@ var CustomDataK8SAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -3945,6 +4026,12 @@ var CustomDataK8SAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -4038,6 +4125,12 @@ var CustomDataK8SAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -4129,6 +4222,12 @@ var CustomDataK8SAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -4222,6 +4321,12 @@ var CustomDataK8SAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -4313,6 +4418,12 @@ var CustomDataK8SAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -4406,6 +4517,12 @@ var CustomDataK8SAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -4497,6 +4614,12 @@ var CustomDataK8SAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -4590,6 +4713,12 @@ var CustomDataK8SAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -4681,6 +4810,12 @@ var CustomDataK8SAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -4774,6 +4909,12 @@ var CustomDataK8SAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -4865,6 +5006,12 @@ var CustomDataK8SAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -4958,6 +5105,12 @@ var CustomDataK8SAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -5050,6 +5203,12 @@ var CustomDataK8SAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -5141,6 +5300,12 @@ var CustomDataK8SAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -5242,6 +5407,12 @@ var CustomDataK8SAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -5342,6 +5513,12 @@ var CustomDataK8SAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -5434,6 +5611,12 @@ var CustomDataK8SAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -5509,11 +5692,47 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 }
             }
         },
+        "protobufAny": {
+            "type": "object",
+            "description": "-Any- contains an arbitrary serialized protocol buffer message along with a\nURL that describes the type of the serialized message.\n\nProtobuf library provides support to pack/unpack Any values in the form\nof utility functions or additional generated methods of the Any type.\n\nExample 1: Pack and unpack a message in C++.\n\n    Foo foo = ...;\n    Any any;\n    any.PackFrom(foo);\n    ...\n    if (any.UnpackTo(\u0026foo)) {\n      ...\n    }\n\nExample 2: Pack and unpack a message in Java.\n\n    Foo foo = ...;\n    Any any = Any.pack(foo);\n    ...\n    if (any.is(Foo.class)) {\n      foo = any.unpack(Foo.class);\n    }\n\n Example 3: Pack and unpack a message in Python.\n\n    foo = Foo(...)\n    any = Any()\n    any.Pack(foo)\n    ...\n    if any.Is(Foo.DESCRIPTOR):\n      any.Unpack(foo)\n      ...\n\n Example 4: Pack and unpack a message in Go\n\n     foo := \u0026pb.Foo{...}\n     any, err := ptypes.MarshalAny(foo)\n     ...\n     foo := \u0026pb.Foo{}\n     if err := ptypes.UnmarshalAny(any, foo); err != nil {\n       ...\n     }\n\nThe pack methods provided by protobuf library will by default use\n'type.googleapis.com/full.type.name' as the type URL and the unpack\nmethods only use the fully qualified type name after the last '/'\nin the type URL, for example \"foo.bar.com/x/y.z\" will yield type\nname \"y.z\".\n\n\nJSON\n====\nThe JSON representation of an -Any- value uses the regular\nrepresentation of the deserialized, embedded message, with an\nadditional field -@type- which contains the type URL. Example:\n\n    package google.profile;\n    message Person {\n      string first_name = 1;\n      string last_name = 2;\n    }\n\n    {\n      \"@type\": \"type.googleapis.com/google.profile.Person\",\n      \"firstName\": \u003cstring\u003e,\n      \"lastName\": \u003cstring\u003e\n    }\n\nIf the embedded message type is well-known and has a custom JSON\nrepresentation, that representation will be embedded adding a field\n-value- which holds the custom JSON in addition to the -@type-\nfield. Example (for message [google.protobuf.Duration][]):\n\n    {\n      \"@type\": \"type.googleapis.com/google.protobuf.Duration\",\n      \"value\": \"1.212s\"\n    }",
+            "properties": {
+                "type_url": {
+                    "type": "string",
+                    "description": "A URL/resource name that uniquely identifies the type of the serialized\nprotocol buffer message. This string must contain at least\none \"/\" character. The last segment of the URL's path must represent\nthe fully qualified name of the type (as in\n-path/google.protobuf.Duration-). The name should be in a canonical form\n(e.g., leading \".\" is not accepted).\n\nIn practice, teams usually precompile into the binary all types that they\nexpect it to use in the context of Any. However, for URLs which use the\nscheme -http-, -https-, or no scheme, one can optionally set up a type\nserver that maps type URLs to message definitions as follows:\n\n* If no scheme is provided, -https- is assumed.\n* An HTTP GET on the URL must yield a [google.protobuf.Type][]\n  value in binary format, or produce an error.\n* Applications are allowed to cache lookup results based on the\n  URL, or have them precompiled into a binary to avoid any\n  lookup. Therefore, binary compatibility needs to be preserved\n  on changes to types. (Use versioned type names to manage\n  breaking changes.)\n\nNote: this functionality is not currently available in the official\nprotobuf release, and it is not used for type URLs beginning with\ntype.googleapis.com.\n\nSchemes other than -http-, -https- (or the empty scheme) might be\nused with implementation specific semantics."
+                },
+                "value": {
+                    "type": "string",
+                    "description": "Must be a valid serialized protocol buffer of the above specified type.",
+                    "format": "byte"
+                }
+            }
+        },
         "resourceQuantity": {
             "type": "object",
             "description": "Quantity is a fixed-point representation of a number.\nIt provides convenient marshaling/unmarshaling in JSON and YAML,\nin addition to String() and AsInt64() accessors.\n\nThe serialization format is:\n\n\u003cquantity\u003e        ::= \u003csignedNumber\u003e\u003csuffix\u003e\n  (Note that \u003csuffix\u003e may be empty, from the \"\" case in \u003cdecimalSI\u003e.)\n\u003cdigit\u003e           ::= 0 | 1 | ... | 9\n\u003cdigits\u003e          ::= \u003cdigit\u003e | \u003cdigit\u003e\u003cdigits\u003e\n\u003cnumber\u003e          ::= \u003cdigits\u003e | \u003cdigits\u003e.\u003cdigits\u003e | \u003cdigits\u003e. | .\u003cdigits\u003e\n\u003csign\u003e            ::= \"+\" | \"-\"\n\u003csignedNumber\u003e    ::= \u003cnumber\u003e | \u003csign\u003e\u003cnumber\u003e\n\u003csuffix\u003e          ::= \u003cbinarySI\u003e | \u003cdecimalExponent\u003e | \u003cdecimalSI\u003e\n\u003cbinarySI\u003e        ::= Ki | Mi | Gi | Ti | Pi | Ei\n  (International System of units; See: http://physics.nist.gov/cuu/Units/binary.html)\n\u003cdecimalSI\u003e       ::= m | \"\" | k | M | G | T | P | E\n  (Note that 1024 = 1Ki but 1000 = 1k; I didn't choose the capitalization.)\n\u003cdecimalExponent\u003e ::= \"e\" \u003csignedNumber\u003e | \"E\" \u003csignedNumber\u003e\n\nNo matter which of the three exponent forms is used, no quantity may represent\na number greater than 2^63-1 in magnitude, nor may it have more than 3 decimal\nplaces. Numbers larger or more precise will be capped or rounded up.\n(E.g.: 0.1m will rounded up to 1m.)\nThis may be extended in the future if we require larger or smaller quantities.\n\nWhen a Quantity is parsed from a string, it will remember the type of suffix\nit had, and will use the same type again when it is serialized.\n\nBefore serializing, Quantity will be put in \"canonical form\".\nThis means that Exponent/suffix will be adjusted up or down (with a\ncorresponding increase or decrease in Mantissa) such that:\n  a. No precision is lost\n  b. No fractional digits will be emitted\n  c. The exponent (or suffix) is as large as possible.\nThe sign will be omitted unless the number is negative.\n\nExamples:\n  1.5 will be serialized as \"1500m\"\n  1.5Gi will be serialized as \"1536Mi\"\n\nNote that the quantity will NEVER be internally represented by a\nfloating point number. That is the whole point of this exercise.\n\nNon-canonical values will still parse as long as they are well formed,\nbut will be re-emitted in their canonical form. (So always use canonical\nform, or don't diff.)\n\nThis format is intended to make it difficult to use these numbers without\nwriting some sort of special handling code in the hopes that that will\ncause implementors to also use a fixed point implementation.\n\n+protobuf=true\n+protobuf.embed=string\n+protobuf.options.marshal=false\n+protobuf.options.(gogoproto.goproto_stringer)=false\n+k8s:deepcopy-gen=true\n+k8s:openapi-gen=true",
             "properties": {
                 "string": {
+                    "type": "string"
+                }
+            }
+        },
+        "runtimeError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/protobufAny"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
                     "type": "string"
                 }
             }
@@ -5977,8 +6196,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 "readOnly": {
                     "type": "boolean",
                     "description": " More info: https://kubernetes.io/docs/concepts/storage/volumes#awselasticblockstore\n +optional",
-                    "title": "Specify \"true\" to force and set the ReadOnly property in VolumeMounts to \"true\".\nIf omitted, the default is \"false\".\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#awselasticblockstore\n+optional",
-                    "format": "boolean"
+                    "title": "Specify \"true\" to force and set the ReadOnly property in VolumeMounts to \"true\".\nIf omitted, the default is \"false\".\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#awselasticblockstore\n+optional"
                 },
                 "volumeID": {
                     "type": "string",
@@ -6049,8 +6267,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 "readOnly": {
                     "type": "boolean",
                     "description": " +optional",
-                    "title": "Defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\n+optional",
-                    "format": "boolean"
+                    "title": "Defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\n+optional"
                 }
             }
         },
@@ -6062,8 +6279,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 "readOnly": {
                     "type": "boolean",
                     "description": " +optional",
-                    "title": "Defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\n+optional",
-                    "format": "boolean"
+                    "title": "Defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\n+optional"
                 },
                 "secretName": {
                     "type": "string",
@@ -6088,8 +6304,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 "readOnly": {
                     "type": "boolean",
                     "description": " +optional",
-                    "title": "Defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\n+optional",
-                    "format": "boolean"
+                    "title": "Defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\n+optional"
                 },
                 "secretName": {
                     "type": "string",
@@ -6138,8 +6353,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 "readOnly": {
                     "type": "boolean",
                     "description": " +optional",
-                    "title": "Optional: The value to pass to ControllerPublishVolumeRequest.\nDefaults to false (read/write).\n+optional",
-                    "format": "boolean"
+                    "title": "Optional: The value to pass to ControllerPublishVolumeRequest.\nDefaults to false (read/write).\n+optional"
                 },
                 "volumeAttributes": {
                     "type": "object",
@@ -6173,8 +6387,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 "readOnly": {
                     "type": "boolean",
                     "description": " +optional",
-                    "title": "Specifies a read-only configuration for the volume.\nDefaults to false (read/write).\n+optional",
-                    "format": "boolean"
+                    "title": "Specifies a read-only configuration for the volume.\nDefaults to false (read/write).\n+optional"
                 },
                 "volumeAttributes": {
                     "type": "object",
@@ -6223,8 +6436,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 "readOnly": {
                     "type": "boolean",
                     "description": " More info: https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it\n +optional",
-                    "title": "Optional: Defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\nMore info: https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it\n+optional",
-                    "format": "boolean"
+                    "title": "Optional: Defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\nMore info: https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it\n+optional"
                 },
                 "secretFile": {
                     "type": "string",
@@ -6262,8 +6474,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 "readOnly": {
                     "type": "boolean",
                     "description": " More info: https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it\n +optional",
-                    "title": "Optional: Defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\nMore info: https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it\n+optional",
-                    "format": "boolean"
+                    "title": "Optional: Defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\nMore info: https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it\n+optional"
                 },
                 "secretFile": {
                     "type": "string",
@@ -6295,8 +6506,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 "readOnly": {
                     "type": "boolean",
                     "description": " More info: https://examples.k8s.io/mysql-cinder-pd/README.md\n +optional",
-                    "title": "Optional: Defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\nMore info: https://examples.k8s.io/mysql-cinder-pd/README.md\n+optional",
-                    "format": "boolean"
+                    "title": "Optional: Defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\nMore info: https://examples.k8s.io/mysql-cinder-pd/README.md\n+optional"
                 },
                 "secretRef": {
                     "description": " +optional",
@@ -6322,8 +6532,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 "readOnly": {
                     "type": "boolean",
                     "description": " More info: https://examples.k8s.io/mysql-cinder-pd/README.md\n +optional",
-                    "title": "Optional: Defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\nMore info: https://examples.k8s.io/mysql-cinder-pd/README.md\n+optional",
-                    "format": "boolean"
+                    "title": "Optional: Defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\nMore info: https://examples.k8s.io/mysql-cinder-pd/README.md\n+optional"
                 },
                 "secretRef": {
                     "description": " +optional",
@@ -6382,8 +6591,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 },
                 "optional": {
                     "type": "boolean",
-                    "title": "Specify whether the ConfigMap must be defined\n+optional",
-                    "format": "boolean"
+                    "title": "Specify whether the ConfigMap must be defined\n+optional"
                 }
             }
         },
@@ -6402,8 +6610,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 },
                 "optional": {
                     "type": "boolean",
-                    "title": "Specify whether the ConfigMap or its key must be defined\n+optional",
-                    "format": "boolean"
+                    "title": "Specify whether the ConfigMap or its key must be defined\n+optional"
                 }
             }
         },
@@ -6472,8 +6679,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 },
                 "optional": {
                     "type": "boolean",
-                    "title": "Specify whether the ConfigMap or its keys must be defined\n+optional",
-                    "format": "boolean"
+                    "title": "Specify whether the ConfigMap or its keys must be defined\n+optional"
                 }
             }
         },
@@ -6501,8 +6707,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 },
                 "optional": {
                     "type": "boolean",
-                    "title": "Specify whether the ConfigMap or its keys must be defined\n+optional",
-                    "format": "boolean"
+                    "title": "Specify whether the ConfigMap or its keys must be defined\n+optional"
                 }
             }
         },
@@ -6598,14 +6803,12 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 "stdin": {
                     "type": "boolean",
                     "description": " Default is false.\n +optional",
-                    "title": "Whether this container should allocate a buffer for stdin in the container runtime. If this\nis not set, reads from stdin in the container will always result in EOF.\nDefault is false.\n+optional",
-                    "format": "boolean"
+                    "title": "Whether this container should allocate a buffer for stdin in the container runtime. If this\nis not set, reads from stdin in the container will always result in EOF.\nDefault is false.\n+optional"
                 },
                 "stdinOnce": {
                     "type": "boolean",
                     "description": " sessions. If stdinOnce is set to true, stdin is opened on container start, is empty until the\n first client attaches to stdin, and then remains open and accepts data until the client disconnects,\n at which time stdin is closed and remains closed until the container is restarted. If this\n flag is false, a container processes that reads from stdin will never receive an EOF.\n Default is false\n +optional",
-                    "title": "Whether the container runtime should close the stdin channel after it has been opened by\na single attach. When stdin is true the stdin stream will remain open across multiple attach\nsessions. If stdinOnce is set to true, stdin is opened on container start, is empty until the\nfirst client attaches to stdin, and then remains open and accepts data until the client disconnects,\nat which time stdin is closed and remains closed until the container is restarted. If this\nflag is false, a container processes that reads from stdin will never receive an EOF.\nDefault is false\n+optional",
-                    "format": "boolean"
+                    "title": "Whether the container runtime should close the stdin channel after it has been opened by\na single attach. When stdin is true the stdin stream will remain open across multiple attach\nsessions. If stdinOnce is set to true, stdin is opened on container start, is empty until the\nfirst client attaches to stdin, and then remains open and accepts data until the client disconnects,\nat which time stdin is closed and remains closed until the container is restarted. If this\nflag is false, a container processes that reads from stdin will never receive an EOF.\nDefault is false\n+optional"
                 },
                 "terminationMessagePath": {
                     "type": "string",
@@ -6620,8 +6823,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 "tty": {
                     "type": "boolean",
                     "description": " +optional",
-                    "title": "Whether this container should allocate a TTY for itself, also requires 'stdin' to be true.\nDefault is false.\n+optional",
-                    "format": "boolean"
+                    "title": "Whether this container should allocate a TTY for itself, also requires 'stdin' to be true.\nDefault is false.\n+optional"
                 },
                 "volumeDevices": {
                     "type": "array",
@@ -6807,8 +7009,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 },
                 "ready": {
                     "type": "boolean",
-                    "description": "Specifies whether the container has passed its readiness probe.",
-                    "format": "boolean"
+                    "description": "Specifies whether the container has passed its readiness probe."
                 },
                 "restartCount": {
                     "type": "integer",
@@ -6818,8 +7019,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 "started": {
                     "type": "boolean",
                     "description": " Resets to false when the container is restarted, or if kubelet loses state temporarily.\n Is always true when no startupProbe is defined.\n +optional",
-                    "title": "Specifies whether the container has passed its startup probe.\nInitialized as false, becomes true after startupProbe is considered successful.\nResets to false when the container is restarted, or if kubelet loses state temporarily.\nIs always true when no startupProbe is defined.\n+optional",
-                    "format": "boolean"
+                    "title": "Specifies whether the container has passed its startup probe.\nInitialized as false, becomes true after startupProbe is considered successful.\nResets to false when the container is restarted, or if kubelet loses state temporarily.\nIs always true when no startupProbe is defined.\n+optional"
                 },
                 "state": {
                     "title": "Details about the container's current condition.\n+optional",
@@ -7103,8 +7303,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 },
                 "paused": {
                     "type": "boolean",
-                    "title": "Indicates that the deployment is paused.\n+optional",
-                    "format": "boolean"
+                    "title": "Indicates that the deployment is paused.\n+optional"
                 },
                 "progressDeadlineSeconds": {
                     "type": "integer",
@@ -7562,14 +7761,12 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 "stdin": {
                     "type": "boolean",
                     "description": " Default is false.\n +optional",
-                    "title": "Whether this container should allocate a buffer for stdin in the container runtime. If this\nis not set, reads from stdin in the container will always result in EOF.\nDefault is false.\n+optional",
-                    "format": "boolean"
+                    "title": "Whether this container should allocate a buffer for stdin in the container runtime. If this\nis not set, reads from stdin in the container will always result in EOF.\nDefault is false.\n+optional"
                 },
                 "stdinOnce": {
                     "type": "boolean",
                     "description": " sessions. If stdinOnce is set to true, stdin is opened on container start, is empty until the\n first client attaches to stdin, and then remains open and accepts data until the client disconnects,\n at which time stdin is closed and remains closed until the container is restarted. If this\n flag is false, a container processes that reads from stdin will never receive an EOF.\n Default is false\n +optional",
-                    "title": "Whether the container runtime should close the stdin channel after it has been opened by\na single attach. When stdin is true the stdin stream will remain open across multiple attach\nsessions. If stdinOnce is set to true, stdin is opened on container start, is empty until the\nfirst client attaches to stdin, and then remains open and accepts data until the client disconnects,\nat which time stdin is closed and remains closed until the container is restarted. If this\nflag is false, a container processes that reads from stdin will never receive an EOF.\nDefault is false\n+optional",
-                    "format": "boolean"
+                    "title": "Whether the container runtime should close the stdin channel after it has been opened by\na single attach. When stdin is true the stdin stream will remain open across multiple attach\nsessions. If stdinOnce is set to true, stdin is opened on container start, is empty until the\nfirst client attaches to stdin, and then remains open and accepts data until the client disconnects,\nat which time stdin is closed and remains closed until the container is restarted. If this\nflag is false, a container processes that reads from stdin will never receive an EOF.\nDefault is false\n+optional"
                 },
                 "terminationMessagePath": {
                     "type": "string",
@@ -7584,8 +7781,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 "tty": {
                     "type": "boolean",
                     "description": " +optional",
-                    "title": "Whether this container should allocate a TTY for itself, also requires 'stdin' to be true.\nDefault is false.\n+optional",
-                    "format": "boolean"
+                    "title": "Whether this container should allocate a TTY for itself, also requires 'stdin' to be true.\nDefault is false.\n+optional"
                 },
                 "volumeDevices": {
                     "type": "array",
@@ -7643,8 +7839,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 "readOnly": {
                     "type": "boolean",
                     "description": " +optional",
-                    "title": "Optional: Defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\n+optional",
-                    "format": "boolean"
+                    "title": "Optional: Defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\n+optional"
                 },
                 "targetWWNs": {
                     "type": "array",
@@ -7695,8 +7890,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 "readOnly": {
                     "type": "boolean",
                     "description": " +optional",
-                    "title": "Optional: Defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\n+optional",
-                    "format": "boolean"
+                    "title": "Optional: Defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\n+optional"
                 },
                 "secretRef": {
                     "description": " empty if no secret object is specified. If the secret object\n contains more than one secret, all secrets are passed to the plugin\n scripts.\n +optional",
@@ -7726,8 +7920,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 "readOnly": {
                     "type": "boolean",
                     "description": " +optional",
-                    "title": "Optional: Defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\n+optional",
-                    "format": "boolean"
+                    "title": "Optional: Defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\n+optional"
                 },
                 "secretRef": {
                     "description": " empty if no secret object is specified. If the secret object\n contains more than one secret, all secrets are passed to the plugin\n scripts.\n +optional",
@@ -7775,8 +7968,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 "readOnly": {
                     "type": "boolean",
                     "description": " More info: https://kubernetes.io/docs/concepts/storage/volumes#gcepersistentdisk\n +optional",
-                    "title": "ReadOnly here will force the ReadOnly setting in VolumeMounts.\nDefaults to false.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#gcepersistentdisk\n+optional",
-                    "format": "boolean"
+                    "title": "ReadOnly here will force the ReadOnly setting in VolumeMounts.\nDefaults to false.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#gcepersistentdisk\n+optional"
                 }
             }
         },
@@ -7821,8 +8013,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 "readOnly": {
                     "type": "boolean",
                     "description": " More info: https://examples.k8s.io/volumes/glusterfs/README.md#create-a-pod\n +optional",
-                    "title": "ReadOnly here will force the Glusterfs volume to be mounted with read-only permissions.\nDefaults to false.\nMore info: https://examples.k8s.io/volumes/glusterfs/README.md#create-a-pod\n+optional",
-                    "format": "boolean"
+                    "title": "ReadOnly here will force the Glusterfs volume to be mounted with read-only permissions.\nDefaults to false.\nMore info: https://examples.k8s.io/volumes/glusterfs/README.md#create-a-pod\n+optional"
                 }
             }
         },
@@ -7842,8 +8033,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 "readOnly": {
                     "type": "boolean",
                     "description": " More info: https://examples.k8s.io/volumes/glusterfs/README.md#create-a-pod\n +optional",
-                    "title": "ReadOnly here will force the Glusterfs volume to be mounted with read-only permissions.\nDefaults to false.\nMore info: https://examples.k8s.io/volumes/glusterfs/README.md#create-a-pod\n+optional",
-                    "format": "boolean"
+                    "title": "ReadOnly here will force the Glusterfs volume to be mounted with read-only permissions.\nDefaults to false.\nMore info: https://examples.k8s.io/volumes/glusterfs/README.md#create-a-pod\n+optional"
                 }
             }
         },
@@ -7957,13 +8147,11 @@ var CustomDataK8SAPISwaggerJSON string = `{
             "properties": {
                 "chapAuthDiscovery": {
                     "type": "boolean",
-                    "title": "whether support iSCSI Discovery CHAP authentication\n+optional",
-                    "format": "boolean"
+                    "title": "whether support iSCSI Discovery CHAP authentication\n+optional"
                 },
                 "chapAuthSession": {
                     "type": "boolean",
-                    "title": "whether support iSCSI Session CHAP authentication\n+optional",
-                    "format": "boolean"
+                    "title": "whether support iSCSI Session CHAP authentication\n+optional"
                 },
                 "fsType": {
                     "type": "string",
@@ -8000,8 +8188,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 "readOnly": {
                     "type": "boolean",
                     "description": " +optional",
-                    "title": "ReadOnly here will force the ReadOnly setting in VolumeMounts.\nDefaults to false.\n+optional",
-                    "format": "boolean"
+                    "title": "ReadOnly here will force the ReadOnly setting in VolumeMounts.\nDefaults to false.\n+optional"
                 },
                 "secretRef": {
                     "title": "CHAP Secret for iSCSI target and initiator authentication\n+optional",
@@ -8020,13 +8207,11 @@ var CustomDataK8SAPISwaggerJSON string = `{
             "properties": {
                 "chapAuthDiscovery": {
                     "type": "boolean",
-                    "title": "whether support iSCSI Discovery CHAP authentication\n+optional",
-                    "format": "boolean"
+                    "title": "whether support iSCSI Discovery CHAP authentication\n+optional"
                 },
                 "chapAuthSession": {
                     "type": "boolean",
-                    "title": "whether support iSCSI Session CHAP authentication\n+optional",
-                    "format": "boolean"
+                    "title": "whether support iSCSI Session CHAP authentication\n+optional"
                 },
                 "fsType": {
                     "type": "string",
@@ -8063,8 +8248,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 "readOnly": {
                     "type": "boolean",
                     "description": " +optional",
-                    "title": "ReadOnly here will force the ReadOnly setting in VolumeMounts.\nDefaults to false.\n+optional",
-                    "format": "boolean"
+                    "title": "ReadOnly here will force the ReadOnly setting in VolumeMounts.\nDefaults to false.\n+optional"
                 },
                 "secretRef": {
                     "title": "CHAP Secret for iSCSI target and initiator authentication\n+optional",
@@ -8174,8 +8358,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 "manualSelector": {
                     "type": "boolean",
                     "description": " When false or unset, the system pick labels unique to this job\n and appends those labels to the pod template.  When true,\n the user is responsible for picking unique labels and specifying\n the selector.  Failure to pick a unique label may cause this\n and other jobs to not function correctly.  However, You may see\n -manualSelector=true- in jobs that were created with the old -extensions/v1beta1-\n API.\n More info: https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/#specifying-your-own-pod-selector\n +optional",
-                    "title": "manualSelector controls generation of pod labels and pod selectors.\nLeave -manualSelector- unset unless you are certain what you are doing.\nWhen false or unset, the system pick labels unique to this job\nand appends those labels to the pod template.  When true,\nthe user is responsible for picking unique labels and specifying\nthe selector.  Failure to pick a unique label may cause this\nand other jobs to not function correctly.  However, You may see\n-manualSelector=true- in jobs that were created with the old -extensions/v1beta1-\nAPI.\nMore info: https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/#specifying-your-own-pod-selector\n+optional",
-                    "format": "boolean"
+                    "title": "manualSelector controls generation of pod labels and pod selectors.\nLeave -manualSelector- unset unless you are certain what you are doing.\nWhen false or unset, the system pick labels unique to this job\nand appends those labels to the pod template.  When true,\nthe user is responsible for picking unique labels and specifying\nthe selector.  Failure to pick a unique label may cause this\nand other jobs to not function correctly.  However, You may see\n-manualSelector=true- in jobs that were created with the old -extensions/v1beta1-\nAPI.\nMore info: https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/#specifying-your-own-pod-selector\n+optional"
                 },
                 "parallelism": {
                     "type": "integer",
@@ -8441,8 +8624,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 "readOnly": {
                     "type": "boolean",
                     "description": " Defaults to false.\n More info: https://kubernetes.io/docs/concepts/storage/volumes#nfs\n +optional",
-                    "title": "ReadOnly here will force\nthe NFS export to be mounted with read-only permissions.\nDefaults to false.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#nfs\n+optional",
-                    "format": "boolean"
+                    "title": "ReadOnly here will force\nthe NFS export to be mounted with read-only permissions.\nDefaults to false.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#nfs\n+optional"
                 },
                 "server": {
                     "type": "string",
@@ -8786,8 +8968,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 "unschedulable": {
                     "type": "boolean",
                     "description": " +optional",
-                    "title": "Unschedulable controls node schedulability of new pods. By default, node is schedulable.\nMore info: https://kubernetes.io/docs/concepts/nodes/node/#manual-node-administration\n+optional",
-                    "format": "boolean"
+                    "title": "Unschedulable controls node schedulability of new pods. By default, node is schedulable.\nMore info: https://kubernetes.io/docs/concepts/nodes/node/#manual-node-administration\n+optional"
                 }
             }
         },
@@ -9059,13 +9240,11 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 },
                 "blockOwnerDeletion": {
                     "type": "boolean",
-                    "title": "If true, AND if the owner has the \"foregroundDeletion\" finalizer, then\nthe owner cannot be deleted from the key-value store until this\nreference is removed.\nDefaults to false.\nTo set this field, a user needs \"delete\" permission of the owner,\notherwise 422 (Unprocessable Entity) will be returned.\n+optional",
-                    "format": "boolean"
+                    "title": "If true, AND if the owner has the \"foregroundDeletion\" finalizer, then\nthe owner cannot be deleted from the key-value store until this\nreference is removed.\nDefaults to false.\nTo set this field, a user needs \"delete\" permission of the owner,\notherwise 422 (Unprocessable Entity) will be returned.\n+optional"
                 },
                 "controller": {
                     "type": "boolean",
-                    "title": "If true, this reference points to the managing controller.\n+optional",
-                    "format": "boolean"
+                    "title": "If true, this reference points to the managing controller.\n+optional"
                 },
                 "kind": {
                     "type": "string",
@@ -9260,8 +9439,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 "readOnly": {
                     "type": "boolean",
                     "description": " +optional",
-                    "title": "Will force the ReadOnly setting in VolumeMounts.\nDefault false.\n+optional",
-                    "format": "boolean"
+                    "title": "Will force the ReadOnly setting in VolumeMounts.\nDefault false.\n+optional"
                 }
             }
         },
@@ -9712,8 +9890,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 "runAsNonRoot": {
                     "type": "boolean",
                     "description": " does not run as UID 0 (root) and fail to start the container if it does.\n If unset or false, no such validation will be performed.\n May also be set in SecurityContext.  If set in both SecurityContext and\n PodSecurityContext, the value specified in SecurityContext takes precedence.\n +optional",
-                    "title": "Indicates that the container must run as a non-root user.\nIf true, the Kubelet will validate the image at runtime to ensure that it\ndoes not run as UID 0 (root) and fail to start the container if it does.\nIf unset or false, no such validation will be performed.\nMay also be set in SecurityContext.  If set in both SecurityContext and\nPodSecurityContext, the value specified in SecurityContext takes precedence.\n+optional",
-                    "format": "boolean"
+                    "title": "Indicates that the container must run as a non-root user.\nIf true, the Kubelet will validate the image at runtime to ensure that it\ndoes not run as UID 0 (root) and fail to start the container if it does.\nIf unset or false, no such validation will be performed.\nMay also be set in SecurityContext.  If set in both SecurityContext and\nPodSecurityContext, the value specified in SecurityContext takes precedence.\n+optional"
                 },
                 "runAsUser": {
                     "type": "string",
@@ -9767,8 +9944,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 },
                 "automountServiceAccountToken": {
                     "type": "boolean",
-                    "title": "AutomountServiceAccountToken indicates whether a service account token should be automatically mounted.\n+optional",
-                    "format": "boolean"
+                    "title": "AutomountServiceAccountToken indicates whether a service account token should be automatically mounted.\n+optional"
                 },
                 "containers": {
                     "type": "array",
@@ -9791,8 +9967,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 "enableServiceLinks": {
                     "type": "boolean",
                     "description": " Optional: Defaults to true.\n +optional",
-                    "title": "EnableServiceLinks indicates whether information about services should be injected into pod's\nenvironment variables, matching the syntax of Docker links.\nOptional: Defaults to true.\n+optional",
-                    "format": "boolean"
+                    "title": "EnableServiceLinks indicates whether information about services should be injected into pod's\nenvironment variables, matching the syntax of Docker links.\nOptional: Defaults to true.\n+optional"
                 },
                 "ephemeralContainers": {
                     "type": "array",
@@ -9813,20 +9988,17 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 "hostIPC": {
                     "type": "boolean",
                     "description": " +k8s:conversion-gen=false\n +optional",
-                    "title": "Use the host's ipc namespace.\nOptional: Default to false.\n+k8s:conversion-gen=false\n+optional",
-                    "format": "boolean"
+                    "title": "Use the host's ipc namespace.\nOptional: Default to false.\n+k8s:conversion-gen=false\n+optional"
                 },
                 "hostNetwork": {
                     "type": "boolean",
                     "description": " Default to false.\n +k8s:conversion-gen=false\n +optional",
-                    "title": "Host networking requested for this pod. Use the host's network namespace.\nIf this option is set, the ports that will be used must be specified.\nDefault to false.\n+k8s:conversion-gen=false\n+optional",
-                    "format": "boolean"
+                    "title": "Host networking requested for this pod. Use the host's network namespace.\nIf this option is set, the ports that will be used must be specified.\nDefault to false.\n+k8s:conversion-gen=false\n+optional"
                 },
                 "hostPID": {
                     "type": "boolean",
                     "description": " +k8s:conversion-gen=false\n +optional",
-                    "title": "Use the host's pid namespace.\nOptional: Default to false.\n+k8s:conversion-gen=false\n+optional",
-                    "format": "boolean"
+                    "title": "Use the host's pid namespace.\nOptional: Default to false.\n+k8s:conversion-gen=false\n+optional"
                 },
                 "hostname": {
                     "type": "string",
@@ -9921,8 +10093,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 "shareProcessNamespace": {
                     "type": "boolean",
                     "description": " in the same pod, and the first process in each container will not be assigned PID 1.\n HostPID and ShareProcessNamespace cannot both be set.\n Optional: Default to false.\n +k8s:conversion-gen=false\n +optional",
-                    "title": "Share a single process namespace between all of the containers in a pod.\nWhen this is set containers will be able to view and signal processes from other containers\nin the same pod, and the first process in each container will not be assigned PID 1.\nHostPID and ShareProcessNamespace cannot both be set.\nOptional: Default to false.\n+k8s:conversion-gen=false\n+optional",
-                    "format": "boolean"
+                    "title": "Share a single process namespace between all of the containers in a pod.\nWhen this is set containers will be able to view and signal processes from other containers\nin the same pod, and the first process in each container will not be assigned PID 1.\nHostPID and ShareProcessNamespace cannot both be set.\nOptional: Default to false.\n+k8s:conversion-gen=false\n+optional"
                 },
                 "subdomain": {
                     "type": "string",
@@ -10074,8 +10245,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 "readOnly": {
                     "type": "boolean",
                     "description": " +optional",
-                    "title": "Defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\n+optional",
-                    "format": "boolean"
+                    "title": "Defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\n+optional"
                 },
                 "volumeID": {
                     "type": "string",
@@ -10173,8 +10343,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 "readOnly": {
                     "type": "boolean",
                     "description": " +optional",
-                    "title": "ReadOnly here will force the Quobyte volume to be mounted with read-only permissions.\nDefaults to false.\n+optional",
-                    "format": "boolean"
+                    "title": "ReadOnly here will force the Quobyte volume to be mounted with read-only permissions.\nDefaults to false.\n+optional"
                 },
                 "registry": {
                     "type": "string",
@@ -10231,8 +10400,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 "readOnly": {
                     "type": "boolean",
                     "description": " More info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it\n +optional",
-                    "title": "ReadOnly here will force the ReadOnly setting in VolumeMounts.\nDefaults to false.\nMore info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it\n+optional",
-                    "format": "boolean"
+                    "title": "ReadOnly here will force the ReadOnly setting in VolumeMounts.\nDefaults to false.\nMore info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it\n+optional"
                 },
                 "secretRef": {
                     "description": " Default is nil.\n More info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it\n +optional",
@@ -10280,8 +10448,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 "readOnly": {
                     "type": "boolean",
                     "description": " More info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it\n +optional",
-                    "title": "ReadOnly here will force the ReadOnly setting in VolumeMounts.\nDefaults to false.\nMore info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it\n+optional",
-                    "format": "boolean"
+                    "title": "ReadOnly here will force the ReadOnly setting in VolumeMounts.\nDefaults to false.\nMore info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it\n+optional"
                 },
                 "secretRef": {
                     "description": " Default is nil.\n More info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it\n +optional",
@@ -10554,8 +10721,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 "readOnly": {
                     "type": "boolean",
                     "description": " +optional",
-                    "title": "Defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\n+optional",
-                    "format": "boolean"
+                    "title": "Defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\n+optional"
                 },
                 "secretRef": {
                     "description": "SecretRef references to the secret for ScaleIO user and other\nsensitive information. If this is not provided, Login operation will fail.",
@@ -10563,8 +10729,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 },
                 "sslEnabled": {
                     "type": "boolean",
-                    "title": "Flag to enable/disable SSL communication with Gateway, default false\n+optional",
-                    "format": "boolean"
+                    "title": "Flag to enable/disable SSL communication with Gateway, default false\n+optional"
                 },
                 "storageMode": {
                     "type": "string",
@@ -10606,8 +10771,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 "readOnly": {
                     "type": "boolean",
                     "description": " +optional",
-                    "title": "Defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\n+optional",
-                    "format": "boolean"
+                    "title": "Defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\n+optional"
                 },
                 "secretRef": {
                     "description": "SecretRef references to the secret for ScaleIO user and other\nsensitive information. If this is not provided, Login operation will fail.",
@@ -10615,8 +10779,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 },
                 "sslEnabled": {
                     "type": "boolean",
-                    "title": "Flag to enable/disable SSL communication with Gateway, default false\n+optional",
-                    "format": "boolean"
+                    "title": "Flag to enable/disable SSL communication with Gateway, default false\n+optional"
                 },
                 "storageMode": {
                     "type": "string",
@@ -10674,8 +10837,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 },
                 "optional": {
                     "type": "boolean",
-                    "title": "Specify whether the Secret must be defined\n+optional",
-                    "format": "boolean"
+                    "title": "Specify whether the Secret must be defined\n+optional"
                 }
             }
         },
@@ -10694,8 +10856,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 },
                 "optional": {
                     "type": "boolean",
-                    "title": "Specify whether the Secret or its key must be defined\n+optional",
-                    "format": "boolean"
+                    "title": "Specify whether the Secret or its key must be defined\n+optional"
                 }
             }
         },
@@ -10736,8 +10897,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 },
                 "optional": {
                     "type": "boolean",
-                    "title": "Specify whether the Secret or its key must be defined\n+optional",
-                    "format": "boolean"
+                    "title": "Specify whether the Secret or its key must be defined\n+optional"
                 }
             }
         },
@@ -10777,8 +10937,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 },
                 "optional": {
                     "type": "boolean",
-                    "title": "Specify whether the Secret or its keys must be defined\n+optional",
-                    "format": "boolean"
+                    "title": "Specify whether the Secret or its keys must be defined\n+optional"
                 },
                 "secretName": {
                     "type": "string",
@@ -10795,8 +10954,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 "allowPrivilegeEscalation": {
                     "type": "boolean",
                     "description": " the no_new_privs flag will be set on the container process.\n AllowPrivilegeEscalation is true always when the container is:\n 1) run as Privileged\n 2) has CAP_SYS_ADMIN\n +optional",
-                    "title": "AllowPrivilegeEscalation controls whether a process can gain more\nprivileges than its parent process. This bool directly controls if\nthe no_new_privs flag will be set on the container process.\nAllowPrivilegeEscalation is true always when the container is:\n1) run as Privileged\n2) has CAP_SYS_ADMIN\n+optional",
-                    "format": "boolean"
+                    "title": "AllowPrivilegeEscalation controls whether a process can gain more\nprivileges than its parent process. This bool directly controls if\nthe no_new_privs flag will be set on the container process.\nAllowPrivilegeEscalation is true always when the container is:\n1) run as Privileged\n2) has CAP_SYS_ADMIN\n+optional"
                 },
                 "capabilities": {
                     "description": " +optional",
@@ -10806,8 +10964,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 "privileged": {
                     "type": "boolean",
                     "description": " Defaults to false.\n +optional",
-                    "title": "Run container in privileged mode.\nProcesses in privileged containers are essentially equivalent to root on the host.\nDefaults to false.\n+optional",
-                    "format": "boolean"
+                    "title": "Run container in privileged mode.\nProcesses in privileged containers are essentially equivalent to root on the host.\nDefaults to false.\n+optional"
                 },
                 "procMount": {
                     "type": "string",
@@ -10817,8 +10974,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 "readOnlyRootFilesystem": {
                     "type": "boolean",
                     "description": " +optional",
-                    "title": "Whether this container has a read-only root filesystem.\nDefault is false.\n+optional",
-                    "format": "boolean"
+                    "title": "Whether this container has a read-only root filesystem.\nDefault is false.\n+optional"
                 },
                 "runAsGroup": {
                     "type": "string",
@@ -10829,8 +10985,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 "runAsNonRoot": {
                     "type": "boolean",
                     "description": " does not run as UID 0 (root) and fail to start the container if it does.\n If unset or false, no such validation will be performed.\n May also be set in PodSecurityContext.  If set in both SecurityContext and\n PodSecurityContext, the value specified in SecurityContext takes precedence.\n +optional",
-                    "title": "Indicates that the container must run as a non-root user.\nIf true, the Kubelet will validate the image at runtime to ensure that it\ndoes not run as UID 0 (root) and fail to start the container if it does.\nIf unset or false, no such validation will be performed.\nMay also be set in PodSecurityContext.  If set in both SecurityContext and\nPodSecurityContext, the value specified in SecurityContext takes precedence.\n+optional",
-                    "format": "boolean"
+                    "title": "Indicates that the container must run as a non-root user.\nIf true, the Kubelet will validate the image at runtime to ensure that it\ndoes not run as UID 0 (root) and fail to start the container if it does.\nIf unset or false, no such validation will be performed.\nMay also be set in PodSecurityContext.  If set in both SecurityContext and\nPodSecurityContext, the value specified in SecurityContext takes precedence.\n+optional"
                 },
                 "runAsUser": {
                     "type": "string",
@@ -11009,8 +11164,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 "publishNotReadyAddresses": {
                     "type": "boolean",
                     "description": " the Service. The default value is false.\n The primary use case for setting this field is to use a StatefulSet's Headless Service\n to propagate SRV records for its Pods without respect to their readiness for purpose\n of peer discovery.\n +optional",
-                    "title": "publishNotReadyAddresses, when set to true, indicates that DNS implementations\nmust publish the notReadyAddresses of subsets for the Endpoints associated with\nthe Service. The default value is false.\nThe primary use case for setting this field is to use a StatefulSet's Headless Service\nto propagate SRV records for its Pods without respect to their readiness for purpose\nof peer discovery.\n+optional",
-                    "format": "boolean"
+                    "title": "publishNotReadyAddresses, when set to true, indicates that DNS implementations\nmust publish the notReadyAddresses of subsets for the Endpoints associated with\nthe Service. The default value is false.\nThe primary use case for setting this field is to use a StatefulSet's Headless Service\nto propagate SRV records for its Pods without respect to their readiness for purpose\nof peer discovery.\n+optional"
                 },
                 "selector": {
                     "type": "object",
@@ -11260,8 +11414,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 "readOnly": {
                     "type": "boolean",
                     "description": " +optional",
-                    "title": "Defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\n+optional",
-                    "format": "boolean"
+                    "title": "Defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\n+optional"
                 },
                 "secretRef": {
                     "description": " +optional",
@@ -11292,8 +11445,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 "readOnly": {
                     "type": "boolean",
                     "description": " +optional",
-                    "title": "Defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\n+optional",
-                    "format": "boolean"
+                    "title": "Defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\n+optional"
                 },
                 "secretRef": {
                     "description": " +optional",
@@ -11511,8 +11663,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 "readOnly": {
                     "type": "boolean",
                     "description": " +optional",
-                    "title": "Mounted read-only if true, read-write otherwise (false or unspecified).\nDefaults to false.\n+optional",
-                    "format": "boolean"
+                    "title": "Mounted read-only if true, read-write otherwise (false or unspecified).\nDefaults to false.\n+optional"
                 },
                 "subPath": {
                     "type": "string",
@@ -11834,8 +11985,7 @@ var CustomDataK8SAPISwaggerJSON string = `{
                 "suspend": {
                     "type": "boolean",
                     "description": " +optional",
-                    "title": "This flag tells the controller to suspend subsequent executions, it does\nnot apply to already started executions.  Defaults to false.\n+optional",
-                    "format": "boolean"
+                    "title": "This flag tells the controller to suspend subsequent executions, it does\nnot apply to already started executions.  Defaults to false.\n+optional"
                 }
             }
         },

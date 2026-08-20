@@ -576,10 +576,7 @@ var CustomAPISwaggerJSON string = `{
         "description": "Additional public APIs for addon_service config object.",
         "version": "version not set"
     },
-    "schemes": [
-        "http",
-        "https"
-    ],
+    "schemes": null,
     "consumes": [
         "application/json"
     ],
@@ -646,6 +643,12 @@ var CustomAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -731,6 +734,12 @@ var CustomAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -814,6 +823,12 @@ var CustomAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1104,15 +1119,13 @@ var CustomAPISwaggerJSON string = `{
         },
         "customer_supportSupportService": {
             "type": "string",
-            "description": "Indicates the list of support service\n\nUnknown Support Service\nAccount Protection Support Service\nAdministration Support Service\nApplication Traffic Insight Support Service\nAudit Logs \u0026 Alerts Support Service\nAuthentication Intelligence Support Service\nBilling Support Service\nClient Side Defense Support Service\nCloud \u0026 Edge Sites Support Service\ndeprecated: use SS_MULTI_CLOUD_NETWORK_CONNECT instead\nDDOS \u0026 Transit Support Service\nDeprecated: use SS_ROUTED_DDOS instead\nDistributed Apps Support Service\nDNS Management Support Service\nLoadBalancers Support Service\ndeprecated: use SS_MULTI_CLOUD_APP_CONNECT instead\nShared Configuration Support Service\nWeb App \u0026 API Protection Support Service\nOther Support Service\nBot Defense Support Service\nContent delivery network Support Service\nObservability Support Service\nDelegated Access Support Service\nNetworking \u0026 security across clouds, edge and on-premises\nConnect apps across clouds, edge and on-premises using Load Balancers\nData Intelligence Support Service\nNGINX One Support Service\nWeb App Scanning Support Service\nRouted DDoS Support Service\nMobile App Shield protects mobile apps from reverse engineering, tampering and malware\nDefault for deprecated services\nAutomation Support Service for Terraform Provider",
+            "description": "Indicates the list of support service\n\nUnknown Support Service\nAccount Protection Support Service\nAdministration Support Service\nApplication Traffic Insight Support Service\nAudit Logs \u0026 Alerts Support Service\nAuthentication Intelligence Support Service\nBilling Support Service\nClient Side Defense Support Service\nCloud \u0026 Edge Sites Support Service\ndeprecated: use SS_MULTI_CLOUD_NETWORK_CONNECT instead\nDDOS \u0026 Transit Support Service\nDeprecated: use SS_ROUTED_DDOS instead\nDistributed Apps Support Service\nDNS Management Support Service\nLoadBalancers Support Service\ndeprecated: use SS_MULTI_CLOUD_APP_CONNECT instead\nShared Configuration Support Service\nWeb App \u0026 API Protection Support Service\nOther Support Service\nBot Defense Support Service\nContent delivery network Support Service\nObservability Support Service\nDelegated Access Support Service\nNetworking \u0026 security across clouds, edge and on-premises\nConnect apps across clouds, edge and on-premises using Load Balancers\nData Intelligence Support Service\nNGINX One Support Service\nWeb App Scanning Support Service\nRouted DDoS Support Service\nMobile App Shield protects mobile apps from reverse engineering, tampering and malware\nDevice Intelligence Support Service\nDefault for deprecated services\nAutomation Support Service for Terraform Provider",
             "title": "SupportService",
             "enum": [
                 "SS_UNKNOWN",
-                "SS_ACCOUNT_PROTECTION",
                 "SS_ADMINISTRATION",
                 "SS_APPLICATION_TRAFFIC_INSIGHT",
                 "SS_AUDIT_LOGS_AND_ALERTS",
-                "SS_AUTHENTICATION_INTELLIGENCE",
                 "SS_BILLING",
                 "SS_CLIENT_SIDE_DEFENSE",
                 "SS_CLOUD_AND_EDGE_SITES",
@@ -1134,6 +1147,7 @@ var CustomAPISwaggerJSON string = `{
                 "SS_WEB_APP_SCANNING",
                 "SS_ROUTED_DDOS",
                 "SS_MOBILE_APP_SHIELD",
+                "SS_DEVICE_INTELLIGENCE",
                 "SS_DEPRECATED",
                 "SS_AUTOMATION"
             ],
@@ -1185,9 +1199,45 @@ var CustomAPISwaggerJSON string = `{
                 }
             }
         },
+        "protobufAny": {
+            "type": "object",
+            "description": "-Any- contains an arbitrary serialized protocol buffer message along with a\nURL that describes the type of the serialized message.\n\nProtobuf library provides support to pack/unpack Any values in the form\nof utility functions or additional generated methods of the Any type.\n\nExample 1: Pack and unpack a message in C++.\n\n    Foo foo = ...;\n    Any any;\n    any.PackFrom(foo);\n    ...\n    if (any.UnpackTo(\u0026foo)) {\n      ...\n    }\n\nExample 2: Pack and unpack a message in Java.\n\n    Foo foo = ...;\n    Any any = Any.pack(foo);\n    ...\n    if (any.is(Foo.class)) {\n      foo = any.unpack(Foo.class);\n    }\n\n Example 3: Pack and unpack a message in Python.\n\n    foo = Foo(...)\n    any = Any()\n    any.Pack(foo)\n    ...\n    if any.Is(Foo.DESCRIPTOR):\n      any.Unpack(foo)\n      ...\n\n Example 4: Pack and unpack a message in Go\n\n     foo := \u0026pb.Foo{...}\n     any, err := ptypes.MarshalAny(foo)\n     ...\n     foo := \u0026pb.Foo{}\n     if err := ptypes.UnmarshalAny(any, foo); err != nil {\n       ...\n     }\n\nThe pack methods provided by protobuf library will by default use\n'type.googleapis.com/full.type.name' as the type URL and the unpack\nmethods only use the fully qualified type name after the last '/'\nin the type URL, for example \"foo.bar.com/x/y.z\" will yield type\nname \"y.z\".\n\n\nJSON\n====\nThe JSON representation of an -Any- value uses the regular\nrepresentation of the deserialized, embedded message, with an\nadditional field -@type- which contains the type URL. Example:\n\n    package google.profile;\n    message Person {\n      string first_name = 1;\n      string last_name = 2;\n    }\n\n    {\n      \"@type\": \"type.googleapis.com/google.profile.Person\",\n      \"firstName\": \u003cstring\u003e,\n      \"lastName\": \u003cstring\u003e\n    }\n\nIf the embedded message type is well-known and has a custom JSON\nrepresentation, that representation will be embedded adding a field\n-value- which holds the custom JSON in addition to the -@type-\nfield. Example (for message [google.protobuf.Duration][]):\n\n    {\n      \"@type\": \"type.googleapis.com/google.protobuf.Duration\",\n      \"value\": \"1.212s\"\n    }",
+            "properties": {
+                "type_url": {
+                    "type": "string",
+                    "description": "A URL/resource name that uniquely identifies the type of the serialized\nprotocol buffer message. This string must contain at least\none \"/\" character. The last segment of the URL's path must represent\nthe fully qualified name of the type (as in\n-path/google.protobuf.Duration-). The name should be in a canonical form\n(e.g., leading \".\" is not accepted).\n\nIn practice, teams usually precompile into the binary all types that they\nexpect it to use in the context of Any. However, for URLs which use the\nscheme -http-, -https-, or no scheme, one can optionally set up a type\nserver that maps type URLs to message definitions as follows:\n\n* If no scheme is provided, -https- is assumed.\n* An HTTP GET on the URL must yield a [google.protobuf.Type][]\n  value in binary format, or produce an error.\n* Applications are allowed to cache lookup results based on the\n  URL, or have them precompiled into a binary to avoid any\n  lookup. Therefore, binary compatibility needs to be preserved\n  on changes to types. (Use versioned type names to manage\n  breaking changes.)\n\nNote: this functionality is not currently available in the official\nprotobuf release, and it is not used for type URLs beginning with\ntype.googleapis.com.\n\nSchemes other than -http-, -https- (or the empty scheme) might be\nused with implementation specific semantics."
+                },
+                "value": {
+                    "type": "string",
+                    "description": "Must be a valid serialized protocol buffer of the above specified type.",
+                    "format": "byte"
+                }
+            }
+        },
+        "runtimeError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/protobufAny"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
         "schemaAddonServiceAccess": {
             "type": "string",
-            "description": "x-displayName: \"Addon Service Access\"\nState of access into service\n\n - AS_AC_NONE: x-displayName: \"None\"\ndefault state\nThis can mean that addon service is not subscribed or is in pending subscription.\n - AS_AC_ALLOWED: x-displayName: \"Allow\"\naccess is allowed\n - AS_AC_PBAC_DENY: x-displayName: \"PBAC Deny\"\nAddon service is not allowed as part of current plan\n - AS_AC_PBAC_DENY_UPGRADE_PLAN: x-displayName: \"PBAC Deny - Upgrade plan\"\nAddon service is not allowed as part of current plan. To enable it, user is requested to uprade the plan\n - AS_AC_PBAC_DENY_CONTACT_SALES: x-displayName: \"PBAC Deny - Contact Sales\"\nAddon service is not allowed as part of current plan. To enable or to find out more, user is requested to contact sales\n - AS_AC_PBAC_DENY_AS_AC_EOL: x-displayName: \"PBAC Deny - End of  Life\"\nAddon service is not allowed as part of current plan as it is discontinued. User is requested to contact sales discuss alternatives",
+            "description": "x-displayName: \"Addon Service Access\"\nState of access into service\n\n - AS_AC_NONE: x-displayName: \"None\"\ndefault state\nThis can mean that addon service is not subscribed or is in pending subscription.\n - AS_AC_ALLOWED: x-displayName: \"Allow\"\naccess is allowed\n - AS_AC_PBAC_DENY: x-displayName: \"PBAC Deny\"\nAddon service is not allowed as part of current plan\n - AS_AC_PBAC_DENY_UPGRADE_PLAN: x-displayName: \"PBAC Deny - Upgrade plan\"\nAddon service is not allowed as part of current plan. To enable it, user is requested to uprade the plan\n - AS_AC_PBAC_DENY_CONTACT_SALES: x-displayName: \"PBAC Deny - Contact Sales\"\nAddon service is not allowed as part of current plan. To enable or to find out more, user is requested to contact sales\n - AS_AC_PBAC_DENY_AS_AC_EOL: x-displayName: \"PBAC Deny - End of Life\"\nAddon service is not allowed as part of current plan as it is discontinued. User is requested to contact sales discuss alternatives\n - AS_AC_UNAVAILABLE: x-displayName: \"Unavailable\"\nAddon service is not available as part of current plan",
             "title": "AddonServiceAccess",
             "enum": [
                 "AS_AC_NONE",
@@ -1195,7 +1245,8 @@ var CustomAPISwaggerJSON string = `{
                 "AS_AC_PBAC_DENY",
                 "AS_AC_PBAC_DENY_UPGRADE_PLAN",
                 "AS_AC_PBAC_DENY_CONTACT_SALES",
-                "AS_AC_PBAC_DENY_AS_AC_EOL"
+                "AS_AC_PBAC_DENY_AS_AC_EOL",
+                "AS_AC_UNAVAILABLE"
             ],
             "default": "AS_AC_NONE"
         },

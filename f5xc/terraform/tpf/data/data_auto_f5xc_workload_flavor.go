@@ -31,13 +31,13 @@ type DataSourceF5XCWorkloadFlavor struct {
 type DataSourceF5XCWorkloadFlavorModel struct {
 	Annotations      types.Map      `tfsdk:"annotations"`
 	Description      types.String   `tfsdk:"description"`
+	Labels           types.Map      `tfsdk:"labels"`
 	Name             types.String   `tfsdk:"name"`
 	Namespace        types.String   `tfsdk:"namespace"`
 	Uid              types.String   `tfsdk:"uid"`
-	Labels           types.Map      `tfsdk:"labels"`
+	EphemeralStorage types.Int64    `tfsdk:"ephemeral_storage"`
 	Memory           types.Int64    `tfsdk:"memory"`
 	Vcpus            types.Float32  `tfsdk:"vcpus"`
-	EphemeralStorage types.Int64    `tfsdk:"ephemeral_storage"`
 	Timeouts         timeouts.Value `tfsdk:"timeouts"`
 }
 
@@ -57,8 +57,8 @@ func (d *DataSourceF5XCWorkloadFlavor) Metadata(ctx context.Context, request dat
 func (r *DataSourceF5XCWorkloadFlavor) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "WorkloadFlavor data source",
-		Description:         "WorkloadFlavor data source",
+		MarkdownDescription: "GetRequest is used to get different forms of a workload_flavor This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of workload_flavor) etc. can be fetched",
+		Description:         "GetRequest is used to get different forms of a workload_flavor This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of workload_flavor) etc. can be fetched",
 
 		Attributes: map[string]schema.Attribute{
 			"annotations": schema.MapAttribute{
@@ -73,6 +73,13 @@ func (r *DataSourceF5XCWorkloadFlavor) Schema(ctx context.Context, request datas
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
+			},
+			"labels": schema.MapAttribute{
+				Description: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				ElementType: types.StringType,
 			},
 			"name": schema.StringAttribute{
 				Description: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
@@ -92,12 +99,11 @@ func (r *DataSourceF5XCWorkloadFlavor) Schema(ctx context.Context, request datas
 				Optional:    false,
 				Computed:    true,
 			},
-			"labels": schema.MapAttribute{
-				Description: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+			"ephemeral_storage": schema.Int64Attribute{
+				Description: "Ephemeral storage in MiB (mebibyte), power of 2. One MiB is 1,048,576 bytes. Ephemeral storage in MiB (mebibyte) allocated for the workload_flavor.",
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
-				ElementType: types.StringType,
 			},
 			"memory": schema.Int64Attribute{
 				Description: "Memory in MiB (mebibyte), power of 2. One MiB is 1,048,576 bytes. Memory in MiB (mebibyte) allocated for the workload_flavor.",
@@ -107,12 +113,6 @@ func (r *DataSourceF5XCWorkloadFlavor) Schema(ctx context.Context, request datas
 			},
 			"vcpus": schema.Float32Attribute{
 				Description: "vCPUs Number of vCPUs allocated for the workload_flavor. Each vCPU is a thread on a CPU core.",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-			},
-			"ephemeral_storage": schema.Int64Attribute{
-				Description: "Ephemeral storage in MiB (mebibyte), power of 2. One MiB is 1,048,576 bytes. Ephemeral storage in MiB (mebibyte) allocated for the workload_flavor.",
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
@@ -164,15 +164,14 @@ func (d *DataSourceF5XCWorkloadFlavor) Read(ctx context.Context, request datasou
 		return
 	}
 
-	readTimeout, diags := data.Timeouts.Read(ctx, duration)
-	response.Diagnostics.Append(diags...)
+	readTimeout, readDiags := data.Timeouts.Read(ctx, duration)
+	response.Diagnostics.Append(readDiags...)
 	if response.Diagnostics.HasError() {
 		return
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
-
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_workload_flavor.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
@@ -209,15 +208,6 @@ func (d *DataSourceF5XCWorkloadFlavor) Read(ctx context.Context, request datasou
 	// data SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
 
-	// data SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
-
-	// data SpecToModelRoot Meta RequiredStringField --> Namespace
-	data.Namespace = types.StringValue(metaData.GetNamespace())
-
-	// data SpecToModelRoot Meta StringField --> Uid
-	data.Uid = types.StringValue(systemMetaData.GetUid())
-
 	// data SpecToModelRoot Meta MapOfStringField --> Labels
 	if metaData.GetLabels() != nil {
 		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
@@ -236,16 +226,14 @@ func (d *DataSourceF5XCWorkloadFlavor) Read(ctx context.Context, request datasou
 		data.Labels = types.MapNull(types.StringType)
 	}
 
-	// data SpecToModelRoot UintField --> Memory
-	memoryValue := specData.GetMemory()
-	if memoryValue > 0 {
-		data.Memory = types.Int64Value(int64(memoryValue))
-	} else {
-		data.Memory = types.Int64Null()
-	}
+	// data SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
 
-	// data specToModelRoot FloatField --> Vcpus
-	data.Vcpus = types.Float32Value(float32(specData.GetVcpus()))
+	// data SpecToModelRoot Meta RequiredStringField --> Namespace
+	data.Namespace = types.StringValue(metaData.GetNamespace())
+
+	// data SpecToModelRoot Meta StringField --> Uid
+	data.Uid = types.StringValue(systemMetaData.GetUid())
 
 	// data SpecToModelRoot UintField --> EphemeralStorage
 	ephemeralStorageValue := specData.GetEphemeralStorage()
@@ -255,8 +243,19 @@ func (d *DataSourceF5XCWorkloadFlavor) Read(ctx context.Context, request datasou
 		data.EphemeralStorage = types.Int64Null()
 	}
 
+	// data SpecToModelRoot UintField --> Memory
+	memoryValue := specData.GetMemory()
+	if memoryValue > 0 {
+		data.Memory = types.Int64Value(int64(memoryValue))
+	} else {
+		data.Memory = types.Int64Null()
+	}
+
+	// data specToModelRootOld FloatField --> Vcpus
+	data.Vcpus = types.Float32Value(float32(specData.GetVcpus()))
+
 	// Set state to fully populated data
-	diags = response.State.Set(ctx, &data)
+	diags := response.State.Set(ctx, &data)
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return

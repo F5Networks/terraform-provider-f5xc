@@ -143,6 +143,7 @@ func (c *NamespaceMLCustomAPIRestClient) doRPCGetApiEndpointsStats(ctx context.C
 		hReq = newReq
 		q := hReq.URL.Query()
 		_ = q
+		q.Add("include_per_vhost_stats", fmt.Sprintf("%v", req.IncludePerVhostStats))
 		q.Add("namespace", fmt.Sprintf("%v", req.Namespace))
 		for _, item := range req.VhostsFilter {
 			q.Add("vhosts_filter", fmt.Sprintf("%v", item))
@@ -230,6 +231,7 @@ func (c *NamespaceMLCustomAPIRestClient) doRPCGetApiEndpointsStatsAllNamespaces(
 		hReq = newReq
 		q := hReq.URL.Query()
 		_ = q
+		q.Add("include_per_vhost_stats", fmt.Sprintf("%v", req.IncludePerVhostStats))
 		q.Add("namespace", fmt.Sprintf("%v", req.Namespace))
 
 		hReq.URL.RawQuery += q.Encode()
@@ -585,10 +587,7 @@ var NamespaceMLCustomAPISwaggerJSON string = `{
         "description": "APIs in this file are custom APIs on namespace object served by asterix",
         "version": "version not set"
     },
-    "schemes": [
-        "http",
-        "https"
-    ],
+    "schemes": null,
     "consumes": [
         "application/json"
     ],
@@ -655,6 +654,12 @@ var NamespaceMLCustomAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -739,6 +744,12 @@ var NamespaceMLCustomAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -832,6 +843,12 @@ var NamespaceMLCustomAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -867,6 +884,59 @@ var NamespaceMLCustomAPISwaggerJSON string = `{
         }
     },
     "definitions": {
+        "namespaceApiEndpointsStats": {
+            "type": "object",
+            "title": "API Endpoints Stats",
+            "x-displayname": "API Endpoints Stats",
+            "x-ves-proto-message": "ves.io.schema.namespace.ApiEndpointsStats",
+            "properties": {
+                "discovered": {
+                    "type": "integer",
+                    "description": " Number of endpoints that are categorized as discovered",
+                    "title": "Number of Discovered Endpoints",
+                    "format": "int32",
+                    "x-displayname": "Discovered"
+                },
+                "inventory": {
+                    "type": "integer",
+                    "description": " Number of endpoints that are categorized as inventory",
+                    "title": "Number of Inventory Endpoints",
+                    "format": "int32",
+                    "x-displayname": "Inventory"
+                },
+                "namespace": {
+                    "type": "string",
+                    "title": "Namespace",
+                    "x-displayname": "Namespace"
+                },
+                "pii_detected": {
+                    "type": "integer",
+                    "description": " Number of endpoints that are detected with PII",
+                    "title": "Number of PII Endpoints",
+                    "format": "int32",
+                    "x-displayname": "PII Detected"
+                },
+                "shadow": {
+                    "type": "integer",
+                    "description": " Number of endpoints that are categorized as shadow",
+                    "title": "Number of Shadow Endpoints",
+                    "format": "int32",
+                    "x-displayname": "Shadow"
+                },
+                "total_endpoints": {
+                    "type": "integer",
+                    "description": " Total endpoints",
+                    "title": "Number of Endpoints",
+                    "format": "int32",
+                    "x-displayname": "Total Endpoints"
+                },
+                "virtual_host": {
+                    "type": "string",
+                    "title": "Virtual Host",
+                    "x-displayname": "Virtual Host"
+                }
+            }
+        },
         "namespaceApiEndpointsStatsAllNSReq": {
             "type": "object",
             "description": "Request shape for GET Api Endpoints Stats All Namespaces",
@@ -874,12 +944,33 @@ var NamespaceMLCustomAPISwaggerJSON string = `{
             "x-displayname": "Api Endpoints Stats All Namespaces Request",
             "x-ves-proto-message": "ves.io.schema.namespace.ApiEndpointsStatsAllNSReq",
             "properties": {
+                "include_per_vhost_stats": {
+                    "type": "boolean",
+                    "description": " Flag to include stats per virtual host",
+                    "title": "Include Stats per Virtual Host",
+                    "x-displayname": "Include Stats per Virtual Host"
+                },
                 "namespace": {
                     "type": "string",
                     "description": " Namespace of the App type for current request\n\nExample: - \"shared\"-",
                     "title": "Namespace",
                     "x-displayname": "Namespace",
                     "x-ves-example": "shared"
+                }
+            }
+        },
+        "namespaceApiEndpointsStatsList": {
+            "type": "object",
+            "description": "x-displayName: \"API Endpoints Stats List\"",
+            "title": "API Endpoints Stats List",
+            "properties": {
+                "apiep_stats_list": {
+                    "type": "array",
+                    "description": "x-displayName: \"List of API Endpoints Stats\"",
+                    "title": "List of API Endpoints Stats",
+                    "items": {
+                        "$ref": "#/definitions/namespaceApiEndpointsStats"
+                    }
                 }
             }
         },
@@ -890,6 +981,12 @@ var NamespaceMLCustomAPISwaggerJSON string = `{
             "x-displayname": "Api Endpoints Stats Request",
             "x-ves-proto-message": "ves.io.schema.namespace.ApiEndpointsStatsNSReq",
             "properties": {
+                "include_per_vhost_stats": {
+                    "type": "boolean",
+                    "description": " Flag to include stats per virtual host",
+                    "title": "Include Stats per Virtual Host",
+                    "x-displayname": "Include Stats per Virtual Host"
+                },
                 "namespace": {
                     "type": "string",
                     "description": " Namespace of the App type for current request\n\nExample: - \"shared\"-",
@@ -909,14 +1006,14 @@ var NamespaceMLCustomAPISwaggerJSON string = `{
                 },
                 "vhosts_types_filter": {
                     "type": "array",
-                    "description": " List of Virtual Hosts types for current request\n If the list is empty or not provided, it will return stats for all virtual hosts under the requested namespace.\n\nExample: - [\"HTTP_LOAD_BALANCER\", \"CDN_LOAD_BALANCER\"]-\n\nValidation Rules:\n  ves.io.schema.rules.enum.in: [1,6,7,8]\n  ves.io.schema.rules.repeated.unique: true\n",
+                    "description": " List of Virtual Hosts types for current request\n If the list is empty or not provided, it will return stats for all virtual hosts under the requested namespace.\n\nExample: - [\"HTTP_LOAD_BALANCER\", \"CDN_LOAD_BALANCER\"]-\n\nValidation Rules:\n  ves.io.schema.rules.repeated.items.enum.in: [1,6,7,8,11]\n  ves.io.schema.rules.repeated.unique: true\n",
                     "title": "Virtual Hosts Types Filter",
                     "items": {
                         "$ref": "#/definitions/virtual_hostVirtualHostType"
                     },
                     "x-displayname": "Virtual Hosts Types Filter",
                     "x-ves-validation-rules": {
-                        "ves.io.schema.rules.enum.in": "[1,6,7,8]",
+                        "ves.io.schema.rules.repeated.items.enum.in": "[1,6,7,8,11]",
                         "ves.io.schema.rules.repeated.unique": "true"
                     }
                 }
@@ -924,45 +1021,60 @@ var NamespaceMLCustomAPISwaggerJSON string = `{
         },
         "namespaceApiEndpointsStatsNSRsp": {
             "type": "object",
-            "description": "Response shape for GET API endpoints Stats.",
-            "title": "Api Endpoints stats Response",
-            "x-displayname": "Api Endpoints Stats Response",
+            "description": "Response shape for GET API endpoints stats",
+            "title": "API Endpoints Stats Response",
+            "x-displayname": "API Endpoints Stats Response",
             "x-ves-proto-message": "ves.io.schema.namespace.ApiEndpointsStatsNSRsp",
             "properties": {
+                "agg_apiep_stats": {
+                    "title": "Aggregated API Endpoints Stats",
+                    "$ref": "#/definitions/namespaceApiEndpointsStats",
+                    "x-displayname": "Aggregated API Endpoints Stats"
+                },
                 "discovered": {
                     "type": "integer",
-                    "description": " number of endpoints that categorized as discover",
-                    "title": "number of discovered endpoints",
+                    "description": " Number of endpoints that are categorized as discovered",
+                    "title": "Number of Discovered Endpoints",
                     "format": "int32",
-                    "x-displayname": "Discovered"
+                    "x-displayname": "Discovered",
+                    "x-ves-deprecated": "This is deprecated, please use discovered under agg_apiep_stats instead"
                 },
                 "inventory": {
                     "type": "integer",
-                    "description": " number of endpoints that categorized as inventory",
-                    "title": "number of inventory endpoints",
+                    "description": " Number of endpoints that are categorized as inventory",
+                    "title": "Number of Inventory Endpoints",
                     "format": "int32",
-                    "x-displayname": "Inventory"
+                    "x-displayname": "Inventory",
+                    "x-ves-deprecated": "This is deprecated, please use inventory under agg_apiep_stats instead"
+                },
+                "per_vhost_type_apiep_stats": {
+                    "type": "object",
+                    "title": "API Endpoints Stats per Virtual Host Type",
+                    "x-displayname": "API Endpoints Stats per Virtual Host Type"
                 },
                 "pii_detected": {
                     "type": "integer",
-                    "description": "number of endpoints that detected with pii",
-                    "title": "number of pii endpoints",
+                    "description": " Number of endpoints that are detected with PII",
+                    "title": "Number of PII Endpoints",
                     "format": "int32",
-                    "x-displayname": "PII Detected"
+                    "x-displayname": "PII Detected",
+                    "x-ves-deprecated": "This is deprecated, please use pii_detected under agg_apiep_stats instead"
                 },
                 "shadow": {
                     "type": "integer",
-                    "description": " number of endpoints that categorized as shadow",
-                    "title": "number of shadow endpoints",
+                    "description": " Number of endpoints that are categorized as shadow",
+                    "title": "Number of Shadow Endpoints",
                     "format": "int32",
-                    "x-displayname": "Shadow"
+                    "x-displayname": "Shadow",
+                    "x-ves-deprecated": "This is deprecated, please use shadow under agg_apiep_stats instead"
                 },
                 "total_endpoints": {
                     "type": "integer",
-                    "description": " total endpoints",
-                    "title": "number of endpoints",
+                    "description": " Total endpoints",
+                    "title": "Number of Endpoints",
                     "format": "int32",
-                    "x-displayname": "Total Endpoints"
+                    "x-displayname": "Total Endpoints",
+                    "x-ves-deprecated": "This is deprecated, please use total_endpoints under agg_apiep_stats instead"
                 }
             }
         },
@@ -1022,6 +1134,27 @@ var NamespaceMLCustomAPISwaggerJSON string = `{
                     "type": "string",
                     "description": "Must be a valid serialized protocol buffer of the above specified type.",
                     "format": "byte"
+                }
+            }
+        },
+        "runtimeError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/protobufAny"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
                 }
             }
         },

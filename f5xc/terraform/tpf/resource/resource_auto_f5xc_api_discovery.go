@@ -22,19 +22,23 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 
-	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+
+	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
-	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/atmostoneofvalidator"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/listuniquevalidator"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -44,7 +48,6 @@ import (
 
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_api_sec_api_discovery "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/api_sec/api_discovery"
-	ves_io_schema_virtual_network "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/virtual_network"
 )
 
 // ResourceF5XCApiDiscovery defines the resource implementation.
@@ -52,75 +55,75 @@ type ResourceF5XCApiDiscovery struct {
 	client *client.APIClient
 }
 
-type ApiDiscoveryApiDiscoveryCustomAuthType struct {
+type ApiDiscoveryCustomAuthType struct {
 	ParameterName types.String `tfsdk:"parameter_name"`
 	ParameterType types.List   `tfsdk:"parameter_type"`
 }
 
-type ApiDiscoveryApiDiscoveryUserDefinedApiDiscoveryPolicy struct {
-	DiscoveryRules        types.List   `tfsdk:"discovery_rules"`
+type ApiDiscoveryUserDefinedApiDiscoveryPolicy struct {
 	DefaultBehaviorChoice types.Object `tfsdk:"default_behavior_choice"`
+	DiscoveryRules        types.List   `tfsdk:"discovery_rules"`
 }
 
-type ApiDiscoveryApiDiscoveryDiscoveryRule struct {
-	Metadata       types.Object `tfsdk:"metadata"`
-	RuleProperties types.Object `tfsdk:"rule_properties"`
-	Labels         types.Map    `tfsdk:"labels"`
+type ApiDiscoveryDefaultBehaviorChoice struct {
+	Exclusive types.Object `tfsdk:"exclusive"`
+	Inclusive types.Bool   `tfsdk:"inclusive"`
 }
 
-type ApiDiscoveryMessageMetaType struct {
-	Name        types.String `tfsdk:"name"`
-	Description types.String `tfsdk:"description"`
-}
-
-type ApiDiscoveryApiDiscoveryRuleProperties struct {
-	RuleTypeChoice types.Object `tfsdk:"rule_type_choice"`
-	CriteriaChoice types.Object `tfsdk:"criteria_choice"`
-}
-
-type ApiDiscoveryRulePropertiesRuleTypeChoice struct {
-	Exclusion types.Object `tfsdk:"exclusion"`
-	Inclusion types.Bool   `tfsdk:"inclusion"`
-}
-
-type ApiDiscoveryRulePropertiesExclusion struct {
+type ApiDiscoveryExclusive struct {
 	ActionChoice types.Object `tfsdk:"action_choice"`
 }
 
-type ApiDiscoveryExclusionConfigActionChoice struct {
-	Ignore  types.Bool `tfsdk:"ignore"`
+type ApiDiscoveryActionChoice struct {
 	Archive types.Bool `tfsdk:"archive"`
+	Ignore  types.Bool `tfsdk:"ignore"`
 }
 
-type ApiDiscoveryRulePropertiesCriteriaChoice struct {
+type ApiDiscoveryDiscoveryRule struct {
+	Labels         types.Map    `tfsdk:"labels"`
+	Metadata       types.Object `tfsdk:"metadata"`
+	RuleProperties types.Object `tfsdk:"rule_properties"`
+}
+
+type ApiDiscoveryMessageMetaType struct {
+	Description types.String `tfsdk:"description"`
+	Name        types.String `tfsdk:"name"`
+}
+
+type ApiDiscoveryRuleProps struct {
+	CriteriaChoice types.Object `tfsdk:"criteria_choice"`
+	RuleTypeChoice types.Object `tfsdk:"rule_type_choice"`
+}
+
+type ApiDiscoveryCriteriaChoice struct {
 	HttpHeaderCriteria types.Object `tfsdk:"http_header_criteria"`
 	Pattern            types.String `tfsdk:"pattern"`
 }
 
-type ApiDiscoveryRulePropertiesHttpHeaderCriteria struct {
-	Location  types.List   `tfsdk:"location"`
+type ApiDiscoveryHttpHeaderCriteria struct {
 	FieldName types.String `tfsdk:"field_name"`
+	Location  types.List   `tfsdk:"location"`
 	MatchType types.List   `tfsdk:"match_type"`
 	Value     types.String `tfsdk:"value"`
 }
 
-type ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoice struct {
-	Inclusive types.Bool   `tfsdk:"inclusive"`
-	Exclusive types.Object `tfsdk:"exclusive"`
+type ApiDiscoveryRuleTypeChoice struct {
+	Exclusion types.Object `tfsdk:"exclusion"`
+	Inclusion types.Bool   `tfsdk:"inclusion"`
 }
 
-type ApiDiscoveryUserDefinedApiDiscoveryPolicyExclusive struct {
+type ApiDiscoveryExclusion struct {
 	ActionChoice types.Object `tfsdk:"action_choice"`
 }
 
 // ResourceF5XCApiDiscoveryModel describes the resource data model.
 type ResourceF5XCApiDiscoveryModel struct {
-	Namespace                     types.String   `tfsdk:"namespace"`
-	Uid                           types.String   `tfsdk:"uid"`
-	Labels                        types.Map      `tfsdk:"labels"`
 	Annotations                   types.Map      `tfsdk:"annotations"`
 	Description                   types.String   `tfsdk:"description"`
+	Labels                        types.Map      `tfsdk:"labels"`
 	Name                          types.String   `tfsdk:"name"`
+	Namespace                     types.String   `tfsdk:"namespace"`
+	Uid                           types.String   `tfsdk:"uid"`
 	CustomAuthTypes               types.List     `tfsdk:"custom_auth_types"`
 	UserDefinedApiDiscoveryPolicy types.Object   `tfsdk:"user_defined_api_discovery_policy"`
 	Timeouts                      timeouts.Value `tfsdk:"timeouts"`
@@ -148,69 +151,115 @@ var ApiDiscoveryCustomAuthTypesModelAttributeMap = map[string]attr.Type{
 // Attribute map for PointerField --> UserDefinedApiDiscoveryPolicy
 var ApiDiscoveryUserDefinedApiDiscoveryPolicyModelAttributeMap = map[string]attr.Type{
 
+	"default_behavior_choice": types.ObjectType{
+		AttrTypes: ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceModelAttributeMap,
+	},
 	"discovery_rules": types.ListType{
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
-				"metadata": types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"name":        types.StringType,
-						"description": types.StringType},
-				}, "rule_properties": types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"rule_type_choice": types.ObjectType{
-							AttrTypes: ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTypeChoiceModelAttributeMap,
-						},
-						"criteria_choice": types.ObjectType{
-							AttrTypes: ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesCriteriaModelAttributeMap,
-						}},
-				},
+
 				"labels": types.MapType{
 					ElemType: types.StringType,
+				}, "metadata": types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"description": types.StringType,
+						"name":        types.StringType},
+				}, "rule_properties": types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"criteria_choice": types.ObjectType{
+							AttrTypes: ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesCriteriaModelAttributeMap,
+						},
+						"rule_type_choice": types.ObjectType{
+							AttrTypes: ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTypeChoiceModelAttributeMap,
+						}},
 				},
 			},
 		},
 	},
-	"default_behavior_choice": types.ObjectType{
-		AttrTypes: ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceModelAttributeMap,
+}
+
+// Attribute map for RequiredOneOfField --> DefaultBehaviorChoice
+var ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceModelAttributeMap = map[string]attr.Type{
+
+	"exclusive": types.ObjectType{
+		AttrTypes: ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceExclusiveModelAttributeMap,
 	},
+	"inclusive": types.BoolType,
+}
+
+// Attribute map for PointerOfOneOfField --> Exclusive
+var ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceExclusiveModelAttributeMap = map[string]attr.Type{
+
+	"action_choice": types.ObjectType{
+		AttrTypes: ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceExclusiveActionChoiceModelAttributeMap,
+	},
+}
+
+// Attribute map for RequiredOneOfField --> ActionChoice
+var ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceExclusiveActionChoiceModelAttributeMap = map[string]attr.Type{
+
+	"archive": types.BoolType,
+	"ignore":  types.BoolType,
 }
 
 // Attribute map for ArrayOfPointerField --> DiscoveryRules
 var ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesModelAttributeMap = map[string]attr.Type{
-	"metadata": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"name":        types.StringType,
-			"description": types.StringType},
-	}, "rule_properties": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"rule_type_choice": types.ObjectType{
-				AttrTypes: ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTypeChoiceModelAttributeMap,
-			},
-			"criteria_choice": types.ObjectType{
-				AttrTypes: ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesCriteriaModelAttributeMap,
-			}},
-	},
+
 	"labels": types.MapType{
 		ElemType: types.StringType,
+	}, "metadata": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"description": types.StringType,
+			"name":        types.StringType},
+	}, "rule_properties": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"criteria_choice": types.ObjectType{
+				AttrTypes: ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesCriteriaModelAttributeMap,
+			},
+			"rule_type_choice": types.ObjectType{
+				AttrTypes: ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTypeChoiceModelAttributeMap,
+			}},
 	},
 }
 
 // Attribute map for PointerField --> Metadata
 var ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesMetadataModelAttributeMap = map[string]attr.Type{
 
-	"name":        types.StringType,
 	"description": types.StringType,
+	"name":        types.StringType,
 }
 
 // Attribute map for PointerField --> RuleProperties
 var ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesModelAttributeMap = map[string]attr.Type{
 
-	"rule_type_choice": types.ObjectType{
-		AttrTypes: ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTypeChoiceModelAttributeMap,
-	},
 	"criteria_choice": types.ObjectType{
 		AttrTypes: ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesCriteriaModelAttributeMap,
 	},
+	"rule_type_choice": types.ObjectType{
+		AttrTypes: ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTypeChoiceModelAttributeMap,
+	},
+}
+
+// Attribute map for RequiredOneOfField --> Criteria
+var ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesCriteriaModelAttributeMap = map[string]attr.Type{
+
+	"http_header_criteria": types.ObjectType{
+		AttrTypes: ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesCriteriaHttpHeaderCriteriaModelAttributeMap,
+	},
+	"pattern": types.StringType,
+}
+
+// Attribute map for PointerOfOneOfField --> HttpHeaderCriteria
+var ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesCriteriaHttpHeaderCriteriaModelAttributeMap = map[string]attr.Type{
+
+	"field_name": types.StringType,
+	"location": types.ListType{
+		ElemType: types.StringType,
+	},
+	"match_type": types.ListType{
+		ElemType: types.StringType,
+	},
+	"value": types.StringType,
 }
 
 // Attribute map for RequiredOneOfField --> RuleTypeChoice
@@ -233,54 +282,8 @@ var ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTyp
 // Attribute map for RequiredOneOfField --> ActionChoice
 var ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTypeChoiceExclusionActionChoiceModelAttributeMap = map[string]attr.Type{
 
-	"ignore":  types.BoolType,
 	"archive": types.BoolType,
-}
-
-// Attribute map for RequiredOneOfField --> Criteria
-var ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesCriteriaModelAttributeMap = map[string]attr.Type{
-
-	"http_header_criteria": types.ObjectType{
-		AttrTypes: ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesCriteriaHttpHeaderCriteriaModelAttributeMap,
-	},
-	"pattern": types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> HttpHeaderCriteria
-var ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesCriteriaHttpHeaderCriteriaModelAttributeMap = map[string]attr.Type{
-
-	"location": types.ListType{
-		ElemType: types.StringType,
-	},
-	"field_name": types.StringType,
-	"match_type": types.ListType{
-		ElemType: types.StringType,
-	},
-	"value": types.StringType,
-}
-
-// Attribute map for RequiredOneOfField --> DefaultBehaviorChoice
-var ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceModelAttributeMap = map[string]attr.Type{
-
-	"inclusive": types.BoolType,
-	"exclusive": types.ObjectType{
-		AttrTypes: ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceExclusiveModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> Exclusive
-var ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceExclusiveModelAttributeMap = map[string]attr.Type{
-
-	"action_choice": types.ObjectType{
-		AttrTypes: ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceExclusiveActionChoiceModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> ActionChoice
-var ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceExclusiveActionChoiceModelAttributeMap = map[string]attr.Type{
-
 	"ignore":  types.BoolType,
-	"archive": types.BoolType,
 }
 
 func NewResourceF5XCApiDiscovery() resource.Resource {
@@ -294,20 +297,66 @@ func (r *ResourceF5XCApiDiscovery) Metadata(ctx context.Context, request resourc
 func (r *ResourceF5XCApiDiscovery) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "ApiDiscovery resource",
-		Description:         "ApiDiscovery resource",
+		MarkdownDescription: "GetRequest is used to get different forms of a api_discovery This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of api_discovery) etc. can be fetched",
+		Description:         "GetRequest is used to get different forms of a api_discovery This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of api_discovery) etc. can be fetched",
 
 		Attributes: map[string]schema.Attribute{
+			"annotations": schema.MapAttribute{
+				Description:         "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
+				MarkdownDescription: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				ElementType:         types.StringType,
+				Validators: []validator.Map{
+					mapvalidator.SizeAtLeast(1),
+					mapvalidator.KeysAre(stringvalidator.LengthBetween(1, 64)),
+					mapvalidator.ValueStringsAre(stringvalidator.LengthBetween(1, 1024)),
+				},
+				PlanModifiers: []planmodifier.Map{
+					mapplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"description": schema.StringAttribute{
+				Description:         "description Human readable description for the object",
+				MarkdownDescription: "description Human readable description for the object",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				Default:             stringdefault.StaticString(""),
+				Validators: []validator.String{
+					bytesvalidator.BytesAtMost(1200),
+				},
+			},
+			"labels": schema.MapAttribute{
+				Description:         "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				MarkdownDescription: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				ElementType:         types.StringType,
+				PlanModifiers: []planmodifier.Map{
+					mapmergemodifier.New(),
+					mapplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"name": schema.StringAttribute{
+				Description:         "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
+				MarkdownDescription: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
+				Required:            true,
+				Optional:            false,
+				Computed:            false,
+			},
 			"namespace": schema.StringAttribute{
 				Description:         "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
-				MarkdownDescription: "",
+				MarkdownDescription: "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
 			},
 			"uid": schema.StringAttribute{
 				Description:         "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
-				MarkdownDescription: "",
+				MarkdownDescription: "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
 				Required:            false,
 				Optional:            false,
 				Computed:            true,
@@ -315,74 +364,41 @@ func (r *ResourceF5XCApiDiscovery) Schema(ctx context.Context, request resource.
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"labels": schema.MapAttribute{
-				Description:         "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            true,
-				ElementType:         types.StringType,
-				PlanModifiers: []planmodifier.Map{
-					mapmergemodifier.New(),
-				},
-			},
-			"annotations": schema.MapAttribute{
-				Description:         "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            false,
-				ElementType:         types.StringType,
-				Validators: []validator.Map{
-					mapvalidator.KeysAre(stringvalidator.LengthBetween(1, 64)),
-					mapvalidator.ValueStringsAre(stringvalidator.LengthBetween(1, 1024)),
-				},
-			},
-			"description": schema.StringAttribute{
-				Description:         "description Human readable description for the object",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            true,
-				Default:             stringdefault.StaticString(""),
-			},
-			"name": schema.StringAttribute{
-				Description:         "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
-				MarkdownDescription: "",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
-			},
 			"custom_auth_types": schema.ListNestedAttribute{
 				Description:         "custom_auth_types Select your custom authentication types to be detected in the API discovery",
-				MarkdownDescription: "",
+				MarkdownDescription: "custom_auth_types Select your custom authentication types to be detected in the API discovery",
 				Required:            false,
 				Optional:            true,
 				Computed:            false,
+				Validators: []validator.List{
+					listvalidator.SizeAtMost(10),
+				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"parameter_name": schema.StringAttribute{
 							Description:         "parameter name The authentication parameter name.",
-							MarkdownDescription: "",
+							MarkdownDescription: "parameter name The authentication parameter name.",
 							Required:            true,
 							Optional:            false,
 							Computed:            false,
 							Validators: []validator.String{
+								bytesvalidator.BytesAtMost(256),
+								stringvalidator.LengthAtLeast(1),
 								stringvalidator.RegexMatches(
 									regexp.MustCompile(`^[!#$%&'*+\-.^_`+"`"+`|~0-9A-Za-z]+$`),
-									"must be valid pattern",
+									"must match pattern `^[!#$%&'*+\\-.^_` + \"`\" + `|~0-9A-Za-z]+$`",
 								),
 							},
 						},
 						"parameter_type": schema.ListAttribute{
 							Description:         "parameter_type",
-							MarkdownDescription: "<br>**Allowed Values (choose one):** `[\"QUERY_PARAMETER\", \"HEADER\", \"COOKIE\"]`",
+							MarkdownDescription: "parameter_type<br>**Allowed Values (choose one):** `['COOKIE', 'HEADER', 'QUERY_PARAMETER']`",
 							ElementType:         types.StringType,
 							Required:            true,
 							Optional:            false,
 							Computed:            false,
 							Validators: []validator.List{
-								listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"QUERY_PARAMETER", "HEADER", "COOKIE"}...)),
+								listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"COOKIE", "HEADER", "QUERY_PARAMETER"}...)),
 								listvalidator.SizeAtMost(1),
 							},
 						},
@@ -391,39 +407,110 @@ func (r *ResourceF5XCApiDiscovery) Schema(ctx context.Context, request resource.
 			},
 			"user_defined_api_discovery_policy": schema.SingleNestedAttribute{
 				Description:         "user_defined_api_discovery_policy Rules are evaluated sequentially, top to bottom. If no rules are added, all traffic will be discovered or ignored based on the selection in the 'Default Behaviour of the Rule Set' field.",
-				MarkdownDescription: "",
+				MarkdownDescription: "user_defined_api_discovery_policy Rules are evaluated sequentially, top to bottom. If no rules are added, all traffic will be discovered or ignored based on the selection in the 'Default Behaviour of the Rule Set' field.",
 				Required:            false,
 				Optional:            true,
 				Computed:            false,
 				Attributes: map[string]schema.Attribute{
+					"default_behavior_choice": schema.SingleNestedAttribute{
+						Description:         "default_behavior_choice Define the default action for endpoints that do not match any rule, choosing to either include or exclude them from the discovery process.",
+						MarkdownDescription: "default_behavior_choice Define the default action for endpoints that do not match any rule, choosing to either include or exclude them from the discovery process.",
+						Required:            true,
+						Optional:            false,
+						Computed:            false,
+						Validators: []validator.Object{
+							exactlyoneofvalidator.RequiredExactlyOneOf(
+								"exclusive",
+								"inclusive",
+							),
+						},
+						Attributes: map[string]schema.Attribute{
+							"exclusive": schema.SingleNestedAttribute{
+								Description:         "exclusive Any traffic that does not match the specified rules will be ignored by default.",
+								MarkdownDescription: "exclusive Any traffic that does not match the specified rules will be ignored by default.",
+								Required:            false,
+								Optional:            true,
+								Computed:            false,
+								Attributes: map[string]schema.Attribute{
+									"action_choice": schema.SingleNestedAttribute{
+										Description:         "action Specifies the action to take for excluded endpoints",
+										MarkdownDescription: "action Specifies the action to take for excluded endpoints",
+										Required:            true,
+										Optional:            false,
+										Computed:            false,
+										Validators: []validator.Object{
+											exactlyoneofvalidator.RequiredExactlyOneOf(
+												"archive",
+												"ignore",
+											),
+										},
+										Attributes: map[string]schema.Attribute{
+											"archive": schema.BoolAttribute{
+												Description:         "archive Endpoints are removed from active API Discovery and stored in the Archive under Non-API Rules for reference and auditing.",
+												MarkdownDescription: "archive Endpoints are removed from active API Discovery and stored in the Archive under Non-API Rules for reference and auditing.",
+												Required:            false,
+												Optional:            true,
+												Computed:            false,
+												Validators: []validator.Bool{
+													boolvalidator.Equals(true),
+												},
+											},
+											"ignore": schema.BoolAttribute{
+												Description:         "ignore Excluded endpoints are completely ignored by API Discovery and will not appear in discovery results, inventories, or insights.",
+												MarkdownDescription: "ignore Excluded endpoints are completely ignored by API Discovery and will not appear in discovery results, inventories, or insights.",
+												Required:            false,
+												Optional:            true,
+												Computed:            false,
+												Validators: []validator.Bool{
+													boolvalidator.Equals(true),
+												},
+											},
+										},
+									},
+								},
+							},
+							"inclusive": schema.BoolAttribute{
+								Description:         "inclusive Any traffic that does not match the specified rules will be discovered by default.",
+								MarkdownDescription: "inclusive Any traffic that does not match the specified rules will be discovered by default.",
+								Required:            false,
+								Optional:            true,
+								Computed:            false,
+								Validators: []validator.Bool{
+									boolvalidator.Equals(true),
+								},
+							},
+						},
+					},
 					"discovery_rules": schema.ListNestedAttribute{
 						Description:         "discovery_rules Define rules to include or exclude endpoints by path, domain, or header. Rules run top to bottom; unmatched endpoints follow the default action.",
-						MarkdownDescription: "",
+						MarkdownDescription: "discovery_rules Define rules to include or exclude endpoints by path, domain, or header. Rules run top to bottom; unmatched endpoints follow the default action.",
 						Required:            false,
 						Optional:            true,
 						Computed:            false,
+						Validators: []validator.List{
+							listvalidator.SizeAtMost(100),
+							listuniquevalidator.ListUniqueValuesIgnoreUnknown(),
+						},
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
+								"labels": schema.MapAttribute{
+									Description:         "labels Map of string keys and values that can be used to organize and categorize the rule",
+									MarkdownDescription: "labels Map of string keys and values that can be used to organize and categorize the rule",
+									ElementType:         types.StringType,
+									Required:            false,
+									Optional:            true,
+									Computed:            false,
+								},
 								"metadata": schema.SingleNestedAttribute{
 									Description:         "metadata Standard object metadata including name, labels, and description",
-									MarkdownDescription: "",
+									MarkdownDescription: "metadata Standard object metadata including name, labels, and description",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
 									Attributes: map[string]schema.Attribute{
-										"name": schema.StringAttribute{
-											Description:         "name This is the name of the message. The value of name has to follow DNS-1035 format.",
-											MarkdownDescription: "<br>**Validation:** `Length LengthAtLeast(1)`",
-											Required:            true,
-											Optional:            false,
-											Computed:            false,
-											Validators: []validator.String{
-												stringvalidator.LengthAtLeast(1),
-											},
-										},
 										"description": schema.StringAttribute{
 											Description:         "description Human readable description.",
-											MarkdownDescription: "<br>**Validation:** `Length LengthAtMost(256)`",
+											MarkdownDescription: "description Human readable description.<br>**Validation:** `Length LengthAtMost(256)`",
 											Required:            false,
 											Optional:            true,
 											Computed:            false,
@@ -431,23 +518,123 @@ func (r *ResourceF5XCApiDiscovery) Schema(ctx context.Context, request resource.
 												stringvalidator.LengthAtMost(256),
 											},
 										},
+										"name": schema.StringAttribute{
+											Description:         "name This is the name of the message. The value of name has to follow DNS-1035 format.",
+											MarkdownDescription: "name This is the name of the message. The value of name has to follow DNS-1035 format.<br>**Validation:** `Length LengthAtLeast(1)`",
+											Required:            true,
+											Optional:            false,
+											Computed:            false,
+											Validators: []validator.String{
+												stringvalidator.LengthAtLeast(1),
+												stringvalidator.RegexMatches(
+													regexp.MustCompile(`^[a-z0-9]([a-z0-9\-]{0,61}[a-z0-9])?$`),
+													"must be a valid F5XC object name",
+												),
+											},
+										},
 									},
 								},
 								"rule_properties": schema.SingleNestedAttribute{
 									Description:         "rule_properties Configuration for rule type and matching criteria",
-									MarkdownDescription: "",
+									MarkdownDescription: "rule_properties Configuration for rule type and matching criteria",
 									Required:            false,
 									Optional:            true,
 									Computed:            false,
 									Attributes: map[string]schema.Attribute{
-										"rule_type_choice": schema.SingleNestedAttribute{
-											Description:         "rule_type_choice Determines whether matching endpoints are included in API Discovery or excluded.",
-											MarkdownDescription: "",
+										"criteria_choice": schema.SingleNestedAttribute{
+											Description:         "criteria Specifies what is used to match endpoints.",
+											MarkdownDescription: "criteria Specifies what is used to match endpoints.",
 											Required:            true,
 											Optional:            false,
 											Computed:            false,
 											Validators: []validator.Object{
-												atmostoneofvalidator.AtMostOneOf(
+												exactlyoneofvalidator.RequiredExactlyOneOf(
+													"http_header_criteria",
+													"pattern",
+												),
+											},
+											Attributes: map[string]schema.Attribute{
+												"http_header_criteria": schema.SingleNestedAttribute{
+													Description:         "http_header_criteria",
+													MarkdownDescription: "http_header_criteria",
+													Required:            false,
+													Optional:            true,
+													Computed:            false,
+													Attributes: map[string]schema.Attribute{
+														"field_name": schema.StringAttribute{
+															Description:         "field_name",
+															MarkdownDescription: "field_name",
+															Required:            true,
+															Optional:            false,
+															Computed:            false,
+															Validators: []validator.String{
+																stringvalidator.RegexMatches(
+																	regexp.MustCompile(`^[a-zA-Z0-9!#$%&'*+\-.^_`+"`"+`|~]+$`),
+																	"must be a valid HTTP header field name",
+																),
+																bytesvalidator.BytesAtMost(256),
+															},
+														},
+														"location": schema.ListAttribute{
+															Description:         "location",
+															MarkdownDescription: "location<br>**Allowed Values (choose one):** `['REQUEST', 'RESPONSE']`<br>**Default:** `REQUEST`",
+															ElementType:         types.StringType,
+															Required:            false,
+															Optional:            true,
+															Computed:            true,
+															Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("REQUEST")),
+															Validators: []validator.List{
+																listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"REQUEST", "RESPONSE"}...)),
+																listvalidator.SizeAtMost(1),
+															},
+														},
+														"match_type": schema.ListAttribute{
+															Description:         "match_type",
+															MarkdownDescription: "match_type<br>**Allowed Values (choose one):** `['EXACT_MATCH', 'REGEX', 'SUBSTRING']`<br>**Default:** `EXACT_MATCH`<br>**Default:** `EXACT_MATCH`",
+															ElementType:         types.StringType,
+															Required:            false,
+															Optional:            true,
+															Computed:            true,
+															Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("EXACT_MATCH")),
+															Validators: []validator.List{
+																listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"EXACT_MATCH", "REGEX", "SUBSTRING"}...)),
+																listvalidator.SizeAtMost(1),
+															},
+														},
+														"value": schema.StringAttribute{
+															Description:         "value",
+															MarkdownDescription: "value",
+															Required:            true,
+															Optional:            false,
+															Computed:            false,
+															Validators: []validator.String{
+																bytesvalidator.BytesAtMost(1024),
+																stringvalidator.LengthAtLeast(1),
+															},
+														},
+													},
+												},
+												"pattern": schema.StringAttribute{
+													Description:         "pattern Patterns are matched against the request path to identify endpoints by path structure, file extension, or version prefix. Endpoints that match this pattern are affected by the rule.",
+													MarkdownDescription: "pattern Patterns are matched against the request path to identify endpoints by path structure, file extension, or version prefix. Endpoints that match this pattern are affected by the rule.",
+													Required:            false,
+													Optional:            true,
+													Computed:            false,
+													Validators: []validator.String{
+														bytesvalidator.BytesAtMost(512),
+														stringvalidator.LengthAtLeast(1),
+													},
+												},
+											},
+										},
+										"rule_type_choice": schema.SingleNestedAttribute{
+											Description:         "rule_type_choice Determines whether matching endpoints are included in API Discovery or excluded.",
+											MarkdownDescription: "rule_type_choice Determines whether matching endpoints are included in API Discovery or excluded.",
+											Required:            true,
+											Optional:            false,
+											Computed:            false,
+											Validators: []validator.Object{
+												exactlyoneofvalidator.RequiredExactlyOneOf(
 													"exclusion",
 													"inclusion",
 												),
@@ -455,27 +642,27 @@ func (r *ResourceF5XCApiDiscovery) Schema(ctx context.Context, request resource.
 											Attributes: map[string]schema.Attribute{
 												"exclusion": schema.SingleNestedAttribute{
 													Description:         "exclusion Matching endpoints will be excluded from API discovery",
-													MarkdownDescription: "",
+													MarkdownDescription: "exclusion Matching endpoints will be excluded from API discovery",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
 													Attributes: map[string]schema.Attribute{
 														"action_choice": schema.SingleNestedAttribute{
 															Description:         "action Specifies the action to take for excluded endpoints",
-															MarkdownDescription: "",
+															MarkdownDescription: "action Specifies the action to take for excluded endpoints",
 															Required:            true,
 															Optional:            false,
 															Computed:            false,
 															Validators: []validator.Object{
-																atmostoneofvalidator.AtMostOneOf(
-																	"ignore",
+																exactlyoneofvalidator.RequiredExactlyOneOf(
 																	"archive",
+																	"ignore",
 																),
 															},
 															Attributes: map[string]schema.Attribute{
-																"ignore": schema.BoolAttribute{
-																	Description:         "ignore Excluded endpoints are completely ignored by API Discovery and will not appear in discovery results, inventories, or insights.",
-																	MarkdownDescription: "",
+																"archive": schema.BoolAttribute{
+																	Description:         "archive Endpoints are removed from active API Discovery and stored in the Archive under Non-API Rules for reference and auditing.",
+																	MarkdownDescription: "archive Endpoints are removed from active API Discovery and stored in the Archive under Non-API Rules for reference and auditing.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -483,9 +670,9 @@ func (r *ResourceF5XCApiDiscovery) Schema(ctx context.Context, request resource.
 																		boolvalidator.Equals(true),
 																	},
 																},
-																"archive": schema.BoolAttribute{
-																	Description:         "archive Endpoints are removed from active API Discovery and stored in the Archive under Non-API Rules for reference and auditing.",
-																	MarkdownDescription: "",
+																"ignore": schema.BoolAttribute{
+																	Description:         "ignore Excluded endpoints are completely ignored by API Discovery and will not appear in discovery results, inventories, or insights.",
+																	MarkdownDescription: "ignore Excluded endpoints are completely ignored by API Discovery and will not appear in discovery results, inventories, or insights.",
 																	Required:            false,
 																	Optional:            true,
 																	Computed:            false,
@@ -499,160 +686,13 @@ func (r *ResourceF5XCApiDiscovery) Schema(ctx context.Context, request resource.
 												},
 												"inclusion": schema.BoolAttribute{
 													Description:         "inclusion Matching endpoints will be included in API discovery",
-													MarkdownDescription: "",
+													MarkdownDescription: "inclusion Matching endpoints will be included in API discovery",
 													Required:            false,
 													Optional:            true,
 													Computed:            false,
 													Validators: []validator.Bool{
 														boolvalidator.Equals(true),
 													},
-												},
-											},
-										},
-										"criteria_choice": schema.SingleNestedAttribute{
-											Description:         "criteria Specifies what is used to match endpoints.",
-											MarkdownDescription: "",
-											Required:            true,
-											Optional:            false,
-											Computed:            false,
-											Validators: []validator.Object{
-												atmostoneofvalidator.AtMostOneOf(
-													"http_header_criteria",
-													"pattern",
-												),
-											},
-											Attributes: map[string]schema.Attribute{
-												"http_header_criteria": schema.SingleNestedAttribute{
-													Description:         "http_header_criteria",
-													MarkdownDescription: "",
-													Required:            false,
-													Optional:            true,
-													Computed:            false,
-													Attributes: map[string]schema.Attribute{
-														"location": schema.ListAttribute{
-															Description:         "location",
-															MarkdownDescription: "<br>**Allowed Values (choose one):** `[\"REQUEST\", \"RESPONSE\"]`",
-															ElementType:         types.StringType,
-															Required:            false,
-															Optional:            true,
-															Computed:            false,
-															Validators: []validator.List{
-																listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"REQUEST", "RESPONSE"}...)),
-																listvalidator.SizeAtMost(1),
-															},
-														},
-														"field_name": schema.StringAttribute{
-															Description:         "field_name",
-															MarkdownDescription: "",
-															Required:            true,
-															Optional:            false,
-															Computed:            false,
-														},
-														"match_type": schema.ListAttribute{
-															Description:         "match_type",
-															MarkdownDescription: "<br>**Allowed Values (choose one):** `[\"EXACT_MATCH\", \"SUBSTRING\", \"REGEX\"]`<br>**Default:** `EXACT_MATCH`",
-															ElementType:         types.StringType,
-															Required:            false,
-															Optional:            true,
-															Computed:            true,
-															Default:             listdefault.StaticValue(utils.GetListStringDefaultValue("EXACT_MATCH")),
-															Validators: []validator.List{
-																listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"EXACT_MATCH", "SUBSTRING", "REGEX"}...)),
-																listvalidator.SizeAtMost(1),
-															},
-														},
-														"value": schema.StringAttribute{
-															Description:         "value",
-															MarkdownDescription: "",
-															Required:            true,
-															Optional:            false,
-															Computed:            false,
-														},
-													},
-												},
-												"pattern": schema.StringAttribute{
-													Description:         "pattern Patterns are matched against the request path to identify endpoints by path structure, file extension, or version prefix. Endpoints that match this pattern are affected by the rule.",
-													MarkdownDescription: "",
-													Required:            false,
-													Optional:            true,
-													Computed:            false,
-												},
-											},
-										},
-									},
-								},
-								"labels": schema.MapAttribute{
-									Description:         "labels Map of string keys and values that can be used to organize and categorize the rule",
-									MarkdownDescription: "",
-									ElementType:         types.StringType,
-									Required:            false,
-									Optional:            true,
-									Computed:            false,
-								},
-							},
-						},
-					},
-					"default_behavior_choice": schema.SingleNestedAttribute{
-						Description:         "default_behavior_choice Define the default action for endpoints that do not match any rule, choosing to either include or exclude them from the discovery process.",
-						MarkdownDescription: "",
-						Required:            true,
-						Optional:            false,
-						Computed:            false,
-						Validators: []validator.Object{
-							atmostoneofvalidator.AtMostOneOf(
-								"inclusive",
-								"exclusive",
-							),
-						},
-						Attributes: map[string]schema.Attribute{
-							"inclusive": schema.BoolAttribute{
-								Description:         "inclusive Any traffic that does not match the specified rules will be discovered by default.",
-								MarkdownDescription: "",
-								Required:            false,
-								Optional:            true,
-								Computed:            false,
-								Validators: []validator.Bool{
-									boolvalidator.Equals(true),
-								},
-							},
-							"exclusive": schema.SingleNestedAttribute{
-								Description:         "exclusive Any traffic that does not match the specified rules will be ignored by default.",
-								MarkdownDescription: "",
-								Required:            false,
-								Optional:            true,
-								Computed:            false,
-								Attributes: map[string]schema.Attribute{
-									"action_choice": schema.SingleNestedAttribute{
-										Description:         "action Specifies the action to take for excluded endpoints",
-										MarkdownDescription: "",
-										Required:            true,
-										Optional:            false,
-										Computed:            false,
-										Validators: []validator.Object{
-											atmostoneofvalidator.AtMostOneOf(
-												"ignore",
-												"archive",
-											),
-										},
-										Attributes: map[string]schema.Attribute{
-											"ignore": schema.BoolAttribute{
-												Description:         "ignore Excluded endpoints are completely ignored by API Discovery and will not appear in discovery results, inventories, or insights.",
-												MarkdownDescription: "",
-												Required:            false,
-												Optional:            true,
-												Computed:            false,
-												Validators: []validator.Bool{
-													boolvalidator.Equals(true),
-												},
-											},
-											"archive": schema.BoolAttribute{
-												Description:         "archive Endpoints are removed from active API Discovery and stored in the Archive under Non-API Rules for reference and auditing.",
-												MarkdownDescription: "",
-												Required:            false,
-												Optional:            true,
-												Computed:            false,
-												Validators: []validator.Bool{
-													boolvalidator.Equals(true),
 												},
 											},
 										},
@@ -665,7 +705,7 @@ func (r *ResourceF5XCApiDiscovery) Schema(ctx context.Context, request resource.
 			},
 			"timeouts": timeouts.Attributes(ctx, timeouts.Opts{
 				Create: true, // activate timeouts.create
-				Update: true, // activate timeouts.update
+				Update: true, // activate timeouts.update (false for CRLD resources)
 				Delete: true, // activate timeouts.delete
 				Read:   true, // activate timeouts.read
 			}),
@@ -765,18 +805,13 @@ func (r *ResourceF5XCApiDiscovery) Create(ctx context.Context, request resource.
 
 	// Populate createReq from data model
 
-	// resource modelToMetaRoot RequiredStringField --> Namespace
-	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
-		meta.Namespace = string(data.Namespace.ValueString())
-	}
-
 	// resource modelToMetaRoot MapOfStringField --> Annotations
 	if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
 		var labels map[string]string
 		diags = data.Annotations.ElementsAs(ctx, &labels, false)
 		response.Diagnostics.Append(diags...)
 		if response.Diagnostics.HasError() {
-			tflog.Error(ctx, "Failed to convert annotations from map to model")
+			tflog.Error(ctx, "Failed to convert Annotations from map to model")
 			return
 		}
 		meta.Annotations = labels
@@ -789,15 +824,34 @@ func (r *ResourceF5XCApiDiscovery) Create(ctx context.Context, request resource.
 		meta.Description = string(data.Description.ValueString())
 	}
 
+	// resource modelToMetaRoot MapOfStringField --> Labels
+	if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
+		var labels map[string]string
+		diags = data.Labels.ElementsAs(ctx, &labels, false)
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			tflog.Error(ctx, "Failed to convert Labels from map to model")
+			return
+		}
+		meta.Labels = labels
+	} else {
+		meta.Labels = nil
+	}
+
 	// resource modelToMetaRoot RequiredStringField --> Name
 	if !data.Name.IsNull() && !data.Name.IsUnknown() {
 		meta.Name = string(data.Name.ValueString())
 	}
 
+	// resource modelToMetaRoot RequiredStringField --> Namespace
+	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
+		meta.Namespace = string(data.Namespace.ValueString())
+	}
+
 	{
 		// resource modelToSpecRoot ArrayOfPointerField --> CustomAuthTypes
 		if !data.CustomAuthTypes.IsNull() && !data.CustomAuthTypes.IsUnknown() {
-			var customAuthTypesElements []ApiDiscoveryApiDiscoveryCustomAuthType
+			var customAuthTypesElements []ApiDiscoveryCustomAuthType
 			response.Diagnostics.Append(data.CustomAuthTypes.ElementsAs(ctx, &customAuthTypesElements, false)...)
 
 			if response.Diagnostics.HasError() {
@@ -849,7 +903,7 @@ func (r *ResourceF5XCApiDiscovery) Create(ctx context.Context, request resource.
 		if !data.UserDefinedApiDiscoveryPolicy.IsNull() && !data.UserDefinedApiDiscoveryPolicy.IsUnknown() {
 			userDefinedApiDiscoveryPolicySpec := &ves_io_schema_api_sec_api_discovery.UserDefinedApiDiscoveryPolicy{}
 			spec.UserDefinedApiDiscoveryPolicy = userDefinedApiDiscoveryPolicySpec
-			var userDefinedApiDiscoveryPolicyModel ApiDiscoveryApiDiscoveryUserDefinedApiDiscoveryPolicy
+			var userDefinedApiDiscoveryPolicyModel ApiDiscoveryUserDefinedApiDiscoveryPolicy
 
 			// Populate the nested model from the main data model
 			diags.Append(data.UserDefinedApiDiscoveryPolicy.As(ctx, &userDefinedApiDiscoveryPolicyModel, basetypes.ObjectAsOptions{})...)
@@ -858,10 +912,64 @@ func (r *ResourceF5XCApiDiscovery) Create(ctx context.Context, request resource.
 				return
 			}
 
+			// resource modelToSpecNested RequiredOneOfField --> DefaultBehaviorChoice
+			if !userDefinedApiDiscoveryPolicyModel.DefaultBehaviorChoice.IsNull() && !userDefinedApiDiscoveryPolicyModel.DefaultBehaviorChoice.IsUnknown() {
+				userDefinedApiDiscoveryPolicyDefaultBehaviorChoiceModel := ApiDiscoveryDefaultBehaviorChoice{}
+				response.Diagnostics.Append(userDefinedApiDiscoveryPolicyModel.DefaultBehaviorChoice.As(ctx, &userDefinedApiDiscoveryPolicyDefaultBehaviorChoiceModel, basetypes.ObjectAsOptions{})...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				// resource modelToSpecNested PointerOfOneOfField --> Exclusive
+				if !userDefinedApiDiscoveryPolicyDefaultBehaviorChoiceModel.Exclusive.IsNull() && !userDefinedApiDiscoveryPolicyDefaultBehaviorChoiceModel.Exclusive.IsUnknown() {
+					var apiDiscoveryExclusiveModel ApiDiscoveryExclusive
+					response.Diagnostics.Append(userDefinedApiDiscoveryPolicyDefaultBehaviorChoiceModel.Exclusive.As(ctx, &apiDiscoveryExclusiveModel, basetypes.ObjectAsOptions{})...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					exclusiveOneOfSpec := &ves_io_schema_api_sec_api_discovery.UserDefinedApiDiscoveryPolicy_Exclusive{}
+					exclusiveOneOfSpec.Exclusive = &ves_io_schema_api_sec_api_discovery.ExclusionConfig{}
+					userDefinedApiDiscoveryPolicySpec.DefaultBehaviorChoice = exclusiveOneOfSpec
+
+					// resource modelToSpecNested RequiredOneOfField --> ActionChoice
+					if !apiDiscoveryExclusiveModel.ActionChoice.IsNull() && !apiDiscoveryExclusiveModel.ActionChoice.IsUnknown() {
+						exclusiveActionChoiceModel := ApiDiscoveryActionChoice{}
+						response.Diagnostics.Append(apiDiscoveryExclusiveModel.ActionChoice.As(ctx, &exclusiveActionChoiceModel, basetypes.ObjectAsOptions{})...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						// resource modelToSpecNested BoolOfOneOfPointerField --> Archive
+						if !exclusiveActionChoiceModel.Archive.IsNull() && !exclusiveActionChoiceModel.Archive.IsUnknown() {
+							archiveSpecBool := &ves_io_schema_api_sec_api_discovery.ExclusionConfig_Archive{}
+							archiveSpecBool.Archive = &ves_io_schema.Empty{}
+							exclusiveOneOfSpec.Exclusive.ActionChoice = archiveSpecBool
+						}
+
+						// resource modelToSpecNested BoolOfOneOfPointerField --> Ignore
+						if !exclusiveActionChoiceModel.Ignore.IsNull() && !exclusiveActionChoiceModel.Ignore.IsUnknown() {
+							ignoreSpecBool := &ves_io_schema_api_sec_api_discovery.ExclusionConfig_Ignore{}
+							ignoreSpecBool.Ignore = &ves_io_schema.Empty{}
+							exclusiveOneOfSpec.Exclusive.ActionChoice = ignoreSpecBool
+						}
+
+					}
+
+				}
+
+				// resource modelToSpecNested BoolOfOneOfPointerField --> Inclusive
+				if !userDefinedApiDiscoveryPolicyDefaultBehaviorChoiceModel.Inclusive.IsNull() && !userDefinedApiDiscoveryPolicyDefaultBehaviorChoiceModel.Inclusive.IsUnknown() {
+					inclusiveSpecBool := &ves_io_schema_api_sec_api_discovery.UserDefinedApiDiscoveryPolicy_Inclusive{}
+					inclusiveSpecBool.Inclusive = &ves_io_schema.Empty{}
+					userDefinedApiDiscoveryPolicySpec.DefaultBehaviorChoice = inclusiveSpecBool
+				}
+
+			}
+
 			// resource modelToSpecNested ArrayOfPointerField --> DiscoveryRules
 			if !userDefinedApiDiscoveryPolicyModel.DiscoveryRules.IsNull() && !userDefinedApiDiscoveryPolicyModel.DiscoveryRules.IsUnknown() && len(userDefinedApiDiscoveryPolicyModel.DiscoveryRules.Elements()) > 0 {
 				// 1. Convert the types.List into a slice of the model's Go struct
-				var discoveryRulesElements []ApiDiscoveryApiDiscoveryDiscoveryRule
+				var discoveryRulesElements []ApiDiscoveryDiscoveryRule
 				response.Diagnostics.Append(userDefinedApiDiscoveryPolicyModel.DiscoveryRules.ElementsAs(ctx, &discoveryRulesElements, false)...)
 				if response.Diagnostics.HasError() {
 					return
@@ -878,6 +986,20 @@ func (r *ResourceF5XCApiDiscovery) Create(ctx context.Context, request resource.
 
 					// Recursively process nested elements
 
+					// resource modelToSpecNested MapOfStringField --> Labels
+					if !discoveryRulesElement.Labels.IsNull() && !discoveryRulesElement.Labels.IsUnknown() {
+						var mapOfString map[string]string
+						diags = discoveryRulesElement.Labels.ElementsAs(ctx, &mapOfString, false)
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						discoveryRulesSpec[i].Labels = mapOfString
+					} else {
+						discoveryRulesSpec[i].Labels = nil
+					}
+
 					// resource modelToSpecNested PointerField --> Metadata
 					if !discoveryRulesElement.Metadata.IsNull() && !discoveryRulesElement.Metadata.IsUnknown() {
 						var metadataModel ApiDiscoveryMessageMetaType
@@ -889,21 +1011,21 @@ func (r *ResourceF5XCApiDiscovery) Create(ctx context.Context, request resource.
 						metadataSpec := &ves_io_schema.MessageMetaType{}
 						discoveryRulesSpec[i].Metadata = metadataSpec
 
-						// resource modelToSpecNested RequiredStringField --> Name
-						if !metadataModel.Name.IsNull() && !metadataModel.Name.IsUnknown() {
-							metadataSpec.Name = string(metadataModel.Name.ValueString())
-						}
-
 						// resource modelToSpecNested StringField --> Description
 						if !metadataModel.Description.IsNull() && !metadataModel.Description.IsUnknown() {
 							metadataSpec.Description = string(metadataModel.Description.ValueString())
+						}
+
+						// resource modelToSpecNested RequiredStringField --> Name
+						if !metadataModel.Name.IsNull() && !metadataModel.Name.IsUnknown() {
+							metadataSpec.Name = string(metadataModel.Name.ValueString())
 						}
 
 					}
 
 					// resource modelToSpecNested PointerField --> RuleProperties
 					if !discoveryRulesElement.RuleProperties.IsNull() && !discoveryRulesElement.RuleProperties.IsUnknown() {
-						var rulePropertiesModel ApiDiscoveryApiDiscoveryRuleProperties
+						var rulePropertiesModel ApiDiscoveryRuleProps
 						response.Diagnostics.Append(discoveryRulesElement.RuleProperties.As(ctx, &rulePropertiesModel, basetypes.ObjectAsOptions{})...)
 						if response.Diagnostics.HasError() {
 							return
@@ -912,9 +1034,97 @@ func (r *ResourceF5XCApiDiscovery) Create(ctx context.Context, request resource.
 						rulePropertiesSpec := &ves_io_schema_api_sec_api_discovery.RuleProperties{}
 						discoveryRulesSpec[i].RuleProperties = rulePropertiesSpec
 
+						// resource modelToSpecNested RequiredOneOfField --> Criteria
+						if !rulePropertiesModel.CriteriaChoice.IsNull() && !rulePropertiesModel.CriteriaChoice.IsUnknown() {
+							rulePropertiesCriteriaChoiceModel := ApiDiscoveryCriteriaChoice{}
+							response.Diagnostics.Append(rulePropertiesModel.CriteriaChoice.As(ctx, &rulePropertiesCriteriaChoiceModel, basetypes.ObjectAsOptions{})...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+
+							// resource modelToSpecNested PointerOfOneOfField --> HttpHeaderCriteria
+							if !rulePropertiesCriteriaChoiceModel.HttpHeaderCriteria.IsNull() && !rulePropertiesCriteriaChoiceModel.HttpHeaderCriteria.IsUnknown() {
+								var apiDiscoveryHttpHeaderCriteriaModel ApiDiscoveryHttpHeaderCriteria
+								response.Diagnostics.Append(rulePropertiesCriteriaChoiceModel.HttpHeaderCriteria.As(ctx, &apiDiscoveryHttpHeaderCriteriaModel, basetypes.ObjectAsOptions{})...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								httpHeaderCriteriaOneOfSpec := &ves_io_schema_api_sec_api_discovery.RuleProperties_HttpHeaderCriteria{}
+								httpHeaderCriteriaOneOfSpec.HttpHeaderCriteria = &ves_io_schema_api_sec_api_discovery.HTTPHeaderCriteria{}
+								rulePropertiesSpec.Criteria = httpHeaderCriteriaOneOfSpec
+
+								// resource modelToSpecNested RequiredStringField --> FieldName
+								if !apiDiscoveryHttpHeaderCriteriaModel.FieldName.IsNull() && !apiDiscoveryHttpHeaderCriteriaModel.FieldName.IsUnknown() {
+									httpHeaderCriteriaOneOfSpec.HttpHeaderCriteria.FieldName = string(apiDiscoveryHttpHeaderCriteriaModel.FieldName.ValueString())
+								}
+
+								// resource modelToSpecNested EnumField --> Location
+								if !apiDiscoveryHttpHeaderCriteriaModel.Location.IsNull() && !apiDiscoveryHttpHeaderCriteriaModel.Location.IsUnknown() {
+									var locationTfStrings []types.String
+									diags = apiDiscoveryHttpHeaderCriteriaModel.Location.ElementsAs(ctx, &locationTfStrings, false)
+									response.Diagnostics.Append(diags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+
+									if len(locationTfStrings) > 0 {
+										valStr := locationTfStrings[0].ValueString()
+										if v, ok := ves_io_schema_api_sec_api_discovery.RuleLocation_value[valStr]; ok {
+											httpHeaderCriteriaOneOfSpec.HttpHeaderCriteria.Location = ves_io_schema_api_sec_api_discovery.RuleLocation(v)
+										} else {
+											response.Diagnostics.AddError("Invalid Enum Value", fmt.Sprintf("Value '%s' is not valid for Location", valStr))
+											return
+										}
+									}
+								} else {
+									if v, ok := ves_io_schema_api_sec_api_discovery.RuleLocation_value["REQUEST"]; ok {
+										httpHeaderCriteriaOneOfSpec.HttpHeaderCriteria.Location = ves_io_schema_api_sec_api_discovery.RuleLocation(v)
+									}
+								}
+
+								// resource modelToSpecNested EnumField --> MatchType
+								if !apiDiscoveryHttpHeaderCriteriaModel.MatchType.IsNull() && !apiDiscoveryHttpHeaderCriteriaModel.MatchType.IsUnknown() {
+									var matchTypeTfStrings []types.String
+									diags = apiDiscoveryHttpHeaderCriteriaModel.MatchType.ElementsAs(ctx, &matchTypeTfStrings, false)
+									response.Diagnostics.Append(diags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+
+									if len(matchTypeTfStrings) > 0 {
+										valStr := matchTypeTfStrings[0].ValueString()
+										if v, ok := ves_io_schema_api_sec_api_discovery.MatchType_value[valStr]; ok {
+											httpHeaderCriteriaOneOfSpec.HttpHeaderCriteria.MatchType = ves_io_schema_api_sec_api_discovery.MatchType(v)
+										} else {
+											response.Diagnostics.AddError("Invalid Enum Value", fmt.Sprintf("Value '%s' is not valid for MatchType", valStr))
+											return
+										}
+									}
+								} else {
+									if v, ok := ves_io_schema_api_sec_api_discovery.MatchType_value["EXACT_MATCH"]; ok {
+										httpHeaderCriteriaOneOfSpec.HttpHeaderCriteria.MatchType = ves_io_schema_api_sec_api_discovery.MatchType(v)
+									}
+								}
+
+								// resource modelToSpecNested RequiredStringField --> Value
+								if !apiDiscoveryHttpHeaderCriteriaModel.Value.IsNull() && !apiDiscoveryHttpHeaderCriteriaModel.Value.IsUnknown() {
+									httpHeaderCriteriaOneOfSpec.HttpHeaderCriteria.Value = string(apiDiscoveryHttpHeaderCriteriaModel.Value.ValueString())
+								}
+
+							}
+
+							// resource modelToSpecNested StringOfOneOfField --> Pattern
+							if !rulePropertiesCriteriaChoiceModel.Pattern.IsNull() && !rulePropertiesCriteriaChoiceModel.Pattern.IsUnknown() {
+								patternSpecStr := &ves_io_schema_api_sec_api_discovery.RuleProperties_Pattern{}
+								patternSpecStr.Pattern = string(rulePropertiesCriteriaChoiceModel.Pattern.ValueString())
+								rulePropertiesSpec.Criteria = patternSpecStr
+							}
+
+						}
+
 						// resource modelToSpecNested RequiredOneOfField --> RuleTypeChoice
 						if !rulePropertiesModel.RuleTypeChoice.IsNull() && !rulePropertiesModel.RuleTypeChoice.IsUnknown() {
-							rulePropertiesRuleTypeChoiceModel := ApiDiscoveryRulePropertiesRuleTypeChoice{}
+							rulePropertiesRuleTypeChoiceModel := ApiDiscoveryRuleTypeChoice{}
 							response.Diagnostics.Append(rulePropertiesModel.RuleTypeChoice.As(ctx, &rulePropertiesRuleTypeChoiceModel, basetypes.ObjectAsOptions{})...)
 							if response.Diagnostics.HasError() {
 								return
@@ -922,8 +1132,8 @@ func (r *ResourceF5XCApiDiscovery) Create(ctx context.Context, request resource.
 
 							// resource modelToSpecNested PointerOfOneOfField --> Exclusion
 							if !rulePropertiesRuleTypeChoiceModel.Exclusion.IsNull() && !rulePropertiesRuleTypeChoiceModel.Exclusion.IsUnknown() {
-								var apiDiscoveryRulePropertiesExclusionModel ApiDiscoveryRulePropertiesExclusion
-								response.Diagnostics.Append(rulePropertiesRuleTypeChoiceModel.Exclusion.As(ctx, &apiDiscoveryRulePropertiesExclusionModel, basetypes.ObjectAsOptions{})...)
+								var apiDiscoveryExclusionModel ApiDiscoveryExclusion
+								response.Diagnostics.Append(rulePropertiesRuleTypeChoiceModel.Exclusion.As(ctx, &apiDiscoveryExclusionModel, basetypes.ObjectAsOptions{})...)
 								if response.Diagnostics.HasError() {
 									return
 								}
@@ -932,18 +1142,11 @@ func (r *ResourceF5XCApiDiscovery) Create(ctx context.Context, request resource.
 								rulePropertiesSpec.RuleTypeChoice = exclusionOneOfSpec
 
 								// resource modelToSpecNested RequiredOneOfField --> ActionChoice
-								if !apiDiscoveryRulePropertiesExclusionModel.ActionChoice.IsNull() && !apiDiscoveryRulePropertiesExclusionModel.ActionChoice.IsUnknown() {
-									exclusionActionChoiceModel := ApiDiscoveryExclusionConfigActionChoice{}
-									response.Diagnostics.Append(apiDiscoveryRulePropertiesExclusionModel.ActionChoice.As(ctx, &exclusionActionChoiceModel, basetypes.ObjectAsOptions{})...)
+								if !apiDiscoveryExclusionModel.ActionChoice.IsNull() && !apiDiscoveryExclusionModel.ActionChoice.IsUnknown() {
+									exclusionActionChoiceModel := ApiDiscoveryActionChoice{}
+									response.Diagnostics.Append(apiDiscoveryExclusionModel.ActionChoice.As(ctx, &exclusionActionChoiceModel, basetypes.ObjectAsOptions{})...)
 									if response.Diagnostics.HasError() {
 										return
-									}
-
-									// resource modelToSpecNested BoolOfOneOfPointerField --> Ignore
-									if !exclusionActionChoiceModel.Ignore.IsNull() && !exclusionActionChoiceModel.Ignore.IsUnknown() {
-										ignoreSpecBool := &ves_io_schema_api_sec_api_discovery.ExclusionConfig_Ignore{}
-										ignoreSpecBool.Ignore = &ves_io_schema.Empty{}
-										exclusionOneOfSpec.Exclusion.ActionChoice = ignoreSpecBool
 									}
 
 									// resource modelToSpecNested BoolOfOneOfPointerField --> Archive
@@ -951,6 +1154,13 @@ func (r *ResourceF5XCApiDiscovery) Create(ctx context.Context, request resource.
 										archiveSpecBool := &ves_io_schema_api_sec_api_discovery.ExclusionConfig_Archive{}
 										archiveSpecBool.Archive = &ves_io_schema.Empty{}
 										exclusionOneOfSpec.Exclusion.ActionChoice = archiveSpecBool
+									}
+
+									// resource modelToSpecNested BoolOfOneOfPointerField --> Ignore
+									if !exclusionActionChoiceModel.Ignore.IsNull() && !exclusionActionChoiceModel.Ignore.IsUnknown() {
+										ignoreSpecBool := &ves_io_schema_api_sec_api_discovery.ExclusionConfig_Ignore{}
+										ignoreSpecBool.Ignore = &ves_io_schema.Empty{}
+										exclusionOneOfSpec.Exclusion.ActionChoice = ignoreSpecBool
 									}
 
 								}
@@ -966,167 +1176,26 @@ func (r *ResourceF5XCApiDiscovery) Create(ctx context.Context, request resource.
 
 						}
 
-						// resource modelToSpecNested RequiredOneOfField --> Criteria
-						if !rulePropertiesModel.CriteriaChoice.IsNull() && !rulePropertiesModel.CriteriaChoice.IsUnknown() {
-							rulePropertiesCriteriaChoiceModel := ApiDiscoveryRulePropertiesCriteriaChoice{}
-							response.Diagnostics.Append(rulePropertiesModel.CriteriaChoice.As(ctx, &rulePropertiesCriteriaChoiceModel, basetypes.ObjectAsOptions{})...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// resource modelToSpecNested PointerOfOneOfField --> HttpHeaderCriteria
-							if !rulePropertiesCriteriaChoiceModel.HttpHeaderCriteria.IsNull() && !rulePropertiesCriteriaChoiceModel.HttpHeaderCriteria.IsUnknown() {
-								var apiDiscoveryRulePropertiesHttpHeaderCriteriaModel ApiDiscoveryRulePropertiesHttpHeaderCriteria
-								response.Diagnostics.Append(rulePropertiesCriteriaChoiceModel.HttpHeaderCriteria.As(ctx, &apiDiscoveryRulePropertiesHttpHeaderCriteriaModel, basetypes.ObjectAsOptions{})...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								httpHeaderCriteriaOneOfSpec := &ves_io_schema_api_sec_api_discovery.RuleProperties_HttpHeaderCriteria{}
-								httpHeaderCriteriaOneOfSpec.HttpHeaderCriteria = &ves_io_schema_api_sec_api_discovery.HTTPHeaderCriteria{}
-								rulePropertiesSpec.Criteria = httpHeaderCriteriaOneOfSpec
-
-								// resource modelToSpecNested EnumField --> Location
-								if !apiDiscoveryRulePropertiesHttpHeaderCriteriaModel.Location.IsNull() && !apiDiscoveryRulePropertiesHttpHeaderCriteriaModel.Location.IsUnknown() {
-									var locationTfStrings []types.String
-									diags = apiDiscoveryRulePropertiesHttpHeaderCriteriaModel.Location.ElementsAs(ctx, &locationTfStrings, false)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									if len(locationTfStrings) > 0 {
-										valStr := locationTfStrings[0].ValueString()
-										if v, ok := ves_io_schema_api_sec_api_discovery.RuleLocation_value[valStr]; ok {
-											httpHeaderCriteriaOneOfSpec.HttpHeaderCriteria.Location = ves_io_schema_api_sec_api_discovery.RuleLocation(v)
-										} else {
-											response.Diagnostics.AddError("Invalid Enum Value", fmt.Sprintf("Value '%s' is not valid for Location", valStr))
-											return
-										}
-									}
-								}
-
-								// resource modelToSpecNested RequiredStringField --> FieldName
-								if !apiDiscoveryRulePropertiesHttpHeaderCriteriaModel.FieldName.IsNull() && !apiDiscoveryRulePropertiesHttpHeaderCriteriaModel.FieldName.IsUnknown() {
-									httpHeaderCriteriaOneOfSpec.HttpHeaderCriteria.FieldName = string(apiDiscoveryRulePropertiesHttpHeaderCriteriaModel.FieldName.ValueString())
-								}
-
-								// resource modelToSpecNested EnumField --> MatchType
-								if !apiDiscoveryRulePropertiesHttpHeaderCriteriaModel.MatchType.IsNull() && !apiDiscoveryRulePropertiesHttpHeaderCriteriaModel.MatchType.IsUnknown() {
-									var matchTypeTfStrings []types.String
-									diags = apiDiscoveryRulePropertiesHttpHeaderCriteriaModel.MatchType.ElementsAs(ctx, &matchTypeTfStrings, false)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									if len(matchTypeTfStrings) > 0 {
-										valStr := matchTypeTfStrings[0].ValueString()
-										if v, ok := ves_io_schema_api_sec_api_discovery.MatchType_value[valStr]; ok {
-											httpHeaderCriteriaOneOfSpec.HttpHeaderCriteria.MatchType = ves_io_schema_api_sec_api_discovery.MatchType(v)
-										} else {
-											response.Diagnostics.AddError("Invalid Enum Value", fmt.Sprintf("Value '%s' is not valid for MatchType", valStr))
-											return
-										}
-									}
-								}
-
-								// resource modelToSpecNested RequiredStringField --> Value
-								if !apiDiscoveryRulePropertiesHttpHeaderCriteriaModel.Value.IsNull() && !apiDiscoveryRulePropertiesHttpHeaderCriteriaModel.Value.IsUnknown() {
-									httpHeaderCriteriaOneOfSpec.HttpHeaderCriteria.Value = string(apiDiscoveryRulePropertiesHttpHeaderCriteriaModel.Value.ValueString())
-								}
-
-							}
-
-							// resource modelToSpecNested StringOfOneOfField --> Pattern
-							if !rulePropertiesCriteriaChoiceModel.Pattern.IsNull() && !rulePropertiesCriteriaChoiceModel.Pattern.IsUnknown() {
-								patternSpecStr := &ves_io_schema_api_sec_api_discovery.RuleProperties_Pattern{}
-								patternSpecStr.Pattern = string(rulePropertiesCriteriaChoiceModel.Pattern.ValueString())
-								rulePropertiesSpec.Criteria = patternSpecStr
-							}
-
-						}
-
-					}
-
-					// resource modelToSpecNested MapOfStringField --> Labels
-					if !discoveryRulesElement.Labels.IsNull() && !discoveryRulesElement.Labels.IsUnknown() {
-						var mapOfString map[string]string
-						diags = discoveryRulesElement.Labels.ElementsAs(ctx, &mapOfString, false)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						discoveryRulesSpec[i].Labels = mapOfString
-					} else {
-						discoveryRulesSpec[i].Labels = nil
 					}
 
 				}
-			}
-
-			// resource modelToSpecNested RequiredOneOfField --> DefaultBehaviorChoice
-			if !userDefinedApiDiscoveryPolicyModel.DefaultBehaviorChoice.IsNull() && !userDefinedApiDiscoveryPolicyModel.DefaultBehaviorChoice.IsUnknown() {
-				userDefinedApiDiscoveryPolicyDefaultBehaviorChoiceModel := ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoice{}
-				response.Diagnostics.Append(userDefinedApiDiscoveryPolicyModel.DefaultBehaviorChoice.As(ctx, &userDefinedApiDiscoveryPolicyDefaultBehaviorChoiceModel, basetypes.ObjectAsOptions{})...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// resource modelToSpecNested BoolOfOneOfPointerField --> Inclusive
-				if !userDefinedApiDiscoveryPolicyDefaultBehaviorChoiceModel.Inclusive.IsNull() && !userDefinedApiDiscoveryPolicyDefaultBehaviorChoiceModel.Inclusive.IsUnknown() {
-					inclusiveSpecBool := &ves_io_schema_api_sec_api_discovery.UserDefinedApiDiscoveryPolicy_Inclusive{}
-					inclusiveSpecBool.Inclusive = &ves_io_schema.Empty{}
-					userDefinedApiDiscoveryPolicySpec.DefaultBehaviorChoice = inclusiveSpecBool
-				}
-
-				// resource modelToSpecNested PointerOfOneOfField --> Exclusive
-				if !userDefinedApiDiscoveryPolicyDefaultBehaviorChoiceModel.Exclusive.IsNull() && !userDefinedApiDiscoveryPolicyDefaultBehaviorChoiceModel.Exclusive.IsUnknown() {
-					var apiDiscoveryUserDefinedApiDiscoveryPolicyExclusiveModel ApiDiscoveryUserDefinedApiDiscoveryPolicyExclusive
-					response.Diagnostics.Append(userDefinedApiDiscoveryPolicyDefaultBehaviorChoiceModel.Exclusive.As(ctx, &apiDiscoveryUserDefinedApiDiscoveryPolicyExclusiveModel, basetypes.ObjectAsOptions{})...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					exclusiveOneOfSpec := &ves_io_schema_api_sec_api_discovery.UserDefinedApiDiscoveryPolicy_Exclusive{}
-					exclusiveOneOfSpec.Exclusive = &ves_io_schema_api_sec_api_discovery.ExclusionConfig{}
-					userDefinedApiDiscoveryPolicySpec.DefaultBehaviorChoice = exclusiveOneOfSpec
-
-					// resource modelToSpecNested RequiredOneOfField --> ActionChoice
-					if !apiDiscoveryUserDefinedApiDiscoveryPolicyExclusiveModel.ActionChoice.IsNull() && !apiDiscoveryUserDefinedApiDiscoveryPolicyExclusiveModel.ActionChoice.IsUnknown() {
-						exclusiveActionChoiceModel := ApiDiscoveryExclusionConfigActionChoice{}
-						response.Diagnostics.Append(apiDiscoveryUserDefinedApiDiscoveryPolicyExclusiveModel.ActionChoice.As(ctx, &exclusiveActionChoiceModel, basetypes.ObjectAsOptions{})...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// resource modelToSpecNested BoolOfOneOfPointerField --> Ignore
-						if !exclusiveActionChoiceModel.Ignore.IsNull() && !exclusiveActionChoiceModel.Ignore.IsUnknown() {
-							ignoreSpecBool := &ves_io_schema_api_sec_api_discovery.ExclusionConfig_Ignore{}
-							ignoreSpecBool.Ignore = &ves_io_schema.Empty{}
-							exclusiveOneOfSpec.Exclusive.ActionChoice = ignoreSpecBool
-						}
-
-						// resource modelToSpecNested BoolOfOneOfPointerField --> Archive
-						if !exclusiveActionChoiceModel.Archive.IsNull() && !exclusiveActionChoiceModel.Archive.IsUnknown() {
-							archiveSpecBool := &ves_io_schema_api_sec_api_discovery.ExclusionConfig_Archive{}
-							archiveSpecBool.Archive = &ves_io_schema.Empty{}
-							exclusiveOneOfSpec.Exclusive.ActionChoice = archiveSpecBool
-						}
-
-					}
-
-				}
-
 			}
 
 		}
+	}
+
+	// Strip backend-injected label keys that must not be sent in Create/Update requests.
+	// These keys are stored in state (for drift-free plans) but must be omitted from the
+	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+		delete(meta.Labels, _omitKey)
 	}
 
 	if response.Diagnostics.HasError() {
 		return
 	}
 
-	createRspType := strings.Replace(ves_io_schema_virtual_network.ObjectType, "Object", "GetResponse", 1)
+	createRspType := strings.Replace(ves_io_schema_api_sec_api_discovery.ObjectType, "Object", "GetResponse", 1)
 	protoMsgType := proto.MessageType(createRspType).Elem()
 	initialProtoMsg := reflect.New(protoMsgType).Interface().(proto.Message)
 	callRsp := &server.CallResponse{
@@ -1155,160 +1224,319 @@ func (r *ResourceF5XCApiDiscovery) Create(ctx context.Context, request resource.
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
+	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		annotationsApiMap := metaData.GetAnnotations()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Annotations already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Annotations.IsUnknown() {
+			if len(annotationsApiMap) > 0 {
+				annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+				response.Diagnostics.Append(annotationsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Annotations = annotationsMap
+			} else {
+				data.Annotations = types.MapNull(types.StringType)
+			}
+		}
+		// When plan is a known map (user labels or merged prior state), leave data.Annotations
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
+	}
+
+	// resource SpecToModelRoot Meta StringField --> Description
+	data.Description = types.StringValue(metaData.GetDescription())
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		labelsApiMap := metaData.GetLabels()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Labels already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Labels.IsUnknown() {
+			if len(labelsApiMap) > 0 {
+				labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+				response.Diagnostics.Append(labelsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Labels = labelsMap
+			} else {
+				data.Labels = types.MapNull(types.StringType)
+			}
+		}
+		// When plan is a known map (user labels or merged prior state), leave data.Labels
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
+	}
+
+	// resource SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
+
 	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
 	data.Namespace = types.StringValue(metaData.GetNamespace())
 
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// CREATE / UPDATE: Store the plan value as-is so the apply result matches the plan.
-		// The plan is either:
-		//   - Unknown (config=null): store the full API response.
-		//   - config value (first create with user labels): store only user labels.
-		//   - prior state (update with user+backend labels): store the merged labels.
-		// In all cases, data.Labels already holds the correct plan value
-		// except when it is Unknown — in that case we use the API response.
-		if data.Labels.IsUnknown() {
-			data.Labels = labelsMap
-		}
-		// When plan is a known map, leave data.Labels unchanged (= plan value).
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
-
-	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// CREATE / UPDATE: Store the plan value as-is so the apply result matches the plan.
-		// The plan is either:
-		//   - Unknown (config=null): store the full API response.
-		//   - config value (first create with user labels): store only user labels.
-		//   - prior state (update with user+backend labels): store the merged labels.
-		// In all cases, data.Annotations already holds the correct plan value
-		// except when it is Unknown — in that case we use the API response.
-		if data.Annotations.IsUnknown() {
-			data.Annotations = annotationsMap
-		}
-		// When plan is a known map, leave data.Annotations unchanged (= plan value).
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Annotations = types.MapNull(types.StringType)
-	}
-
-	// resource SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
-
-	// resource SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
-
 	// resource SpecToModelRoot ArrayOfPointerField --> CustomAuthTypes
-	if len(specData.CustomAuthTypes) > 0 {
-		customAuthTypesElements := make([]ApiDiscoveryApiDiscoveryCustomAuthType, 0, len(specData.CustomAuthTypes))
-
-		for _, customAuthTypesElement := range specData.CustomAuthTypes {
-			apiDiscoveryApiDiscoveryCustomAuthTypeModel := ApiDiscoveryApiDiscoveryCustomAuthType{}
+	if len(specData.GetCustomAuthTypes()) > 0 {
+		customAuthTypesElements := make([]ApiDiscoveryCustomAuthType, 0, len(specData.GetCustomAuthTypes()))
+		for _, customAuthTypesElement := range specData.GetCustomAuthTypes() {
+			apiDiscoveryCustomAuthTypeModel := ApiDiscoveryCustomAuthType{}
 
 			// resource specToModelNested RequiredStringField --> ParameterName
 			if customAuthTypesElement.GetParameterName() != "" {
-				apiDiscoveryApiDiscoveryCustomAuthTypeModel.ParameterName = types.StringValue(customAuthTypesElement.GetParameterName())
+				apiDiscoveryCustomAuthTypeModel.ParameterName = types.StringValue(customAuthTypesElement.GetParameterName())
 			} else {
 				// Empty string, set to null
-				apiDiscoveryApiDiscoveryCustomAuthTypeModel.ParameterName = types.StringNull()
+				apiDiscoveryCustomAuthTypeModel.ParameterName = types.StringNull()
 			}
 
 			// resource specToModelNested RequiredEnumField --> ParameterType
-			if customAuthTypesElement.GetParameterType().String() != "" {
-				stringValue := types.StringValue(customAuthTypesElement.GetParameterType().String())
-				stringSlice := []types.String{stringValue}
-				listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
+			{
+				if customAuthTypesElement.GetParameterType().String() != "" {
+					stringValue := types.StringValue(customAuthTypesElement.GetParameterType().String())
+					stringSlice := []types.String{stringValue}
+					listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+					response.Diagnostics.Append(listDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					apiDiscoveryCustomAuthTypeModel.ParameterType = listValue
+				} else {
+					apiDiscoveryCustomAuthTypeModel.ParameterType = types.ListNull(types.StringType)
 				}
-				apiDiscoveryApiDiscoveryCustomAuthTypeModel.ParameterType = listValue
-			} else {
-				apiDiscoveryApiDiscoveryCustomAuthTypeModel.ParameterType = types.ListNull(types.StringType)
 			}
 
-			customAuthTypesElements = append(customAuthTypesElements, apiDiscoveryApiDiscoveryCustomAuthTypeModel)
+			customAuthTypesElements = append(customAuthTypesElements, apiDiscoveryCustomAuthTypeModel)
 		}
 
-		customAuthTypesList, diags := utils.GoStructSliceToListValue(
-			ctx,
-			ApiDiscoveryCustomAuthTypesModelAttributeMap,
-			customAuthTypesElements,
-		)
+		{
+			customAuthTypesList, listDiags := utils.GoStructSliceToListValue(
+				ctx,
+				ApiDiscoveryCustomAuthTypesModelAttributeMap,
+				customAuthTypesElements,
+			)
 
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			data.CustomAuthTypes = customAuthTypesList
 		}
-
-		data.CustomAuthTypes = customAuthTypesList
 	} else {
 		var customAuthTypesObjectType = basetypes.ObjectType{
 			AttrTypes: ApiDiscoveryCustomAuthTypesModelAttributeMap,
 		}
 		nullCustomAuthTypesList := basetypes.NewListNull(customAuthTypesObjectType)
-		data.CustomAuthTypes = nullCustomAuthTypesList
+		var priorValCustomAuthTypes types.List
+		_ = request.Plan.GetAttribute(ctx, path.Root("custom_auth_types"), &priorValCustomAuthTypes)
+		if !priorValCustomAuthTypes.IsNull() && !priorValCustomAuthTypes.IsUnknown() {
+			data.CustomAuthTypes = priorValCustomAuthTypes
+		} else {
+			data.CustomAuthTypes = nullCustomAuthTypesList
+		}
+
 	}
 
 	// resource SpecToModelRoot PointerField --> UserDefinedApiDiscoveryPolicy
 	if specData.GetUserDefinedApiDiscoveryPolicy() != nil {
-		var apiDiscoveryApiDiscoveryUserDefinedApiDiscoveryPolicyModel = &ApiDiscoveryApiDiscoveryUserDefinedApiDiscoveryPolicy{}
+		var apiDiscoveryUserDefinedApiDiscoveryPolicyModel = &ApiDiscoveryUserDefinedApiDiscoveryPolicy{}
 		userDefinedApiDiscoveryPolicyElement := specData.GetUserDefinedApiDiscoveryPolicy()
+
+		// resource specToModelNested RequiredOneOfField --> DefaultBehaviorChoice
+		// GlobalSpecType
+		if userDefinedApiDiscoveryPolicyElement.GetDefaultBehaviorChoice() != nil {
+			// Create a temporary attribute map for the choices within this OneOf
+			userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+			// Define a variable for the spec choices to be passed down to nested templates
+			userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoices := userDefinedApiDiscoveryPolicyElement.GetDefaultBehaviorChoice()
+
+			// Process nested choices, populating the temporary attribute map
+
+			// resource specToModelNested PointerOfOneOfField --> Exclusive
+			// GlobalSpecType
+			// false
+			{
+				exclusiveOptionsWrapper, isExclusive := userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoices.(*ves_io_schema_api_sec_api_discovery.UserDefinedApiDiscoveryPolicy_Exclusive)
+				exclusiveAttributeMap := make(map[string]attr.Value)
+
+				if isExclusive && exclusiveOptionsWrapper != nil && exclusiveOptionsWrapper.Exclusive != nil {
+					exclusiveElement := exclusiveOptionsWrapper.Exclusive
+
+					// resource specToModelNested RequiredOneOfField --> ActionChoice
+					// GlobalSpecType
+					if exclusiveElement.GetActionChoice() != nil {
+						// Create a temporary attribute map for the choices within this OneOf
+						exclusiveactionChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+						// Define a variable for the spec choices to be passed down to nested templates
+						exclusiveactionChoiceChoices := exclusiveElement.GetActionChoice()
+
+						// Process nested choices, populating the temporary attribute map
+
+						// resource specToModelNested BoolOfOneOfPointerField --> Archive
+						_, isArchive := exclusiveactionChoiceChoices.(*ves_io_schema_api_sec_api_discovery.ExclusionConfig_Archive)
+
+						if isArchive {
+							exclusiveactionChoiceChoicesAttributeMap["archive"] = types.BoolValue(true)
+						} else {
+							exclusiveactionChoiceChoicesAttributeMap["archive"] = types.BoolNull()
+						}
+
+						// resource specToModelNested BoolOfOneOfPointerField --> Ignore
+						_, isIgnore := exclusiveactionChoiceChoices.(*ves_io_schema_api_sec_api_discovery.ExclusionConfig_Ignore)
+
+						if isIgnore {
+							exclusiveactionChoiceChoicesAttributeMap["ignore"] = types.BoolValue(true)
+						} else {
+							exclusiveactionChoiceChoicesAttributeMap["ignore"] = types.BoolNull()
+						}
+
+						// --- End of Choices ---
+
+						// Create the final ObjectValue for this OneOf field
+						finalObj, exclusiveactionChoiceChoicesObjDiags := types.ObjectValue(
+							ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceExclusiveActionChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+							exclusiveactionChoiceChoicesAttributeMap,
+						)
+						response.Diagnostics.Append(exclusiveactionChoiceChoicesObjDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						// Assign the final object to the correct place (either the root model or a parent's attribute map)
+						exclusiveAttributeMap["action_choice"] = finalObj
+					} else {
+						// The OneOf field is nil in the source spec, so set the Terraform object to null.
+						exclusiveAttributeMap["action_choice"] = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceExclusiveActionChoiceModelAttributeMap)
+					}
+
+					exclusiveObj, exclusiveObjDiags := types.ObjectValue(ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceExclusiveModelAttributeMap, exclusiveAttributeMap)
+					response.Diagnostics.Append(exclusiveObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoicesAttributeMap["exclusive"] = exclusiveObj
+				} else {
+					userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoicesAttributeMap["exclusive"] = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceExclusiveModelAttributeMap)
+				}
+			}
+
+			// resource specToModelNested BoolOfOneOfPointerField --> Inclusive
+			_, isInclusive := userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoices.(*ves_io_schema_api_sec_api_discovery.UserDefinedApiDiscoveryPolicy_Inclusive)
+
+			if isInclusive {
+				userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoicesAttributeMap["inclusive"] = types.BoolValue(true)
+			} else {
+				userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoicesAttributeMap["inclusive"] = types.BoolNull()
+			}
+
+			// --- End of Choices ---
+
+			// Create the final ObjectValue for this OneOf field
+			finalObj, userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoicesObjDiags := types.ObjectValue(
+				ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+				userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoicesAttributeMap,
+			)
+			response.Diagnostics.Append(userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoicesObjDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			// Assign the final object to the correct place (either the root model or a parent's attribute map)
+			apiDiscoveryUserDefinedApiDiscoveryPolicyModel.DefaultBehaviorChoice = finalObj
+		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			apiDiscoveryUserDefinedApiDiscoveryPolicyModel.DefaultBehaviorChoice = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceModelAttributeMap)
+		}
 
 		// resource specToModelNested ArrayOfPointerField --> DiscoveryRules
 		if len(userDefinedApiDiscoveryPolicyElement.GetDiscoveryRules()) > 0 {
 			// Step 1: Always create a slice of model structs from the spec data.
 			// This slice serves as an intermediate representation.
-			discoveryRulesElements := make([]ApiDiscoveryApiDiscoveryDiscoveryRule, 0, len(userDefinedApiDiscoveryPolicyElement.GetDiscoveryRules()))
+			discoveryRulesElements := make([]ApiDiscoveryDiscoveryRule, 0, len(userDefinedApiDiscoveryPolicyElement.GetDiscoveryRules()))
 			for _, discoveryRulesElement := range userDefinedApiDiscoveryPolicyElement.GetDiscoveryRules() {
-				apiDiscoveryApiDiscoveryDiscoveryRuleModel := ApiDiscoveryApiDiscoveryDiscoveryRule{}
+				apiDiscoveryDiscoveryRuleModel := ApiDiscoveryDiscoveryRule{}
+
+				// resource specToModelNested MapOfStringField --> Labels
+				if discoveryRulesElement.GetLabels() != nil {
+					// Filter out backend-injected keys during create/update to prevent Terraform core errors.
+					// They will be picked up during the next Read.
+					filteredMap := make(map[string]string)
+					for k, v := range discoveryRulesElement.GetLabels() {
+						if !strings.HasPrefix(k, "ves.io/") {
+							filteredMap[k] = v
+						}
+					}
+
+					if len(filteredMap) > 0 {
+						labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
+						response.Diagnostics.Append(labelsDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						apiDiscoveryDiscoveryRuleModel.Labels = labelsMap
+					} else {
+						apiDiscoveryDiscoveryRuleModel.Labels = types.MapNull(types.StringType)
+					}
+				} else {
+					// API returned nil (Protobuf omits empty maps). Set to null.
+					// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
+					apiDiscoveryDiscoveryRuleModel.Labels = types.MapNull(types.StringType)
+				}
 
 				// resource specToModelNested PointerField --> Metadata
 				if discoveryRulesElement.GetMetadata() != nil {
@@ -1318,14 +1546,6 @@ func (r *ResourceF5XCApiDiscovery) Create(ctx context.Context, request resource.
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredStringField --> Name
-					if metadataElement.GetName() != "" {
-						apiDiscoveryMessageMetaTypeModel.Name = types.StringValue(metadataElement.GetName())
-					} else {
-						// Empty string, set to null
-						apiDiscoveryMessageMetaTypeModel.Name = types.StringNull()
-					}
-
 					// resource specToModelNested StringField --> Description
 					if metadataElement.GetDescription() != "" {
 						apiDiscoveryMessageMetaTypeModel.Description = types.StringValue(metadataElement.GetDescription())
@@ -1334,13 +1554,21 @@ func (r *ResourceF5XCApiDiscovery) Create(ctx context.Context, request resource.
 						apiDiscoveryMessageMetaTypeModel.Description = types.StringNull()
 					}
 
+					// resource specToModelNested RequiredStringField --> Name
+					if metadataElement.GetName() != "" {
+						apiDiscoveryMessageMetaTypeModel.Name = types.StringValue(metadataElement.GetName())
+					} else {
+						// Empty string, set to null
+						apiDiscoveryMessageMetaTypeModel.Name = types.StringNull()
+					}
+
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					apiDiscoveryMessageMetaTypeModelObj, diags := types.ObjectValueFrom(ctx, ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesMetadataModelAttributeMap, apiDiscoveryMessageMetaTypeModel)
-					response.Diagnostics.Append(diags...)
+					apiDiscoveryMessageMetaTypeModelObj, apiDiscoveryMessageMetaTypeModelObjDiags := types.ObjectValueFrom(ctx, ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesMetadataModelAttributeMap, apiDiscoveryMessageMetaTypeModel)
+					response.Diagnostics.Append(apiDiscoveryMessageMetaTypeModelObjDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					apiDiscoveryApiDiscoveryDiscoveryRuleModel.Metadata = apiDiscoveryMessageMetaTypeModelObj
+					apiDiscoveryDiscoveryRuleModel.Metadata = apiDiscoveryMessageMetaTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -1349,123 +1577,16 @@ func (r *ResourceF5XCApiDiscovery) Create(ctx context.Context, request resource.
 					// because the API may always return a non-nil struct (with REDACTED values) for this field,
 					// making this else-branch unreachable. The child OneOf handles the actual healing.
 					// The target is a types.Object, so we use types.ObjectNull.
-					apiDiscoveryApiDiscoveryDiscoveryRuleModel.Metadata = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesMetadataModelAttributeMap)
+					apiDiscoveryDiscoveryRuleModel.Metadata = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesMetadataModelAttributeMap)
 				}
 
 				// resource specToModelNested PointerField --> RuleProperties
 				if discoveryRulesElement.GetRuleProperties() != nil {
 					// Create the nested Go struct
-					apiDiscoveryApiDiscoveryRulePropertiesModel := &ApiDiscoveryApiDiscoveryRuleProperties{}
+					apiDiscoveryRulePropsModel := &ApiDiscoveryRuleProps{}
 					rulePropertiesElement := discoveryRulesElement.GetRuleProperties()
 
 					// Recursively populate the nested struct
-
-					// resource specToModelNested RequiredOneOfField --> RuleTypeChoice
-					// GlobalSpecType
-					if rulePropertiesElement.GetRuleTypeChoice() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						rulePropertiesruleTypeChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates
-						rulePropertiesruleTypeChoiceChoices := rulePropertiesElement.GetRuleTypeChoice()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// resource specToModelNested PointerOfOneOfField --> Exclusion
-						// GlobalSpecType
-						// false
-						{
-							exclusionOptions, isExclusion := rulePropertiesruleTypeChoiceChoices.(*ves_io_schema_api_sec_api_discovery.RuleProperties_Exclusion)
-							exclusionAttributeMap := make(map[string]attr.Value)
-
-							if isExclusion && exclusionOptions != nil {
-
-								// resource specToModelNested RequiredOneOfField --> ActionChoice
-								// GlobalSpecType
-								if exclusionOptions.Exclusion.GetActionChoice() != nil {
-									// Create a temporary attribute map for the choices within this OneOf
-									exclusionactionChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-									// Define a variable for the spec choices to be passed down to nested templates
-									exclusionactionChoiceChoices := exclusionOptions.Exclusion.GetActionChoice()
-
-									// Process nested choices, populating the temporary attribute map
-
-									// resource specToModelNested BoolOfOneOfPointerField --> Ignore
-									_, isIgnore := exclusionactionChoiceChoices.(*ves_io_schema_api_sec_api_discovery.ExclusionConfig_Ignore)
-
-									if isIgnore {
-										exclusionactionChoiceChoicesAttributeMap["ignore"] = types.BoolValue(true)
-									} else {
-										exclusionactionChoiceChoicesAttributeMap["ignore"] = types.BoolNull()
-									}
-
-									// resource specToModelNested BoolOfOneOfPointerField --> Archive
-									_, isArchive := exclusionactionChoiceChoices.(*ves_io_schema_api_sec_api_discovery.ExclusionConfig_Archive)
-
-									if isArchive {
-										exclusionactionChoiceChoicesAttributeMap["archive"] = types.BoolValue(true)
-									} else {
-										exclusionactionChoiceChoicesAttributeMap["archive"] = types.BoolNull()
-									}
-
-									// --- End of Choices ---
-
-									// Create the final ObjectValue for this OneOf field
-									finalObj, exclusionactionChoiceChoicesObjDiags := types.ObjectValue(
-										ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTypeChoiceExclusionActionChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-										exclusionactionChoiceChoicesAttributeMap,
-									)
-									response.Diagnostics.Append(exclusionactionChoiceChoicesObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									exclusionAttributeMap["action_choice"] = finalObj
-								} else {
-									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									exclusionAttributeMap["action_choice"] = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTypeChoiceExclusionActionChoiceModelAttributeMap)
-								}
-
-								exclusionObj, diags := types.ObjectValue(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTypeChoiceExclusionModelAttributeMap, exclusionAttributeMap)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								rulePropertiesruleTypeChoiceChoicesAttributeMap["exclusion"] = exclusionObj
-							} else {
-								rulePropertiesruleTypeChoiceChoicesAttributeMap["exclusion"] = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTypeChoiceExclusionModelAttributeMap)
-							}
-						}
-
-						// resource specToModelNested BoolOfOneOfPointerField --> Inclusion
-						_, isInclusion := rulePropertiesruleTypeChoiceChoices.(*ves_io_schema_api_sec_api_discovery.RuleProperties_Inclusion)
-
-						if isInclusion {
-							rulePropertiesruleTypeChoiceChoicesAttributeMap["inclusion"] = types.BoolValue(true)
-						} else {
-							rulePropertiesruleTypeChoiceChoicesAttributeMap["inclusion"] = types.BoolNull()
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, rulePropertiesruleTypeChoiceChoicesObjDiags := types.ObjectValue(
-							ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTypeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-							rulePropertiesruleTypeChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(rulePropertiesruleTypeChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						apiDiscoveryApiDiscoveryRulePropertiesModel.RuleTypeChoice = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						apiDiscoveryApiDiscoveryRulePropertiesModel.RuleTypeChoice = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTypeChoiceModelAttributeMap)
-					}
 
 					// resource specToModelNested RequiredOneOfField --> Criteria
 					// GlobalSpecType
@@ -1482,57 +1603,62 @@ func (r *ResourceF5XCApiDiscovery) Create(ctx context.Context, request resource.
 						// GlobalSpecType
 						// false
 						{
-							httpHeaderCriteriaOptions, isHttpHeaderCriteria := rulePropertiescriteriaChoiceChoices.(*ves_io_schema_api_sec_api_discovery.RuleProperties_HttpHeaderCriteria)
+							httpHeaderCriteriaOptionsWrapper, isHttpHeaderCriteria := rulePropertiescriteriaChoiceChoices.(*ves_io_schema_api_sec_api_discovery.RuleProperties_HttpHeaderCriteria)
 							httpHeaderCriteriaAttributeMap := make(map[string]attr.Value)
 
-							if isHttpHeaderCriteria && httpHeaderCriteriaOptions != nil {
-
-								// resource specToModelNested EnumField --> Location
-								if httpHeaderCriteriaOptions.HttpHeaderCriteria.GetLocation().String() != "" {
-									stringValue := types.StringValue(httpHeaderCriteriaOptions.HttpHeaderCriteria.GetLocation().String())
-									stringSlice := []types.String{stringValue}
-									listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									httpHeaderCriteriaAttributeMap["location"] = listValue
-								} else {
-									httpHeaderCriteriaAttributeMap["location"] = types.ListNull(types.StringType)
-								}
+							if isHttpHeaderCriteria && httpHeaderCriteriaOptionsWrapper != nil && httpHeaderCriteriaOptionsWrapper.HttpHeaderCriteria != nil {
+								httpHeaderCriteriaElement := httpHeaderCriteriaOptionsWrapper.HttpHeaderCriteria
 
 								// resource specToModelNested RequiredStringField --> FieldName
-								if httpHeaderCriteriaOptions.HttpHeaderCriteria.GetFieldName() != "" {
-									httpHeaderCriteriaAttributeMap["field_name"] = types.StringValue(httpHeaderCriteriaOptions.HttpHeaderCriteria.GetFieldName())
+								if httpHeaderCriteriaElement.GetFieldName() != "" {
+									httpHeaderCriteriaAttributeMap["field_name"] = types.StringValue(httpHeaderCriteriaElement.GetFieldName())
 								} else {
 									// Empty string, set to null
 									httpHeaderCriteriaAttributeMap["field_name"] = types.StringNull()
 								}
 
-								// resource specToModelNested EnumField --> MatchType
-								if httpHeaderCriteriaOptions.HttpHeaderCriteria.GetMatchType().String() != "" {
-									stringValue := types.StringValue(httpHeaderCriteriaOptions.HttpHeaderCriteria.GetMatchType().String())
-									stringSlice := []types.String{stringValue}
-									listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
+								// resource specToModelNested EnumField --> Location
+								{
+									if httpHeaderCriteriaElement.GetLocation().String() != "" {
+										stringValue := types.StringValue(httpHeaderCriteriaElement.GetLocation().String())
+										stringSlice := []types.String{stringValue}
+										listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+										response.Diagnostics.Append(listDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										httpHeaderCriteriaAttributeMap["location"] = listValue
+									} else {
+										httpHeaderCriteriaAttributeMap["location"] = types.ListNull(types.StringType)
 									}
-									httpHeaderCriteriaAttributeMap["match_type"] = listValue
-								} else {
-									httpHeaderCriteriaAttributeMap["match_type"] = types.ListNull(types.StringType)
+								}
+
+								// resource specToModelNested EnumField --> MatchType
+								{
+									if httpHeaderCriteriaElement.GetMatchType().String() != "" {
+										stringValue := types.StringValue(httpHeaderCriteriaElement.GetMatchType().String())
+										stringSlice := []types.String{stringValue}
+										listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+										response.Diagnostics.Append(listDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										httpHeaderCriteriaAttributeMap["match_type"] = listValue
+									} else {
+										httpHeaderCriteriaAttributeMap["match_type"] = types.ListNull(types.StringType)
+									}
 								}
 
 								// resource specToModelNested RequiredStringField --> Value
-								if httpHeaderCriteriaOptions.HttpHeaderCriteria.GetValue() != "" {
-									httpHeaderCriteriaAttributeMap["value"] = types.StringValue(httpHeaderCriteriaOptions.HttpHeaderCriteria.GetValue())
+								if httpHeaderCriteriaElement.GetValue() != "" {
+									httpHeaderCriteriaAttributeMap["value"] = types.StringValue(httpHeaderCriteriaElement.GetValue())
 								} else {
 									// Empty string, set to null
 									httpHeaderCriteriaAttributeMap["value"] = types.StringNull()
 								}
 
-								httpHeaderCriteriaObj, diags := types.ObjectValue(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesCriteriaHttpHeaderCriteriaModelAttributeMap, httpHeaderCriteriaAttributeMap)
-								response.Diagnostics.Append(diags...)
+								httpHeaderCriteriaObj, httpHeaderCriteriaObjDiags := types.ObjectValue(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesCriteriaHttpHeaderCriteriaModelAttributeMap, httpHeaderCriteriaAttributeMap)
+								response.Diagnostics.Append(httpHeaderCriteriaObjDiags...)
 								if response.Diagnostics.HasError() {
 									return
 								}
@@ -1565,19 +1691,127 @@ func (r *ResourceF5XCApiDiscovery) Create(ctx context.Context, request resource.
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						apiDiscoveryApiDiscoveryRulePropertiesModel.CriteriaChoice = finalObj
+						apiDiscoveryRulePropsModel.CriteriaChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						apiDiscoveryApiDiscoveryRulePropertiesModel.CriteriaChoice = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesCriteriaModelAttributeMap)
+						apiDiscoveryRulePropsModel.CriteriaChoice = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesCriteriaModelAttributeMap)
+					}
+
+					// resource specToModelNested RequiredOneOfField --> RuleTypeChoice
+					// GlobalSpecType
+					if rulePropertiesElement.GetRuleTypeChoice() != nil {
+						// Create a temporary attribute map for the choices within this OneOf
+						rulePropertiesruleTypeChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+						// Define a variable for the spec choices to be passed down to nested templates
+						rulePropertiesruleTypeChoiceChoices := rulePropertiesElement.GetRuleTypeChoice()
+
+						// Process nested choices, populating the temporary attribute map
+
+						// resource specToModelNested PointerOfOneOfField --> Exclusion
+						// GlobalSpecType
+						// false
+						{
+							exclusionOptionsWrapper, isExclusion := rulePropertiesruleTypeChoiceChoices.(*ves_io_schema_api_sec_api_discovery.RuleProperties_Exclusion)
+							exclusionAttributeMap := make(map[string]attr.Value)
+
+							if isExclusion && exclusionOptionsWrapper != nil && exclusionOptionsWrapper.Exclusion != nil {
+								exclusionElement := exclusionOptionsWrapper.Exclusion
+
+								// resource specToModelNested RequiredOneOfField --> ActionChoice
+								// GlobalSpecType
+								if exclusionElement.GetActionChoice() != nil {
+									// Create a temporary attribute map for the choices within this OneOf
+									exclusionactionChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+									// Define a variable for the spec choices to be passed down to nested templates
+									exclusionactionChoiceChoices := exclusionElement.GetActionChoice()
+
+									// Process nested choices, populating the temporary attribute map
+
+									// resource specToModelNested BoolOfOneOfPointerField --> Archive
+									_, isArchive := exclusionactionChoiceChoices.(*ves_io_schema_api_sec_api_discovery.ExclusionConfig_Archive)
+
+									if isArchive {
+										exclusionactionChoiceChoicesAttributeMap["archive"] = types.BoolValue(true)
+									} else {
+										exclusionactionChoiceChoicesAttributeMap["archive"] = types.BoolNull()
+									}
+
+									// resource specToModelNested BoolOfOneOfPointerField --> Ignore
+									_, isIgnore := exclusionactionChoiceChoices.(*ves_io_schema_api_sec_api_discovery.ExclusionConfig_Ignore)
+
+									if isIgnore {
+										exclusionactionChoiceChoicesAttributeMap["ignore"] = types.BoolValue(true)
+									} else {
+										exclusionactionChoiceChoicesAttributeMap["ignore"] = types.BoolNull()
+									}
+
+									// --- End of Choices ---
+
+									// Create the final ObjectValue for this OneOf field
+									finalObj, exclusionactionChoiceChoicesObjDiags := types.ObjectValue(
+										ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTypeChoiceExclusionActionChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+										exclusionactionChoiceChoicesAttributeMap,
+									)
+									response.Diagnostics.Append(exclusionactionChoiceChoicesObjDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+
+									// Assign the final object to the correct place (either the root model or a parent's attribute map)
+									exclusionAttributeMap["action_choice"] = finalObj
+								} else {
+									// The OneOf field is nil in the source spec, so set the Terraform object to null.
+									exclusionAttributeMap["action_choice"] = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTypeChoiceExclusionActionChoiceModelAttributeMap)
+								}
+
+								exclusionObj, exclusionObjDiags := types.ObjectValue(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTypeChoiceExclusionModelAttributeMap, exclusionAttributeMap)
+								response.Diagnostics.Append(exclusionObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								rulePropertiesruleTypeChoiceChoicesAttributeMap["exclusion"] = exclusionObj
+							} else {
+								rulePropertiesruleTypeChoiceChoicesAttributeMap["exclusion"] = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTypeChoiceExclusionModelAttributeMap)
+							}
+						}
+
+						// resource specToModelNested BoolOfOneOfPointerField --> Inclusion
+						_, isInclusion := rulePropertiesruleTypeChoiceChoices.(*ves_io_schema_api_sec_api_discovery.RuleProperties_Inclusion)
+
+						if isInclusion {
+							rulePropertiesruleTypeChoiceChoicesAttributeMap["inclusion"] = types.BoolValue(true)
+						} else {
+							rulePropertiesruleTypeChoiceChoicesAttributeMap["inclusion"] = types.BoolNull()
+						}
+
+						// --- End of Choices ---
+
+						// Create the final ObjectValue for this OneOf field
+						finalObj, rulePropertiesruleTypeChoiceChoicesObjDiags := types.ObjectValue(
+							ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTypeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+							rulePropertiesruleTypeChoiceChoicesAttributeMap,
+						)
+						response.Diagnostics.Append(rulePropertiesruleTypeChoiceChoicesObjDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						// Assign the final object to the correct place (either the root model or a parent's attribute map)
+						apiDiscoveryRulePropsModel.RuleTypeChoice = finalObj
+					} else {
+						// The OneOf field is nil in the source spec, so set the Terraform object to null.
+						apiDiscoveryRulePropsModel.RuleTypeChoice = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTypeChoiceModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					apiDiscoveryApiDiscoveryRulePropertiesModelObj, diags := types.ObjectValueFrom(ctx, ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesModelAttributeMap, apiDiscoveryApiDiscoveryRulePropertiesModel)
-					response.Diagnostics.Append(diags...)
+					apiDiscoveryRulePropsModelObj, apiDiscoveryRulePropsModelObjDiags := types.ObjectValueFrom(ctx, ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesModelAttributeMap, apiDiscoveryRulePropsModel)
+					response.Diagnostics.Append(apiDiscoveryRulePropsModelObjDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					apiDiscoveryApiDiscoveryDiscoveryRuleModel.RuleProperties = apiDiscoveryApiDiscoveryRulePropertiesModelObj
+					apiDiscoveryDiscoveryRuleModel.RuleProperties = apiDiscoveryRulePropsModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -1586,153 +1820,31 @@ func (r *ResourceF5XCApiDiscovery) Create(ctx context.Context, request resource.
 					// because the API may always return a non-nil struct (with REDACTED values) for this field,
 					// making this else-branch unreachable. The child OneOf handles the actual healing.
 					// The target is a types.Object, so we use types.ObjectNull.
-					apiDiscoveryApiDiscoveryDiscoveryRuleModel.RuleProperties = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesModelAttributeMap)
+					apiDiscoveryDiscoveryRuleModel.RuleProperties = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesModelAttributeMap)
 				}
 
-				// resource specToModelNested MapOfStringField --> Labels
-				if discoveryRulesElement.GetLabels() != nil {
-					// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-					labelsMap, labelsDiags := utils.StringMapToTerraformMap(discoveryRulesElement.GetLabels())
-					response.Diagnostics.Append(labelsDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					// Assign the typed map to the model
-					apiDiscoveryApiDiscoveryDiscoveryRuleModel.Labels = labelsMap
-				} else {
-					// Ensure the state reflects a Null map with the correct element type to avoid DynamicPseudoType errors
-					apiDiscoveryApiDiscoveryDiscoveryRuleModel.Labels = types.MapNull(types.StringType)
-				}
-
-				discoveryRulesElements = append(discoveryRulesElements, apiDiscoveryApiDiscoveryDiscoveryRuleModel)
+				discoveryRulesElements = append(discoveryRulesElements, apiDiscoveryDiscoveryRuleModel)
 			}
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// The intermediate slice of structs must be converted to a `types.ListValue`.
-			discoveryRulesListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesModelAttributeMap}, discoveryRulesElements)
-			response.Diagnostics.Append(diags...)
+			discoveryRulesListValue, discoveryRulesListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesModelAttributeMap}, discoveryRulesElements)
+			response.Diagnostics.Append(discoveryRulesListDiags...)
 			if response.Diagnostics.HasError() {
 				return
 			}
-			apiDiscoveryApiDiscoveryUserDefinedApiDiscoveryPolicyModel.DiscoveryRules = discoveryRulesListValue
+			apiDiscoveryUserDefinedApiDiscoveryPolicyModel.DiscoveryRules = discoveryRulesListValue
 
 		} else {
 			// The source list is empty or nil.
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// Assign a null `types.ListValue`.
-			apiDiscoveryApiDiscoveryUserDefinedApiDiscoveryPolicyModel.DiscoveryRules = types.ListNull(types.ObjectType{AttrTypes: ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesModelAttributeMap})
-		}
-
-		// resource specToModelNested RequiredOneOfField --> DefaultBehaviorChoice
-		// GlobalSpecType
-		if userDefinedApiDiscoveryPolicyElement.GetDefaultBehaviorChoice() != nil {
-			// Create a temporary attribute map for the choices within this OneOf
-			userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-			// Define a variable for the spec choices to be passed down to nested templates
-			userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoices := userDefinedApiDiscoveryPolicyElement.GetDefaultBehaviorChoice()
-
-			// Process nested choices, populating the temporary attribute map
-
-			// resource specToModelNested BoolOfOneOfPointerField --> Inclusive
-			_, isInclusive := userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoices.(*ves_io_schema_api_sec_api_discovery.UserDefinedApiDiscoveryPolicy_Inclusive)
-
-			if isInclusive {
-				userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoicesAttributeMap["inclusive"] = types.BoolValue(true)
-			} else {
-				userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoicesAttributeMap["inclusive"] = types.BoolNull()
-			}
-
-			// resource specToModelNested PointerOfOneOfField --> Exclusive
-			// GlobalSpecType
-			// false
-			{
-				exclusiveOptions, isExclusive := userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoices.(*ves_io_schema_api_sec_api_discovery.UserDefinedApiDiscoveryPolicy_Exclusive)
-				exclusiveAttributeMap := make(map[string]attr.Value)
-
-				if isExclusive && exclusiveOptions != nil {
-
-					// resource specToModelNested RequiredOneOfField --> ActionChoice
-					// GlobalSpecType
-					if exclusiveOptions.Exclusive.GetActionChoice() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						exclusiveactionChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates
-						exclusiveactionChoiceChoices := exclusiveOptions.Exclusive.GetActionChoice()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// resource specToModelNested BoolOfOneOfPointerField --> Ignore
-						_, isIgnore := exclusiveactionChoiceChoices.(*ves_io_schema_api_sec_api_discovery.ExclusionConfig_Ignore)
-
-						if isIgnore {
-							exclusiveactionChoiceChoicesAttributeMap["ignore"] = types.BoolValue(true)
-						} else {
-							exclusiveactionChoiceChoicesAttributeMap["ignore"] = types.BoolNull()
-						}
-
-						// resource specToModelNested BoolOfOneOfPointerField --> Archive
-						_, isArchive := exclusiveactionChoiceChoices.(*ves_io_schema_api_sec_api_discovery.ExclusionConfig_Archive)
-
-						if isArchive {
-							exclusiveactionChoiceChoicesAttributeMap["archive"] = types.BoolValue(true)
-						} else {
-							exclusiveactionChoiceChoicesAttributeMap["archive"] = types.BoolNull()
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, exclusiveactionChoiceChoicesObjDiags := types.ObjectValue(
-							ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceExclusiveActionChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-							exclusiveactionChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(exclusiveactionChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						exclusiveAttributeMap["action_choice"] = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						exclusiveAttributeMap["action_choice"] = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceExclusiveActionChoiceModelAttributeMap)
-					}
-
-					exclusiveObj, diags := types.ObjectValue(ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceExclusiveModelAttributeMap, exclusiveAttributeMap)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoicesAttributeMap["exclusive"] = exclusiveObj
-				} else {
-					userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoicesAttributeMap["exclusive"] = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceExclusiveModelAttributeMap)
-				}
-			}
-
-			// --- End of Choices ---
-
-			// Create the final ObjectValue for this OneOf field
-			finalObj, userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoicesObjDiags := types.ObjectValue(
-				ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-				userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoicesAttributeMap,
-			)
-			response.Diagnostics.Append(userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoicesObjDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			apiDiscoveryApiDiscoveryUserDefinedApiDiscoveryPolicyModel.DefaultBehaviorChoice = finalObj
-		} else {
-			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			apiDiscoveryApiDiscoveryUserDefinedApiDiscoveryPolicyModel.DefaultBehaviorChoice = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceModelAttributeMap)
+			apiDiscoveryUserDefinedApiDiscoveryPolicyModel.DiscoveryRules = types.ListNull(types.ObjectType{AttrTypes: ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesModelAttributeMap})
 		}
 
 		userDefinedApiDiscoveryPolicyObj, userDefinedApiDiscoveryPolicyDiags := utils.GoStructToObjectValue(
 			ctx,
 			ApiDiscoveryUserDefinedApiDiscoveryPolicyModelAttributeMap,
-			apiDiscoveryApiDiscoveryUserDefinedApiDiscoveryPolicyModel,
+			apiDiscoveryUserDefinedApiDiscoveryPolicyModel,
 		)
 		response.Diagnostics.Append(userDefinedApiDiscoveryPolicyDiags...)
 		if response.Diagnostics.HasError() {
@@ -1806,176 +1918,308 @@ func (r *ResourceF5XCApiDiscovery) Read(ctx context.Context, request resource.Re
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
+	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		annotationsApiMap := metaData.GetAnnotations()
+		// READ: always store the full API response (captures backend-injected keys like "ves.io/provider").
+		if len(annotationsApiMap) > 0 {
+			annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+			response.Diagnostics.Append(annotationsDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			data.Annotations = annotationsMap
+		} else {
+			data.Annotations = types.MapNull(types.StringType)
+		}
+	}
+
+	// resource SpecToModelRoot Meta StringField --> Description
+	{
+		apiValDescription := metaData.GetDescription()
+		if apiValDescription != "" {
+			data.Description = types.StringValue(apiValDescription)
+		} else {
+			var priorValDescription types.String
+			response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("description"), &priorValDescription)...)
+			if !priorValDescription.IsNull() && !priorValDescription.IsUnknown() {
+				data.Description = priorValDescription
+			} else {
+				data.Description = types.StringValue(apiValDescription)
+			}
+		}
+	}
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		labelsApiMap := metaData.GetLabels()
+		// READ: always store the full API response (captures backend-injected keys like "ves.io/provider").
+		if len(labelsApiMap) > 0 {
+			labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+			response.Diagnostics.Append(labelsDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			data.Labels = labelsMap
+		} else {
+			data.Labels = types.MapNull(types.StringType)
+		}
+	}
+
+	// resource SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
+
 	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
 	data.Namespace = types.StringValue(metaData.GetNamespace())
 
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedLabels := make(map[string]attr.Value)
-		for k, v := range labelsMap.Elements() {
-			mergedLabels[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
-			for k, v := range data.Labels.Elements() {
-				mergedLabels[k] = v
-			}
-		}
-		mergedLabelsMap, mergedLabelsDiags := types.MapValue(types.StringType, mergedLabels)
-		response.Diagnostics.Append(mergedLabelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Labels = mergedLabelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
-
-	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedAnnotations := make(map[string]attr.Value)
-		for k, v := range annotationsMap.Elements() {
-			mergedAnnotations[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
-			for k, v := range data.Annotations.Elements() {
-				mergedAnnotations[k] = v
-			}
-		}
-		mergedAnnotationsMap, mergedAnnotationsDiags := types.MapValue(types.StringType, mergedAnnotations)
-		response.Diagnostics.Append(mergedAnnotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Annotations = mergedAnnotationsMap
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Annotations = types.MapNull(types.StringType)
-	}
-
-	// resource SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
-
-	// resource SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
-
 	// resource SpecToModelRoot ArrayOfPointerField --> CustomAuthTypes
-	if len(specData.CustomAuthTypes) > 0 {
-		customAuthTypesElements := make([]ApiDiscoveryApiDiscoveryCustomAuthType, 0, len(specData.CustomAuthTypes))
-
-		for _, customAuthTypesElement := range specData.CustomAuthTypes {
-			apiDiscoveryApiDiscoveryCustomAuthTypeModel := ApiDiscoveryApiDiscoveryCustomAuthType{}
+	if len(specData.GetCustomAuthTypes()) > 0 {
+		customAuthTypesElements := make([]ApiDiscoveryCustomAuthType, 0, len(specData.GetCustomAuthTypes()))
+		for _, customAuthTypesElement := range specData.GetCustomAuthTypes() {
+			apiDiscoveryCustomAuthTypeModel := ApiDiscoveryCustomAuthType{}
 
 			// resource specToModelNested RequiredStringField --> ParameterName
 			if customAuthTypesElement.GetParameterName() != "" {
-				apiDiscoveryApiDiscoveryCustomAuthTypeModel.ParameterName = types.StringValue(customAuthTypesElement.GetParameterName())
+				apiDiscoveryCustomAuthTypeModel.ParameterName = types.StringValue(customAuthTypesElement.GetParameterName())
 			} else {
 				// Empty string, set to null
-				apiDiscoveryApiDiscoveryCustomAuthTypeModel.ParameterName = types.StringNull()
+				apiDiscoveryCustomAuthTypeModel.ParameterName = types.StringNull()
 			}
 
 			// resource specToModelNested RequiredEnumField --> ParameterType
-			if customAuthTypesElement.GetParameterType().String() != "" {
-				stringValue := types.StringValue(customAuthTypesElement.GetParameterType().String())
-				stringSlice := []types.String{stringValue}
-				listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
+			{
+				if customAuthTypesElement.GetParameterType().String() != "" {
+					stringValue := types.StringValue(customAuthTypesElement.GetParameterType().String())
+					stringSlice := []types.String{stringValue}
+					listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+					response.Diagnostics.Append(listDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					apiDiscoveryCustomAuthTypeModel.ParameterType = listValue
+				} else {
+					apiDiscoveryCustomAuthTypeModel.ParameterType = types.ListNull(types.StringType)
 				}
-				apiDiscoveryApiDiscoveryCustomAuthTypeModel.ParameterType = listValue
-			} else {
-				apiDiscoveryApiDiscoveryCustomAuthTypeModel.ParameterType = types.ListNull(types.StringType)
 			}
 
-			customAuthTypesElements = append(customAuthTypesElements, apiDiscoveryApiDiscoveryCustomAuthTypeModel)
+			customAuthTypesElements = append(customAuthTypesElements, apiDiscoveryCustomAuthTypeModel)
 		}
 
-		customAuthTypesList, diags := utils.GoStructSliceToListValue(
-			ctx,
-			ApiDiscoveryCustomAuthTypesModelAttributeMap,
-			customAuthTypesElements,
-		)
+		{
+			customAuthTypesList, listDiags := utils.GoStructSliceToListValue(
+				ctx,
+				ApiDiscoveryCustomAuthTypesModelAttributeMap,
+				customAuthTypesElements,
+			)
 
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			data.CustomAuthTypes = customAuthTypesList
 		}
-
-		data.CustomAuthTypes = customAuthTypesList
 	} else {
 		var customAuthTypesObjectType = basetypes.ObjectType{
 			AttrTypes: ApiDiscoveryCustomAuthTypesModelAttributeMap,
 		}
 		nullCustomAuthTypesList := basetypes.NewListNull(customAuthTypesObjectType)
-		data.CustomAuthTypes = nullCustomAuthTypesList
+		var priorValCustomAuthTypes types.List
+		_ = request.State.GetAttribute(ctx, path.Root("custom_auth_types"), &priorValCustomAuthTypes)
+		if !priorValCustomAuthTypes.IsNull() && !priorValCustomAuthTypes.IsUnknown() {
+			data.CustomAuthTypes = priorValCustomAuthTypes
+		} else {
+			data.CustomAuthTypes = nullCustomAuthTypesList
+		}
+
 	}
 
 	// resource SpecToModelRoot PointerField --> UserDefinedApiDiscoveryPolicy
 	if specData.GetUserDefinedApiDiscoveryPolicy() != nil {
-		var apiDiscoveryApiDiscoveryUserDefinedApiDiscoveryPolicyModel = &ApiDiscoveryApiDiscoveryUserDefinedApiDiscoveryPolicy{}
+		var apiDiscoveryUserDefinedApiDiscoveryPolicyModel = &ApiDiscoveryUserDefinedApiDiscoveryPolicy{}
 		userDefinedApiDiscoveryPolicyElement := specData.GetUserDefinedApiDiscoveryPolicy()
+
+		// resource specToModelNested RequiredOneOfField --> DefaultBehaviorChoice
+		// <no value>
+		if userDefinedApiDiscoveryPolicyElement.GetDefaultBehaviorChoice() != nil {
+			// Create a temporary attribute map for the choices within this OneOf
+			userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+			// Define a variable for the spec choices to be passed down to nested templates
+			userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoices := userDefinedApiDiscoveryPolicyElement.GetDefaultBehaviorChoice()
+
+			// Process nested choices, populating the temporary attribute map
+
+			// resource specToModelNested PointerOfOneOfField --> Exclusive
+			// <no value>
+			// false
+			{
+				exclusiveOptionsWrapper, isExclusive := userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoices.(*ves_io_schema_api_sec_api_discovery.UserDefinedApiDiscoveryPolicy_Exclusive)
+				exclusiveAttributeMap := make(map[string]attr.Value)
+
+				if isExclusive && exclusiveOptionsWrapper != nil && exclusiveOptionsWrapper.Exclusive != nil {
+					exclusiveElement := exclusiveOptionsWrapper.Exclusive
+
+					// resource specToModelNested RequiredOneOfField --> ActionChoice
+					// <no value>
+					if exclusiveElement.GetActionChoice() != nil {
+						// Create a temporary attribute map for the choices within this OneOf
+						exclusiveactionChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+						// Define a variable for the spec choices to be passed down to nested templates
+						exclusiveactionChoiceChoices := exclusiveElement.GetActionChoice()
+
+						// Process nested choices, populating the temporary attribute map
+
+						// resource specToModelNested BoolOfOneOfPointerField --> Archive
+						_, isArchive := exclusiveactionChoiceChoices.(*ves_io_schema_api_sec_api_discovery.ExclusionConfig_Archive)
+
+						if isArchive {
+							exclusiveactionChoiceChoicesAttributeMap["archive"] = types.BoolValue(true)
+						} else {
+							exclusiveactionChoiceChoicesAttributeMap["archive"] = types.BoolNull()
+						}
+
+						// resource specToModelNested BoolOfOneOfPointerField --> Ignore
+						_, isIgnore := exclusiveactionChoiceChoices.(*ves_io_schema_api_sec_api_discovery.ExclusionConfig_Ignore)
+
+						if isIgnore {
+							exclusiveactionChoiceChoicesAttributeMap["ignore"] = types.BoolValue(true)
+						} else {
+							exclusiveactionChoiceChoicesAttributeMap["ignore"] = types.BoolNull()
+						}
+
+						// --- End of Choices ---
+
+						// Create the final ObjectValue for this OneOf field
+						finalObj, exclusiveactionChoiceChoicesObjDiags := types.ObjectValue(
+							ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceExclusiveActionChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+							exclusiveactionChoiceChoicesAttributeMap,
+						)
+						response.Diagnostics.Append(exclusiveactionChoiceChoicesObjDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						// Assign the final object to the correct place (either the root model or a parent's attribute map)
+						exclusiveAttributeMap["action_choice"] = finalObj
+					} else {
+						// The OneOf field is nil in the source spec, so set the Terraform object to null.
+						exclusiveAttributeMap["action_choice"] = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceExclusiveActionChoiceModelAttributeMap)
+					}
+
+					exclusiveObj, exclusiveObjDiags := types.ObjectValue(ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceExclusiveModelAttributeMap, exclusiveAttributeMap)
+					response.Diagnostics.Append(exclusiveObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoicesAttributeMap["exclusive"] = exclusiveObj
+				} else {
+					userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoicesAttributeMap["exclusive"] = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceExclusiveModelAttributeMap)
+				}
+			}
+
+			// resource specToModelNested BoolOfOneOfPointerField --> Inclusive
+			_, isInclusive := userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoices.(*ves_io_schema_api_sec_api_discovery.UserDefinedApiDiscoveryPolicy_Inclusive)
+
+			if isInclusive {
+				userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoicesAttributeMap["inclusive"] = types.BoolValue(true)
+			} else {
+				userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoicesAttributeMap["inclusive"] = types.BoolNull()
+			}
+
+			// --- End of Choices ---
+
+			// Create the final ObjectValue for this OneOf field
+			finalObj, userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoicesObjDiags := types.ObjectValue(
+				ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+				userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoicesAttributeMap,
+			)
+			response.Diagnostics.Append(userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoicesObjDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			// Assign the final object to the correct place (either the root model or a parent's attribute map)
+			apiDiscoveryUserDefinedApiDiscoveryPolicyModel.DefaultBehaviorChoice = finalObj
+		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			apiDiscoveryUserDefinedApiDiscoveryPolicyModel.DefaultBehaviorChoice = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceModelAttributeMap)
+		}
 
 		// resource specToModelNested ArrayOfPointerField --> DiscoveryRules
 		if len(userDefinedApiDiscoveryPolicyElement.GetDiscoveryRules()) > 0 {
 			// Step 1: Always create a slice of model structs from the spec data.
 			// This slice serves as an intermediate representation.
-			discoveryRulesElements := make([]ApiDiscoveryApiDiscoveryDiscoveryRule, 0, len(userDefinedApiDiscoveryPolicyElement.GetDiscoveryRules()))
+			discoveryRulesElements := make([]ApiDiscoveryDiscoveryRule, 0, len(userDefinedApiDiscoveryPolicyElement.GetDiscoveryRules()))
 			for _, discoveryRulesElement := range userDefinedApiDiscoveryPolicyElement.GetDiscoveryRules() {
-				apiDiscoveryApiDiscoveryDiscoveryRuleModel := ApiDiscoveryApiDiscoveryDiscoveryRule{}
+				apiDiscoveryDiscoveryRuleModel := ApiDiscoveryDiscoveryRule{}
+
+				// resource specToModelNested MapOfStringField --> Labels
+				if discoveryRulesElement.GetLabels() != nil {
+					// READ operation: keep backend-injected keys so they enter the state.
+					labelsMap, labelsDiags := utils.StringMapToTerraformMap(discoveryRulesElement.GetLabels())
+					response.Diagnostics.Append(labelsDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					apiDiscoveryDiscoveryRuleModel.Labels = labelsMap
+				} else {
+					// API returned nil (Protobuf omits empty maps). Set to null.
+					// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
+					apiDiscoveryDiscoveryRuleModel.Labels = types.MapNull(types.StringType)
+				}
 
 				// resource specToModelNested PointerField --> Metadata
 				if discoveryRulesElement.GetMetadata() != nil {
@@ -1985,14 +2229,6 @@ func (r *ResourceF5XCApiDiscovery) Read(ctx context.Context, request resource.Re
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredStringField --> Name
-					if metadataElement.GetName() != "" {
-						apiDiscoveryMessageMetaTypeModel.Name = types.StringValue(metadataElement.GetName())
-					} else {
-						// Empty string, set to null
-						apiDiscoveryMessageMetaTypeModel.Name = types.StringNull()
-					}
-
 					// resource specToModelNested StringField --> Description
 					if metadataElement.GetDescription() != "" {
 						apiDiscoveryMessageMetaTypeModel.Description = types.StringValue(metadataElement.GetDescription())
@@ -2001,13 +2237,21 @@ func (r *ResourceF5XCApiDiscovery) Read(ctx context.Context, request resource.Re
 						apiDiscoveryMessageMetaTypeModel.Description = types.StringNull()
 					}
 
+					// resource specToModelNested RequiredStringField --> Name
+					if metadataElement.GetName() != "" {
+						apiDiscoveryMessageMetaTypeModel.Name = types.StringValue(metadataElement.GetName())
+					} else {
+						// Empty string, set to null
+						apiDiscoveryMessageMetaTypeModel.Name = types.StringNull()
+					}
+
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					apiDiscoveryMessageMetaTypeModelObj, diags := types.ObjectValueFrom(ctx, ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesMetadataModelAttributeMap, apiDiscoveryMessageMetaTypeModel)
-					response.Diagnostics.Append(diags...)
+					apiDiscoveryMessageMetaTypeModelObj, apiDiscoveryMessageMetaTypeModelObjDiags := types.ObjectValueFrom(ctx, ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesMetadataModelAttributeMap, apiDiscoveryMessageMetaTypeModel)
+					response.Diagnostics.Append(apiDiscoveryMessageMetaTypeModelObjDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					apiDiscoveryApiDiscoveryDiscoveryRuleModel.Metadata = apiDiscoveryMessageMetaTypeModelObj
+					apiDiscoveryDiscoveryRuleModel.Metadata = apiDiscoveryMessageMetaTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -2016,123 +2260,16 @@ func (r *ResourceF5XCApiDiscovery) Read(ctx context.Context, request resource.Re
 					// because the API may always return a non-nil struct (with REDACTED values) for this field,
 					// making this else-branch unreachable. The child OneOf handles the actual healing.
 					// The target is a types.Object, so we use types.ObjectNull.
-					apiDiscoveryApiDiscoveryDiscoveryRuleModel.Metadata = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesMetadataModelAttributeMap)
+					apiDiscoveryDiscoveryRuleModel.Metadata = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesMetadataModelAttributeMap)
 				}
 
 				// resource specToModelNested PointerField --> RuleProperties
 				if discoveryRulesElement.GetRuleProperties() != nil {
 					// Create the nested Go struct
-					apiDiscoveryApiDiscoveryRulePropertiesModel := &ApiDiscoveryApiDiscoveryRuleProperties{}
+					apiDiscoveryRulePropsModel := &ApiDiscoveryRuleProps{}
 					rulePropertiesElement := discoveryRulesElement.GetRuleProperties()
 
 					// Recursively populate the nested struct
-
-					// resource specToModelNested RequiredOneOfField --> RuleTypeChoice
-					// <no value>
-					if rulePropertiesElement.GetRuleTypeChoice() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						rulePropertiesruleTypeChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates
-						rulePropertiesruleTypeChoiceChoices := rulePropertiesElement.GetRuleTypeChoice()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// resource specToModelNested PointerOfOneOfField --> Exclusion
-						// <no value>
-						// false
-						{
-							exclusionOptions, isExclusion := rulePropertiesruleTypeChoiceChoices.(*ves_io_schema_api_sec_api_discovery.RuleProperties_Exclusion)
-							exclusionAttributeMap := make(map[string]attr.Value)
-
-							if isExclusion && exclusionOptions != nil {
-
-								// resource specToModelNested RequiredOneOfField --> ActionChoice
-								// <no value>
-								if exclusionOptions.Exclusion.GetActionChoice() != nil {
-									// Create a temporary attribute map for the choices within this OneOf
-									exclusionactionChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-									// Define a variable for the spec choices to be passed down to nested templates
-									exclusionactionChoiceChoices := exclusionOptions.Exclusion.GetActionChoice()
-
-									// Process nested choices, populating the temporary attribute map
-
-									// resource specToModelNested BoolOfOneOfPointerField --> Ignore
-									_, isIgnore := exclusionactionChoiceChoices.(*ves_io_schema_api_sec_api_discovery.ExclusionConfig_Ignore)
-
-									if isIgnore {
-										exclusionactionChoiceChoicesAttributeMap["ignore"] = types.BoolValue(true)
-									} else {
-										exclusionactionChoiceChoicesAttributeMap["ignore"] = types.BoolNull()
-									}
-
-									// resource specToModelNested BoolOfOneOfPointerField --> Archive
-									_, isArchive := exclusionactionChoiceChoices.(*ves_io_schema_api_sec_api_discovery.ExclusionConfig_Archive)
-
-									if isArchive {
-										exclusionactionChoiceChoicesAttributeMap["archive"] = types.BoolValue(true)
-									} else {
-										exclusionactionChoiceChoicesAttributeMap["archive"] = types.BoolNull()
-									}
-
-									// --- End of Choices ---
-
-									// Create the final ObjectValue for this OneOf field
-									finalObj, exclusionactionChoiceChoicesObjDiags := types.ObjectValue(
-										ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTypeChoiceExclusionActionChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-										exclusionactionChoiceChoicesAttributeMap,
-									)
-									response.Diagnostics.Append(exclusionactionChoiceChoicesObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									exclusionAttributeMap["action_choice"] = finalObj
-								} else {
-									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									exclusionAttributeMap["action_choice"] = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTypeChoiceExclusionActionChoiceModelAttributeMap)
-								}
-
-								exclusionObj, diags := types.ObjectValue(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTypeChoiceExclusionModelAttributeMap, exclusionAttributeMap)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								rulePropertiesruleTypeChoiceChoicesAttributeMap["exclusion"] = exclusionObj
-							} else {
-								rulePropertiesruleTypeChoiceChoicesAttributeMap["exclusion"] = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTypeChoiceExclusionModelAttributeMap)
-							}
-						}
-
-						// resource specToModelNested BoolOfOneOfPointerField --> Inclusion
-						_, isInclusion := rulePropertiesruleTypeChoiceChoices.(*ves_io_schema_api_sec_api_discovery.RuleProperties_Inclusion)
-
-						if isInclusion {
-							rulePropertiesruleTypeChoiceChoicesAttributeMap["inclusion"] = types.BoolValue(true)
-						} else {
-							rulePropertiesruleTypeChoiceChoicesAttributeMap["inclusion"] = types.BoolNull()
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, rulePropertiesruleTypeChoiceChoicesObjDiags := types.ObjectValue(
-							ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTypeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-							rulePropertiesruleTypeChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(rulePropertiesruleTypeChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						apiDiscoveryApiDiscoveryRulePropertiesModel.RuleTypeChoice = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						apiDiscoveryApiDiscoveryRulePropertiesModel.RuleTypeChoice = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTypeChoiceModelAttributeMap)
-					}
 
 					// resource specToModelNested RequiredOneOfField --> Criteria
 					// <no value>
@@ -2149,57 +2286,62 @@ func (r *ResourceF5XCApiDiscovery) Read(ctx context.Context, request resource.Re
 						// <no value>
 						// false
 						{
-							httpHeaderCriteriaOptions, isHttpHeaderCriteria := rulePropertiescriteriaChoiceChoices.(*ves_io_schema_api_sec_api_discovery.RuleProperties_HttpHeaderCriteria)
+							httpHeaderCriteriaOptionsWrapper, isHttpHeaderCriteria := rulePropertiescriteriaChoiceChoices.(*ves_io_schema_api_sec_api_discovery.RuleProperties_HttpHeaderCriteria)
 							httpHeaderCriteriaAttributeMap := make(map[string]attr.Value)
 
-							if isHttpHeaderCriteria && httpHeaderCriteriaOptions != nil {
-
-								// resource specToModelNested EnumField --> Location
-								if httpHeaderCriteriaOptions.HttpHeaderCriteria.GetLocation().String() != "" {
-									stringValue := types.StringValue(httpHeaderCriteriaOptions.HttpHeaderCriteria.GetLocation().String())
-									stringSlice := []types.String{stringValue}
-									listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									httpHeaderCriteriaAttributeMap["location"] = listValue
-								} else {
-									httpHeaderCriteriaAttributeMap["location"] = types.ListNull(types.StringType)
-								}
+							if isHttpHeaderCriteria && httpHeaderCriteriaOptionsWrapper != nil && httpHeaderCriteriaOptionsWrapper.HttpHeaderCriteria != nil {
+								httpHeaderCriteriaElement := httpHeaderCriteriaOptionsWrapper.HttpHeaderCriteria
 
 								// resource specToModelNested RequiredStringField --> FieldName
-								if httpHeaderCriteriaOptions.HttpHeaderCriteria.GetFieldName() != "" {
-									httpHeaderCriteriaAttributeMap["field_name"] = types.StringValue(httpHeaderCriteriaOptions.HttpHeaderCriteria.GetFieldName())
+								if httpHeaderCriteriaElement.GetFieldName() != "" {
+									httpHeaderCriteriaAttributeMap["field_name"] = types.StringValue(httpHeaderCriteriaElement.GetFieldName())
 								} else {
 									// Empty string, set to null
 									httpHeaderCriteriaAttributeMap["field_name"] = types.StringNull()
 								}
 
-								// resource specToModelNested EnumField --> MatchType
-								if httpHeaderCriteriaOptions.HttpHeaderCriteria.GetMatchType().String() != "" {
-									stringValue := types.StringValue(httpHeaderCriteriaOptions.HttpHeaderCriteria.GetMatchType().String())
-									stringSlice := []types.String{stringValue}
-									listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
+								// resource specToModelNested EnumField --> Location
+								{
+									if httpHeaderCriteriaElement.GetLocation().String() != "" {
+										stringValue := types.StringValue(httpHeaderCriteriaElement.GetLocation().String())
+										stringSlice := []types.String{stringValue}
+										listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+										response.Diagnostics.Append(listDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										httpHeaderCriteriaAttributeMap["location"] = listValue
+									} else {
+										httpHeaderCriteriaAttributeMap["location"] = types.ListNull(types.StringType)
 									}
-									httpHeaderCriteriaAttributeMap["match_type"] = listValue
-								} else {
-									httpHeaderCriteriaAttributeMap["match_type"] = types.ListNull(types.StringType)
+								}
+
+								// resource specToModelNested EnumField --> MatchType
+								{
+									if httpHeaderCriteriaElement.GetMatchType().String() != "" {
+										stringValue := types.StringValue(httpHeaderCriteriaElement.GetMatchType().String())
+										stringSlice := []types.String{stringValue}
+										listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+										response.Diagnostics.Append(listDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										httpHeaderCriteriaAttributeMap["match_type"] = listValue
+									} else {
+										httpHeaderCriteriaAttributeMap["match_type"] = types.ListNull(types.StringType)
+									}
 								}
 
 								// resource specToModelNested RequiredStringField --> Value
-								if httpHeaderCriteriaOptions.HttpHeaderCriteria.GetValue() != "" {
-									httpHeaderCriteriaAttributeMap["value"] = types.StringValue(httpHeaderCriteriaOptions.HttpHeaderCriteria.GetValue())
+								if httpHeaderCriteriaElement.GetValue() != "" {
+									httpHeaderCriteriaAttributeMap["value"] = types.StringValue(httpHeaderCriteriaElement.GetValue())
 								} else {
 									// Empty string, set to null
 									httpHeaderCriteriaAttributeMap["value"] = types.StringNull()
 								}
 
-								httpHeaderCriteriaObj, diags := types.ObjectValue(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesCriteriaHttpHeaderCriteriaModelAttributeMap, httpHeaderCriteriaAttributeMap)
-								response.Diagnostics.Append(diags...)
+								httpHeaderCriteriaObj, httpHeaderCriteriaObjDiags := types.ObjectValue(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesCriteriaHttpHeaderCriteriaModelAttributeMap, httpHeaderCriteriaAttributeMap)
+								response.Diagnostics.Append(httpHeaderCriteriaObjDiags...)
 								if response.Diagnostics.HasError() {
 									return
 								}
@@ -2232,19 +2374,127 @@ func (r *ResourceF5XCApiDiscovery) Read(ctx context.Context, request resource.Re
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						apiDiscoveryApiDiscoveryRulePropertiesModel.CriteriaChoice = finalObj
+						apiDiscoveryRulePropsModel.CriteriaChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						apiDiscoveryApiDiscoveryRulePropertiesModel.CriteriaChoice = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesCriteriaModelAttributeMap)
+						apiDiscoveryRulePropsModel.CriteriaChoice = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesCriteriaModelAttributeMap)
+					}
+
+					// resource specToModelNested RequiredOneOfField --> RuleTypeChoice
+					// <no value>
+					if rulePropertiesElement.GetRuleTypeChoice() != nil {
+						// Create a temporary attribute map for the choices within this OneOf
+						rulePropertiesruleTypeChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+						// Define a variable for the spec choices to be passed down to nested templates
+						rulePropertiesruleTypeChoiceChoices := rulePropertiesElement.GetRuleTypeChoice()
+
+						// Process nested choices, populating the temporary attribute map
+
+						// resource specToModelNested PointerOfOneOfField --> Exclusion
+						// <no value>
+						// false
+						{
+							exclusionOptionsWrapper, isExclusion := rulePropertiesruleTypeChoiceChoices.(*ves_io_schema_api_sec_api_discovery.RuleProperties_Exclusion)
+							exclusionAttributeMap := make(map[string]attr.Value)
+
+							if isExclusion && exclusionOptionsWrapper != nil && exclusionOptionsWrapper.Exclusion != nil {
+								exclusionElement := exclusionOptionsWrapper.Exclusion
+
+								// resource specToModelNested RequiredOneOfField --> ActionChoice
+								// <no value>
+								if exclusionElement.GetActionChoice() != nil {
+									// Create a temporary attribute map for the choices within this OneOf
+									exclusionactionChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+									// Define a variable for the spec choices to be passed down to nested templates
+									exclusionactionChoiceChoices := exclusionElement.GetActionChoice()
+
+									// Process nested choices, populating the temporary attribute map
+
+									// resource specToModelNested BoolOfOneOfPointerField --> Archive
+									_, isArchive := exclusionactionChoiceChoices.(*ves_io_schema_api_sec_api_discovery.ExclusionConfig_Archive)
+
+									if isArchive {
+										exclusionactionChoiceChoicesAttributeMap["archive"] = types.BoolValue(true)
+									} else {
+										exclusionactionChoiceChoicesAttributeMap["archive"] = types.BoolNull()
+									}
+
+									// resource specToModelNested BoolOfOneOfPointerField --> Ignore
+									_, isIgnore := exclusionactionChoiceChoices.(*ves_io_schema_api_sec_api_discovery.ExclusionConfig_Ignore)
+
+									if isIgnore {
+										exclusionactionChoiceChoicesAttributeMap["ignore"] = types.BoolValue(true)
+									} else {
+										exclusionactionChoiceChoicesAttributeMap["ignore"] = types.BoolNull()
+									}
+
+									// --- End of Choices ---
+
+									// Create the final ObjectValue for this OneOf field
+									finalObj, exclusionactionChoiceChoicesObjDiags := types.ObjectValue(
+										ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTypeChoiceExclusionActionChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+										exclusionactionChoiceChoicesAttributeMap,
+									)
+									response.Diagnostics.Append(exclusionactionChoiceChoicesObjDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+
+									// Assign the final object to the correct place (either the root model or a parent's attribute map)
+									exclusionAttributeMap["action_choice"] = finalObj
+								} else {
+									// The OneOf field is nil in the source spec, so set the Terraform object to null.
+									exclusionAttributeMap["action_choice"] = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTypeChoiceExclusionActionChoiceModelAttributeMap)
+								}
+
+								exclusionObj, exclusionObjDiags := types.ObjectValue(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTypeChoiceExclusionModelAttributeMap, exclusionAttributeMap)
+								response.Diagnostics.Append(exclusionObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								rulePropertiesruleTypeChoiceChoicesAttributeMap["exclusion"] = exclusionObj
+							} else {
+								rulePropertiesruleTypeChoiceChoicesAttributeMap["exclusion"] = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTypeChoiceExclusionModelAttributeMap)
+							}
+						}
+
+						// resource specToModelNested BoolOfOneOfPointerField --> Inclusion
+						_, isInclusion := rulePropertiesruleTypeChoiceChoices.(*ves_io_schema_api_sec_api_discovery.RuleProperties_Inclusion)
+
+						if isInclusion {
+							rulePropertiesruleTypeChoiceChoicesAttributeMap["inclusion"] = types.BoolValue(true)
+						} else {
+							rulePropertiesruleTypeChoiceChoicesAttributeMap["inclusion"] = types.BoolNull()
+						}
+
+						// --- End of Choices ---
+
+						// Create the final ObjectValue for this OneOf field
+						finalObj, rulePropertiesruleTypeChoiceChoicesObjDiags := types.ObjectValue(
+							ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTypeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+							rulePropertiesruleTypeChoiceChoicesAttributeMap,
+						)
+						response.Diagnostics.Append(rulePropertiesruleTypeChoiceChoicesObjDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						// Assign the final object to the correct place (either the root model or a parent's attribute map)
+						apiDiscoveryRulePropsModel.RuleTypeChoice = finalObj
+					} else {
+						// The OneOf field is nil in the source spec, so set the Terraform object to null.
+						apiDiscoveryRulePropsModel.RuleTypeChoice = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTypeChoiceModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					apiDiscoveryApiDiscoveryRulePropertiesModelObj, diags := types.ObjectValueFrom(ctx, ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesModelAttributeMap, apiDiscoveryApiDiscoveryRulePropertiesModel)
-					response.Diagnostics.Append(diags...)
+					apiDiscoveryRulePropsModelObj, apiDiscoveryRulePropsModelObjDiags := types.ObjectValueFrom(ctx, ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesModelAttributeMap, apiDiscoveryRulePropsModel)
+					response.Diagnostics.Append(apiDiscoveryRulePropsModelObjDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					apiDiscoveryApiDiscoveryDiscoveryRuleModel.RuleProperties = apiDiscoveryApiDiscoveryRulePropertiesModelObj
+					apiDiscoveryDiscoveryRuleModel.RuleProperties = apiDiscoveryRulePropsModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -2253,153 +2503,31 @@ func (r *ResourceF5XCApiDiscovery) Read(ctx context.Context, request resource.Re
 					// because the API may always return a non-nil struct (with REDACTED values) for this field,
 					// making this else-branch unreachable. The child OneOf handles the actual healing.
 					// The target is a types.Object, so we use types.ObjectNull.
-					apiDiscoveryApiDiscoveryDiscoveryRuleModel.RuleProperties = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesModelAttributeMap)
+					apiDiscoveryDiscoveryRuleModel.RuleProperties = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesModelAttributeMap)
 				}
 
-				// resource specToModelNested MapOfStringField --> Labels
-				if discoveryRulesElement.GetLabels() != nil {
-					// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-					labelsMap, labelsDiags := utils.StringMapToTerraformMap(discoveryRulesElement.GetLabels())
-					response.Diagnostics.Append(labelsDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					// Assign the typed map to the model
-					apiDiscoveryApiDiscoveryDiscoveryRuleModel.Labels = labelsMap
-				} else {
-					// Ensure the state reflects a Null map with the correct element type to avoid DynamicPseudoType errors
-					apiDiscoveryApiDiscoveryDiscoveryRuleModel.Labels = types.MapNull(types.StringType)
-				}
-
-				discoveryRulesElements = append(discoveryRulesElements, apiDiscoveryApiDiscoveryDiscoveryRuleModel)
+				discoveryRulesElements = append(discoveryRulesElements, apiDiscoveryDiscoveryRuleModel)
 			}
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// The intermediate slice of structs must be converted to a `types.ListValue`.
-			discoveryRulesListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesModelAttributeMap}, discoveryRulesElements)
-			response.Diagnostics.Append(diags...)
+			discoveryRulesListValue, discoveryRulesListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesModelAttributeMap}, discoveryRulesElements)
+			response.Diagnostics.Append(discoveryRulesListDiags...)
 			if response.Diagnostics.HasError() {
 				return
 			}
-			apiDiscoveryApiDiscoveryUserDefinedApiDiscoveryPolicyModel.DiscoveryRules = discoveryRulesListValue
+			apiDiscoveryUserDefinedApiDiscoveryPolicyModel.DiscoveryRules = discoveryRulesListValue
 
 		} else {
 			// The source list is empty or nil.
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// Assign a null `types.ListValue`.
-			apiDiscoveryApiDiscoveryUserDefinedApiDiscoveryPolicyModel.DiscoveryRules = types.ListNull(types.ObjectType{AttrTypes: ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesModelAttributeMap})
-		}
-
-		// resource specToModelNested RequiredOneOfField --> DefaultBehaviorChoice
-		// <no value>
-		if userDefinedApiDiscoveryPolicyElement.GetDefaultBehaviorChoice() != nil {
-			// Create a temporary attribute map for the choices within this OneOf
-			userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-			// Define a variable for the spec choices to be passed down to nested templates
-			userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoices := userDefinedApiDiscoveryPolicyElement.GetDefaultBehaviorChoice()
-
-			// Process nested choices, populating the temporary attribute map
-
-			// resource specToModelNested BoolOfOneOfPointerField --> Inclusive
-			_, isInclusive := userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoices.(*ves_io_schema_api_sec_api_discovery.UserDefinedApiDiscoveryPolicy_Inclusive)
-
-			if isInclusive {
-				userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoicesAttributeMap["inclusive"] = types.BoolValue(true)
-			} else {
-				userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoicesAttributeMap["inclusive"] = types.BoolNull()
-			}
-
-			// resource specToModelNested PointerOfOneOfField --> Exclusive
-			// <no value>
-			// false
-			{
-				exclusiveOptions, isExclusive := userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoices.(*ves_io_schema_api_sec_api_discovery.UserDefinedApiDiscoveryPolicy_Exclusive)
-				exclusiveAttributeMap := make(map[string]attr.Value)
-
-				if isExclusive && exclusiveOptions != nil {
-
-					// resource specToModelNested RequiredOneOfField --> ActionChoice
-					// <no value>
-					if exclusiveOptions.Exclusive.GetActionChoice() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						exclusiveactionChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates
-						exclusiveactionChoiceChoices := exclusiveOptions.Exclusive.GetActionChoice()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// resource specToModelNested BoolOfOneOfPointerField --> Ignore
-						_, isIgnore := exclusiveactionChoiceChoices.(*ves_io_schema_api_sec_api_discovery.ExclusionConfig_Ignore)
-
-						if isIgnore {
-							exclusiveactionChoiceChoicesAttributeMap["ignore"] = types.BoolValue(true)
-						} else {
-							exclusiveactionChoiceChoicesAttributeMap["ignore"] = types.BoolNull()
-						}
-
-						// resource specToModelNested BoolOfOneOfPointerField --> Archive
-						_, isArchive := exclusiveactionChoiceChoices.(*ves_io_schema_api_sec_api_discovery.ExclusionConfig_Archive)
-
-						if isArchive {
-							exclusiveactionChoiceChoicesAttributeMap["archive"] = types.BoolValue(true)
-						} else {
-							exclusiveactionChoiceChoicesAttributeMap["archive"] = types.BoolNull()
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, exclusiveactionChoiceChoicesObjDiags := types.ObjectValue(
-							ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceExclusiveActionChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-							exclusiveactionChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(exclusiveactionChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						exclusiveAttributeMap["action_choice"] = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						exclusiveAttributeMap["action_choice"] = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceExclusiveActionChoiceModelAttributeMap)
-					}
-
-					exclusiveObj, diags := types.ObjectValue(ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceExclusiveModelAttributeMap, exclusiveAttributeMap)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoicesAttributeMap["exclusive"] = exclusiveObj
-				} else {
-					userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoicesAttributeMap["exclusive"] = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceExclusiveModelAttributeMap)
-				}
-			}
-
-			// --- End of Choices ---
-
-			// Create the final ObjectValue for this OneOf field
-			finalObj, userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoicesObjDiags := types.ObjectValue(
-				ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-				userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoicesAttributeMap,
-			)
-			response.Diagnostics.Append(userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoicesObjDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			apiDiscoveryApiDiscoveryUserDefinedApiDiscoveryPolicyModel.DefaultBehaviorChoice = finalObj
-		} else {
-			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			apiDiscoveryApiDiscoveryUserDefinedApiDiscoveryPolicyModel.DefaultBehaviorChoice = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceModelAttributeMap)
+			apiDiscoveryUserDefinedApiDiscoveryPolicyModel.DiscoveryRules = types.ListNull(types.ObjectType{AttrTypes: ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesModelAttributeMap})
 		}
 
 		userDefinedApiDiscoveryPolicyObj, userDefinedApiDiscoveryPolicyDiags := utils.GoStructToObjectValue(
 			ctx,
 			ApiDiscoveryUserDefinedApiDiscoveryPolicyModelAttributeMap,
-			apiDiscoveryApiDiscoveryUserDefinedApiDiscoveryPolicyModel,
+			apiDiscoveryUserDefinedApiDiscoveryPolicyModel,
 		)
 		response.Diagnostics.Append(userDefinedApiDiscoveryPolicyDiags...)
 		if response.Diagnostics.HasError() {
@@ -2427,6 +2555,25 @@ func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return
+	}
+	// For Optional+Computed map meta-attributes (labels, annotations), the MapMergeModifier
+	// sets the plan value to the prior state to satisfy Terraform Core's constraint
+	// (plan must equal config or prior state). We save the plan values so we can restore
+	// them after the API call — the apply result must equal the plan value.
+	// We read user-intent values from Config (not Plan) so that the API request reflects
+	// the user's actual changes (e.g. updated label values).
+	planAnnotations := data.Annotations
+	planLabels := data.Labels
+	var configData ResourceF5XCApiDiscoveryModel
+	response.Diagnostics.Append(request.Config.Get(ctx, &configData)...)
+	if response.Diagnostics.HasError() {
+		return
+	}
+	if !configData.Annotations.IsUnknown() {
+		data.Annotations = configData.Annotations
+	}
+	if !configData.Labels.IsUnknown() {
+		data.Labels = configData.Labels
 	}
 
 	duration, err := time.ParseDuration("10m0s")
@@ -2457,18 +2604,13 @@ func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.
 
 	// Populate updateReq from data model
 
-	// resource modelToMetaRoot RequiredStringField --> Namespace
-	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
-		meta.Namespace = string(data.Namespace.ValueString())
-	}
-
 	// resource modelToMetaRoot MapOfStringField --> Annotations
 	if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
 		var labels map[string]string
 		diags = data.Annotations.ElementsAs(ctx, &labels, false)
 		response.Diagnostics.Append(diags...)
 		if response.Diagnostics.HasError() {
-			tflog.Error(ctx, "Failed to convert annotations from map to model")
+			tflog.Error(ctx, "Failed to convert Annotations from map to model")
 			return
 		}
 		meta.Annotations = labels
@@ -2481,15 +2623,34 @@ func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.
 		meta.Description = string(data.Description.ValueString())
 	}
 
+	// resource modelToMetaRoot MapOfStringField --> Labels
+	if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
+		var labels map[string]string
+		diags = data.Labels.ElementsAs(ctx, &labels, false)
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			tflog.Error(ctx, "Failed to convert Labels from map to model")
+			return
+		}
+		meta.Labels = labels
+	} else {
+		meta.Labels = nil
+	}
+
 	// resource modelToMetaRoot RequiredStringField --> Name
 	if !data.Name.IsNull() && !data.Name.IsUnknown() {
 		meta.Name = string(data.Name.ValueString())
 	}
 
+	// resource modelToMetaRoot RequiredStringField --> Namespace
+	if !data.Namespace.IsNull() && !data.Namespace.IsUnknown() {
+		meta.Namespace = string(data.Namespace.ValueString())
+	}
+
 	{
 		// resource modelToSpecRoot ArrayOfPointerField --> CustomAuthTypes
 		if !data.CustomAuthTypes.IsNull() && !data.CustomAuthTypes.IsUnknown() {
-			var customAuthTypesElements []ApiDiscoveryApiDiscoveryCustomAuthType
+			var customAuthTypesElements []ApiDiscoveryCustomAuthType
 			response.Diagnostics.Append(data.CustomAuthTypes.ElementsAs(ctx, &customAuthTypesElements, false)...)
 
 			if response.Diagnostics.HasError() {
@@ -2541,7 +2702,7 @@ func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.
 		if !data.UserDefinedApiDiscoveryPolicy.IsNull() && !data.UserDefinedApiDiscoveryPolicy.IsUnknown() {
 			userDefinedApiDiscoveryPolicySpec := &ves_io_schema_api_sec_api_discovery.UserDefinedApiDiscoveryPolicy{}
 			spec.UserDefinedApiDiscoveryPolicy = userDefinedApiDiscoveryPolicySpec
-			var userDefinedApiDiscoveryPolicyModel ApiDiscoveryApiDiscoveryUserDefinedApiDiscoveryPolicy
+			var userDefinedApiDiscoveryPolicyModel ApiDiscoveryUserDefinedApiDiscoveryPolicy
 
 			// Populate the nested model from the main data model
 			diags.Append(data.UserDefinedApiDiscoveryPolicy.As(ctx, &userDefinedApiDiscoveryPolicyModel, basetypes.ObjectAsOptions{})...)
@@ -2550,10 +2711,64 @@ func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.
 				return
 			}
 
+			// resource modelToSpecNested RequiredOneOfField --> DefaultBehaviorChoice
+			if !userDefinedApiDiscoveryPolicyModel.DefaultBehaviorChoice.IsNull() && !userDefinedApiDiscoveryPolicyModel.DefaultBehaviorChoice.IsUnknown() {
+				userDefinedApiDiscoveryPolicyDefaultBehaviorChoiceModel := ApiDiscoveryDefaultBehaviorChoice{}
+				response.Diagnostics.Append(userDefinedApiDiscoveryPolicyModel.DefaultBehaviorChoice.As(ctx, &userDefinedApiDiscoveryPolicyDefaultBehaviorChoiceModel, basetypes.ObjectAsOptions{})...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				// resource modelToSpecNested PointerOfOneOfField --> Exclusive
+				if !userDefinedApiDiscoveryPolicyDefaultBehaviorChoiceModel.Exclusive.IsNull() && !userDefinedApiDiscoveryPolicyDefaultBehaviorChoiceModel.Exclusive.IsUnknown() {
+					var apiDiscoveryExclusiveModel ApiDiscoveryExclusive
+					response.Diagnostics.Append(userDefinedApiDiscoveryPolicyDefaultBehaviorChoiceModel.Exclusive.As(ctx, &apiDiscoveryExclusiveModel, basetypes.ObjectAsOptions{})...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					exclusiveOneOfSpec := &ves_io_schema_api_sec_api_discovery.UserDefinedApiDiscoveryPolicy_Exclusive{}
+					exclusiveOneOfSpec.Exclusive = &ves_io_schema_api_sec_api_discovery.ExclusionConfig{}
+					userDefinedApiDiscoveryPolicySpec.DefaultBehaviorChoice = exclusiveOneOfSpec
+
+					// resource modelToSpecNested RequiredOneOfField --> ActionChoice
+					if !apiDiscoveryExclusiveModel.ActionChoice.IsNull() && !apiDiscoveryExclusiveModel.ActionChoice.IsUnknown() {
+						exclusiveActionChoiceModel := ApiDiscoveryActionChoice{}
+						response.Diagnostics.Append(apiDiscoveryExclusiveModel.ActionChoice.As(ctx, &exclusiveActionChoiceModel, basetypes.ObjectAsOptions{})...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						// resource modelToSpecNested BoolOfOneOfPointerField --> Archive
+						if !exclusiveActionChoiceModel.Archive.IsNull() && !exclusiveActionChoiceModel.Archive.IsUnknown() {
+							archiveSpecBool := &ves_io_schema_api_sec_api_discovery.ExclusionConfig_Archive{}
+							archiveSpecBool.Archive = &ves_io_schema.Empty{}
+							exclusiveOneOfSpec.Exclusive.ActionChoice = archiveSpecBool
+						}
+
+						// resource modelToSpecNested BoolOfOneOfPointerField --> Ignore
+						if !exclusiveActionChoiceModel.Ignore.IsNull() && !exclusiveActionChoiceModel.Ignore.IsUnknown() {
+							ignoreSpecBool := &ves_io_schema_api_sec_api_discovery.ExclusionConfig_Ignore{}
+							ignoreSpecBool.Ignore = &ves_io_schema.Empty{}
+							exclusiveOneOfSpec.Exclusive.ActionChoice = ignoreSpecBool
+						}
+
+					}
+
+				}
+
+				// resource modelToSpecNested BoolOfOneOfPointerField --> Inclusive
+				if !userDefinedApiDiscoveryPolicyDefaultBehaviorChoiceModel.Inclusive.IsNull() && !userDefinedApiDiscoveryPolicyDefaultBehaviorChoiceModel.Inclusive.IsUnknown() {
+					inclusiveSpecBool := &ves_io_schema_api_sec_api_discovery.UserDefinedApiDiscoveryPolicy_Inclusive{}
+					inclusiveSpecBool.Inclusive = &ves_io_schema.Empty{}
+					userDefinedApiDiscoveryPolicySpec.DefaultBehaviorChoice = inclusiveSpecBool
+				}
+
+			}
+
 			// resource modelToSpecNested ArrayOfPointerField --> DiscoveryRules
 			if !userDefinedApiDiscoveryPolicyModel.DiscoveryRules.IsNull() && !userDefinedApiDiscoveryPolicyModel.DiscoveryRules.IsUnknown() && len(userDefinedApiDiscoveryPolicyModel.DiscoveryRules.Elements()) > 0 {
 				// 1. Convert the types.List into a slice of the model's Go struct
-				var discoveryRulesElements []ApiDiscoveryApiDiscoveryDiscoveryRule
+				var discoveryRulesElements []ApiDiscoveryDiscoveryRule
 				response.Diagnostics.Append(userDefinedApiDiscoveryPolicyModel.DiscoveryRules.ElementsAs(ctx, &discoveryRulesElements, false)...)
 				if response.Diagnostics.HasError() {
 					return
@@ -2570,6 +2785,20 @@ func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.
 
 					// Recursively process nested elements
 
+					// resource modelToSpecNested MapOfStringField --> Labels
+					if !discoveryRulesElement.Labels.IsNull() && !discoveryRulesElement.Labels.IsUnknown() {
+						var mapOfString map[string]string
+						diags = discoveryRulesElement.Labels.ElementsAs(ctx, &mapOfString, false)
+						response.Diagnostics.Append(diags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						discoveryRulesSpec[i].Labels = mapOfString
+					} else {
+						discoveryRulesSpec[i].Labels = nil
+					}
+
 					// resource modelToSpecNested PointerField --> Metadata
 					if !discoveryRulesElement.Metadata.IsNull() && !discoveryRulesElement.Metadata.IsUnknown() {
 						var metadataModel ApiDiscoveryMessageMetaType
@@ -2581,21 +2810,21 @@ func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.
 						metadataSpec := &ves_io_schema.MessageMetaType{}
 						discoveryRulesSpec[i].Metadata = metadataSpec
 
-						// resource modelToSpecNested RequiredStringField --> Name
-						if !metadataModel.Name.IsNull() && !metadataModel.Name.IsUnknown() {
-							metadataSpec.Name = string(metadataModel.Name.ValueString())
-						}
-
 						// resource modelToSpecNested StringField --> Description
 						if !metadataModel.Description.IsNull() && !metadataModel.Description.IsUnknown() {
 							metadataSpec.Description = string(metadataModel.Description.ValueString())
+						}
+
+						// resource modelToSpecNested RequiredStringField --> Name
+						if !metadataModel.Name.IsNull() && !metadataModel.Name.IsUnknown() {
+							metadataSpec.Name = string(metadataModel.Name.ValueString())
 						}
 
 					}
 
 					// resource modelToSpecNested PointerField --> RuleProperties
 					if !discoveryRulesElement.RuleProperties.IsNull() && !discoveryRulesElement.RuleProperties.IsUnknown() {
-						var rulePropertiesModel ApiDiscoveryApiDiscoveryRuleProperties
+						var rulePropertiesModel ApiDiscoveryRuleProps
 						response.Diagnostics.Append(discoveryRulesElement.RuleProperties.As(ctx, &rulePropertiesModel, basetypes.ObjectAsOptions{})...)
 						if response.Diagnostics.HasError() {
 							return
@@ -2604,9 +2833,97 @@ func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.
 						rulePropertiesSpec := &ves_io_schema_api_sec_api_discovery.RuleProperties{}
 						discoveryRulesSpec[i].RuleProperties = rulePropertiesSpec
 
+						// resource modelToSpecNested RequiredOneOfField --> Criteria
+						if !rulePropertiesModel.CriteriaChoice.IsNull() && !rulePropertiesModel.CriteriaChoice.IsUnknown() {
+							rulePropertiesCriteriaChoiceModel := ApiDiscoveryCriteriaChoice{}
+							response.Diagnostics.Append(rulePropertiesModel.CriteriaChoice.As(ctx, &rulePropertiesCriteriaChoiceModel, basetypes.ObjectAsOptions{})...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+
+							// resource modelToSpecNested PointerOfOneOfField --> HttpHeaderCriteria
+							if !rulePropertiesCriteriaChoiceModel.HttpHeaderCriteria.IsNull() && !rulePropertiesCriteriaChoiceModel.HttpHeaderCriteria.IsUnknown() {
+								var apiDiscoveryHttpHeaderCriteriaModel ApiDiscoveryHttpHeaderCriteria
+								response.Diagnostics.Append(rulePropertiesCriteriaChoiceModel.HttpHeaderCriteria.As(ctx, &apiDiscoveryHttpHeaderCriteriaModel, basetypes.ObjectAsOptions{})...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								httpHeaderCriteriaOneOfSpec := &ves_io_schema_api_sec_api_discovery.RuleProperties_HttpHeaderCriteria{}
+								httpHeaderCriteriaOneOfSpec.HttpHeaderCriteria = &ves_io_schema_api_sec_api_discovery.HTTPHeaderCriteria{}
+								rulePropertiesSpec.Criteria = httpHeaderCriteriaOneOfSpec
+
+								// resource modelToSpecNested RequiredStringField --> FieldName
+								if !apiDiscoveryHttpHeaderCriteriaModel.FieldName.IsNull() && !apiDiscoveryHttpHeaderCriteriaModel.FieldName.IsUnknown() {
+									httpHeaderCriteriaOneOfSpec.HttpHeaderCriteria.FieldName = string(apiDiscoveryHttpHeaderCriteriaModel.FieldName.ValueString())
+								}
+
+								// resource modelToSpecNested EnumField --> Location
+								if !apiDiscoveryHttpHeaderCriteriaModel.Location.IsNull() && !apiDiscoveryHttpHeaderCriteriaModel.Location.IsUnknown() {
+									var locationTfStrings []types.String
+									diags = apiDiscoveryHttpHeaderCriteriaModel.Location.ElementsAs(ctx, &locationTfStrings, false)
+									response.Diagnostics.Append(diags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+
+									if len(locationTfStrings) > 0 {
+										valStr := locationTfStrings[0].ValueString()
+										if v, ok := ves_io_schema_api_sec_api_discovery.RuleLocation_value[valStr]; ok {
+											httpHeaderCriteriaOneOfSpec.HttpHeaderCriteria.Location = ves_io_schema_api_sec_api_discovery.RuleLocation(v)
+										} else {
+											response.Diagnostics.AddError("Invalid Enum Value", fmt.Sprintf("Value '%s' is not valid for Location", valStr))
+											return
+										}
+									}
+								} else {
+									if v, ok := ves_io_schema_api_sec_api_discovery.RuleLocation_value["REQUEST"]; ok {
+										httpHeaderCriteriaOneOfSpec.HttpHeaderCriteria.Location = ves_io_schema_api_sec_api_discovery.RuleLocation(v)
+									}
+								}
+
+								// resource modelToSpecNested EnumField --> MatchType
+								if !apiDiscoveryHttpHeaderCriteriaModel.MatchType.IsNull() && !apiDiscoveryHttpHeaderCriteriaModel.MatchType.IsUnknown() {
+									var matchTypeTfStrings []types.String
+									diags = apiDiscoveryHttpHeaderCriteriaModel.MatchType.ElementsAs(ctx, &matchTypeTfStrings, false)
+									response.Diagnostics.Append(diags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+
+									if len(matchTypeTfStrings) > 0 {
+										valStr := matchTypeTfStrings[0].ValueString()
+										if v, ok := ves_io_schema_api_sec_api_discovery.MatchType_value[valStr]; ok {
+											httpHeaderCriteriaOneOfSpec.HttpHeaderCriteria.MatchType = ves_io_schema_api_sec_api_discovery.MatchType(v)
+										} else {
+											response.Diagnostics.AddError("Invalid Enum Value", fmt.Sprintf("Value '%s' is not valid for MatchType", valStr))
+											return
+										}
+									}
+								} else {
+									if v, ok := ves_io_schema_api_sec_api_discovery.MatchType_value["EXACT_MATCH"]; ok {
+										httpHeaderCriteriaOneOfSpec.HttpHeaderCriteria.MatchType = ves_io_schema_api_sec_api_discovery.MatchType(v)
+									}
+								}
+
+								// resource modelToSpecNested RequiredStringField --> Value
+								if !apiDiscoveryHttpHeaderCriteriaModel.Value.IsNull() && !apiDiscoveryHttpHeaderCriteriaModel.Value.IsUnknown() {
+									httpHeaderCriteriaOneOfSpec.HttpHeaderCriteria.Value = string(apiDiscoveryHttpHeaderCriteriaModel.Value.ValueString())
+								}
+
+							}
+
+							// resource modelToSpecNested StringOfOneOfField --> Pattern
+							if !rulePropertiesCriteriaChoiceModel.Pattern.IsNull() && !rulePropertiesCriteriaChoiceModel.Pattern.IsUnknown() {
+								patternSpecStr := &ves_io_schema_api_sec_api_discovery.RuleProperties_Pattern{}
+								patternSpecStr.Pattern = string(rulePropertiesCriteriaChoiceModel.Pattern.ValueString())
+								rulePropertiesSpec.Criteria = patternSpecStr
+							}
+
+						}
+
 						// resource modelToSpecNested RequiredOneOfField --> RuleTypeChoice
 						if !rulePropertiesModel.RuleTypeChoice.IsNull() && !rulePropertiesModel.RuleTypeChoice.IsUnknown() {
-							rulePropertiesRuleTypeChoiceModel := ApiDiscoveryRulePropertiesRuleTypeChoice{}
+							rulePropertiesRuleTypeChoiceModel := ApiDiscoveryRuleTypeChoice{}
 							response.Diagnostics.Append(rulePropertiesModel.RuleTypeChoice.As(ctx, &rulePropertiesRuleTypeChoiceModel, basetypes.ObjectAsOptions{})...)
 							if response.Diagnostics.HasError() {
 								return
@@ -2614,8 +2931,8 @@ func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.
 
 							// resource modelToSpecNested PointerOfOneOfField --> Exclusion
 							if !rulePropertiesRuleTypeChoiceModel.Exclusion.IsNull() && !rulePropertiesRuleTypeChoiceModel.Exclusion.IsUnknown() {
-								var apiDiscoveryRulePropertiesExclusionModel ApiDiscoveryRulePropertiesExclusion
-								response.Diagnostics.Append(rulePropertiesRuleTypeChoiceModel.Exclusion.As(ctx, &apiDiscoveryRulePropertiesExclusionModel, basetypes.ObjectAsOptions{})...)
+								var apiDiscoveryExclusionModel ApiDiscoveryExclusion
+								response.Diagnostics.Append(rulePropertiesRuleTypeChoiceModel.Exclusion.As(ctx, &apiDiscoveryExclusionModel, basetypes.ObjectAsOptions{})...)
 								if response.Diagnostics.HasError() {
 									return
 								}
@@ -2624,18 +2941,11 @@ func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.
 								rulePropertiesSpec.RuleTypeChoice = exclusionOneOfSpec
 
 								// resource modelToSpecNested RequiredOneOfField --> ActionChoice
-								if !apiDiscoveryRulePropertiesExclusionModel.ActionChoice.IsNull() && !apiDiscoveryRulePropertiesExclusionModel.ActionChoice.IsUnknown() {
-									exclusionActionChoiceModel := ApiDiscoveryExclusionConfigActionChoice{}
-									response.Diagnostics.Append(apiDiscoveryRulePropertiesExclusionModel.ActionChoice.As(ctx, &exclusionActionChoiceModel, basetypes.ObjectAsOptions{})...)
+								if !apiDiscoveryExclusionModel.ActionChoice.IsNull() && !apiDiscoveryExclusionModel.ActionChoice.IsUnknown() {
+									exclusionActionChoiceModel := ApiDiscoveryActionChoice{}
+									response.Diagnostics.Append(apiDiscoveryExclusionModel.ActionChoice.As(ctx, &exclusionActionChoiceModel, basetypes.ObjectAsOptions{})...)
 									if response.Diagnostics.HasError() {
 										return
-									}
-
-									// resource modelToSpecNested BoolOfOneOfPointerField --> Ignore
-									if !exclusionActionChoiceModel.Ignore.IsNull() && !exclusionActionChoiceModel.Ignore.IsUnknown() {
-										ignoreSpecBool := &ves_io_schema_api_sec_api_discovery.ExclusionConfig_Ignore{}
-										ignoreSpecBool.Ignore = &ves_io_schema.Empty{}
-										exclusionOneOfSpec.Exclusion.ActionChoice = ignoreSpecBool
 									}
 
 									// resource modelToSpecNested BoolOfOneOfPointerField --> Archive
@@ -2643,6 +2953,13 @@ func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.
 										archiveSpecBool := &ves_io_schema_api_sec_api_discovery.ExclusionConfig_Archive{}
 										archiveSpecBool.Archive = &ves_io_schema.Empty{}
 										exclusionOneOfSpec.Exclusion.ActionChoice = archiveSpecBool
+									}
+
+									// resource modelToSpecNested BoolOfOneOfPointerField --> Ignore
+									if !exclusionActionChoiceModel.Ignore.IsNull() && !exclusionActionChoiceModel.Ignore.IsUnknown() {
+										ignoreSpecBool := &ves_io_schema_api_sec_api_discovery.ExclusionConfig_Ignore{}
+										ignoreSpecBool.Ignore = &ves_io_schema.Empty{}
+										exclusionOneOfSpec.Exclusion.ActionChoice = ignoreSpecBool
 									}
 
 								}
@@ -2658,160 +2975,19 @@ func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.
 
 						}
 
-						// resource modelToSpecNested RequiredOneOfField --> Criteria
-						if !rulePropertiesModel.CriteriaChoice.IsNull() && !rulePropertiesModel.CriteriaChoice.IsUnknown() {
-							rulePropertiesCriteriaChoiceModel := ApiDiscoveryRulePropertiesCriteriaChoice{}
-							response.Diagnostics.Append(rulePropertiesModel.CriteriaChoice.As(ctx, &rulePropertiesCriteriaChoiceModel, basetypes.ObjectAsOptions{})...)
-							if response.Diagnostics.HasError() {
-								return
-							}
-
-							// resource modelToSpecNested PointerOfOneOfField --> HttpHeaderCriteria
-							if !rulePropertiesCriteriaChoiceModel.HttpHeaderCriteria.IsNull() && !rulePropertiesCriteriaChoiceModel.HttpHeaderCriteria.IsUnknown() {
-								var apiDiscoveryRulePropertiesHttpHeaderCriteriaModel ApiDiscoveryRulePropertiesHttpHeaderCriteria
-								response.Diagnostics.Append(rulePropertiesCriteriaChoiceModel.HttpHeaderCriteria.As(ctx, &apiDiscoveryRulePropertiesHttpHeaderCriteriaModel, basetypes.ObjectAsOptions{})...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								httpHeaderCriteriaOneOfSpec := &ves_io_schema_api_sec_api_discovery.RuleProperties_HttpHeaderCriteria{}
-								httpHeaderCriteriaOneOfSpec.HttpHeaderCriteria = &ves_io_schema_api_sec_api_discovery.HTTPHeaderCriteria{}
-								rulePropertiesSpec.Criteria = httpHeaderCriteriaOneOfSpec
-
-								// resource modelToSpecNested EnumField --> Location
-								if !apiDiscoveryRulePropertiesHttpHeaderCriteriaModel.Location.IsNull() && !apiDiscoveryRulePropertiesHttpHeaderCriteriaModel.Location.IsUnknown() {
-									var locationTfStrings []types.String
-									diags = apiDiscoveryRulePropertiesHttpHeaderCriteriaModel.Location.ElementsAs(ctx, &locationTfStrings, false)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									if len(locationTfStrings) > 0 {
-										valStr := locationTfStrings[0].ValueString()
-										if v, ok := ves_io_schema_api_sec_api_discovery.RuleLocation_value[valStr]; ok {
-											httpHeaderCriteriaOneOfSpec.HttpHeaderCriteria.Location = ves_io_schema_api_sec_api_discovery.RuleLocation(v)
-										} else {
-											response.Diagnostics.AddError("Invalid Enum Value", fmt.Sprintf("Value '%s' is not valid for Location", valStr))
-											return
-										}
-									}
-								}
-
-								// resource modelToSpecNested RequiredStringField --> FieldName
-								if !apiDiscoveryRulePropertiesHttpHeaderCriteriaModel.FieldName.IsNull() && !apiDiscoveryRulePropertiesHttpHeaderCriteriaModel.FieldName.IsUnknown() {
-									httpHeaderCriteriaOneOfSpec.HttpHeaderCriteria.FieldName = string(apiDiscoveryRulePropertiesHttpHeaderCriteriaModel.FieldName.ValueString())
-								}
-
-								// resource modelToSpecNested EnumField --> MatchType
-								if !apiDiscoveryRulePropertiesHttpHeaderCriteriaModel.MatchType.IsNull() && !apiDiscoveryRulePropertiesHttpHeaderCriteriaModel.MatchType.IsUnknown() {
-									var matchTypeTfStrings []types.String
-									diags = apiDiscoveryRulePropertiesHttpHeaderCriteriaModel.MatchType.ElementsAs(ctx, &matchTypeTfStrings, false)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									if len(matchTypeTfStrings) > 0 {
-										valStr := matchTypeTfStrings[0].ValueString()
-										if v, ok := ves_io_schema_api_sec_api_discovery.MatchType_value[valStr]; ok {
-											httpHeaderCriteriaOneOfSpec.HttpHeaderCriteria.MatchType = ves_io_schema_api_sec_api_discovery.MatchType(v)
-										} else {
-											response.Diagnostics.AddError("Invalid Enum Value", fmt.Sprintf("Value '%s' is not valid for MatchType", valStr))
-											return
-										}
-									}
-								}
-
-								// resource modelToSpecNested RequiredStringField --> Value
-								if !apiDiscoveryRulePropertiesHttpHeaderCriteriaModel.Value.IsNull() && !apiDiscoveryRulePropertiesHttpHeaderCriteriaModel.Value.IsUnknown() {
-									httpHeaderCriteriaOneOfSpec.HttpHeaderCriteria.Value = string(apiDiscoveryRulePropertiesHttpHeaderCriteriaModel.Value.ValueString())
-								}
-
-							}
-
-							// resource modelToSpecNested StringOfOneOfField --> Pattern
-							if !rulePropertiesCriteriaChoiceModel.Pattern.IsNull() && !rulePropertiesCriteriaChoiceModel.Pattern.IsUnknown() {
-								patternSpecStr := &ves_io_schema_api_sec_api_discovery.RuleProperties_Pattern{}
-								patternSpecStr.Pattern = string(rulePropertiesCriteriaChoiceModel.Pattern.ValueString())
-								rulePropertiesSpec.Criteria = patternSpecStr
-							}
-
-						}
-
-					}
-
-					// resource modelToSpecNested MapOfStringField --> Labels
-					if !discoveryRulesElement.Labels.IsNull() && !discoveryRulesElement.Labels.IsUnknown() {
-						var mapOfString map[string]string
-						diags = discoveryRulesElement.Labels.ElementsAs(ctx, &mapOfString, false)
-						response.Diagnostics.Append(diags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						discoveryRulesSpec[i].Labels = mapOfString
-					} else {
-						discoveryRulesSpec[i].Labels = nil
 					}
 
 				}
-			}
-
-			// resource modelToSpecNested RequiredOneOfField --> DefaultBehaviorChoice
-			if !userDefinedApiDiscoveryPolicyModel.DefaultBehaviorChoice.IsNull() && !userDefinedApiDiscoveryPolicyModel.DefaultBehaviorChoice.IsUnknown() {
-				userDefinedApiDiscoveryPolicyDefaultBehaviorChoiceModel := ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoice{}
-				response.Diagnostics.Append(userDefinedApiDiscoveryPolicyModel.DefaultBehaviorChoice.As(ctx, &userDefinedApiDiscoveryPolicyDefaultBehaviorChoiceModel, basetypes.ObjectAsOptions{})...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// resource modelToSpecNested BoolOfOneOfPointerField --> Inclusive
-				if !userDefinedApiDiscoveryPolicyDefaultBehaviorChoiceModel.Inclusive.IsNull() && !userDefinedApiDiscoveryPolicyDefaultBehaviorChoiceModel.Inclusive.IsUnknown() {
-					inclusiveSpecBool := &ves_io_schema_api_sec_api_discovery.UserDefinedApiDiscoveryPolicy_Inclusive{}
-					inclusiveSpecBool.Inclusive = &ves_io_schema.Empty{}
-					userDefinedApiDiscoveryPolicySpec.DefaultBehaviorChoice = inclusiveSpecBool
-				}
-
-				// resource modelToSpecNested PointerOfOneOfField --> Exclusive
-				if !userDefinedApiDiscoveryPolicyDefaultBehaviorChoiceModel.Exclusive.IsNull() && !userDefinedApiDiscoveryPolicyDefaultBehaviorChoiceModel.Exclusive.IsUnknown() {
-					var apiDiscoveryUserDefinedApiDiscoveryPolicyExclusiveModel ApiDiscoveryUserDefinedApiDiscoveryPolicyExclusive
-					response.Diagnostics.Append(userDefinedApiDiscoveryPolicyDefaultBehaviorChoiceModel.Exclusive.As(ctx, &apiDiscoveryUserDefinedApiDiscoveryPolicyExclusiveModel, basetypes.ObjectAsOptions{})...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					exclusiveOneOfSpec := &ves_io_schema_api_sec_api_discovery.UserDefinedApiDiscoveryPolicy_Exclusive{}
-					exclusiveOneOfSpec.Exclusive = &ves_io_schema_api_sec_api_discovery.ExclusionConfig{}
-					userDefinedApiDiscoveryPolicySpec.DefaultBehaviorChoice = exclusiveOneOfSpec
-
-					// resource modelToSpecNested RequiredOneOfField --> ActionChoice
-					if !apiDiscoveryUserDefinedApiDiscoveryPolicyExclusiveModel.ActionChoice.IsNull() && !apiDiscoveryUserDefinedApiDiscoveryPolicyExclusiveModel.ActionChoice.IsUnknown() {
-						exclusiveActionChoiceModel := ApiDiscoveryExclusionConfigActionChoice{}
-						response.Diagnostics.Append(apiDiscoveryUserDefinedApiDiscoveryPolicyExclusiveModel.ActionChoice.As(ctx, &exclusiveActionChoiceModel, basetypes.ObjectAsOptions{})...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// resource modelToSpecNested BoolOfOneOfPointerField --> Ignore
-						if !exclusiveActionChoiceModel.Ignore.IsNull() && !exclusiveActionChoiceModel.Ignore.IsUnknown() {
-							ignoreSpecBool := &ves_io_schema_api_sec_api_discovery.ExclusionConfig_Ignore{}
-							ignoreSpecBool.Ignore = &ves_io_schema.Empty{}
-							exclusiveOneOfSpec.Exclusive.ActionChoice = ignoreSpecBool
-						}
-
-						// resource modelToSpecNested BoolOfOneOfPointerField --> Archive
-						if !exclusiveActionChoiceModel.Archive.IsNull() && !exclusiveActionChoiceModel.Archive.IsUnknown() {
-							archiveSpecBool := &ves_io_schema_api_sec_api_discovery.ExclusionConfig_Archive{}
-							archiveSpecBool.Archive = &ves_io_schema.Empty{}
-							exclusiveOneOfSpec.Exclusive.ActionChoice = archiveSpecBool
-						}
-
-					}
-
-				}
-
 			}
 
 		}
+	}
+
+	// Strip backend-injected label keys that must not be sent in Create/Update requests.
+	// These keys are stored in state (for drift-free plans) but must be omitted from the
+	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+		delete(meta.Labels, _omitKey)
 	}
 
 	if response.Diagnostics.HasError() {
@@ -2848,176 +3024,319 @@ func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
+	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		annotationsApiMap := metaData.GetAnnotations()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Annotations already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Annotations.IsUnknown() {
+			if len(annotationsApiMap) > 0 {
+				annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+				response.Diagnostics.Append(annotationsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Annotations = annotationsMap
+			} else {
+				data.Annotations = types.MapNull(types.StringType)
+			}
+		}
+		// When plan is a known map (user labels or merged prior state), leave data.Annotations
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
+	}
+
+	// resource SpecToModelRoot Meta StringField --> Description
+	data.Description = types.StringValue(metaData.GetDescription())
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		labelsApiMap := metaData.GetLabels()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Labels already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Labels.IsUnknown() {
+			if len(labelsApiMap) > 0 {
+				labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+				response.Diagnostics.Append(labelsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Labels = labelsMap
+			} else {
+				data.Labels = types.MapNull(types.StringType)
+			}
+		}
+		// When plan is a known map (user labels or merged prior state), leave data.Labels
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
+	}
+
+	// resource SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
+
 	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
 	data.Namespace = types.StringValue(metaData.GetNamespace())
 
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedLabels := make(map[string]attr.Value)
-		for k, v := range labelsMap.Elements() {
-			mergedLabels[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
-			for k, v := range data.Labels.Elements() {
-				mergedLabels[k] = v
-			}
-		}
-		mergedLabelsMap, mergedLabelsDiags := types.MapValue(types.StringType, mergedLabels)
-		response.Diagnostics.Append(mergedLabelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Labels = mergedLabelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
-
-	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedAnnotations := make(map[string]attr.Value)
-		for k, v := range annotationsMap.Elements() {
-			mergedAnnotations[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
-			for k, v := range data.Annotations.Elements() {
-				mergedAnnotations[k] = v
-			}
-		}
-		mergedAnnotationsMap, mergedAnnotationsDiags := types.MapValue(types.StringType, mergedAnnotations)
-		response.Diagnostics.Append(mergedAnnotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Annotations = mergedAnnotationsMap
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Annotations = types.MapNull(types.StringType)
-	}
-
-	// resource SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
-
-	// resource SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
-
 	// resource SpecToModelRoot ArrayOfPointerField --> CustomAuthTypes
-	if len(specData.CustomAuthTypes) > 0 {
-		customAuthTypesElements := make([]ApiDiscoveryApiDiscoveryCustomAuthType, 0, len(specData.CustomAuthTypes))
-
-		for _, customAuthTypesElement := range specData.CustomAuthTypes {
-			apiDiscoveryApiDiscoveryCustomAuthTypeModel := ApiDiscoveryApiDiscoveryCustomAuthType{}
+	if len(specData.GetCustomAuthTypes()) > 0 {
+		customAuthTypesElements := make([]ApiDiscoveryCustomAuthType, 0, len(specData.GetCustomAuthTypes()))
+		for _, customAuthTypesElement := range specData.GetCustomAuthTypes() {
+			apiDiscoveryCustomAuthTypeModel := ApiDiscoveryCustomAuthType{}
 
 			// resource specToModelNested RequiredStringField --> ParameterName
 			if customAuthTypesElement.GetParameterName() != "" {
-				apiDiscoveryApiDiscoveryCustomAuthTypeModel.ParameterName = types.StringValue(customAuthTypesElement.GetParameterName())
+				apiDiscoveryCustomAuthTypeModel.ParameterName = types.StringValue(customAuthTypesElement.GetParameterName())
 			} else {
 				// Empty string, set to null
-				apiDiscoveryApiDiscoveryCustomAuthTypeModel.ParameterName = types.StringNull()
+				apiDiscoveryCustomAuthTypeModel.ParameterName = types.StringNull()
 			}
 
 			// resource specToModelNested RequiredEnumField --> ParameterType
-			if customAuthTypesElement.GetParameterType().String() != "" {
-				stringValue := types.StringValue(customAuthTypesElement.GetParameterType().String())
-				stringSlice := []types.String{stringValue}
-				listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
+			{
+				if customAuthTypesElement.GetParameterType().String() != "" {
+					stringValue := types.StringValue(customAuthTypesElement.GetParameterType().String())
+					stringSlice := []types.String{stringValue}
+					listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+					response.Diagnostics.Append(listDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					apiDiscoveryCustomAuthTypeModel.ParameterType = listValue
+				} else {
+					apiDiscoveryCustomAuthTypeModel.ParameterType = types.ListNull(types.StringType)
 				}
-				apiDiscoveryApiDiscoveryCustomAuthTypeModel.ParameterType = listValue
-			} else {
-				apiDiscoveryApiDiscoveryCustomAuthTypeModel.ParameterType = types.ListNull(types.StringType)
 			}
 
-			customAuthTypesElements = append(customAuthTypesElements, apiDiscoveryApiDiscoveryCustomAuthTypeModel)
+			customAuthTypesElements = append(customAuthTypesElements, apiDiscoveryCustomAuthTypeModel)
 		}
 
-		customAuthTypesList, diags := utils.GoStructSliceToListValue(
-			ctx,
-			ApiDiscoveryCustomAuthTypesModelAttributeMap,
-			customAuthTypesElements,
-		)
+		{
+			customAuthTypesList, listDiags := utils.GoStructSliceToListValue(
+				ctx,
+				ApiDiscoveryCustomAuthTypesModelAttributeMap,
+				customAuthTypesElements,
+			)
 
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			data.CustomAuthTypes = customAuthTypesList
 		}
-
-		data.CustomAuthTypes = customAuthTypesList
 	} else {
 		var customAuthTypesObjectType = basetypes.ObjectType{
 			AttrTypes: ApiDiscoveryCustomAuthTypesModelAttributeMap,
 		}
 		nullCustomAuthTypesList := basetypes.NewListNull(customAuthTypesObjectType)
-		data.CustomAuthTypes = nullCustomAuthTypesList
+		var priorValCustomAuthTypes types.List
+		_ = request.Plan.GetAttribute(ctx, path.Root("custom_auth_types"), &priorValCustomAuthTypes)
+		if !priorValCustomAuthTypes.IsNull() && !priorValCustomAuthTypes.IsUnknown() {
+			data.CustomAuthTypes = priorValCustomAuthTypes
+		} else {
+			data.CustomAuthTypes = nullCustomAuthTypesList
+		}
+
 	}
 
 	// resource SpecToModelRoot PointerField --> UserDefinedApiDiscoveryPolicy
 	if specData.GetUserDefinedApiDiscoveryPolicy() != nil {
-		var apiDiscoveryApiDiscoveryUserDefinedApiDiscoveryPolicyModel = &ApiDiscoveryApiDiscoveryUserDefinedApiDiscoveryPolicy{}
+		var apiDiscoveryUserDefinedApiDiscoveryPolicyModel = &ApiDiscoveryUserDefinedApiDiscoveryPolicy{}
 		userDefinedApiDiscoveryPolicyElement := specData.GetUserDefinedApiDiscoveryPolicy()
+
+		// resource specToModelNested RequiredOneOfField --> DefaultBehaviorChoice
+		// GlobalSpecType
+		if userDefinedApiDiscoveryPolicyElement.GetDefaultBehaviorChoice() != nil {
+			// Create a temporary attribute map for the choices within this OneOf
+			userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+			// Define a variable for the spec choices to be passed down to nested templates
+			userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoices := userDefinedApiDiscoveryPolicyElement.GetDefaultBehaviorChoice()
+
+			// Process nested choices, populating the temporary attribute map
+
+			// resource specToModelNested PointerOfOneOfField --> Exclusive
+			// GlobalSpecType
+			// false
+			{
+				exclusiveOptionsWrapper, isExclusive := userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoices.(*ves_io_schema_api_sec_api_discovery.UserDefinedApiDiscoveryPolicy_Exclusive)
+				exclusiveAttributeMap := make(map[string]attr.Value)
+
+				if isExclusive && exclusiveOptionsWrapper != nil && exclusiveOptionsWrapper.Exclusive != nil {
+					exclusiveElement := exclusiveOptionsWrapper.Exclusive
+
+					// resource specToModelNested RequiredOneOfField --> ActionChoice
+					// GlobalSpecType
+					if exclusiveElement.GetActionChoice() != nil {
+						// Create a temporary attribute map for the choices within this OneOf
+						exclusiveactionChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+						// Define a variable for the spec choices to be passed down to nested templates
+						exclusiveactionChoiceChoices := exclusiveElement.GetActionChoice()
+
+						// Process nested choices, populating the temporary attribute map
+
+						// resource specToModelNested BoolOfOneOfPointerField --> Archive
+						_, isArchive := exclusiveactionChoiceChoices.(*ves_io_schema_api_sec_api_discovery.ExclusionConfig_Archive)
+
+						if isArchive {
+							exclusiveactionChoiceChoicesAttributeMap["archive"] = types.BoolValue(true)
+						} else {
+							exclusiveactionChoiceChoicesAttributeMap["archive"] = types.BoolNull()
+						}
+
+						// resource specToModelNested BoolOfOneOfPointerField --> Ignore
+						_, isIgnore := exclusiveactionChoiceChoices.(*ves_io_schema_api_sec_api_discovery.ExclusionConfig_Ignore)
+
+						if isIgnore {
+							exclusiveactionChoiceChoicesAttributeMap["ignore"] = types.BoolValue(true)
+						} else {
+							exclusiveactionChoiceChoicesAttributeMap["ignore"] = types.BoolNull()
+						}
+
+						// --- End of Choices ---
+
+						// Create the final ObjectValue for this OneOf field
+						finalObj, exclusiveactionChoiceChoicesObjDiags := types.ObjectValue(
+							ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceExclusiveActionChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+							exclusiveactionChoiceChoicesAttributeMap,
+						)
+						response.Diagnostics.Append(exclusiveactionChoiceChoicesObjDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						// Assign the final object to the correct place (either the root model or a parent's attribute map)
+						exclusiveAttributeMap["action_choice"] = finalObj
+					} else {
+						// The OneOf field is nil in the source spec, so set the Terraform object to null.
+						exclusiveAttributeMap["action_choice"] = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceExclusiveActionChoiceModelAttributeMap)
+					}
+
+					exclusiveObj, exclusiveObjDiags := types.ObjectValue(ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceExclusiveModelAttributeMap, exclusiveAttributeMap)
+					response.Diagnostics.Append(exclusiveObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoicesAttributeMap["exclusive"] = exclusiveObj
+				} else {
+					userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoicesAttributeMap["exclusive"] = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceExclusiveModelAttributeMap)
+				}
+			}
+
+			// resource specToModelNested BoolOfOneOfPointerField --> Inclusive
+			_, isInclusive := userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoices.(*ves_io_schema_api_sec_api_discovery.UserDefinedApiDiscoveryPolicy_Inclusive)
+
+			if isInclusive {
+				userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoicesAttributeMap["inclusive"] = types.BoolValue(true)
+			} else {
+				userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoicesAttributeMap["inclusive"] = types.BoolNull()
+			}
+
+			// --- End of Choices ---
+
+			// Create the final ObjectValue for this OneOf field
+			finalObj, userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoicesObjDiags := types.ObjectValue(
+				ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+				userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoicesAttributeMap,
+			)
+			response.Diagnostics.Append(userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoicesObjDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			// Assign the final object to the correct place (either the root model or a parent's attribute map)
+			apiDiscoveryUserDefinedApiDiscoveryPolicyModel.DefaultBehaviorChoice = finalObj
+		} else {
+			// The OneOf field is nil in the source spec, so set the Terraform object to null.
+			apiDiscoveryUserDefinedApiDiscoveryPolicyModel.DefaultBehaviorChoice = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceModelAttributeMap)
+		}
 
 		// resource specToModelNested ArrayOfPointerField --> DiscoveryRules
 		if len(userDefinedApiDiscoveryPolicyElement.GetDiscoveryRules()) > 0 {
 			// Step 1: Always create a slice of model structs from the spec data.
 			// This slice serves as an intermediate representation.
-			discoveryRulesElements := make([]ApiDiscoveryApiDiscoveryDiscoveryRule, 0, len(userDefinedApiDiscoveryPolicyElement.GetDiscoveryRules()))
+			discoveryRulesElements := make([]ApiDiscoveryDiscoveryRule, 0, len(userDefinedApiDiscoveryPolicyElement.GetDiscoveryRules()))
 			for _, discoveryRulesElement := range userDefinedApiDiscoveryPolicyElement.GetDiscoveryRules() {
-				apiDiscoveryApiDiscoveryDiscoveryRuleModel := ApiDiscoveryApiDiscoveryDiscoveryRule{}
+				apiDiscoveryDiscoveryRuleModel := ApiDiscoveryDiscoveryRule{}
+
+				// resource specToModelNested MapOfStringField --> Labels
+				if discoveryRulesElement.GetLabels() != nil {
+					// Filter out backend-injected keys during create/update to prevent Terraform core errors.
+					// They will be picked up during the next Read.
+					filteredMap := make(map[string]string)
+					for k, v := range discoveryRulesElement.GetLabels() {
+						if !strings.HasPrefix(k, "ves.io/") {
+							filteredMap[k] = v
+						}
+					}
+
+					if len(filteredMap) > 0 {
+						labelsMap, labelsDiags := types.MapValueFrom(ctx, types.StringType, filteredMap)
+						response.Diagnostics.Append(labelsDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+						apiDiscoveryDiscoveryRuleModel.Labels = labelsMap
+					} else {
+						apiDiscoveryDiscoveryRuleModel.Labels = types.MapNull(types.StringType)
+					}
+				} else {
+					// API returned nil (Protobuf omits empty maps). Set to null.
+					// Empty maps are prevented by mapvalidator.SizeAtLeast(1) in the schema.
+					apiDiscoveryDiscoveryRuleModel.Labels = types.MapNull(types.StringType)
+				}
 
 				// resource specToModelNested PointerField --> Metadata
 				if discoveryRulesElement.GetMetadata() != nil {
@@ -3027,14 +3346,6 @@ func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.
 
 					// Recursively populate the nested struct
 
-					// resource specToModelNested RequiredStringField --> Name
-					if metadataElement.GetName() != "" {
-						apiDiscoveryMessageMetaTypeModel.Name = types.StringValue(metadataElement.GetName())
-					} else {
-						// Empty string, set to null
-						apiDiscoveryMessageMetaTypeModel.Name = types.StringNull()
-					}
-
 					// resource specToModelNested StringField --> Description
 					if metadataElement.GetDescription() != "" {
 						apiDiscoveryMessageMetaTypeModel.Description = types.StringValue(metadataElement.GetDescription())
@@ -3043,13 +3354,21 @@ func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.
 						apiDiscoveryMessageMetaTypeModel.Description = types.StringNull()
 					}
 
+					// resource specToModelNested RequiredStringField --> Name
+					if metadataElement.GetName() != "" {
+						apiDiscoveryMessageMetaTypeModel.Name = types.StringValue(metadataElement.GetName())
+					} else {
+						// Empty string, set to null
+						apiDiscoveryMessageMetaTypeModel.Name = types.StringNull()
+					}
+
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					apiDiscoveryMessageMetaTypeModelObj, diags := types.ObjectValueFrom(ctx, ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesMetadataModelAttributeMap, apiDiscoveryMessageMetaTypeModel)
-					response.Diagnostics.Append(diags...)
+					apiDiscoveryMessageMetaTypeModelObj, apiDiscoveryMessageMetaTypeModelObjDiags := types.ObjectValueFrom(ctx, ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesMetadataModelAttributeMap, apiDiscoveryMessageMetaTypeModel)
+					response.Diagnostics.Append(apiDiscoveryMessageMetaTypeModelObjDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					apiDiscoveryApiDiscoveryDiscoveryRuleModel.Metadata = apiDiscoveryMessageMetaTypeModelObj
+					apiDiscoveryDiscoveryRuleModel.Metadata = apiDiscoveryMessageMetaTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -3058,123 +3377,16 @@ func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.
 					// because the API may always return a non-nil struct (with REDACTED values) for this field,
 					// making this else-branch unreachable. The child OneOf handles the actual healing.
 					// The target is a types.Object, so we use types.ObjectNull.
-					apiDiscoveryApiDiscoveryDiscoveryRuleModel.Metadata = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesMetadataModelAttributeMap)
+					apiDiscoveryDiscoveryRuleModel.Metadata = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesMetadataModelAttributeMap)
 				}
 
 				// resource specToModelNested PointerField --> RuleProperties
 				if discoveryRulesElement.GetRuleProperties() != nil {
 					// Create the nested Go struct
-					apiDiscoveryApiDiscoveryRulePropertiesModel := &ApiDiscoveryApiDiscoveryRuleProperties{}
+					apiDiscoveryRulePropsModel := &ApiDiscoveryRuleProps{}
 					rulePropertiesElement := discoveryRulesElement.GetRuleProperties()
 
 					// Recursively populate the nested struct
-
-					// resource specToModelNested RequiredOneOfField --> RuleTypeChoice
-					// GlobalSpecType
-					if rulePropertiesElement.GetRuleTypeChoice() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						rulePropertiesruleTypeChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates
-						rulePropertiesruleTypeChoiceChoices := rulePropertiesElement.GetRuleTypeChoice()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// resource specToModelNested PointerOfOneOfField --> Exclusion
-						// GlobalSpecType
-						// false
-						{
-							exclusionOptions, isExclusion := rulePropertiesruleTypeChoiceChoices.(*ves_io_schema_api_sec_api_discovery.RuleProperties_Exclusion)
-							exclusionAttributeMap := make(map[string]attr.Value)
-
-							if isExclusion && exclusionOptions != nil {
-
-								// resource specToModelNested RequiredOneOfField --> ActionChoice
-								// GlobalSpecType
-								if exclusionOptions.Exclusion.GetActionChoice() != nil {
-									// Create a temporary attribute map for the choices within this OneOf
-									exclusionactionChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-									// Define a variable for the spec choices to be passed down to nested templates
-									exclusionactionChoiceChoices := exclusionOptions.Exclusion.GetActionChoice()
-
-									// Process nested choices, populating the temporary attribute map
-
-									// resource specToModelNested BoolOfOneOfPointerField --> Ignore
-									_, isIgnore := exclusionactionChoiceChoices.(*ves_io_schema_api_sec_api_discovery.ExclusionConfig_Ignore)
-
-									if isIgnore {
-										exclusionactionChoiceChoicesAttributeMap["ignore"] = types.BoolValue(true)
-									} else {
-										exclusionactionChoiceChoicesAttributeMap["ignore"] = types.BoolNull()
-									}
-
-									// resource specToModelNested BoolOfOneOfPointerField --> Archive
-									_, isArchive := exclusionactionChoiceChoices.(*ves_io_schema_api_sec_api_discovery.ExclusionConfig_Archive)
-
-									if isArchive {
-										exclusionactionChoiceChoicesAttributeMap["archive"] = types.BoolValue(true)
-									} else {
-										exclusionactionChoiceChoicesAttributeMap["archive"] = types.BoolNull()
-									}
-
-									// --- End of Choices ---
-
-									// Create the final ObjectValue for this OneOf field
-									finalObj, exclusionactionChoiceChoicesObjDiags := types.ObjectValue(
-										ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTypeChoiceExclusionActionChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-										exclusionactionChoiceChoicesAttributeMap,
-									)
-									response.Diagnostics.Append(exclusionactionChoiceChoicesObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									exclusionAttributeMap["action_choice"] = finalObj
-								} else {
-									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									exclusionAttributeMap["action_choice"] = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTypeChoiceExclusionActionChoiceModelAttributeMap)
-								}
-
-								exclusionObj, diags := types.ObjectValue(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTypeChoiceExclusionModelAttributeMap, exclusionAttributeMap)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								rulePropertiesruleTypeChoiceChoicesAttributeMap["exclusion"] = exclusionObj
-							} else {
-								rulePropertiesruleTypeChoiceChoicesAttributeMap["exclusion"] = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTypeChoiceExclusionModelAttributeMap)
-							}
-						}
-
-						// resource specToModelNested BoolOfOneOfPointerField --> Inclusion
-						_, isInclusion := rulePropertiesruleTypeChoiceChoices.(*ves_io_schema_api_sec_api_discovery.RuleProperties_Inclusion)
-
-						if isInclusion {
-							rulePropertiesruleTypeChoiceChoicesAttributeMap["inclusion"] = types.BoolValue(true)
-						} else {
-							rulePropertiesruleTypeChoiceChoicesAttributeMap["inclusion"] = types.BoolNull()
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, rulePropertiesruleTypeChoiceChoicesObjDiags := types.ObjectValue(
-							ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTypeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-							rulePropertiesruleTypeChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(rulePropertiesruleTypeChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						apiDiscoveryApiDiscoveryRulePropertiesModel.RuleTypeChoice = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						apiDiscoveryApiDiscoveryRulePropertiesModel.RuleTypeChoice = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTypeChoiceModelAttributeMap)
-					}
 
 					// resource specToModelNested RequiredOneOfField --> Criteria
 					// GlobalSpecType
@@ -3191,57 +3403,62 @@ func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.
 						// GlobalSpecType
 						// false
 						{
-							httpHeaderCriteriaOptions, isHttpHeaderCriteria := rulePropertiescriteriaChoiceChoices.(*ves_io_schema_api_sec_api_discovery.RuleProperties_HttpHeaderCriteria)
+							httpHeaderCriteriaOptionsWrapper, isHttpHeaderCriteria := rulePropertiescriteriaChoiceChoices.(*ves_io_schema_api_sec_api_discovery.RuleProperties_HttpHeaderCriteria)
 							httpHeaderCriteriaAttributeMap := make(map[string]attr.Value)
 
-							if isHttpHeaderCriteria && httpHeaderCriteriaOptions != nil {
-
-								// resource specToModelNested EnumField --> Location
-								if httpHeaderCriteriaOptions.HttpHeaderCriteria.GetLocation().String() != "" {
-									stringValue := types.StringValue(httpHeaderCriteriaOptions.HttpHeaderCriteria.GetLocation().String())
-									stringSlice := []types.String{stringValue}
-									listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									httpHeaderCriteriaAttributeMap["location"] = listValue
-								} else {
-									httpHeaderCriteriaAttributeMap["location"] = types.ListNull(types.StringType)
-								}
+							if isHttpHeaderCriteria && httpHeaderCriteriaOptionsWrapper != nil && httpHeaderCriteriaOptionsWrapper.HttpHeaderCriteria != nil {
+								httpHeaderCriteriaElement := httpHeaderCriteriaOptionsWrapper.HttpHeaderCriteria
 
 								// resource specToModelNested RequiredStringField --> FieldName
-								if httpHeaderCriteriaOptions.HttpHeaderCriteria.GetFieldName() != "" {
-									httpHeaderCriteriaAttributeMap["field_name"] = types.StringValue(httpHeaderCriteriaOptions.HttpHeaderCriteria.GetFieldName())
+								if httpHeaderCriteriaElement.GetFieldName() != "" {
+									httpHeaderCriteriaAttributeMap["field_name"] = types.StringValue(httpHeaderCriteriaElement.GetFieldName())
 								} else {
 									// Empty string, set to null
 									httpHeaderCriteriaAttributeMap["field_name"] = types.StringNull()
 								}
 
-								// resource specToModelNested EnumField --> MatchType
-								if httpHeaderCriteriaOptions.HttpHeaderCriteria.GetMatchType().String() != "" {
-									stringValue := types.StringValue(httpHeaderCriteriaOptions.HttpHeaderCriteria.GetMatchType().String())
-									stringSlice := []types.String{stringValue}
-									listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
+								// resource specToModelNested EnumField --> Location
+								{
+									if httpHeaderCriteriaElement.GetLocation().String() != "" {
+										stringValue := types.StringValue(httpHeaderCriteriaElement.GetLocation().String())
+										stringSlice := []types.String{stringValue}
+										listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+										response.Diagnostics.Append(listDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										httpHeaderCriteriaAttributeMap["location"] = listValue
+									} else {
+										httpHeaderCriteriaAttributeMap["location"] = types.ListNull(types.StringType)
 									}
-									httpHeaderCriteriaAttributeMap["match_type"] = listValue
-								} else {
-									httpHeaderCriteriaAttributeMap["match_type"] = types.ListNull(types.StringType)
+								}
+
+								// resource specToModelNested EnumField --> MatchType
+								{
+									if httpHeaderCriteriaElement.GetMatchType().String() != "" {
+										stringValue := types.StringValue(httpHeaderCriteriaElement.GetMatchType().String())
+										stringSlice := []types.String{stringValue}
+										listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+										response.Diagnostics.Append(listDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+										httpHeaderCriteriaAttributeMap["match_type"] = listValue
+									} else {
+										httpHeaderCriteriaAttributeMap["match_type"] = types.ListNull(types.StringType)
+									}
 								}
 
 								// resource specToModelNested RequiredStringField --> Value
-								if httpHeaderCriteriaOptions.HttpHeaderCriteria.GetValue() != "" {
-									httpHeaderCriteriaAttributeMap["value"] = types.StringValue(httpHeaderCriteriaOptions.HttpHeaderCriteria.GetValue())
+								if httpHeaderCriteriaElement.GetValue() != "" {
+									httpHeaderCriteriaAttributeMap["value"] = types.StringValue(httpHeaderCriteriaElement.GetValue())
 								} else {
 									// Empty string, set to null
 									httpHeaderCriteriaAttributeMap["value"] = types.StringNull()
 								}
 
-								httpHeaderCriteriaObj, diags := types.ObjectValue(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesCriteriaHttpHeaderCriteriaModelAttributeMap, httpHeaderCriteriaAttributeMap)
-								response.Diagnostics.Append(diags...)
+								httpHeaderCriteriaObj, httpHeaderCriteriaObjDiags := types.ObjectValue(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesCriteriaHttpHeaderCriteriaModelAttributeMap, httpHeaderCriteriaAttributeMap)
+								response.Diagnostics.Append(httpHeaderCriteriaObjDiags...)
 								if response.Diagnostics.HasError() {
 									return
 								}
@@ -3274,19 +3491,127 @@ func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.
 						}
 
 						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						apiDiscoveryApiDiscoveryRulePropertiesModel.CriteriaChoice = finalObj
+						apiDiscoveryRulePropsModel.CriteriaChoice = finalObj
 					} else {
 						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						apiDiscoveryApiDiscoveryRulePropertiesModel.CriteriaChoice = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesCriteriaModelAttributeMap)
+						apiDiscoveryRulePropsModel.CriteriaChoice = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesCriteriaModelAttributeMap)
+					}
+
+					// resource specToModelNested RequiredOneOfField --> RuleTypeChoice
+					// GlobalSpecType
+					if rulePropertiesElement.GetRuleTypeChoice() != nil {
+						// Create a temporary attribute map for the choices within this OneOf
+						rulePropertiesruleTypeChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+						// Define a variable for the spec choices to be passed down to nested templates
+						rulePropertiesruleTypeChoiceChoices := rulePropertiesElement.GetRuleTypeChoice()
+
+						// Process nested choices, populating the temporary attribute map
+
+						// resource specToModelNested PointerOfOneOfField --> Exclusion
+						// GlobalSpecType
+						// false
+						{
+							exclusionOptionsWrapper, isExclusion := rulePropertiesruleTypeChoiceChoices.(*ves_io_schema_api_sec_api_discovery.RuleProperties_Exclusion)
+							exclusionAttributeMap := make(map[string]attr.Value)
+
+							if isExclusion && exclusionOptionsWrapper != nil && exclusionOptionsWrapper.Exclusion != nil {
+								exclusionElement := exclusionOptionsWrapper.Exclusion
+
+								// resource specToModelNested RequiredOneOfField --> ActionChoice
+								// GlobalSpecType
+								if exclusionElement.GetActionChoice() != nil {
+									// Create a temporary attribute map for the choices within this OneOf
+									exclusionactionChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+									// Define a variable for the spec choices to be passed down to nested templates
+									exclusionactionChoiceChoices := exclusionElement.GetActionChoice()
+
+									// Process nested choices, populating the temporary attribute map
+
+									// resource specToModelNested BoolOfOneOfPointerField --> Archive
+									_, isArchive := exclusionactionChoiceChoices.(*ves_io_schema_api_sec_api_discovery.ExclusionConfig_Archive)
+
+									if isArchive {
+										exclusionactionChoiceChoicesAttributeMap["archive"] = types.BoolValue(true)
+									} else {
+										exclusionactionChoiceChoicesAttributeMap["archive"] = types.BoolNull()
+									}
+
+									// resource specToModelNested BoolOfOneOfPointerField --> Ignore
+									_, isIgnore := exclusionactionChoiceChoices.(*ves_io_schema_api_sec_api_discovery.ExclusionConfig_Ignore)
+
+									if isIgnore {
+										exclusionactionChoiceChoicesAttributeMap["ignore"] = types.BoolValue(true)
+									} else {
+										exclusionactionChoiceChoicesAttributeMap["ignore"] = types.BoolNull()
+									}
+
+									// --- End of Choices ---
+
+									// Create the final ObjectValue for this OneOf field
+									finalObj, exclusionactionChoiceChoicesObjDiags := types.ObjectValue(
+										ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTypeChoiceExclusionActionChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+										exclusionactionChoiceChoicesAttributeMap,
+									)
+									response.Diagnostics.Append(exclusionactionChoiceChoicesObjDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+
+									// Assign the final object to the correct place (either the root model or a parent's attribute map)
+									exclusionAttributeMap["action_choice"] = finalObj
+								} else {
+									// The OneOf field is nil in the source spec, so set the Terraform object to null.
+									exclusionAttributeMap["action_choice"] = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTypeChoiceExclusionActionChoiceModelAttributeMap)
+								}
+
+								exclusionObj, exclusionObjDiags := types.ObjectValue(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTypeChoiceExclusionModelAttributeMap, exclusionAttributeMap)
+								response.Diagnostics.Append(exclusionObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								rulePropertiesruleTypeChoiceChoicesAttributeMap["exclusion"] = exclusionObj
+							} else {
+								rulePropertiesruleTypeChoiceChoicesAttributeMap["exclusion"] = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTypeChoiceExclusionModelAttributeMap)
+							}
+						}
+
+						// resource specToModelNested BoolOfOneOfPointerField --> Inclusion
+						_, isInclusion := rulePropertiesruleTypeChoiceChoices.(*ves_io_schema_api_sec_api_discovery.RuleProperties_Inclusion)
+
+						if isInclusion {
+							rulePropertiesruleTypeChoiceChoicesAttributeMap["inclusion"] = types.BoolValue(true)
+						} else {
+							rulePropertiesruleTypeChoiceChoicesAttributeMap["inclusion"] = types.BoolNull()
+						}
+
+						// --- End of Choices ---
+
+						// Create the final ObjectValue for this OneOf field
+						finalObj, rulePropertiesruleTypeChoiceChoicesObjDiags := types.ObjectValue(
+							ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTypeChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+							rulePropertiesruleTypeChoiceChoicesAttributeMap,
+						)
+						response.Diagnostics.Append(rulePropertiesruleTypeChoiceChoicesObjDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						// Assign the final object to the correct place (either the root model or a parent's attribute map)
+						apiDiscoveryRulePropsModel.RuleTypeChoice = finalObj
+					} else {
+						// The OneOf field is nil in the source spec, so set the Terraform object to null.
+						apiDiscoveryRulePropsModel.RuleTypeChoice = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesRuleTypeChoiceModelAttributeMap)
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					apiDiscoveryApiDiscoveryRulePropertiesModelObj, diags := types.ObjectValueFrom(ctx, ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesModelAttributeMap, apiDiscoveryApiDiscoveryRulePropertiesModel)
-					response.Diagnostics.Append(diags...)
+					apiDiscoveryRulePropsModelObj, apiDiscoveryRulePropsModelObjDiags := types.ObjectValueFrom(ctx, ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesModelAttributeMap, apiDiscoveryRulePropsModel)
+					response.Diagnostics.Append(apiDiscoveryRulePropsModelObjDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					apiDiscoveryApiDiscoveryDiscoveryRuleModel.RuleProperties = apiDiscoveryApiDiscoveryRulePropertiesModelObj
+					apiDiscoveryDiscoveryRuleModel.RuleProperties = apiDiscoveryRulePropsModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -3295,153 +3620,31 @@ func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.
 					// because the API may always return a non-nil struct (with REDACTED values) for this field,
 					// making this else-branch unreachable. The child OneOf handles the actual healing.
 					// The target is a types.Object, so we use types.ObjectNull.
-					apiDiscoveryApiDiscoveryDiscoveryRuleModel.RuleProperties = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesModelAttributeMap)
+					apiDiscoveryDiscoveryRuleModel.RuleProperties = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesRulePropertiesModelAttributeMap)
 				}
 
-				// resource specToModelNested MapOfStringField --> Labels
-				if discoveryRulesElement.GetLabels() != nil {
-					// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-					labelsMap, labelsDiags := utils.StringMapToTerraformMap(discoveryRulesElement.GetLabels())
-					response.Diagnostics.Append(labelsDiags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					// Assign the typed map to the model
-					apiDiscoveryApiDiscoveryDiscoveryRuleModel.Labels = labelsMap
-				} else {
-					// Ensure the state reflects a Null map with the correct element type to avoid DynamicPseudoType errors
-					apiDiscoveryApiDiscoveryDiscoveryRuleModel.Labels = types.MapNull(types.StringType)
-				}
-
-				discoveryRulesElements = append(discoveryRulesElements, apiDiscoveryApiDiscoveryDiscoveryRuleModel)
+				discoveryRulesElements = append(discoveryRulesElements, apiDiscoveryDiscoveryRuleModel)
 			}
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// The intermediate slice of structs must be converted to a `types.ListValue`.
-			discoveryRulesListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesModelAttributeMap}, discoveryRulesElements)
-			response.Diagnostics.Append(diags...)
+			discoveryRulesListValue, discoveryRulesListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesModelAttributeMap}, discoveryRulesElements)
+			response.Diagnostics.Append(discoveryRulesListDiags...)
 			if response.Diagnostics.HasError() {
 				return
 			}
-			apiDiscoveryApiDiscoveryUserDefinedApiDiscoveryPolicyModel.DiscoveryRules = discoveryRulesListValue
+			apiDiscoveryUserDefinedApiDiscoveryPolicyModel.DiscoveryRules = discoveryRulesListValue
 
 		} else {
 			// The source list is empty or nil.
 			// CASE 1: The target field is a `types.List` or an attribute map.
 			// Assign a null `types.ListValue`.
-			apiDiscoveryApiDiscoveryUserDefinedApiDiscoveryPolicyModel.DiscoveryRules = types.ListNull(types.ObjectType{AttrTypes: ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesModelAttributeMap})
-		}
-
-		// resource specToModelNested RequiredOneOfField --> DefaultBehaviorChoice
-		// GlobalSpecType
-		if userDefinedApiDiscoveryPolicyElement.GetDefaultBehaviorChoice() != nil {
-			// Create a temporary attribute map for the choices within this OneOf
-			userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-			// Define a variable for the spec choices to be passed down to nested templates
-			userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoices := userDefinedApiDiscoveryPolicyElement.GetDefaultBehaviorChoice()
-
-			// Process nested choices, populating the temporary attribute map
-
-			// resource specToModelNested BoolOfOneOfPointerField --> Inclusive
-			_, isInclusive := userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoices.(*ves_io_schema_api_sec_api_discovery.UserDefinedApiDiscoveryPolicy_Inclusive)
-
-			if isInclusive {
-				userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoicesAttributeMap["inclusive"] = types.BoolValue(true)
-			} else {
-				userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoicesAttributeMap["inclusive"] = types.BoolNull()
-			}
-
-			// resource specToModelNested PointerOfOneOfField --> Exclusive
-			// GlobalSpecType
-			// false
-			{
-				exclusiveOptions, isExclusive := userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoices.(*ves_io_schema_api_sec_api_discovery.UserDefinedApiDiscoveryPolicy_Exclusive)
-				exclusiveAttributeMap := make(map[string]attr.Value)
-
-				if isExclusive && exclusiveOptions != nil {
-
-					// resource specToModelNested RequiredOneOfField --> ActionChoice
-					// GlobalSpecType
-					if exclusiveOptions.Exclusive.GetActionChoice() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						exclusiveactionChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates
-						exclusiveactionChoiceChoices := exclusiveOptions.Exclusive.GetActionChoice()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// resource specToModelNested BoolOfOneOfPointerField --> Ignore
-						_, isIgnore := exclusiveactionChoiceChoices.(*ves_io_schema_api_sec_api_discovery.ExclusionConfig_Ignore)
-
-						if isIgnore {
-							exclusiveactionChoiceChoicesAttributeMap["ignore"] = types.BoolValue(true)
-						} else {
-							exclusiveactionChoiceChoicesAttributeMap["ignore"] = types.BoolNull()
-						}
-
-						// resource specToModelNested BoolOfOneOfPointerField --> Archive
-						_, isArchive := exclusiveactionChoiceChoices.(*ves_io_schema_api_sec_api_discovery.ExclusionConfig_Archive)
-
-						if isArchive {
-							exclusiveactionChoiceChoicesAttributeMap["archive"] = types.BoolValue(true)
-						} else {
-							exclusiveactionChoiceChoicesAttributeMap["archive"] = types.BoolNull()
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, exclusiveactionChoiceChoicesObjDiags := types.ObjectValue(
-							ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceExclusiveActionChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-							exclusiveactionChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(exclusiveactionChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						exclusiveAttributeMap["action_choice"] = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						exclusiveAttributeMap["action_choice"] = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceExclusiveActionChoiceModelAttributeMap)
-					}
-
-					exclusiveObj, diags := types.ObjectValue(ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceExclusiveModelAttributeMap, exclusiveAttributeMap)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoicesAttributeMap["exclusive"] = exclusiveObj
-				} else {
-					userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoicesAttributeMap["exclusive"] = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceExclusiveModelAttributeMap)
-				}
-			}
-
-			// --- End of Choices ---
-
-			// Create the final ObjectValue for this OneOf field
-			finalObj, userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoicesObjDiags := types.ObjectValue(
-				ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-				userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoicesAttributeMap,
-			)
-			response.Diagnostics.Append(userDefinedApiDiscoveryPolicydefaultBehaviorChoiceChoicesObjDiags...)
-			if response.Diagnostics.HasError() {
-				return
-			}
-
-			// Assign the final object to the correct place (either the root model or a parent's attribute map)
-			apiDiscoveryApiDiscoveryUserDefinedApiDiscoveryPolicyModel.DefaultBehaviorChoice = finalObj
-		} else {
-			// The OneOf field is nil in the source spec, so set the Terraform object to null.
-			apiDiscoveryApiDiscoveryUserDefinedApiDiscoveryPolicyModel.DefaultBehaviorChoice = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyDefaultBehaviorChoiceModelAttributeMap)
+			apiDiscoveryUserDefinedApiDiscoveryPolicyModel.DiscoveryRules = types.ListNull(types.ObjectType{AttrTypes: ApiDiscoveryUserDefinedApiDiscoveryPolicyDiscoveryRulesModelAttributeMap})
 		}
 
 		userDefinedApiDiscoveryPolicyObj, userDefinedApiDiscoveryPolicyDiags := utils.GoStructToObjectValue(
 			ctx,
 			ApiDiscoveryUserDefinedApiDiscoveryPolicyModelAttributeMap,
-			apiDiscoveryApiDiscoveryUserDefinedApiDiscoveryPolicyModel,
+			apiDiscoveryUserDefinedApiDiscoveryPolicyModel,
 		)
 		response.Diagnostics.Append(userDefinedApiDiscoveryPolicyDiags...)
 		if response.Diagnostics.HasError() {
@@ -3450,6 +3653,32 @@ func (r *ResourceF5XCApiDiscovery) Update(ctx context.Context, request resource.
 		data.UserDefinedApiDiscoveryPolicy = userDefinedApiDiscoveryPolicyObj
 	} else {
 		data.UserDefinedApiDiscoveryPolicy = types.ObjectNull(ApiDiscoveryUserDefinedApiDiscoveryPolicyModelAttributeMap)
+	}
+
+	// Restore the merged value for Optional+Computed map meta-attributes.
+	// MapMergeModifier sets plan = prior state on Update so that Terraform Core's
+	// constraint (plan must equal config or prior state) is satisfied.
+	// We merge planX (prior state, contains backend-injected keys such as
+	// "ves.io/config-propagation-destination") with configData.X (user-intent values,
+	// config wins on conflict) so that:
+	//   (a) backend-injected keys from prior state are preserved in state, and
+	//   (b) user-changed values (e.g. "version":"v1" → "v2") are reflected immediately
+	//       without waiting for the next Read — fixing ImportStateVerify failures.
+	{
+		mergedMap, mergeDiags := utils.MergeStringMaps(planAnnotations, configData.Annotations)
+		response.Diagnostics.Append(mergeDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.Annotations = mergedMap
+	}
+	{
+		mergedMap, mergeDiags := utils.MergeStringMaps(planLabels, configData.Labels)
+		response.Diagnostics.Append(mergeDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.Labels = mergedMap
 	}
 
 	// Save updated data into Terraform state
@@ -3486,9 +3715,8 @@ func (r *ResourceF5XCApiDiscovery) Delete(ctx context.Context, request resource.
 	defer cancel()
 
 	// Standard Delete Logic
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
+	opts := []vesapi.CallOpt{}
+	opts = append(opts, vesapi.WithFailIfReferred())
 
 	err = r.client.DeleteObject(ctx, ves_io_schema_api_sec_api_discovery.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 
@@ -3503,19 +3731,32 @@ func (r *ResourceF5XCApiDiscovery) Delete(ctx context.Context, request resource.
 		)
 		return
 	}
-}
 
+}
 func (r *ResourceF5XCApiDiscovery) ImportState(ctx context.Context, req resource.ImportStateRequest, response *resource.ImportStateResponse) {
 	// Import ID format: namespace/name
 	parts := strings.Split(req.ID, "/")
-	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+	if len(parts) != 2 {
 		response.Diagnostics.AddError(
 			"Invalid Import ID",
 			fmt.Sprintf("Expected import ID format: namespace/name, got: %s", req.ID),
 		)
 		return
 	}
-
+	if parts[0] == "" {
+		response.Diagnostics.AddError(
+			"Invalid Import ID",
+			fmt.Sprintf("Expected import ID format: namespace/name, got: %s (namespace is empty)", req.ID),
+		)
+		return
+	}
 	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("namespace"), parts[0])...)
+	if parts[1] == "" {
+		response.Diagnostics.AddError(
+			"Invalid Import ID",
+			fmt.Sprintf("Expected import ID format: namespace/name, got: %s (name is empty)", req.ID),
+		)
+		return
+	}
 	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("name"), parts[1])...)
 }

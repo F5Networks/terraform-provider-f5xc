@@ -17,3 +17,7 @@ go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs generate \
   --examples-dir ../../f5xc/terraform/tpf/examples \
   --rendered-website-dir ../../f5xc/terraform/tpf/docs \
   --website-source-dir ../../f5xc/terraform/tpf/templates
+
+# Run post-processing to inject subcategories and API reference links from categories.yaml
+echo "Post-processing generated documentation..."
+go run post_process_docs.go

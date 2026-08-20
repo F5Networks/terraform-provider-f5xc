@@ -1689,10 +1689,7 @@ var APISwaggerJSON string = `{
         "description": "Rate limiter policy defines parameters that can be used for fine-grained control over requests for a http load balancer that are subjected to rate limiting.\n\nIt will create the following child objects.\n\n* service_policy\n* service_policy_rule",
         "version": "version not set"
     },
-    "schemes": [
-        "http",
-        "https"
-    ],
+    "schemes": null,
     "consumes": [
         "application/json"
     ],
@@ -1759,6 +1756,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1851,6 +1854,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1951,6 +1960,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2068,6 +2083,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2170,6 +2191,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2612,7 +2639,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Invert the match result.",
                     "title": "invert_matcher",
-                    "format": "boolean",
                     "x-displayname": "Invert Match Result"
                 }
             }
@@ -2628,7 +2654,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Invert the match result.",
                     "title": "invert_matcher",
-                    "format": "boolean",
                     "x-displayname": "Invert Method Matcher"
                 },
                 "methods": {
@@ -2660,7 +2685,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Invert the match result.",
                     "title": "invert_matcher",
-                    "format": "boolean",
                     "x-displayname": "Invert IP Matcher"
                 },
                 "prefix_sets": {
@@ -2797,7 +2821,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Invert the match result.",
                     "title": "invert_matcher",
-                    "format": "boolean",
                     "x-displayname": "Invert Match Result"
                 },
                 "ip_prefixes": {
@@ -2967,7 +2990,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Fail the delete operation if this object is being referred by other objects",
                     "title": "fail_if_referred",
-                    "format": "boolean",
                     "x-displayname": "Fail-If-Referred"
                 },
                 "name": {
@@ -3126,7 +3148,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true indicates rate_limiter_policy is administratively disabled",
                     "title": "disabled",
-                    "format": "boolean",
                     "x-displayname": "Disabled"
                 },
                 "get_spec": {
@@ -3282,6 +3303,27 @@ var APISwaggerJSON string = `{
                         "$ref": "#/definitions/ioschemaObjectRefType"
                     },
                     "x-displayname": "Config Object"
+                }
+            }
+        },
+        "runtimeError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/protobufAny"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
                 }
             }
         },
@@ -3545,7 +3587,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "labels": {
@@ -3609,7 +3650,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable",
                     "x-ves-example": "true"
                 },
@@ -3675,7 +3715,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "labels": {
@@ -3761,7 +3800,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Indicate whether mars deems this object to be stale via graceful restart timer information",
                     "title": "vtrp_stale",
-                    "format": "boolean",
                     "x-displayname": "VTRP Stale"
                 }
             }
@@ -3966,7 +4004,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Invert the match result.",
                     "title": "invert_matcher",
-                    "format": "boolean",
                     "x-displayname": "Invert Header Matcher"
                 },
                 "item": {
@@ -4002,7 +4039,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": "Match against the encoded, escaped path\n\nExample: - \"match \\\"/path/%20another%20path\\\" instead of default \\\"/path/ another path\\\"\"-",
                     "title": "Encoded_Path",
-                    "format": "boolean",
                     "x-displayname": "Match Encoded Path",
                     "x-ves-example": "match \\\"/path/%20another%20path\\\" instead of default \\\"/path/ another path\\\""
                 },
@@ -4029,7 +4065,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Invert the match result.",
                     "title": "invert_matcher",
-                    "format": "boolean",
                     "x-displayname": "Invert Path Matcher"
                 },
                 "prefix_values": {

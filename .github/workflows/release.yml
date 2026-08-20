@@ -9,12 +9,19 @@ on:
   workflow_dispatch:
 
 jobs:
+  goreleaser:
+    name: GoReleaser
+    runs-on: self-hosted
+    # Ensure variables like GOPRIVATE are available for the build
+    env:
+      GOPRIVATE: "gopkg.volterra.us,gitlab.com/f5/*"
+      # GOTOOLCHAIN: "local"
+      GIT_TERMINAL_PROMPT: "0"
   sync-release:
     name: Sync GitLab Binaries to GitHub Release
     runs-on: ubuntu-latest
     permissions:
       contents: write
-
     steps:
       - name: Download binaries from GitLab Package Registry
         env:

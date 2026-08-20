@@ -5,17 +5,18 @@ package healthcheck
 
 import (
 	fmt "fmt"
-	_ "github.com/gogo/protobuf/gogoproto"
-	proto "github.com/gogo/protobuf/proto"
-	github_com_gogo_protobuf_sortkeys "github.com/gogo/protobuf/sortkeys"
-	golang_proto "github.com/golang/protobuf/proto"
-	schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	io "io"
 	math "math"
 	math_bits "math/bits"
 	reflect "reflect"
 	strconv "strconv"
 	strings "strings"
+
+	_ "github.com/gogo/protobuf/gogoproto"
+	proto "github.com/gogo/protobuf/proto"
+	github_com_gogo_protobuf_sortkeys "github.com/gogo/protobuf/sortkeys"
+	golang_proto "github.com/golang/protobuf/proto"
+	schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -674,12 +675,15 @@ type GlobalSpecType struct {
 	// healthy. Note that during startup, only a single successful health check is
 	// required to mark a host healthy.
 	HealthyThreshold uint32 `protobuf:"varint,7,opt,name=healthy_threshold,json=healthyThreshold,proto3" json:"healthy_threshold,omitempty"`
-	// jitter percent
+	// jitter_choice
 	//
-	// x-displayName: "Jitter Percent"
-	// x-example: "25"
-	// Add a random amount of time as a percent value to the interval between successive healthcheck requests.
-	JitterPercent uint32 `protobuf:"varint,9,opt,name=jitter_percent,json=jitterPercent,proto3" json:"jitter_percent,omitempty"`
+	// x-displayName: "Jitter Configuration"
+	// Configure jitter as a percentage of the health check interval to add random variation between successive requests.
+	//
+	// Types that are valid to be assigned to JitterChoice:
+	//	*GlobalSpecType_DefaultJitter
+	//	*GlobalSpecType_JitterPercent
+	JitterChoice isGlobalSpecType_JitterChoice `protobuf_oneof:"jitter_choice"`
 }
 
 func (m *GlobalSpecType) Reset()      { *m = GlobalSpecType{} }
@@ -716,6 +720,12 @@ type isGlobalSpecType_HealthCheck interface {
 	MarshalTo([]byte) (int, error)
 	Size() int
 }
+type isGlobalSpecType_JitterChoice interface {
+	isGlobalSpecType_JitterChoice()
+	Equal(interface{}) bool
+	MarshalTo([]byte) (int, error)
+	Size() int
+}
 
 type GlobalSpecType_HttpHealthCheck struct {
 	HttpHealthCheck *HttpHealthCheck `protobuf:"bytes,1,opt,name=http_health_check,json=httpHealthCheck,proto3,oneof" json:"http_health_check,omitempty"`
@@ -738,6 +748,12 @@ type GlobalSpecType_DnsProxyIcmpHealthCheck struct {
 type GlobalSpecType_UdpIcmpHealthCheck struct {
 	UdpIcmpHealthCheck *schema.Empty `protobuf:"bytes,14,opt,name=udp_icmp_health_check,json=udpIcmpHealthCheck,proto3,oneof" json:"udp_icmp_health_check,omitempty"`
 }
+type GlobalSpecType_DefaultJitter struct {
+	DefaultJitter *schema.Empty `protobuf:"bytes,16,opt,name=default_jitter,json=defaultJitter,proto3,oneof" json:"default_jitter,omitempty"`
+}
+type GlobalSpecType_JitterPercent struct {
+	JitterPercent uint32 `protobuf:"varint,9,opt,name=jitter_percent,json=jitterPercent,proto3,oneof" json:"jitter_percent,omitempty"`
+}
 
 func (*GlobalSpecType_HttpHealthCheck) isGlobalSpecType_HealthCheck()         {}
 func (*GlobalSpecType_TcpHealthCheck) isGlobalSpecType_HealthCheck()          {}
@@ -746,10 +762,18 @@ func (*GlobalSpecType_DnsProxyUdpHealthCheck) isGlobalSpecType_HealthCheck()  {}
 func (*GlobalSpecType_DnsHealthCheck) isGlobalSpecType_HealthCheck()          {}
 func (*GlobalSpecType_DnsProxyIcmpHealthCheck) isGlobalSpecType_HealthCheck() {}
 func (*GlobalSpecType_UdpIcmpHealthCheck) isGlobalSpecType_HealthCheck()      {}
+func (*GlobalSpecType_DefaultJitter) isGlobalSpecType_JitterChoice()          {}
+func (*GlobalSpecType_JitterPercent) isGlobalSpecType_JitterChoice()          {}
 
 func (m *GlobalSpecType) GetHealthCheck() isGlobalSpecType_HealthCheck {
 	if m != nil {
 		return m.HealthCheck
+	}
+	return nil
+}
+func (m *GlobalSpecType) GetJitterChoice() isGlobalSpecType_JitterChoice {
+	if m != nil {
+		return m.JitterChoice
 	}
 	return nil
 }
@@ -838,9 +862,16 @@ func (m *GlobalSpecType) GetHealthyThreshold() uint32 {
 	return 0
 }
 
+func (m *GlobalSpecType) GetDefaultJitter() *schema.Empty {
+	if x, ok := m.GetJitterChoice().(*GlobalSpecType_DefaultJitter); ok {
+		return x.DefaultJitter
+	}
+	return nil
+}
+
 func (m *GlobalSpecType) GetJitterPercent() uint32 {
-	if m != nil {
-		return m.JitterPercent
+	if x, ok := m.GetJitterChoice().(*GlobalSpecType_JitterPercent); ok {
+		return x.JitterPercent
 	}
 	return 0
 }
@@ -855,6 +886,8 @@ func (*GlobalSpecType) XXX_OneofWrappers() []interface{} {
 		(*GlobalSpecType_DnsHealthCheck)(nil),
 		(*GlobalSpecType_DnsProxyIcmpHealthCheck)(nil),
 		(*GlobalSpecType_UdpIcmpHealthCheck)(nil),
+		(*GlobalSpecType_DefaultJitter)(nil),
+		(*GlobalSpecType_JitterPercent)(nil),
 	}
 }
 
@@ -877,7 +910,10 @@ type CreateSpecType struct {
 	Interval           uint32                       `protobuf:"varint,4,opt,name=interval,proto3" json:"interval,omitempty"`
 	UnhealthyThreshold uint32                       `protobuf:"varint,6,opt,name=unhealthy_threshold,json=unhealthyThreshold,proto3" json:"unhealthy_threshold,omitempty"`
 	HealthyThreshold   uint32                       `protobuf:"varint,7,opt,name=healthy_threshold,json=healthyThreshold,proto3" json:"healthy_threshold,omitempty"`
-	JitterPercent      uint32                       `protobuf:"varint,9,opt,name=jitter_percent,json=jitterPercent,proto3" json:"jitter_percent,omitempty"`
+	// Types that are valid to be assigned to JitterChoice:
+	//	*CreateSpecType_DefaultJitter
+	//	*CreateSpecType_JitterPercent
+	JitterChoice isCreateSpecType_JitterChoice `protobuf_oneof:"jitter_choice"`
 }
 
 func (m *CreateSpecType) Reset()      { *m = CreateSpecType{} }
@@ -914,6 +950,12 @@ type isCreateSpecType_HealthCheck interface {
 	MarshalTo([]byte) (int, error)
 	Size() int
 }
+type isCreateSpecType_JitterChoice interface {
+	isCreateSpecType_JitterChoice()
+	Equal(interface{}) bool
+	MarshalTo([]byte) (int, error)
+	Size() int
+}
 
 type CreateSpecType_HttpHealthCheck struct {
 	HttpHealthCheck *HttpHealthCheck `protobuf:"bytes,1,opt,name=http_health_check,json=httpHealthCheck,proto3,oneof" json:"http_health_check,omitempty"`
@@ -936,6 +978,12 @@ type CreateSpecType_DnsProxyIcmpHealthCheck struct {
 type CreateSpecType_UdpIcmpHealthCheck struct {
 	UdpIcmpHealthCheck *schema.Empty `protobuf:"bytes,14,opt,name=udp_icmp_health_check,json=udpIcmpHealthCheck,proto3,oneof" json:"udp_icmp_health_check,omitempty"`
 }
+type CreateSpecType_DefaultJitter struct {
+	DefaultJitter *schema.Empty `protobuf:"bytes,16,opt,name=default_jitter,json=defaultJitter,proto3,oneof" json:"default_jitter,omitempty"`
+}
+type CreateSpecType_JitterPercent struct {
+	JitterPercent uint32 `protobuf:"varint,9,opt,name=jitter_percent,json=jitterPercent,proto3,oneof" json:"jitter_percent,omitempty"`
+}
 
 func (*CreateSpecType_HttpHealthCheck) isCreateSpecType_HealthCheck()         {}
 func (*CreateSpecType_TcpHealthCheck) isCreateSpecType_HealthCheck()          {}
@@ -944,10 +992,18 @@ func (*CreateSpecType_DnsProxyUdpHealthCheck) isCreateSpecType_HealthCheck()  {}
 func (*CreateSpecType_DnsHealthCheck) isCreateSpecType_HealthCheck()          {}
 func (*CreateSpecType_DnsProxyIcmpHealthCheck) isCreateSpecType_HealthCheck() {}
 func (*CreateSpecType_UdpIcmpHealthCheck) isCreateSpecType_HealthCheck()      {}
+func (*CreateSpecType_DefaultJitter) isCreateSpecType_JitterChoice()          {}
+func (*CreateSpecType_JitterPercent) isCreateSpecType_JitterChoice()          {}
 
 func (m *CreateSpecType) GetHealthCheck() isCreateSpecType_HealthCheck {
 	if m != nil {
 		return m.HealthCheck
+	}
+	return nil
+}
+func (m *CreateSpecType) GetJitterChoice() isCreateSpecType_JitterChoice {
+	if m != nil {
+		return m.JitterChoice
 	}
 	return nil
 }
@@ -1029,9 +1085,16 @@ func (m *CreateSpecType) GetHealthyThreshold() uint32 {
 	return 0
 }
 
+func (m *CreateSpecType) GetDefaultJitter() *schema.Empty {
+	if x, ok := m.GetJitterChoice().(*CreateSpecType_DefaultJitter); ok {
+		return x.DefaultJitter
+	}
+	return nil
+}
+
 func (m *CreateSpecType) GetJitterPercent() uint32 {
-	if m != nil {
-		return m.JitterPercent
+	if x, ok := m.GetJitterChoice().(*CreateSpecType_JitterPercent); ok {
+		return x.JitterPercent
 	}
 	return 0
 }
@@ -1046,6 +1109,8 @@ func (*CreateSpecType) XXX_OneofWrappers() []interface{} {
 		(*CreateSpecType_DnsHealthCheck)(nil),
 		(*CreateSpecType_DnsProxyIcmpHealthCheck)(nil),
 		(*CreateSpecType_UdpIcmpHealthCheck)(nil),
+		(*CreateSpecType_DefaultJitter)(nil),
+		(*CreateSpecType_JitterPercent)(nil),
 	}
 }
 
@@ -1068,7 +1133,10 @@ type ReplaceSpecType struct {
 	Interval           uint32                        `protobuf:"varint,4,opt,name=interval,proto3" json:"interval,omitempty"`
 	UnhealthyThreshold uint32                        `protobuf:"varint,6,opt,name=unhealthy_threshold,json=unhealthyThreshold,proto3" json:"unhealthy_threshold,omitempty"`
 	HealthyThreshold   uint32                        `protobuf:"varint,7,opt,name=healthy_threshold,json=healthyThreshold,proto3" json:"healthy_threshold,omitempty"`
-	JitterPercent      uint32                        `protobuf:"varint,9,opt,name=jitter_percent,json=jitterPercent,proto3" json:"jitter_percent,omitempty"`
+	// Types that are valid to be assigned to JitterChoice:
+	//	*ReplaceSpecType_DefaultJitter
+	//	*ReplaceSpecType_JitterPercent
+	JitterChoice isReplaceSpecType_JitterChoice `protobuf_oneof:"jitter_choice"`
 }
 
 func (m *ReplaceSpecType) Reset()      { *m = ReplaceSpecType{} }
@@ -1105,6 +1173,12 @@ type isReplaceSpecType_HealthCheck interface {
 	MarshalTo([]byte) (int, error)
 	Size() int
 }
+type isReplaceSpecType_JitterChoice interface {
+	isReplaceSpecType_JitterChoice()
+	Equal(interface{}) bool
+	MarshalTo([]byte) (int, error)
+	Size() int
+}
 
 type ReplaceSpecType_HttpHealthCheck struct {
 	HttpHealthCheck *HttpHealthCheck `protobuf:"bytes,1,opt,name=http_health_check,json=httpHealthCheck,proto3,oneof" json:"http_health_check,omitempty"`
@@ -1127,6 +1201,12 @@ type ReplaceSpecType_DnsProxyIcmpHealthCheck struct {
 type ReplaceSpecType_UdpIcmpHealthCheck struct {
 	UdpIcmpHealthCheck *schema.Empty `protobuf:"bytes,14,opt,name=udp_icmp_health_check,json=udpIcmpHealthCheck,proto3,oneof" json:"udp_icmp_health_check,omitempty"`
 }
+type ReplaceSpecType_DefaultJitter struct {
+	DefaultJitter *schema.Empty `protobuf:"bytes,16,opt,name=default_jitter,json=defaultJitter,proto3,oneof" json:"default_jitter,omitempty"`
+}
+type ReplaceSpecType_JitterPercent struct {
+	JitterPercent uint32 `protobuf:"varint,9,opt,name=jitter_percent,json=jitterPercent,proto3,oneof" json:"jitter_percent,omitempty"`
+}
 
 func (*ReplaceSpecType_HttpHealthCheck) isReplaceSpecType_HealthCheck()         {}
 func (*ReplaceSpecType_TcpHealthCheck) isReplaceSpecType_HealthCheck()          {}
@@ -1135,10 +1215,18 @@ func (*ReplaceSpecType_DnsProxyUdpHealthCheck) isReplaceSpecType_HealthCheck()  
 func (*ReplaceSpecType_DnsHealthCheck) isReplaceSpecType_HealthCheck()          {}
 func (*ReplaceSpecType_DnsProxyIcmpHealthCheck) isReplaceSpecType_HealthCheck() {}
 func (*ReplaceSpecType_UdpIcmpHealthCheck) isReplaceSpecType_HealthCheck()      {}
+func (*ReplaceSpecType_DefaultJitter) isReplaceSpecType_JitterChoice()          {}
+func (*ReplaceSpecType_JitterPercent) isReplaceSpecType_JitterChoice()          {}
 
 func (m *ReplaceSpecType) GetHealthCheck() isReplaceSpecType_HealthCheck {
 	if m != nil {
 		return m.HealthCheck
+	}
+	return nil
+}
+func (m *ReplaceSpecType) GetJitterChoice() isReplaceSpecType_JitterChoice {
+	if m != nil {
+		return m.JitterChoice
 	}
 	return nil
 }
@@ -1220,9 +1308,16 @@ func (m *ReplaceSpecType) GetHealthyThreshold() uint32 {
 	return 0
 }
 
+func (m *ReplaceSpecType) GetDefaultJitter() *schema.Empty {
+	if x, ok := m.GetJitterChoice().(*ReplaceSpecType_DefaultJitter); ok {
+		return x.DefaultJitter
+	}
+	return nil
+}
+
 func (m *ReplaceSpecType) GetJitterPercent() uint32 {
-	if m != nil {
-		return m.JitterPercent
+	if x, ok := m.GetJitterChoice().(*ReplaceSpecType_JitterPercent); ok {
+		return x.JitterPercent
 	}
 	return 0
 }
@@ -1237,6 +1332,8 @@ func (*ReplaceSpecType) XXX_OneofWrappers() []interface{} {
 		(*ReplaceSpecType_DnsHealthCheck)(nil),
 		(*ReplaceSpecType_DnsProxyIcmpHealthCheck)(nil),
 		(*ReplaceSpecType_UdpIcmpHealthCheck)(nil),
+		(*ReplaceSpecType_DefaultJitter)(nil),
+		(*ReplaceSpecType_JitterPercent)(nil),
 	}
 }
 
@@ -1260,7 +1357,10 @@ type GetSpecType struct {
 	Jitter             uint32                    `protobuf:"varint,5,opt,name=jitter,proto3" json:"jitter,omitempty"`
 	UnhealthyThreshold uint32                    `protobuf:"varint,6,opt,name=unhealthy_threshold,json=unhealthyThreshold,proto3" json:"unhealthy_threshold,omitempty"`
 	HealthyThreshold   uint32                    `protobuf:"varint,7,opt,name=healthy_threshold,json=healthyThreshold,proto3" json:"healthy_threshold,omitempty"`
-	JitterPercent      uint32                    `protobuf:"varint,9,opt,name=jitter_percent,json=jitterPercent,proto3" json:"jitter_percent,omitempty"`
+	// Types that are valid to be assigned to JitterChoice:
+	//	*GetSpecType_DefaultJitter
+	//	*GetSpecType_JitterPercent
+	JitterChoice isGetSpecType_JitterChoice `protobuf_oneof:"jitter_choice"`
 }
 
 func (m *GetSpecType) Reset()      { *m = GetSpecType{} }
@@ -1297,6 +1397,12 @@ type isGetSpecType_HealthCheck interface {
 	MarshalTo([]byte) (int, error)
 	Size() int
 }
+type isGetSpecType_JitterChoice interface {
+	isGetSpecType_JitterChoice()
+	Equal(interface{}) bool
+	MarshalTo([]byte) (int, error)
+	Size() int
+}
 
 type GetSpecType_HttpHealthCheck struct {
 	HttpHealthCheck *HttpHealthCheck `protobuf:"bytes,1,opt,name=http_health_check,json=httpHealthCheck,proto3,oneof" json:"http_health_check,omitempty"`
@@ -1319,6 +1425,12 @@ type GetSpecType_DnsProxyIcmpHealthCheck struct {
 type GetSpecType_UdpIcmpHealthCheck struct {
 	UdpIcmpHealthCheck *schema.Empty `protobuf:"bytes,14,opt,name=udp_icmp_health_check,json=udpIcmpHealthCheck,proto3,oneof" json:"udp_icmp_health_check,omitempty"`
 }
+type GetSpecType_DefaultJitter struct {
+	DefaultJitter *schema.Empty `protobuf:"bytes,16,opt,name=default_jitter,json=defaultJitter,proto3,oneof" json:"default_jitter,omitempty"`
+}
+type GetSpecType_JitterPercent struct {
+	JitterPercent uint32 `protobuf:"varint,9,opt,name=jitter_percent,json=jitterPercent,proto3,oneof" json:"jitter_percent,omitempty"`
+}
 
 func (*GetSpecType_HttpHealthCheck) isGetSpecType_HealthCheck()         {}
 func (*GetSpecType_TcpHealthCheck) isGetSpecType_HealthCheck()          {}
@@ -1327,10 +1439,18 @@ func (*GetSpecType_DnsProxyUdpHealthCheck) isGetSpecType_HealthCheck()  {}
 func (*GetSpecType_DnsHealthCheck) isGetSpecType_HealthCheck()          {}
 func (*GetSpecType_DnsProxyIcmpHealthCheck) isGetSpecType_HealthCheck() {}
 func (*GetSpecType_UdpIcmpHealthCheck) isGetSpecType_HealthCheck()      {}
+func (*GetSpecType_DefaultJitter) isGetSpecType_JitterChoice()          {}
+func (*GetSpecType_JitterPercent) isGetSpecType_JitterChoice()          {}
 
 func (m *GetSpecType) GetHealthCheck() isGetSpecType_HealthCheck {
 	if m != nil {
 		return m.HealthCheck
+	}
+	return nil
+}
+func (m *GetSpecType) GetJitterChoice() isGetSpecType_JitterChoice {
+	if m != nil {
+		return m.JitterChoice
 	}
 	return nil
 }
@@ -1419,9 +1539,16 @@ func (m *GetSpecType) GetHealthyThreshold() uint32 {
 	return 0
 }
 
+func (m *GetSpecType) GetDefaultJitter() *schema.Empty {
+	if x, ok := m.GetJitterChoice().(*GetSpecType_DefaultJitter); ok {
+		return x.DefaultJitter
+	}
+	return nil
+}
+
 func (m *GetSpecType) GetJitterPercent() uint32 {
-	if m != nil {
-		return m.JitterPercent
+	if x, ok := m.GetJitterChoice().(*GetSpecType_JitterPercent); ok {
+		return x.JitterPercent
 	}
 	return 0
 }
@@ -1436,6 +1563,8 @@ func (*GetSpecType) XXX_OneofWrappers() []interface{} {
 		(*GetSpecType_DnsHealthCheck)(nil),
 		(*GetSpecType_DnsProxyIcmpHealthCheck)(nil),
 		(*GetSpecType_UdpIcmpHealthCheck)(nil),
+		(*GetSpecType_DefaultJitter)(nil),
+		(*GetSpecType_JitterPercent)(nil),
 	}
 }
 
@@ -1476,127 +1605,130 @@ func init() {
 }
 
 var fileDescriptor_1d9419355153b697 = []byte{
-	// 1905 bytes of a gzipped FileDescriptorProto
+	// 1966 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xec, 0x59, 0xcf, 0x6f, 0xdb, 0xc8,
-	0x15, 0xd6, 0x48, 0xb2, 0x24, 0x8f, 0x6c, 0x99, 0x9e, 0xf8, 0x07, 0xad, 0x04, 0x02, 0xd7, 0x68,
-	0x5a, 0xaf, 0x57, 0x91, 0x6c, 0x39, 0x8e, 0x13, 0x07, 0x08, 0x60, 0xda, 0xea, 0x3a, 0x1b, 0xc0,
-	0x76, 0x68, 0xb9, 0xd8, 0x14, 0xdb, 0x25, 0x68, 0x72, 0x62, 0xa9, 0x91, 0x44, 0x2e, 0x39, 0x52,
-	0xad, 0x00, 0x05, 0x8c, 0x1e, 0x16, 0xad, 0x5b, 0x14, 0x8b, 0x1c, 0xf7, 0xd4, 0x63, 0xff, 0x86,
-	0xd2, 0x87, 0x20, 0x68, 0x81, 0xa0, 0x27, 0x1f, 0x8d, 0x05, 0x0a, 0x24, 0xca, 0x25, 0xdd, 0x53,
-	0xb0, 0xa7, 0xa2, 0x97, 0x16, 0x33, 0x24, 0x65, 0x52, 0x96, 0xd5, 0xa0, 0xd8, 0xdd, 0x22, 0x85,
-	0x6f, 0x43, 0xce, 0x7b, 0xdf, 0xf7, 0xde, 0xcc, 0x7b, 0xdf, 0x0c, 0x48, 0x78, 0xb5, 0x89, 0xad,
-	0x5c, 0x45, 0xcf, 0x5b, 0x6a, 0x19, 0xd7, 0x94, 0x7c, 0x19, 0x2b, 0x55, 0x52, 0x56, 0xcb, 0x58,
-	0x7d, 0x94, 0x27, 0x2d, 0x03, 0x5b, 0x39, 0xc3, 0xd4, 0x89, 0x8e, 0xa6, 0x1c, 0xb3, 0x9c, 0x63,
-	0x96, 0xf3, 0x99, 0xa5, 0xaf, 0xed, 0x55, 0x48, 0xb9, 0xb1, 0x9b, 0x53, 0xf5, 0x5a, 0x7e, 0x4f,
-	0xdf, 0xd3, 0xf3, 0xcc, 0x63, 0xb7, 0xf1, 0x90, 0x3d, 0xb1, 0x07, 0x36, 0x72, 0x90, 0xd2, 0x93,
-	0x41, 0xc2, 0x3a, 0x26, 0xee, 0xc4, 0xe5, 0xe0, 0x84, 0x6e, 0x90, 0x8a, 0x5e, 0x77, 0xf9, 0xd3,
-	0x53, 0xc1, 0x49, 0x5f, 0x68, 0xe9, 0x2b, 0xc1, 0xa9, 0xa6, 0x52, 0xad, 0x68, 0x0a, 0xc1, 0xee,
-	0xac, 0xd0, 0x35, 0x5b, 0xc1, 0xbf, 0x90, 0x03, 0xd0, 0xd3, 0x7f, 0x4b, 0xc0, 0x91, 0x75, 0x42,
-	0x8c, 0x75, 0x96, 0xd3, 0x2a, 0xcd, 0x09, 0xdd, 0x83, 0x13, 0x0d, 0x0b, 0xcb, 0xba, 0x59, 0xd9,
-	0xab, 0xd4, 0x65, 0x0b, 0x9b, 0x4d, 0x6c, 0xca, 0x75, 0xa5, 0x86, 0xf9, 0xb8, 0x00, 0x66, 0x92,
-	0x85, 0xb1, 0x5c, 0x70, 0x3d, 0x8a, 0x35, 0x83, 0xb4, 0xd6, 0x43, 0xd2, 0xa5, 0x86, 0x85, 0x37,
-	0x99, 0xd3, 0x36, 0xf3, 0xd9, 0x50, 0x6a, 0x18, 0xdd, 0x86, 0xc9, 0xb2, 0x6e, 0x11, 0xb9, 0x8c,
-	0x15, 0x0d, 0x9b, 0x3c, 0x10, 0xc0, 0xcc, 0xa0, 0xc8, 0xff, 0xc3, 0x06, 0xa1, 0x3f, 0xfd, 0xfd,
-	0x69, 0x64, 0xc0, 0x8c, 0xf0, 0x9f, 0x87, 0xdd, 0xd1, 0x0b, 0x00, 0xd6, 0x43, 0x12, 0xa4, 0xe6,
-	0xeb, 0xcc, 0x1a, 0xa9, 0x30, 0x6a, 0x28, 0xa4, 0xcc, 0x87, 0x99, 0xd7, 0xe6, 0x57, 0x36, 0x00,
-	0xf9, 0xb6, 0x0d, 0x16, 0x21, 0xc8, 0xc3, 0xb8, 0xbb, 0x5d, 0x70, 0xc8, 0xbf, 0x6f, 0x30, 0xe1,
-	0x3e, 0x3d, 0x86, 0xb1, 0x7c, 0xb5, 0xd2, 0xc4, 0x8f, 0x61, 0x3c, 0x6f, 0x62, 0x45, 0x6b, 0x3d,
-	0xf6, 0x38, 0x13, 0x66, 0x8c, 0x3f, 0xe0, 0x5e, 0x87, 0x81, 0xc4, 0xc0, 0x51, 0x3b, 0x0c, 0xe3,
-	0x4e, 0x74, 0x16, 0x1f, 0x11, 0x22, 0x33, 0xc9, 0xc2, 0x52, 0xee, 0xdc, 0x0d, 0xcf, 0x75, 0x2d,
-	0x56, 0xce, 0x89, 0xd4, 0x2a, 0xd6, 0x89, 0xd9, 0x12, 0x7f, 0x1f, 0x7e, 0x6a, 0x03, 0x40, 0x49,
-	0x86, 0xbe, 0x04, 0x83, 0xd3, 0x71, 0x73, 0x80, 0x03, 0xfc, 0x81, 0x93, 0xdf, 0x97, 0x20, 0xcc,
-	0x71, 0xde, 0xd4, 0xac, 0x3b, 0xc5, 0xb5, 0x5f, 0xfc, 0x25, 0x22, 0x1c, 0x1e, 0x81, 0x2b, 0x28,
-	0xfd, 0xb5, 0x0d, 0x26, 0xd6, 0x4b, 0xa5, 0x2d, 0xc1, 0x09, 0x46, 0x78, 0x84, 0x5b, 0x82, 0x45,
-	0xcc, 0x4a, 0x7d, 0x8f, 0x1a, 0x4d, 0x1d, 0x1e, 0x81, 0x71, 0x74, 0xa9, 0x6d, 0x83, 0x11, 0x66,
-	0xe4, 0xf0, 0x0a, 0xf7, 0x70, 0x8b, 0xce, 0xc2, 0xc3, 0x23, 0x10, 0x43, 0xd1, 0xe7, 0x36, 0x08,
-	0xd1, 0xc7, 0xd8, 0xe1, 0x11, 0x08, 0x27, 0x00, 0x1d, 0xde, 0x39, 0x3c, 0x02, 0xcb, 0xe9, 0x9b,
-	0x5f, 0xdb, 0xe0, 0xfa, 0x36, 0x03, 0x13, 0xf4, 0x87, 0x82, 0xaa, 0xd7, 0x6a, 0x8a, 0x60, 0x61,
-	0x43, 0x31, 0x15, 0x82, 0x35, 0xa1, 0x5a, 0xb1, 0x08, 0x7d, 0xef, 0xa7, 0x6f, 0x2a, 0xd5, 0x06,
-	0xb6, 0x28, 0xc4, 0xe5, 0xc3, 0x23, 0x30, 0x99, 0x1e, 0x6f, 0xdb, 0x60, 0xd4, 0x4f, 0xfd, 0x13,
-	0x6a, 0xd0, 0x21, 0x4f, 0x53, 0xf2, 0x88, 0xef, 0x91, 0xae, 0x84, 0xe4, 0x2d, 0x2c, 0xfa, 0x04,
-	0x4e, 0x99, 0xf8, 0xb3, 0x06, 0xee, 0x54, 0x82, 0x25, 0x13, 0x5d, 0x36, 0x71, 0x4d, 0x6f, 0x62,
-	0x3e, 0x2a, 0x44, 0x66, 0x06, 0xc5, 0xf7, 0xa8, 0x87, 0xb7, 0x49, 0xf0, 0x09, 0x88, 0x4f, 0xd3,
-	0xea, 0x70, 0x57, 0xef, 0x09, 0x5d, 0x3d, 0x69, 0xc2, 0xc5, 0x70, 0x17, 0xbd, 0xa4, 0x4b, 0x0c,
-	0x00, 0xbd, 0x07, 0x07, 0x69, 0xc5, 0x96, 0x09, 0x31, 0x0a, 0xfc, 0x80, 0x00, 0x66, 0x12, 0x62,
-	0x94, 0x22, 0x49, 0x89, 0x86, 0x85, 0xe9, 0x8e, 0x15, 0x50, 0x13, 0x8e, 0xe3, 0x7d, 0x03, 0xab,
-	0x04, 0x6b, 0xb2, 0x45, 0x14, 0xd2, 0xb0, 0x64, 0x55, 0xd7, 0xb0, 0xc5, 0x27, 0x18, 0xb9, 0x48,
-	0xc9, 0xbf, 0xb2, 0x41, 0xa4, 0x30, 0x37, 0xe7, 0xc5, 0x90, 0x7c, 0x02, 0x12, 0xd3, 0x31, 0x33,
-	0xca, 0x45, 0x78, 0xe8, 0x8f, 0xe9, 0x8b, 0x28, 0x38, 0x8d, 0xc9, 0x1b, 0xf1, 0x40, 0xba, 0xe4,
-	0x11, 0x6c, 0x33, 0xfc, 0x55, 0x0a, 0x8f, 0xee, 0xc2, 0xd1, 0x0e, 0xaf, 0x89, 0x2d, 0x43, 0xaf,
-	0x5b, 0x98, 0x1f, 0x64, 0xf5, 0x7c, 0xc5, 0x4d, 0x38, 0xe2, 0x75, 0xc2, 0x01, 0xe7, 0x8e, 0xde,
-	0x00, 0x20, 0x71, 0x9e, 0x9b, 0xe4, 0x7a, 0xa5, 0x97, 0xe1, 0x90, 0xbf, 0xda, 0x10, 0x07, 0x23,
-	0x8f, 0x70, 0xcb, 0x69, 0x29, 0x89, 0x0e, 0xd1, 0x18, 0x1c, 0x60, 0xdb, 0xe6, 0x34, 0x8c, 0xe4,
-	0x3c, 0x2c, 0x87, 0x6f, 0x82, 0xe5, 0xbb, 0xdf, 0xdc, 0x49, 0xde, 0xc8, 0x16, 0xb2, 0x8b, 0xd9,
-	0x85, 0xec, 0xf5, 0xec, 0xcd, 0x67, 0x36, 0x58, 0x82, 0x8b, 0xf0, 0x07, 0x4e, 0x25, 0x0b, 0xac,
-	0x94, 0x9d, 0xdd, 0x97, 0x9c, 0x15, 0x16, 0xb6, 0x14, 0x53, 0xa9, 0x61, 0x42, 0xf7, 0x6e, 0xd8,
-	0xe7, 0x98, 0xbd, 0x25, 0x5e, 0x85, 0xc8, 0xd7, 0xd1, 0xb2, 0x5a, 0xd6, 0x2b, 0x2a, 0x46, 0x23,
-	0x4f, 0x6d, 0x10, 0x3f, 0xb6, 0x41, 0xac, 0x6d, 0x83, 0xc8, 0x52, 0x76, 0xfe, 0xa3, 0x68, 0x22,
-	0xc6, 0xc5, 0xa7, 0xff, 0x1c, 0x81, 0xa9, 0xb5, 0xba, 0xe5, 0x97, 0x97, 0x0c, 0x8c, 0x9b, 0xb8,
-	0x89, 0x4d, 0xcb, 0x09, 0x33, 0x21, 0xba, 0xa5, 0xe2, 0xbe, 0x44, 0x1f, 0x40, 0xf8, 0x59, 0x03,
-	0x9b, 0x2d, 0x47, 0x72, 0x22, 0x6c, 0xa9, 0x86, 0xe8, 0xc2, 0x38, 0x3d, 0xf3, 0x2f, 0x20, 0x0d,
-	0xb2, 0x79, 0x26, 0x2f, 0x3f, 0xf6, 0x8c, 0xa9, 0x28, 0xf2, 0x51, 0x01, 0xcc, 0xa4, 0x0a, 0x3f,
-	0xea, 0xd3, 0xbe, 0x6b, 0x1b, 0xdb, 0xf7, 0xa9, 0x7d, 0xa9, 0x65, 0x60, 0x17, 0x87, 0x0e, 0x51,
-	0x19, 0x8e, 0xf9, 0xb6, 0x49, 0xd5, 0x4d, 0xcd, 0x41, 0x1c, 0x60, 0x88, 0x73, 0xfd, 0x11, 0xbd,
-	0x1d, 0x92, 0x98, 0x23, 0xc5, 0x73, 0x73, 0x42, 0xa7, 0x7b, 0xe8, 0xcd, 0xa0, 0x4f, 0x60, 0xea,
-	0x94, 0x89, 0x96, 0x20, 0x1f, 0x63, 0x1c, 0xf9, 0xb7, 0xe4, 0xa0, 0x2e, 0x3e, 0x8a, 0xe1, 0x0e,
-	0x05, 0x9d, 0x40, 0xc5, 0x5e, 0xe5, 0x16, 0x77, 0x44, 0xd7, 0x2d, 0xf1, 0x70, 0x6e, 0xd6, 0x2f,
-	0xbf, 0x07, 0x89, 0xb3, 0xa5, 0xb6, 0x9c, 0xfa, 0xe6, 0x4e, 0xb2, 0xc0, 0x76, 0x7c, 0x31, 0x7b,
-	0x23, 0xbb, 0x34, 0x7d, 0x04, 0xe0, 0xc4, 0x5a, 0xdd, 0xda, 0x32, 0xf5, 0xfd, 0xd6, 0x8e, 0x16,
-	0x38, 0x2d, 0xe6, 0xe1, 0x90, 0x85, 0xeb, 0x9a, 0x6c, 0x28, 0xad, 0xaa, 0xae, 0x68, 0xae, 0xc2,
-	0xa7, 0x82, 0x75, 0x2d, 0x25, 0xa9, 0xcd, 0x96, 0x63, 0x82, 0x6e, 0xf7, 0x0a, 0x32, 0xdc, 0xd3,
-	0xef, 0x6c, 0x68, 0x85, 0x67, 0x36, 0xc8, 0xc1, 0x2c, 0xbc, 0x1a, 0xa8, 0xdd, 0x9d, 0xb5, 0xd3,
-	0xd2, 0x55, 0xea, 0x9a, 0xe0, 0x99, 0xa3, 0xc8, 0x7c, 0xb6, 0x10, 0x08, 0xbf, 0xa4, 0xbe, 0x73,
-	0xe1, 0x3f, 0x07, 0x30, 0xd5, 0x15, 0xf6, 0xed, 0x9e, 0x61, 0xf3, 0xe7, 0xaa, 0x49, 0x20, 0x81,
-	0xe2, 0xf9, 0x09, 0xf0, 0x6f, 0xaf, 0x47, 0xe7, 0xa4, 0x52, 0x5a, 0xed, 0x97, 0xca, 0xe7, 0x83,
-	0x30, 0xf5, 0x61, 0x55, 0xdf, 0x55, 0xaa, 0xdb, 0x06, 0x56, 0x59, 0x43, 0x7c, 0x0a, 0x47, 0xa9,
-	0x70, 0xcb, 0x4e, 0xc1, 0xcb, 0xac, 0xe2, 0x59, 0x3e, 0xc9, 0xc2, 0xec, 0xdb, 0x1f, 0xc4, 0x62,
-	0xf4, 0xd8, 0x66, 0xf7, 0x87, 0x91, 0x72, 0xd7, 0x75, 0x66, 0x07, 0x72, 0x44, 0xed, 0x82, 0x0f,
-	0x33, 0xf8, 0xf7, 0xfb, 0xc0, 0x07, 0xd7, 0x7b, 0x3d, 0x24, 0xa5, 0x48, 0x70, 0x07, 0xf6, 0x61,
-	0x5a, 0xab, 0x5b, 0xb2, 0x41, 0x6b, 0x4a, 0x3e, 0x43, 0x00, 0x19, 0xc1, 0x7c, 0xbf, 0x9e, 0xee,
-	0x59, 0x8f, 0x62, 0xfc, 0xe4, 0x97, 0xe0, 0xb5, 0x93, 0xc9, 0x84, 0xd6, 0xbb, 0x64, 0x03, 0xcc,
-	0x0d, 0xad, 0x8b, 0x39, 0xf9, 0xd6, 0xcc, 0xc1, 0x46, 0xee, 0xc9, 0xdc, 0xd5, 0xeb, 0x9f, 0x42,
-	0x8e, 0x32, 0x07, 0xf8, 0x86, 0xfe, 0xe3, 0x52, 0x06, 0xf5, 0xdf, 0xcf, 0x93, 0xd2, 0x82, 0x47,
-	0xc3, 0xcf, 0xe0, 0xe5, 0xd3, 0xcc, 0x2a, 0x6a, 0xad, 0x2b, 0xb5, 0xe1, 0xf3, 0xaf, 0x9f, 0x7e,
-	0xd4, 0x49, 0x2f, 0xfa, 0xbb, 0x6a, 0x2d, 0x10, 0xfe, 0x5d, 0x38, 0x4e, 0x97, 0xeb, 0x2c, 0x70,
-	0xaa, 0xef, 0xbd, 0x16, 0x35, 0x34, 0xa3, 0x1b, 0x6a, 0x01, 0xc6, 0x49, 0xa5, 0x86, 0xf5, 0x06,
-	0x61, 0x27, 0xd4, 0xb0, 0x38, 0x45, 0x2f, 0xa7, 0x0b, 0x54, 0x58, 0x7f, 0x7d, 0xe4, 0x5c, 0x01,
-	0xe3, 0xb3, 0x03, 0xfc, 0x49, 0x74, 0x06, 0x48, 0x9e, 0x25, 0xba, 0x01, 0x13, 0x95, 0x3a, 0xc1,
-	0x66, 0x53, 0xa9, 0xb2, 0xa3, 0x6a, 0x58, 0x4c, 0x53, 0x3d, 0x9e, 0x5f, 0xec, 0xe9, 0xd6, 0xb1,
-	0x45, 0xef, 0xc3, 0xd8, 0xcf, 0x2b, 0x84, 0x60, 0x93, 0x1d, 0x47, 0xc3, 0xe2, 0xa8, 0x9b, 0x2b,
-	0xeb, 0xce, 0xd9, 0x08, 0x7f, 0x12, 0x95, 0x5c, 0x03, 0x54, 0x84, 0x97, 0x1a, 0x75, 0x27, 0xb7,
-	0x96, 0x4c, 0xca, 0x26, 0xb6, 0xca, 0x7a, 0x55, 0x63, 0x47, 0xcc, 0xb0, 0x38, 0x46, 0x63, 0x9c,
-	0xf7, 0xc4, 0x3f, 0x36, 0x1b, 0xe5, 0xb9, 0x19, 0x20, 0xa1, 0x8e, 0x43, 0xc9, 0xb3, 0x47, 0x2b,
-	0x70, 0xf4, 0x2c, 0x48, 0xfc, 0x14, 0x64, 0xa1, 0x1b, 0x84, 0x3b, 0x03, 0x51, 0x84, 0x29, 0x27,
-	0x26, 0xd9, 0xc0, 0xa6, 0x8a, 0xeb, 0x84, 0xdd, 0x7a, 0x86, 0xc5, 0x8c, 0x77, 0x0c, 0x2d, 0x9c,
-	0x5e, 0xb4, 0x66, 0x07, 0xc5, 0xf8, 0x5c, 0x76, 0x7e, 0xee, 0xda, 0xe2, 0x9c, 0x34, 0xec, 0x78,
-	0x6d, 0x39, 0x4e, 0xcb, 0xd9, 0x67, 0x36, 0x98, 0x81, 0x3f, 0x84, 0x93, 0x01, 0x91, 0xf1, 0xdd,
-	0x4e, 0x92, 0x37, 0xd9, 0x39, 0x75, 0x23, 0xbb, 0x94, 0xbd, 0x25, 0x4e, 0xc3, 0x21, 0xff, 0xc6,
-	0x22, 0x44, 0xc9, 0x8e, 0x6d, 0x90, 0x68, 0xdb, 0x20, 0x36, 0x9f, 0x2d, 0x64, 0xe7, 0xaf, 0x7f,
-	0x14, 0x4d, 0x24, 0xb8, 0xc1, 0xe9, 0xdf, 0xc6, 0x61, 0x6a, 0xd5, 0xc4, 0x0a, 0xc1, 0x1d, 0x21,
-	0xfa, 0xf8, 0x5b, 0x11, 0xa2, 0xef, 0x51, 0x82, 0xf4, 0xef, 0x44, 0x82, 0xfa, 0x28, 0x8f, 0xfe,
-	0x9d, 0x28, 0x4f, 0x1f, 0xc1, 0xd9, 0xf9, 0x16, 0x04, 0xa7, 0x87, 0xce, 0x94, 0xfe, 0x6b, 0x9d,
-	0xf9, 0x9e, 0xe4, 0x85, 0xef, 0x92, 0x97, 0x53, 0x0d, 0x49, 0x77, 0x6b, 0x88, 0x4f, 0x27, 0xf2,
-	0x7d, 0x9a, 0xbf, 0x67, 0x9b, 0x7f, 0x70, 0x6e, 0x9b, 0xf7, 0x68, 0xe8, 0xab, 0xbd, 0x1b, 0xba,
-	0xbb, 0x61, 0x47, 0xff, 0x7a, 0xa7, 0xeb, 0x84, 0x17, 0x85, 0xae, 0xae, 0xe4, 0x7e, 0xf5, 0x4f,
-	0x10, 0x78, 0x33, 0xfd, 0xbb, 0x38, 0x1c, 0x91, 0xb0, 0x51, 0x55, 0xd4, 0x8b, 0x76, 0xbc, 0x68,
-	0xc7, 0x8b, 0x76, 0xfc, 0x1f, 0xb7, 0xe3, 0x1f, 0xe2, 0x30, 0xf9, 0x21, 0x26, 0x17, 0xad, 0x78,
-	0xd1, 0x8a, 0xff, 0x1f, 0xad, 0x38, 0x11, 0xbc, 0x41, 0x77, 0xae, 0xcb, 0xef, 0x6c, 0x8b, 0xce,
-	0xde, 0x82, 0x43, 0xfe, 0x6f, 0x59, 0x68, 0x04, 0x26, 0xd7, 0x36, 0xb6, 0xe5, 0xfb, 0xa5, 0x07,
-	0x5b, 0x45, 0x79, 0x85, 0x0b, 0x21, 0x04, 0x53, 0xbe, 0x17, 0x2b, 0x2b, 0x2b, 0x1c, 0x60, 0x1f,
-	0x65, 0x43, 0xb3, 0x1b, 0x70, 0xac, 0xd7, 0x07, 0x25, 0x34, 0x05, 0xc7, 0xa9, 0x87, 0x54, 0xdc,
-	0x96, 0xa5, 0xd5, 0xcd, 0xb5, 0xa2, 0xbc, 0xb1, 0x59, 0x94, 0xa4, 0x4d, 0x89, 0x0b, 0xa1, 0x71,
-	0x38, 0x1a, 0x9c, 0x5a, 0xd9, 0x78, 0xd0, 0xc1, 0xfb, 0x98, 0xf9, 0x9d, 0xfd, 0x08, 0x86, 0xae,
-	0x40, 0xde, 0xf1, 0xba, 0xbf, 0x53, 0xdc, 0x2e, 0x15, 0xd7, 0xe4, 0xfb, 0x3b, 0x45, 0xe9, 0x81,
-	0x4c, 0x23, 0xe2, 0x42, 0xe8, 0x32, 0x9c, 0xec, 0x60, 0x16, 0x57, 0x37, 0xa5, 0x35, 0xd9, 0x09,
-	0xf5, 0x14, 0x59, 0xfc, 0x0d, 0x38, 0x7e, 0x99, 0x09, 0x9d, 0xbc, 0xcc, 0x84, 0xde, 0xbc, 0xcc,
-	0x80, 0x83, 0x76, 0x06, 0xfc, 0xb1, 0x9d, 0x01, 0xcf, 0xdb, 0x19, 0x70, 0xdc, 0xce, 0x80, 0x93,
-	0x76, 0x06, 0xbc, 0x68, 0x67, 0xc0, 0xeb, 0x76, 0x26, 0xf4, 0xa6, 0x9d, 0x01, 0x5f, 0xbc, 0xca,
-	0x84, 0x9e, 0xbe, 0xca, 0x80, 0xe3, 0x57, 0x99, 0xd0, 0xc9, 0xab, 0x4c, 0xe8, 0xa7, 0xf7, 0xf6,
-	0x74, 0xe3, 0xd1, 0x5e, 0xae, 0xa9, 0x57, 0x09, 0x36, 0x4d, 0x25, 0xd7, 0xb0, 0xf2, 0x6c, 0xf0,
-	0x50, 0x37, 0x6b, 0xd7, 0x0c, 0x53, 0x6f, 0x56, 0x34, 0x6c, 0x5e, 0x7b, 0xb8, 0xb8, 0xaf, 0xe6,
-	0x8d, 0xdd, 0x3d, 0x3d, 0x8f, 0xf7, 0x89, 0xfb, 0xa7, 0xe4, 0xec, 0x0f, 0xa1, 0xdd, 0x18, 0xfb,
-	0x61, 0xb2, 0xf0, 0xef, 0x00, 0x00, 0x00, 0xff, 0xff, 0xdb, 0x2e, 0x38, 0x8c, 0x34, 0x1a, 0x00,
-	0x00,
+	0x15, 0xd6, 0x48, 0xb2, 0x24, 0x8f, 0x6c, 0x99, 0x9e, 0xf8, 0x07, 0xad, 0x04, 0x02, 0x57, 0x68,
+	0x10, 0xc7, 0x2b, 0x4b, 0x96, 0x1c, 0xdb, 0x89, 0x83, 0x0d, 0x60, 0xda, 0xea, 0x3a, 0x09, 0x60,
+	0x3b, 0xb4, 0x5c, 0x6c, 0x8a, 0xed, 0x12, 0x34, 0x39, 0xb6, 0xd4, 0x48, 0x22, 0x97, 0xa4, 0x54,
+	0x2b, 0x40, 0x01, 0x63, 0x81, 0x16, 0xad, 0x0f, 0xc5, 0x22, 0xc7, 0xfd, 0x0b, 0xfa, 0x37, 0x94,
+	0x3e, 0x18, 0x41, 0x0b, 0x04, 0x3d, 0xf9, 0x68, 0x2c, 0x50, 0x20, 0x51, 0x2e, 0xe9, 0xf6, 0x92,
+	0xee, 0xa9, 0xd8, 0x4b, 0x8b, 0x19, 0x52, 0x32, 0x29, 0xc9, 0x6a, 0x50, 0x64, 0x17, 0x68, 0xeb,
+	0xdb, 0x90, 0xf3, 0xde, 0xf7, 0xbd, 0x37, 0xf3, 0xde, 0x37, 0x23, 0x0a, 0x5e, 0xaf, 0x63, 0x23,
+	0x5d, 0x52, 0x33, 0x86, 0x5c, 0xc4, 0x15, 0x29, 0x53, 0xc4, 0x52, 0xd9, 0x2c, 0xca, 0x45, 0x2c,
+	0x3f, 0xc9, 0x98, 0x0d, 0x0d, 0x1b, 0x69, 0x4d, 0x57, 0x4d, 0x15, 0x4d, 0xd9, 0x66, 0x69, 0xdb,
+	0x2c, 0xed, 0x32, 0x8b, 0xcf, 0xee, 0x97, 0xcc, 0x62, 0x6d, 0x37, 0x2d, 0xab, 0x95, 0xcc, 0xbe,
+	0xba, 0xaf, 0x66, 0xa8, 0xc7, 0x6e, 0x6d, 0x8f, 0x3e, 0xd1, 0x07, 0x3a, 0xb2, 0x91, 0xe2, 0x93,
+	0x5e, 0xc2, 0x2a, 0x36, 0x9d, 0x89, 0xab, 0xde, 0x09, 0x55, 0x33, 0x4b, 0x6a, 0xd5, 0xe1, 0x8f,
+	0x4f, 0x79, 0x27, 0x5d, 0xa1, 0xc5, 0xaf, 0x79, 0xa7, 0xea, 0x52, 0xb9, 0xa4, 0x48, 0x26, 0x76,
+	0x66, 0xb9, 0x8e, 0xd9, 0x12, 0xfe, 0x85, 0xe8, 0x81, 0x4e, 0xfe, 0x25, 0x02, 0x47, 0xd6, 0x4d,
+	0x53, 0x5b, 0xa7, 0x39, 0xad, 0x92, 0x9c, 0xd0, 0x43, 0x38, 0x51, 0x33, 0xb0, 0xa8, 0xea, 0xa5,
+	0xfd, 0x52, 0x55, 0x34, 0xb0, 0x5e, 0xc7, 0xba, 0x58, 0x95, 0x2a, 0x98, 0x0d, 0x73, 0x60, 0x3a,
+	0x9a, 0x1b, 0x4b, 0x7b, 0xd7, 0x23, 0x5f, 0xd1, 0xcc, 0xc6, 0xba, 0x4f, 0xb8, 0x52, 0x33, 0xf0,
+	0x26, 0x75, 0xda, 0xa6, 0x3e, 0x1b, 0x52, 0x05, 0xa3, 0xbb, 0x30, 0x5a, 0x54, 0x0d, 0x53, 0x2c,
+	0x62, 0x49, 0xc1, 0x3a, 0x0b, 0x38, 0x30, 0x3d, 0xc8, 0xb3, 0xff, 0xb0, 0x80, 0xef, 0x0f, 0x7f,
+	0x3d, 0x09, 0x0c, 0xe8, 0x01, 0xf6, 0xd7, 0x7e, 0x67, 0xf4, 0x12, 0x80, 0x75, 0x9f, 0x00, 0x89,
+	0xf9, 0x3a, 0xb5, 0x46, 0x32, 0x0c, 0x6a, 0x92, 0x59, 0x64, 0xfd, 0xd4, 0x6b, 0xf3, 0x6b, 0x0b,
+	0x80, 0x4c, 0xd3, 0x02, 0x0b, 0x10, 0x64, 0x60, 0xd8, 0xd9, 0x2e, 0x38, 0xe4, 0xde, 0x37, 0x18,
+	0x71, 0x9e, 0x9e, 0xc2, 0x50, 0xa6, 0x5c, 0xaa, 0xe3, 0xa7, 0x30, 0x9c, 0xd1, 0xb1, 0xa4, 0x34,
+	0x9e, 0xb6, 0x38, 0x23, 0x7a, 0x88, 0x3d, 0x64, 0xde, 0xf8, 0x81, 0x40, 0xc1, 0x51, 0xd3, 0x0f,
+	0xc3, 0x76, 0x74, 0x06, 0x1b, 0xe0, 0x02, 0xd3, 0xd1, 0xdc, 0x52, 0xfa, 0xc2, 0x0d, 0x4f, 0x77,
+	0x2c, 0x56, 0xda, 0x8e, 0xd4, 0xc8, 0x57, 0x4d, 0xbd, 0xc1, 0xff, 0xce, 0x7f, 0x62, 0x01, 0x40,
+	0x48, 0x86, 0xbe, 0x02, 0x83, 0xc9, 0xb0, 0x3e, 0xc0, 0x00, 0xf6, 0xd0, 0xce, 0xef, 0x2b, 0xe0,
+	0x67, 0x98, 0xd6, 0xd4, 0x8c, 0x33, 0xc5, 0x34, 0x5f, 0xfe, 0x29, 0xc0, 0x1d, 0x1d, 0x83, 0x6b,
+	0x28, 0xfe, 0x8d, 0x05, 0x26, 0xd6, 0x0b, 0x85, 0x2d, 0xce, 0x0e, 0x86, 0x7b, 0x82, 0x1b, 0x9c,
+	0x61, 0xea, 0xa5, 0xea, 0x3e, 0x31, 0x9a, 0x3a, 0x3a, 0x06, 0xe3, 0xe8, 0x4a, 0xd3, 0x02, 0x23,
+	0xd4, 0xc8, 0xe6, 0xe5, 0x1e, 0xe2, 0x06, 0x99, 0x85, 0x47, 0xc7, 0x20, 0x84, 0x82, 0x2f, 0x2c,
+	0xe0, 0x23, 0x8f, 0xa1, 0xa3, 0x63, 0xe0, 0x8f, 0x00, 0x32, 0xbc, 0x77, 0x74, 0x0c, 0x96, 0xe3,
+	0xb7, 0xbf, 0xb1, 0xc0, 0xad, 0x6d, 0x0a, 0xc6, 0xa9, 0x7b, 0x9c, 0xac, 0x56, 0x2a, 0x12, 0x67,
+	0x60, 0x4d, 0xd2, 0x25, 0x13, 0x2b, 0x5c, 0xb9, 0x64, 0x98, 0xe4, 0xbd, 0x9b, 0xbe, 0x2e, 0x95,
+	0x6b, 0xd8, 0x20, 0x10, 0x57, 0x8f, 0x8e, 0xc1, 0x64, 0x7c, 0xbc, 0x69, 0x81, 0x51, 0x37, 0xf5,
+	0x4f, 0x88, 0x41, 0x9b, 0x3c, 0x4e, 0xc8, 0x03, 0xae, 0x47, 0xb2, 0x12, 0x42, 0x6b, 0x61, 0xd1,
+	0xa7, 0x70, 0x4a, 0xc7, 0x9f, 0xd7, 0x70, 0xbb, 0x12, 0x0c, 0xd1, 0x54, 0x45, 0x1d, 0x57, 0xd4,
+	0x3a, 0x66, 0x83, 0x5c, 0x60, 0x7a, 0x90, 0xff, 0x80, 0x78, 0xb4, 0x36, 0x09, 0x3e, 0x03, 0xe1,
+	0x24, 0xa9, 0x0e, 0x67, 0xf5, 0x9e, 0x91, 0xd5, 0x13, 0x26, 0x1c, 0x0c, 0x67, 0xd1, 0x0b, 0xaa,
+	0x40, 0x01, 0xd0, 0x07, 0x70, 0x90, 0x54, 0x6c, 0xd1, 0x34, 0xb5, 0x1c, 0x3b, 0xc0, 0x81, 0xe9,
+	0x08, 0x1f, 0x24, 0x48, 0x42, 0xa4, 0x66, 0x60, 0xb2, 0x63, 0x39, 0x54, 0x87, 0xe3, 0xf8, 0x40,
+	0xc3, 0xb2, 0x89, 0x15, 0xd1, 0x30, 0x25, 0xb3, 0x66, 0x88, 0xb2, 0xaa, 0x60, 0x83, 0x8d, 0x50,
+	0x72, 0x9e, 0x90, 0x7f, 0x6d, 0x81, 0x40, 0x6e, 0x6e, 0xae, 0x15, 0x43, 0xf4, 0x19, 0x88, 0x24,
+	0x43, 0x7a, 0x90, 0x09, 0xb0, 0xd0, 0x1d, 0xd3, 0x97, 0x41, 0x70, 0x1e, 0x53, 0x6b, 0xc4, 0x02,
+	0xe1, 0x4a, 0x8b, 0x60, 0x9b, 0xe2, 0xaf, 0x12, 0x78, 0x74, 0x1f, 0x8e, 0xb6, 0x79, 0x75, 0x6c,
+	0x68, 0x6a, 0xd5, 0xc0, 0xec, 0x20, 0xad, 0xe7, 0x6b, 0x4e, 0xc2, 0x81, 0x56, 0x27, 0x1c, 0x32,
+	0xce, 0xe8, 0x2d, 0x00, 0x02, 0xd3, 0x72, 0x13, 0x1c, 0xaf, 0xf8, 0x32, 0x1c, 0x72, 0x57, 0x1b,
+	0x62, 0x60, 0xe0, 0x09, 0x6e, 0xd8, 0x2d, 0x25, 0x90, 0x21, 0x1a, 0x83, 0x03, 0x74, 0xdb, 0xec,
+	0x86, 0x11, 0xec, 0x87, 0x65, 0xff, 0x6d, 0xb0, 0x7c, 0xff, 0xdb, 0x7b, 0xd1, 0xc5, 0x54, 0x2e,
+	0xb5, 0x90, 0x9a, 0x4f, 0xdd, 0x4a, 0xdd, 0x7e, 0x6e, 0x81, 0x25, 0xb8, 0x00, 0x7f, 0x64, 0x57,
+	0x32, 0x47, 0x4b, 0xd9, 0xde, 0x7d, 0xc1, 0x5e, 0x61, 0x6e, 0x4b, 0xd2, 0xa5, 0x0a, 0x36, 0xc9,
+	0xde, 0x0d, 0xbb, 0x1c, 0x53, 0x77, 0xf8, 0xeb, 0x10, 0xb9, 0x3a, 0x5a, 0x94, 0x8b, 0x6a, 0x49,
+	0xc6, 0x68, 0xe4, 0xc4, 0x02, 0xe1, 0x53, 0x0b, 0x84, 0x9a, 0x16, 0x08, 0x2c, 0xa5, 0xb2, 0x0f,
+	0x82, 0x91, 0x10, 0x13, 0x4e, 0xfe, 0x31, 0x00, 0x63, 0x6b, 0x55, 0xc3, 0x2d, 0x2f, 0x09, 0x18,
+	0xd6, 0x71, 0x1d, 0xeb, 0x86, 0x1d, 0x66, 0x84, 0x77, 0x4a, 0xc5, 0x79, 0x89, 0x3e, 0x84, 0xf0,
+	0xf3, 0x1a, 0xd6, 0x1b, 0xb6, 0xe4, 0x04, 0xe8, 0x52, 0x0d, 0x91, 0x85, 0xb1, 0x7b, 0xe6, 0x9f,
+	0x40, 0x18, 0xa4, 0xf3, 0x54, 0x5e, 0x7e, 0xdc, 0x32, 0x26, 0xa2, 0xc8, 0x06, 0x39, 0x30, 0x1d,
+	0xcb, 0xdd, 0xe8, 0xd3, 0xbe, 0x6b, 0x1b, 0xdb, 0x8f, 0x88, 0x7d, 0xa1, 0xa1, 0x61, 0x07, 0x87,
+	0x0c, 0x51, 0x11, 0x8e, 0xb9, 0xb6, 0x49, 0x56, 0x75, 0xc5, 0x46, 0x1c, 0xa0, 0x88, 0x73, 0xfd,
+	0x11, 0x5b, 0x3b, 0x24, 0x50, 0x47, 0x82, 0xe7, 0xe4, 0x84, 0xce, 0xf7, 0xb0, 0x35, 0x83, 0x3e,
+	0x85, 0xb1, 0x73, 0x26, 0x52, 0x82, 0x6c, 0x88, 0x72, 0x64, 0xde, 0x91, 0x83, 0xb8, 0xb8, 0x28,
+	0x86, 0xdb, 0x14, 0x64, 0x02, 0xe5, 0x7b, 0x95, 0x5b, 0xd8, 0x16, 0x5d, 0xa7, 0xc4, 0xfd, 0xe9,
+	0x19, 0xb7, 0xfc, 0x1e, 0x46, 0xba, 0x4b, 0x6d, 0x39, 0xf6, 0xed, 0xbd, 0x68, 0x8e, 0xee, 0xf8,
+	0x42, 0x6a, 0x31, 0xb5, 0x94, 0x3c, 0x06, 0x70, 0x62, 0xad, 0x6a, 0x6c, 0xe9, 0xea, 0x41, 0x63,
+	0x47, 0xf1, 0x9c, 0x16, 0x59, 0x38, 0x64, 0xe0, 0xaa, 0x22, 0x6a, 0x52, 0xa3, 0xac, 0x4a, 0x8a,
+	0xa3, 0xf0, 0x31, 0x6f, 0x5d, 0x0b, 0x51, 0x62, 0xb3, 0x65, 0x9b, 0xa0, 0xbb, 0xbd, 0x82, 0xf4,
+	0xf7, 0xf4, 0xeb, 0x0e, 0x2d, 0xf7, 0xdc, 0x02, 0x69, 0x98, 0x82, 0xd7, 0x3d, 0xb5, 0xbb, 0xb3,
+	0x76, 0x5e, 0xba, 0x52, 0x55, 0xe1, 0x5a, 0xe6, 0x28, 0x90, 0x4d, 0xe5, 0x3c, 0xe1, 0x17, 0xe4,
+	0xff, 0xba, 0xf0, 0x5f, 0x00, 0x18, 0xeb, 0x08, 0xfb, 0x6e, 0xcf, 0xb0, 0xd9, 0x0b, 0xd5, 0xc4,
+	0x93, 0x40, 0xfe, 0xe2, 0x04, 0xd8, 0x77, 0xd7, 0xa3, 0x0b, 0x52, 0x29, 0xac, 0xf6, 0x4b, 0xe5,
+	0x6f, 0x83, 0x30, 0xf6, 0x71, 0x59, 0xdd, 0x95, 0xca, 0xdb, 0x1a, 0x96, 0x69, 0x43, 0x7c, 0x06,
+	0x47, 0x89, 0x70, 0x8b, 0x76, 0xc1, 0x8b, 0xb4, 0xe2, 0x69, 0x3e, 0xd1, 0xdc, 0xcc, 0xbb, 0x1f,
+	0xc4, 0x7c, 0xf0, 0xd4, 0xa2, 0xf7, 0x87, 0x91, 0x62, 0xc7, 0x75, 0x66, 0x07, 0x32, 0xa6, 0xdc,
+	0x01, 0xef, 0xa7, 0xf0, 0x37, 0xfb, 0xc0, 0x7b, 0xd7, 0x7b, 0xdd, 0x27, 0xc4, 0x4c, 0xef, 0x0e,
+	0x1c, 0xc0, 0xb8, 0x52, 0x35, 0x44, 0x8d, 0xd4, 0x94, 0xd8, 0x45, 0x00, 0x29, 0x41, 0xb6, 0x5f,
+	0x4f, 0xf7, 0xac, 0x47, 0x3e, 0x7c, 0xf6, 0x4b, 0xf0, 0xc6, 0xce, 0x64, 0x42, 0xe9, 0x5d, 0xb2,
+	0x1e, 0xe6, 0x9a, 0xd2, 0xc1, 0x1c, 0x7d, 0x67, 0x66, 0x6f, 0x23, 0xf7, 0x64, 0xee, 0xe8, 0xf5,
+	0xcf, 0x20, 0x43, 0x98, 0x3d, 0x7c, 0x43, 0xff, 0x76, 0x29, 0xbd, 0xfa, 0xef, 0xe6, 0x89, 0x29,
+	0xde, 0xa3, 0xe1, 0x67, 0xf0, 0xea, 0x79, 0x66, 0x25, 0xb9, 0xd2, 0x91, 0xda, 0xf0, 0xc5, 0xd7,
+	0x4f, 0x37, 0xea, 0x64, 0x2b, 0xfa, 0xfb, 0x72, 0xc5, 0x13, 0xfe, 0x7d, 0x38, 0x4e, 0x96, 0xab,
+	0x1b, 0x38, 0xd6, 0xf7, 0x5e, 0x8b, 0x6a, 0x8a, 0xd6, 0x09, 0x35, 0x0f, 0xc3, 0x66, 0xa9, 0x82,
+	0xd5, 0x9a, 0x49, 0x4f, 0xa8, 0x61, 0x7e, 0x8a, 0x5c, 0x4e, 0xe7, 0x89, 0xb0, 0xfe, 0xe6, 0xd8,
+	0xbe, 0x02, 0x86, 0x67, 0x06, 0xd8, 0xb3, 0xe0, 0x34, 0x10, 0x5a, 0x96, 0x68, 0x11, 0x46, 0x4a,
+	0x55, 0x13, 0xeb, 0x75, 0xa9, 0x4c, 0x8f, 0xaa, 0x61, 0x3e, 0x4e, 0xf4, 0x38, 0xbb, 0xd0, 0xd3,
+	0xad, 0x6d, 0x8b, 0x6e, 0xc2, 0xd0, 0xcf, 0x4b, 0xa6, 0x89, 0x75, 0x7a, 0x1c, 0x0d, 0xf3, 0xa3,
+	0x4e, 0xae, 0xb4, 0x3b, 0x67, 0x02, 0xec, 0x59, 0x50, 0x70, 0x0c, 0x50, 0x1e, 0x5e, 0xa9, 0x55,
+	0xed, 0xdc, 0x1a, 0xa2, 0x59, 0xd4, 0xb1, 0x51, 0x54, 0xcb, 0x0a, 0x3d, 0x62, 0x86, 0xf9, 0x31,
+	0x12, 0x63, 0xb6, 0x25, 0xfe, 0xa1, 0x99, 0x20, 0xcb, 0x4c, 0x03, 0x01, 0xb5, 0x1d, 0x0a, 0x2d,
+	0x7b, 0xb4, 0x02, 0x47, 0xbb, 0x41, 0xc2, 0xe7, 0x20, 0xf3, 0x9d, 0x20, 0x4c, 0x17, 0xc4, 0x47,
+	0x30, 0xa6, 0xe0, 0x3d, 0xa9, 0x56, 0x36, 0x45, 0x27, 0x78, 0xa6, 0xcf, 0x2a, 0x03, 0x61, 0xd8,
+	0xb1, 0x7e, 0x60, 0x27, 0xf2, 0x11, 0x8c, 0xd9, 0x6e, 0xa2, 0x86, 0x75, 0x19, 0x57, 0x4d, 0x7a,
+	0x69, 0x1a, 0xe6, 0xc7, 0xda, 0xb7, 0xb3, 0x99, 0x41, 0x3e, 0x3c, 0x97, 0xca, 0xce, 0xcd, 0x2e,
+	0xcc, 0x11, 0x77, 0xdb, 0x7a, 0xcb, 0x36, 0x5e, 0x9e, 0x7d, 0x6e, 0x81, 0x9b, 0xf0, 0x06, 0x9c,
+	0xf4, 0x68, 0x93, 0xeb, 0x52, 0x33, 0x74, 0x9b, 0x1e, 0x6f, 0x8b, 0xa9, 0xa5, 0x54, 0x76, 0x81,
+	0x4f, 0xc2, 0x21, 0x77, 0x41, 0x20, 0x44, 0xce, 0xca, 0x53, 0x0b, 0x44, 0x9a, 0x16, 0x08, 0x65,
+	0x53, 0xb9, 0x54, 0xf6, 0x16, 0x7f, 0x1d, 0x3a, 0x1c, 0xad, 0x2b, 0xcf, 0xd8, 0x89, 0x05, 0x98,
+	0x17, 0xb6, 0xe1, 0x48, 0xd3, 0x02, 0xc1, 0xec, 0x62, 0xea, 0xce, 0x83, 0x60, 0x24, 0xc2, 0x0c,
+	0x3e, 0x08, 0x46, 0x46, 0x18, 0x26, 0xf9, 0x36, 0x0c, 0x63, 0xab, 0x3a, 0x96, 0x4c, 0xdc, 0x56,
+	0xbb, 0x4f, 0xde, 0x8b, 0xda, 0xfd, 0x80, 0x3a, 0xa7, 0x7e, 0x2f, 0x3a, 0xd7, 0x47, 0xde, 0xd4,
+	0xef, 0x45, 0xde, 0xfa, 0xa8, 0xda, 0xce, 0x7b, 0x50, 0xb5, 0x1e, 0x62, 0x56, 0xf8, 0x8f, 0xc5,
+	0xec, 0x07, 0xd2, 0x30, 0xb6, 0x43, 0xc3, 0xce, 0x85, 0x2a, 0xde, 0x29, 0x54, 0x2e, 0x31, 0xca,
+	0xf4, 0x51, 0x98, 0x9e, 0x5a, 0xf2, 0xe1, 0x85, 0x5a, 0xf2, 0xfe, 0x55, 0xe3, 0x46, 0x6f, 0xd5,
+	0xe8, 0xd6, 0x87, 0xd1, 0x3f, 0xdf, 0xeb, 0xb8, 0x87, 0xf0, 0x5c, 0x87, 0x06, 0x30, 0x5f, 0x7c,
+	0x07, 0x3c, 0x6f, 0xf8, 0x64, 0xa7, 0x02, 0x8c, 0x7e, 0xf1, 0x1d, 0xf0, 0xbe, 0x4a, 0xfe, 0x3d,
+	0x0c, 0x47, 0x04, 0xac, 0x95, 0x25, 0xf9, 0xb2, 0xe7, 0x2f, 0x7b, 0xfe, 0xb2, 0xe7, 0xff, 0x1f,
+	0x7a, 0xfe, 0x57, 0x11, 0x18, 0xfd, 0x18, 0x9b, 0x97, 0xfd, 0x7e, 0xd9, 0xef, 0xff, 0x1b, 0xfd,
+	0x3e, 0xe1, 0xfd, 0xc1, 0xd1, 0xfe, 0x75, 0x71, 0xa9, 0x03, 0xfd, 0x74, 0x60, 0xe6, 0x0e, 0x1c,
+	0x72, 0x7f, 0x5f, 0x44, 0x23, 0x30, 0xba, 0xb6, 0xb1, 0x2d, 0x3e, 0x2a, 0x3c, 0xde, 0xca, 0x8b,
+	0x2b, 0x8c, 0x0f, 0x21, 0x18, 0x73, 0xbd, 0x58, 0x59, 0x59, 0x61, 0x00, 0xfd, 0x50, 0xee, 0x9b,
+	0xd9, 0x80, 0x63, 0xbd, 0x3e, 0xf2, 0xa1, 0x29, 0x38, 0x4e, 0x3c, 0x84, 0xfc, 0xb6, 0x28, 0xac,
+	0x6e, 0xae, 0xe5, 0xc5, 0x8d, 0xcd, 0xbc, 0x20, 0x6c, 0x0a, 0x8c, 0x0f, 0x8d, 0xc3, 0x51, 0xef,
+	0xd4, 0xca, 0xc6, 0xe3, 0x36, 0xde, 0x27, 0xd4, 0xaf, 0xfb, 0xc3, 0x24, 0xba, 0x06, 0x59, 0xdb,
+	0xeb, 0xd1, 0x4e, 0x7e, 0xbb, 0x90, 0x5f, 0x13, 0x1f, 0xed, 0xe4, 0x85, 0xc7, 0x22, 0x89, 0x88,
+	0xf1, 0xa1, 0xab, 0x70, 0xb2, 0x8d, 0x99, 0x5f, 0xdd, 0x14, 0xd6, 0x44, 0x3b, 0xd4, 0x73, 0x64,
+	0xfe, 0xb7, 0xe0, 0xf4, 0x55, 0xc2, 0x77, 0xf6, 0x2a, 0xe1, 0x7b, 0xfb, 0x2a, 0x01, 0x0e, 0x9b,
+	0x09, 0xf0, 0xfb, 0x66, 0x02, 0xbc, 0x68, 0x26, 0xc0, 0x69, 0x33, 0x01, 0xce, 0x9a, 0x09, 0xf0,
+	0xb2, 0x99, 0x00, 0x6f, 0x9a, 0x09, 0xdf, 0xdb, 0x66, 0x02, 0x7c, 0xf9, 0x3a, 0xe1, 0x3b, 0x79,
+	0x9d, 0x00, 0xa7, 0xaf, 0x13, 0xbe, 0xb3, 0xd7, 0x09, 0xdf, 0x4f, 0x1f, 0xee, 0xab, 0xda, 0x93,
+	0xfd, 0x74, 0x5d, 0x2d, 0x9b, 0x58, 0xd7, 0xa5, 0x74, 0xcd, 0xc8, 0xd0, 0xc1, 0x9e, 0xaa, 0x57,
+	0x66, 0x35, 0x5d, 0xad, 0x97, 0x14, 0xac, 0xcf, 0xee, 0x2d, 0x1c, 0xc8, 0x19, 0x6d, 0x77, 0x5f,
+	0xcd, 0xe0, 0x03, 0xd3, 0xf9, 0xf7, 0xaa, 0xfb, 0x4f, 0xba, 0xdd, 0x10, 0xfd, 0x13, 0x6b, 0xfe,
+	0x5f, 0x01, 0x00, 0x00, 0xff, 0xff, 0x3a, 0xbf, 0x27, 0x2d, 0xc8, 0x1b, 0x00, 0x00,
 }
 
 func (x DNSQueryType) String() string {
@@ -1894,7 +2026,13 @@ func (this *GlobalSpecType) Equal(that interface{}) bool {
 	if this.HealthyThreshold != that1.HealthyThreshold {
 		return false
 	}
-	if this.JitterPercent != that1.JitterPercent {
+	if that1.JitterChoice == nil {
+		if this.JitterChoice != nil {
+			return false
+		}
+	} else if this.JitterChoice == nil {
+		return false
+	} else if !this.JitterChoice.Equal(that1.JitterChoice) {
 		return false
 	}
 	return true
@@ -2067,6 +2205,54 @@ func (this *GlobalSpecType_UdpIcmpHealthCheck) Equal(that interface{}) bool {
 	}
 	return true
 }
+func (this *GlobalSpecType_DefaultJitter) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GlobalSpecType_DefaultJitter)
+	if !ok {
+		that2, ok := that.(GlobalSpecType_DefaultJitter)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.DefaultJitter.Equal(that1.DefaultJitter) {
+		return false
+	}
+	return true
+}
+func (this *GlobalSpecType_JitterPercent) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GlobalSpecType_JitterPercent)
+	if !ok {
+		that2, ok := that.(GlobalSpecType_JitterPercent)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.JitterPercent != that1.JitterPercent {
+		return false
+	}
+	return true
+}
 func (this *CreateSpecType) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
@@ -2107,7 +2293,13 @@ func (this *CreateSpecType) Equal(that interface{}) bool {
 	if this.HealthyThreshold != that1.HealthyThreshold {
 		return false
 	}
-	if this.JitterPercent != that1.JitterPercent {
+	if that1.JitterChoice == nil {
+		if this.JitterChoice != nil {
+			return false
+		}
+	} else if this.JitterChoice == nil {
+		return false
+	} else if !this.JitterChoice.Equal(that1.JitterChoice) {
 		return false
 	}
 	return true
@@ -2280,6 +2472,54 @@ func (this *CreateSpecType_UdpIcmpHealthCheck) Equal(that interface{}) bool {
 	}
 	return true
 }
+func (this *CreateSpecType_DefaultJitter) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*CreateSpecType_DefaultJitter)
+	if !ok {
+		that2, ok := that.(CreateSpecType_DefaultJitter)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.DefaultJitter.Equal(that1.DefaultJitter) {
+		return false
+	}
+	return true
+}
+func (this *CreateSpecType_JitterPercent) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*CreateSpecType_JitterPercent)
+	if !ok {
+		that2, ok := that.(CreateSpecType_JitterPercent)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.JitterPercent != that1.JitterPercent {
+		return false
+	}
+	return true
+}
 func (this *ReplaceSpecType) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
@@ -2320,7 +2560,13 @@ func (this *ReplaceSpecType) Equal(that interface{}) bool {
 	if this.HealthyThreshold != that1.HealthyThreshold {
 		return false
 	}
-	if this.JitterPercent != that1.JitterPercent {
+	if that1.JitterChoice == nil {
+		if this.JitterChoice != nil {
+			return false
+		}
+	} else if this.JitterChoice == nil {
+		return false
+	} else if !this.JitterChoice.Equal(that1.JitterChoice) {
 		return false
 	}
 	return true
@@ -2493,6 +2739,54 @@ func (this *ReplaceSpecType_UdpIcmpHealthCheck) Equal(that interface{}) bool {
 	}
 	return true
 }
+func (this *ReplaceSpecType_DefaultJitter) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ReplaceSpecType_DefaultJitter)
+	if !ok {
+		that2, ok := that.(ReplaceSpecType_DefaultJitter)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.DefaultJitter.Equal(that1.DefaultJitter) {
+		return false
+	}
+	return true
+}
+func (this *ReplaceSpecType_JitterPercent) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ReplaceSpecType_JitterPercent)
+	if !ok {
+		that2, ok := that.(ReplaceSpecType_JitterPercent)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.JitterPercent != that1.JitterPercent {
+		return false
+	}
+	return true
+}
 func (this *GetSpecType) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
@@ -2536,7 +2830,13 @@ func (this *GetSpecType) Equal(that interface{}) bool {
 	if this.HealthyThreshold != that1.HealthyThreshold {
 		return false
 	}
-	if this.JitterPercent != that1.JitterPercent {
+	if that1.JitterChoice == nil {
+		if this.JitterChoice != nil {
+			return false
+		}
+	} else if this.JitterChoice == nil {
+		return false
+	} else if !this.JitterChoice.Equal(that1.JitterChoice) {
 		return false
 	}
 	return true
@@ -2709,6 +3009,54 @@ func (this *GetSpecType_UdpIcmpHealthCheck) Equal(that interface{}) bool {
 	}
 	return true
 }
+func (this *GetSpecType_DefaultJitter) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GetSpecType_DefaultJitter)
+	if !ok {
+		that2, ok := that.(GetSpecType_DefaultJitter)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.DefaultJitter.Equal(that1.DefaultJitter) {
+		return false
+	}
+	return true
+}
+func (this *GetSpecType_JitterPercent) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GetSpecType_JitterPercent)
+	if !ok {
+		that2, ok := that.(GetSpecType_JitterPercent)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.JitterPercent != that1.JitterPercent {
+		return false
+	}
+	return true
+}
 func (this *HttpHealthCheck) GoString() string {
 	if this == nil {
 		return "nil"
@@ -2807,7 +3155,7 @@ func (this *GlobalSpecType) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 17)
+	s := make([]string, 0, 18)
 	s = append(s, "&healthcheck.GlobalSpecType{")
 	if this.HealthCheck != nil {
 		s = append(s, "HealthCheck: "+fmt.Sprintf("%#v", this.HealthCheck)+",\n")
@@ -2817,7 +3165,9 @@ func (this *GlobalSpecType) GoString() string {
 	s = append(s, "Jitter: "+fmt.Sprintf("%#v", this.Jitter)+",\n")
 	s = append(s, "UnhealthyThreshold: "+fmt.Sprintf("%#v", this.UnhealthyThreshold)+",\n")
 	s = append(s, "HealthyThreshold: "+fmt.Sprintf("%#v", this.HealthyThreshold)+",\n")
-	s = append(s, "JitterPercent: "+fmt.Sprintf("%#v", this.JitterPercent)+",\n")
+	if this.JitterChoice != nil {
+		s = append(s, "JitterChoice: "+fmt.Sprintf("%#v", this.JitterChoice)+",\n")
+	}
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
@@ -2877,11 +3227,27 @@ func (this *GlobalSpecType_UdpIcmpHealthCheck) GoString() string {
 		`UdpIcmpHealthCheck:` + fmt.Sprintf("%#v", this.UdpIcmpHealthCheck) + `}`}, ", ")
 	return s
 }
+func (this *GlobalSpecType_DefaultJitter) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&healthcheck.GlobalSpecType_DefaultJitter{` +
+		`DefaultJitter:` + fmt.Sprintf("%#v", this.DefaultJitter) + `}`}, ", ")
+	return s
+}
+func (this *GlobalSpecType_JitterPercent) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&healthcheck.GlobalSpecType_JitterPercent{` +
+		`JitterPercent:` + fmt.Sprintf("%#v", this.JitterPercent) + `}`}, ", ")
+	return s
+}
 func (this *CreateSpecType) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 16)
+	s := make([]string, 0, 17)
 	s = append(s, "&healthcheck.CreateSpecType{")
 	if this.HealthCheck != nil {
 		s = append(s, "HealthCheck: "+fmt.Sprintf("%#v", this.HealthCheck)+",\n")
@@ -2890,7 +3256,9 @@ func (this *CreateSpecType) GoString() string {
 	s = append(s, "Interval: "+fmt.Sprintf("%#v", this.Interval)+",\n")
 	s = append(s, "UnhealthyThreshold: "+fmt.Sprintf("%#v", this.UnhealthyThreshold)+",\n")
 	s = append(s, "HealthyThreshold: "+fmt.Sprintf("%#v", this.HealthyThreshold)+",\n")
-	s = append(s, "JitterPercent: "+fmt.Sprintf("%#v", this.JitterPercent)+",\n")
+	if this.JitterChoice != nil {
+		s = append(s, "JitterChoice: "+fmt.Sprintf("%#v", this.JitterChoice)+",\n")
+	}
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
@@ -2950,11 +3318,27 @@ func (this *CreateSpecType_UdpIcmpHealthCheck) GoString() string {
 		`UdpIcmpHealthCheck:` + fmt.Sprintf("%#v", this.UdpIcmpHealthCheck) + `}`}, ", ")
 	return s
 }
+func (this *CreateSpecType_DefaultJitter) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&healthcheck.CreateSpecType_DefaultJitter{` +
+		`DefaultJitter:` + fmt.Sprintf("%#v", this.DefaultJitter) + `}`}, ", ")
+	return s
+}
+func (this *CreateSpecType_JitterPercent) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&healthcheck.CreateSpecType_JitterPercent{` +
+		`JitterPercent:` + fmt.Sprintf("%#v", this.JitterPercent) + `}`}, ", ")
+	return s
+}
 func (this *ReplaceSpecType) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 16)
+	s := make([]string, 0, 17)
 	s = append(s, "&healthcheck.ReplaceSpecType{")
 	if this.HealthCheck != nil {
 		s = append(s, "HealthCheck: "+fmt.Sprintf("%#v", this.HealthCheck)+",\n")
@@ -2963,7 +3347,9 @@ func (this *ReplaceSpecType) GoString() string {
 	s = append(s, "Interval: "+fmt.Sprintf("%#v", this.Interval)+",\n")
 	s = append(s, "UnhealthyThreshold: "+fmt.Sprintf("%#v", this.UnhealthyThreshold)+",\n")
 	s = append(s, "HealthyThreshold: "+fmt.Sprintf("%#v", this.HealthyThreshold)+",\n")
-	s = append(s, "JitterPercent: "+fmt.Sprintf("%#v", this.JitterPercent)+",\n")
+	if this.JitterChoice != nil {
+		s = append(s, "JitterChoice: "+fmt.Sprintf("%#v", this.JitterChoice)+",\n")
+	}
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
@@ -3023,11 +3409,27 @@ func (this *ReplaceSpecType_UdpIcmpHealthCheck) GoString() string {
 		`UdpIcmpHealthCheck:` + fmt.Sprintf("%#v", this.UdpIcmpHealthCheck) + `}`}, ", ")
 	return s
 }
+func (this *ReplaceSpecType_DefaultJitter) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&healthcheck.ReplaceSpecType_DefaultJitter{` +
+		`DefaultJitter:` + fmt.Sprintf("%#v", this.DefaultJitter) + `}`}, ", ")
+	return s
+}
+func (this *ReplaceSpecType_JitterPercent) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&healthcheck.ReplaceSpecType_JitterPercent{` +
+		`JitterPercent:` + fmt.Sprintf("%#v", this.JitterPercent) + `}`}, ", ")
+	return s
+}
 func (this *GetSpecType) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 17)
+	s := make([]string, 0, 18)
 	s = append(s, "&healthcheck.GetSpecType{")
 	if this.HealthCheck != nil {
 		s = append(s, "HealthCheck: "+fmt.Sprintf("%#v", this.HealthCheck)+",\n")
@@ -3037,7 +3439,9 @@ func (this *GetSpecType) GoString() string {
 	s = append(s, "Jitter: "+fmt.Sprintf("%#v", this.Jitter)+",\n")
 	s = append(s, "UnhealthyThreshold: "+fmt.Sprintf("%#v", this.UnhealthyThreshold)+",\n")
 	s = append(s, "HealthyThreshold: "+fmt.Sprintf("%#v", this.HealthyThreshold)+",\n")
-	s = append(s, "JitterPercent: "+fmt.Sprintf("%#v", this.JitterPercent)+",\n")
+	if this.JitterChoice != nil {
+		s = append(s, "JitterChoice: "+fmt.Sprintf("%#v", this.JitterChoice)+",\n")
+	}
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
@@ -3095,6 +3499,22 @@ func (this *GetSpecType_UdpIcmpHealthCheck) GoString() string {
 	}
 	s := strings.Join([]string{`&healthcheck.GetSpecType_UdpIcmpHealthCheck{` +
 		`UdpIcmpHealthCheck:` + fmt.Sprintf("%#v", this.UdpIcmpHealthCheck) + `}`}, ", ")
+	return s
+}
+func (this *GetSpecType_DefaultJitter) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&healthcheck.GetSpecType_DefaultJitter{` +
+		`DefaultJitter:` + fmt.Sprintf("%#v", this.DefaultJitter) + `}`}, ", ")
+	return s
+}
+func (this *GetSpecType_JitterPercent) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&healthcheck.GetSpecType_JitterPercent{` +
+		`JitterPercent:` + fmt.Sprintf("%#v", this.JitterPercent) + `}`}, ", ")
 	return s
 }
 func valueToGoStringTypes(v interface{}, typ string) string {
@@ -3431,6 +3851,15 @@ func (m *GlobalSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if m.JitterChoice != nil {
+		{
+			size := m.JitterChoice.Size()
+			i -= size
+			if _, err := m.JitterChoice.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
+	}
 	if m.HealthCheck != nil {
 		{
 			size := m.HealthCheck.Size()
@@ -3439,11 +3868,6 @@ func (m *GlobalSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 				return 0, err
 			}
 		}
-	}
-	if m.JitterPercent != 0 {
-		i = encodeVarintTypes(dAtA, i, uint64(m.JitterPercent))
-		i--
-		dAtA[i] = 0x48
 	}
 	if m.HealthyThreshold != 0 {
 		i = encodeVarintTypes(dAtA, i, uint64(m.HealthyThreshold))
@@ -3513,6 +3937,18 @@ func (m *GlobalSpecType_TcpHealthCheck) MarshalToSizedBuffer(dAtA []byte) (int, 
 		i--
 		dAtA[i] = 0x12
 	}
+	return len(dAtA) - i, nil
+}
+func (m *GlobalSpecType_JitterPercent) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GlobalSpecType_JitterPercent) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	i = encodeVarintTypes(dAtA, i, uint64(m.JitterPercent))
+	i--
+	dAtA[i] = 0x48
 	return len(dAtA) - i, nil
 }
 func (m *GlobalSpecType_DnsProxyTcpHealthCheck) MarshalTo(dAtA []byte) (int, error) {
@@ -3620,6 +4056,29 @@ func (m *GlobalSpecType_UdpIcmpHealthCheck) MarshalToSizedBuffer(dAtA []byte) (i
 	}
 	return len(dAtA) - i, nil
 }
+func (m *GlobalSpecType_DefaultJitter) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GlobalSpecType_DefaultJitter) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.DefaultJitter != nil {
+		{
+			size, err := m.DefaultJitter.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1
+		i--
+		dAtA[i] = 0x82
+	}
+	return len(dAtA) - i, nil
+}
 func (m *CreateSpecType) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -3640,6 +4099,15 @@ func (m *CreateSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if m.JitterChoice != nil {
+		{
+			size := m.JitterChoice.Size()
+			i -= size
+			if _, err := m.JitterChoice.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
+	}
 	if m.HealthCheck != nil {
 		{
 			size := m.HealthCheck.Size()
@@ -3648,11 +4116,6 @@ func (m *CreateSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 				return 0, err
 			}
 		}
-	}
-	if m.JitterPercent != 0 {
-		i = encodeVarintTypes(dAtA, i, uint64(m.JitterPercent))
-		i--
-		dAtA[i] = 0x48
 	}
 	if m.HealthyThreshold != 0 {
 		i = encodeVarintTypes(dAtA, i, uint64(m.HealthyThreshold))
@@ -3717,6 +4180,18 @@ func (m *CreateSpecType_TcpHealthCheck) MarshalToSizedBuffer(dAtA []byte) (int, 
 		i--
 		dAtA[i] = 0x12
 	}
+	return len(dAtA) - i, nil
+}
+func (m *CreateSpecType_JitterPercent) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *CreateSpecType_JitterPercent) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	i = encodeVarintTypes(dAtA, i, uint64(m.JitterPercent))
+	i--
+	dAtA[i] = 0x48
 	return len(dAtA) - i, nil
 }
 func (m *CreateSpecType_DnsProxyTcpHealthCheck) MarshalTo(dAtA []byte) (int, error) {
@@ -3824,6 +4299,29 @@ func (m *CreateSpecType_UdpIcmpHealthCheck) MarshalToSizedBuffer(dAtA []byte) (i
 	}
 	return len(dAtA) - i, nil
 }
+func (m *CreateSpecType_DefaultJitter) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *CreateSpecType_DefaultJitter) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.DefaultJitter != nil {
+		{
+			size, err := m.DefaultJitter.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1
+		i--
+		dAtA[i] = 0x82
+	}
+	return len(dAtA) - i, nil
+}
 func (m *ReplaceSpecType) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -3844,6 +4342,15 @@ func (m *ReplaceSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if m.JitterChoice != nil {
+		{
+			size := m.JitterChoice.Size()
+			i -= size
+			if _, err := m.JitterChoice.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
+	}
 	if m.HealthCheck != nil {
 		{
 			size := m.HealthCheck.Size()
@@ -3852,11 +4359,6 @@ func (m *ReplaceSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 				return 0, err
 			}
 		}
-	}
-	if m.JitterPercent != 0 {
-		i = encodeVarintTypes(dAtA, i, uint64(m.JitterPercent))
-		i--
-		dAtA[i] = 0x48
 	}
 	if m.HealthyThreshold != 0 {
 		i = encodeVarintTypes(dAtA, i, uint64(m.HealthyThreshold))
@@ -3921,6 +4423,18 @@ func (m *ReplaceSpecType_TcpHealthCheck) MarshalToSizedBuffer(dAtA []byte) (int,
 		i--
 		dAtA[i] = 0x12
 	}
+	return len(dAtA) - i, nil
+}
+func (m *ReplaceSpecType_JitterPercent) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ReplaceSpecType_JitterPercent) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	i = encodeVarintTypes(dAtA, i, uint64(m.JitterPercent))
+	i--
+	dAtA[i] = 0x48
 	return len(dAtA) - i, nil
 }
 func (m *ReplaceSpecType_DnsProxyTcpHealthCheck) MarshalTo(dAtA []byte) (int, error) {
@@ -4028,6 +4542,29 @@ func (m *ReplaceSpecType_UdpIcmpHealthCheck) MarshalToSizedBuffer(dAtA []byte) (
 	}
 	return len(dAtA) - i, nil
 }
+func (m *ReplaceSpecType_DefaultJitter) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ReplaceSpecType_DefaultJitter) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.DefaultJitter != nil {
+		{
+			size, err := m.DefaultJitter.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1
+		i--
+		dAtA[i] = 0x82
+	}
+	return len(dAtA) - i, nil
+}
 func (m *GetSpecType) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -4048,6 +4585,15 @@ func (m *GetSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if m.JitterChoice != nil {
+		{
+			size := m.JitterChoice.Size()
+			i -= size
+			if _, err := m.JitterChoice.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
+	}
 	if m.HealthCheck != nil {
 		{
 			size := m.HealthCheck.Size()
@@ -4056,11 +4602,6 @@ func (m *GetSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 				return 0, err
 			}
 		}
-	}
-	if m.JitterPercent != 0 {
-		i = encodeVarintTypes(dAtA, i, uint64(m.JitterPercent))
-		i--
-		dAtA[i] = 0x48
 	}
 	if m.HealthyThreshold != 0 {
 		i = encodeVarintTypes(dAtA, i, uint64(m.HealthyThreshold))
@@ -4130,6 +4671,18 @@ func (m *GetSpecType_TcpHealthCheck) MarshalToSizedBuffer(dAtA []byte) (int, err
 		i--
 		dAtA[i] = 0x12
 	}
+	return len(dAtA) - i, nil
+}
+func (m *GetSpecType_JitterPercent) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetSpecType_JitterPercent) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	i = encodeVarintTypes(dAtA, i, uint64(m.JitterPercent))
+	i--
+	dAtA[i] = 0x48
 	return len(dAtA) - i, nil
 }
 func (m *GetSpecType_DnsProxyTcpHealthCheck) MarshalTo(dAtA []byte) (int, error) {
@@ -4234,6 +4787,29 @@ func (m *GetSpecType_UdpIcmpHealthCheck) MarshalToSizedBuffer(dAtA []byte) (int,
 		}
 		i--
 		dAtA[i] = 0x72
+	}
+	return len(dAtA) - i, nil
+}
+func (m *GetSpecType_DefaultJitter) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetSpecType_DefaultJitter) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.DefaultJitter != nil {
+		{
+			size, err := m.DefaultJitter.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1
+		i--
+		dAtA[i] = 0x82
 	}
 	return len(dAtA) - i, nil
 }
@@ -4417,8 +4993,8 @@ func (m *GlobalSpecType) Size() (n int) {
 	if m.HealthyThreshold != 0 {
 		n += 1 + sovTypes(uint64(m.HealthyThreshold))
 	}
-	if m.JitterPercent != 0 {
-		n += 1 + sovTypes(uint64(m.JitterPercent))
+	if m.JitterChoice != nil {
+		n += m.JitterChoice.Size()
 	}
 	return n
 }
@@ -4445,6 +5021,15 @@ func (m *GlobalSpecType_TcpHealthCheck) Size() (n int) {
 		l = m.TcpHealthCheck.Size()
 		n += 1 + l + sovTypes(uint64(l))
 	}
+	return n
+}
+func (m *GlobalSpecType_JitterPercent) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	n += 1 + sovTypes(uint64(m.JitterPercent))
 	return n
 }
 func (m *GlobalSpecType_DnsProxyTcpHealthCheck) Size() (n int) {
@@ -4507,6 +5092,18 @@ func (m *GlobalSpecType_UdpIcmpHealthCheck) Size() (n int) {
 	}
 	return n
 }
+func (m *GlobalSpecType_DefaultJitter) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.DefaultJitter != nil {
+		l = m.DefaultJitter.Size()
+		n += 2 + l + sovTypes(uint64(l))
+	}
+	return n
+}
 func (m *CreateSpecType) Size() (n int) {
 	if m == nil {
 		return 0
@@ -4528,8 +5125,8 @@ func (m *CreateSpecType) Size() (n int) {
 	if m.HealthyThreshold != 0 {
 		n += 1 + sovTypes(uint64(m.HealthyThreshold))
 	}
-	if m.JitterPercent != 0 {
-		n += 1 + sovTypes(uint64(m.JitterPercent))
+	if m.JitterChoice != nil {
+		n += m.JitterChoice.Size()
 	}
 	return n
 }
@@ -4556,6 +5153,15 @@ func (m *CreateSpecType_TcpHealthCheck) Size() (n int) {
 		l = m.TcpHealthCheck.Size()
 		n += 1 + l + sovTypes(uint64(l))
 	}
+	return n
+}
+func (m *CreateSpecType_JitterPercent) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	n += 1 + sovTypes(uint64(m.JitterPercent))
 	return n
 }
 func (m *CreateSpecType_DnsProxyTcpHealthCheck) Size() (n int) {
@@ -4618,6 +5224,18 @@ func (m *CreateSpecType_UdpIcmpHealthCheck) Size() (n int) {
 	}
 	return n
 }
+func (m *CreateSpecType_DefaultJitter) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.DefaultJitter != nil {
+		l = m.DefaultJitter.Size()
+		n += 2 + l + sovTypes(uint64(l))
+	}
+	return n
+}
 func (m *ReplaceSpecType) Size() (n int) {
 	if m == nil {
 		return 0
@@ -4639,8 +5257,8 @@ func (m *ReplaceSpecType) Size() (n int) {
 	if m.HealthyThreshold != 0 {
 		n += 1 + sovTypes(uint64(m.HealthyThreshold))
 	}
-	if m.JitterPercent != 0 {
-		n += 1 + sovTypes(uint64(m.JitterPercent))
+	if m.JitterChoice != nil {
+		n += m.JitterChoice.Size()
 	}
 	return n
 }
@@ -4667,6 +5285,15 @@ func (m *ReplaceSpecType_TcpHealthCheck) Size() (n int) {
 		l = m.TcpHealthCheck.Size()
 		n += 1 + l + sovTypes(uint64(l))
 	}
+	return n
+}
+func (m *ReplaceSpecType_JitterPercent) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	n += 1 + sovTypes(uint64(m.JitterPercent))
 	return n
 }
 func (m *ReplaceSpecType_DnsProxyTcpHealthCheck) Size() (n int) {
@@ -4729,6 +5356,18 @@ func (m *ReplaceSpecType_UdpIcmpHealthCheck) Size() (n int) {
 	}
 	return n
 }
+func (m *ReplaceSpecType_DefaultJitter) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.DefaultJitter != nil {
+		l = m.DefaultJitter.Size()
+		n += 2 + l + sovTypes(uint64(l))
+	}
+	return n
+}
 func (m *GetSpecType) Size() (n int) {
 	if m == nil {
 		return 0
@@ -4753,8 +5392,8 @@ func (m *GetSpecType) Size() (n int) {
 	if m.HealthyThreshold != 0 {
 		n += 1 + sovTypes(uint64(m.HealthyThreshold))
 	}
-	if m.JitterPercent != 0 {
-		n += 1 + sovTypes(uint64(m.JitterPercent))
+	if m.JitterChoice != nil {
+		n += m.JitterChoice.Size()
 	}
 	return n
 }
@@ -4781,6 +5420,15 @@ func (m *GetSpecType_TcpHealthCheck) Size() (n int) {
 		l = m.TcpHealthCheck.Size()
 		n += 1 + l + sovTypes(uint64(l))
 	}
+	return n
+}
+func (m *GetSpecType_JitterPercent) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	n += 1 + sovTypes(uint64(m.JitterPercent))
 	return n
 }
 func (m *GetSpecType_DnsProxyTcpHealthCheck) Size() (n int) {
@@ -4840,6 +5488,18 @@ func (m *GetSpecType_UdpIcmpHealthCheck) Size() (n int) {
 	if m.UdpIcmpHealthCheck != nil {
 		l = m.UdpIcmpHealthCheck.Size()
 		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *GetSpecType_DefaultJitter) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.DefaultJitter != nil {
+		l = m.DefaultJitter.Size()
+		n += 2 + l + sovTypes(uint64(l))
 	}
 	return n
 }
@@ -4955,7 +5615,7 @@ func (this *GlobalSpecType) String() string {
 		`Jitter:` + fmt.Sprintf("%v", this.Jitter) + `,`,
 		`UnhealthyThreshold:` + fmt.Sprintf("%v", this.UnhealthyThreshold) + `,`,
 		`HealthyThreshold:` + fmt.Sprintf("%v", this.HealthyThreshold) + `,`,
-		`JitterPercent:` + fmt.Sprintf("%v", this.JitterPercent) + `,`,
+		`JitterChoice:` + fmt.Sprintf("%v", this.JitterChoice) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -4976,6 +5636,16 @@ func (this *GlobalSpecType_TcpHealthCheck) String() string {
 	}
 	s := strings.Join([]string{`&GlobalSpecType_TcpHealthCheck{`,
 		`TcpHealthCheck:` + strings.Replace(fmt.Sprintf("%v", this.TcpHealthCheck), "TcpHealthCheck", "TcpHealthCheck", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GlobalSpecType_JitterPercent) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GlobalSpecType_JitterPercent{`,
+		`JitterPercent:` + fmt.Sprintf("%v", this.JitterPercent) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -5030,6 +5700,16 @@ func (this *GlobalSpecType_UdpIcmpHealthCheck) String() string {
 	}, "")
 	return s
 }
+func (this *GlobalSpecType_DefaultJitter) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GlobalSpecType_DefaultJitter{`,
+		`DefaultJitter:` + strings.Replace(fmt.Sprintf("%v", this.DefaultJitter), "Empty", "schema.Empty", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
 func (this *CreateSpecType) String() string {
 	if this == nil {
 		return "nil"
@@ -5040,7 +5720,7 @@ func (this *CreateSpecType) String() string {
 		`Interval:` + fmt.Sprintf("%v", this.Interval) + `,`,
 		`UnhealthyThreshold:` + fmt.Sprintf("%v", this.UnhealthyThreshold) + `,`,
 		`HealthyThreshold:` + fmt.Sprintf("%v", this.HealthyThreshold) + `,`,
-		`JitterPercent:` + fmt.Sprintf("%v", this.JitterPercent) + `,`,
+		`JitterChoice:` + fmt.Sprintf("%v", this.JitterChoice) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -5061,6 +5741,16 @@ func (this *CreateSpecType_TcpHealthCheck) String() string {
 	}
 	s := strings.Join([]string{`&CreateSpecType_TcpHealthCheck{`,
 		`TcpHealthCheck:` + strings.Replace(fmt.Sprintf("%v", this.TcpHealthCheck), "TcpHealthCheck", "TcpHealthCheck", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *CreateSpecType_JitterPercent) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&CreateSpecType_JitterPercent{`,
+		`JitterPercent:` + fmt.Sprintf("%v", this.JitterPercent) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -5115,6 +5805,16 @@ func (this *CreateSpecType_UdpIcmpHealthCheck) String() string {
 	}, "")
 	return s
 }
+func (this *CreateSpecType_DefaultJitter) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&CreateSpecType_DefaultJitter{`,
+		`DefaultJitter:` + strings.Replace(fmt.Sprintf("%v", this.DefaultJitter), "Empty", "schema.Empty", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
 func (this *ReplaceSpecType) String() string {
 	if this == nil {
 		return "nil"
@@ -5125,7 +5825,7 @@ func (this *ReplaceSpecType) String() string {
 		`Interval:` + fmt.Sprintf("%v", this.Interval) + `,`,
 		`UnhealthyThreshold:` + fmt.Sprintf("%v", this.UnhealthyThreshold) + `,`,
 		`HealthyThreshold:` + fmt.Sprintf("%v", this.HealthyThreshold) + `,`,
-		`JitterPercent:` + fmt.Sprintf("%v", this.JitterPercent) + `,`,
+		`JitterChoice:` + fmt.Sprintf("%v", this.JitterChoice) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -5146,6 +5846,16 @@ func (this *ReplaceSpecType_TcpHealthCheck) String() string {
 	}
 	s := strings.Join([]string{`&ReplaceSpecType_TcpHealthCheck{`,
 		`TcpHealthCheck:` + strings.Replace(fmt.Sprintf("%v", this.TcpHealthCheck), "TcpHealthCheck", "TcpHealthCheck", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ReplaceSpecType_JitterPercent) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ReplaceSpecType_JitterPercent{`,
+		`JitterPercent:` + fmt.Sprintf("%v", this.JitterPercent) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -5200,6 +5910,16 @@ func (this *ReplaceSpecType_UdpIcmpHealthCheck) String() string {
 	}, "")
 	return s
 }
+func (this *ReplaceSpecType_DefaultJitter) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ReplaceSpecType_DefaultJitter{`,
+		`DefaultJitter:` + strings.Replace(fmt.Sprintf("%v", this.DefaultJitter), "Empty", "schema.Empty", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
 func (this *GetSpecType) String() string {
 	if this == nil {
 		return "nil"
@@ -5211,7 +5931,7 @@ func (this *GetSpecType) String() string {
 		`Jitter:` + fmt.Sprintf("%v", this.Jitter) + `,`,
 		`UnhealthyThreshold:` + fmt.Sprintf("%v", this.UnhealthyThreshold) + `,`,
 		`HealthyThreshold:` + fmt.Sprintf("%v", this.HealthyThreshold) + `,`,
-		`JitterPercent:` + fmt.Sprintf("%v", this.JitterPercent) + `,`,
+		`JitterChoice:` + fmt.Sprintf("%v", this.JitterChoice) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -5232,6 +5952,16 @@ func (this *GetSpecType_TcpHealthCheck) String() string {
 	}
 	s := strings.Join([]string{`&GetSpecType_TcpHealthCheck{`,
 		`TcpHealthCheck:` + strings.Replace(fmt.Sprintf("%v", this.TcpHealthCheck), "TcpHealthCheck", "TcpHealthCheck", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GetSpecType_JitterPercent) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GetSpecType_JitterPercent{`,
+		`JitterPercent:` + fmt.Sprintf("%v", this.JitterPercent) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -5282,6 +6012,16 @@ func (this *GetSpecType_UdpIcmpHealthCheck) String() string {
 	}
 	s := strings.Join([]string{`&GetSpecType_UdpIcmpHealthCheck{`,
 		`UdpIcmpHealthCheck:` + strings.Replace(fmt.Sprintf("%v", this.UdpIcmpHealthCheck), "Empty", "schema.Empty", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GetSpecType_DefaultJitter) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GetSpecType_DefaultJitter{`,
+		`DefaultJitter:` + strings.Replace(fmt.Sprintf("%v", this.DefaultJitter), "Empty", "schema.Empty", 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -5503,7 +6243,7 @@ func (m *HttpHealthCheck) Unmarshal(dAtA []byte) error {
 					if err != nil {
 						return err
 					}
-					if skippy < 0 {
+					if (skippy < 0) || (iNdEx+skippy) < 0 {
 						return ErrInvalidLengthTypes
 					}
 					if (iNdEx + skippy) > postIndex {
@@ -5671,10 +6411,7 @@ func (m *HttpHealthCheck) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -5865,10 +6602,7 @@ func (m *DnsHealthCheck) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -5982,10 +6716,7 @@ func (m *DnsProxyUdpHealthCheck) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -6099,10 +6830,7 @@ func (m *DnsProxyTcpHealthCheck) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -6216,10 +6944,7 @@ func (m *TcpHealthCheck) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -6432,7 +7157,7 @@ func (m *GlobalSpecType) Unmarshal(dAtA []byte) error {
 			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field JitterPercent", wireType)
 			}
-			m.JitterPercent = 0
+			var v uint32
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowTypes
@@ -6442,11 +7167,12 @@ func (m *GlobalSpecType) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.JitterPercent |= uint32(b&0x7F) << shift
+				v |= uint32(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
+			m.JitterChoice = &GlobalSpecType_JitterPercent{v}
 		case 10:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field DnsProxyTcpHealthCheck", wireType)
@@ -6622,16 +7348,48 @@ func (m *GlobalSpecType) Unmarshal(dAtA []byte) error {
 			}
 			m.HealthCheck = &GlobalSpecType_UdpIcmpHealthCheck{v}
 			iNdEx = postIndex
+		case 16:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field DefaultJitter", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &schema.Empty{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.JitterChoice = &GlobalSpecType_DefaultJitter{v}
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipTypes(dAtA[iNdEx:])
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -6825,7 +7583,7 @@ func (m *CreateSpecType) Unmarshal(dAtA []byte) error {
 			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field JitterPercent", wireType)
 			}
-			m.JitterPercent = 0
+			var v uint32
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowTypes
@@ -6835,11 +7593,12 @@ func (m *CreateSpecType) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.JitterPercent |= uint32(b&0x7F) << shift
+				v |= uint32(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
+			m.JitterChoice = &CreateSpecType_JitterPercent{v}
 		case 10:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field DnsProxyTcpHealthCheck", wireType)
@@ -7015,16 +7774,48 @@ func (m *CreateSpecType) Unmarshal(dAtA []byte) error {
 			}
 			m.HealthCheck = &CreateSpecType_UdpIcmpHealthCheck{v}
 			iNdEx = postIndex
+		case 16:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field DefaultJitter", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &schema.Empty{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.JitterChoice = &CreateSpecType_DefaultJitter{v}
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipTypes(dAtA[iNdEx:])
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -7218,7 +8009,7 @@ func (m *ReplaceSpecType) Unmarshal(dAtA []byte) error {
 			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field JitterPercent", wireType)
 			}
-			m.JitterPercent = 0
+			var v uint32
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowTypes
@@ -7228,11 +8019,12 @@ func (m *ReplaceSpecType) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.JitterPercent |= uint32(b&0x7F) << shift
+				v |= uint32(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
+			m.JitterChoice = &ReplaceSpecType_JitterPercent{v}
 		case 10:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field DnsProxyTcpHealthCheck", wireType)
@@ -7408,16 +8200,48 @@ func (m *ReplaceSpecType) Unmarshal(dAtA []byte) error {
 			}
 			m.HealthCheck = &ReplaceSpecType_UdpIcmpHealthCheck{v}
 			iNdEx = postIndex
+		case 16:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field DefaultJitter", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &schema.Empty{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.JitterChoice = &ReplaceSpecType_DefaultJitter{v}
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipTypes(dAtA[iNdEx:])
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -7630,7 +8454,7 @@ func (m *GetSpecType) Unmarshal(dAtA []byte) error {
 			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field JitterPercent", wireType)
 			}
-			m.JitterPercent = 0
+			var v uint32
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowTypes
@@ -7640,11 +8464,12 @@ func (m *GetSpecType) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.JitterPercent |= uint32(b&0x7F) << shift
+				v |= uint32(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
+			m.JitterChoice = &GetSpecType_JitterPercent{v}
 		case 10:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field DnsProxyTcpHealthCheck", wireType)
@@ -7820,16 +8645,48 @@ func (m *GetSpecType) Unmarshal(dAtA []byte) error {
 			}
 			m.HealthCheck = &GetSpecType_UdpIcmpHealthCheck{v}
 			iNdEx = postIndex
+		case 16:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field DefaultJitter", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &schema.Empty{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.JitterChoice = &GetSpecType_DefaultJitter{v}
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipTypes(dAtA[iNdEx:])
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthTypes
 			}
 			if (iNdEx + skippy) > l {

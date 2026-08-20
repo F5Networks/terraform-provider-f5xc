@@ -9,28 +9,34 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"regexp"
 	"strings"
 	"time"
 
 	"github.com/gogo/protobuf/proto"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"gopkg.volterra.us/stdlib/client/vesapi"
 	"gopkg.volterra.us/stdlib/server"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 
-	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+
+	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -40,7 +46,6 @@ import (
 
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_namespace "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/namespace"
-	ves_io_schema_virtual_network "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/virtual_network"
 )
 
 // ResourceF5XCNamespace defines the resource implementation.
@@ -48,16 +53,44 @@ type ResourceF5XCNamespace struct {
 	client *client.APIClient
 }
 
+type NsSubCA struct {
+	Name       types.String `tfsdk:"name"`
+	Pem        types.String `tfsdk:"pem"`
+	PrivateKey types.Object `tfsdk:"private_key"`
+	Version    types.Int64  `tfsdk:"version"`
+}
+
+type NsSecretType struct {
+	SecretInfoChoice types.Object `tfsdk:"secret_info_choice"`
+}
+
+type NsSecretInfoChoice struct {
+	BlindfoldSecretInfo types.Object `tfsdk:"blindfold_secret_info"`
+	ClearSecretInfo     types.Object `tfsdk:"clear_secret_info"`
+}
+
+type NsBlindfoldSecretInfo struct {
+	DecryptionProvider types.String `tfsdk:"decryption_provider"`
+	Location           types.String `tfsdk:"location"`
+	StoreProvider      types.String `tfsdk:"store_provider"`
+}
+
+type NsClearSecretInfo struct {
+	Provider types.String `tfsdk:"provider"`
+	Url      types.String `tfsdk:"url"`
+}
+
 // ResourceF5XCNamespaceModel describes the resource data model.
 type ResourceF5XCNamespaceModel struct {
+	Annotations             types.Map      `tfsdk:"annotations"`
+	Description             types.String   `tfsdk:"description"`
+	Labels                  types.Map      `tfsdk:"labels"`
 	Name                    types.String   `tfsdk:"name"`
 	Namespace               types.String   `tfsdk:"namespace"`
 	Uid                     types.String   `tfsdk:"uid"`
-	Labels                  types.Map      `tfsdk:"labels"`
-	Annotations             types.Map      `tfsdk:"annotations"`
-	Description             types.String   `tfsdk:"description"`
-	ProxySubCaLatestVersion types.Int64    `tfsdk:"proxy_sub_ca_latest_version"`
 	AllowAdvertiseOnPublic  types.List     `tfsdk:"allow_advertise_on_public"`
+	ProxySubCaLatestVersion types.Int64    `tfsdk:"proxy_sub_ca_latest_version"`
+	ProxySubCas             types.List     `tfsdk:"proxy_sub_cas"`
 	Timeouts                timeouts.Value `tfsdk:"timeouts"`
 }
 
@@ -71,6 +104,52 @@ var (
 )
 
 // --- Attribute Maps for Nested Structs ---
+// Attribute map for ArrayOfPointerField --> ProxySubCas
+var NamespaceProxySubCasModelAttributeMap = map[string]attr.Type{
+
+	"name": types.StringType,
+	"pem":  types.StringType, "private_key": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"secret_info_choice": types.ObjectType{
+				AttrTypes: NamespaceProxySubCasPrivateKeySecretInfoOneofModelAttributeMap,
+			}},
+	},
+	"version": types.Int64Type,
+}
+
+// Attribute map for RequiredPointerField --> PrivateKey
+var NamespaceProxySubCasPrivateKeyModelAttributeMap = map[string]attr.Type{
+
+	"secret_info_choice": types.ObjectType{
+		AttrTypes: NamespaceProxySubCasPrivateKeySecretInfoOneofModelAttributeMap,
+	},
+}
+
+// Attribute map for RequiredOneOfField --> SecretInfoOneof
+var NamespaceProxySubCasPrivateKeySecretInfoOneofModelAttributeMap = map[string]attr.Type{
+
+	"blindfold_secret_info": types.ObjectType{
+		AttrTypes: NamespaceProxySubCasPrivateKeySecretInfoOneofBlindfoldSecretInfoModelAttributeMap,
+	},
+	"clear_secret_info": types.ObjectType{
+		AttrTypes: NamespaceProxySubCasPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
+var NamespaceProxySubCasPrivateKeySecretInfoOneofBlindfoldSecretInfoModelAttributeMap = map[string]attr.Type{
+
+	"decryption_provider": types.StringType,
+	"location":            types.StringType,
+	"store_provider":      types.StringType,
+}
+
+// Attribute map for PointerOfOneOfField --> ClearSecretInfo
+var NamespaceProxySubCasPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap = map[string]attr.Type{
+
+	"provider": types.StringType,
+	"url":      types.StringType,
+}
 
 func NewResourceF5XCNamespace() resource.Resource {
 	return &ResourceF5XCNamespace{}
@@ -83,20 +162,59 @@ func (r *ResourceF5XCNamespace) Metadata(ctx context.Context, request resource.M
 func (r *ResourceF5XCNamespace) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Namespace resource",
-		Description:         "Namespace resource",
+		MarkdownDescription: "GetRequest is used to get different forms of a namespace This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of namespace) etc. can be fetched",
+		Description:         "GetRequest is used to get different forms of a namespace This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of namespace) etc. can be fetched",
 
 		Attributes: map[string]schema.Attribute{
+			"annotations": schema.MapAttribute{
+				Description:         "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
+				MarkdownDescription: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				ElementType:         types.StringType,
+				Validators: []validator.Map{
+					mapvalidator.SizeAtLeast(1),
+					mapvalidator.KeysAre(stringvalidator.LengthBetween(1, 64)),
+					mapvalidator.ValueStringsAre(stringvalidator.LengthBetween(1, 1024)),
+				},
+				PlanModifiers: []planmodifier.Map{
+					mapplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"description": schema.StringAttribute{
+				Description:         "description Human readable description for the object",
+				MarkdownDescription: "description Human readable description for the object",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				Default:             stringdefault.StaticString(""),
+				Validators: []validator.String{
+					bytesvalidator.BytesAtMost(1200),
+				},
+			},
+			"labels": schema.MapAttribute{
+				Description:         "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				MarkdownDescription: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				ElementType:         types.StringType,
+				PlanModifiers: []planmodifier.Map{
+					mapmergemodifier.New(),
+					mapplanmodifier.UseStateForUnknown(),
+				},
+			},
 			"name": schema.StringAttribute{
 				Description:         "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
-				MarkdownDescription: "",
+				MarkdownDescription: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
 				Required:            true,
 				Optional:            false,
 				Computed:            false,
 			},
 			"namespace": schema.StringAttribute{
 				Description:         "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
-				MarkdownDescription: "",
+				MarkdownDescription: "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
 				Required:            false,
 				Optional:            false,
 				Computed:            true,
@@ -106,7 +224,7 @@ func (r *ResourceF5XCNamespace) Schema(ctx context.Context, request resource.Sch
 			},
 			"uid": schema.StringAttribute{
 				Description:         "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
-				MarkdownDescription: "",
+				MarkdownDescription: "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
 				Required:            false,
 				Optional:            false,
 				Computed:            true,
@@ -114,60 +232,165 @@ func (r *ResourceF5XCNamespace) Schema(ctx context.Context, request resource.Sch
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"labels": schema.MapAttribute{
-				Description:         "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            true,
-				ElementType:         types.StringType,
-				PlanModifiers: []planmodifier.Map{
-					mapmergemodifier.New(),
-				},
-			},
-			"annotations": schema.MapAttribute{
-				Description:         "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            false,
-				ElementType:         types.StringType,
-				Validators: []validator.Map{
-					mapvalidator.KeysAre(stringvalidator.LengthBetween(1, 64)),
-					mapvalidator.ValueStringsAre(stringvalidator.LengthBetween(1, 1024)),
-				},
-			},
-			"description": schema.StringAttribute{
-				Description:         "description Human readable description for the object",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            true,
-				Default:             stringdefault.StaticString(""),
-			},
-			"proxy_sub_ca_latest_version": schema.Int64Attribute{
-				Description:         "Proxy Sub CA Version SubCA version which is the latest and will be used for proxy feature.",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            false,
-			},
 			"allow_advertise_on_public": schema.ListAttribute{
 				Description:         "Allow advertisement on public. Config choice to allow advertisement on the public.",
-				MarkdownDescription: "<br>**Allowed Values (choose one):** `[\"Enable\", \"Disable\", \"Default\"]`<br>**Default:** `Default`",
+				MarkdownDescription: "Allow advertisement on public. Config choice to allow advertisement on the public.<br>**Allowed Values (choose one):** `['Default', 'Disable', 'Enable']`<br>**Default:** `Default`<br>**Default:** `Default`",
 				Required:            false,
 				Optional:            true,
 				Computed:            true,
 				ElementType:         types.StringType,
 				Default:             listdefault.StaticValue(types.ListValueMust(types.StringType, []attr.Value{types.StringValue("Default")})),
 				Validators: []validator.List{
-					listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"Enable", "Disable", "Default"}...)),
+					listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"Default", "Disable", "Enable"}...)),
 					listvalidator.SizeAtMost(1),
+				},
+			},
+			"proxy_sub_ca_latest_version": schema.Int64Attribute{
+				Description:         "Proxy Sub CA Version SubCA version which is the latest and will be used for proxy feature.",
+				MarkdownDescription: "Proxy Sub CA Version SubCA version which is the latest and will be used for proxy feature.",
+				Required:            false,
+				Optional:            true,
+				Computed:            false,
+			},
+			"proxy_sub_cas": schema.ListNestedAttribute{
+				Description:         "Proxy Sub CAs Array of SubCAs, the latest one will be used for proxy feature.",
+				MarkdownDescription: "Proxy Sub CAs Array of SubCAs, the latest one will be used for proxy feature.",
+				Required:            false,
+				Optional:            true,
+				Computed:            false,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"name": schema.StringAttribute{
+							Description:         "Name Name for this CA",
+							MarkdownDescription: "Name Name for this CA<br>**Validation:** `Length LengthBetween(1, 514)`",
+							Required:            true,
+							Optional:            false,
+							Computed:            false,
+							Validators: []validator.String{
+								stringvalidator.LengthBetween(1, 514),
+							},
+						},
+						"pem": schema.StringAttribute{
+							Description:         "CA PEM PEM encoded certificate",
+							MarkdownDescription: "CA PEM PEM encoded certificate<br>**Validation:** `Length LengthBetween(1, 10240)`",
+							Required:            true,
+							Optional:            false,
+							Computed:            false,
+							Validators: []validator.String{
+								stringvalidator.LengthBetween(1, 10240),
+							},
+						},
+						"private_key": schema.SingleNestedAttribute{
+							Description:         "Private Key Private Key for CA",
+							MarkdownDescription: "Private Key Private Key for CA",
+							Required:            true,
+							Optional:            false,
+							Computed:            false,
+							Attributes: map[string]schema.Attribute{
+								"secret_info_choice": schema.SingleNestedAttribute{
+									Description:         "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+									MarkdownDescription: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+									Required:            true,
+									Optional:            false,
+									Computed:            false,
+									Validators: []validator.Object{
+										exactlyoneofvalidator.RequiredExactlyOneOf(
+											"blindfold_secret_info",
+											"clear_secret_info",
+										),
+									},
+									Attributes: map[string]schema.Attribute{
+										"blindfold_secret_info": schema.SingleNestedAttribute{
+											Description:         "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+											MarkdownDescription: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+											Required:            false,
+											Optional:            true,
+											Computed:            false,
+											Attributes: map[string]schema.Attribute{
+												"decryption_provider": schema.StringAttribute{
+													Description:         "Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.",
+													MarkdownDescription: "Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.",
+													Required:            false,
+													Optional:            true,
+													Computed:            false,
+												},
+												"location": schema.StringAttribute{
+													Description:         "Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location",
+													MarkdownDescription: "Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location",
+													Required:            true,
+													Optional:            false,
+													Computed:            false,
+													Validators: []validator.String{
+														stringvalidator.RegexMatches(
+															regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
+															"must be a valid URI reference (RFC 3986)",
+														),
+													},
+												},
+												"store_provider": schema.StringAttribute{
+													Description:         "Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
+													MarkdownDescription: "Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
+													Required:            false,
+													Optional:            true,
+													Computed:            false,
+													Validators: []validator.String{
+														stringvalidator.LengthAtLeast(1),
+													},
+												},
+											},
+										},
+										"clear_secret_info": schema.SingleNestedAttribute{
+											Description:         "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+											MarkdownDescription: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+											Required:            false,
+											Optional:            true,
+											Computed:            false,
+											Attributes: map[string]schema.Attribute{
+												"provider": schema.StringAttribute{
+													Description:         "Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
+													MarkdownDescription: "Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
+													Required:            false,
+													Optional:            true,
+													Computed:            false,
+												},
+												"url": schema.StringAttribute{
+													Description:         "URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.",
+													MarkdownDescription: "URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.",
+													Required:            true,
+													Optional:            false,
+													Computed:            false,
+													Sensitive:           true,
+													Validators: []validator.String{
+														stringvalidator.RegexMatches(
+															regexp.MustCompile(`^string:///[^\s]*$`),
+															"must match pattern `^string:///[^\\s]*$`",
+														),
+														bytesvalidator.BytesAtMost(131072),
+														stringvalidator.RegexMatches(
+															regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+\-.]*://[^\s]*|/[^\s]*)$`),
+															"must be a valid URI reference (RFC 3986)",
+														),
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+						"version": schema.Int64Attribute{
+							Description:         "Version Certificate version",
+							MarkdownDescription: "Version Certificate version",
+							Required:            false,
+							Optional:            true,
+							Computed:            false,
+						},
+					},
 				},
 			},
 			"timeouts": timeouts.Attributes(ctx, timeouts.Opts{
 				Create: true, // activate timeouts.create
-				Update: true, // activate timeouts.update
+				Update: true, // activate timeouts.update (false for CRLD resources)
 				Delete: true, // activate timeouts.delete
 				Read:   true, // activate timeouts.read
 			}),
@@ -267,18 +490,13 @@ func (r *ResourceF5XCNamespace) Create(ctx context.Context, request resource.Cre
 
 	// Populate createReq from data model
 
-	// resource modelToMetaRoot RequiredStringField --> Name
-	if !data.Name.IsNull() && !data.Name.IsUnknown() {
-		meta.Name = string(data.Name.ValueString())
-	}
-
 	// resource modelToMetaRoot MapOfStringField --> Annotations
 	if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
 		var labels map[string]string
 		diags = data.Annotations.ElementsAs(ctx, &labels, false)
 		response.Diagnostics.Append(diags...)
 		if response.Diagnostics.HasError() {
-			tflog.Error(ctx, "Failed to convert annotations from map to model")
+			tflog.Error(ctx, "Failed to convert Annotations from map to model")
 			return
 		}
 		meta.Annotations = labels
@@ -291,11 +509,37 @@ func (r *ResourceF5XCNamespace) Create(ctx context.Context, request resource.Cre
 		meta.Description = string(data.Description.ValueString())
 	}
 
+	// resource modelToMetaRoot MapOfStringField --> Labels
+	if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
+		var labels map[string]string
+		diags = data.Labels.ElementsAs(ctx, &labels, false)
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			tflog.Error(ctx, "Failed to convert Labels from map to model")
+			return
+		}
+		meta.Labels = labels
+	} else {
+		meta.Labels = nil
+	}
+
+	// resource modelToMetaRoot RequiredStringField --> Name
+	if !data.Name.IsNull() && !data.Name.IsUnknown() {
+		meta.Name = string(data.Name.ValueString())
+	}
+
+	// Strip backend-injected label keys that must not be sent in Create/Update requests.
+	// These keys are stored in state (for drift-free plans) but must be omitted from the
+	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+		delete(meta.Labels, _omitKey)
+	}
+
 	if response.Diagnostics.HasError() {
 		return
 	}
 
-	createRspType := strings.Replace(ves_io_schema_virtual_network.ObjectType, "Object", "GetResponse", 1)
+	createRspType := strings.Replace(ves_io_schema_namespace.ObjectType, "Object", "GetResponse", 1)
 	protoMsgType := proto.MessageType(createRspType).Elem()
 	initialProtoMsg := reflect.New(protoMsgType).Interface().(proto.Message)
 	callRsp := &server.CallResponse{
@@ -315,6 +559,34 @@ func (r *ResourceF5XCNamespace) Create(ctx context.Context, request resource.Cre
 		return
 	}
 
+	err = utils.WaitForPendingInitializers(
+		ctx,
+		data.Name.ValueString(),
+		data.Namespace.ValueString(),
+		data.Uid.ValueString(),
+		func(ctx context.Context, namespace, name string) (*ves_io_schema_namespace.DBObject, error) {
+			resp, getErr := r.client.GetObject(ctx, ves_io_schema_namespace.ObjectType, namespace, name, opts...)
+			if getErr != nil {
+				return nil, getErr
+			}
+			// Extract the DBObject from the response
+			dbObj, ok := resp.(*ves_io_schema_namespace.DBObject)
+			if !ok {
+				return nil, fmt.Errorf("unexpected response type: %T", resp)
+			}
+			return dbObj, nil
+		},
+	)
+	if err != nil {
+		// handle error, e.g. clear ID if resource is gone
+		if strings.Contains(err.Error(), "no longer exists") {
+			data.Uid = types.StringNull()
+		}
+		response.Diagnostics.AddError(
+			"Pending Initializers Error", fmt.Sprintf("Error waiting for initializers on %s: %s", "namespace", err),
+		)
+		return
+	}
 	// Write back the response to the model
 	metaData := httpResp.GetObjMetadata()
 	specData := httpResp.GetObjSpec().(*ves_io_schema_namespace.SpecType).GcSpec
@@ -323,6 +595,101 @@ func (r *ResourceF5XCNamespace) Create(ctx context.Context, request resource.Cre
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		annotationsApiMap := metaData.GetAnnotations()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Annotations already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Annotations.IsUnknown() {
+			if len(annotationsApiMap) > 0 {
+				annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+				response.Diagnostics.Append(annotationsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Annotations = annotationsMap
+			} else {
+				data.Annotations = types.MapNull(types.StringType)
+			}
+		}
+		// When plan is a known map (user labels or merged prior state), leave data.Annotations
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
+	}
+
+	// resource SpecToModelRoot Meta StringField --> Description
+	data.Description = types.StringValue(metaData.GetDescription())
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		labelsApiMap := metaData.GetLabels()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Labels already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Labels.IsUnknown() {
+			if len(labelsApiMap) > 0 {
+				labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+				response.Diagnostics.Append(labelsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Labels = labelsMap
+			} else {
+				data.Labels = types.MapNull(types.StringType)
+			}
+		}
+		// When plan is a known map (user labels or merged prior state), leave data.Labels
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
+	}
 
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
 	data.Name = types.StringValue(metaData.GetName())
@@ -333,86 +700,22 @@ func (r *ResourceF5XCNamespace) Create(ctx context.Context, request resource.Cre
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
+	// resource SpecToModelRoot EnumField --> AllowAdvertiseOnPublic
+	{
+		if specData.GetAllowAdvertiseOnPublic().String() != "" {
+			stringValue := types.StringValue(specData.GetAllowAdvertiseOnPublic().String())
+			stringSlice := []types.String{stringValue}
+			listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			data.AllowAdvertiseOnPublic = listValue
+		} else {
+			// Empty string, set to null
+			data.AllowAdvertiseOnPublic = types.ListNull(types.StringType)
 		}
-		// CREATE / UPDATE: Store the plan value as-is so the apply result matches the plan.
-		// The plan is either:
-		//   - Unknown (config=null): store the full API response.
-		//   - config value (first create with user labels): store only user labels.
-		//   - prior state (update with user+backend labels): store the merged labels.
-		// In all cases, data.Labels already holds the correct plan value
-		// except when it is Unknown — in that case we use the API response.
-		if data.Labels.IsUnknown() {
-			data.Labels = labelsMap
-		}
-		// When plan is a known map, leave data.Labels unchanged (= plan value).
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
 	}
-
-	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// CREATE / UPDATE: Store the plan value as-is so the apply result matches the plan.
-		// The plan is either:
-		//   - Unknown (config=null): store the full API response.
-		//   - config value (first create with user labels): store only user labels.
-		//   - prior state (update with user+backend labels): store the merged labels.
-		// In all cases, data.Annotations already holds the correct plan value
-		// except when it is Unknown — in that case we use the API response.
-		if data.Annotations.IsUnknown() {
-			data.Annotations = annotationsMap
-		}
-		// When plan is a known map, leave data.Annotations unchanged (= plan value).
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Annotations = types.MapNull(types.StringType)
-	}
-
-	// resource SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
 
 	// resource SpecToModelRoot UintField --> ProxySubCaLatestVersion
 	proxySubCaLatestVersionValue := specData.GetProxySubCaLatestVersion()
@@ -422,19 +725,201 @@ func (r *ResourceF5XCNamespace) Create(ctx context.Context, request resource.Cre
 		data.ProxySubCaLatestVersion = types.Int64Null()
 	}
 
-	// resource SpecToModelRoot EnumField --> AllowAdvertiseOnPublic
-	if specData.GetAllowAdvertiseOnPublic().String() != "" {
-		stringValue := types.StringValue(specData.GetAllowAdvertiseOnPublic().String())
-		stringSlice := []types.String{stringValue}
-		listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
+	// resource SpecToModelRoot ArrayOfPointerField --> ProxySubCas
+	if len(specData.GetProxySubCas()) > 0 {
+		proxySubCasElements := make([]NsSubCA, 0, len(specData.GetProxySubCas()))
+		i := 0
+		for _, proxySubCasElement := range specData.GetProxySubCas() {
+			nsSubCAModel := NsSubCA{}
+
+			// resource specToModelNested RequiredStringField --> Name
+			if proxySubCasElement.GetName() != "" {
+				nsSubCAModel.Name = types.StringValue(proxySubCasElement.GetName())
+			} else {
+				// Empty string, set to null
+				nsSubCAModel.Name = types.StringNull()
+			}
+
+			// resource specToModelNested RequiredStringField --> Pem
+			if proxySubCasElement.GetPem() != "" {
+				nsSubCAModel.Pem = types.StringValue(proxySubCasElement.GetPem())
+			} else {
+				// Empty string, set to null
+				nsSubCAModel.Pem = types.StringNull()
+			}
+
+			// resource specToModelNested RequiredPointerField --> PrivateKey
+			if proxySubCasElement.GetPrivateKey() != nil {
+				// Create the nested Go struct
+				nsSecretTypeModel := &NsSecretType{}
+				privateKeyElement := proxySubCasElement.GetPrivateKey()
+
+				// Recursively populate the nested struct
+
+				// resource specToModelNested RequiredOneOfField --> SecretInfoOneof
+				// GlobalSpecType
+				if privateKeyElement.GetSecretInfoOneof() != nil {
+					// Create a temporary attribute map for the choices within this OneOf
+					privateKeysecretInfoChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+					// Define a variable for the spec choices to be passed down to nested templates
+					privateKeysecretInfoChoiceChoices := privateKeyElement.GetSecretInfoOneof()
+
+					// Process nested choices, populating the temporary attribute map
+
+					// resource specToModelNested PointerOfOneOfField --> BlindfoldSecretInfo
+					// GlobalSpecType
+					// false
+					{
+						blindfoldSecretInfoOptionsWrapper, isBlindfoldSecretInfo := privateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_BlindfoldSecretInfo)
+						blindfoldSecretInfoAttributeMap := make(map[string]attr.Value)
+
+						if isBlindfoldSecretInfo && blindfoldSecretInfoOptionsWrapper != nil && blindfoldSecretInfoOptionsWrapper.BlindfoldSecretInfo != nil {
+							blindfoldSecretInfoElement := blindfoldSecretInfoOptionsWrapper.BlindfoldSecretInfo
+
+							// resource specToModelNested StringField --> DecryptionProvider
+							if blindfoldSecretInfoElement.GetDecryptionProvider() != "" {
+								blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoElement.GetDecryptionProvider())
+							} else {
+								// Empty string, set to null
+								blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringNull()
+							}
+
+							// resource specToModelNested RequiredStringField --> Location
+							if blindfoldSecretInfoElement.GetLocation() != "" {
+								blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoElement.GetLocation())
+							} else {
+								// Empty string, set to null
+								blindfoldSecretInfoAttributeMap["location"] = types.StringNull()
+							}
+
+							// resource specToModelNested StringField --> StoreProvider
+							if blindfoldSecretInfoElement.GetStoreProvider() != "" {
+								blindfoldSecretInfoAttributeMap["store_provider"] = types.StringValue(blindfoldSecretInfoElement.GetStoreProvider())
+							} else {
+								// Empty string, set to null
+								blindfoldSecretInfoAttributeMap["store_provider"] = types.StringNull()
+							}
+
+							blindfoldSecretInfoObj, blindfoldSecretInfoObjDiags := types.ObjectValue(NamespaceProxySubCasPrivateKeySecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
+							response.Diagnostics.Append(blindfoldSecretInfoObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							privateKeysecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = blindfoldSecretInfoObj
+						} else {
+							privateKeysecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = types.ObjectNull(NamespaceProxySubCasPrivateKeySecretInfoOneofBlindfoldSecretInfoModelAttributeMap)
+						}
+					}
+
+					// resource specToModelNested PointerOfOneOfField --> ClearSecretInfo
+					// GlobalSpecType
+					// false
+					{
+						clearSecretInfoOptionsWrapper, isClearSecretInfo := privateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_ClearSecretInfo)
+						clearSecretInfoAttributeMap := make(map[string]attr.Value)
+
+						if isClearSecretInfo && clearSecretInfoOptionsWrapper != nil && clearSecretInfoOptionsWrapper.ClearSecretInfo != nil {
+							clearSecretInfoElement := clearSecretInfoOptionsWrapper.ClearSecretInfo
+
+							// resource specToModelNested StringField --> Provider
+							if clearSecretInfoElement.GetProvider() != "" {
+								clearSecretInfoAttributeMap["provider"] = types.StringValue(clearSecretInfoElement.GetProvider())
+							} else {
+								// Empty string, set to null
+								clearSecretInfoAttributeMap["provider"] = types.StringNull()
+							}
+
+							// resource specToModelNested RequiredStringField --> Url
+							if clearSecretInfoElement.GetUrl() != "" {
+								clearSecretInfoAttributeMap["url"] = types.StringValue(clearSecretInfoElement.GetUrl())
+							} else {
+								// Empty string, set to null
+								clearSecretInfoAttributeMap["url"] = types.StringNull()
+							}
+
+							clearSecretInfoObj, clearSecretInfoObjDiags := types.ObjectValue(NamespaceProxySubCasPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap, clearSecretInfoAttributeMap)
+							response.Diagnostics.Append(clearSecretInfoObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							privateKeysecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = clearSecretInfoObj
+						} else {
+							privateKeysecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(NamespaceProxySubCasPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap)
+						}
+					}
+
+					// --- End of Choices ---
+
+					// Create the final ObjectValue for this OneOf field
+					finalObj, privateKeysecretInfoChoiceChoicesObjDiags := types.ObjectValue(
+						NamespaceProxySubCasPrivateKeySecretInfoOneofModelAttributeMap, // The attribute schema for the OneOf choices
+						privateKeysecretInfoChoiceChoicesAttributeMap,
+					)
+					response.Diagnostics.Append(privateKeysecretInfoChoiceChoicesObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					// Assign the final object to the correct place (either the root model or a parent's attribute map)
+					nsSecretTypeModel.SecretInfoChoice = finalObj
+				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					nsSecretTypeModel.SecretInfoChoice = types.ObjectNull(NamespaceProxySubCasPrivateKeySecretInfoOneofModelAttributeMap)
+				}
+
+				// This field needs to be converted to a types.ObjectValue before assignment.
+				nsSecretTypeModelObj, nsSecretTypeModelObjDiags := types.ObjectValueFrom(ctx, NamespaceProxySubCasPrivateKeyModelAttributeMap, nsSecretTypeModel)
+				response.Diagnostics.Append(nsSecretTypeModelObjDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				nsSubCAModel.PrivateKey = nsSecretTypeModelObj
+
+			} else {
+				// The source field is nil (e.g. redacted by the API).
+				// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
+				// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
+				// here because the API may always return a non-nil struct (with REDACTED values) for this
+				// field, making this else-branch unreachable. The child OneOf handles the actual healing.
+				// The target is a types.Object, so we use types.ObjectNull.
+				nsSubCAModel.PrivateKey = types.ObjectNull(NamespaceProxySubCasPrivateKeyModelAttributeMap)
+			}
+
+			// resource specToModelNested UintField --> Version
+			nsSubCAModel.Version = types.Int64Value(int64(proxySubCasElement.GetVersion()))
+
+			proxySubCasElements = append(proxySubCasElements, nsSubCAModel)
+			i++
 		}
-		data.AllowAdvertiseOnPublic = listValue
+
+		{
+			proxySubCasList, listDiags := utils.GoStructSliceToListValue(
+				ctx,
+				NamespaceProxySubCasModelAttributeMap,
+				proxySubCasElements,
+			)
+
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			data.ProxySubCas = proxySubCasList
+		}
 	} else {
-		// Empty string, set to null
-		data.AllowAdvertiseOnPublic = types.ListNull(types.StringType)
+		var proxySubCasObjectType = basetypes.ObjectType{
+			AttrTypes: NamespaceProxySubCasModelAttributeMap,
+		}
+		nullProxySubCasList := basetypes.NewListNull(proxySubCasObjectType)
+		var priorValProxySubCas types.List
+		_ = request.Plan.GetAttribute(ctx, path.Root("proxy_sub_cas"), &priorValProxySubCas)
+		if !priorValProxySubCas.IsNull() && !priorValProxySubCas.IsUnknown() {
+			data.ProxySubCas = priorValProxySubCas
+		} else {
+			data.ProxySubCas = nullProxySubCasList
+		}
+
 	}
 
 	if response.Diagnostics.HasError() {
@@ -479,6 +964,7 @@ func (r *ResourceF5XCNamespace) Read(ctx context.Context, request resource.ReadR
 
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
+	priorProxySubCas := data.ProxySubCas
 
 	opts := []vesapi.CallOpt{
 		vesapi.WithFailIfReferred(),
@@ -500,6 +986,102 @@ func (r *ResourceF5XCNamespace) Read(ctx context.Context, request resource.ReadR
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
+	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		annotationsApiMap := metaData.GetAnnotations()
+		// READ: always store the full API response (captures backend-injected keys like "ves.io/provider").
+		if len(annotationsApiMap) > 0 {
+			annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+			response.Diagnostics.Append(annotationsDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			data.Annotations = annotationsMap
+		} else {
+			data.Annotations = types.MapNull(types.StringType)
+		}
+	}
+
+	// resource SpecToModelRoot Meta StringField --> Description
+	{
+		apiValDescription := metaData.GetDescription()
+		if apiValDescription != "" {
+			data.Description = types.StringValue(apiValDescription)
+		} else {
+			var priorValDescription types.String
+			response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("description"), &priorValDescription)...)
+			if !priorValDescription.IsNull() && !priorValDescription.IsUnknown() {
+				data.Description = priorValDescription
+			} else {
+				data.Description = types.StringValue(apiValDescription)
+			}
+		}
+	}
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		labelsApiMap := metaData.GetLabels()
+		// READ: always store the full API response (captures backend-injected keys like "ves.io/provider").
+		if len(labelsApiMap) > 0 {
+			labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+			response.Diagnostics.Append(labelsDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			data.Labels = labelsMap
+		} else {
+			data.Labels = types.MapNull(types.StringType)
+		}
+	}
+
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
 	data.Name = types.StringValue(metaData.GetName())
 
@@ -509,102 +1091,22 @@ func (r *ResourceF5XCNamespace) Read(ctx context.Context, request resource.ReadR
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedLabels := make(map[string]attr.Value)
-		for k, v := range labelsMap.Elements() {
-			mergedLabels[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
-			for k, v := range data.Labels.Elements() {
-				mergedLabels[k] = v
+	// resource SpecToModelRoot EnumField --> AllowAdvertiseOnPublic
+	{
+		if specData.GetAllowAdvertiseOnPublic().String() != "" {
+			stringValue := types.StringValue(specData.GetAllowAdvertiseOnPublic().String())
+			stringSlice := []types.String{stringValue}
+			listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
 			}
+			data.AllowAdvertiseOnPublic = listValue
+		} else {
+			// Empty string, set to null
+			data.AllowAdvertiseOnPublic = types.ListNull(types.StringType)
 		}
-		mergedLabelsMap, mergedLabelsDiags := types.MapValue(types.StringType, mergedLabels)
-		response.Diagnostics.Append(mergedLabelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Labels = mergedLabelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
 	}
-
-	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedAnnotations := make(map[string]attr.Value)
-		for k, v := range annotationsMap.Elements() {
-			mergedAnnotations[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
-			for k, v := range data.Annotations.Elements() {
-				mergedAnnotations[k] = v
-			}
-		}
-		mergedAnnotationsMap, mergedAnnotationsDiags := types.MapValue(types.StringType, mergedAnnotations)
-		response.Diagnostics.Append(mergedAnnotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Annotations = mergedAnnotationsMap
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Annotations = types.MapNull(types.StringType)
-	}
-
-	// resource SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
 
 	// resource SpecToModelRoot UintField --> ProxySubCaLatestVersion
 	proxySubCaLatestVersionValue := specData.GetProxySubCaLatestVersion()
@@ -614,19 +1116,219 @@ func (r *ResourceF5XCNamespace) Read(ctx context.Context, request resource.ReadR
 		data.ProxySubCaLatestVersion = types.Int64Null()
 	}
 
-	// resource SpecToModelRoot EnumField --> AllowAdvertiseOnPublic
-	if specData.GetAllowAdvertiseOnPublic().String() != "" {
-		stringValue := types.StringValue(specData.GetAllowAdvertiseOnPublic().String())
-		stringSlice := []types.String{stringValue}
-		listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
+	// resource SpecToModelRoot ArrayOfPointerField --> ProxySubCas
+	if len(specData.GetProxySubCas()) > 0 {
+		proxySubCasElements := make([]NsSubCA, 0, len(specData.GetProxySubCas()))
+		i := 0
+		for _, proxySubCasElement := range specData.GetProxySubCas() {
+			nsSubCAModel := NsSubCA{}
+
+			// resource specToModelNested RequiredStringField --> Name
+			if proxySubCasElement.GetName() != "" {
+				nsSubCAModel.Name = types.StringValue(proxySubCasElement.GetName())
+			} else {
+				// Empty string, set to null
+				nsSubCAModel.Name = types.StringNull()
+			}
+
+			// resource specToModelNested RequiredStringField --> Pem
+			if proxySubCasElement.GetPem() != "" {
+				nsSubCAModel.Pem = types.StringValue(proxySubCasElement.GetPem())
+			} else {
+				// Empty string, set to null
+				nsSubCAModel.Pem = types.StringNull()
+			}
+
+			// resource specToModelNested RequiredPointerField --> PrivateKey
+			if proxySubCasElement.GetPrivateKey() != nil {
+				// Create the nested Go struct
+				nsSecretTypeModel := &NsSecretType{}
+				privateKeyElement := proxySubCasElement.GetPrivateKey()
+
+				// Recursively populate the nested struct
+
+				// resource specToModelNested RequiredOneOfField --> SecretInfoOneof
+				// <no value>
+				if privateKeyElement.GetSecretInfoOneof() != nil {
+					// Create a temporary attribute map for the choices within this OneOf
+					privateKeysecretInfoChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+					// Define a variable for the spec choices to be passed down to nested templates
+					privateKeysecretInfoChoiceChoices := privateKeyElement.GetSecretInfoOneof()
+
+					// Process nested choices, populating the temporary attribute map
+
+					// resource specToModelNested PointerOfOneOfField --> BlindfoldSecretInfo
+					// <no value>
+					// false
+					{
+						blindfoldSecretInfoOptionsWrapper, isBlindfoldSecretInfo := privateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_BlindfoldSecretInfo)
+						blindfoldSecretInfoAttributeMap := make(map[string]attr.Value)
+
+						if isBlindfoldSecretInfo && blindfoldSecretInfoOptionsWrapper != nil && blindfoldSecretInfoOptionsWrapper.BlindfoldSecretInfo != nil {
+							blindfoldSecretInfoElement := blindfoldSecretInfoOptionsWrapper.BlindfoldSecretInfo
+
+							// resource specToModelNested StringField --> DecryptionProvider
+							if blindfoldSecretInfoElement.GetDecryptionProvider() != "" {
+								blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoElement.GetDecryptionProvider())
+							} else {
+								// Empty string, set to null
+								blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringNull()
+							}
+
+							// resource specToModelNested RequiredStringField --> Location
+							if blindfoldSecretInfoElement.GetLocation() != "" {
+								blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoElement.GetLocation())
+							} else {
+								// Empty string, set to null
+								blindfoldSecretInfoAttributeMap["location"] = types.StringNull()
+							}
+
+							// resource specToModelNested StringField --> StoreProvider
+							if blindfoldSecretInfoElement.GetStoreProvider() != "" {
+								blindfoldSecretInfoAttributeMap["store_provider"] = types.StringValue(blindfoldSecretInfoElement.GetStoreProvider())
+							} else {
+								// Empty string, set to null
+								blindfoldSecretInfoAttributeMap["store_provider"] = types.StringNull()
+							}
+
+							blindfoldSecretInfoObj, blindfoldSecretInfoObjDiags := types.ObjectValue(NamespaceProxySubCasPrivateKeySecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
+							response.Diagnostics.Append(blindfoldSecretInfoObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							privateKeysecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = blindfoldSecretInfoObj
+						} else {
+							privateKeysecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = types.ObjectNull(NamespaceProxySubCasPrivateKeySecretInfoOneofBlindfoldSecretInfoModelAttributeMap)
+						}
+					}
+
+					// resource specToModelNested PointerOfOneOfField --> ClearSecretInfo
+					// <no value>
+					// false
+					{
+						clearSecretInfoOptionsWrapper, isClearSecretInfo := privateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_ClearSecretInfo)
+						clearSecretInfoAttributeMap := make(map[string]attr.Value)
+
+						if isClearSecretInfo && clearSecretInfoOptionsWrapper != nil && clearSecretInfoOptionsWrapper.ClearSecretInfo != nil {
+							clearSecretInfoElement := clearSecretInfoOptionsWrapper.ClearSecretInfo
+
+							// resource specToModelNested StringField --> Provider
+							if clearSecretInfoElement.GetProvider() != "" {
+								clearSecretInfoAttributeMap["provider"] = types.StringValue(clearSecretInfoElement.GetProvider())
+							} else {
+								// Empty string, set to null
+								clearSecretInfoAttributeMap["provider"] = types.StringNull()
+							}
+
+							// resource specToModelNested RequiredStringField --> Url
+							if clearSecretInfoElement.GetUrl() != "" {
+								clearSecretInfoAttributeMap["url"] = types.StringValue(clearSecretInfoElement.GetUrl())
+							} else {
+								// Empty string, set to null
+								clearSecretInfoAttributeMap["url"] = types.StringNull()
+							}
+
+							clearSecretInfoObj, clearSecretInfoObjDiags := types.ObjectValue(NamespaceProxySubCasPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap, clearSecretInfoAttributeMap)
+							response.Diagnostics.Append(clearSecretInfoObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							privateKeysecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = clearSecretInfoObj
+						} else {
+							privateKeysecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(NamespaceProxySubCasPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap)
+						}
+					}
+
+					// --- End of Choices ---
+
+					// Create the final ObjectValue for this OneOf field
+					finalObj, privateKeysecretInfoChoiceChoicesObjDiags := types.ObjectValue(
+						NamespaceProxySubCasPrivateKeySecretInfoOneofModelAttributeMap, // The attribute schema for the OneOf choices
+						privateKeysecretInfoChoiceChoicesAttributeMap,
+					)
+					response.Diagnostics.Append(privateKeysecretInfoChoiceChoicesObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					// Assign the final object to the correct place (either the root model or a parent's attribute map)
+					nsSecretTypeModel.SecretInfoChoice = finalObj
+				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					// State Healing: The API redacted the OneOf secret field (returned nil). Restore the entire
+					// secret_info_choice object from prior Terraform state so that the model reflects what the
+					// user originally configured and Terraform does not detect a false drift.
+					{
+						savedSecretInfoChoicePath := path.Root("proxy_sub_cas").AtListIndex(i).AtName("private_key").AtName("secret_info_choice")
+						var savedSecretInfoChoice types.Object
+						stateHealDiags := request.State.GetAttribute(ctx, savedSecretInfoChoicePath, &savedSecretInfoChoice)
+						if !stateHealDiags.HasError() && !savedSecretInfoChoice.IsNull() && !savedSecretInfoChoice.IsUnknown() {
+							nsSecretTypeModel.SecretInfoChoice = savedSecretInfoChoice
+						} else {
+							nsSecretTypeModel.SecretInfoChoice = types.ObjectNull(NamespaceProxySubCasPrivateKeySecretInfoOneofModelAttributeMap)
+						}
+					}
+				}
+
+				// This field needs to be converted to a types.ObjectValue before assignment.
+				nsSecretTypeModelObj, nsSecretTypeModelObjDiags := types.ObjectValueFrom(ctx, NamespaceProxySubCasPrivateKeyModelAttributeMap, nsSecretTypeModel)
+				response.Diagnostics.Append(nsSecretTypeModelObjDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				nsSubCAModel.PrivateKey = nsSecretTypeModelObj
+
+			} else {
+				// The source field is nil (e.g. redacted by the API).
+				// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
+				// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
+				// here because the API may always return a non-nil struct (with REDACTED values) for this
+				// field, making this else-branch unreachable. The child OneOf handles the actual healing.
+				// The target is a types.Object, so we use types.ObjectNull.
+				nsSubCAModel.PrivateKey = types.ObjectNull(NamespaceProxySubCasPrivateKeyModelAttributeMap)
+			}
+
+			// resource specToModelNested UintField --> Version
+			nsSubCAModel.Version = types.Int64Value(int64(proxySubCasElement.GetVersion()))
+
+			proxySubCasElements = append(proxySubCasElements, nsSubCAModel)
+			i++
 		}
-		data.AllowAdvertiseOnPublic = listValue
+
+		{
+			proxySubCasList, listDiags := utils.GoStructSliceToListValue(
+				ctx,
+				NamespaceProxySubCasModelAttributeMap,
+				proxySubCasElements,
+			)
+
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			data.ProxySubCas = proxySubCasList
+		}
 	} else {
-		// Empty string, set to null
-		data.AllowAdvertiseOnPublic = types.ListNull(types.StringType)
+		var proxySubCasObjectType = basetypes.ObjectType{
+			AttrTypes: NamespaceProxySubCasModelAttributeMap,
+		}
+		nullProxySubCasList := basetypes.NewListNull(proxySubCasObjectType)
+		var priorValProxySubCas types.List
+		_ = request.State.GetAttribute(ctx, path.Root("proxy_sub_cas"), &priorValProxySubCas)
+		if !priorValProxySubCas.IsNull() && !priorValProxySubCas.IsUnknown() {
+			data.ProxySubCas = priorValProxySubCas
+		} else {
+			data.ProxySubCas = nullProxySubCasList
+		}
+
+	}
+
+	// Restore prior state for ProxySubCas. The API redacts sensitive fields
+	// in GET responses. Preserve prior state to keep state consistent.
+	if !priorProxySubCas.IsNull() && !priorProxySubCas.IsUnknown() {
+		data.ProxySubCas = priorProxySubCas
 	}
 
 	if response.Diagnostics.HasError() {
@@ -647,6 +1349,26 @@ func (r *ResourceF5XCNamespace) Update(ctx context.Context, request resource.Upd
 	if response.Diagnostics.HasError() {
 		return
 	}
+	// For Optional+Computed map meta-attributes (labels, annotations), the MapMergeModifier
+	// sets the plan value to the prior state to satisfy Terraform Core's constraint
+	// (plan must equal config or prior state). We save the plan values so we can restore
+	// them after the API call — the apply result must equal the plan value.
+	// We read user-intent values from Config (not Plan) so that the API request reflects
+	// the user's actual changes (e.g. updated label values).
+	planAnnotations := data.Annotations
+	planLabels := data.Labels
+	var configData ResourceF5XCNamespaceModel
+	response.Diagnostics.Append(request.Config.Get(ctx, &configData)...)
+	if response.Diagnostics.HasError() {
+		return
+	}
+	if !configData.Annotations.IsUnknown() {
+		data.Annotations = configData.Annotations
+	}
+	if !configData.Labels.IsUnknown() {
+		data.Labels = configData.Labels
+	}
+	planProxySubCas := data.ProxySubCas
 
 	duration, err := time.ParseDuration("10m0s")
 	if err != nil {
@@ -676,18 +1398,13 @@ func (r *ResourceF5XCNamespace) Update(ctx context.Context, request resource.Upd
 
 	// Populate updateReq from data model
 
-	// resource modelToMetaRoot RequiredStringField --> Name
-	if !data.Name.IsNull() && !data.Name.IsUnknown() {
-		meta.Name = string(data.Name.ValueString())
-	}
-
 	// resource modelToMetaRoot MapOfStringField --> Annotations
 	if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
 		var labels map[string]string
 		diags = data.Annotations.ElementsAs(ctx, &labels, false)
 		response.Diagnostics.Append(diags...)
 		if response.Diagnostics.HasError() {
-			tflog.Error(ctx, "Failed to convert annotations from map to model")
+			tflog.Error(ctx, "Failed to convert Annotations from map to model")
 			return
 		}
 		meta.Annotations = labels
@@ -698,6 +1415,32 @@ func (r *ResourceF5XCNamespace) Update(ctx context.Context, request resource.Upd
 	// resource modelToMetaRoot StringField --> Description
 	if !data.Description.IsNull() && !data.Description.IsUnknown() {
 		meta.Description = string(data.Description.ValueString())
+	}
+
+	// resource modelToMetaRoot MapOfStringField --> Labels
+	if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
+		var labels map[string]string
+		diags = data.Labels.ElementsAs(ctx, &labels, false)
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			tflog.Error(ctx, "Failed to convert Labels from map to model")
+			return
+		}
+		meta.Labels = labels
+	} else {
+		meta.Labels = nil
+	}
+
+	// resource modelToMetaRoot RequiredStringField --> Name
+	if !data.Name.IsNull() && !data.Name.IsUnknown() {
+		meta.Name = string(data.Name.ValueString())
+	}
+
+	// Strip backend-injected label keys that must not be sent in Create/Update requests.
+	// These keys are stored in state (for drift-free plans) but must be omitted from the
+	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+		delete(meta.Labels, _omitKey)
 	}
 
 	if response.Diagnostics.HasError() {
@@ -734,6 +1477,101 @@ func (r *ResourceF5XCNamespace) Update(ctx context.Context, request resource.Upd
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
+	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		annotationsApiMap := metaData.GetAnnotations()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Annotations already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Annotations.IsUnknown() {
+			if len(annotationsApiMap) > 0 {
+				annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+				response.Diagnostics.Append(annotationsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Annotations = annotationsMap
+			} else {
+				data.Annotations = types.MapNull(types.StringType)
+			}
+		}
+		// When plan is a known map (user labels or merged prior state), leave data.Annotations
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
+	}
+
+	// resource SpecToModelRoot Meta StringField --> Description
+	data.Description = types.StringValue(metaData.GetDescription())
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		labelsApiMap := metaData.GetLabels()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Labels already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Labels.IsUnknown() {
+			if len(labelsApiMap) > 0 {
+				labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+				response.Diagnostics.Append(labelsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Labels = labelsMap
+			} else {
+				data.Labels = types.MapNull(types.StringType)
+			}
+		}
+		// When plan is a known map (user labels or merged prior state), leave data.Labels
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
+	}
+
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
 	data.Name = types.StringValue(metaData.GetName())
 
@@ -743,102 +1581,22 @@ func (r *ResourceF5XCNamespace) Update(ctx context.Context, request resource.Upd
 	// resource SpecToModelRoot Meta StringField --> Uid
 	data.Uid = types.StringValue(systemMetaData.GetUid())
 
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedLabels := make(map[string]attr.Value)
-		for k, v := range labelsMap.Elements() {
-			mergedLabels[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
-			for k, v := range data.Labels.Elements() {
-				mergedLabels[k] = v
+	// resource SpecToModelRoot EnumField --> AllowAdvertiseOnPublic
+	{
+		if specData.GetAllowAdvertiseOnPublic().String() != "" {
+			stringValue := types.StringValue(specData.GetAllowAdvertiseOnPublic().String())
+			stringSlice := []types.String{stringValue}
+			listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
 			}
+			data.AllowAdvertiseOnPublic = listValue
+		} else {
+			// Empty string, set to null
+			data.AllowAdvertiseOnPublic = types.ListNull(types.StringType)
 		}
-		mergedLabelsMap, mergedLabelsDiags := types.MapValue(types.StringType, mergedLabels)
-		response.Diagnostics.Append(mergedLabelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Labels = mergedLabelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
 	}
-
-	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedAnnotations := make(map[string]attr.Value)
-		for k, v := range annotationsMap.Elements() {
-			mergedAnnotations[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
-			for k, v := range data.Annotations.Elements() {
-				mergedAnnotations[k] = v
-			}
-		}
-		mergedAnnotationsMap, mergedAnnotationsDiags := types.MapValue(types.StringType, mergedAnnotations)
-		response.Diagnostics.Append(mergedAnnotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Annotations = mergedAnnotationsMap
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Annotations = types.MapNull(types.StringType)
-	}
-
-	// resource SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
 
 	// resource SpecToModelRoot UintField --> ProxySubCaLatestVersion
 	proxySubCaLatestVersionValue := specData.GetProxySubCaLatestVersion()
@@ -848,20 +1606,231 @@ func (r *ResourceF5XCNamespace) Update(ctx context.Context, request resource.Upd
 		data.ProxySubCaLatestVersion = types.Int64Null()
 	}
 
-	// resource SpecToModelRoot EnumField --> AllowAdvertiseOnPublic
-	if specData.GetAllowAdvertiseOnPublic().String() != "" {
-		stringValue := types.StringValue(specData.GetAllowAdvertiseOnPublic().String())
-		stringSlice := []types.String{stringValue}
-		listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-		response.Diagnostics.Append(diags...)
+	// resource SpecToModelRoot ArrayOfPointerField --> ProxySubCas
+	if len(specData.GetProxySubCas()) > 0 {
+		proxySubCasElements := make([]NsSubCA, 0, len(specData.GetProxySubCas()))
+		i := 0
+		for _, proxySubCasElement := range specData.GetProxySubCas() {
+			nsSubCAModel := NsSubCA{}
+
+			// resource specToModelNested RequiredStringField --> Name
+			if proxySubCasElement.GetName() != "" {
+				nsSubCAModel.Name = types.StringValue(proxySubCasElement.GetName())
+			} else {
+				// Empty string, set to null
+				nsSubCAModel.Name = types.StringNull()
+			}
+
+			// resource specToModelNested RequiredStringField --> Pem
+			if proxySubCasElement.GetPem() != "" {
+				nsSubCAModel.Pem = types.StringValue(proxySubCasElement.GetPem())
+			} else {
+				// Empty string, set to null
+				nsSubCAModel.Pem = types.StringNull()
+			}
+
+			// resource specToModelNested RequiredPointerField --> PrivateKey
+			if proxySubCasElement.GetPrivateKey() != nil {
+				// Create the nested Go struct
+				nsSecretTypeModel := &NsSecretType{}
+				privateKeyElement := proxySubCasElement.GetPrivateKey()
+
+				// Recursively populate the nested struct
+
+				// resource specToModelNested RequiredOneOfField --> SecretInfoOneof
+				// GlobalSpecType
+				if privateKeyElement.GetSecretInfoOneof() != nil {
+					// Create a temporary attribute map for the choices within this OneOf
+					privateKeysecretInfoChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+					// Define a variable for the spec choices to be passed down to nested templates
+					privateKeysecretInfoChoiceChoices := privateKeyElement.GetSecretInfoOneof()
+
+					// Process nested choices, populating the temporary attribute map
+
+					// resource specToModelNested PointerOfOneOfField --> BlindfoldSecretInfo
+					// GlobalSpecType
+					// false
+					{
+						blindfoldSecretInfoOptionsWrapper, isBlindfoldSecretInfo := privateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_BlindfoldSecretInfo)
+						blindfoldSecretInfoAttributeMap := make(map[string]attr.Value)
+
+						if isBlindfoldSecretInfo && blindfoldSecretInfoOptionsWrapper != nil && blindfoldSecretInfoOptionsWrapper.BlindfoldSecretInfo != nil {
+							blindfoldSecretInfoElement := blindfoldSecretInfoOptionsWrapper.BlindfoldSecretInfo
+
+							// resource specToModelNested StringField --> DecryptionProvider
+							if blindfoldSecretInfoElement.GetDecryptionProvider() != "" {
+								blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoElement.GetDecryptionProvider())
+							} else {
+								// Empty string, set to null
+								blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringNull()
+							}
+
+							// resource specToModelNested RequiredStringField --> Location
+							if blindfoldSecretInfoElement.GetLocation() != "" {
+								blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoElement.GetLocation())
+							} else {
+								// Empty string, set to null
+								blindfoldSecretInfoAttributeMap["location"] = types.StringNull()
+							}
+
+							// resource specToModelNested StringField --> StoreProvider
+							if blindfoldSecretInfoElement.GetStoreProvider() != "" {
+								blindfoldSecretInfoAttributeMap["store_provider"] = types.StringValue(blindfoldSecretInfoElement.GetStoreProvider())
+							} else {
+								// Empty string, set to null
+								blindfoldSecretInfoAttributeMap["store_provider"] = types.StringNull()
+							}
+
+							blindfoldSecretInfoObj, blindfoldSecretInfoObjDiags := types.ObjectValue(NamespaceProxySubCasPrivateKeySecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
+							response.Diagnostics.Append(blindfoldSecretInfoObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							privateKeysecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = blindfoldSecretInfoObj
+						} else {
+							privateKeysecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = types.ObjectNull(NamespaceProxySubCasPrivateKeySecretInfoOneofBlindfoldSecretInfoModelAttributeMap)
+						}
+					}
+
+					// resource specToModelNested PointerOfOneOfField --> ClearSecretInfo
+					// GlobalSpecType
+					// false
+					{
+						clearSecretInfoOptionsWrapper, isClearSecretInfo := privateKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_ClearSecretInfo)
+						clearSecretInfoAttributeMap := make(map[string]attr.Value)
+
+						if isClearSecretInfo && clearSecretInfoOptionsWrapper != nil && clearSecretInfoOptionsWrapper.ClearSecretInfo != nil {
+							clearSecretInfoElement := clearSecretInfoOptionsWrapper.ClearSecretInfo
+
+							// resource specToModelNested StringField --> Provider
+							if clearSecretInfoElement.GetProvider() != "" {
+								clearSecretInfoAttributeMap["provider"] = types.StringValue(clearSecretInfoElement.GetProvider())
+							} else {
+								// Empty string, set to null
+								clearSecretInfoAttributeMap["provider"] = types.StringNull()
+							}
+
+							// resource specToModelNested RequiredStringField --> Url
+							if clearSecretInfoElement.GetUrl() != "" {
+								clearSecretInfoAttributeMap["url"] = types.StringValue(clearSecretInfoElement.GetUrl())
+							} else {
+								// Empty string, set to null
+								clearSecretInfoAttributeMap["url"] = types.StringNull()
+							}
+
+							clearSecretInfoObj, clearSecretInfoObjDiags := types.ObjectValue(NamespaceProxySubCasPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap, clearSecretInfoAttributeMap)
+							response.Diagnostics.Append(clearSecretInfoObjDiags...)
+							if response.Diagnostics.HasError() {
+								return
+							}
+							privateKeysecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = clearSecretInfoObj
+						} else {
+							privateKeysecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(NamespaceProxySubCasPrivateKeySecretInfoOneofClearSecretInfoModelAttributeMap)
+						}
+					}
+
+					// --- End of Choices ---
+
+					// Create the final ObjectValue for this OneOf field
+					finalObj, privateKeysecretInfoChoiceChoicesObjDiags := types.ObjectValue(
+						NamespaceProxySubCasPrivateKeySecretInfoOneofModelAttributeMap, // The attribute schema for the OneOf choices
+						privateKeysecretInfoChoiceChoicesAttributeMap,
+					)
+					response.Diagnostics.Append(privateKeysecretInfoChoiceChoicesObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					// Assign the final object to the correct place (either the root model or a parent's attribute map)
+					nsSecretTypeModel.SecretInfoChoice = finalObj
+				} else {
+					// The OneOf field is nil in the source spec, so set the Terraform object to null.
+					nsSecretTypeModel.SecretInfoChoice = types.ObjectNull(NamespaceProxySubCasPrivateKeySecretInfoOneofModelAttributeMap)
+				}
+
+				// This field needs to be converted to a types.ObjectValue before assignment.
+				nsSecretTypeModelObj, nsSecretTypeModelObjDiags := types.ObjectValueFrom(ctx, NamespaceProxySubCasPrivateKeyModelAttributeMap, nsSecretTypeModel)
+				response.Diagnostics.Append(nsSecretTypeModelObjDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				nsSubCAModel.PrivateKey = nsSecretTypeModelObj
+
+			} else {
+				// The source field is nil (e.g. redacted by the API).
+				// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
+				// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
+				// here because the API may always return a non-nil struct (with REDACTED values) for this
+				// field, making this else-branch unreachable. The child OneOf handles the actual healing.
+				// The target is a types.Object, so we use types.ObjectNull.
+				nsSubCAModel.PrivateKey = types.ObjectNull(NamespaceProxySubCasPrivateKeyModelAttributeMap)
+			}
+
+			// resource specToModelNested UintField --> Version
+			nsSubCAModel.Version = types.Int64Value(int64(proxySubCasElement.GetVersion()))
+
+			proxySubCasElements = append(proxySubCasElements, nsSubCAModel)
+			i++
+		}
+
+		{
+			proxySubCasList, listDiags := utils.GoStructSliceToListValue(
+				ctx,
+				NamespaceProxySubCasModelAttributeMap,
+				proxySubCasElements,
+			)
+
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			data.ProxySubCas = proxySubCasList
+		}
+	} else {
+		var proxySubCasObjectType = basetypes.ObjectType{
+			AttrTypes: NamespaceProxySubCasModelAttributeMap,
+		}
+		nullProxySubCasList := basetypes.NewListNull(proxySubCasObjectType)
+		var priorValProxySubCas types.List
+		_ = request.Plan.GetAttribute(ctx, path.Root("proxy_sub_cas"), &priorValProxySubCas)
+		if !priorValProxySubCas.IsNull() && !priorValProxySubCas.IsUnknown() {
+			data.ProxySubCas = priorValProxySubCas
+		} else {
+			data.ProxySubCas = nullProxySubCasList
+		}
+
+	}
+
+	// Restore the merged value for Optional+Computed map meta-attributes.
+	// MapMergeModifier sets plan = prior state on Update so that Terraform Core's
+	// constraint (plan must equal config or prior state) is satisfied.
+	// We merge planX (prior state, contains backend-injected keys such as
+	// "ves.io/config-propagation-destination") with configData.X (user-intent values,
+	// config wins on conflict) so that:
+	//   (a) backend-injected keys from prior state are preserved in state, and
+	//   (b) user-changed values (e.g. "version":"v1" → "v2") are reflected immediately
+	//       without waiting for the next Read — fixing ImportStateVerify failures.
+	{
+		mergedMap, mergeDiags := utils.MergeStringMaps(planAnnotations, configData.Annotations)
+		response.Diagnostics.Append(mergeDiags...)
 		if response.Diagnostics.HasError() {
 			return
 		}
-		data.AllowAdvertiseOnPublic = listValue
-	} else {
-		// Empty string, set to null
-		data.AllowAdvertiseOnPublic = types.ListNull(types.StringType)
+		data.Annotations = mergedMap
 	}
+	{
+		mergedMap, mergeDiags := utils.MergeStringMaps(planLabels, configData.Labels)
+		response.Diagnostics.Append(mergeDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		data.Labels = mergedMap
+	}
+	// Restore plan value for ProxySubCas. The API redacts sensitive fields
+	// in GET responses. Restoring the plan value ensures apply result == plan.
+	data.ProxySubCas = planProxySubCas
 
 	// Save updated data into Terraform state
 	response.Diagnostics.Append(response.State.Set(ctx, &data)...)
@@ -924,19 +1893,24 @@ func (r *ResourceF5XCNamespace) Delete(ctx context.Context, request resource.Del
 		)
 		return
 	}
-}
 
+}
 func (r *ResourceF5XCNamespace) ImportState(ctx context.Context, req resource.ImportStateRequest, response *resource.ImportStateResponse) {
-	// Import ID format: namespace/name
+	// Import ID format: name
 	parts := strings.Split(req.ID, "/")
-	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+	if len(parts) != 1 {
 		response.Diagnostics.AddError(
 			"Invalid Import ID",
-			fmt.Sprintf("Expected import ID format: namespace/name, got: %s", req.ID),
+			fmt.Sprintf("Expected import ID format: name, got: %s", req.ID),
 		)
 		return
 	}
-
-	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("namespace"), parts[0])...)
-	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("name"), parts[1])...)
+	if parts[0] == "" {
+		response.Diagnostics.AddError(
+			"Invalid Import ID",
+			fmt.Sprintf("Expected import ID format: name, got: %s (name is empty)", req.ID),
+		)
+		return
+	}
+	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("name"), parts[0])...)
 }

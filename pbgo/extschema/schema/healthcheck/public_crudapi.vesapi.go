@@ -1689,10 +1689,7 @@ var APISwaggerJSON string = `{
         "description": "Health check configuration for a given cluster.",
         "version": "version not set"
     },
-    "schemes": [
-        "http",
-        "https"
-    ],
+    "schemes": null,
     "consumes": [
         "application/json"
     ],
@@ -1759,6 +1756,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1851,6 +1854,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1951,6 +1960,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2068,6 +2083,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2171,6 +2192,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2265,8 +2292,14 @@ var APISwaggerJSON string = `{
             "title": "Create healthcheck",
             "x-displayname": "Create Health Check",
             "x-ves-oneof-field-health_check": "[\"http_health_check\",\"tcp_health_check\",\"udp_icmp_health_check\"]",
+            "x-ves-oneof-field-jitter_choice": "[\"default_jitter\",\"jitter_percent\"]",
             "x-ves-proto-message": "ves.io.schema.healthcheck.CreateSpecType",
             "properties": {
+                "default_jitter": {
+                    "description": "Exclusive with [jitter_percent]\n Use the default jitter value of 30 percent of the health check interval.",
+                    "$ref": "#/definitions/ioschemaEmpty",
+                    "x-displayname": "Default Jitter"
+                },
                 "healthy_threshold": {
                     "type": "integer",
                     "description": " Number of successful responses before declaring healthy. In other words, this is\n the number of healthy health checks required before a host is marked\n healthy. Note that during startup, only a single successful health check is\n required to mark a host healthy.\n\nExample: - \"2\"-\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n  ves.io.schema.rules.uint32.gte: 1\n  ves.io.schema.rules.uint32.lte: 16\n",
@@ -2300,9 +2333,9 @@ var APISwaggerJSON string = `{
                 },
                 "jitter_percent": {
                     "type": "integer",
-                    "description": " Add a random amount of time as a percent value to the interval between successive healthcheck requests.\n\nExample: - \"25\"-\n\nValidation Rules:\n  ves.io.schema.rules.uint32.ranges: 0,10-50\n",
+                    "description": "Exclusive with [default_jitter]\n Specify a custom jitter value as a percentage of the health check interval.\n Valid values are 0 (to disable jitter) and 10 to 50.\n\nExample: - \"25\"-\n\nValidation Rules:\n  ves.io.schema.rules.uint32.ranges: 0,10-50\n",
                     "format": "int64",
-                    "x-displayname": "Jitter Percent",
+                    "x-displayname": "Custom Jitter Percent",
                     "x-ves-example": "25",
                     "x-ves-validation-rules": {
                         "ves.io.schema.rules.uint32.ranges": "0,10-50"
@@ -2387,7 +2420,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Fail the delete operation if this object is being referred by other objects",
                     "title": "fail_if_referred",
-                    "format": "boolean",
                     "x-displayname": "Fail-If-Referred"
                 },
                 "name": {
@@ -2439,8 +2471,7 @@ var APISwaggerJSON string = `{
                 "reverse": {
                     "type": "boolean",
                     "description": "x-displayName: \"Use Reverse mode\"\nx-example: false\nEnable the monitor operation in reverse mode.\nWhen the monitor is in reverse mode, a successful receive\nstring match marks the monitored object down instead of up.",
-                    "title": "Use Reverse mode",
-                    "format": "boolean"
+                    "title": "Use Reverse mode"
                 }
             }
         },
@@ -2574,8 +2605,14 @@ var APISwaggerJSON string = `{
             "title": "Get healthcheck",
             "x-displayname": "Get Health Check",
             "x-ves-oneof-field-health_check": "[\"http_health_check\",\"tcp_health_check\",\"udp_icmp_health_check\"]",
+            "x-ves-oneof-field-jitter_choice": "[\"default_jitter\",\"jitter_percent\"]",
             "x-ves-proto-message": "ves.io.schema.healthcheck.GetSpecType",
             "properties": {
+                "default_jitter": {
+                    "description": "Exclusive with [jitter_percent]\n Use the default jitter value of 30 percent of the health check interval.",
+                    "$ref": "#/definitions/ioschemaEmpty",
+                    "x-displayname": "Default Jitter"
+                },
                 "healthy_threshold": {
                     "type": "integer",
                     "description": " Number of successful responses before declaring healthy. In other words, this is\n the number of healthy health checks required before a host is marked\n healthy. Note that during startup, only a single successful health check is\n required to mark a host healthy.\n\nExample: - \"2\"-\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n  ves.io.schema.rules.uint32.gte: 1\n  ves.io.schema.rules.uint32.lte: 16\n",
@@ -2609,9 +2646,9 @@ var APISwaggerJSON string = `{
                 },
                 "jitter_percent": {
                     "type": "integer",
-                    "description": " Add a random amount of time as a percent value to the interval between successive healthcheck requests.\n\nExample: - \"25\"-\n\nValidation Rules:\n  ves.io.schema.rules.uint32.ranges: 0,10-50\n",
+                    "description": "Exclusive with [default_jitter]\n Specify a custom jitter value as a percentage of the health check interval.\n Valid values are 0 (to disable jitter) and 10 to 50.\n\nExample: - \"25\"-\n\nValidation Rules:\n  ves.io.schema.rules.uint32.ranges: 0,10-50\n",
                     "format": "int64",
-                    "x-displayname": "Jitter Percent",
+                    "x-displayname": "Custom Jitter Percent",
                     "x-ves-example": "25",
                     "x-ves-validation-rules": {
                         "ves.io.schema.rules.uint32.ranges": "0,10-50"
@@ -2756,7 +2793,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " If set, health checks will be made using http/2.\n\nExample: - false-",
                     "title": "Use HTTP2",
-                    "format": "boolean",
                     "x-displayname": "Use HTTP2"
                 },
                 "use_origin_server_name": {
@@ -2817,7 +2853,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true indicates healthcheck is administratively disabled",
                     "title": "disabled",
-                    "format": "boolean",
                     "x-displayname": "Disabled"
                 },
                 "get_spec": {
@@ -2920,8 +2955,14 @@ var APISwaggerJSON string = `{
             "title": "replace healthcheck",
             "x-displayname": "Replace Health Check",
             "x-ves-oneof-field-health_check": "[\"http_health_check\",\"tcp_health_check\",\"udp_icmp_health_check\"]",
+            "x-ves-oneof-field-jitter_choice": "[\"default_jitter\",\"jitter_percent\"]",
             "x-ves-proto-message": "ves.io.schema.healthcheck.ReplaceSpecType",
             "properties": {
+                "default_jitter": {
+                    "description": "Exclusive with [jitter_percent]\n Use the default jitter value of 30 percent of the health check interval.",
+                    "$ref": "#/definitions/ioschemaEmpty",
+                    "x-displayname": "Default Jitter"
+                },
                 "healthy_threshold": {
                     "type": "integer",
                     "description": " Number of successful responses before declaring healthy. In other words, this is\n the number of healthy health checks required before a host is marked\n healthy. Note that during startup, only a single successful health check is\n required to mark a host healthy.\n\nExample: - \"2\"-\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n  ves.io.schema.rules.uint32.gte: 1\n  ves.io.schema.rules.uint32.lte: 16\n",
@@ -2955,9 +2996,9 @@ var APISwaggerJSON string = `{
                 },
                 "jitter_percent": {
                     "type": "integer",
-                    "description": " Add a random amount of time as a percent value to the interval between successive healthcheck requests.\n\nExample: - \"25\"-\n\nValidation Rules:\n  ves.io.schema.rules.uint32.ranges: 0,10-50\n",
+                    "description": "Exclusive with [default_jitter]\n Specify a custom jitter value as a percentage of the health check interval.\n Valid values are 0 (to disable jitter) and 10 to 50.\n\nExample: - \"25\"-\n\nValidation Rules:\n  ves.io.schema.rules.uint32.ranges: 0,10-50\n",
                     "format": "int64",
-                    "x-displayname": "Jitter Percent",
+                    "x-displayname": "Custom Jitter Percent",
                     "x-ves-example": "25",
                     "x-ves-validation-rules": {
                         "ves.io.schema.rules.uint32.ranges": "0,10-50"
@@ -3086,6 +3127,27 @@ var APISwaggerJSON string = `{
                     "type": "string",
                     "description": "Must be a valid serialized protocol buffer of the above specified type.",
                     "format": "byte"
+                }
+            }
+        },
+        "runtimeError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/protobufAny"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
                 }
             }
         },
@@ -3264,7 +3326,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "labels": {
@@ -3328,7 +3389,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable",
                     "x-ves-example": "true"
                 },
@@ -3438,7 +3498,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "labels": {
@@ -3524,7 +3583,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Indicate whether mars deems this object to be stale via graceful restart timer information",
                     "title": "vtrp_stale",
-                    "format": "boolean",
                     "x-displayname": "VTRP Stale"
                 }
             }

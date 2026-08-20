@@ -23,21 +23,26 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 
-	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework-validators/boolvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/mapvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+
+	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/defaultvaluemodifier"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/modifiers/mapmergemodifier"
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/utils"
-	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/atmostoneofvalidator"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/bytesvalidator"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/exactlyoneofvalidator"
+	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/validators/listuniquevalidator"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -48,7 +53,6 @@ import (
 	ves_io_schema "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	ves_io_schema_dns_lb_pool "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/dns_lb_pool"
 	ves_io_schema_views "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views"
-	ves_io_schema_virtual_network "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/virtual_network"
 )
 
 // ResourceF5XCDnsLbPool defines the resource implementation.
@@ -56,7 +60,7 @@ type ResourceF5XCDnsLbPool struct {
 	client *client.APIClient
 }
 
-type DnsLbPoolGlobalSpecTypePoolTypeChoice struct {
+type DnsLbPoolPoolTypeChoice struct {
 	APool     types.Object `tfsdk:"a_pool"`
 	AaaaPool  types.Object `tfsdk:"aaaa_pool"`
 	CnamePool types.Object `tfsdk:"cname_pool"`
@@ -64,40 +68,32 @@ type DnsLbPoolGlobalSpecTypePoolTypeChoice struct {
 	SrvPool   types.Object `tfsdk:"srv_pool"`
 }
 
-type DnsLbPoolGlobalSpecTypeAPool struct {
-	Members           types.List   `tfsdk:"members"`
+type DnsLbPoolAPool struct {
 	HealthCheckChoice types.Object `tfsdk:"health_check_choice"`
 	MaxAnswers        types.Int64  `tfsdk:"max_answers"`
+	Members           types.List   `tfsdk:"members"`
 }
 
-type DnsLbPoolDnsLbPoolAddressMember struct {
-	Name       types.String `tfsdk:"name"`
-	IpEndpoint types.String `tfsdk:"ip_endpoint"`
-	Ratio      types.Int64  `tfsdk:"ratio"`
-	Priority   types.Int64  `tfsdk:"priority"`
-}
-
-type DnsLbPoolAPoolHealthCheckChoice struct {
+type DnsLbPoolHealthCheckChoice struct {
 	DisableHealthCheck types.Bool   `tfsdk:"disable_health_check"`
 	HealthCheck        types.Object `tfsdk:"health_check"`
 }
 
-type DnsLbPoolGlobalSpecTypeAaaaPool struct {
-	Members    types.List  `tfsdk:"members"`
+type DnsLbPoolAddrMember struct {
+	IpEndpoint types.String `tfsdk:"ip_endpoint"`
+	Name       types.String `tfsdk:"name"`
+	Priority   types.Int64  `tfsdk:"priority"`
+	Ratio      types.Int64  `tfsdk:"ratio"`
+}
+
+type DnsLbPoolAaaaPool struct {
 	MaxAnswers types.Int64 `tfsdk:"max_answers"`
+	Members    types.List  `tfsdk:"members"`
 }
 
-type DnsLbPoolGlobalSpecTypeCnamePool struct {
-	Members           types.List   `tfsdk:"members"`
+type DnsLbPoolCnamePool struct {
 	HealthCheckChoice types.Object `tfsdk:"health_check_choice"`
-}
-
-type DnsLbPoolDnsLbPoolCNAMEMember struct {
-	Priority         types.Int64  `tfsdk:"priority"`
-	Domain           types.String `tfsdk:"domain"`
-	Ratio            types.Int64  `tfsdk:"ratio"`
-	FinalTranslation types.Bool   `tfsdk:"final_translation"`
-	Name             types.String `tfsdk:"name"`
+	Members           types.List   `tfsdk:"members"`
 }
 
 type DnsLbPoolCNAMEPoolHealthCheckChoice struct {
@@ -105,50 +101,58 @@ type DnsLbPoolCNAMEPoolHealthCheckChoice struct {
 	HealthCheck        types.Object `tfsdk:"health_check"`
 }
 
-type DnsLbPoolGlobalSpecTypeMxPool struct {
-	Members    types.List  `tfsdk:"members"`
-	MaxAnswers types.Int64 `tfsdk:"max_answers"`
+type DnsLbPoolCNAMEMember struct {
+	Domain           types.String `tfsdk:"domain"`
+	FinalTranslation types.Bool   `tfsdk:"final_translation"`
+	Name             types.String `tfsdk:"name"`
+	Priority         types.Int64  `tfsdk:"priority"`
+	Ratio            types.Int64  `tfsdk:"ratio"`
 }
 
-type DnsLbPoolDnsLbPoolMXMember struct {
-	Name     types.String `tfsdk:"name"`
+type DnsLbPoolMxPool struct {
+	MaxAnswers types.Int64 `tfsdk:"max_answers"`
+	Members    types.List  `tfsdk:"members"`
+}
+
+type DnsLbPoolMXMember struct {
 	Domain   types.String `tfsdk:"domain"`
+	Name     types.String `tfsdk:"name"`
 	Priority types.Int64  `tfsdk:"priority"`
 	Ratio    types.Int64  `tfsdk:"ratio"`
 }
 
-type DnsLbPoolGlobalSpecTypeSrvPool struct {
-	Members    types.List  `tfsdk:"members"`
+type DnsLbPoolSrvPool struct {
 	MaxAnswers types.Int64 `tfsdk:"max_answers"`
+	Members    types.List  `tfsdk:"members"`
 }
 
-type DnsLbPoolDnsLbPoolSRVMember struct {
-	Priority         types.Int64  `tfsdk:"priority"`
-	Weight           types.Int64  `tfsdk:"weight"`
-	Port             types.Int64  `tfsdk:"port"`
-	Target           types.String `tfsdk:"target"`
+type DnsLbPoolSRVMember struct {
 	FinalTranslation types.Bool   `tfsdk:"final_translation"`
-	Ratio            types.Int64  `tfsdk:"ratio"`
 	Name             types.String `tfsdk:"name"`
+	Port             types.Int64  `tfsdk:"port"`
+	Priority         types.Int64  `tfsdk:"priority"`
+	Ratio            types.Int64  `tfsdk:"ratio"`
+	Target           types.String `tfsdk:"target"`
+	Weight           types.Int64  `tfsdk:"weight"`
 }
 
-type DnsLbPoolGlobalSpecTypeTtlChoice struct {
+type DnsLbPoolTtlChoice struct {
 	Ttl         types.Int64 `tfsdk:"ttl"`
 	UseRrsetTtl types.Bool  `tfsdk:"use_rrset_ttl"`
 }
 
 // ResourceF5XCDnsLbPoolModel describes the resource data model.
 type ResourceF5XCDnsLbPoolModel struct {
-	Uid               types.String   `tfsdk:"uid"`
-	Labels            types.Map      `tfsdk:"labels"`
 	Annotations       types.Map      `tfsdk:"annotations"`
 	Description       types.String   `tfsdk:"description"`
+	Labels            types.Map      `tfsdk:"labels"`
 	Name              types.String   `tfsdk:"name"`
 	Namespace         types.String   `tfsdk:"namespace"`
-	PoolTypeChoice    types.Object   `tfsdk:"pool_type_choice"`
-	LoadBalancingMode types.List     `tfsdk:"load_balancing_mode"`
-	TtlChoice         types.Object   `tfsdk:"ttl_choice"`
+	Uid               types.String   `tfsdk:"uid"`
 	DnsLoadBalancers  types.List     `tfsdk:"dns_load_balancers"`
+	LoadBalancingMode types.List     `tfsdk:"load_balancing_mode"`
+	PoolTypeChoice    types.Object   `tfsdk:"pool_type_choice"`
+	TtlChoice         types.Object   `tfsdk:"ttl_choice"`
 	Timeouts          timeouts.Value `tfsdk:"timeouts"`
 }
 
@@ -162,6 +166,14 @@ var (
 )
 
 // --- Attribute Maps for Nested Structs ---
+// Attribute map for ArrayOfPointerField --> DnsLoadBalancers
+var DnsLbPoolDnsLoadBalancersObjectRefModelAttributeMap = map[string]attr.Type{
+
+	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
+}
+
 // Attribute map for RequiredOneOfField --> PoolTypeChoice
 var DnsLbPoolPoolTypeChoiceModelAttributeMap = map[string]attr.Type{
 
@@ -185,30 +197,21 @@ var DnsLbPoolPoolTypeChoiceModelAttributeMap = map[string]attr.Type{
 // Attribute map for PointerOfOneOfField --> APool
 var DnsLbPoolPoolTypeChoiceAPoolModelAttributeMap = map[string]attr.Type{
 
-	"members": types.ListType{
-		ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-
-				"name":        types.StringType,
-				"ip_endpoint": types.StringType,
-				"ratio":       types.Int64Type,
-				"priority":    types.Int64Type,
-			},
-		},
-	},
 	"health_check_choice": types.ObjectType{
 		AttrTypes: DnsLbPoolPoolTypeChoiceAPoolHealthCheckChoiceModelAttributeMap,
 	},
 	"max_answers": types.Int64Type,
-}
+	"members": types.ListType{
+		ElemType: types.ObjectType{
+			AttrTypes: map[string]attr.Type{
 
-// Attribute map for RequiredArrayOfPointerField --> Members
-var DnsLbPoolPoolTypeChoiceAPoolMembersModelAttributeMap = map[string]attr.Type{
-
-	"name":        types.StringType,
-	"ip_endpoint": types.StringType,
-	"ratio":       types.Int64Type,
-	"priority":    types.Int64Type,
+				"ip_endpoint": types.StringType,
+				"name":        types.StringType,
+				"priority":    types.Int64Type,
+				"ratio":       types.Int64Type,
+			},
+		},
+	},
 }
 
 // Attribute map for RequiredOneOfField --> HealthCheckChoice
@@ -223,65 +226,64 @@ var DnsLbPoolPoolTypeChoiceAPoolHealthCheckChoiceModelAttributeMap = map[string]
 // Attribute map for PointerOfOneOfField --> HealthCheck
 var DnsLbPoolPoolTypeChoiceAPoolHealthCheckChoiceHealthCheckModelAttributeMap = map[string]attr.Type{
 
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
 	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
+}
+
+// Attribute map for RequiredArrayOfPointerField --> Members
+var DnsLbPoolPoolTypeChoiceAPoolMembersModelAttributeMap = map[string]attr.Type{
+
+	"ip_endpoint": types.StringType,
+	"name":        types.StringType,
+	"priority":    types.Int64Type,
+	"ratio":       types.Int64Type,
 }
 
 // Attribute map for PointerOfOneOfField --> AaaaPool
 var DnsLbPoolPoolTypeChoiceAaaaPoolModelAttributeMap = map[string]attr.Type{
 
+	"max_answers": types.Int64Type,
 	"members": types.ListType{
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
 
 				"ip_endpoint": types.StringType,
-				"ratio":       types.Int64Type,
-				"priority":    types.Int64Type,
 				"name":        types.StringType,
+				"priority":    types.Int64Type,
+				"ratio":       types.Int64Type,
 			},
 		},
 	},
-	"max_answers": types.Int64Type,
 }
 
 // Attribute map for RequiredArrayOfPointerField --> Members
 var DnsLbPoolPoolTypeChoiceAaaaPoolMembersModelAttributeMap = map[string]attr.Type{
 
 	"ip_endpoint": types.StringType,
-	"ratio":       types.Int64Type,
-	"priority":    types.Int64Type,
 	"name":        types.StringType,
+	"priority":    types.Int64Type,
+	"ratio":       types.Int64Type,
 }
 
 // Attribute map for PointerOfOneOfField --> CnamePool
 var DnsLbPoolPoolTypeChoiceCnamePoolModelAttributeMap = map[string]attr.Type{
 
+	"health_check_choice": types.ObjectType{
+		AttrTypes: DnsLbPoolPoolTypeChoiceCnamePoolHealthCheckChoiceModelAttributeMap,
+	},
 	"members": types.ListType{
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
 
-				"priority":          types.Int64Type,
 				"domain":            types.StringType,
-				"ratio":             types.Int64Type,
 				"final_translation": types.BoolType,
 				"name":              types.StringType,
+				"priority":          types.Int64Type,
+				"ratio":             types.Int64Type,
 			},
 		},
 	},
-	"health_check_choice": types.ObjectType{
-		AttrTypes: DnsLbPoolPoolTypeChoiceCnamePoolHealthCheckChoiceModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredArrayOfPointerField --> Members
-var DnsLbPoolPoolTypeChoiceCnamePoolMembersModelAttributeMap = map[string]attr.Type{
-
-	"priority":          types.Int64Type,
-	"domain":            types.StringType,
-	"ratio":             types.Int64Type,
-	"final_translation": types.BoolType,
-	"name":              types.StringType,
 }
 
 // Attribute map for RequiredOneOfField --> HealthCheckChoice
@@ -297,32 +299,42 @@ var DnsLbPoolPoolTypeChoiceCnamePoolHealthCheckChoiceModelAttributeMap = map[str
 var DnsLbPoolPoolTypeChoiceCnamePoolHealthCheckChoiceHealthCheckModelAttributeMap = map[string]attr.Type{
 
 	"name":      types.StringType,
-	"tenant":    types.StringType,
 	"namespace": types.StringType,
+	"tenant":    types.StringType,
+}
+
+// Attribute map for RequiredArrayOfPointerField --> Members
+var DnsLbPoolPoolTypeChoiceCnamePoolMembersModelAttributeMap = map[string]attr.Type{
+
+	"domain":            types.StringType,
+	"final_translation": types.BoolType,
+	"name":              types.StringType,
+	"priority":          types.Int64Type,
+	"ratio":             types.Int64Type,
 }
 
 // Attribute map for PointerOfOneOfField --> MxPool
 var DnsLbPoolPoolTypeChoiceMxPoolModelAttributeMap = map[string]attr.Type{
 
+	"max_answers": types.Int64Type,
 	"members": types.ListType{
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
 
-				"name":     types.StringType,
 				"domain":   types.StringType,
+				"name":     types.StringType,
 				"priority": types.Int64Type,
 				"ratio":    types.Int64Type,
 			},
 		},
 	},
-	"max_answers": types.Int64Type,
 }
 
 // Attribute map for RequiredArrayOfPointerField --> Members
 var DnsLbPoolPoolTypeChoiceMxPoolMembersModelAttributeMap = map[string]attr.Type{
 
-	"name":     types.StringType,
 	"domain":   types.StringType,
+	"name":     types.StringType,
 	"priority": types.Int64Type,
 	"ratio":    types.Int64Type,
 }
@@ -330,33 +342,33 @@ var DnsLbPoolPoolTypeChoiceMxPoolMembersModelAttributeMap = map[string]attr.Type
 // Attribute map for PointerOfOneOfField --> SrvPool
 var DnsLbPoolPoolTypeChoiceSrvPoolModelAttributeMap = map[string]attr.Type{
 
+	"max_answers": types.Int64Type,
 	"members": types.ListType{
 		ElemType: types.ObjectType{
 			AttrTypes: map[string]attr.Type{
 
-				"priority":          types.Int64Type,
-				"weight":            types.Int64Type,
-				"port":              types.Int64Type,
-				"target":            types.StringType,
 				"final_translation": types.BoolType,
-				"ratio":             types.Int64Type,
 				"name":              types.StringType,
+				"port":              types.Int64Type,
+				"priority":          types.Int64Type,
+				"ratio":             types.Int64Type,
+				"target":            types.StringType,
+				"weight":            types.Int64Type,
 			},
 		},
 	},
-	"max_answers": types.Int64Type,
 }
 
 // Attribute map for RequiredArrayOfPointerField --> Members
 var DnsLbPoolPoolTypeChoiceSrvPoolMembersModelAttributeMap = map[string]attr.Type{
 
-	"priority":          types.Int64Type,
-	"weight":            types.Int64Type,
-	"port":              types.Int64Type,
-	"target":            types.StringType,
 	"final_translation": types.BoolType,
-	"ratio":             types.Int64Type,
 	"name":              types.StringType,
+	"port":              types.Int64Type,
+	"priority":          types.Int64Type,
+	"ratio":             types.Int64Type,
+	"target":            types.StringType,
+	"weight":            types.Int64Type,
 }
 
 // Attribute map for RequiredOneOfField --> TtlChoice
@@ -364,14 +376,6 @@ var DnsLbPoolTtlChoiceModelAttributeMap = map[string]attr.Type{
 
 	"ttl":           types.Int64Type,
 	"use_rrset_ttl": types.BoolType,
-}
-
-// Attribute map for ArrayOfPointerField --> DnsLoadBalancers
-var DnsLbPoolDnsLoadBalancersObjectRefModelAttributeMap = map[string]attr.Type{
-
-	"name":      types.StringType,
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
 }
 
 func NewResourceF5XCDnsLbPool() resource.Resource {
@@ -385,13 +389,69 @@ func (r *ResourceF5XCDnsLbPool) Metadata(ctx context.Context, request resource.M
 func (r *ResourceF5XCDnsLbPool) Schema(ctx context.Context, request resource.SchemaRequest, response *resource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "DnsLbPool resource",
-		Description:         "DnsLbPool resource",
+		MarkdownDescription: "GetRequest is used to get different forms of a dns_lb_pool This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of dns_lb_pool) etc. can be fetched",
+		Description:         "GetRequest is used to get different forms of a dns_lb_pool This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of dns_lb_pool) etc. can be fetched",
 
 		Attributes: map[string]schema.Attribute{
+			"annotations": schema.MapAttribute{
+				Description:         "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
+				MarkdownDescription: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				ElementType:         types.StringType,
+				Validators: []validator.Map{
+					mapvalidator.SizeAtLeast(1),
+					mapvalidator.KeysAre(stringvalidator.LengthBetween(1, 64)),
+					mapvalidator.ValueStringsAre(stringvalidator.LengthBetween(1, 1024)),
+				},
+				PlanModifiers: []planmodifier.Map{
+					mapplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"description": schema.StringAttribute{
+				Description:         "description Human readable description for the object",
+				MarkdownDescription: "description Human readable description for the object",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				Default:             stringdefault.StaticString(""),
+				Validators: []validator.String{
+					bytesvalidator.BytesAtMost(1200),
+				},
+			},
+			"labels": schema.MapAttribute{
+				Description:         "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				MarkdownDescription: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				Required:            false,
+				Optional:            true,
+				Computed:            true,
+				ElementType:         types.StringType,
+				PlanModifiers: []planmodifier.Map{
+					mapmergemodifier.New(),
+					mapplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"name": schema.StringAttribute{
+				Description:         "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
+				MarkdownDescription: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
+				Required:            true,
+				Optional:            false,
+				Computed:            false,
+			},
+			"namespace": schema.StringAttribute{
+				Description:         "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
+				MarkdownDescription: "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
+				Required:            true,
+				Optional:            false,
+				Computed:            false,
+				Validators: []validator.String{
+					stringvalidator.OneOf([]string{"system"}...),
+				},
+			},
 			"uid": schema.StringAttribute{
 				Description:         "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
-				MarkdownDescription: "",
+				MarkdownDescription: "uid uid is the unique in time and space value for this object. Object create will fail if provided by the client and the value exists in the system. Typically generated by the server on successful creation of an object and is not allowed to change once populated. Shadowed by SystemObjectMeta's uid field.",
 				Required:            false,
 				Optional:            false,
 				Computed:            true,
@@ -399,624 +459,25 @@ func (r *ResourceF5XCDnsLbPool) Schema(ctx context.Context, request resource.Sch
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"labels": schema.MapAttribute{
-				Description:         "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            true,
-				ElementType:         types.StringType,
-				PlanModifiers: []planmodifier.Map{
-					mapmergemodifier.New(),
-				},
-			},
-			"annotations": schema.MapAttribute{
-				Description:         "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            false,
-				ElementType:         types.StringType,
-				Validators: []validator.Map{
-					mapvalidator.KeysAre(stringvalidator.LengthBetween(1, 64)),
-					mapvalidator.ValueStringsAre(stringvalidator.LengthBetween(1, 1024)),
-				},
-			},
-			"description": schema.StringAttribute{
-				Description:         "description Human readable description for the object",
-				MarkdownDescription: "",
-				Required:            false,
-				Optional:            true,
-				Computed:            true,
-				Default:             stringdefault.StaticString(""),
-			},
-			"name": schema.StringAttribute{
-				Description:         "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
-				MarkdownDescription: "",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
-			},
-			"namespace": schema.StringAttribute{
-				Description:         "namespace This defines the workspace within which each the configuration object is to be created. Must be a DNS_LABEL format. For a namespace object itself, namespace value will be ''",
-				MarkdownDescription: "",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
-			},
-			"pool_type_choice": schema.SingleNestedAttribute{
-				Description:         "Pool Type",
-				MarkdownDescription: "",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
-				Validators: []validator.Object{
-					atmostoneofvalidator.AtMostOneOf(
-						"a_pool",
-						"aaaa_pool",
-						"cname_pool",
-						"mx_pool",
-						"srv_pool",
-					),
-				},
-				Attributes: map[string]schema.Attribute{
-					"a_pool": schema.SingleNestedAttribute{
-						Description:         "A Pool",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Attributes: map[string]schema.Attribute{
-							"members": schema.ListNestedAttribute{
-								Description:         "Collection of A record members",
-								MarkdownDescription: "",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
-								NestedObject: schema.NestedAttributeObject{
-									Attributes: map[string]schema.Attribute{
-										"name": schema.StringAttribute{
-											Description:         "Name Pool member name",
-											MarkdownDescription: "<br>**Validation:** `Length LengthAtMost(256)`",
-											Required:            false,
-											Optional:            true,
-											Computed:            false,
-											Validators: []validator.String{
-												stringvalidator.LengthAtMost(256),
-											},
-										},
-										"ip_endpoint": schema.StringAttribute{
-											Description:         "IP Public IP address",
-											MarkdownDescription: "",
-											Required:            true,
-											Optional:            false,
-											Computed:            false,
-										},
-										"ratio": schema.Int64Attribute{
-											Description:         "Ratio Used if the pool’s load balancing mode is set to Ratio-Member",
-											MarkdownDescription: "<br>**Default:** `1`",
-											Required:            false,
-											Optional:            true,
-											Computed:            true,
-											Default:             int64default.StaticInt64(1),
-											Validators: []validator.Int64{
-												int64validator.Between(0, 100),
-											},
-										},
-										"priority": schema.Int64Attribute{
-											Description:         "Priority Used if the pool’s load balancing mode is set to Priority",
-											MarkdownDescription: "<br>**Default:** `10`",
-											Required:            false,
-											Optional:            true,
-											Computed:            true,
-											Default:             int64default.StaticInt64(10),
-											Validators: []validator.Int64{
-												int64validator.Between(0, 255),
-											},
-										},
-									},
-								},
-							},
-							"health_check_choice": schema.SingleNestedAttribute{
-								Description:         "DNS Load Balancer Health Check",
-								MarkdownDescription: "",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
-								Validators: []validator.Object{
-									atmostoneofvalidator.AtMostOneOf(
-										"disable_health_check",
-										"health_check",
-									),
-								},
-								Attributes: map[string]schema.Attribute{
-									"disable_health_check": schema.BoolAttribute{
-										Description:         "Disable health check When health check is disabled, the pool member is presumed to be always healthy",
-										MarkdownDescription: "",
-										Required:            false,
-										Optional:            true,
-										Computed:            false,
-										Validators: []validator.Bool{
-											boolvalidator.Equals(true),
-										},
-									},
-									"health_check": schema.SingleNestedAttribute{
-										Description:         "Health Check Select the health check to be applied to all the pool members",
-										MarkdownDescription: "",
-										Required:            false,
-										Optional:            true,
-										Computed:            false,
-										Attributes: map[string]schema.Attribute{
-											"tenant": schema.StringAttribute{
-												Description:         "",
-												MarkdownDescription: "",
-												Required:            false,
-												Optional:            false,
-												Computed:            true,
-												PlanModifiers: []planmodifier.String{
-													stringplanmodifier.UseStateForUnknown(),
-												},
-											},
-											"namespace": schema.StringAttribute{
-												Description:         "",
-												MarkdownDescription: "",
-												Required:            true,
-												Optional:            false,
-												Computed:            false,
-											},
-											"name": schema.StringAttribute{
-												Description:         "",
-												MarkdownDescription: "",
-												Required:            true,
-												Optional:            false,
-												Computed:            false,
-											},
-										},
-									},
-								},
-							},
-							"max_answers": schema.Int64Attribute{
-								Description:         "Maximum Answers Limit on number of Resource Records to be included in the response to query",
-								MarkdownDescription: "<br>**Default:** `1`",
-								Required:            false,
-								Optional:            true,
-								Computed:            true,
-								Default:             int64default.StaticInt64(1),
-								Validators: []validator.Int64{
-									int64validator.Between(1, 32),
-								},
-							},
-						},
-					},
-					"aaaa_pool": schema.SingleNestedAttribute{
-						Description:         "AAAA Pool",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Attributes: map[string]schema.Attribute{
-							"members": schema.ListNestedAttribute{
-								Description:         "Collection of AAAA record members",
-								MarkdownDescription: "",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
-								NestedObject: schema.NestedAttributeObject{
-									Attributes: map[string]schema.Attribute{
-										"ip_endpoint": schema.StringAttribute{
-											Description:         "IP Public IP address",
-											MarkdownDescription: "",
-											Required:            true,
-											Optional:            false,
-											Computed:            false,
-										},
-										"ratio": schema.Int64Attribute{
-											Description:         "Ratio Used if the pool’s load balancing mode is set to Ratio-Member",
-											MarkdownDescription: "<br>**Default:** `1`",
-											Required:            false,
-											Optional:            true,
-											Computed:            true,
-											Default:             int64default.StaticInt64(1),
-											Validators: []validator.Int64{
-												int64validator.Between(0, 100),
-											},
-										},
-										"priority": schema.Int64Attribute{
-											Description:         "Priority Used if the pool’s load balancing mode is set to Priority",
-											MarkdownDescription: "<br>**Default:** `10`",
-											Required:            false,
-											Optional:            true,
-											Computed:            true,
-											Default:             int64default.StaticInt64(10),
-											Validators: []validator.Int64{
-												int64validator.Between(0, 255),
-											},
-										},
-										"name": schema.StringAttribute{
-											Description:         "Name Pool member name",
-											MarkdownDescription: "<br>**Validation:** `Length LengthAtMost(256)`",
-											Required:            false,
-											Optional:            true,
-											Computed:            false,
-											Validators: []validator.String{
-												stringvalidator.LengthAtMost(256),
-											},
-										},
-									},
-								},
-							},
-							"max_answers": schema.Int64Attribute{
-								Description:         "Maximum Answers Limit on number of Resource Records to be included in the response to query",
-								MarkdownDescription: "<br>**Default:** `1`",
-								Required:            false,
-								Optional:            true,
-								Computed:            true,
-								Default:             int64default.StaticInt64(1),
-								Validators: []validator.Int64{
-									int64validator.Between(1, 32),
-								},
-							},
-						},
-					},
-					"cname_pool": schema.SingleNestedAttribute{
-						Description:         "CNAME Pool",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Attributes: map[string]schema.Attribute{
-							"members": schema.ListNestedAttribute{
-								Description:         "Collection of CNAME record members",
-								MarkdownDescription: "",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
-								NestedObject: schema.NestedAttributeObject{
-									Attributes: map[string]schema.Attribute{
-										"priority": schema.Int64Attribute{
-											Description:         "Priority Used if the pool’s load balancing mode is set to Priority. Determines the order in which traffic is routed to pool members. The lower the number, the higher the priority, making those members active while higher-numbered members act as backups.",
-											MarkdownDescription: "<br>**Default:** `10`",
-											Required:            false,
-											Optional:            true,
-											Computed:            true,
-											Default:             int64default.StaticInt64(10),
-											Validators: []validator.Int64{
-												int64validator.Between(0, 255),
-											},
-										},
-										"domain": schema.StringAttribute{
-											Description:         "FQDN Specifies the fully qualified domain name.",
-											MarkdownDescription: "",
-											Required:            true,
-											Optional:            false,
-											Computed:            false,
-										},
-										"ratio": schema.Int64Attribute{
-											Description:         "Ratio Used if the pool’s load balancing mode is set to Ratio-Member",
-											MarkdownDescription: "<br>**Default:** `1`",
-											Required:            false,
-											Optional:            true,
-											Computed:            true,
-											Default:             int64default.StaticInt64(1),
-											Validators: []validator.Int64{
-												int64validator.Between(0, 100),
-											},
-										},
-										"final_translation": schema.BoolAttribute{
-											Description:         "Final Translation If this flag is true, the CNAME record will not be translated further.",
-											MarkdownDescription: "<br>**Default:** `false`",
-											Required:            false,
-											Optional:            true,
-											Computed:            true,
-											Default:             booldefault.StaticBool(false),
-										},
-										"name": schema.StringAttribute{
-											Description:         "Name Pool member name",
-											MarkdownDescription: "<br>**Validation:** `Length LengthAtMost(256)`",
-											Required:            false,
-											Optional:            true,
-											Computed:            false,
-											Validators: []validator.String{
-												stringvalidator.LengthAtMost(256),
-											},
-										},
-									},
-								},
-							},
-							"health_check_choice": schema.SingleNestedAttribute{
-								Description:         "DNS Load Balancer Health Check",
-								MarkdownDescription: "",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
-								Validators: []validator.Object{
-									atmostoneofvalidator.AtMostOneOf(
-										"disable_health_check",
-										"health_check",
-									),
-								},
-								Attributes: map[string]schema.Attribute{
-									"disable_health_check": schema.BoolAttribute{
-										Description:         "Disable health check When health check is disabled, the pool member is presumed to be always healthy",
-										MarkdownDescription: "",
-										Required:            false,
-										Optional:            true,
-										Computed:            false,
-										Validators: []validator.Bool{
-											boolvalidator.Equals(true),
-										},
-									},
-									"health_check": schema.SingleNestedAttribute{
-										Description:         "Health Check Select the health check to be applied to all the pool members",
-										MarkdownDescription: "",
-										Required:            false,
-										Optional:            true,
-										Computed:            false,
-										Attributes: map[string]schema.Attribute{
-											"name": schema.StringAttribute{
-												Description:         "",
-												MarkdownDescription: "",
-												Required:            true,
-												Optional:            false,
-												Computed:            false,
-											},
-											"tenant": schema.StringAttribute{
-												Description:         "",
-												MarkdownDescription: "",
-												Required:            false,
-												Optional:            false,
-												Computed:            true,
-												PlanModifiers: []planmodifier.String{
-													stringplanmodifier.UseStateForUnknown(),
-												},
-											},
-											"namespace": schema.StringAttribute{
-												Description:         "",
-												MarkdownDescription: "",
-												Required:            true,
-												Optional:            false,
-												Computed:            false,
-											},
-										},
-									},
-								},
-							},
-						},
-					},
-					"mx_pool": schema.SingleNestedAttribute{
-						Description:         "MX Pool",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Attributes: map[string]schema.Attribute{
-							"members": schema.ListNestedAttribute{
-								Description:         "Collection of MX record members",
-								MarkdownDescription: "",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
-								NestedObject: schema.NestedAttributeObject{
-									Attributes: map[string]schema.Attribute{
-										"name": schema.StringAttribute{
-											Description:         "Name Pool member name",
-											MarkdownDescription: "<br>**Validation:** `Length LengthAtMost(256)`",
-											Required:            false,
-											Optional:            true,
-											Computed:            false,
-											Validators: []validator.String{
-												stringvalidator.LengthAtMost(256),
-											},
-										},
-										"domain": schema.StringAttribute{
-											Description:         "Domain",
-											MarkdownDescription: "",
-											Required:            true,
-											Optional:            false,
-											Computed:            false,
-										},
-										"priority": schema.Int64Attribute{
-											Description:         "Priority MX Record priority",
-											MarkdownDescription: "<br>**Default:** `10`",
-											Required:            false,
-											Optional:            true,
-											Computed:            true,
-											Default:             int64default.StaticInt64(10),
-											Validators: []validator.Int64{
-												int64validator.Between(0, 65535),
-											},
-										},
-										"ratio": schema.Int64Attribute{
-											Description:         "Ratio Load Balancing Ratio",
-											MarkdownDescription: "<br>**Default:** `1`",
-											Required:            false,
-											Optional:            true,
-											Computed:            true,
-											Default:             int64default.StaticInt64(1),
-											Validators: []validator.Int64{
-												int64validator.Between(0, 100),
-											},
-										},
-									},
-								},
-							},
-							"max_answers": schema.Int64Attribute{
-								Description:         "Maximum Answers Limit on number of Resource Records to be included in the response to query",
-								MarkdownDescription: "<br>**Default:** `1`",
-								Required:            false,
-								Optional:            true,
-								Computed:            true,
-								Default:             int64default.StaticInt64(1),
-								Validators: []validator.Int64{
-									int64validator.Between(1, 32),
-								},
-							},
-						},
-					},
-					"srv_pool": schema.SingleNestedAttribute{
-						Description:         "SRV Pool",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Attributes: map[string]schema.Attribute{
-							"members": schema.ListNestedAttribute{
-								Description:         "Collection of SRV record members",
-								MarkdownDescription: "",
-								Required:            true,
-								Optional:            false,
-								Computed:            false,
-								NestedObject: schema.NestedAttributeObject{
-									Attributes: map[string]schema.Attribute{
-										"priority": schema.Int64Attribute{
-											Description:         "Priority Priority of the target. A lower number indicates a higher preference.",
-											MarkdownDescription: "<br>**Default:** `10`",
-											Required:            false,
-											Optional:            true,
-											Computed:            true,
-											Default:             int64default.StaticInt64(10),
-											Validators: []validator.Int64{
-												int64validator.Between(0, 65535),
-											},
-										},
-										"weight": schema.Int64Attribute{
-											Description:         "Weight Weight of the target. A higher number indicates a higher preference.",
-											MarkdownDescription: "<br>**Default:** `10`",
-											Required:            false,
-											Optional:            true,
-											Computed:            true,
-											Default:             int64default.StaticInt64(10),
-											Validators: []validator.Int64{
-												int64validator.Between(0, 65535),
-											},
-										},
-										"port": schema.Int64Attribute{
-											Description:         "Port Port on which the service can be found",
-											MarkdownDescription: "<br>**Default:** `10`",
-											Required:            false,
-											Optional:            true,
-											Computed:            true,
-											Default:             int64default.StaticInt64(10),
-											Validators: []validator.Int64{
-												int64validator.Between(0, 65535),
-											},
-										},
-										"target": schema.StringAttribute{
-											Description:         "Target Domain name of the machine providing the service",
-											MarkdownDescription: "",
-											Required:            true,
-											Optional:            false,
-											Computed:            false,
-											Validators: []validator.String{
-												stringvalidator.RegexMatches(
-													regexp.MustCompile(`^[.]$|^([a-zA-Z0-9]{1}[a-zA-Z0-9_-]{0,62})(\.[a-zA-Z0-9_]{1}[a-zA-Z0-9_-]{0,62})*?(\.[a-zA-Z]{1}[a-zA-Z0-9]{0,62})\.?$`),
-													"must be valid pattern",
-												),
-											},
-										},
-										"final_translation": schema.BoolAttribute{
-											Description:         "Final Translation If this flag is true, the SRV record will not be translated further.",
-											MarkdownDescription: "<br>**Default:** `false`",
-											Required:            false,
-											Optional:            true,
-											Computed:            true,
-											Default:             booldefault.StaticBool(false),
-										},
-										"ratio": schema.Int64Attribute{
-											Description:         "Ratio Ratio",
-											MarkdownDescription: "<br>**Default:** `1`",
-											Required:            false,
-											Optional:            true,
-											Computed:            true,
-											Default:             int64default.StaticInt64(1),
-											Validators: []validator.Int64{
-												int64validator.Between(0, 100),
-											},
-										},
-										"name": schema.StringAttribute{
-											Description:         "Name Pool member name",
-											MarkdownDescription: "<br>**Validation:** `Length LengthAtMost(256)`",
-											Required:            false,
-											Optional:            true,
-											Computed:            false,
-											Validators: []validator.String{
-												stringvalidator.LengthAtMost(256),
-											},
-										},
-									},
-								},
-							},
-							"max_answers": schema.Int64Attribute{
-								Description:         "Maximum Answers Limit on number of Resource Records to be included in the response to query",
-								MarkdownDescription: "<br>**Default:** `1`",
-								Required:            false,
-								Optional:            true,
-								Computed:            true,
-								Default:             int64default.StaticInt64(1),
-								Validators: []validator.Int64{
-									int64validator.Between(1, 32),
-								},
-							},
-						},
-					},
-				},
-			},
-			"load_balancing_mode": schema.ListAttribute{
-				Description:         "Load Balancing Mode",
-				MarkdownDescription: "<br>**Allowed Values (choose one):** `[\"RATIO_MEMBER\", \"STATIC_PERSIST\", \"PRIORITY\", \"ROUND_ROBIN\"]`",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
-				ElementType:         types.StringType,
-				Validators: []validator.List{
-					listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"RATIO_MEMBER", "STATIC_PERSIST", "PRIORITY", "ROUND_ROBIN"}...)),
-					listvalidator.SizeAtMost(1),
-				},
-			},
-			"ttl_choice": schema.SingleNestedAttribute{
-				Description:         "TTL choice TTL in seconds",
-				MarkdownDescription: "",
-				Required:            true,
-				Optional:            false,
-				Computed:            false,
-				Validators: []validator.Object{
-					atmostoneofvalidator.AtMostOneOf(
-						"use_rrset_ttl",
-						"ttl",
-					),
-				},
-				Attributes: map[string]schema.Attribute{
-					"ttl": schema.Int64Attribute{
-						Description:         "Custom TTL Custom TTL in seconds (default 30) for responses from this pool",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						PlanModifiers: []planmodifier.Int64{
-							defaultvaluemodifier.NewDefaultValueModifierInt64("use_rrset_ttl"),
-						},
-					},
-					"use_rrset_ttl": schema.BoolAttribute{
-						Description:         "Use RRSet TTL Use TTL specified in the RRSet of the DNS Load Balancer Record which uses the pool",
-						MarkdownDescription: "",
-						Required:            false,
-						Optional:            true,
-						Computed:            false,
-						Validators: []validator.Bool{
-							boolvalidator.Equals(true),
-						},
-					},
-				},
-			},
 			"dns_load_balancers": schema.ListNestedAttribute{
 				Description:         "backref_objs a list of Load balancers associated with this load balancer pool",
-				MarkdownDescription: "",
+				MarkdownDescription: "backref_objs a list of Load balancers associated with this load balancer pool",
 				Required:            false,
 				Optional:            true,
-				Computed:            false,
+				Computed:            true,
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
+				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"name": schema.StringAttribute{
+							Description:         "",
+							MarkdownDescription: "",
+							Required:            true,
+							Optional:            false,
+							Computed:            false,
+						},
+						"namespace": schema.StringAttribute{
 							Description:         "",
 							MarkdownDescription: "",
 							Required:            true,
@@ -1033,19 +494,623 @@ func (r *ResourceF5XCDnsLbPool) Schema(ctx context.Context, request resource.Sch
 								stringplanmodifier.UseStateForUnknown(),
 							},
 						},
-						"namespace": schema.StringAttribute{
-							Description:         "",
-							MarkdownDescription: "",
-							Required:            true,
-							Optional:            false,
-							Computed:            false,
+					},
+				},
+			},
+			"load_balancing_mode": schema.ListAttribute{
+				Description:         "Load Balancing Mode",
+				MarkdownDescription: "Load Balancing Mode<br>**Allowed Values (choose one):** `['PRIORITY', 'RATIO_MEMBER', 'ROUND_ROBIN', 'STATIC_PERSIST']`",
+				Required:            true,
+				Optional:            false,
+				Computed:            false,
+				ElementType:         types.StringType,
+				Validators: []validator.List{
+					listvalidator.ValueStringsAre(stringvalidator.OneOf([]string{"PRIORITY", "RATIO_MEMBER", "ROUND_ROBIN", "STATIC_PERSIST"}...)),
+					listvalidator.SizeAtMost(1),
+				},
+			},
+			"pool_type_choice": schema.SingleNestedAttribute{
+				Description:         "Pool Type",
+				MarkdownDescription: "Pool Type",
+				Required:            true,
+				Optional:            false,
+				Computed:            false,
+				Validators: []validator.Object{
+					exactlyoneofvalidator.RequiredExactlyOneOf(
+						"a_pool",
+						"aaaa_pool",
+						"cname_pool",
+						"mx_pool",
+						"srv_pool",
+					),
+				},
+				Attributes: map[string]schema.Attribute{
+					"a_pool": schema.SingleNestedAttribute{
+						Description:         "A Pool",
+						MarkdownDescription: "A Pool",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Attributes: map[string]schema.Attribute{
+							"health_check_choice": schema.SingleNestedAttribute{
+								Description:         "DNS Load Balancer Health Check",
+								MarkdownDescription: "DNS Load Balancer Health Check",
+								Required:            true,
+								Optional:            false,
+								Computed:            false,
+								Validators: []validator.Object{
+									exactlyoneofvalidator.RequiredExactlyOneOf(
+										"disable_health_check",
+										"health_check",
+									),
+								},
+								Attributes: map[string]schema.Attribute{
+									"disable_health_check": schema.BoolAttribute{
+										Description:         "Disable health check When health check is disabled, the pool member is presumed to be always healthy",
+										MarkdownDescription: "Disable health check When health check is disabled, the pool member is presumed to be always healthy",
+										Required:            false,
+										Optional:            true,
+										Computed:            false,
+										Validators: []validator.Bool{
+											boolvalidator.Equals(true),
+										},
+									},
+									"health_check": schema.SingleNestedAttribute{
+										Description:         "Health Check Select the health check to be applied to all the pool members",
+										MarkdownDescription: "Health Check Select the health check to be applied to all the pool members",
+										Required:            false,
+										Optional:            true,
+										Computed:            false,
+										Attributes: map[string]schema.Attribute{
+											"name": schema.StringAttribute{
+												Description:         "",
+												MarkdownDescription: "",
+												Required:            true,
+												Optional:            false,
+												Computed:            false,
+											},
+											"namespace": schema.StringAttribute{
+												Description:         "",
+												MarkdownDescription: "",
+												Required:            true,
+												Optional:            false,
+												Computed:            false,
+											},
+											"tenant": schema.StringAttribute{
+												Description:         "",
+												MarkdownDescription: "",
+												Required:            false,
+												Optional:            false,
+												Computed:            true,
+												PlanModifiers: []planmodifier.String{
+													stringplanmodifier.UseStateForUnknown(),
+												},
+											},
+										},
+									},
+								},
+							},
+							"max_answers": schema.Int64Attribute{
+								Description:         "Maximum Answers Limit on number of Resource Records to be included in the response to query",
+								MarkdownDescription: "Maximum Answers Limit on number of Resource Records to be included in the response to query<br>**Default:** `1`",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
+								Default:             int64default.StaticInt64(1),
+								Validators: []validator.Int64{
+									int64validator.Between(1, 32),
+								},
+							},
+							"members": schema.ListNestedAttribute{
+								Description:         "Collection of A record members",
+								MarkdownDescription: "Collection of A record members",
+								Required:            true,
+								Optional:            false,
+								Computed:            false,
+								Validators: []validator.List{
+									listvalidator.SizeBetween(1, 32),
+									listuniquevalidator.ListUniqueValuesIgnoreUnknown(),
+								},
+								NestedObject: schema.NestedAttributeObject{
+									Attributes: map[string]schema.Attribute{
+										"ip_endpoint": schema.StringAttribute{
+											Description:         "IP Public IP address",
+											MarkdownDescription: "IP Public IP address",
+											Required:            true,
+											Optional:            false,
+											Computed:            false,
+											Validators: []validator.String{
+												stringvalidator.RegexMatches(
+													regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)$)|(^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$)`),
+													"must be a valid IP address (IPv4 or IPv6)",
+												),
+											},
+										},
+										"name": schema.StringAttribute{
+											Description:         "Name Pool member name",
+											MarkdownDescription: "Name Pool member name<br>**Validation:** `Length LengthAtMost(256)`",
+											Required:            false,
+											Optional:            true,
+											Computed:            false,
+											Validators: []validator.String{
+												stringvalidator.LengthAtMost(256),
+											},
+										},
+										"priority": schema.Int64Attribute{
+											Description:         "Priority Used if the pool’s load balancing mode is set to Priority",
+											MarkdownDescription: "Priority Used if the pool’s load balancing mode is set to Priority<br>**Default:** `10`",
+											Required:            false,
+											Optional:            true,
+											Computed:            true,
+											Default:             int64default.StaticInt64(10),
+											Validators: []validator.Int64{
+												int64validator.Between(0, 255),
+											},
+										},
+										"ratio": schema.Int64Attribute{
+											Description:         "Ratio Used if the pool’s load balancing mode is set to Ratio-Member",
+											MarkdownDescription: "Ratio Used if the pool’s load balancing mode is set to Ratio-Member<br>**Default:** `1`",
+											Required:            false,
+											Optional:            true,
+											Computed:            true,
+											Default:             int64default.StaticInt64(1),
+											Validators: []validator.Int64{
+												int64validator.Between(0, 100),
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+					"aaaa_pool": schema.SingleNestedAttribute{
+						Description:         "AAAA Pool",
+						MarkdownDescription: "AAAA Pool",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Attributes: map[string]schema.Attribute{
+							"max_answers": schema.Int64Attribute{
+								Description:         "Maximum Answers Limit on number of Resource Records to be included in the response to query",
+								MarkdownDescription: "Maximum Answers Limit on number of Resource Records to be included in the response to query<br>**Default:** `1`",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
+								Default:             int64default.StaticInt64(1),
+								Validators: []validator.Int64{
+									int64validator.Between(1, 32),
+								},
+							},
+							"members": schema.ListNestedAttribute{
+								Description:         "Collection of AAAA record members",
+								MarkdownDescription: "Collection of AAAA record members",
+								Required:            true,
+								Optional:            false,
+								Computed:            false,
+								Validators: []validator.List{
+									listvalidator.SizeBetween(1, 32),
+									listuniquevalidator.ListUniqueValuesIgnoreUnknown(),
+								},
+								NestedObject: schema.NestedAttributeObject{
+									Attributes: map[string]schema.Attribute{
+										"ip_endpoint": schema.StringAttribute{
+											Description:         "IP Public IP address",
+											MarkdownDescription: "IP Public IP address",
+											Required:            true,
+											Optional:            false,
+											Computed:            false,
+											Validators: []validator.String{
+												stringvalidator.RegexMatches(
+													regexp.MustCompile(`(^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.){3}(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)$)|(^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$)`),
+													"must be a valid IP address (IPv4 or IPv6)",
+												),
+											},
+										},
+										"name": schema.StringAttribute{
+											Description:         "Name Pool member name",
+											MarkdownDescription: "Name Pool member name<br>**Validation:** `Length LengthAtMost(256)`",
+											Required:            false,
+											Optional:            true,
+											Computed:            false,
+											Validators: []validator.String{
+												stringvalidator.LengthAtMost(256),
+											},
+										},
+										"priority": schema.Int64Attribute{
+											Description:         "Priority Used if the pool’s load balancing mode is set to Priority",
+											MarkdownDescription: "Priority Used if the pool’s load balancing mode is set to Priority<br>**Default:** `10`",
+											Required:            false,
+											Optional:            true,
+											Computed:            true,
+											Default:             int64default.StaticInt64(10),
+											Validators: []validator.Int64{
+												int64validator.Between(0, 255),
+											},
+										},
+										"ratio": schema.Int64Attribute{
+											Description:         "Ratio Used if the pool’s load balancing mode is set to Ratio-Member",
+											MarkdownDescription: "Ratio Used if the pool’s load balancing mode is set to Ratio-Member<br>**Default:** `1`",
+											Required:            false,
+											Optional:            true,
+											Computed:            true,
+											Default:             int64default.StaticInt64(1),
+											Validators: []validator.Int64{
+												int64validator.Between(0, 100),
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+					"cname_pool": schema.SingleNestedAttribute{
+						Description:         "CNAME Pool",
+						MarkdownDescription: "CNAME Pool",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Attributes: map[string]schema.Attribute{
+							"health_check_choice": schema.SingleNestedAttribute{
+								Description:         "DNS Load Balancer Health Check",
+								MarkdownDescription: "DNS Load Balancer Health Check",
+								Required:            true,
+								Optional:            false,
+								Computed:            false,
+								Validators: []validator.Object{
+									exactlyoneofvalidator.RequiredExactlyOneOf(
+										"disable_health_check",
+										"health_check",
+									),
+								},
+								Attributes: map[string]schema.Attribute{
+									"disable_health_check": schema.BoolAttribute{
+										Description:         "Disable health check When health check is disabled, the pool member is presumed to be always healthy",
+										MarkdownDescription: "Disable health check When health check is disabled, the pool member is presumed to be always healthy",
+										Required:            false,
+										Optional:            true,
+										Computed:            false,
+										Validators: []validator.Bool{
+											boolvalidator.Equals(true),
+										},
+									},
+									"health_check": schema.SingleNestedAttribute{
+										Description:         "Health Check Select the health check to be applied to all the pool members",
+										MarkdownDescription: "Health Check Select the health check to be applied to all the pool members",
+										Required:            false,
+										Optional:            true,
+										Computed:            false,
+										Attributes: map[string]schema.Attribute{
+											"name": schema.StringAttribute{
+												Description:         "",
+												MarkdownDescription: "",
+												Required:            true,
+												Optional:            false,
+												Computed:            false,
+											},
+											"namespace": schema.StringAttribute{
+												Description:         "",
+												MarkdownDescription: "",
+												Required:            true,
+												Optional:            false,
+												Computed:            false,
+											},
+											"tenant": schema.StringAttribute{
+												Description:         "",
+												MarkdownDescription: "",
+												Required:            false,
+												Optional:            false,
+												Computed:            true,
+												PlanModifiers: []planmodifier.String{
+													stringplanmodifier.UseStateForUnknown(),
+												},
+											},
+										},
+									},
+								},
+							},
+							"members": schema.ListNestedAttribute{
+								Description:         "Collection of CNAME record members",
+								MarkdownDescription: "Collection of CNAME record members",
+								Required:            true,
+								Optional:            false,
+								Computed:            false,
+								Validators: []validator.List{
+									listvalidator.SizeBetween(1, 32),
+									listuniquevalidator.ListUniqueValuesIgnoreUnknown(),
+								},
+								NestedObject: schema.NestedAttributeObject{
+									Attributes: map[string]schema.Attribute{
+										"domain": schema.StringAttribute{
+											Description:         "FQDN Specifies the fully qualified domain name.",
+											MarkdownDescription: "FQDN Specifies the fully qualified domain name.",
+											Required:            true,
+											Optional:            false,
+											Computed:            false,
+											Validators: []validator.String{
+												stringvalidator.RegexMatches(
+													regexp.MustCompile(`^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)*[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?$`),
+													"must be a valid hostname (RFC 1034)",
+												),
+											},
+										},
+										"final_translation": schema.BoolAttribute{
+											Description:         "Final Translation If this flag is true, the CNAME record will not be translated further.",
+											MarkdownDescription: "Final Translation If this flag is true, the CNAME record will not be translated further.<br>**Default:** `false`",
+											Required:            false,
+											Optional:            true,
+											Computed:            true,
+											Default:             booldefault.StaticBool(false),
+										},
+										"name": schema.StringAttribute{
+											Description:         "Name Pool member name",
+											MarkdownDescription: "Name Pool member name<br>**Validation:** `Length LengthAtMost(256)`",
+											Required:            false,
+											Optional:            true,
+											Computed:            false,
+											Validators: []validator.String{
+												stringvalidator.LengthAtMost(256),
+											},
+										},
+										"priority": schema.Int64Attribute{
+											Description:         "Priority Used if the pool’s load balancing mode is set to Priority. Determines the order in which traffic is routed to pool members. The lower the number, the higher the priority, making those members active while higher-numbered members act as backups.",
+											MarkdownDescription: "Priority Used if the pool’s load balancing mode is set to Priority. Determines the order in which traffic is routed to pool members. The lower the number, the higher the priority, making those members active while higher-numbered members act as backups.<br>**Default:** `10`",
+											Required:            false,
+											Optional:            true,
+											Computed:            true,
+											Default:             int64default.StaticInt64(10),
+											Validators: []validator.Int64{
+												int64validator.Between(0, 255),
+											},
+										},
+										"ratio": schema.Int64Attribute{
+											Description:         "Ratio Used if the pool’s load balancing mode is set to Ratio-Member",
+											MarkdownDescription: "Ratio Used if the pool’s load balancing mode is set to Ratio-Member<br>**Default:** `1`",
+											Required:            false,
+											Optional:            true,
+											Computed:            true,
+											Default:             int64default.StaticInt64(1),
+											Validators: []validator.Int64{
+												int64validator.Between(0, 100),
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+					"mx_pool": schema.SingleNestedAttribute{
+						Description:         "MX Pool",
+						MarkdownDescription: "MX Pool",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Attributes: map[string]schema.Attribute{
+							"max_answers": schema.Int64Attribute{
+								Description:         "Maximum Answers Limit on number of Resource Records to be included in the response to query",
+								MarkdownDescription: "Maximum Answers Limit on number of Resource Records to be included in the response to query<br>**Default:** `1`",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
+								Default:             int64default.StaticInt64(1),
+								Validators: []validator.Int64{
+									int64validator.Between(1, 32),
+								},
+							},
+							"members": schema.ListNestedAttribute{
+								Description:         "Collection of MX record members",
+								MarkdownDescription: "Collection of MX record members",
+								Required:            true,
+								Optional:            false,
+								Computed:            false,
+								Validators: []validator.List{
+									listvalidator.SizeBetween(1, 32),
+									listuniquevalidator.ListUniqueValuesIgnoreUnknown(),
+								},
+								NestedObject: schema.NestedAttributeObject{
+									Attributes: map[string]schema.Attribute{
+										"domain": schema.StringAttribute{
+											Description:         "Domain",
+											MarkdownDescription: "Domain",
+											Required:            true,
+											Optional:            false,
+											Computed:            false,
+											Validators: []validator.String{
+												stringvalidator.RegexMatches(
+													regexp.MustCompile(`^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)*[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?$`),
+													"must be a valid hostname (RFC 1034)",
+												),
+											},
+										},
+										"name": schema.StringAttribute{
+											Description:         "Name Pool member name",
+											MarkdownDescription: "Name Pool member name<br>**Validation:** `Length LengthAtMost(256)`",
+											Required:            false,
+											Optional:            true,
+											Computed:            false,
+											Validators: []validator.String{
+												stringvalidator.LengthAtMost(256),
+											},
+										},
+										"priority": schema.Int64Attribute{
+											Description:         "Priority MX Record priority",
+											MarkdownDescription: "Priority MX Record priority<br>**Default:** `10`",
+											Required:            false,
+											Optional:            true,
+											Computed:            true,
+											Default:             int64default.StaticInt64(10),
+											Validators: []validator.Int64{
+												int64validator.Between(0, 65535),
+											},
+										},
+										"ratio": schema.Int64Attribute{
+											Description:         "Ratio Load Balancing Ratio",
+											MarkdownDescription: "Ratio Load Balancing Ratio<br>**Default:** `1`",
+											Required:            false,
+											Optional:            true,
+											Computed:            true,
+											Default:             int64default.StaticInt64(1),
+											Validators: []validator.Int64{
+												int64validator.Between(0, 100),
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+					"srv_pool": schema.SingleNestedAttribute{
+						Description:         "SRV Pool",
+						MarkdownDescription: "SRV Pool",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Attributes: map[string]schema.Attribute{
+							"max_answers": schema.Int64Attribute{
+								Description:         "Maximum Answers Limit on number of Resource Records to be included in the response to query",
+								MarkdownDescription: "Maximum Answers Limit on number of Resource Records to be included in the response to query<br>**Default:** `1`",
+								Required:            false,
+								Optional:            true,
+								Computed:            true,
+								Default:             int64default.StaticInt64(1),
+								Validators: []validator.Int64{
+									int64validator.Between(1, 32),
+								},
+							},
+							"members": schema.ListNestedAttribute{
+								Description:         "Collection of SRV record members",
+								MarkdownDescription: "Collection of SRV record members",
+								Required:            true,
+								Optional:            false,
+								Computed:            false,
+								Validators: []validator.List{
+									listvalidator.SizeBetween(1, 32),
+									listuniquevalidator.ListUniqueValuesIgnoreUnknown(),
+								},
+								NestedObject: schema.NestedAttributeObject{
+									Attributes: map[string]schema.Attribute{
+										"final_translation": schema.BoolAttribute{
+											Description:         "Final Translation If this flag is true, the SRV record will not be translated further.",
+											MarkdownDescription: "Final Translation If this flag is true, the SRV record will not be translated further.<br>**Default:** `false`",
+											Required:            false,
+											Optional:            true,
+											Computed:            true,
+											Default:             booldefault.StaticBool(false),
+										},
+										"name": schema.StringAttribute{
+											Description:         "Name Pool member name",
+											MarkdownDescription: "Name Pool member name<br>**Validation:** `Length LengthAtMost(256)`",
+											Required:            false,
+											Optional:            true,
+											Computed:            false,
+											Validators: []validator.String{
+												stringvalidator.LengthAtMost(256),
+											},
+										},
+										"port": schema.Int64Attribute{
+											Description:         "Port Port on which the service can be found",
+											MarkdownDescription: "Port Port on which the service can be found<br>**Default:** `10`",
+											Required:            false,
+											Optional:            true,
+											Computed:            true,
+											Default:             int64default.StaticInt64(10),
+											Validators: []validator.Int64{
+												int64validator.Between(0, 65535),
+											},
+										},
+										"priority": schema.Int64Attribute{
+											Description:         "Priority Priority of the target. A lower number indicates a higher preference.",
+											MarkdownDescription: "Priority Priority of the target. A lower number indicates a higher preference.<br>**Default:** `10`",
+											Required:            false,
+											Optional:            true,
+											Computed:            true,
+											Default:             int64default.StaticInt64(10),
+											Validators: []validator.Int64{
+												int64validator.Between(0, 65535),
+											},
+										},
+										"ratio": schema.Int64Attribute{
+											Description:         "Ratio Ratio",
+											MarkdownDescription: "Ratio Ratio<br>**Default:** `1`",
+											Required:            false,
+											Optional:            true,
+											Computed:            true,
+											Default:             int64default.StaticInt64(1),
+											Validators: []validator.Int64{
+												int64validator.Between(0, 100),
+											},
+										},
+										"target": schema.StringAttribute{
+											Description:         "Target Domain name of the machine providing the service",
+											MarkdownDescription: "Target Domain name of the machine providing the service",
+											Required:            true,
+											Optional:            false,
+											Computed:            false,
+											Validators: []validator.String{
+												stringvalidator.RegexMatches(
+													regexp.MustCompile(`^[.]$|^([a-zA-Z0-9]{1}[a-zA-Z0-9_-]{0,62})(\.[a-zA-Z0-9_]{1}[a-zA-Z0-9_-]{0,62})*?(\.[a-zA-Z]{1}[a-zA-Z0-9]{0,62})\.?$`),
+													"must match pattern `^[.]$|^([a-zA-Z0-9]{1}[a-zA-Z0-9_-]{0,62})(\\.[a-zA-Z0-9_]{1}[a-zA-Z0-9_-]{0,62})*?(\\.[a-zA-Z]{1}[a-zA-Z0-9]{0,62})\\.?$`",
+												),
+											},
+										},
+										"weight": schema.Int64Attribute{
+											Description:         "Weight Weight of the target. A higher number indicates a higher preference.",
+											MarkdownDescription: "Weight Weight of the target. A higher number indicates a higher preference.<br>**Default:** `10`",
+											Required:            false,
+											Optional:            true,
+											Computed:            true,
+											Default:             int64default.StaticInt64(10),
+											Validators: []validator.Int64{
+												int64validator.Between(0, 65535),
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			"ttl_choice": schema.SingleNestedAttribute{
+				Description:         "TTL choice TTL in seconds",
+				MarkdownDescription: "TTL choice TTL in seconds",
+				Required:            true,
+				Optional:            false,
+				Computed:            false,
+				Validators: []validator.Object{
+					exactlyoneofvalidator.RequiredExactlyOneOf(
+						"ttl",
+						"use_rrset_ttl",
+					),
+				},
+				Attributes: map[string]schema.Attribute{
+					"ttl": schema.Int64Attribute{
+						Description:         "Custom TTL Custom TTL in seconds (default 30) for responses from this pool",
+						MarkdownDescription: "Custom TTL Custom TTL in seconds (default 30) for responses from this pool",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Validators: []validator.Int64{
+							int64validator.Between(0, 2147483647),
+						},
+						PlanModifiers: []planmodifier.Int64{
+							defaultvaluemodifier.NewDefaultValueModifierInt64("use_rrset_ttl"),
+						},
+					},
+					"use_rrset_ttl": schema.BoolAttribute{
+						Description:         "Use RRSet TTL Use TTL specified in the RRSet of the DNS Load Balancer Record which uses the pool",
+						MarkdownDescription: "Use RRSet TTL Use TTL specified in the RRSet of the DNS Load Balancer Record which uses the pool",
+						Required:            false,
+						Optional:            true,
+						Computed:            false,
+						Validators: []validator.Bool{
+							boolvalidator.Equals(true),
 						},
 					},
 				},
 			},
 			"timeouts": timeouts.Attributes(ctx, timeouts.Opts{
 				Create: true, // activate timeouts.create
-				Update: true, // activate timeouts.update
+				Update: true, // activate timeouts.update (false for CRLD resources)
 				Delete: true, // activate timeouts.delete
 				Read:   true, // activate timeouts.read
 			}),
@@ -1151,7 +1216,7 @@ func (r *ResourceF5XCDnsLbPool) Create(ctx context.Context, request resource.Cre
 		diags = data.Annotations.ElementsAs(ctx, &labels, false)
 		response.Diagnostics.Append(diags...)
 		if response.Diagnostics.HasError() {
-			tflog.Error(ctx, "Failed to convert annotations from map to model")
+			tflog.Error(ctx, "Failed to convert Annotations from map to model")
 			return
 		}
 		meta.Annotations = labels
@@ -1164,6 +1229,20 @@ func (r *ResourceF5XCDnsLbPool) Create(ctx context.Context, request resource.Cre
 		meta.Description = string(data.Description.ValueString())
 	}
 
+	// resource modelToMetaRoot MapOfStringField --> Labels
+	if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
+		var labels map[string]string
+		diags = data.Labels.ElementsAs(ctx, &labels, false)
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			tflog.Error(ctx, "Failed to convert Labels from map to model")
+			return
+		}
+		meta.Labels = labels
+	} else {
+		meta.Labels = nil
+	}
+
 	// resource modelToMetaRoot RequiredStringField --> Name
 	if !data.Name.IsNull() && !data.Name.IsUnknown() {
 		meta.Name = string(data.Name.ValueString())
@@ -1174,9 +1253,34 @@ func (r *ResourceF5XCDnsLbPool) Create(ctx context.Context, request resource.Cre
 		meta.Namespace = string(data.Namespace.ValueString())
 	}
 
+	// resource modelToSpecRoot RequiredEnumField --> LoadBalancingMode
+	{
+		var loadBalancingModeElements []types.String
+		diags = data.LoadBalancingMode.ElementsAs(ctx, &loadBalancingModeElements, false)
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+
+		if len(loadBalancingModeElements) > 0 {
+			loadBalancingModeStrVal := loadBalancingModeElements[0].ValueString()
+
+			if v, ok := ves_io_schema_dns_lb_pool.LoadBalancingMode_value[loadBalancingModeStrVal]; ok {
+				// Dynamic path assignment (Global vs CreateSpec)
+				spec.LoadBalancingMode = ves_io_schema_dns_lb_pool.LoadBalancingMode(v)
+			} else {
+				response.Diagnostics.AddError(
+					"Invalid Enum Value",
+					fmt.Sprintf("Value '%s' is not a valid member for ves_io_schema_dns_lb_pool.LoadBalancingMode", loadBalancingModeStrVal),
+				)
+				return
+			}
+		}
+	}
+
 	// resource modelToSpecRoot RequiredOneOfField --> PoolTypeChoice
 	if !data.PoolTypeChoice.IsNull() && !data.PoolTypeChoice.IsUnknown() {
-		poolTypeChoiceModel := DnsLbPoolGlobalSpecTypePoolTypeChoice{}
+		poolTypeChoiceModel := DnsLbPoolPoolTypeChoice{}
 		response.Diagnostics.Append(data.PoolTypeChoice.As(ctx, &poolTypeChoiceModel, basetypes.ObjectAsOptions{})...)
 		if response.Diagnostics.HasError() {
 			return
@@ -1184,8 +1288,8 @@ func (r *ResourceF5XCDnsLbPool) Create(ctx context.Context, request resource.Cre
 
 		// resource modelToSpecNested PointerOfOneOfField --> APool
 		if !poolTypeChoiceModel.APool.IsNull() && !poolTypeChoiceModel.APool.IsUnknown() {
-			var dnsLbPoolGlobalSpecTypeAPoolModel DnsLbPoolGlobalSpecTypeAPool
-			response.Diagnostics.Append(poolTypeChoiceModel.APool.As(ctx, &dnsLbPoolGlobalSpecTypeAPoolModel, basetypes.ObjectAsOptions{})...)
+			var dnsLbPoolAPoolModel DnsLbPoolAPool
+			response.Diagnostics.Append(poolTypeChoiceModel.APool.As(ctx, &dnsLbPoolAPoolModel, basetypes.ObjectAsOptions{})...)
 			if response.Diagnostics.HasError() {
 				return
 			}
@@ -1193,53 +1297,10 @@ func (r *ResourceF5XCDnsLbPool) Create(ctx context.Context, request resource.Cre
 			aPoolOneOfSpec.APool = &ves_io_schema_dns_lb_pool.APool{}
 			spec.PoolTypeChoice = aPoolOneOfSpec
 
-			// resource modelToSpecNested RequiredArrayOfPointerField --> Members
-			if !dnsLbPoolGlobalSpecTypeAPoolModel.Members.IsNull() && !dnsLbPoolGlobalSpecTypeAPoolModel.Members.IsUnknown() && len(dnsLbPoolGlobalSpecTypeAPoolModel.Members.Elements()) > 0 {
-				// 1. Convert the types.List into a slice of the model's Go struct
-				var membersElements []DnsLbPoolDnsLbPoolAddressMember
-				response.Diagnostics.Append(dnsLbPoolGlobalSpecTypeAPoolModel.Members.ElementsAs(ctx, &membersElements, false)...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// 2. Initialize the spec slice
-				membersSpec := make([]*ves_io_schema_dns_lb_pool.AddressMember, len(membersElements))
-				aPoolOneOfSpec.APool.Members = membersSpec
-
-				// 3. Iterate over the converted Go slice
-				for i, membersElement := range membersElements {
-					// Initialize the spec struct for the current element
-					aPoolOneOfSpec.APool.Members[i] = &ves_io_schema_dns_lb_pool.AddressMember{}
-
-					// Recursively process nested elements
-
-					// resource modelToSpecNested StringField --> Name
-					if !membersElement.Name.IsNull() && !membersElement.Name.IsUnknown() {
-						membersSpec[i].Name = string(membersElement.Name.ValueString())
-					}
-
-					// resource modelToSpecNested RequiredStringField --> IpEndpoint
-					if !membersElement.IpEndpoint.IsNull() && !membersElement.IpEndpoint.IsUnknown() {
-						membersSpec[i].IpEndpoint = string(membersElement.IpEndpoint.ValueString())
-					}
-
-					// resource modelToSpecNested UintField --> Ratio
-					if !membersElement.Ratio.IsNull() && !membersElement.Ratio.IsUnknown() {
-						membersSpec[i].Ratio = uint32(uint32(membersElement.Ratio.ValueInt64()))
-					}
-
-					// resource modelToSpecNested UintField --> Priority
-					if !membersElement.Priority.IsNull() && !membersElement.Priority.IsUnknown() {
-						membersSpec[i].Priority = uint32(uint32(membersElement.Priority.ValueInt64()))
-					}
-
-				}
-			}
-
 			// resource modelToSpecNested RequiredOneOfField --> HealthCheckChoice
-			if !dnsLbPoolGlobalSpecTypeAPoolModel.HealthCheckChoice.IsNull() && !dnsLbPoolGlobalSpecTypeAPoolModel.HealthCheckChoice.IsUnknown() {
-				aPoolHealthCheckChoiceModel := DnsLbPoolAPoolHealthCheckChoice{}
-				response.Diagnostics.Append(dnsLbPoolGlobalSpecTypeAPoolModel.HealthCheckChoice.As(ctx, &aPoolHealthCheckChoiceModel, basetypes.ObjectAsOptions{})...)
+			if !dnsLbPoolAPoolModel.HealthCheckChoice.IsNull() && !dnsLbPoolAPoolModel.HealthCheckChoice.IsUnknown() {
+				aPoolHealthCheckChoiceModel := DnsLbPoolHealthCheckChoice{}
+				response.Diagnostics.Append(dnsLbPoolAPoolModel.HealthCheckChoice.As(ctx, &aPoolHealthCheckChoiceModel, basetypes.ObjectAsOptions{})...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -1262,14 +1323,14 @@ func (r *ResourceF5XCDnsLbPool) Create(ctx context.Context, request resource.Cre
 					healthCheckOneOfSpec.HealthCheck = &ves_io_schema_views.ObjectRefType{}
 					aPoolOneOfSpec.APool.HealthCheckChoice = healthCheckOneOfSpec
 
-					// resource modelToSpecNested RequiredStringField --> Namespace
-					if !objectRefTypeModelModel.Namespace.IsNull() && !objectRefTypeModelModel.Namespace.IsUnknown() {
-						healthCheckOneOfSpec.HealthCheck.Namespace = string(objectRefTypeModelModel.Namespace.ValueString())
-					}
-
 					// resource modelToSpecNested RequiredStringField --> Name
 					if !objectRefTypeModelModel.Name.IsNull() && !objectRefTypeModelModel.Name.IsUnknown() {
 						healthCheckOneOfSpec.HealthCheck.Name = string(objectRefTypeModelModel.Name.ValueString())
+					}
+
+					// resource modelToSpecNested RequiredStringField --> Namespace
+					if !objectRefTypeModelModel.Namespace.IsNull() && !objectRefTypeModelModel.Namespace.IsUnknown() {
+						healthCheckOneOfSpec.HealthCheck.Namespace = string(objectRefTypeModelModel.Namespace.ValueString())
 					}
 
 				}
@@ -1277,14 +1338,61 @@ func (r *ResourceF5XCDnsLbPool) Create(ctx context.Context, request resource.Cre
 			}
 
 			// resource modelToSpecNested RequiredUintField --> MaxAnswers
-			aPoolOneOfSpec.APool.MaxAnswers = uint32(uint32(dnsLbPoolGlobalSpecTypeAPoolModel.MaxAnswers.ValueInt64()))
+			aPoolOneOfSpec.APool.MaxAnswers = uint32(uint32(dnsLbPoolAPoolModel.MaxAnswers.ValueInt64()))
+
+			// resource modelToSpecNested RequiredArrayOfPointerField --> Members
+			if !dnsLbPoolAPoolModel.Members.IsNull() && !dnsLbPoolAPoolModel.Members.IsUnknown() && len(dnsLbPoolAPoolModel.Members.Elements()) > 0 {
+				// 1. Convert the types.List into a slice of the model's Go struct
+				var membersElements []DnsLbPoolAddrMember
+				response.Diagnostics.Append(dnsLbPoolAPoolModel.Members.ElementsAs(ctx, &membersElements, false)...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				// 2. Initialize the spec slice
+				membersSpec := make([]*ves_io_schema_dns_lb_pool.AddressMember, len(membersElements))
+				aPoolOneOfSpec.APool.Members = membersSpec
+
+				// 3. Iterate over the converted Go slice
+				for i, membersElement := range membersElements {
+					// Initialize the spec struct for the current element
+					aPoolOneOfSpec.APool.Members[i] = &ves_io_schema_dns_lb_pool.AddressMember{}
+
+					// Recursively process nested elements
+
+					// resource modelToSpecNested RequiredStringField --> IpEndpoint
+					if !membersElement.IpEndpoint.IsNull() && !membersElement.IpEndpoint.IsUnknown() {
+						aPoolOneOfSpec.APool.Members[i].IpEndpoint = string(membersElement.IpEndpoint.ValueString())
+					}
+
+					// resource modelToSpecNested StringField --> Name
+					if !membersElement.Name.IsNull() && !membersElement.Name.IsUnknown() {
+						aPoolOneOfSpec.APool.Members[i].Name = string(membersElement.Name.ValueString())
+					}
+
+					// resource modelToSpecNested UintField --> Priority
+					if !membersElement.Priority.IsNull() && !membersElement.Priority.IsUnknown() {
+						aPoolOneOfSpec.APool.Members[i].Priority = uint32(uint32(membersElement.Priority.ValueInt64()))
+					} else {
+						aPoolOneOfSpec.APool.Members[i].Priority = uint32(10)
+					}
+
+					// resource modelToSpecNested UintField --> Ratio
+					if !membersElement.Ratio.IsNull() && !membersElement.Ratio.IsUnknown() {
+						aPoolOneOfSpec.APool.Members[i].Ratio = uint32(uint32(membersElement.Ratio.ValueInt64()))
+					} else {
+						aPoolOneOfSpec.APool.Members[i].Ratio = uint32(1)
+					}
+
+				}
+			}
 
 		}
 
 		// resource modelToSpecNested PointerOfOneOfField --> AaaaPool
 		if !poolTypeChoiceModel.AaaaPool.IsNull() && !poolTypeChoiceModel.AaaaPool.IsUnknown() {
-			var dnsLbPoolGlobalSpecTypeAaaaPoolModel DnsLbPoolGlobalSpecTypeAaaaPool
-			response.Diagnostics.Append(poolTypeChoiceModel.AaaaPool.As(ctx, &dnsLbPoolGlobalSpecTypeAaaaPoolModel, basetypes.ObjectAsOptions{})...)
+			var dnsLbPoolAaaaPoolModel DnsLbPoolAaaaPool
+			response.Diagnostics.Append(poolTypeChoiceModel.AaaaPool.As(ctx, &dnsLbPoolAaaaPoolModel, basetypes.ObjectAsOptions{})...)
 			if response.Diagnostics.HasError() {
 				return
 			}
@@ -1292,11 +1400,14 @@ func (r *ResourceF5XCDnsLbPool) Create(ctx context.Context, request resource.Cre
 			aaaaPoolOneOfSpec.AaaaPool = &ves_io_schema_dns_lb_pool.AAAAPool{}
 			spec.PoolTypeChoice = aaaaPoolOneOfSpec
 
+			// resource modelToSpecNested RequiredUintField --> MaxAnswers
+			aaaaPoolOneOfSpec.AaaaPool.MaxAnswers = uint32(uint32(dnsLbPoolAaaaPoolModel.MaxAnswers.ValueInt64()))
+
 			// resource modelToSpecNested RequiredArrayOfPointerField --> Members
-			if !dnsLbPoolGlobalSpecTypeAaaaPoolModel.Members.IsNull() && !dnsLbPoolGlobalSpecTypeAaaaPoolModel.Members.IsUnknown() && len(dnsLbPoolGlobalSpecTypeAaaaPoolModel.Members.Elements()) > 0 {
+			if !dnsLbPoolAaaaPoolModel.Members.IsNull() && !dnsLbPoolAaaaPoolModel.Members.IsUnknown() && len(dnsLbPoolAaaaPoolModel.Members.Elements()) > 0 {
 				// 1. Convert the types.List into a slice of the model's Go struct
-				var membersElements []DnsLbPoolDnsLbPoolAddressMember
-				response.Diagnostics.Append(dnsLbPoolGlobalSpecTypeAaaaPoolModel.Members.ElementsAs(ctx, &membersElements, false)...)
+				var membersElements []DnsLbPoolAddrMember
+				response.Diagnostics.Append(dnsLbPoolAaaaPoolModel.Members.ElementsAs(ctx, &membersElements, false)...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -1314,36 +1425,37 @@ func (r *ResourceF5XCDnsLbPool) Create(ctx context.Context, request resource.Cre
 
 					// resource modelToSpecNested RequiredStringField --> IpEndpoint
 					if !membersElement.IpEndpoint.IsNull() && !membersElement.IpEndpoint.IsUnknown() {
-						membersSpec[i].IpEndpoint = string(membersElement.IpEndpoint.ValueString())
-					}
-
-					// resource modelToSpecNested UintField --> Ratio
-					if !membersElement.Ratio.IsNull() && !membersElement.Ratio.IsUnknown() {
-						membersSpec[i].Ratio = uint32(uint32(membersElement.Ratio.ValueInt64()))
-					}
-
-					// resource modelToSpecNested UintField --> Priority
-					if !membersElement.Priority.IsNull() && !membersElement.Priority.IsUnknown() {
-						membersSpec[i].Priority = uint32(uint32(membersElement.Priority.ValueInt64()))
+						aaaaPoolOneOfSpec.AaaaPool.Members[i].IpEndpoint = string(membersElement.IpEndpoint.ValueString())
 					}
 
 					// resource modelToSpecNested StringField --> Name
 					if !membersElement.Name.IsNull() && !membersElement.Name.IsUnknown() {
-						membersSpec[i].Name = string(membersElement.Name.ValueString())
+						aaaaPoolOneOfSpec.AaaaPool.Members[i].Name = string(membersElement.Name.ValueString())
+					}
+
+					// resource modelToSpecNested UintField --> Priority
+					if !membersElement.Priority.IsNull() && !membersElement.Priority.IsUnknown() {
+						aaaaPoolOneOfSpec.AaaaPool.Members[i].Priority = uint32(uint32(membersElement.Priority.ValueInt64()))
+					} else {
+						aaaaPoolOneOfSpec.AaaaPool.Members[i].Priority = uint32(10)
+					}
+
+					// resource modelToSpecNested UintField --> Ratio
+					if !membersElement.Ratio.IsNull() && !membersElement.Ratio.IsUnknown() {
+						aaaaPoolOneOfSpec.AaaaPool.Members[i].Ratio = uint32(uint32(membersElement.Ratio.ValueInt64()))
+					} else {
+						aaaaPoolOneOfSpec.AaaaPool.Members[i].Ratio = uint32(1)
 					}
 
 				}
 			}
 
-			// resource modelToSpecNested RequiredUintField --> MaxAnswers
-			aaaaPoolOneOfSpec.AaaaPool.MaxAnswers = uint32(uint32(dnsLbPoolGlobalSpecTypeAaaaPoolModel.MaxAnswers.ValueInt64()))
-
 		}
 
 		// resource modelToSpecNested PointerOfOneOfField --> CnamePool
 		if !poolTypeChoiceModel.CnamePool.IsNull() && !poolTypeChoiceModel.CnamePool.IsUnknown() {
-			var dnsLbPoolGlobalSpecTypeCnamePoolModel DnsLbPoolGlobalSpecTypeCnamePool
-			response.Diagnostics.Append(poolTypeChoiceModel.CnamePool.As(ctx, &dnsLbPoolGlobalSpecTypeCnamePoolModel, basetypes.ObjectAsOptions{})...)
+			var dnsLbPoolCnamePoolModel DnsLbPoolCnamePool
+			response.Diagnostics.Append(poolTypeChoiceModel.CnamePool.As(ctx, &dnsLbPoolCnamePoolModel, basetypes.ObjectAsOptions{})...)
 			if response.Diagnostics.HasError() {
 				return
 			}
@@ -1351,58 +1463,10 @@ func (r *ResourceF5XCDnsLbPool) Create(ctx context.Context, request resource.Cre
 			cnamePoolOneOfSpec.CnamePool = &ves_io_schema_dns_lb_pool.CNAMEPool{}
 			spec.PoolTypeChoice = cnamePoolOneOfSpec
 
-			// resource modelToSpecNested RequiredArrayOfPointerField --> Members
-			if !dnsLbPoolGlobalSpecTypeCnamePoolModel.Members.IsNull() && !dnsLbPoolGlobalSpecTypeCnamePoolModel.Members.IsUnknown() && len(dnsLbPoolGlobalSpecTypeCnamePoolModel.Members.Elements()) > 0 {
-				// 1. Convert the types.List into a slice of the model's Go struct
-				var membersElements []DnsLbPoolDnsLbPoolCNAMEMember
-				response.Diagnostics.Append(dnsLbPoolGlobalSpecTypeCnamePoolModel.Members.ElementsAs(ctx, &membersElements, false)...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// 2. Initialize the spec slice
-				membersSpec := make([]*ves_io_schema_dns_lb_pool.CNAMEMember, len(membersElements))
-				cnamePoolOneOfSpec.CnamePool.Members = membersSpec
-
-				// 3. Iterate over the converted Go slice
-				for i, membersElement := range membersElements {
-					// Initialize the spec struct for the current element
-					cnamePoolOneOfSpec.CnamePool.Members[i] = &ves_io_schema_dns_lb_pool.CNAMEMember{}
-
-					// Recursively process nested elements
-
-					// resource modelToSpecNested UintField --> Priority
-					if !membersElement.Priority.IsNull() && !membersElement.Priority.IsUnknown() {
-						membersSpec[i].Priority = uint32(uint32(membersElement.Priority.ValueInt64()))
-					}
-
-					// resource modelToSpecNested RequiredStringField --> Domain
-					if !membersElement.Domain.IsNull() && !membersElement.Domain.IsUnknown() {
-						membersSpec[i].Domain = string(membersElement.Domain.ValueString())
-					}
-
-					// resource modelToSpecNested UintField --> Ratio
-					if !membersElement.Ratio.IsNull() && !membersElement.Ratio.IsUnknown() {
-						membersSpec[i].Ratio = uint32(uint32(membersElement.Ratio.ValueInt64()))
-					}
-
-					// resource modelToSpecNested BoolField --> FinalTranslation
-					if !membersElement.FinalTranslation.IsNull() && !membersElement.FinalTranslation.IsUnknown() {
-						membersSpec[i].FinalTranslation = bool(membersElement.FinalTranslation.ValueBool())
-					}
-
-					// resource modelToSpecNested StringField --> Name
-					if !membersElement.Name.IsNull() && !membersElement.Name.IsUnknown() {
-						membersSpec[i].Name = string(membersElement.Name.ValueString())
-					}
-
-				}
-			}
-
 			// resource modelToSpecNested RequiredOneOfField --> HealthCheckChoice
-			if !dnsLbPoolGlobalSpecTypeCnamePoolModel.HealthCheckChoice.IsNull() && !dnsLbPoolGlobalSpecTypeCnamePoolModel.HealthCheckChoice.IsUnknown() {
+			if !dnsLbPoolCnamePoolModel.HealthCheckChoice.IsNull() && !dnsLbPoolCnamePoolModel.HealthCheckChoice.IsUnknown() {
 				cnamePoolHealthCheckChoiceModel := DnsLbPoolCNAMEPoolHealthCheckChoice{}
-				response.Diagnostics.Append(dnsLbPoolGlobalSpecTypeCnamePoolModel.HealthCheckChoice.As(ctx, &cnamePoolHealthCheckChoiceModel, basetypes.ObjectAsOptions{})...)
+				response.Diagnostics.Append(dnsLbPoolCnamePoolModel.HealthCheckChoice.As(ctx, &cnamePoolHealthCheckChoiceModel, basetypes.ObjectAsOptions{})...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -1439,12 +1503,66 @@ func (r *ResourceF5XCDnsLbPool) Create(ctx context.Context, request resource.Cre
 
 			}
 
+			// resource modelToSpecNested RequiredArrayOfPointerField --> Members
+			if !dnsLbPoolCnamePoolModel.Members.IsNull() && !dnsLbPoolCnamePoolModel.Members.IsUnknown() && len(dnsLbPoolCnamePoolModel.Members.Elements()) > 0 {
+				// 1. Convert the types.List into a slice of the model's Go struct
+				var membersElements []DnsLbPoolCNAMEMember
+				response.Diagnostics.Append(dnsLbPoolCnamePoolModel.Members.ElementsAs(ctx, &membersElements, false)...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				// 2. Initialize the spec slice
+				membersSpec := make([]*ves_io_schema_dns_lb_pool.CNAMEMember, len(membersElements))
+				cnamePoolOneOfSpec.CnamePool.Members = membersSpec
+
+				// 3. Iterate over the converted Go slice
+				for i, membersElement := range membersElements {
+					// Initialize the spec struct for the current element
+					cnamePoolOneOfSpec.CnamePool.Members[i] = &ves_io_schema_dns_lb_pool.CNAMEMember{}
+
+					// Recursively process nested elements
+
+					// resource modelToSpecNested RequiredStringField --> Domain
+					if !membersElement.Domain.IsNull() && !membersElement.Domain.IsUnknown() {
+						cnamePoolOneOfSpec.CnamePool.Members[i].Domain = string(membersElement.Domain.ValueString())
+					}
+
+					// resource modelToSpecNested BoolField --> FinalTranslation
+					if !membersElement.FinalTranslation.IsNull() && !membersElement.FinalTranslation.IsUnknown() {
+						cnamePoolOneOfSpec.CnamePool.Members[i].FinalTranslation = bool(membersElement.FinalTranslation.ValueBool())
+					} else {
+						cnamePoolOneOfSpec.CnamePool.Members[i].FinalTranslation = bool(false)
+					}
+
+					// resource modelToSpecNested StringField --> Name
+					if !membersElement.Name.IsNull() && !membersElement.Name.IsUnknown() {
+						cnamePoolOneOfSpec.CnamePool.Members[i].Name = string(membersElement.Name.ValueString())
+					}
+
+					// resource modelToSpecNested UintField --> Priority
+					if !membersElement.Priority.IsNull() && !membersElement.Priority.IsUnknown() {
+						cnamePoolOneOfSpec.CnamePool.Members[i].Priority = uint32(uint32(membersElement.Priority.ValueInt64()))
+					} else {
+						cnamePoolOneOfSpec.CnamePool.Members[i].Priority = uint32(10)
+					}
+
+					// resource modelToSpecNested UintField --> Ratio
+					if !membersElement.Ratio.IsNull() && !membersElement.Ratio.IsUnknown() {
+						cnamePoolOneOfSpec.CnamePool.Members[i].Ratio = uint32(uint32(membersElement.Ratio.ValueInt64()))
+					} else {
+						cnamePoolOneOfSpec.CnamePool.Members[i].Ratio = uint32(1)
+					}
+
+				}
+			}
+
 		}
 
 		// resource modelToSpecNested PointerOfOneOfField --> MxPool
 		if !poolTypeChoiceModel.MxPool.IsNull() && !poolTypeChoiceModel.MxPool.IsUnknown() {
-			var dnsLbPoolGlobalSpecTypeMxPoolModel DnsLbPoolGlobalSpecTypeMxPool
-			response.Diagnostics.Append(poolTypeChoiceModel.MxPool.As(ctx, &dnsLbPoolGlobalSpecTypeMxPoolModel, basetypes.ObjectAsOptions{})...)
+			var dnsLbPoolMxPoolModel DnsLbPoolMxPool
+			response.Diagnostics.Append(poolTypeChoiceModel.MxPool.As(ctx, &dnsLbPoolMxPoolModel, basetypes.ObjectAsOptions{})...)
 			if response.Diagnostics.HasError() {
 				return
 			}
@@ -1452,11 +1570,14 @@ func (r *ResourceF5XCDnsLbPool) Create(ctx context.Context, request resource.Cre
 			mxPoolOneOfSpec.MxPool = &ves_io_schema_dns_lb_pool.MXPool{}
 			spec.PoolTypeChoice = mxPoolOneOfSpec
 
+			// resource modelToSpecNested RequiredUintField --> MaxAnswers
+			mxPoolOneOfSpec.MxPool.MaxAnswers = uint32(uint32(dnsLbPoolMxPoolModel.MaxAnswers.ValueInt64()))
+
 			// resource modelToSpecNested RequiredArrayOfPointerField --> Members
-			if !dnsLbPoolGlobalSpecTypeMxPoolModel.Members.IsNull() && !dnsLbPoolGlobalSpecTypeMxPoolModel.Members.IsUnknown() && len(dnsLbPoolGlobalSpecTypeMxPoolModel.Members.Elements()) > 0 {
+			if !dnsLbPoolMxPoolModel.Members.IsNull() && !dnsLbPoolMxPoolModel.Members.IsUnknown() && len(dnsLbPoolMxPoolModel.Members.Elements()) > 0 {
 				// 1. Convert the types.List into a slice of the model's Go struct
-				var membersElements []DnsLbPoolDnsLbPoolMXMember
-				response.Diagnostics.Append(dnsLbPoolGlobalSpecTypeMxPoolModel.Members.ElementsAs(ctx, &membersElements, false)...)
+				var membersElements []DnsLbPoolMXMember
+				response.Diagnostics.Append(dnsLbPoolMxPoolModel.Members.ElementsAs(ctx, &membersElements, false)...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -1472,38 +1593,39 @@ func (r *ResourceF5XCDnsLbPool) Create(ctx context.Context, request resource.Cre
 
 					// Recursively process nested elements
 
-					// resource modelToSpecNested StringField --> Name
-					if !membersElement.Name.IsNull() && !membersElement.Name.IsUnknown() {
-						membersSpec[i].Name = string(membersElement.Name.ValueString())
-					}
-
 					// resource modelToSpecNested RequiredStringField --> Domain
 					if !membersElement.Domain.IsNull() && !membersElement.Domain.IsUnknown() {
-						membersSpec[i].Domain = string(membersElement.Domain.ValueString())
+						mxPoolOneOfSpec.MxPool.Members[i].Domain = string(membersElement.Domain.ValueString())
+					}
+
+					// resource modelToSpecNested StringField --> Name
+					if !membersElement.Name.IsNull() && !membersElement.Name.IsUnknown() {
+						mxPoolOneOfSpec.MxPool.Members[i].Name = string(membersElement.Name.ValueString())
 					}
 
 					// resource modelToSpecNested UintField --> Priority
 					if !membersElement.Priority.IsNull() && !membersElement.Priority.IsUnknown() {
-						membersSpec[i].Priority = uint32(uint32(membersElement.Priority.ValueInt64()))
+						mxPoolOneOfSpec.MxPool.Members[i].Priority = uint32(uint32(membersElement.Priority.ValueInt64()))
+					} else {
+						mxPoolOneOfSpec.MxPool.Members[i].Priority = uint32(10)
 					}
 
 					// resource modelToSpecNested UintField --> Ratio
 					if !membersElement.Ratio.IsNull() && !membersElement.Ratio.IsUnknown() {
-						membersSpec[i].Ratio = uint32(uint32(membersElement.Ratio.ValueInt64()))
+						mxPoolOneOfSpec.MxPool.Members[i].Ratio = uint32(uint32(membersElement.Ratio.ValueInt64()))
+					} else {
+						mxPoolOneOfSpec.MxPool.Members[i].Ratio = uint32(1)
 					}
 
 				}
 			}
 
-			// resource modelToSpecNested RequiredUintField --> MaxAnswers
-			mxPoolOneOfSpec.MxPool.MaxAnswers = uint32(uint32(dnsLbPoolGlobalSpecTypeMxPoolModel.MaxAnswers.ValueInt64()))
-
 		}
 
 		// resource modelToSpecNested PointerOfOneOfField --> SrvPool
 		if !poolTypeChoiceModel.SrvPool.IsNull() && !poolTypeChoiceModel.SrvPool.IsUnknown() {
-			var dnsLbPoolGlobalSpecTypeSrvPoolModel DnsLbPoolGlobalSpecTypeSrvPool
-			response.Diagnostics.Append(poolTypeChoiceModel.SrvPool.As(ctx, &dnsLbPoolGlobalSpecTypeSrvPoolModel, basetypes.ObjectAsOptions{})...)
+			var dnsLbPoolSrvPoolModel DnsLbPoolSrvPool
+			response.Diagnostics.Append(poolTypeChoiceModel.SrvPool.As(ctx, &dnsLbPoolSrvPoolModel, basetypes.ObjectAsOptions{})...)
 			if response.Diagnostics.HasError() {
 				return
 			}
@@ -1511,11 +1633,14 @@ func (r *ResourceF5XCDnsLbPool) Create(ctx context.Context, request resource.Cre
 			srvPoolOneOfSpec.SrvPool = &ves_io_schema_dns_lb_pool.SRVPool{}
 			spec.PoolTypeChoice = srvPoolOneOfSpec
 
+			// resource modelToSpecNested RequiredUintField --> MaxAnswers
+			srvPoolOneOfSpec.SrvPool.MaxAnswers = uint32(uint32(dnsLbPoolSrvPoolModel.MaxAnswers.ValueInt64()))
+
 			// resource modelToSpecNested RequiredArrayOfPointerField --> Members
-			if !dnsLbPoolGlobalSpecTypeSrvPoolModel.Members.IsNull() && !dnsLbPoolGlobalSpecTypeSrvPoolModel.Members.IsUnknown() && len(dnsLbPoolGlobalSpecTypeSrvPoolModel.Members.Elements()) > 0 {
+			if !dnsLbPoolSrvPoolModel.Members.IsNull() && !dnsLbPoolSrvPoolModel.Members.IsUnknown() && len(dnsLbPoolSrvPoolModel.Members.Elements()) > 0 {
 				// 1. Convert the types.List into a slice of the model's Go struct
-				var membersElements []DnsLbPoolDnsLbPoolSRVMember
-				response.Diagnostics.Append(dnsLbPoolGlobalSpecTypeSrvPoolModel.Members.ElementsAs(ctx, &membersElements, false)...)
+				var membersElements []DnsLbPoolSRVMember
+				response.Diagnostics.Append(dnsLbPoolSrvPoolModel.Members.ElementsAs(ctx, &membersElements, false)...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -1531,73 +1656,49 @@ func (r *ResourceF5XCDnsLbPool) Create(ctx context.Context, request resource.Cre
 
 					// Recursively process nested elements
 
-					// resource modelToSpecNested RequiredUintField --> Priority
-					membersSpec[i].Priority = uint32(uint32(membersElement.Priority.ValueInt64()))
-
-					// resource modelToSpecNested RequiredUintField --> Weight
-					membersSpec[i].Weight = uint32(uint32(membersElement.Weight.ValueInt64()))
-
-					// resource modelToSpecNested RequiredUintField --> Port
-					membersSpec[i].Port = uint32(uint32(membersElement.Port.ValueInt64()))
-
-					// resource modelToSpecNested RequiredStringField --> Target
-					if !membersElement.Target.IsNull() && !membersElement.Target.IsUnknown() {
-						membersSpec[i].Target = string(membersElement.Target.ValueString())
-					}
-
 					// resource modelToSpecNested BoolField --> FinalTranslation
 					if !membersElement.FinalTranslation.IsNull() && !membersElement.FinalTranslation.IsUnknown() {
-						membersSpec[i].FinalTranslation = bool(membersElement.FinalTranslation.ValueBool())
-					}
-
-					// resource modelToSpecNested UintField --> Ratio
-					if !membersElement.Ratio.IsNull() && !membersElement.Ratio.IsUnknown() {
-						membersSpec[i].Ratio = uint32(uint32(membersElement.Ratio.ValueInt64()))
+						srvPoolOneOfSpec.SrvPool.Members[i].FinalTranslation = bool(membersElement.FinalTranslation.ValueBool())
+					} else {
+						srvPoolOneOfSpec.SrvPool.Members[i].FinalTranslation = bool(false)
 					}
 
 					// resource modelToSpecNested StringField --> Name
 					if !membersElement.Name.IsNull() && !membersElement.Name.IsUnknown() {
-						membersSpec[i].Name = string(membersElement.Name.ValueString())
+						srvPoolOneOfSpec.SrvPool.Members[i].Name = string(membersElement.Name.ValueString())
 					}
+
+					// resource modelToSpecNested RequiredUintField --> Port
+					srvPoolOneOfSpec.SrvPool.Members[i].Port = uint32(uint32(membersElement.Port.ValueInt64()))
+
+					// resource modelToSpecNested RequiredUintField --> Priority
+					srvPoolOneOfSpec.SrvPool.Members[i].Priority = uint32(uint32(membersElement.Priority.ValueInt64()))
+
+					// resource modelToSpecNested UintField --> Ratio
+					if !membersElement.Ratio.IsNull() && !membersElement.Ratio.IsUnknown() {
+						srvPoolOneOfSpec.SrvPool.Members[i].Ratio = uint32(uint32(membersElement.Ratio.ValueInt64()))
+					} else {
+						srvPoolOneOfSpec.SrvPool.Members[i].Ratio = uint32(1)
+					}
+
+					// resource modelToSpecNested RequiredStringField --> Target
+					if !membersElement.Target.IsNull() && !membersElement.Target.IsUnknown() {
+						srvPoolOneOfSpec.SrvPool.Members[i].Target = string(membersElement.Target.ValueString())
+					}
+
+					// resource modelToSpecNested RequiredUintField --> Weight
+					srvPoolOneOfSpec.SrvPool.Members[i].Weight = uint32(uint32(membersElement.Weight.ValueInt64()))
 
 				}
 			}
 
-			// resource modelToSpecNested RequiredUintField --> MaxAnswers
-			srvPoolOneOfSpec.SrvPool.MaxAnswers = uint32(uint32(dnsLbPoolGlobalSpecTypeSrvPoolModel.MaxAnswers.ValueInt64()))
-
 		}
 
-	}
-
-	// resource modelToSpecRoot RequiredEnumField --> LoadBalancingMode
-	{
-		var loadBalancingModeElements []types.String
-		diags = data.LoadBalancingMode.ElementsAs(ctx, &loadBalancingModeElements, false)
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-
-		if len(loadBalancingModeElements) > 0 {
-			loadBalancingModeStrVal := loadBalancingModeElements[0].ValueString()
-
-			if v, ok := ves_io_schema_dns_lb_pool.LoadBalancingMode_value[loadBalancingModeStrVal]; ok {
-				// Dynamic path assignment (Global vs CreateSpec)
-				spec.LoadBalancingMode = ves_io_schema_dns_lb_pool.LoadBalancingMode(v)
-			} else {
-				response.Diagnostics.AddError(
-					"Invalid Enum Value",
-					fmt.Sprintf("Value '%s' is not a valid member for ves_io_schema_dns_lb_pool.LoadBalancingMode", loadBalancingModeStrVal),
-				)
-				return
-			}
-		}
 	}
 
 	// resource modelToSpecRoot RequiredOneOfField --> TtlChoice
 	if !data.TtlChoice.IsNull() && !data.TtlChoice.IsUnknown() {
-		ttlChoiceModel := DnsLbPoolGlobalSpecTypeTtlChoice{}
+		ttlChoiceModel := DnsLbPoolTtlChoice{}
 		response.Diagnostics.Append(data.TtlChoice.As(ctx, &ttlChoiceModel, basetypes.ObjectAsOptions{})...)
 		if response.Diagnostics.HasError() {
 			return
@@ -1618,12 +1719,18 @@ func (r *ResourceF5XCDnsLbPool) Create(ctx context.Context, request resource.Cre
 		}
 
 	}
+	// Strip backend-injected label keys that must not be sent in Create/Update requests.
+	// These keys are stored in state (for drift-free plans) but must be omitted from the
+	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+		delete(meta.Labels, _omitKey)
+	}
 
 	if response.Diagnostics.HasError() {
 		return
 	}
 
-	createRspType := strings.Replace(ves_io_schema_virtual_network.ObjectType, "Object", "GetResponse", 1)
+	createRspType := strings.Replace(ves_io_schema_dns_lb_pool.ObjectType, "Object", "GetResponse", 1)
 	protoMsgType := proto.MessageType(createRspType).Elem()
 	initialProtoMsg := reflect.New(protoMsgType).Interface().(proto.Message)
 	callRsp := &server.CallResponse{
@@ -1652,95 +1759,188 @@ func (r *ResourceF5XCDnsLbPool) Create(ctx context.Context, request resource.Cre
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
-	// resource SpecToModelRoot Meta StringField --> Uid
-	data.Uid = types.StringValue(systemMetaData.GetUid())
-
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// CREATE / UPDATE: Store the plan value as-is so the apply result matches the plan.
-		// The plan is either:
-		//   - Unknown (config=null): store the full API response.
-		//   - config value (first create with user labels): store only user labels.
-		//   - prior state (update with user+backend labels): store the merged labels.
-		// In all cases, data.Labels already holds the correct plan value
-		// except when it is Unknown — in that case we use the API response.
-		if data.Labels.IsUnknown() {
-			data.Labels = labelsMap
-		}
-		// When plan is a known map, leave data.Labels unchanged (= plan value).
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
-
 	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
 	//
-	// Create/Update (called from Create/Update handlers):
+	// Supported scenarios:
 	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
 	//
-	// Read (called from Read handler):
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
 	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// CREATE / UPDATE: Store the plan value as-is so the apply result matches the plan.
-		// The plan is either:
-		//   - Unknown (config=null): store the full API response.
-		//   - config value (first create with user labels): store only user labels.
-		//   - prior state (update with user+backend labels): store the merged labels.
-		// In all cases, data.Annotations already holds the correct plan value
-		// except when it is Unknown — in that case we use the API response.
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		annotationsApiMap := metaData.GetAnnotations()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Annotations already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
 		if data.Annotations.IsUnknown() {
-			data.Annotations = annotationsMap
+			if len(annotationsApiMap) > 0 {
+				annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+				response.Diagnostics.Append(annotationsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Annotations = annotationsMap
+			} else {
+				data.Annotations = types.MapNull(types.StringType)
+			}
 		}
-		// When plan is a known map, leave data.Annotations unchanged (= plan value).
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Annotations = types.MapNull(types.StringType)
+		// When plan is a known map (user labels or merged prior state), leave data.Annotations
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
 	}
 
 	// resource SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		labelsApiMap := metaData.GetLabels()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Labels already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Labels.IsUnknown() {
+			if len(labelsApiMap) > 0 {
+				labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+				response.Diagnostics.Append(labelsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Labels = labelsMap
+			} else {
+				data.Labels = types.MapNull(types.StringType)
+			}
+		}
+		// When plan is a known map (user labels or merged prior state), leave data.Labels
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
+	}
 
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
 	data.Name = types.StringValue(metaData.GetName())
 
 	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
 	data.Namespace = types.StringValue(metaData.GetNamespace())
+
+	// resource SpecToModelRoot Meta StringField --> Uid
+	data.Uid = types.StringValue(systemMetaData.GetUid())
+
+	// resource SpecToModelRoot ArrayOfPointerField --> DnsLoadBalancers
+	if len(specData.GetDnsLoadBalancers()) > 0 {
+		dnsLoadBalancersElements := make([]ObjectRefTypeModel, 0, len(specData.GetDnsLoadBalancers()))
+		for _, dnsLoadBalancersElement := range specData.GetDnsLoadBalancers() {
+			objectRefTypeModelModel := ObjectRefTypeModel{}
+
+			// resource specToModelNested RequiredStringField --> Name
+			if dnsLoadBalancersElement.GetName() != "" {
+				objectRefTypeModelModel.Name = types.StringValue(dnsLoadBalancersElement.GetName())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Name = types.StringNull()
+			}
+
+			// resource specToModelNested RequiredStringField --> Namespace
+			if dnsLoadBalancersElement.GetNamespace() != "" {
+				objectRefTypeModelModel.Namespace = types.StringValue(dnsLoadBalancersElement.GetNamespace())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Namespace = types.StringNull()
+			}
+
+			// resource specToModelNested StringField --> Tenant
+			if dnsLoadBalancersElement.GetTenant() != "" {
+				objectRefTypeModelModel.Tenant = types.StringValue(dnsLoadBalancersElement.GetTenant())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Tenant = types.StringNull()
+			}
+
+			dnsLoadBalancersElements = append(dnsLoadBalancersElements, objectRefTypeModelModel)
+		}
+
+		{
+			dnsLoadBalancersList, listDiags := utils.GoStructSliceToListValue(
+				ctx,
+				DnsLbPoolDnsLoadBalancersObjectRefModelAttributeMap,
+				dnsLoadBalancersElements,
+			)
+
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			data.DnsLoadBalancers = dnsLoadBalancersList
+		}
+	} else {
+		var dnsLoadBalancersObjectType = basetypes.ObjectType{
+			AttrTypes: DnsLbPoolDnsLoadBalancersObjectRefModelAttributeMap,
+		}
+		nullDnsLoadBalancersList := basetypes.NewListNull(dnsLoadBalancersObjectType)
+		var priorValDnsLoadBalancers types.List
+		_ = request.Plan.GetAttribute(ctx, path.Root("dns_load_balancers"), &priorValDnsLoadBalancers)
+		if !priorValDnsLoadBalancers.IsNull() && !priorValDnsLoadBalancers.IsUnknown() {
+			data.DnsLoadBalancers = priorValDnsLoadBalancers
+		} else {
+			data.DnsLoadBalancers = nullDnsLoadBalancersList
+		}
+
+	}
+
+	// resource SpecToModelRoot RequiredEnumField --> LoadBalancingMode
+	{
+		if specData.GetLoadBalancingMode().String() != "" {
+			stringValue := types.StringValue(specData.GetLoadBalancingMode().String())
+			stringSlice := []types.String{stringValue}
+			listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			data.LoadBalancingMode = listValue
+		} else {
+			// Empty string, set to null
+			data.LoadBalancingMode = types.ListNull(types.StringType)
+		}
+	}
 
 	// resource SpecToModelRoot RequiredOneOfField --> PoolTypeChoice
 	// false
@@ -1751,7 +1951,7 @@ func (r *ResourceF5XCDnsLbPool) Create(ctx context.Context, request resource.Cre
 		poolTypeChoiceChoices := specData.GetPoolTypeChoice()
 
 		// The model struct that will be populated by the nested template.
-		var poolTypeChoiceChoicesModel = &DnsLbPoolGlobalSpecTypePoolTypeChoice{}
+		var poolTypeChoiceChoicesModel = &DnsLbPoolPoolTypeChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -1759,67 +1959,20 @@ func (r *ResourceF5XCDnsLbPool) Create(ctx context.Context, request resource.Cre
 		// GlobalSpecType
 		// false
 		{
-			aPoolOptions, isAPool := poolTypeChoiceChoices.(*ves_io_schema_dns_lb_pool.GlobalSpecType_APool)
+			aPoolOptionsWrapper, isAPool := poolTypeChoiceChoices.(*ves_io_schema_dns_lb_pool.GlobalSpecType_APool)
 			aPoolAttributeMap := make(map[string]attr.Value)
 
-			if isAPool && aPoolOptions != nil {
-
-				// resource specToModelNested RequiredArrayOfPointerField --> Members
-				if len(aPoolOptions.APool.GetMembers()) > 0 {
-					// Step 1: Always create a slice of model structs from the spec data.
-					// This slice serves as an intermediate representation.
-					membersElements := make([]DnsLbPoolDnsLbPoolAddressMember, 0, len(aPoolOptions.APool.GetMembers()))
-					for _, membersElement := range aPoolOptions.APool.GetMembers() {
-						dnsLbPoolDnsLbPoolAddressMemberModel := DnsLbPoolDnsLbPoolAddressMember{}
-
-						// resource specToModelNested StringField --> Name
-						if membersElement.GetName() != "" {
-							dnsLbPoolDnsLbPoolAddressMemberModel.Name = types.StringValue(membersElement.GetName())
-						} else {
-							// Empty string, set to null
-							dnsLbPoolDnsLbPoolAddressMemberModel.Name = types.StringNull()
-						}
-
-						// resource specToModelNested RequiredStringField --> IpEndpoint
-						if membersElement.GetIpEndpoint() != "" {
-							dnsLbPoolDnsLbPoolAddressMemberModel.IpEndpoint = types.StringValue(membersElement.GetIpEndpoint())
-						} else {
-							// Empty string, set to null
-							dnsLbPoolDnsLbPoolAddressMemberModel.IpEndpoint = types.StringNull()
-						}
-
-						// resource specToModelNested UintField --> Ratio
-						dnsLbPoolDnsLbPoolAddressMemberModel.Ratio = types.Int64Value(int64(membersElement.GetRatio()))
-
-						// resource specToModelNested UintField --> Priority
-						dnsLbPoolDnsLbPoolAddressMemberModel.Priority = types.Int64Value(int64(membersElement.GetPriority()))
-
-						membersElements = append(membersElements, dnsLbPoolDnsLbPoolAddressMemberModel)
-					}
-					// CASE 1: The target field is a `types.List` or an attribute map.
-					// The intermediate slice of structs must be converted to a `types.ListValue`.
-					membersListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DnsLbPoolPoolTypeChoiceAPoolMembersModelAttributeMap}, membersElements)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					aPoolAttributeMap["members"] = membersListValue
-
-				} else {
-					// The source list is empty or nil.
-					// CASE 1: The target field is a `types.List` or an attribute map.
-					// Assign a null `types.ListValue`.
-					aPoolAttributeMap["members"] = types.ListNull(types.ObjectType{AttrTypes: DnsLbPoolPoolTypeChoiceAPoolMembersModelAttributeMap})
-				}
+			if isAPool && aPoolOptionsWrapper != nil && aPoolOptionsWrapper.APool != nil {
+				aPoolElement := aPoolOptionsWrapper.APool
 
 				// resource specToModelNested RequiredOneOfField --> HealthCheckChoice
 				// GlobalSpecType
-				if aPoolOptions.APool.GetHealthCheckChoice() != nil {
+				if aPoolElement.GetHealthCheckChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					aPoolhealthCheckChoiceChoicesAttributeMap := make(map[string]attr.Value)
 
 					// Define a variable for the spec choices to be passed down to nested templates
-					aPoolhealthCheckChoiceChoices := aPoolOptions.APool.GetHealthCheckChoice()
+					aPoolhealthCheckChoiceChoices := aPoolElement.GetHealthCheckChoice()
 
 					// Process nested choices, populating the temporary attribute map
 
@@ -1836,37 +1989,38 @@ func (r *ResourceF5XCDnsLbPool) Create(ctx context.Context, request resource.Cre
 					// GlobalSpecType
 					// false
 					{
-						healthCheckOptions, isHealthCheck := aPoolhealthCheckChoiceChoices.(*ves_io_schema_dns_lb_pool.APool_HealthCheck)
+						healthCheckOptionsWrapper, isHealthCheck := aPoolhealthCheckChoiceChoices.(*ves_io_schema_dns_lb_pool.APool_HealthCheck)
 						healthCheckAttributeMap := make(map[string]attr.Value)
 
-						if isHealthCheck && healthCheckOptions != nil {
-
-							// resource specToModelNested StringField --> Tenant
-							if healthCheckOptions.HealthCheck.GetTenant() != "" {
-								healthCheckAttributeMap["tenant"] = types.StringValue(healthCheckOptions.HealthCheck.GetTenant())
-							} else {
-								// Empty string, set to null
-								healthCheckAttributeMap["tenant"] = types.StringNull()
-							}
-
-							// resource specToModelNested RequiredStringField --> Namespace
-							if healthCheckOptions.HealthCheck.GetNamespace() != "" {
-								healthCheckAttributeMap["namespace"] = types.StringValue(healthCheckOptions.HealthCheck.GetNamespace())
-							} else {
-								// Empty string, set to null
-								healthCheckAttributeMap["namespace"] = types.StringNull()
-							}
+						if isHealthCheck && healthCheckOptionsWrapper != nil && healthCheckOptionsWrapper.HealthCheck != nil {
+							healthCheckElement := healthCheckOptionsWrapper.HealthCheck
 
 							// resource specToModelNested RequiredStringField --> Name
-							if healthCheckOptions.HealthCheck.GetName() != "" {
-								healthCheckAttributeMap["name"] = types.StringValue(healthCheckOptions.HealthCheck.GetName())
+							if healthCheckElement.GetName() != "" {
+								healthCheckAttributeMap["name"] = types.StringValue(healthCheckElement.GetName())
 							} else {
 								// Empty string, set to null
 								healthCheckAttributeMap["name"] = types.StringNull()
 							}
 
-							healthCheckObj, diags := types.ObjectValue(DnsLbPoolPoolTypeChoiceAPoolHealthCheckChoiceHealthCheckModelAttributeMap, healthCheckAttributeMap)
-							response.Diagnostics.Append(diags...)
+							// resource specToModelNested RequiredStringField --> Namespace
+							if healthCheckElement.GetNamespace() != "" {
+								healthCheckAttributeMap["namespace"] = types.StringValue(healthCheckElement.GetNamespace())
+							} else {
+								// Empty string, set to null
+								healthCheckAttributeMap["namespace"] = types.StringNull()
+							}
+
+							// resource specToModelNested StringField --> Tenant
+							if healthCheckElement.GetTenant() != "" {
+								healthCheckAttributeMap["tenant"] = types.StringValue(healthCheckElement.GetTenant())
+							} else {
+								// Empty string, set to null
+								healthCheckAttributeMap["tenant"] = types.StringNull()
+							}
+
+							healthCheckObj, healthCheckObjDiags := types.ObjectValue(DnsLbPoolPoolTypeChoiceAPoolHealthCheckChoiceHealthCheckModelAttributeMap, healthCheckAttributeMap)
+							response.Diagnostics.Append(healthCheckObjDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
@@ -1896,10 +2050,58 @@ func (r *ResourceF5XCDnsLbPool) Create(ctx context.Context, request resource.Cre
 				}
 
 				// resource specToModelNested RequiredUintField --> MaxAnswers
-				aPoolAttributeMap["max_answers"] = types.Int64Value(int64(aPoolOptions.APool.GetMaxAnswers()))
+				aPoolAttributeMap["max_answers"] = types.Int64Value(int64(aPoolElement.GetMaxAnswers()))
 
-				aPoolObj, diags := types.ObjectValue(DnsLbPoolPoolTypeChoiceAPoolModelAttributeMap, aPoolAttributeMap)
-				response.Diagnostics.Append(diags...)
+				// resource specToModelNested RequiredArrayOfPointerField --> Members
+				if len(aPoolElement.GetMembers()) > 0 {
+					// Step 1: Always create a slice of model structs from the spec data.
+					// This slice serves as an intermediate representation.
+					membersElements := make([]DnsLbPoolAddrMember, 0, len(aPoolElement.GetMembers()))
+					for _, membersElement := range aPoolElement.GetMembers() {
+						dnsLbPoolAddrMemberModel := DnsLbPoolAddrMember{}
+
+						// resource specToModelNested RequiredStringField --> IpEndpoint
+						if membersElement.GetIpEndpoint() != "" {
+							dnsLbPoolAddrMemberModel.IpEndpoint = types.StringValue(membersElement.GetIpEndpoint())
+						} else {
+							// Empty string, set to null
+							dnsLbPoolAddrMemberModel.IpEndpoint = types.StringNull()
+						}
+
+						// resource specToModelNested StringField --> Name
+						if membersElement.GetName() != "" {
+							dnsLbPoolAddrMemberModel.Name = types.StringValue(membersElement.GetName())
+						} else {
+							// Empty string, set to null
+							dnsLbPoolAddrMemberModel.Name = types.StringNull()
+						}
+
+						// resource specToModelNested UintField --> Priority
+						dnsLbPoolAddrMemberModel.Priority = types.Int64Value(int64(membersElement.GetPriority()))
+
+						// resource specToModelNested UintField --> Ratio
+						dnsLbPoolAddrMemberModel.Ratio = types.Int64Value(int64(membersElement.GetRatio()))
+
+						membersElements = append(membersElements, dnsLbPoolAddrMemberModel)
+					}
+					// CASE 1: The target field is a `types.List` or an attribute map.
+					// The intermediate slice of structs must be converted to a `types.ListValue`.
+					membersListValue, membersListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DnsLbPoolPoolTypeChoiceAPoolMembersModelAttributeMap}, membersElements)
+					response.Diagnostics.Append(membersListDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					aPoolAttributeMap["members"] = membersListValue
+
+				} else {
+					// The source list is empty or nil.
+					// CASE 1: The target field is a `types.List` or an attribute map.
+					// Assign a null `types.ListValue`.
+					aPoolAttributeMap["members"] = types.ListNull(types.ObjectType{AttrTypes: DnsLbPoolPoolTypeChoiceAPoolMembersModelAttributeMap})
+				}
+
+				aPoolObj, aPoolObjDiags := types.ObjectValue(DnsLbPoolPoolTypeChoiceAPoolModelAttributeMap, aPoolAttributeMap)
+				response.Diagnostics.Append(aPoolObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -1913,47 +2115,51 @@ func (r *ResourceF5XCDnsLbPool) Create(ctx context.Context, request resource.Cre
 		// GlobalSpecType
 		// false
 		{
-			aaaaPoolOptions, isAaaaPool := poolTypeChoiceChoices.(*ves_io_schema_dns_lb_pool.GlobalSpecType_AaaaPool)
+			aaaaPoolOptionsWrapper, isAaaaPool := poolTypeChoiceChoices.(*ves_io_schema_dns_lb_pool.GlobalSpecType_AaaaPool)
 			aaaaPoolAttributeMap := make(map[string]attr.Value)
 
-			if isAaaaPool && aaaaPoolOptions != nil {
+			if isAaaaPool && aaaaPoolOptionsWrapper != nil && aaaaPoolOptionsWrapper.AaaaPool != nil {
+				aaaaPoolElement := aaaaPoolOptionsWrapper.AaaaPool
+
+				// resource specToModelNested RequiredUintField --> MaxAnswers
+				aaaaPoolAttributeMap["max_answers"] = types.Int64Value(int64(aaaaPoolElement.GetMaxAnswers()))
 
 				// resource specToModelNested RequiredArrayOfPointerField --> Members
-				if len(aaaaPoolOptions.AaaaPool.GetMembers()) > 0 {
+				if len(aaaaPoolElement.GetMembers()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					membersElements := make([]DnsLbPoolDnsLbPoolAddressMember, 0, len(aaaaPoolOptions.AaaaPool.GetMembers()))
-					for _, membersElement := range aaaaPoolOptions.AaaaPool.GetMembers() {
-						dnsLbPoolDnsLbPoolAddressMemberModel := DnsLbPoolDnsLbPoolAddressMember{}
+					membersElements := make([]DnsLbPoolAddrMember, 0, len(aaaaPoolElement.GetMembers()))
+					for _, membersElement := range aaaaPoolElement.GetMembers() {
+						dnsLbPoolAddrMemberModel := DnsLbPoolAddrMember{}
 
 						// resource specToModelNested RequiredStringField --> IpEndpoint
 						if membersElement.GetIpEndpoint() != "" {
-							dnsLbPoolDnsLbPoolAddressMemberModel.IpEndpoint = types.StringValue(membersElement.GetIpEndpoint())
+							dnsLbPoolAddrMemberModel.IpEndpoint = types.StringValue(membersElement.GetIpEndpoint())
 						} else {
 							// Empty string, set to null
-							dnsLbPoolDnsLbPoolAddressMemberModel.IpEndpoint = types.StringNull()
+							dnsLbPoolAddrMemberModel.IpEndpoint = types.StringNull()
 						}
-
-						// resource specToModelNested UintField --> Ratio
-						dnsLbPoolDnsLbPoolAddressMemberModel.Ratio = types.Int64Value(int64(membersElement.GetRatio()))
-
-						// resource specToModelNested UintField --> Priority
-						dnsLbPoolDnsLbPoolAddressMemberModel.Priority = types.Int64Value(int64(membersElement.GetPriority()))
 
 						// resource specToModelNested StringField --> Name
 						if membersElement.GetName() != "" {
-							dnsLbPoolDnsLbPoolAddressMemberModel.Name = types.StringValue(membersElement.GetName())
+							dnsLbPoolAddrMemberModel.Name = types.StringValue(membersElement.GetName())
 						} else {
 							// Empty string, set to null
-							dnsLbPoolDnsLbPoolAddressMemberModel.Name = types.StringNull()
+							dnsLbPoolAddrMemberModel.Name = types.StringNull()
 						}
 
-						membersElements = append(membersElements, dnsLbPoolDnsLbPoolAddressMemberModel)
+						// resource specToModelNested UintField --> Priority
+						dnsLbPoolAddrMemberModel.Priority = types.Int64Value(int64(membersElement.GetPriority()))
+
+						// resource specToModelNested UintField --> Ratio
+						dnsLbPoolAddrMemberModel.Ratio = types.Int64Value(int64(membersElement.GetRatio()))
+
+						membersElements = append(membersElements, dnsLbPoolAddrMemberModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
-					membersListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DnsLbPoolPoolTypeChoiceAaaaPoolMembersModelAttributeMap}, membersElements)
-					response.Diagnostics.Append(diags...)
+					membersListValue, membersListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DnsLbPoolPoolTypeChoiceAaaaPoolMembersModelAttributeMap}, membersElements)
+					response.Diagnostics.Append(membersListDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
@@ -1966,11 +2172,8 @@ func (r *ResourceF5XCDnsLbPool) Create(ctx context.Context, request resource.Cre
 					aaaaPoolAttributeMap["members"] = types.ListNull(types.ObjectType{AttrTypes: DnsLbPoolPoolTypeChoiceAaaaPoolMembersModelAttributeMap})
 				}
 
-				// resource specToModelNested RequiredUintField --> MaxAnswers
-				aaaaPoolAttributeMap["max_answers"] = types.Int64Value(int64(aaaaPoolOptions.AaaaPool.GetMaxAnswers()))
-
-				aaaaPoolObj, diags := types.ObjectValue(DnsLbPoolPoolTypeChoiceAaaaPoolModelAttributeMap, aaaaPoolAttributeMap)
-				response.Diagnostics.Append(diags...)
+				aaaaPoolObj, aaaaPoolObjDiags := types.ObjectValue(DnsLbPoolPoolTypeChoiceAaaaPoolModelAttributeMap, aaaaPoolAttributeMap)
+				response.Diagnostics.Append(aaaaPoolObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -1984,70 +2187,20 @@ func (r *ResourceF5XCDnsLbPool) Create(ctx context.Context, request resource.Cre
 		// GlobalSpecType
 		// false
 		{
-			cnamePoolOptions, isCnamePool := poolTypeChoiceChoices.(*ves_io_schema_dns_lb_pool.GlobalSpecType_CnamePool)
+			cnamePoolOptionsWrapper, isCnamePool := poolTypeChoiceChoices.(*ves_io_schema_dns_lb_pool.GlobalSpecType_CnamePool)
 			cnamePoolAttributeMap := make(map[string]attr.Value)
 
-			if isCnamePool && cnamePoolOptions != nil {
-
-				// resource specToModelNested RequiredArrayOfPointerField --> Members
-				if len(cnamePoolOptions.CnamePool.GetMembers()) > 0 {
-					// Step 1: Always create a slice of model structs from the spec data.
-					// This slice serves as an intermediate representation.
-					membersElements := make([]DnsLbPoolDnsLbPoolCNAMEMember, 0, len(cnamePoolOptions.CnamePool.GetMembers()))
-					for _, membersElement := range cnamePoolOptions.CnamePool.GetMembers() {
-						dnsLbPoolDnsLbPoolCNAMEMemberModel := DnsLbPoolDnsLbPoolCNAMEMember{}
-
-						// resource specToModelNested UintField --> Priority
-						dnsLbPoolDnsLbPoolCNAMEMemberModel.Priority = types.Int64Value(int64(membersElement.GetPriority()))
-
-						// resource specToModelNested RequiredStringField --> Domain
-						if membersElement.GetDomain() != "" {
-							dnsLbPoolDnsLbPoolCNAMEMemberModel.Domain = types.StringValue(membersElement.GetDomain())
-						} else {
-							// Empty string, set to null
-							dnsLbPoolDnsLbPoolCNAMEMemberModel.Domain = types.StringNull()
-						}
-
-						// resource specToModelNested UintField --> Ratio
-						dnsLbPoolDnsLbPoolCNAMEMemberModel.Ratio = types.Int64Value(int64(membersElement.GetRatio()))
-
-						// resource specToModelNested BoolField --> FinalTranslation
-						dnsLbPoolDnsLbPoolCNAMEMemberModel.FinalTranslation = types.BoolValue(bool(membersElement.GetFinalTranslation()))
-
-						// resource specToModelNested StringField --> Name
-						if membersElement.GetName() != "" {
-							dnsLbPoolDnsLbPoolCNAMEMemberModel.Name = types.StringValue(membersElement.GetName())
-						} else {
-							// Empty string, set to null
-							dnsLbPoolDnsLbPoolCNAMEMemberModel.Name = types.StringNull()
-						}
-
-						membersElements = append(membersElements, dnsLbPoolDnsLbPoolCNAMEMemberModel)
-					}
-					// CASE 1: The target field is a `types.List` or an attribute map.
-					// The intermediate slice of structs must be converted to a `types.ListValue`.
-					membersListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DnsLbPoolPoolTypeChoiceCnamePoolMembersModelAttributeMap}, membersElements)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					cnamePoolAttributeMap["members"] = membersListValue
-
-				} else {
-					// The source list is empty or nil.
-					// CASE 1: The target field is a `types.List` or an attribute map.
-					// Assign a null `types.ListValue`.
-					cnamePoolAttributeMap["members"] = types.ListNull(types.ObjectType{AttrTypes: DnsLbPoolPoolTypeChoiceCnamePoolMembersModelAttributeMap})
-				}
+			if isCnamePool && cnamePoolOptionsWrapper != nil && cnamePoolOptionsWrapper.CnamePool != nil {
+				cnamePoolElement := cnamePoolOptionsWrapper.CnamePool
 
 				// resource specToModelNested RequiredOneOfField --> HealthCheckChoice
 				// GlobalSpecType
-				if cnamePoolOptions.CnamePool.GetHealthCheckChoice() != nil {
+				if cnamePoolElement.GetHealthCheckChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					cnamePoolhealthCheckChoiceChoicesAttributeMap := make(map[string]attr.Value)
 
 					// Define a variable for the spec choices to be passed down to nested templates
-					cnamePoolhealthCheckChoiceChoices := cnamePoolOptions.CnamePool.GetHealthCheckChoice()
+					cnamePoolhealthCheckChoiceChoices := cnamePoolElement.GetHealthCheckChoice()
 
 					// Process nested choices, populating the temporary attribute map
 
@@ -2064,37 +2217,38 @@ func (r *ResourceF5XCDnsLbPool) Create(ctx context.Context, request resource.Cre
 					// GlobalSpecType
 					// false
 					{
-						healthCheckOptions, isHealthCheck := cnamePoolhealthCheckChoiceChoices.(*ves_io_schema_dns_lb_pool.CNAMEPool_HealthCheck)
+						healthCheckOptionsWrapper, isHealthCheck := cnamePoolhealthCheckChoiceChoices.(*ves_io_schema_dns_lb_pool.CNAMEPool_HealthCheck)
 						healthCheckAttributeMap := make(map[string]attr.Value)
 
-						if isHealthCheck && healthCheckOptions != nil {
+						if isHealthCheck && healthCheckOptionsWrapper != nil && healthCheckOptionsWrapper.HealthCheck != nil {
+							healthCheckElement := healthCheckOptionsWrapper.HealthCheck
 
 							// resource specToModelNested RequiredStringField --> Name
-							if healthCheckOptions.HealthCheck.GetName() != "" {
-								healthCheckAttributeMap["name"] = types.StringValue(healthCheckOptions.HealthCheck.GetName())
+							if healthCheckElement.GetName() != "" {
+								healthCheckAttributeMap["name"] = types.StringValue(healthCheckElement.GetName())
 							} else {
 								// Empty string, set to null
 								healthCheckAttributeMap["name"] = types.StringNull()
 							}
 
-							// resource specToModelNested StringField --> Tenant
-							if healthCheckOptions.HealthCheck.GetTenant() != "" {
-								healthCheckAttributeMap["tenant"] = types.StringValue(healthCheckOptions.HealthCheck.GetTenant())
-							} else {
-								// Empty string, set to null
-								healthCheckAttributeMap["tenant"] = types.StringNull()
-							}
-
 							// resource specToModelNested RequiredStringField --> Namespace
-							if healthCheckOptions.HealthCheck.GetNamespace() != "" {
-								healthCheckAttributeMap["namespace"] = types.StringValue(healthCheckOptions.HealthCheck.GetNamespace())
+							if healthCheckElement.GetNamespace() != "" {
+								healthCheckAttributeMap["namespace"] = types.StringValue(healthCheckElement.GetNamespace())
 							} else {
 								// Empty string, set to null
 								healthCheckAttributeMap["namespace"] = types.StringNull()
 							}
 
-							healthCheckObj, diags := types.ObjectValue(DnsLbPoolPoolTypeChoiceCnamePoolHealthCheckChoiceHealthCheckModelAttributeMap, healthCheckAttributeMap)
-							response.Diagnostics.Append(diags...)
+							// resource specToModelNested StringField --> Tenant
+							if healthCheckElement.GetTenant() != "" {
+								healthCheckAttributeMap["tenant"] = types.StringValue(healthCheckElement.GetTenant())
+							} else {
+								// Empty string, set to null
+								healthCheckAttributeMap["tenant"] = types.StringNull()
+							}
+
+							healthCheckObj, healthCheckObjDiags := types.ObjectValue(DnsLbPoolPoolTypeChoiceCnamePoolHealthCheckChoiceHealthCheckModelAttributeMap, healthCheckAttributeMap)
+							response.Diagnostics.Append(healthCheckObjDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
@@ -2123,8 +2277,59 @@ func (r *ResourceF5XCDnsLbPool) Create(ctx context.Context, request resource.Cre
 					cnamePoolAttributeMap["health_check_choice"] = types.ObjectNull(DnsLbPoolPoolTypeChoiceCnamePoolHealthCheckChoiceModelAttributeMap)
 				}
 
-				cnamePoolObj, diags := types.ObjectValue(DnsLbPoolPoolTypeChoiceCnamePoolModelAttributeMap, cnamePoolAttributeMap)
-				response.Diagnostics.Append(diags...)
+				// resource specToModelNested RequiredArrayOfPointerField --> Members
+				if len(cnamePoolElement.GetMembers()) > 0 {
+					// Step 1: Always create a slice of model structs from the spec data.
+					// This slice serves as an intermediate representation.
+					membersElements := make([]DnsLbPoolCNAMEMember, 0, len(cnamePoolElement.GetMembers()))
+					for _, membersElement := range cnamePoolElement.GetMembers() {
+						dnsLbPoolCNAMEMemberModel := DnsLbPoolCNAMEMember{}
+
+						// resource specToModelNested RequiredStringField --> Domain
+						if membersElement.GetDomain() != "" {
+							dnsLbPoolCNAMEMemberModel.Domain = types.StringValue(membersElement.GetDomain())
+						} else {
+							// Empty string, set to null
+							dnsLbPoolCNAMEMemberModel.Domain = types.StringNull()
+						}
+
+						// resource specToModelNested BoolField --> FinalTranslation
+						dnsLbPoolCNAMEMemberModel.FinalTranslation = types.BoolValue(bool(membersElement.GetFinalTranslation()))
+
+						// resource specToModelNested StringField --> Name
+						if membersElement.GetName() != "" {
+							dnsLbPoolCNAMEMemberModel.Name = types.StringValue(membersElement.GetName())
+						} else {
+							// Empty string, set to null
+							dnsLbPoolCNAMEMemberModel.Name = types.StringNull()
+						}
+
+						// resource specToModelNested UintField --> Priority
+						dnsLbPoolCNAMEMemberModel.Priority = types.Int64Value(int64(membersElement.GetPriority()))
+
+						// resource specToModelNested UintField --> Ratio
+						dnsLbPoolCNAMEMemberModel.Ratio = types.Int64Value(int64(membersElement.GetRatio()))
+
+						membersElements = append(membersElements, dnsLbPoolCNAMEMemberModel)
+					}
+					// CASE 1: The target field is a `types.List` or an attribute map.
+					// The intermediate slice of structs must be converted to a `types.ListValue`.
+					membersListValue, membersListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DnsLbPoolPoolTypeChoiceCnamePoolMembersModelAttributeMap}, membersElements)
+					response.Diagnostics.Append(membersListDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					cnamePoolAttributeMap["members"] = membersListValue
+
+				} else {
+					// The source list is empty or nil.
+					// CASE 1: The target field is a `types.List` or an attribute map.
+					// Assign a null `types.ListValue`.
+					cnamePoolAttributeMap["members"] = types.ListNull(types.ObjectType{AttrTypes: DnsLbPoolPoolTypeChoiceCnamePoolMembersModelAttributeMap})
+				}
+
+				cnamePoolObj, cnamePoolObjDiags := types.ObjectValue(DnsLbPoolPoolTypeChoiceCnamePoolModelAttributeMap, cnamePoolAttributeMap)
+				response.Diagnostics.Append(cnamePoolObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -2138,47 +2343,51 @@ func (r *ResourceF5XCDnsLbPool) Create(ctx context.Context, request resource.Cre
 		// GlobalSpecType
 		// false
 		{
-			mxPoolOptions, isMxPool := poolTypeChoiceChoices.(*ves_io_schema_dns_lb_pool.GlobalSpecType_MxPool)
+			mxPoolOptionsWrapper, isMxPool := poolTypeChoiceChoices.(*ves_io_schema_dns_lb_pool.GlobalSpecType_MxPool)
 			mxPoolAttributeMap := make(map[string]attr.Value)
 
-			if isMxPool && mxPoolOptions != nil {
+			if isMxPool && mxPoolOptionsWrapper != nil && mxPoolOptionsWrapper.MxPool != nil {
+				mxPoolElement := mxPoolOptionsWrapper.MxPool
+
+				// resource specToModelNested RequiredUintField --> MaxAnswers
+				mxPoolAttributeMap["max_answers"] = types.Int64Value(int64(mxPoolElement.GetMaxAnswers()))
 
 				// resource specToModelNested RequiredArrayOfPointerField --> Members
-				if len(mxPoolOptions.MxPool.GetMembers()) > 0 {
+				if len(mxPoolElement.GetMembers()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					membersElements := make([]DnsLbPoolDnsLbPoolMXMember, 0, len(mxPoolOptions.MxPool.GetMembers()))
-					for _, membersElement := range mxPoolOptions.MxPool.GetMembers() {
-						dnsLbPoolDnsLbPoolMXMemberModel := DnsLbPoolDnsLbPoolMXMember{}
-
-						// resource specToModelNested StringField --> Name
-						if membersElement.GetName() != "" {
-							dnsLbPoolDnsLbPoolMXMemberModel.Name = types.StringValue(membersElement.GetName())
-						} else {
-							// Empty string, set to null
-							dnsLbPoolDnsLbPoolMXMemberModel.Name = types.StringNull()
-						}
+					membersElements := make([]DnsLbPoolMXMember, 0, len(mxPoolElement.GetMembers()))
+					for _, membersElement := range mxPoolElement.GetMembers() {
+						dnsLbPoolMXMemberModel := DnsLbPoolMXMember{}
 
 						// resource specToModelNested RequiredStringField --> Domain
 						if membersElement.GetDomain() != "" {
-							dnsLbPoolDnsLbPoolMXMemberModel.Domain = types.StringValue(membersElement.GetDomain())
+							dnsLbPoolMXMemberModel.Domain = types.StringValue(membersElement.GetDomain())
 						} else {
 							// Empty string, set to null
-							dnsLbPoolDnsLbPoolMXMemberModel.Domain = types.StringNull()
+							dnsLbPoolMXMemberModel.Domain = types.StringNull()
+						}
+
+						// resource specToModelNested StringField --> Name
+						if membersElement.GetName() != "" {
+							dnsLbPoolMXMemberModel.Name = types.StringValue(membersElement.GetName())
+						} else {
+							// Empty string, set to null
+							dnsLbPoolMXMemberModel.Name = types.StringNull()
 						}
 
 						// resource specToModelNested UintField --> Priority
-						dnsLbPoolDnsLbPoolMXMemberModel.Priority = types.Int64Value(int64(membersElement.GetPriority()))
+						dnsLbPoolMXMemberModel.Priority = types.Int64Value(int64(membersElement.GetPriority()))
 
 						// resource specToModelNested UintField --> Ratio
-						dnsLbPoolDnsLbPoolMXMemberModel.Ratio = types.Int64Value(int64(membersElement.GetRatio()))
+						dnsLbPoolMXMemberModel.Ratio = types.Int64Value(int64(membersElement.GetRatio()))
 
-						membersElements = append(membersElements, dnsLbPoolDnsLbPoolMXMemberModel)
+						membersElements = append(membersElements, dnsLbPoolMXMemberModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
-					membersListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DnsLbPoolPoolTypeChoiceMxPoolMembersModelAttributeMap}, membersElements)
-					response.Diagnostics.Append(diags...)
+					membersListValue, membersListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DnsLbPoolPoolTypeChoiceMxPoolMembersModelAttributeMap}, membersElements)
+					response.Diagnostics.Append(membersListDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
@@ -2191,11 +2400,8 @@ func (r *ResourceF5XCDnsLbPool) Create(ctx context.Context, request resource.Cre
 					mxPoolAttributeMap["members"] = types.ListNull(types.ObjectType{AttrTypes: DnsLbPoolPoolTypeChoiceMxPoolMembersModelAttributeMap})
 				}
 
-				// resource specToModelNested RequiredUintField --> MaxAnswers
-				mxPoolAttributeMap["max_answers"] = types.Int64Value(int64(mxPoolOptions.MxPool.GetMaxAnswers()))
-
-				mxPoolObj, diags := types.ObjectValue(DnsLbPoolPoolTypeChoiceMxPoolModelAttributeMap, mxPoolAttributeMap)
-				response.Diagnostics.Append(diags...)
+				mxPoolObj, mxPoolObjDiags := types.ObjectValue(DnsLbPoolPoolTypeChoiceMxPoolModelAttributeMap, mxPoolAttributeMap)
+				response.Diagnostics.Append(mxPoolObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -2209,56 +2415,60 @@ func (r *ResourceF5XCDnsLbPool) Create(ctx context.Context, request resource.Cre
 		// GlobalSpecType
 		// false
 		{
-			srvPoolOptions, isSrvPool := poolTypeChoiceChoices.(*ves_io_schema_dns_lb_pool.GlobalSpecType_SrvPool)
+			srvPoolOptionsWrapper, isSrvPool := poolTypeChoiceChoices.(*ves_io_schema_dns_lb_pool.GlobalSpecType_SrvPool)
 			srvPoolAttributeMap := make(map[string]attr.Value)
 
-			if isSrvPool && srvPoolOptions != nil {
+			if isSrvPool && srvPoolOptionsWrapper != nil && srvPoolOptionsWrapper.SrvPool != nil {
+				srvPoolElement := srvPoolOptionsWrapper.SrvPool
+
+				// resource specToModelNested RequiredUintField --> MaxAnswers
+				srvPoolAttributeMap["max_answers"] = types.Int64Value(int64(srvPoolElement.GetMaxAnswers()))
 
 				// resource specToModelNested RequiredArrayOfPointerField --> Members
-				if len(srvPoolOptions.SrvPool.GetMembers()) > 0 {
+				if len(srvPoolElement.GetMembers()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					membersElements := make([]DnsLbPoolDnsLbPoolSRVMember, 0, len(srvPoolOptions.SrvPool.GetMembers()))
-					for _, membersElement := range srvPoolOptions.SrvPool.GetMembers() {
-						dnsLbPoolDnsLbPoolSRVMemberModel := DnsLbPoolDnsLbPoolSRVMember{}
-
-						// resource specToModelNested RequiredUintField --> Priority
-						dnsLbPoolDnsLbPoolSRVMemberModel.Priority = types.Int64Value(int64(membersElement.GetPriority()))
-
-						// resource specToModelNested RequiredUintField --> Weight
-						dnsLbPoolDnsLbPoolSRVMemberModel.Weight = types.Int64Value(int64(membersElement.GetWeight()))
-
-						// resource specToModelNested RequiredUintField --> Port
-						dnsLbPoolDnsLbPoolSRVMemberModel.Port = types.Int64Value(int64(membersElement.GetPort()))
-
-						// resource specToModelNested RequiredStringField --> Target
-						if membersElement.GetTarget() != "" {
-							dnsLbPoolDnsLbPoolSRVMemberModel.Target = types.StringValue(membersElement.GetTarget())
-						} else {
-							// Empty string, set to null
-							dnsLbPoolDnsLbPoolSRVMemberModel.Target = types.StringNull()
-						}
+					membersElements := make([]DnsLbPoolSRVMember, 0, len(srvPoolElement.GetMembers()))
+					for _, membersElement := range srvPoolElement.GetMembers() {
+						dnsLbPoolSRVMemberModel := DnsLbPoolSRVMember{}
 
 						// resource specToModelNested BoolField --> FinalTranslation
-						dnsLbPoolDnsLbPoolSRVMemberModel.FinalTranslation = types.BoolValue(bool(membersElement.GetFinalTranslation()))
-
-						// resource specToModelNested UintField --> Ratio
-						dnsLbPoolDnsLbPoolSRVMemberModel.Ratio = types.Int64Value(int64(membersElement.GetRatio()))
+						dnsLbPoolSRVMemberModel.FinalTranslation = types.BoolValue(bool(membersElement.GetFinalTranslation()))
 
 						// resource specToModelNested StringField --> Name
 						if membersElement.GetName() != "" {
-							dnsLbPoolDnsLbPoolSRVMemberModel.Name = types.StringValue(membersElement.GetName())
+							dnsLbPoolSRVMemberModel.Name = types.StringValue(membersElement.GetName())
 						} else {
 							// Empty string, set to null
-							dnsLbPoolDnsLbPoolSRVMemberModel.Name = types.StringNull()
+							dnsLbPoolSRVMemberModel.Name = types.StringNull()
 						}
 
-						membersElements = append(membersElements, dnsLbPoolDnsLbPoolSRVMemberModel)
+						// resource specToModelNested RequiredUintField --> Port
+						dnsLbPoolSRVMemberModel.Port = types.Int64Value(int64(membersElement.GetPort()))
+
+						// resource specToModelNested RequiredUintField --> Priority
+						dnsLbPoolSRVMemberModel.Priority = types.Int64Value(int64(membersElement.GetPriority()))
+
+						// resource specToModelNested UintField --> Ratio
+						dnsLbPoolSRVMemberModel.Ratio = types.Int64Value(int64(membersElement.GetRatio()))
+
+						// resource specToModelNested RequiredStringField --> Target
+						if membersElement.GetTarget() != "" {
+							dnsLbPoolSRVMemberModel.Target = types.StringValue(membersElement.GetTarget())
+						} else {
+							// Empty string, set to null
+							dnsLbPoolSRVMemberModel.Target = types.StringNull()
+						}
+
+						// resource specToModelNested RequiredUintField --> Weight
+						dnsLbPoolSRVMemberModel.Weight = types.Int64Value(int64(membersElement.GetWeight()))
+
+						membersElements = append(membersElements, dnsLbPoolSRVMemberModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
-					membersListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DnsLbPoolPoolTypeChoiceSrvPoolMembersModelAttributeMap}, membersElements)
-					response.Diagnostics.Append(diags...)
+					membersListValue, membersListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DnsLbPoolPoolTypeChoiceSrvPoolMembersModelAttributeMap}, membersElements)
+					response.Diagnostics.Append(membersListDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
@@ -2271,11 +2481,8 @@ func (r *ResourceF5XCDnsLbPool) Create(ctx context.Context, request resource.Cre
 					srvPoolAttributeMap["members"] = types.ListNull(types.ObjectType{AttrTypes: DnsLbPoolPoolTypeChoiceSrvPoolMembersModelAttributeMap})
 				}
 
-				// resource specToModelNested RequiredUintField --> MaxAnswers
-				srvPoolAttributeMap["max_answers"] = types.Int64Value(int64(srvPoolOptions.SrvPool.GetMaxAnswers()))
-
-				srvPoolObj, diags := types.ObjectValue(DnsLbPoolPoolTypeChoiceSrvPoolModelAttributeMap, srvPoolAttributeMap)
-				response.Diagnostics.Append(diags...)
+				srvPoolObj, srvPoolObjDiags := types.ObjectValue(DnsLbPoolPoolTypeChoiceSrvPoolModelAttributeMap, srvPoolAttributeMap)
+				response.Diagnostics.Append(srvPoolObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -2286,36 +2493,25 @@ func (r *ResourceF5XCDnsLbPool) Create(ctx context.Context, request resource.Cre
 		}
 
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		poolTypeChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			DnsLbPoolPoolTypeChoiceModelAttributeMap,
-			poolTypeChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
+		{
+			poolTypeChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				DnsLbPoolPoolTypeChoiceModelAttributeMap,
+				poolTypeChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
 
-		// Assign the final object to the root data model.
-		data.PoolTypeChoice = poolTypeChoiceObj
+			// Assign the final object to the root data model.
+			data.PoolTypeChoice = poolTypeChoiceObj
+		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
+		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.PoolTypeChoice = types.ObjectNull(DnsLbPoolPoolTypeChoiceModelAttributeMap)
-	}
-
-	// resource SpecToModelRoot RequiredEnumField --> LoadBalancingMode
-	if specData.GetLoadBalancingMode().String() != "" {
-		stringValue := types.StringValue(specData.GetLoadBalancingMode().String())
-		stringSlice := []types.String{stringValue}
-		listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.LoadBalancingMode = listValue
-	} else {
-		// Empty string, set to null
-		data.LoadBalancingMode = types.ListNull(types.StringType)
 	}
 
 	// resource SpecToModelRoot RequiredOneOfField --> TtlChoice
@@ -2327,7 +2523,7 @@ func (r *ResourceF5XCDnsLbPool) Create(ctx context.Context, request resource.Cre
 		ttlChoiceChoices := specData.GetTtlChoice()
 
 		// The model struct that will be populated by the nested template.
-		var ttlChoiceChoicesModel = &DnsLbPoolGlobalSpecTypeTtlChoice{}
+		var ttlChoiceChoicesModel = &DnsLbPoolTtlChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -2351,75 +2547,25 @@ func (r *ResourceF5XCDnsLbPool) Create(ctx context.Context, request resource.Cre
 		}
 
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		ttlChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			DnsLbPoolTtlChoiceModelAttributeMap,
-			ttlChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
+		{
+			ttlChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				DnsLbPoolTtlChoiceModelAttributeMap,
+				ttlChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
 
-		// Assign the final object to the root data model.
-		data.TtlChoice = ttlChoiceObj
+			// Assign the final object to the root data model.
+			data.TtlChoice = ttlChoiceObj
+		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
+		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.TtlChoice = types.ObjectNull(DnsLbPoolTtlChoiceModelAttributeMap)
-	}
-
-	// resource SpecToModelRoot ArrayOfPointerField --> DnsLoadBalancers
-	if len(specData.DnsLoadBalancers) > 0 {
-		dnsLoadBalancersElements := make([]ObjectRefTypeModel, 0, len(specData.DnsLoadBalancers))
-
-		for _, dnsLoadBalancersElement := range specData.DnsLoadBalancers {
-			objectRefTypeModelModel := ObjectRefTypeModel{}
-
-			// resource specToModelNested RequiredStringField --> Name
-			if dnsLoadBalancersElement.GetName() != "" {
-				objectRefTypeModelModel.Name = types.StringValue(dnsLoadBalancersElement.GetName())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Name = types.StringNull()
-			}
-
-			// resource specToModelNested StringField --> Tenant
-			if dnsLoadBalancersElement.GetTenant() != "" {
-				objectRefTypeModelModel.Tenant = types.StringValue(dnsLoadBalancersElement.GetTenant())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Tenant = types.StringNull()
-			}
-
-			// resource specToModelNested RequiredStringField --> Namespace
-			if dnsLoadBalancersElement.GetNamespace() != "" {
-				objectRefTypeModelModel.Namespace = types.StringValue(dnsLoadBalancersElement.GetNamespace())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Namespace = types.StringNull()
-			}
-
-			dnsLoadBalancersElements = append(dnsLoadBalancersElements, objectRefTypeModelModel)
-		}
-
-		dnsLoadBalancersList, diags := utils.GoStructSliceToListValue(
-			ctx,
-			DnsLbPoolDnsLoadBalancersObjectRefModelAttributeMap,
-			dnsLoadBalancersElements,
-		)
-
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-
-		data.DnsLoadBalancers = dnsLoadBalancersList
-	} else {
-		var dnsLoadBalancersObjectType = basetypes.ObjectType{
-			AttrTypes: DnsLbPoolDnsLoadBalancersObjectRefModelAttributeMap,
-		}
-		nullDnsLoadBalancersList := basetypes.NewListNull(dnsLoadBalancersObjectType)
-		data.DnsLoadBalancers = nullDnsLoadBalancersList
 	}
 
 	if response.Diagnostics.HasError() {
@@ -2485,111 +2631,189 @@ func (r *ResourceF5XCDnsLbPool) Read(ctx context.Context, request resource.ReadR
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
-	// resource SpecToModelRoot Meta StringField --> Uid
-	data.Uid = types.StringValue(systemMetaData.GetUid())
-
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedLabels := make(map[string]attr.Value)
-		for k, v := range labelsMap.Elements() {
-			mergedLabels[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
-			for k, v := range data.Labels.Elements() {
-				mergedLabels[k] = v
-			}
-		}
-		mergedLabelsMap, mergedLabelsDiags := types.MapValue(types.StringType, mergedLabels)
-		response.Diagnostics.Append(mergedLabelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Labels = mergedLabelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
-
 	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
 	//
-	// Create/Update (called from Create/Update handlers):
+	// Supported scenarios:
 	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
 	//
-	// Read (called from Read handler):
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
 	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedAnnotations := make(map[string]attr.Value)
-		for k, v := range annotationsMap.Elements() {
-			mergedAnnotations[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
-			for k, v := range data.Annotations.Elements() {
-				mergedAnnotations[k] = v
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		annotationsApiMap := metaData.GetAnnotations()
+		// READ: always store the full API response (captures backend-injected keys like "ves.io/provider").
+		if len(annotationsApiMap) > 0 {
+			annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+			response.Diagnostics.Append(annotationsDiags...)
+			if response.Diagnostics.HasError() {
+				return
 			}
+			data.Annotations = annotationsMap
+		} else {
+			data.Annotations = types.MapNull(types.StringType)
 		}
-		mergedAnnotationsMap, mergedAnnotationsDiags := types.MapValue(types.StringType, mergedAnnotations)
-		response.Diagnostics.Append(mergedAnnotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Annotations = mergedAnnotationsMap
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Annotations = types.MapNull(types.StringType)
 	}
 
 	// resource SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
+	{
+		apiValDescription := metaData.GetDescription()
+		if apiValDescription != "" {
+			data.Description = types.StringValue(apiValDescription)
+		} else {
+			var priorValDescription types.String
+			response.Diagnostics.Append(request.State.GetAttribute(ctx, path.Root("description"), &priorValDescription)...)
+			if !priorValDescription.IsNull() && !priorValDescription.IsUnknown() {
+				data.Description = priorValDescription
+			} else {
+				data.Description = types.StringValue(apiValDescription)
+			}
+		}
+	}
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		labelsApiMap := metaData.GetLabels()
+		// READ: always store the full API response (captures backend-injected keys like "ves.io/provider").
+		if len(labelsApiMap) > 0 {
+			labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+			response.Diagnostics.Append(labelsDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			data.Labels = labelsMap
+		} else {
+			data.Labels = types.MapNull(types.StringType)
+		}
+	}
 
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
 	data.Name = types.StringValue(metaData.GetName())
 
 	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
 	data.Namespace = types.StringValue(metaData.GetNamespace())
+
+	// resource SpecToModelRoot Meta StringField --> Uid
+	data.Uid = types.StringValue(systemMetaData.GetUid())
+
+	// resource SpecToModelRoot ArrayOfPointerField --> DnsLoadBalancers
+	if len(specData.GetDnsLoadBalancers()) > 0 {
+		dnsLoadBalancersElements := make([]ObjectRefTypeModel, 0, len(specData.GetDnsLoadBalancers()))
+		for _, dnsLoadBalancersElement := range specData.GetDnsLoadBalancers() {
+			objectRefTypeModelModel := ObjectRefTypeModel{}
+
+			// resource specToModelNested RequiredStringField --> Name
+			if dnsLoadBalancersElement.GetName() != "" {
+				objectRefTypeModelModel.Name = types.StringValue(dnsLoadBalancersElement.GetName())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Name = types.StringNull()
+			}
+
+			// resource specToModelNested RequiredStringField --> Namespace
+			if dnsLoadBalancersElement.GetNamespace() != "" {
+				objectRefTypeModelModel.Namespace = types.StringValue(dnsLoadBalancersElement.GetNamespace())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Namespace = types.StringNull()
+			}
+
+			// resource specToModelNested StringField --> Tenant
+			if dnsLoadBalancersElement.GetTenant() != "" {
+				objectRefTypeModelModel.Tenant = types.StringValue(dnsLoadBalancersElement.GetTenant())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Tenant = types.StringNull()
+			}
+
+			dnsLoadBalancersElements = append(dnsLoadBalancersElements, objectRefTypeModelModel)
+		}
+
+		{
+			dnsLoadBalancersList, listDiags := utils.GoStructSliceToListValue(
+				ctx,
+				DnsLbPoolDnsLoadBalancersObjectRefModelAttributeMap,
+				dnsLoadBalancersElements,
+			)
+
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			data.DnsLoadBalancers = dnsLoadBalancersList
+		}
+	} else {
+		var dnsLoadBalancersObjectType = basetypes.ObjectType{
+			AttrTypes: DnsLbPoolDnsLoadBalancersObjectRefModelAttributeMap,
+		}
+		nullDnsLoadBalancersList := basetypes.NewListNull(dnsLoadBalancersObjectType)
+		var priorValDnsLoadBalancers types.List
+		_ = request.State.GetAttribute(ctx, path.Root("dns_load_balancers"), &priorValDnsLoadBalancers)
+		if !priorValDnsLoadBalancers.IsNull() && !priorValDnsLoadBalancers.IsUnknown() {
+			data.DnsLoadBalancers = priorValDnsLoadBalancers
+		} else {
+			data.DnsLoadBalancers = nullDnsLoadBalancersList
+		}
+
+	}
+
+	// resource SpecToModelRoot RequiredEnumField --> LoadBalancingMode
+	{
+		if specData.GetLoadBalancingMode().String() != "" {
+			stringValue := types.StringValue(specData.GetLoadBalancingMode().String())
+			stringSlice := []types.String{stringValue}
+			listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			data.LoadBalancingMode = listValue
+		} else {
+			// Empty string, set to null
+			data.LoadBalancingMode = types.ListNull(types.StringType)
+		}
+	}
 
 	// resource SpecToModelRoot RequiredOneOfField --> PoolTypeChoice
 	// false
@@ -2600,7 +2824,7 @@ func (r *ResourceF5XCDnsLbPool) Read(ctx context.Context, request resource.ReadR
 		poolTypeChoiceChoices := specData.GetPoolTypeChoice()
 
 		// The model struct that will be populated by the nested template.
-		var poolTypeChoiceChoicesModel = &DnsLbPoolGlobalSpecTypePoolTypeChoice{}
+		var poolTypeChoiceChoicesModel = &DnsLbPoolPoolTypeChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -2608,67 +2832,20 @@ func (r *ResourceF5XCDnsLbPool) Read(ctx context.Context, request resource.ReadR
 		// <no value>
 		// false
 		{
-			aPoolOptions, isAPool := poolTypeChoiceChoices.(*ves_io_schema_dns_lb_pool.GlobalSpecType_APool)
+			aPoolOptionsWrapper, isAPool := poolTypeChoiceChoices.(*ves_io_schema_dns_lb_pool.GlobalSpecType_APool)
 			aPoolAttributeMap := make(map[string]attr.Value)
 
-			if isAPool && aPoolOptions != nil {
-
-				// resource specToModelNested RequiredArrayOfPointerField --> Members
-				if len(aPoolOptions.APool.GetMembers()) > 0 {
-					// Step 1: Always create a slice of model structs from the spec data.
-					// This slice serves as an intermediate representation.
-					membersElements := make([]DnsLbPoolDnsLbPoolAddressMember, 0, len(aPoolOptions.APool.GetMembers()))
-					for _, membersElement := range aPoolOptions.APool.GetMembers() {
-						dnsLbPoolDnsLbPoolAddressMemberModel := DnsLbPoolDnsLbPoolAddressMember{}
-
-						// resource specToModelNested StringField --> Name
-						if membersElement.GetName() != "" {
-							dnsLbPoolDnsLbPoolAddressMemberModel.Name = types.StringValue(membersElement.GetName())
-						} else {
-							// Empty string, set to null
-							dnsLbPoolDnsLbPoolAddressMemberModel.Name = types.StringNull()
-						}
-
-						// resource specToModelNested RequiredStringField --> IpEndpoint
-						if membersElement.GetIpEndpoint() != "" {
-							dnsLbPoolDnsLbPoolAddressMemberModel.IpEndpoint = types.StringValue(membersElement.GetIpEndpoint())
-						} else {
-							// Empty string, set to null
-							dnsLbPoolDnsLbPoolAddressMemberModel.IpEndpoint = types.StringNull()
-						}
-
-						// resource specToModelNested UintField --> Ratio
-						dnsLbPoolDnsLbPoolAddressMemberModel.Ratio = types.Int64Value(int64(membersElement.GetRatio()))
-
-						// resource specToModelNested UintField --> Priority
-						dnsLbPoolDnsLbPoolAddressMemberModel.Priority = types.Int64Value(int64(membersElement.GetPriority()))
-
-						membersElements = append(membersElements, dnsLbPoolDnsLbPoolAddressMemberModel)
-					}
-					// CASE 1: The target field is a `types.List` or an attribute map.
-					// The intermediate slice of structs must be converted to a `types.ListValue`.
-					membersListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DnsLbPoolPoolTypeChoiceAPoolMembersModelAttributeMap}, membersElements)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					aPoolAttributeMap["members"] = membersListValue
-
-				} else {
-					// The source list is empty or nil.
-					// CASE 1: The target field is a `types.List` or an attribute map.
-					// Assign a null `types.ListValue`.
-					aPoolAttributeMap["members"] = types.ListNull(types.ObjectType{AttrTypes: DnsLbPoolPoolTypeChoiceAPoolMembersModelAttributeMap})
-				}
+			if isAPool && aPoolOptionsWrapper != nil && aPoolOptionsWrapper.APool != nil {
+				aPoolElement := aPoolOptionsWrapper.APool
 
 				// resource specToModelNested RequiredOneOfField --> HealthCheckChoice
 				// <no value>
-				if aPoolOptions.APool.GetHealthCheckChoice() != nil {
+				if aPoolElement.GetHealthCheckChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					aPoolhealthCheckChoiceChoicesAttributeMap := make(map[string]attr.Value)
 
 					// Define a variable for the spec choices to be passed down to nested templates
-					aPoolhealthCheckChoiceChoices := aPoolOptions.APool.GetHealthCheckChoice()
+					aPoolhealthCheckChoiceChoices := aPoolElement.GetHealthCheckChoice()
 
 					// Process nested choices, populating the temporary attribute map
 
@@ -2685,37 +2862,38 @@ func (r *ResourceF5XCDnsLbPool) Read(ctx context.Context, request resource.ReadR
 					// <no value>
 					// false
 					{
-						healthCheckOptions, isHealthCheck := aPoolhealthCheckChoiceChoices.(*ves_io_schema_dns_lb_pool.APool_HealthCheck)
+						healthCheckOptionsWrapper, isHealthCheck := aPoolhealthCheckChoiceChoices.(*ves_io_schema_dns_lb_pool.APool_HealthCheck)
 						healthCheckAttributeMap := make(map[string]attr.Value)
 
-						if isHealthCheck && healthCheckOptions != nil {
-
-							// resource specToModelNested StringField --> Tenant
-							if healthCheckOptions.HealthCheck.GetTenant() != "" {
-								healthCheckAttributeMap["tenant"] = types.StringValue(healthCheckOptions.HealthCheck.GetTenant())
-							} else {
-								// Empty string, set to null
-								healthCheckAttributeMap["tenant"] = types.StringNull()
-							}
-
-							// resource specToModelNested RequiredStringField --> Namespace
-							if healthCheckOptions.HealthCheck.GetNamespace() != "" {
-								healthCheckAttributeMap["namespace"] = types.StringValue(healthCheckOptions.HealthCheck.GetNamespace())
-							} else {
-								// Empty string, set to null
-								healthCheckAttributeMap["namespace"] = types.StringNull()
-							}
+						if isHealthCheck && healthCheckOptionsWrapper != nil && healthCheckOptionsWrapper.HealthCheck != nil {
+							healthCheckElement := healthCheckOptionsWrapper.HealthCheck
 
 							// resource specToModelNested RequiredStringField --> Name
-							if healthCheckOptions.HealthCheck.GetName() != "" {
-								healthCheckAttributeMap["name"] = types.StringValue(healthCheckOptions.HealthCheck.GetName())
+							if healthCheckElement.GetName() != "" {
+								healthCheckAttributeMap["name"] = types.StringValue(healthCheckElement.GetName())
 							} else {
 								// Empty string, set to null
 								healthCheckAttributeMap["name"] = types.StringNull()
 							}
 
-							healthCheckObj, diags := types.ObjectValue(DnsLbPoolPoolTypeChoiceAPoolHealthCheckChoiceHealthCheckModelAttributeMap, healthCheckAttributeMap)
-							response.Diagnostics.Append(diags...)
+							// resource specToModelNested RequiredStringField --> Namespace
+							if healthCheckElement.GetNamespace() != "" {
+								healthCheckAttributeMap["namespace"] = types.StringValue(healthCheckElement.GetNamespace())
+							} else {
+								// Empty string, set to null
+								healthCheckAttributeMap["namespace"] = types.StringNull()
+							}
+
+							// resource specToModelNested StringField --> Tenant
+							if healthCheckElement.GetTenant() != "" {
+								healthCheckAttributeMap["tenant"] = types.StringValue(healthCheckElement.GetTenant())
+							} else {
+								// Empty string, set to null
+								healthCheckAttributeMap["tenant"] = types.StringNull()
+							}
+
+							healthCheckObj, healthCheckObjDiags := types.ObjectValue(DnsLbPoolPoolTypeChoiceAPoolHealthCheckChoiceHealthCheckModelAttributeMap, healthCheckAttributeMap)
+							response.Diagnostics.Append(healthCheckObjDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
@@ -2745,10 +2923,58 @@ func (r *ResourceF5XCDnsLbPool) Read(ctx context.Context, request resource.ReadR
 				}
 
 				// resource specToModelNested RequiredUintField --> MaxAnswers
-				aPoolAttributeMap["max_answers"] = types.Int64Value(int64(aPoolOptions.APool.GetMaxAnswers()))
+				aPoolAttributeMap["max_answers"] = types.Int64Value(int64(aPoolElement.GetMaxAnswers()))
 
-				aPoolObj, diags := types.ObjectValue(DnsLbPoolPoolTypeChoiceAPoolModelAttributeMap, aPoolAttributeMap)
-				response.Diagnostics.Append(diags...)
+				// resource specToModelNested RequiredArrayOfPointerField --> Members
+				if len(aPoolElement.GetMembers()) > 0 {
+					// Step 1: Always create a slice of model structs from the spec data.
+					// This slice serves as an intermediate representation.
+					membersElements := make([]DnsLbPoolAddrMember, 0, len(aPoolElement.GetMembers()))
+					for _, membersElement := range aPoolElement.GetMembers() {
+						dnsLbPoolAddrMemberModel := DnsLbPoolAddrMember{}
+
+						// resource specToModelNested RequiredStringField --> IpEndpoint
+						if membersElement.GetIpEndpoint() != "" {
+							dnsLbPoolAddrMemberModel.IpEndpoint = types.StringValue(membersElement.GetIpEndpoint())
+						} else {
+							// Empty string, set to null
+							dnsLbPoolAddrMemberModel.IpEndpoint = types.StringNull()
+						}
+
+						// resource specToModelNested StringField --> Name
+						if membersElement.GetName() != "" {
+							dnsLbPoolAddrMemberModel.Name = types.StringValue(membersElement.GetName())
+						} else {
+							// Empty string, set to null
+							dnsLbPoolAddrMemberModel.Name = types.StringNull()
+						}
+
+						// resource specToModelNested UintField --> Priority
+						dnsLbPoolAddrMemberModel.Priority = types.Int64Value(int64(membersElement.GetPriority()))
+
+						// resource specToModelNested UintField --> Ratio
+						dnsLbPoolAddrMemberModel.Ratio = types.Int64Value(int64(membersElement.GetRatio()))
+
+						membersElements = append(membersElements, dnsLbPoolAddrMemberModel)
+					}
+					// CASE 1: The target field is a `types.List` or an attribute map.
+					// The intermediate slice of structs must be converted to a `types.ListValue`.
+					membersListValue, membersListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DnsLbPoolPoolTypeChoiceAPoolMembersModelAttributeMap}, membersElements)
+					response.Diagnostics.Append(membersListDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					aPoolAttributeMap["members"] = membersListValue
+
+				} else {
+					// The source list is empty or nil.
+					// CASE 1: The target field is a `types.List` or an attribute map.
+					// Assign a null `types.ListValue`.
+					aPoolAttributeMap["members"] = types.ListNull(types.ObjectType{AttrTypes: DnsLbPoolPoolTypeChoiceAPoolMembersModelAttributeMap})
+				}
+
+				aPoolObj, aPoolObjDiags := types.ObjectValue(DnsLbPoolPoolTypeChoiceAPoolModelAttributeMap, aPoolAttributeMap)
+				response.Diagnostics.Append(aPoolObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -2762,47 +2988,51 @@ func (r *ResourceF5XCDnsLbPool) Read(ctx context.Context, request resource.ReadR
 		// <no value>
 		// false
 		{
-			aaaaPoolOptions, isAaaaPool := poolTypeChoiceChoices.(*ves_io_schema_dns_lb_pool.GlobalSpecType_AaaaPool)
+			aaaaPoolOptionsWrapper, isAaaaPool := poolTypeChoiceChoices.(*ves_io_schema_dns_lb_pool.GlobalSpecType_AaaaPool)
 			aaaaPoolAttributeMap := make(map[string]attr.Value)
 
-			if isAaaaPool && aaaaPoolOptions != nil {
+			if isAaaaPool && aaaaPoolOptionsWrapper != nil && aaaaPoolOptionsWrapper.AaaaPool != nil {
+				aaaaPoolElement := aaaaPoolOptionsWrapper.AaaaPool
+
+				// resource specToModelNested RequiredUintField --> MaxAnswers
+				aaaaPoolAttributeMap["max_answers"] = types.Int64Value(int64(aaaaPoolElement.GetMaxAnswers()))
 
 				// resource specToModelNested RequiredArrayOfPointerField --> Members
-				if len(aaaaPoolOptions.AaaaPool.GetMembers()) > 0 {
+				if len(aaaaPoolElement.GetMembers()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					membersElements := make([]DnsLbPoolDnsLbPoolAddressMember, 0, len(aaaaPoolOptions.AaaaPool.GetMembers()))
-					for _, membersElement := range aaaaPoolOptions.AaaaPool.GetMembers() {
-						dnsLbPoolDnsLbPoolAddressMemberModel := DnsLbPoolDnsLbPoolAddressMember{}
+					membersElements := make([]DnsLbPoolAddrMember, 0, len(aaaaPoolElement.GetMembers()))
+					for _, membersElement := range aaaaPoolElement.GetMembers() {
+						dnsLbPoolAddrMemberModel := DnsLbPoolAddrMember{}
 
 						// resource specToModelNested RequiredStringField --> IpEndpoint
 						if membersElement.GetIpEndpoint() != "" {
-							dnsLbPoolDnsLbPoolAddressMemberModel.IpEndpoint = types.StringValue(membersElement.GetIpEndpoint())
+							dnsLbPoolAddrMemberModel.IpEndpoint = types.StringValue(membersElement.GetIpEndpoint())
 						} else {
 							// Empty string, set to null
-							dnsLbPoolDnsLbPoolAddressMemberModel.IpEndpoint = types.StringNull()
+							dnsLbPoolAddrMemberModel.IpEndpoint = types.StringNull()
 						}
-
-						// resource specToModelNested UintField --> Ratio
-						dnsLbPoolDnsLbPoolAddressMemberModel.Ratio = types.Int64Value(int64(membersElement.GetRatio()))
-
-						// resource specToModelNested UintField --> Priority
-						dnsLbPoolDnsLbPoolAddressMemberModel.Priority = types.Int64Value(int64(membersElement.GetPriority()))
 
 						// resource specToModelNested StringField --> Name
 						if membersElement.GetName() != "" {
-							dnsLbPoolDnsLbPoolAddressMemberModel.Name = types.StringValue(membersElement.GetName())
+							dnsLbPoolAddrMemberModel.Name = types.StringValue(membersElement.GetName())
 						} else {
 							// Empty string, set to null
-							dnsLbPoolDnsLbPoolAddressMemberModel.Name = types.StringNull()
+							dnsLbPoolAddrMemberModel.Name = types.StringNull()
 						}
 
-						membersElements = append(membersElements, dnsLbPoolDnsLbPoolAddressMemberModel)
+						// resource specToModelNested UintField --> Priority
+						dnsLbPoolAddrMemberModel.Priority = types.Int64Value(int64(membersElement.GetPriority()))
+
+						// resource specToModelNested UintField --> Ratio
+						dnsLbPoolAddrMemberModel.Ratio = types.Int64Value(int64(membersElement.GetRatio()))
+
+						membersElements = append(membersElements, dnsLbPoolAddrMemberModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
-					membersListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DnsLbPoolPoolTypeChoiceAaaaPoolMembersModelAttributeMap}, membersElements)
-					response.Diagnostics.Append(diags...)
+					membersListValue, membersListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DnsLbPoolPoolTypeChoiceAaaaPoolMembersModelAttributeMap}, membersElements)
+					response.Diagnostics.Append(membersListDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
@@ -2815,11 +3045,8 @@ func (r *ResourceF5XCDnsLbPool) Read(ctx context.Context, request resource.ReadR
 					aaaaPoolAttributeMap["members"] = types.ListNull(types.ObjectType{AttrTypes: DnsLbPoolPoolTypeChoiceAaaaPoolMembersModelAttributeMap})
 				}
 
-				// resource specToModelNested RequiredUintField --> MaxAnswers
-				aaaaPoolAttributeMap["max_answers"] = types.Int64Value(int64(aaaaPoolOptions.AaaaPool.GetMaxAnswers()))
-
-				aaaaPoolObj, diags := types.ObjectValue(DnsLbPoolPoolTypeChoiceAaaaPoolModelAttributeMap, aaaaPoolAttributeMap)
-				response.Diagnostics.Append(diags...)
+				aaaaPoolObj, aaaaPoolObjDiags := types.ObjectValue(DnsLbPoolPoolTypeChoiceAaaaPoolModelAttributeMap, aaaaPoolAttributeMap)
+				response.Diagnostics.Append(aaaaPoolObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -2833,70 +3060,20 @@ func (r *ResourceF5XCDnsLbPool) Read(ctx context.Context, request resource.ReadR
 		// <no value>
 		// false
 		{
-			cnamePoolOptions, isCnamePool := poolTypeChoiceChoices.(*ves_io_schema_dns_lb_pool.GlobalSpecType_CnamePool)
+			cnamePoolOptionsWrapper, isCnamePool := poolTypeChoiceChoices.(*ves_io_schema_dns_lb_pool.GlobalSpecType_CnamePool)
 			cnamePoolAttributeMap := make(map[string]attr.Value)
 
-			if isCnamePool && cnamePoolOptions != nil {
-
-				// resource specToModelNested RequiredArrayOfPointerField --> Members
-				if len(cnamePoolOptions.CnamePool.GetMembers()) > 0 {
-					// Step 1: Always create a slice of model structs from the spec data.
-					// This slice serves as an intermediate representation.
-					membersElements := make([]DnsLbPoolDnsLbPoolCNAMEMember, 0, len(cnamePoolOptions.CnamePool.GetMembers()))
-					for _, membersElement := range cnamePoolOptions.CnamePool.GetMembers() {
-						dnsLbPoolDnsLbPoolCNAMEMemberModel := DnsLbPoolDnsLbPoolCNAMEMember{}
-
-						// resource specToModelNested UintField --> Priority
-						dnsLbPoolDnsLbPoolCNAMEMemberModel.Priority = types.Int64Value(int64(membersElement.GetPriority()))
-
-						// resource specToModelNested RequiredStringField --> Domain
-						if membersElement.GetDomain() != "" {
-							dnsLbPoolDnsLbPoolCNAMEMemberModel.Domain = types.StringValue(membersElement.GetDomain())
-						} else {
-							// Empty string, set to null
-							dnsLbPoolDnsLbPoolCNAMEMemberModel.Domain = types.StringNull()
-						}
-
-						// resource specToModelNested UintField --> Ratio
-						dnsLbPoolDnsLbPoolCNAMEMemberModel.Ratio = types.Int64Value(int64(membersElement.GetRatio()))
-
-						// resource specToModelNested BoolField --> FinalTranslation
-						dnsLbPoolDnsLbPoolCNAMEMemberModel.FinalTranslation = types.BoolValue(bool(membersElement.GetFinalTranslation()))
-
-						// resource specToModelNested StringField --> Name
-						if membersElement.GetName() != "" {
-							dnsLbPoolDnsLbPoolCNAMEMemberModel.Name = types.StringValue(membersElement.GetName())
-						} else {
-							// Empty string, set to null
-							dnsLbPoolDnsLbPoolCNAMEMemberModel.Name = types.StringNull()
-						}
-
-						membersElements = append(membersElements, dnsLbPoolDnsLbPoolCNAMEMemberModel)
-					}
-					// CASE 1: The target field is a `types.List` or an attribute map.
-					// The intermediate slice of structs must be converted to a `types.ListValue`.
-					membersListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DnsLbPoolPoolTypeChoiceCnamePoolMembersModelAttributeMap}, membersElements)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					cnamePoolAttributeMap["members"] = membersListValue
-
-				} else {
-					// The source list is empty or nil.
-					// CASE 1: The target field is a `types.List` or an attribute map.
-					// Assign a null `types.ListValue`.
-					cnamePoolAttributeMap["members"] = types.ListNull(types.ObjectType{AttrTypes: DnsLbPoolPoolTypeChoiceCnamePoolMembersModelAttributeMap})
-				}
+			if isCnamePool && cnamePoolOptionsWrapper != nil && cnamePoolOptionsWrapper.CnamePool != nil {
+				cnamePoolElement := cnamePoolOptionsWrapper.CnamePool
 
 				// resource specToModelNested RequiredOneOfField --> HealthCheckChoice
 				// <no value>
-				if cnamePoolOptions.CnamePool.GetHealthCheckChoice() != nil {
+				if cnamePoolElement.GetHealthCheckChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					cnamePoolhealthCheckChoiceChoicesAttributeMap := make(map[string]attr.Value)
 
 					// Define a variable for the spec choices to be passed down to nested templates
-					cnamePoolhealthCheckChoiceChoices := cnamePoolOptions.CnamePool.GetHealthCheckChoice()
+					cnamePoolhealthCheckChoiceChoices := cnamePoolElement.GetHealthCheckChoice()
 
 					// Process nested choices, populating the temporary attribute map
 
@@ -2913,37 +3090,38 @@ func (r *ResourceF5XCDnsLbPool) Read(ctx context.Context, request resource.ReadR
 					// <no value>
 					// false
 					{
-						healthCheckOptions, isHealthCheck := cnamePoolhealthCheckChoiceChoices.(*ves_io_schema_dns_lb_pool.CNAMEPool_HealthCheck)
+						healthCheckOptionsWrapper, isHealthCheck := cnamePoolhealthCheckChoiceChoices.(*ves_io_schema_dns_lb_pool.CNAMEPool_HealthCheck)
 						healthCheckAttributeMap := make(map[string]attr.Value)
 
-						if isHealthCheck && healthCheckOptions != nil {
+						if isHealthCheck && healthCheckOptionsWrapper != nil && healthCheckOptionsWrapper.HealthCheck != nil {
+							healthCheckElement := healthCheckOptionsWrapper.HealthCheck
 
 							// resource specToModelNested RequiredStringField --> Name
-							if healthCheckOptions.HealthCheck.GetName() != "" {
-								healthCheckAttributeMap["name"] = types.StringValue(healthCheckOptions.HealthCheck.GetName())
+							if healthCheckElement.GetName() != "" {
+								healthCheckAttributeMap["name"] = types.StringValue(healthCheckElement.GetName())
 							} else {
 								// Empty string, set to null
 								healthCheckAttributeMap["name"] = types.StringNull()
 							}
 
-							// resource specToModelNested StringField --> Tenant
-							if healthCheckOptions.HealthCheck.GetTenant() != "" {
-								healthCheckAttributeMap["tenant"] = types.StringValue(healthCheckOptions.HealthCheck.GetTenant())
-							} else {
-								// Empty string, set to null
-								healthCheckAttributeMap["tenant"] = types.StringNull()
-							}
-
 							// resource specToModelNested RequiredStringField --> Namespace
-							if healthCheckOptions.HealthCheck.GetNamespace() != "" {
-								healthCheckAttributeMap["namespace"] = types.StringValue(healthCheckOptions.HealthCheck.GetNamespace())
+							if healthCheckElement.GetNamespace() != "" {
+								healthCheckAttributeMap["namespace"] = types.StringValue(healthCheckElement.GetNamespace())
 							} else {
 								// Empty string, set to null
 								healthCheckAttributeMap["namespace"] = types.StringNull()
 							}
 
-							healthCheckObj, diags := types.ObjectValue(DnsLbPoolPoolTypeChoiceCnamePoolHealthCheckChoiceHealthCheckModelAttributeMap, healthCheckAttributeMap)
-							response.Diagnostics.Append(diags...)
+							// resource specToModelNested StringField --> Tenant
+							if healthCheckElement.GetTenant() != "" {
+								healthCheckAttributeMap["tenant"] = types.StringValue(healthCheckElement.GetTenant())
+							} else {
+								// Empty string, set to null
+								healthCheckAttributeMap["tenant"] = types.StringNull()
+							}
+
+							healthCheckObj, healthCheckObjDiags := types.ObjectValue(DnsLbPoolPoolTypeChoiceCnamePoolHealthCheckChoiceHealthCheckModelAttributeMap, healthCheckAttributeMap)
+							response.Diagnostics.Append(healthCheckObjDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
@@ -2972,8 +3150,59 @@ func (r *ResourceF5XCDnsLbPool) Read(ctx context.Context, request resource.ReadR
 					cnamePoolAttributeMap["health_check_choice"] = types.ObjectNull(DnsLbPoolPoolTypeChoiceCnamePoolHealthCheckChoiceModelAttributeMap)
 				}
 
-				cnamePoolObj, diags := types.ObjectValue(DnsLbPoolPoolTypeChoiceCnamePoolModelAttributeMap, cnamePoolAttributeMap)
-				response.Diagnostics.Append(diags...)
+				// resource specToModelNested RequiredArrayOfPointerField --> Members
+				if len(cnamePoolElement.GetMembers()) > 0 {
+					// Step 1: Always create a slice of model structs from the spec data.
+					// This slice serves as an intermediate representation.
+					membersElements := make([]DnsLbPoolCNAMEMember, 0, len(cnamePoolElement.GetMembers()))
+					for _, membersElement := range cnamePoolElement.GetMembers() {
+						dnsLbPoolCNAMEMemberModel := DnsLbPoolCNAMEMember{}
+
+						// resource specToModelNested RequiredStringField --> Domain
+						if membersElement.GetDomain() != "" {
+							dnsLbPoolCNAMEMemberModel.Domain = types.StringValue(membersElement.GetDomain())
+						} else {
+							// Empty string, set to null
+							dnsLbPoolCNAMEMemberModel.Domain = types.StringNull()
+						}
+
+						// resource specToModelNested BoolField --> FinalTranslation
+						dnsLbPoolCNAMEMemberModel.FinalTranslation = types.BoolValue(bool(membersElement.GetFinalTranslation()))
+
+						// resource specToModelNested StringField --> Name
+						if membersElement.GetName() != "" {
+							dnsLbPoolCNAMEMemberModel.Name = types.StringValue(membersElement.GetName())
+						} else {
+							// Empty string, set to null
+							dnsLbPoolCNAMEMemberModel.Name = types.StringNull()
+						}
+
+						// resource specToModelNested UintField --> Priority
+						dnsLbPoolCNAMEMemberModel.Priority = types.Int64Value(int64(membersElement.GetPriority()))
+
+						// resource specToModelNested UintField --> Ratio
+						dnsLbPoolCNAMEMemberModel.Ratio = types.Int64Value(int64(membersElement.GetRatio()))
+
+						membersElements = append(membersElements, dnsLbPoolCNAMEMemberModel)
+					}
+					// CASE 1: The target field is a `types.List` or an attribute map.
+					// The intermediate slice of structs must be converted to a `types.ListValue`.
+					membersListValue, membersListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DnsLbPoolPoolTypeChoiceCnamePoolMembersModelAttributeMap}, membersElements)
+					response.Diagnostics.Append(membersListDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					cnamePoolAttributeMap["members"] = membersListValue
+
+				} else {
+					// The source list is empty or nil.
+					// CASE 1: The target field is a `types.List` or an attribute map.
+					// Assign a null `types.ListValue`.
+					cnamePoolAttributeMap["members"] = types.ListNull(types.ObjectType{AttrTypes: DnsLbPoolPoolTypeChoiceCnamePoolMembersModelAttributeMap})
+				}
+
+				cnamePoolObj, cnamePoolObjDiags := types.ObjectValue(DnsLbPoolPoolTypeChoiceCnamePoolModelAttributeMap, cnamePoolAttributeMap)
+				response.Diagnostics.Append(cnamePoolObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -2987,47 +3216,51 @@ func (r *ResourceF5XCDnsLbPool) Read(ctx context.Context, request resource.ReadR
 		// <no value>
 		// false
 		{
-			mxPoolOptions, isMxPool := poolTypeChoiceChoices.(*ves_io_schema_dns_lb_pool.GlobalSpecType_MxPool)
+			mxPoolOptionsWrapper, isMxPool := poolTypeChoiceChoices.(*ves_io_schema_dns_lb_pool.GlobalSpecType_MxPool)
 			mxPoolAttributeMap := make(map[string]attr.Value)
 
-			if isMxPool && mxPoolOptions != nil {
+			if isMxPool && mxPoolOptionsWrapper != nil && mxPoolOptionsWrapper.MxPool != nil {
+				mxPoolElement := mxPoolOptionsWrapper.MxPool
+
+				// resource specToModelNested RequiredUintField --> MaxAnswers
+				mxPoolAttributeMap["max_answers"] = types.Int64Value(int64(mxPoolElement.GetMaxAnswers()))
 
 				// resource specToModelNested RequiredArrayOfPointerField --> Members
-				if len(mxPoolOptions.MxPool.GetMembers()) > 0 {
+				if len(mxPoolElement.GetMembers()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					membersElements := make([]DnsLbPoolDnsLbPoolMXMember, 0, len(mxPoolOptions.MxPool.GetMembers()))
-					for _, membersElement := range mxPoolOptions.MxPool.GetMembers() {
-						dnsLbPoolDnsLbPoolMXMemberModel := DnsLbPoolDnsLbPoolMXMember{}
-
-						// resource specToModelNested StringField --> Name
-						if membersElement.GetName() != "" {
-							dnsLbPoolDnsLbPoolMXMemberModel.Name = types.StringValue(membersElement.GetName())
-						} else {
-							// Empty string, set to null
-							dnsLbPoolDnsLbPoolMXMemberModel.Name = types.StringNull()
-						}
+					membersElements := make([]DnsLbPoolMXMember, 0, len(mxPoolElement.GetMembers()))
+					for _, membersElement := range mxPoolElement.GetMembers() {
+						dnsLbPoolMXMemberModel := DnsLbPoolMXMember{}
 
 						// resource specToModelNested RequiredStringField --> Domain
 						if membersElement.GetDomain() != "" {
-							dnsLbPoolDnsLbPoolMXMemberModel.Domain = types.StringValue(membersElement.GetDomain())
+							dnsLbPoolMXMemberModel.Domain = types.StringValue(membersElement.GetDomain())
 						} else {
 							// Empty string, set to null
-							dnsLbPoolDnsLbPoolMXMemberModel.Domain = types.StringNull()
+							dnsLbPoolMXMemberModel.Domain = types.StringNull()
+						}
+
+						// resource specToModelNested StringField --> Name
+						if membersElement.GetName() != "" {
+							dnsLbPoolMXMemberModel.Name = types.StringValue(membersElement.GetName())
+						} else {
+							// Empty string, set to null
+							dnsLbPoolMXMemberModel.Name = types.StringNull()
 						}
 
 						// resource specToModelNested UintField --> Priority
-						dnsLbPoolDnsLbPoolMXMemberModel.Priority = types.Int64Value(int64(membersElement.GetPriority()))
+						dnsLbPoolMXMemberModel.Priority = types.Int64Value(int64(membersElement.GetPriority()))
 
 						// resource specToModelNested UintField --> Ratio
-						dnsLbPoolDnsLbPoolMXMemberModel.Ratio = types.Int64Value(int64(membersElement.GetRatio()))
+						dnsLbPoolMXMemberModel.Ratio = types.Int64Value(int64(membersElement.GetRatio()))
 
-						membersElements = append(membersElements, dnsLbPoolDnsLbPoolMXMemberModel)
+						membersElements = append(membersElements, dnsLbPoolMXMemberModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
-					membersListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DnsLbPoolPoolTypeChoiceMxPoolMembersModelAttributeMap}, membersElements)
-					response.Diagnostics.Append(diags...)
+					membersListValue, membersListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DnsLbPoolPoolTypeChoiceMxPoolMembersModelAttributeMap}, membersElements)
+					response.Diagnostics.Append(membersListDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
@@ -3040,11 +3273,8 @@ func (r *ResourceF5XCDnsLbPool) Read(ctx context.Context, request resource.ReadR
 					mxPoolAttributeMap["members"] = types.ListNull(types.ObjectType{AttrTypes: DnsLbPoolPoolTypeChoiceMxPoolMembersModelAttributeMap})
 				}
 
-				// resource specToModelNested RequiredUintField --> MaxAnswers
-				mxPoolAttributeMap["max_answers"] = types.Int64Value(int64(mxPoolOptions.MxPool.GetMaxAnswers()))
-
-				mxPoolObj, diags := types.ObjectValue(DnsLbPoolPoolTypeChoiceMxPoolModelAttributeMap, mxPoolAttributeMap)
-				response.Diagnostics.Append(diags...)
+				mxPoolObj, mxPoolObjDiags := types.ObjectValue(DnsLbPoolPoolTypeChoiceMxPoolModelAttributeMap, mxPoolAttributeMap)
+				response.Diagnostics.Append(mxPoolObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -3058,56 +3288,60 @@ func (r *ResourceF5XCDnsLbPool) Read(ctx context.Context, request resource.ReadR
 		// <no value>
 		// false
 		{
-			srvPoolOptions, isSrvPool := poolTypeChoiceChoices.(*ves_io_schema_dns_lb_pool.GlobalSpecType_SrvPool)
+			srvPoolOptionsWrapper, isSrvPool := poolTypeChoiceChoices.(*ves_io_schema_dns_lb_pool.GlobalSpecType_SrvPool)
 			srvPoolAttributeMap := make(map[string]attr.Value)
 
-			if isSrvPool && srvPoolOptions != nil {
+			if isSrvPool && srvPoolOptionsWrapper != nil && srvPoolOptionsWrapper.SrvPool != nil {
+				srvPoolElement := srvPoolOptionsWrapper.SrvPool
+
+				// resource specToModelNested RequiredUintField --> MaxAnswers
+				srvPoolAttributeMap["max_answers"] = types.Int64Value(int64(srvPoolElement.GetMaxAnswers()))
 
 				// resource specToModelNested RequiredArrayOfPointerField --> Members
-				if len(srvPoolOptions.SrvPool.GetMembers()) > 0 {
+				if len(srvPoolElement.GetMembers()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					membersElements := make([]DnsLbPoolDnsLbPoolSRVMember, 0, len(srvPoolOptions.SrvPool.GetMembers()))
-					for _, membersElement := range srvPoolOptions.SrvPool.GetMembers() {
-						dnsLbPoolDnsLbPoolSRVMemberModel := DnsLbPoolDnsLbPoolSRVMember{}
-
-						// resource specToModelNested RequiredUintField --> Priority
-						dnsLbPoolDnsLbPoolSRVMemberModel.Priority = types.Int64Value(int64(membersElement.GetPriority()))
-
-						// resource specToModelNested RequiredUintField --> Weight
-						dnsLbPoolDnsLbPoolSRVMemberModel.Weight = types.Int64Value(int64(membersElement.GetWeight()))
-
-						// resource specToModelNested RequiredUintField --> Port
-						dnsLbPoolDnsLbPoolSRVMemberModel.Port = types.Int64Value(int64(membersElement.GetPort()))
-
-						// resource specToModelNested RequiredStringField --> Target
-						if membersElement.GetTarget() != "" {
-							dnsLbPoolDnsLbPoolSRVMemberModel.Target = types.StringValue(membersElement.GetTarget())
-						} else {
-							// Empty string, set to null
-							dnsLbPoolDnsLbPoolSRVMemberModel.Target = types.StringNull()
-						}
+					membersElements := make([]DnsLbPoolSRVMember, 0, len(srvPoolElement.GetMembers()))
+					for _, membersElement := range srvPoolElement.GetMembers() {
+						dnsLbPoolSRVMemberModel := DnsLbPoolSRVMember{}
 
 						// resource specToModelNested BoolField --> FinalTranslation
-						dnsLbPoolDnsLbPoolSRVMemberModel.FinalTranslation = types.BoolValue(bool(membersElement.GetFinalTranslation()))
-
-						// resource specToModelNested UintField --> Ratio
-						dnsLbPoolDnsLbPoolSRVMemberModel.Ratio = types.Int64Value(int64(membersElement.GetRatio()))
+						dnsLbPoolSRVMemberModel.FinalTranslation = types.BoolValue(bool(membersElement.GetFinalTranslation()))
 
 						// resource specToModelNested StringField --> Name
 						if membersElement.GetName() != "" {
-							dnsLbPoolDnsLbPoolSRVMemberModel.Name = types.StringValue(membersElement.GetName())
+							dnsLbPoolSRVMemberModel.Name = types.StringValue(membersElement.GetName())
 						} else {
 							// Empty string, set to null
-							dnsLbPoolDnsLbPoolSRVMemberModel.Name = types.StringNull()
+							dnsLbPoolSRVMemberModel.Name = types.StringNull()
 						}
 
-						membersElements = append(membersElements, dnsLbPoolDnsLbPoolSRVMemberModel)
+						// resource specToModelNested RequiredUintField --> Port
+						dnsLbPoolSRVMemberModel.Port = types.Int64Value(int64(membersElement.GetPort()))
+
+						// resource specToModelNested RequiredUintField --> Priority
+						dnsLbPoolSRVMemberModel.Priority = types.Int64Value(int64(membersElement.GetPriority()))
+
+						// resource specToModelNested UintField --> Ratio
+						dnsLbPoolSRVMemberModel.Ratio = types.Int64Value(int64(membersElement.GetRatio()))
+
+						// resource specToModelNested RequiredStringField --> Target
+						if membersElement.GetTarget() != "" {
+							dnsLbPoolSRVMemberModel.Target = types.StringValue(membersElement.GetTarget())
+						} else {
+							// Empty string, set to null
+							dnsLbPoolSRVMemberModel.Target = types.StringNull()
+						}
+
+						// resource specToModelNested RequiredUintField --> Weight
+						dnsLbPoolSRVMemberModel.Weight = types.Int64Value(int64(membersElement.GetWeight()))
+
+						membersElements = append(membersElements, dnsLbPoolSRVMemberModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
-					membersListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DnsLbPoolPoolTypeChoiceSrvPoolMembersModelAttributeMap}, membersElements)
-					response.Diagnostics.Append(diags...)
+					membersListValue, membersListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DnsLbPoolPoolTypeChoiceSrvPoolMembersModelAttributeMap}, membersElements)
+					response.Diagnostics.Append(membersListDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
@@ -3120,11 +3354,8 @@ func (r *ResourceF5XCDnsLbPool) Read(ctx context.Context, request resource.ReadR
 					srvPoolAttributeMap["members"] = types.ListNull(types.ObjectType{AttrTypes: DnsLbPoolPoolTypeChoiceSrvPoolMembersModelAttributeMap})
 				}
 
-				// resource specToModelNested RequiredUintField --> MaxAnswers
-				srvPoolAttributeMap["max_answers"] = types.Int64Value(int64(srvPoolOptions.SrvPool.GetMaxAnswers()))
-
-				srvPoolObj, diags := types.ObjectValue(DnsLbPoolPoolTypeChoiceSrvPoolModelAttributeMap, srvPoolAttributeMap)
-				response.Diagnostics.Append(diags...)
+				srvPoolObj, srvPoolObjDiags := types.ObjectValue(DnsLbPoolPoolTypeChoiceSrvPoolModelAttributeMap, srvPoolAttributeMap)
+				response.Diagnostics.Append(srvPoolObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -3135,36 +3366,25 @@ func (r *ResourceF5XCDnsLbPool) Read(ctx context.Context, request resource.ReadR
 		}
 
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		poolTypeChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			DnsLbPoolPoolTypeChoiceModelAttributeMap,
-			poolTypeChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
+		{
+			poolTypeChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				DnsLbPoolPoolTypeChoiceModelAttributeMap,
+				poolTypeChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
 
-		// Assign the final object to the root data model.
-		data.PoolTypeChoice = poolTypeChoiceObj
+			// Assign the final object to the root data model.
+			data.PoolTypeChoice = poolTypeChoiceObj
+		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
+		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.PoolTypeChoice = types.ObjectNull(DnsLbPoolPoolTypeChoiceModelAttributeMap)
-	}
-
-	// resource SpecToModelRoot RequiredEnumField --> LoadBalancingMode
-	if specData.GetLoadBalancingMode().String() != "" {
-		stringValue := types.StringValue(specData.GetLoadBalancingMode().String())
-		stringSlice := []types.String{stringValue}
-		listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.LoadBalancingMode = listValue
-	} else {
-		// Empty string, set to null
-		data.LoadBalancingMode = types.ListNull(types.StringType)
 	}
 
 	// resource SpecToModelRoot RequiredOneOfField --> TtlChoice
@@ -3176,7 +3396,7 @@ func (r *ResourceF5XCDnsLbPool) Read(ctx context.Context, request resource.ReadR
 		ttlChoiceChoices := specData.GetTtlChoice()
 
 		// The model struct that will be populated by the nested template.
-		var ttlChoiceChoicesModel = &DnsLbPoolGlobalSpecTypeTtlChoice{}
+		var ttlChoiceChoicesModel = &DnsLbPoolTtlChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -3200,75 +3420,25 @@ func (r *ResourceF5XCDnsLbPool) Read(ctx context.Context, request resource.ReadR
 		}
 
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		ttlChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			DnsLbPoolTtlChoiceModelAttributeMap,
-			ttlChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
+		{
+			ttlChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				DnsLbPoolTtlChoiceModelAttributeMap,
+				ttlChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
 
-		// Assign the final object to the root data model.
-		data.TtlChoice = ttlChoiceObj
+			// Assign the final object to the root data model.
+			data.TtlChoice = ttlChoiceObj
+		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
+		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.TtlChoice = types.ObjectNull(DnsLbPoolTtlChoiceModelAttributeMap)
-	}
-
-	// resource SpecToModelRoot ArrayOfPointerField --> DnsLoadBalancers
-	if len(specData.DnsLoadBalancers) > 0 {
-		dnsLoadBalancersElements := make([]ObjectRefTypeModel, 0, len(specData.DnsLoadBalancers))
-
-		for _, dnsLoadBalancersElement := range specData.DnsLoadBalancers {
-			objectRefTypeModelModel := ObjectRefTypeModel{}
-
-			// resource specToModelNested RequiredStringField --> Name
-			if dnsLoadBalancersElement.GetName() != "" {
-				objectRefTypeModelModel.Name = types.StringValue(dnsLoadBalancersElement.GetName())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Name = types.StringNull()
-			}
-
-			// resource specToModelNested StringField --> Tenant
-			if dnsLoadBalancersElement.GetTenant() != "" {
-				objectRefTypeModelModel.Tenant = types.StringValue(dnsLoadBalancersElement.GetTenant())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Tenant = types.StringNull()
-			}
-
-			// resource specToModelNested RequiredStringField --> Namespace
-			if dnsLoadBalancersElement.GetNamespace() != "" {
-				objectRefTypeModelModel.Namespace = types.StringValue(dnsLoadBalancersElement.GetNamespace())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Namespace = types.StringNull()
-			}
-
-			dnsLoadBalancersElements = append(dnsLoadBalancersElements, objectRefTypeModelModel)
-		}
-
-		dnsLoadBalancersList, diags := utils.GoStructSliceToListValue(
-			ctx,
-			DnsLbPoolDnsLoadBalancersObjectRefModelAttributeMap,
-			dnsLoadBalancersElements,
-		)
-
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-
-		data.DnsLoadBalancers = dnsLoadBalancersList
-	} else {
-		var dnsLoadBalancersObjectType = basetypes.ObjectType{
-			AttrTypes: DnsLbPoolDnsLoadBalancersObjectRefModelAttributeMap,
-		}
-		nullDnsLoadBalancersList := basetypes.NewListNull(dnsLoadBalancersObjectType)
-		data.DnsLoadBalancers = nullDnsLoadBalancersList
 	}
 
 	if response.Diagnostics.HasError() {
@@ -3288,6 +3458,25 @@ func (r *ResourceF5XCDnsLbPool) Update(ctx context.Context, request resource.Upd
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return
+	}
+	// For Optional+Computed map meta-attributes (labels, annotations), the MapMergeModifier
+	// sets the plan value to the prior state to satisfy Terraform Core's constraint
+	// (plan must equal config or prior state). We save the plan values so we can restore
+	// them after the API call — the apply result must equal the plan value.
+	// We read user-intent values from Config (not Plan) so that the API request reflects
+	// the user's actual changes (e.g. updated label values).
+	planAnnotations := data.Annotations
+	planLabels := data.Labels
+	var configData ResourceF5XCDnsLbPoolModel
+	response.Diagnostics.Append(request.Config.Get(ctx, &configData)...)
+	if response.Diagnostics.HasError() {
+		return
+	}
+	if !configData.Annotations.IsUnknown() {
+		data.Annotations = configData.Annotations
+	}
+	if !configData.Labels.IsUnknown() {
+		data.Labels = configData.Labels
 	}
 
 	duration, err := time.ParseDuration("10m0s")
@@ -3324,7 +3513,7 @@ func (r *ResourceF5XCDnsLbPool) Update(ctx context.Context, request resource.Upd
 		diags = data.Annotations.ElementsAs(ctx, &labels, false)
 		response.Diagnostics.Append(diags...)
 		if response.Diagnostics.HasError() {
-			tflog.Error(ctx, "Failed to convert annotations from map to model")
+			tflog.Error(ctx, "Failed to convert Annotations from map to model")
 			return
 		}
 		meta.Annotations = labels
@@ -3337,6 +3526,20 @@ func (r *ResourceF5XCDnsLbPool) Update(ctx context.Context, request resource.Upd
 		meta.Description = string(data.Description.ValueString())
 	}
 
+	// resource modelToMetaRoot MapOfStringField --> Labels
+	if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
+		var labels map[string]string
+		diags = data.Labels.ElementsAs(ctx, &labels, false)
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			tflog.Error(ctx, "Failed to convert Labels from map to model")
+			return
+		}
+		meta.Labels = labels
+	} else {
+		meta.Labels = nil
+	}
+
 	// resource modelToMetaRoot RequiredStringField --> Name
 	if !data.Name.IsNull() && !data.Name.IsUnknown() {
 		meta.Name = string(data.Name.ValueString())
@@ -3347,9 +3550,34 @@ func (r *ResourceF5XCDnsLbPool) Update(ctx context.Context, request resource.Upd
 		meta.Namespace = string(data.Namespace.ValueString())
 	}
 
+	// resource modelToSpecRoot RequiredEnumField --> LoadBalancingMode
+	{
+		var loadBalancingModeElements []types.String
+		diags = data.LoadBalancingMode.ElementsAs(ctx, &loadBalancingModeElements, false)
+		response.Diagnostics.Append(diags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+
+		if len(loadBalancingModeElements) > 0 {
+			loadBalancingModeStrVal := loadBalancingModeElements[0].ValueString()
+
+			if v, ok := ves_io_schema_dns_lb_pool.LoadBalancingMode_value[loadBalancingModeStrVal]; ok {
+				// Dynamic path assignment (Global vs CreateSpec)
+				spec.LoadBalancingMode = ves_io_schema_dns_lb_pool.LoadBalancingMode(v)
+			} else {
+				response.Diagnostics.AddError(
+					"Invalid Enum Value",
+					fmt.Sprintf("Value '%s' is not a valid member for ves_io_schema_dns_lb_pool.LoadBalancingMode", loadBalancingModeStrVal),
+				)
+				return
+			}
+		}
+	}
+
 	// resource modelToSpecRoot RequiredOneOfField --> PoolTypeChoice
 	if !data.PoolTypeChoice.IsNull() && !data.PoolTypeChoice.IsUnknown() {
-		poolTypeChoiceModel := DnsLbPoolGlobalSpecTypePoolTypeChoice{}
+		poolTypeChoiceModel := DnsLbPoolPoolTypeChoice{}
 		response.Diagnostics.Append(data.PoolTypeChoice.As(ctx, &poolTypeChoiceModel, basetypes.ObjectAsOptions{})...)
 		if response.Diagnostics.HasError() {
 			return
@@ -3357,8 +3585,8 @@ func (r *ResourceF5XCDnsLbPool) Update(ctx context.Context, request resource.Upd
 
 		// resource modelToSpecNested PointerOfOneOfField --> APool
 		if !poolTypeChoiceModel.APool.IsNull() && !poolTypeChoiceModel.APool.IsUnknown() {
-			var dnsLbPoolGlobalSpecTypeAPoolModel DnsLbPoolGlobalSpecTypeAPool
-			response.Diagnostics.Append(poolTypeChoiceModel.APool.As(ctx, &dnsLbPoolGlobalSpecTypeAPoolModel, basetypes.ObjectAsOptions{})...)
+			var dnsLbPoolAPoolModel DnsLbPoolAPool
+			response.Diagnostics.Append(poolTypeChoiceModel.APool.As(ctx, &dnsLbPoolAPoolModel, basetypes.ObjectAsOptions{})...)
 			if response.Diagnostics.HasError() {
 				return
 			}
@@ -3366,53 +3594,10 @@ func (r *ResourceF5XCDnsLbPool) Update(ctx context.Context, request resource.Upd
 			aPoolOneOfSpec.APool = &ves_io_schema_dns_lb_pool.APool{}
 			spec.PoolTypeChoice = aPoolOneOfSpec
 
-			// resource modelToSpecNested RequiredArrayOfPointerField --> Members
-			if !dnsLbPoolGlobalSpecTypeAPoolModel.Members.IsNull() && !dnsLbPoolGlobalSpecTypeAPoolModel.Members.IsUnknown() && len(dnsLbPoolGlobalSpecTypeAPoolModel.Members.Elements()) > 0 {
-				// 1. Convert the types.List into a slice of the model's Go struct
-				var membersElements []DnsLbPoolDnsLbPoolAddressMember
-				response.Diagnostics.Append(dnsLbPoolGlobalSpecTypeAPoolModel.Members.ElementsAs(ctx, &membersElements, false)...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// 2. Initialize the spec slice
-				membersSpec := make([]*ves_io_schema_dns_lb_pool.AddressMember, len(membersElements))
-				aPoolOneOfSpec.APool.Members = membersSpec
-
-				// 3. Iterate over the converted Go slice
-				for i, membersElement := range membersElements {
-					// Initialize the spec struct for the current element
-					aPoolOneOfSpec.APool.Members[i] = &ves_io_schema_dns_lb_pool.AddressMember{}
-
-					// Recursively process nested elements
-
-					// resource modelToSpecNested StringField --> Name
-					if !membersElement.Name.IsNull() && !membersElement.Name.IsUnknown() {
-						membersSpec[i].Name = string(membersElement.Name.ValueString())
-					}
-
-					// resource modelToSpecNested RequiredStringField --> IpEndpoint
-					if !membersElement.IpEndpoint.IsNull() && !membersElement.IpEndpoint.IsUnknown() {
-						membersSpec[i].IpEndpoint = string(membersElement.IpEndpoint.ValueString())
-					}
-
-					// resource modelToSpecNested UintField --> Ratio
-					if !membersElement.Ratio.IsNull() && !membersElement.Ratio.IsUnknown() {
-						membersSpec[i].Ratio = uint32(uint32(membersElement.Ratio.ValueInt64()))
-					}
-
-					// resource modelToSpecNested UintField --> Priority
-					if !membersElement.Priority.IsNull() && !membersElement.Priority.IsUnknown() {
-						membersSpec[i].Priority = uint32(uint32(membersElement.Priority.ValueInt64()))
-					}
-
-				}
-			}
-
 			// resource modelToSpecNested RequiredOneOfField --> HealthCheckChoice
-			if !dnsLbPoolGlobalSpecTypeAPoolModel.HealthCheckChoice.IsNull() && !dnsLbPoolGlobalSpecTypeAPoolModel.HealthCheckChoice.IsUnknown() {
-				aPoolHealthCheckChoiceModel := DnsLbPoolAPoolHealthCheckChoice{}
-				response.Diagnostics.Append(dnsLbPoolGlobalSpecTypeAPoolModel.HealthCheckChoice.As(ctx, &aPoolHealthCheckChoiceModel, basetypes.ObjectAsOptions{})...)
+			if !dnsLbPoolAPoolModel.HealthCheckChoice.IsNull() && !dnsLbPoolAPoolModel.HealthCheckChoice.IsUnknown() {
+				aPoolHealthCheckChoiceModel := DnsLbPoolHealthCheckChoice{}
+				response.Diagnostics.Append(dnsLbPoolAPoolModel.HealthCheckChoice.As(ctx, &aPoolHealthCheckChoiceModel, basetypes.ObjectAsOptions{})...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -3435,14 +3620,14 @@ func (r *ResourceF5XCDnsLbPool) Update(ctx context.Context, request resource.Upd
 					healthCheckOneOfSpec.HealthCheck = &ves_io_schema_views.ObjectRefType{}
 					aPoolOneOfSpec.APool.HealthCheckChoice = healthCheckOneOfSpec
 
-					// resource modelToSpecNested RequiredStringField --> Namespace
-					if !objectRefTypeModelModel.Namespace.IsNull() && !objectRefTypeModelModel.Namespace.IsUnknown() {
-						healthCheckOneOfSpec.HealthCheck.Namespace = string(objectRefTypeModelModel.Namespace.ValueString())
-					}
-
 					// resource modelToSpecNested RequiredStringField --> Name
 					if !objectRefTypeModelModel.Name.IsNull() && !objectRefTypeModelModel.Name.IsUnknown() {
 						healthCheckOneOfSpec.HealthCheck.Name = string(objectRefTypeModelModel.Name.ValueString())
+					}
+
+					// resource modelToSpecNested RequiredStringField --> Namespace
+					if !objectRefTypeModelModel.Namespace.IsNull() && !objectRefTypeModelModel.Namespace.IsUnknown() {
+						healthCheckOneOfSpec.HealthCheck.Namespace = string(objectRefTypeModelModel.Namespace.ValueString())
 					}
 
 				}
@@ -3450,14 +3635,61 @@ func (r *ResourceF5XCDnsLbPool) Update(ctx context.Context, request resource.Upd
 			}
 
 			// resource modelToSpecNested RequiredUintField --> MaxAnswers
-			aPoolOneOfSpec.APool.MaxAnswers = uint32(uint32(dnsLbPoolGlobalSpecTypeAPoolModel.MaxAnswers.ValueInt64()))
+			aPoolOneOfSpec.APool.MaxAnswers = uint32(uint32(dnsLbPoolAPoolModel.MaxAnswers.ValueInt64()))
+
+			// resource modelToSpecNested RequiredArrayOfPointerField --> Members
+			if !dnsLbPoolAPoolModel.Members.IsNull() && !dnsLbPoolAPoolModel.Members.IsUnknown() && len(dnsLbPoolAPoolModel.Members.Elements()) > 0 {
+				// 1. Convert the types.List into a slice of the model's Go struct
+				var membersElements []DnsLbPoolAddrMember
+				response.Diagnostics.Append(dnsLbPoolAPoolModel.Members.ElementsAs(ctx, &membersElements, false)...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				// 2. Initialize the spec slice
+				membersSpec := make([]*ves_io_schema_dns_lb_pool.AddressMember, len(membersElements))
+				aPoolOneOfSpec.APool.Members = membersSpec
+
+				// 3. Iterate over the converted Go slice
+				for i, membersElement := range membersElements {
+					// Initialize the spec struct for the current element
+					aPoolOneOfSpec.APool.Members[i] = &ves_io_schema_dns_lb_pool.AddressMember{}
+
+					// Recursively process nested elements
+
+					// resource modelToSpecNested RequiredStringField --> IpEndpoint
+					if !membersElement.IpEndpoint.IsNull() && !membersElement.IpEndpoint.IsUnknown() {
+						aPoolOneOfSpec.APool.Members[i].IpEndpoint = string(membersElement.IpEndpoint.ValueString())
+					}
+
+					// resource modelToSpecNested StringField --> Name
+					if !membersElement.Name.IsNull() && !membersElement.Name.IsUnknown() {
+						aPoolOneOfSpec.APool.Members[i].Name = string(membersElement.Name.ValueString())
+					}
+
+					// resource modelToSpecNested UintField --> Priority
+					if !membersElement.Priority.IsNull() && !membersElement.Priority.IsUnknown() {
+						aPoolOneOfSpec.APool.Members[i].Priority = uint32(uint32(membersElement.Priority.ValueInt64()))
+					} else {
+						aPoolOneOfSpec.APool.Members[i].Priority = uint32(10)
+					}
+
+					// resource modelToSpecNested UintField --> Ratio
+					if !membersElement.Ratio.IsNull() && !membersElement.Ratio.IsUnknown() {
+						aPoolOneOfSpec.APool.Members[i].Ratio = uint32(uint32(membersElement.Ratio.ValueInt64()))
+					} else {
+						aPoolOneOfSpec.APool.Members[i].Ratio = uint32(1)
+					}
+
+				}
+			}
 
 		}
 
 		// resource modelToSpecNested PointerOfOneOfField --> AaaaPool
 		if !poolTypeChoiceModel.AaaaPool.IsNull() && !poolTypeChoiceModel.AaaaPool.IsUnknown() {
-			var dnsLbPoolGlobalSpecTypeAaaaPoolModel DnsLbPoolGlobalSpecTypeAaaaPool
-			response.Diagnostics.Append(poolTypeChoiceModel.AaaaPool.As(ctx, &dnsLbPoolGlobalSpecTypeAaaaPoolModel, basetypes.ObjectAsOptions{})...)
+			var dnsLbPoolAaaaPoolModel DnsLbPoolAaaaPool
+			response.Diagnostics.Append(poolTypeChoiceModel.AaaaPool.As(ctx, &dnsLbPoolAaaaPoolModel, basetypes.ObjectAsOptions{})...)
 			if response.Diagnostics.HasError() {
 				return
 			}
@@ -3465,11 +3697,14 @@ func (r *ResourceF5XCDnsLbPool) Update(ctx context.Context, request resource.Upd
 			aaaaPoolOneOfSpec.AaaaPool = &ves_io_schema_dns_lb_pool.AAAAPool{}
 			spec.PoolTypeChoice = aaaaPoolOneOfSpec
 
+			// resource modelToSpecNested RequiredUintField --> MaxAnswers
+			aaaaPoolOneOfSpec.AaaaPool.MaxAnswers = uint32(uint32(dnsLbPoolAaaaPoolModel.MaxAnswers.ValueInt64()))
+
 			// resource modelToSpecNested RequiredArrayOfPointerField --> Members
-			if !dnsLbPoolGlobalSpecTypeAaaaPoolModel.Members.IsNull() && !dnsLbPoolGlobalSpecTypeAaaaPoolModel.Members.IsUnknown() && len(dnsLbPoolGlobalSpecTypeAaaaPoolModel.Members.Elements()) > 0 {
+			if !dnsLbPoolAaaaPoolModel.Members.IsNull() && !dnsLbPoolAaaaPoolModel.Members.IsUnknown() && len(dnsLbPoolAaaaPoolModel.Members.Elements()) > 0 {
 				// 1. Convert the types.List into a slice of the model's Go struct
-				var membersElements []DnsLbPoolDnsLbPoolAddressMember
-				response.Diagnostics.Append(dnsLbPoolGlobalSpecTypeAaaaPoolModel.Members.ElementsAs(ctx, &membersElements, false)...)
+				var membersElements []DnsLbPoolAddrMember
+				response.Diagnostics.Append(dnsLbPoolAaaaPoolModel.Members.ElementsAs(ctx, &membersElements, false)...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -3487,36 +3722,37 @@ func (r *ResourceF5XCDnsLbPool) Update(ctx context.Context, request resource.Upd
 
 					// resource modelToSpecNested RequiredStringField --> IpEndpoint
 					if !membersElement.IpEndpoint.IsNull() && !membersElement.IpEndpoint.IsUnknown() {
-						membersSpec[i].IpEndpoint = string(membersElement.IpEndpoint.ValueString())
-					}
-
-					// resource modelToSpecNested UintField --> Ratio
-					if !membersElement.Ratio.IsNull() && !membersElement.Ratio.IsUnknown() {
-						membersSpec[i].Ratio = uint32(uint32(membersElement.Ratio.ValueInt64()))
-					}
-
-					// resource modelToSpecNested UintField --> Priority
-					if !membersElement.Priority.IsNull() && !membersElement.Priority.IsUnknown() {
-						membersSpec[i].Priority = uint32(uint32(membersElement.Priority.ValueInt64()))
+						aaaaPoolOneOfSpec.AaaaPool.Members[i].IpEndpoint = string(membersElement.IpEndpoint.ValueString())
 					}
 
 					// resource modelToSpecNested StringField --> Name
 					if !membersElement.Name.IsNull() && !membersElement.Name.IsUnknown() {
-						membersSpec[i].Name = string(membersElement.Name.ValueString())
+						aaaaPoolOneOfSpec.AaaaPool.Members[i].Name = string(membersElement.Name.ValueString())
+					}
+
+					// resource modelToSpecNested UintField --> Priority
+					if !membersElement.Priority.IsNull() && !membersElement.Priority.IsUnknown() {
+						aaaaPoolOneOfSpec.AaaaPool.Members[i].Priority = uint32(uint32(membersElement.Priority.ValueInt64()))
+					} else {
+						aaaaPoolOneOfSpec.AaaaPool.Members[i].Priority = uint32(10)
+					}
+
+					// resource modelToSpecNested UintField --> Ratio
+					if !membersElement.Ratio.IsNull() && !membersElement.Ratio.IsUnknown() {
+						aaaaPoolOneOfSpec.AaaaPool.Members[i].Ratio = uint32(uint32(membersElement.Ratio.ValueInt64()))
+					} else {
+						aaaaPoolOneOfSpec.AaaaPool.Members[i].Ratio = uint32(1)
 					}
 
 				}
 			}
 
-			// resource modelToSpecNested RequiredUintField --> MaxAnswers
-			aaaaPoolOneOfSpec.AaaaPool.MaxAnswers = uint32(uint32(dnsLbPoolGlobalSpecTypeAaaaPoolModel.MaxAnswers.ValueInt64()))
-
 		}
 
 		// resource modelToSpecNested PointerOfOneOfField --> CnamePool
 		if !poolTypeChoiceModel.CnamePool.IsNull() && !poolTypeChoiceModel.CnamePool.IsUnknown() {
-			var dnsLbPoolGlobalSpecTypeCnamePoolModel DnsLbPoolGlobalSpecTypeCnamePool
-			response.Diagnostics.Append(poolTypeChoiceModel.CnamePool.As(ctx, &dnsLbPoolGlobalSpecTypeCnamePoolModel, basetypes.ObjectAsOptions{})...)
+			var dnsLbPoolCnamePoolModel DnsLbPoolCnamePool
+			response.Diagnostics.Append(poolTypeChoiceModel.CnamePool.As(ctx, &dnsLbPoolCnamePoolModel, basetypes.ObjectAsOptions{})...)
 			if response.Diagnostics.HasError() {
 				return
 			}
@@ -3524,58 +3760,10 @@ func (r *ResourceF5XCDnsLbPool) Update(ctx context.Context, request resource.Upd
 			cnamePoolOneOfSpec.CnamePool = &ves_io_schema_dns_lb_pool.CNAMEPool{}
 			spec.PoolTypeChoice = cnamePoolOneOfSpec
 
-			// resource modelToSpecNested RequiredArrayOfPointerField --> Members
-			if !dnsLbPoolGlobalSpecTypeCnamePoolModel.Members.IsNull() && !dnsLbPoolGlobalSpecTypeCnamePoolModel.Members.IsUnknown() && len(dnsLbPoolGlobalSpecTypeCnamePoolModel.Members.Elements()) > 0 {
-				// 1. Convert the types.List into a slice of the model's Go struct
-				var membersElements []DnsLbPoolDnsLbPoolCNAMEMember
-				response.Diagnostics.Append(dnsLbPoolGlobalSpecTypeCnamePoolModel.Members.ElementsAs(ctx, &membersElements, false)...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-
-				// 2. Initialize the spec slice
-				membersSpec := make([]*ves_io_schema_dns_lb_pool.CNAMEMember, len(membersElements))
-				cnamePoolOneOfSpec.CnamePool.Members = membersSpec
-
-				// 3. Iterate over the converted Go slice
-				for i, membersElement := range membersElements {
-					// Initialize the spec struct for the current element
-					cnamePoolOneOfSpec.CnamePool.Members[i] = &ves_io_schema_dns_lb_pool.CNAMEMember{}
-
-					// Recursively process nested elements
-
-					// resource modelToSpecNested UintField --> Priority
-					if !membersElement.Priority.IsNull() && !membersElement.Priority.IsUnknown() {
-						membersSpec[i].Priority = uint32(uint32(membersElement.Priority.ValueInt64()))
-					}
-
-					// resource modelToSpecNested RequiredStringField --> Domain
-					if !membersElement.Domain.IsNull() && !membersElement.Domain.IsUnknown() {
-						membersSpec[i].Domain = string(membersElement.Domain.ValueString())
-					}
-
-					// resource modelToSpecNested UintField --> Ratio
-					if !membersElement.Ratio.IsNull() && !membersElement.Ratio.IsUnknown() {
-						membersSpec[i].Ratio = uint32(uint32(membersElement.Ratio.ValueInt64()))
-					}
-
-					// resource modelToSpecNested BoolField --> FinalTranslation
-					if !membersElement.FinalTranslation.IsNull() && !membersElement.FinalTranslation.IsUnknown() {
-						membersSpec[i].FinalTranslation = bool(membersElement.FinalTranslation.ValueBool())
-					}
-
-					// resource modelToSpecNested StringField --> Name
-					if !membersElement.Name.IsNull() && !membersElement.Name.IsUnknown() {
-						membersSpec[i].Name = string(membersElement.Name.ValueString())
-					}
-
-				}
-			}
-
 			// resource modelToSpecNested RequiredOneOfField --> HealthCheckChoice
-			if !dnsLbPoolGlobalSpecTypeCnamePoolModel.HealthCheckChoice.IsNull() && !dnsLbPoolGlobalSpecTypeCnamePoolModel.HealthCheckChoice.IsUnknown() {
+			if !dnsLbPoolCnamePoolModel.HealthCheckChoice.IsNull() && !dnsLbPoolCnamePoolModel.HealthCheckChoice.IsUnknown() {
 				cnamePoolHealthCheckChoiceModel := DnsLbPoolCNAMEPoolHealthCheckChoice{}
-				response.Diagnostics.Append(dnsLbPoolGlobalSpecTypeCnamePoolModel.HealthCheckChoice.As(ctx, &cnamePoolHealthCheckChoiceModel, basetypes.ObjectAsOptions{})...)
+				response.Diagnostics.Append(dnsLbPoolCnamePoolModel.HealthCheckChoice.As(ctx, &cnamePoolHealthCheckChoiceModel, basetypes.ObjectAsOptions{})...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -3612,12 +3800,66 @@ func (r *ResourceF5XCDnsLbPool) Update(ctx context.Context, request resource.Upd
 
 			}
 
+			// resource modelToSpecNested RequiredArrayOfPointerField --> Members
+			if !dnsLbPoolCnamePoolModel.Members.IsNull() && !dnsLbPoolCnamePoolModel.Members.IsUnknown() && len(dnsLbPoolCnamePoolModel.Members.Elements()) > 0 {
+				// 1. Convert the types.List into a slice of the model's Go struct
+				var membersElements []DnsLbPoolCNAMEMember
+				response.Diagnostics.Append(dnsLbPoolCnamePoolModel.Members.ElementsAs(ctx, &membersElements, false)...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+
+				// 2. Initialize the spec slice
+				membersSpec := make([]*ves_io_schema_dns_lb_pool.CNAMEMember, len(membersElements))
+				cnamePoolOneOfSpec.CnamePool.Members = membersSpec
+
+				// 3. Iterate over the converted Go slice
+				for i, membersElement := range membersElements {
+					// Initialize the spec struct for the current element
+					cnamePoolOneOfSpec.CnamePool.Members[i] = &ves_io_schema_dns_lb_pool.CNAMEMember{}
+
+					// Recursively process nested elements
+
+					// resource modelToSpecNested RequiredStringField --> Domain
+					if !membersElement.Domain.IsNull() && !membersElement.Domain.IsUnknown() {
+						cnamePoolOneOfSpec.CnamePool.Members[i].Domain = string(membersElement.Domain.ValueString())
+					}
+
+					// resource modelToSpecNested BoolField --> FinalTranslation
+					if !membersElement.FinalTranslation.IsNull() && !membersElement.FinalTranslation.IsUnknown() {
+						cnamePoolOneOfSpec.CnamePool.Members[i].FinalTranslation = bool(membersElement.FinalTranslation.ValueBool())
+					} else {
+						cnamePoolOneOfSpec.CnamePool.Members[i].FinalTranslation = bool(false)
+					}
+
+					// resource modelToSpecNested StringField --> Name
+					if !membersElement.Name.IsNull() && !membersElement.Name.IsUnknown() {
+						cnamePoolOneOfSpec.CnamePool.Members[i].Name = string(membersElement.Name.ValueString())
+					}
+
+					// resource modelToSpecNested UintField --> Priority
+					if !membersElement.Priority.IsNull() && !membersElement.Priority.IsUnknown() {
+						cnamePoolOneOfSpec.CnamePool.Members[i].Priority = uint32(uint32(membersElement.Priority.ValueInt64()))
+					} else {
+						cnamePoolOneOfSpec.CnamePool.Members[i].Priority = uint32(10)
+					}
+
+					// resource modelToSpecNested UintField --> Ratio
+					if !membersElement.Ratio.IsNull() && !membersElement.Ratio.IsUnknown() {
+						cnamePoolOneOfSpec.CnamePool.Members[i].Ratio = uint32(uint32(membersElement.Ratio.ValueInt64()))
+					} else {
+						cnamePoolOneOfSpec.CnamePool.Members[i].Ratio = uint32(1)
+					}
+
+				}
+			}
+
 		}
 
 		// resource modelToSpecNested PointerOfOneOfField --> MxPool
 		if !poolTypeChoiceModel.MxPool.IsNull() && !poolTypeChoiceModel.MxPool.IsUnknown() {
-			var dnsLbPoolGlobalSpecTypeMxPoolModel DnsLbPoolGlobalSpecTypeMxPool
-			response.Diagnostics.Append(poolTypeChoiceModel.MxPool.As(ctx, &dnsLbPoolGlobalSpecTypeMxPoolModel, basetypes.ObjectAsOptions{})...)
+			var dnsLbPoolMxPoolModel DnsLbPoolMxPool
+			response.Diagnostics.Append(poolTypeChoiceModel.MxPool.As(ctx, &dnsLbPoolMxPoolModel, basetypes.ObjectAsOptions{})...)
 			if response.Diagnostics.HasError() {
 				return
 			}
@@ -3625,11 +3867,14 @@ func (r *ResourceF5XCDnsLbPool) Update(ctx context.Context, request resource.Upd
 			mxPoolOneOfSpec.MxPool = &ves_io_schema_dns_lb_pool.MXPool{}
 			spec.PoolTypeChoice = mxPoolOneOfSpec
 
+			// resource modelToSpecNested RequiredUintField --> MaxAnswers
+			mxPoolOneOfSpec.MxPool.MaxAnswers = uint32(uint32(dnsLbPoolMxPoolModel.MaxAnswers.ValueInt64()))
+
 			// resource modelToSpecNested RequiredArrayOfPointerField --> Members
-			if !dnsLbPoolGlobalSpecTypeMxPoolModel.Members.IsNull() && !dnsLbPoolGlobalSpecTypeMxPoolModel.Members.IsUnknown() && len(dnsLbPoolGlobalSpecTypeMxPoolModel.Members.Elements()) > 0 {
+			if !dnsLbPoolMxPoolModel.Members.IsNull() && !dnsLbPoolMxPoolModel.Members.IsUnknown() && len(dnsLbPoolMxPoolModel.Members.Elements()) > 0 {
 				// 1. Convert the types.List into a slice of the model's Go struct
-				var membersElements []DnsLbPoolDnsLbPoolMXMember
-				response.Diagnostics.Append(dnsLbPoolGlobalSpecTypeMxPoolModel.Members.ElementsAs(ctx, &membersElements, false)...)
+				var membersElements []DnsLbPoolMXMember
+				response.Diagnostics.Append(dnsLbPoolMxPoolModel.Members.ElementsAs(ctx, &membersElements, false)...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -3645,38 +3890,39 @@ func (r *ResourceF5XCDnsLbPool) Update(ctx context.Context, request resource.Upd
 
 					// Recursively process nested elements
 
-					// resource modelToSpecNested StringField --> Name
-					if !membersElement.Name.IsNull() && !membersElement.Name.IsUnknown() {
-						membersSpec[i].Name = string(membersElement.Name.ValueString())
-					}
-
 					// resource modelToSpecNested RequiredStringField --> Domain
 					if !membersElement.Domain.IsNull() && !membersElement.Domain.IsUnknown() {
-						membersSpec[i].Domain = string(membersElement.Domain.ValueString())
+						mxPoolOneOfSpec.MxPool.Members[i].Domain = string(membersElement.Domain.ValueString())
+					}
+
+					// resource modelToSpecNested StringField --> Name
+					if !membersElement.Name.IsNull() && !membersElement.Name.IsUnknown() {
+						mxPoolOneOfSpec.MxPool.Members[i].Name = string(membersElement.Name.ValueString())
 					}
 
 					// resource modelToSpecNested UintField --> Priority
 					if !membersElement.Priority.IsNull() && !membersElement.Priority.IsUnknown() {
-						membersSpec[i].Priority = uint32(uint32(membersElement.Priority.ValueInt64()))
+						mxPoolOneOfSpec.MxPool.Members[i].Priority = uint32(uint32(membersElement.Priority.ValueInt64()))
+					} else {
+						mxPoolOneOfSpec.MxPool.Members[i].Priority = uint32(10)
 					}
 
 					// resource modelToSpecNested UintField --> Ratio
 					if !membersElement.Ratio.IsNull() && !membersElement.Ratio.IsUnknown() {
-						membersSpec[i].Ratio = uint32(uint32(membersElement.Ratio.ValueInt64()))
+						mxPoolOneOfSpec.MxPool.Members[i].Ratio = uint32(uint32(membersElement.Ratio.ValueInt64()))
+					} else {
+						mxPoolOneOfSpec.MxPool.Members[i].Ratio = uint32(1)
 					}
 
 				}
 			}
 
-			// resource modelToSpecNested RequiredUintField --> MaxAnswers
-			mxPoolOneOfSpec.MxPool.MaxAnswers = uint32(uint32(dnsLbPoolGlobalSpecTypeMxPoolModel.MaxAnswers.ValueInt64()))
-
 		}
 
 		// resource modelToSpecNested PointerOfOneOfField --> SrvPool
 		if !poolTypeChoiceModel.SrvPool.IsNull() && !poolTypeChoiceModel.SrvPool.IsUnknown() {
-			var dnsLbPoolGlobalSpecTypeSrvPoolModel DnsLbPoolGlobalSpecTypeSrvPool
-			response.Diagnostics.Append(poolTypeChoiceModel.SrvPool.As(ctx, &dnsLbPoolGlobalSpecTypeSrvPoolModel, basetypes.ObjectAsOptions{})...)
+			var dnsLbPoolSrvPoolModel DnsLbPoolSrvPool
+			response.Diagnostics.Append(poolTypeChoiceModel.SrvPool.As(ctx, &dnsLbPoolSrvPoolModel, basetypes.ObjectAsOptions{})...)
 			if response.Diagnostics.HasError() {
 				return
 			}
@@ -3684,11 +3930,14 @@ func (r *ResourceF5XCDnsLbPool) Update(ctx context.Context, request resource.Upd
 			srvPoolOneOfSpec.SrvPool = &ves_io_schema_dns_lb_pool.SRVPool{}
 			spec.PoolTypeChoice = srvPoolOneOfSpec
 
+			// resource modelToSpecNested RequiredUintField --> MaxAnswers
+			srvPoolOneOfSpec.SrvPool.MaxAnswers = uint32(uint32(dnsLbPoolSrvPoolModel.MaxAnswers.ValueInt64()))
+
 			// resource modelToSpecNested RequiredArrayOfPointerField --> Members
-			if !dnsLbPoolGlobalSpecTypeSrvPoolModel.Members.IsNull() && !dnsLbPoolGlobalSpecTypeSrvPoolModel.Members.IsUnknown() && len(dnsLbPoolGlobalSpecTypeSrvPoolModel.Members.Elements()) > 0 {
+			if !dnsLbPoolSrvPoolModel.Members.IsNull() && !dnsLbPoolSrvPoolModel.Members.IsUnknown() && len(dnsLbPoolSrvPoolModel.Members.Elements()) > 0 {
 				// 1. Convert the types.List into a slice of the model's Go struct
-				var membersElements []DnsLbPoolDnsLbPoolSRVMember
-				response.Diagnostics.Append(dnsLbPoolGlobalSpecTypeSrvPoolModel.Members.ElementsAs(ctx, &membersElements, false)...)
+				var membersElements []DnsLbPoolSRVMember
+				response.Diagnostics.Append(dnsLbPoolSrvPoolModel.Members.ElementsAs(ctx, &membersElements, false)...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -3704,73 +3953,49 @@ func (r *ResourceF5XCDnsLbPool) Update(ctx context.Context, request resource.Upd
 
 					// Recursively process nested elements
 
-					// resource modelToSpecNested RequiredUintField --> Priority
-					membersSpec[i].Priority = uint32(uint32(membersElement.Priority.ValueInt64()))
-
-					// resource modelToSpecNested RequiredUintField --> Weight
-					membersSpec[i].Weight = uint32(uint32(membersElement.Weight.ValueInt64()))
-
-					// resource modelToSpecNested RequiredUintField --> Port
-					membersSpec[i].Port = uint32(uint32(membersElement.Port.ValueInt64()))
-
-					// resource modelToSpecNested RequiredStringField --> Target
-					if !membersElement.Target.IsNull() && !membersElement.Target.IsUnknown() {
-						membersSpec[i].Target = string(membersElement.Target.ValueString())
-					}
-
 					// resource modelToSpecNested BoolField --> FinalTranslation
 					if !membersElement.FinalTranslation.IsNull() && !membersElement.FinalTranslation.IsUnknown() {
-						membersSpec[i].FinalTranslation = bool(membersElement.FinalTranslation.ValueBool())
-					}
-
-					// resource modelToSpecNested UintField --> Ratio
-					if !membersElement.Ratio.IsNull() && !membersElement.Ratio.IsUnknown() {
-						membersSpec[i].Ratio = uint32(uint32(membersElement.Ratio.ValueInt64()))
+						srvPoolOneOfSpec.SrvPool.Members[i].FinalTranslation = bool(membersElement.FinalTranslation.ValueBool())
+					} else {
+						srvPoolOneOfSpec.SrvPool.Members[i].FinalTranslation = bool(false)
 					}
 
 					// resource modelToSpecNested StringField --> Name
 					if !membersElement.Name.IsNull() && !membersElement.Name.IsUnknown() {
-						membersSpec[i].Name = string(membersElement.Name.ValueString())
+						srvPoolOneOfSpec.SrvPool.Members[i].Name = string(membersElement.Name.ValueString())
 					}
+
+					// resource modelToSpecNested RequiredUintField --> Port
+					srvPoolOneOfSpec.SrvPool.Members[i].Port = uint32(uint32(membersElement.Port.ValueInt64()))
+
+					// resource modelToSpecNested RequiredUintField --> Priority
+					srvPoolOneOfSpec.SrvPool.Members[i].Priority = uint32(uint32(membersElement.Priority.ValueInt64()))
+
+					// resource modelToSpecNested UintField --> Ratio
+					if !membersElement.Ratio.IsNull() && !membersElement.Ratio.IsUnknown() {
+						srvPoolOneOfSpec.SrvPool.Members[i].Ratio = uint32(uint32(membersElement.Ratio.ValueInt64()))
+					} else {
+						srvPoolOneOfSpec.SrvPool.Members[i].Ratio = uint32(1)
+					}
+
+					// resource modelToSpecNested RequiredStringField --> Target
+					if !membersElement.Target.IsNull() && !membersElement.Target.IsUnknown() {
+						srvPoolOneOfSpec.SrvPool.Members[i].Target = string(membersElement.Target.ValueString())
+					}
+
+					// resource modelToSpecNested RequiredUintField --> Weight
+					srvPoolOneOfSpec.SrvPool.Members[i].Weight = uint32(uint32(membersElement.Weight.ValueInt64()))
 
 				}
 			}
 
-			// resource modelToSpecNested RequiredUintField --> MaxAnswers
-			srvPoolOneOfSpec.SrvPool.MaxAnswers = uint32(uint32(dnsLbPoolGlobalSpecTypeSrvPoolModel.MaxAnswers.ValueInt64()))
-
 		}
 
-	}
-
-	// resource modelToSpecRoot RequiredEnumField --> LoadBalancingMode
-	{
-		var loadBalancingModeElements []types.String
-		diags = data.LoadBalancingMode.ElementsAs(ctx, &loadBalancingModeElements, false)
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-
-		if len(loadBalancingModeElements) > 0 {
-			loadBalancingModeStrVal := loadBalancingModeElements[0].ValueString()
-
-			if v, ok := ves_io_schema_dns_lb_pool.LoadBalancingMode_value[loadBalancingModeStrVal]; ok {
-				// Dynamic path assignment (Global vs CreateSpec)
-				spec.LoadBalancingMode = ves_io_schema_dns_lb_pool.LoadBalancingMode(v)
-			} else {
-				response.Diagnostics.AddError(
-					"Invalid Enum Value",
-					fmt.Sprintf("Value '%s' is not a valid member for ves_io_schema_dns_lb_pool.LoadBalancingMode", loadBalancingModeStrVal),
-				)
-				return
-			}
-		}
 	}
 
 	// resource modelToSpecRoot RequiredOneOfField --> TtlChoice
 	if !data.TtlChoice.IsNull() && !data.TtlChoice.IsUnknown() {
-		ttlChoiceModel := DnsLbPoolGlobalSpecTypeTtlChoice{}
+		ttlChoiceModel := DnsLbPoolTtlChoice{}
 		response.Diagnostics.Append(data.TtlChoice.As(ctx, &ttlChoiceModel, basetypes.ObjectAsOptions{})...)
 		if response.Diagnostics.HasError() {
 			return
@@ -3790,6 +4015,12 @@ func (r *ResourceF5XCDnsLbPool) Update(ctx context.Context, request resource.Upd
 			spec.TtlChoice = useRrsetTtlSpecBool
 		}
 
+	}
+	// Strip backend-injected label keys that must not be sent in Create/Update requests.
+	// These keys are stored in state (for drift-free plans) but must be omitted from the
+	// API payload because the backend rejects them (e.g. "ves.io/config-propagation-destination").
+	for _, _omitKey := range []string{"ves.io/config-propagation-destination"} {
+		delete(meta.Labels, _omitKey)
 	}
 
 	if response.Diagnostics.HasError() {
@@ -3826,111 +4057,188 @@ func (r *ResourceF5XCDnsLbPool) Update(ctx context.Context, request resource.Upd
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
 
-	// resource SpecToModelRoot Meta StringField --> Uid
-	data.Uid = types.StringValue(systemMetaData.GetUid())
-
-	// resource SpecToModelRoot Meta MapOfStringField --> Labels
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
-	//
-	// Create/Update (called from Create/Update handlers):
-	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
-	//
-	// Read (called from Read handler):
-	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedLabels := make(map[string]attr.Value)
-		for k, v := range labelsMap.Elements() {
-			mergedLabels[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Labels.IsNull() && !data.Labels.IsUnknown() {
-			for k, v := range data.Labels.Elements() {
-				mergedLabels[k] = v
-			}
-		}
-		mergedLabelsMap, mergedLabelsDiags := types.MapValue(types.StringType, mergedLabels)
-		response.Diagnostics.Append(mergedLabelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Labels = mergedLabelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
-
 	// resource SpecToModelRoot Meta MapOfStringField --> Annotations
-	// Labels are Optional+Computed. The MapMergeModifier ensures the plan never causes
-	// a "Provider produced invalid plan" or "inconsistent result after apply" error.
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
 	//
-	// Create/Update (called from Create/Update handlers):
+	// Supported scenarios:
 	//
-	//	The apply result must match the plan exactly. We store only what the plan
-	//	contained. Backend-injected keys (e.g. "ves.io/provider") that were not in
-	//	the plan are intentionally omitted here — they will be picked up by Read.
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
 	//
-	// Read (called from Read handler):
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
 	//
-	//	We merge the current state (user-configured labels) with the API response
-	//	(which may contain backend-injected labels). The merged result is stored in
-	//	state. On the next plan, the MapMergeModifier sets plan=state (merged), so
-	//	Terraform sees no diff and no "inconsistent result" error occurs.
-	if metaData.GetAnnotations() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
-		response.Diagnostics.Append(annotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// READ: Merge user-configured labels (current state) with backend-injected labels (API response).
-		// Start with the API response as the base (backend is authoritative for its own keys).
-		mergedAnnotations := make(map[string]attr.Value)
-		for k, v := range annotationsMap.Elements() {
-			mergedAnnotations[k] = v
-		}
-		// Overlay with user-configured labels from the current state so that user labels
-		// are preserved even if the backend does not echo them back.
-		if !data.Annotations.IsNull() && !data.Annotations.IsUnknown() {
-			for k, v := range data.Annotations.Elements() {
-				mergedAnnotations[k] = v
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		annotationsApiMap := metaData.GetAnnotations()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Annotations already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Annotations.IsUnknown() {
+			if len(annotationsApiMap) > 0 {
+				annotationsMap, annotationsDiags := utils.StringMapToTerraformMap(metaData.GetAnnotations())
+				response.Diagnostics.Append(annotationsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Annotations = annotationsMap
+			} else {
+				data.Annotations = types.MapNull(types.StringType)
 			}
 		}
-		mergedAnnotationsMap, mergedAnnotationsDiags := types.MapValue(types.StringType, mergedAnnotations)
-		response.Diagnostics.Append(mergedAnnotationsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.Annotations = mergedAnnotationsMap
-	} else if data.Annotations.IsNull() || data.Annotations.IsUnknown() {
-		// API returned nil. Set an explicit Null map to avoid DynamicPseudoType errors.
-		data.Annotations = types.MapNull(types.StringType)
+		// When plan is a known map (user labels or merged prior state), leave data.Annotations
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
 	}
 
 	// resource SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
+
+	// resource SpecToModelRoot Meta MapOfStringField --> Labels
+	// Labels/Annotations are Optional+Computed. The MapMergeModifier handles plan-level
+	// merging to preserve backend-injected keys (e.g. "ves.io/provider") across updates.
+	//
+	// Supported scenarios:
+	//
+	//  1. First Create (user sets labels, no prior state):
+	//     Plan = user labels only (MapMergeModifier: null ∪ config).
+	//     Apply result must match plan → store only plan value (leave data.X unchanged).
+	//     Backend-injected keys (e.g. "ves.io/provider") are NOT in the plan and must NOT
+	//     be stored here — they will be picked up by the subsequent Read.
+	//
+	//  2. First Create (no labels configured, no prior state):
+	//     Plan = unknown (Computed). Apply result may be anything → store full API response.
+	//
+	//  3. Update (prior state contains merged labels incl. backend-injected keys):
+	//     Plan = MapMergeModifier merges prior state ∪ config (includes "ves.io/provider").
+	//     Apply result = same merged map → store plan value (leave data.X unchanged).
+	//
+	//  4. Read (called from Read handler):
+	//     Always store the full API response so backend-injected keys are captured in state.
+	//     On the next plan, MapMergeModifier will merge them with the user config.
+	//
+	//  5. Import (prior state is null):
+	//     Plan = unknown → falls through to API response path (same as scenario 2).
+	{
+		labelsApiMap := metaData.GetLabels()
+		// CREATE / UPDATE: store the plan value as-is so the apply result matches the plan.
+		// data.Labels already holds the correct plan value except when
+		// it is Unknown (config=null on first create) — in that case use the API response.
+		if data.Labels.IsUnknown() {
+			if len(labelsApiMap) > 0 {
+				labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+				response.Diagnostics.Append(labelsDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				data.Labels = labelsMap
+			} else {
+				data.Labels = types.MapNull(types.StringType)
+			}
+		}
+		// When plan is a known map (user labels or merged prior state), leave data.Labels
+		// unchanged — it already equals the plan value, ensuring apply result == plan.
+	}
 
 	// resource SpecToModelRoot Meta RequiredStringField --> Name
 	data.Name = types.StringValue(metaData.GetName())
 
 	// resource SpecToModelRoot Meta RequiredStringField --> Namespace
 	data.Namespace = types.StringValue(metaData.GetNamespace())
+
+	// resource SpecToModelRoot Meta StringField --> Uid
+	data.Uid = types.StringValue(systemMetaData.GetUid())
+
+	// resource SpecToModelRoot ArrayOfPointerField --> DnsLoadBalancers
+	if len(specData.GetDnsLoadBalancers()) > 0 {
+		dnsLoadBalancersElements := make([]ObjectRefTypeModel, 0, len(specData.GetDnsLoadBalancers()))
+		for _, dnsLoadBalancersElement := range specData.GetDnsLoadBalancers() {
+			objectRefTypeModelModel := ObjectRefTypeModel{}
+
+			// resource specToModelNested RequiredStringField --> Name
+			if dnsLoadBalancersElement.GetName() != "" {
+				objectRefTypeModelModel.Name = types.StringValue(dnsLoadBalancersElement.GetName())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Name = types.StringNull()
+			}
+
+			// resource specToModelNested RequiredStringField --> Namespace
+			if dnsLoadBalancersElement.GetNamespace() != "" {
+				objectRefTypeModelModel.Namespace = types.StringValue(dnsLoadBalancersElement.GetNamespace())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Namespace = types.StringNull()
+			}
+
+			// resource specToModelNested StringField --> Tenant
+			if dnsLoadBalancersElement.GetTenant() != "" {
+				objectRefTypeModelModel.Tenant = types.StringValue(dnsLoadBalancersElement.GetTenant())
+			} else {
+				// Empty string, set to null
+				objectRefTypeModelModel.Tenant = types.StringNull()
+			}
+
+			dnsLoadBalancersElements = append(dnsLoadBalancersElements, objectRefTypeModelModel)
+		}
+
+		{
+			dnsLoadBalancersList, listDiags := utils.GoStructSliceToListValue(
+				ctx,
+				DnsLbPoolDnsLoadBalancersObjectRefModelAttributeMap,
+				dnsLoadBalancersElements,
+			)
+
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+
+			data.DnsLoadBalancers = dnsLoadBalancersList
+		}
+	} else {
+		var dnsLoadBalancersObjectType = basetypes.ObjectType{
+			AttrTypes: DnsLbPoolDnsLoadBalancersObjectRefModelAttributeMap,
+		}
+		nullDnsLoadBalancersList := basetypes.NewListNull(dnsLoadBalancersObjectType)
+		var priorValDnsLoadBalancers types.List
+		_ = request.Plan.GetAttribute(ctx, path.Root("dns_load_balancers"), &priorValDnsLoadBalancers)
+		if !priorValDnsLoadBalancers.IsNull() && !priorValDnsLoadBalancers.IsUnknown() {
+			data.DnsLoadBalancers = priorValDnsLoadBalancers
+		} else {
+			data.DnsLoadBalancers = nullDnsLoadBalancersList
+		}
+
+	}
+
+	// resource SpecToModelRoot RequiredEnumField --> LoadBalancingMode
+	{
+		if specData.GetLoadBalancingMode().String() != "" {
+			stringValue := types.StringValue(specData.GetLoadBalancingMode().String())
+			stringSlice := []types.String{stringValue}
+			listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+			response.Diagnostics.Append(listDiags...)
+			if response.Diagnostics.HasError() {
+				return
+			}
+			data.LoadBalancingMode = listValue
+		} else {
+			// Empty string, set to null
+			data.LoadBalancingMode = types.ListNull(types.StringType)
+		}
+	}
 
 	// resource SpecToModelRoot RequiredOneOfField --> PoolTypeChoice
 	// false
@@ -3941,7 +4249,7 @@ func (r *ResourceF5XCDnsLbPool) Update(ctx context.Context, request resource.Upd
 		poolTypeChoiceChoices := specData.GetPoolTypeChoice()
 
 		// The model struct that will be populated by the nested template.
-		var poolTypeChoiceChoicesModel = &DnsLbPoolGlobalSpecTypePoolTypeChoice{}
+		var poolTypeChoiceChoicesModel = &DnsLbPoolPoolTypeChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -3949,67 +4257,20 @@ func (r *ResourceF5XCDnsLbPool) Update(ctx context.Context, request resource.Upd
 		// GlobalSpecType
 		// false
 		{
-			aPoolOptions, isAPool := poolTypeChoiceChoices.(*ves_io_schema_dns_lb_pool.GlobalSpecType_APool)
+			aPoolOptionsWrapper, isAPool := poolTypeChoiceChoices.(*ves_io_schema_dns_lb_pool.GlobalSpecType_APool)
 			aPoolAttributeMap := make(map[string]attr.Value)
 
-			if isAPool && aPoolOptions != nil {
-
-				// resource specToModelNested RequiredArrayOfPointerField --> Members
-				if len(aPoolOptions.APool.GetMembers()) > 0 {
-					// Step 1: Always create a slice of model structs from the spec data.
-					// This slice serves as an intermediate representation.
-					membersElements := make([]DnsLbPoolDnsLbPoolAddressMember, 0, len(aPoolOptions.APool.GetMembers()))
-					for _, membersElement := range aPoolOptions.APool.GetMembers() {
-						dnsLbPoolDnsLbPoolAddressMemberModel := DnsLbPoolDnsLbPoolAddressMember{}
-
-						// resource specToModelNested StringField --> Name
-						if membersElement.GetName() != "" {
-							dnsLbPoolDnsLbPoolAddressMemberModel.Name = types.StringValue(membersElement.GetName())
-						} else {
-							// Empty string, set to null
-							dnsLbPoolDnsLbPoolAddressMemberModel.Name = types.StringNull()
-						}
-
-						// resource specToModelNested RequiredStringField --> IpEndpoint
-						if membersElement.GetIpEndpoint() != "" {
-							dnsLbPoolDnsLbPoolAddressMemberModel.IpEndpoint = types.StringValue(membersElement.GetIpEndpoint())
-						} else {
-							// Empty string, set to null
-							dnsLbPoolDnsLbPoolAddressMemberModel.IpEndpoint = types.StringNull()
-						}
-
-						// resource specToModelNested UintField --> Ratio
-						dnsLbPoolDnsLbPoolAddressMemberModel.Ratio = types.Int64Value(int64(membersElement.GetRatio()))
-
-						// resource specToModelNested UintField --> Priority
-						dnsLbPoolDnsLbPoolAddressMemberModel.Priority = types.Int64Value(int64(membersElement.GetPriority()))
-
-						membersElements = append(membersElements, dnsLbPoolDnsLbPoolAddressMemberModel)
-					}
-					// CASE 1: The target field is a `types.List` or an attribute map.
-					// The intermediate slice of structs must be converted to a `types.ListValue`.
-					membersListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DnsLbPoolPoolTypeChoiceAPoolMembersModelAttributeMap}, membersElements)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					aPoolAttributeMap["members"] = membersListValue
-
-				} else {
-					// The source list is empty or nil.
-					// CASE 1: The target field is a `types.List` or an attribute map.
-					// Assign a null `types.ListValue`.
-					aPoolAttributeMap["members"] = types.ListNull(types.ObjectType{AttrTypes: DnsLbPoolPoolTypeChoiceAPoolMembersModelAttributeMap})
-				}
+			if isAPool && aPoolOptionsWrapper != nil && aPoolOptionsWrapper.APool != nil {
+				aPoolElement := aPoolOptionsWrapper.APool
 
 				// resource specToModelNested RequiredOneOfField --> HealthCheckChoice
 				// GlobalSpecType
-				if aPoolOptions.APool.GetHealthCheckChoice() != nil {
+				if aPoolElement.GetHealthCheckChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					aPoolhealthCheckChoiceChoicesAttributeMap := make(map[string]attr.Value)
 
 					// Define a variable for the spec choices to be passed down to nested templates
-					aPoolhealthCheckChoiceChoices := aPoolOptions.APool.GetHealthCheckChoice()
+					aPoolhealthCheckChoiceChoices := aPoolElement.GetHealthCheckChoice()
 
 					// Process nested choices, populating the temporary attribute map
 
@@ -4026,37 +4287,38 @@ func (r *ResourceF5XCDnsLbPool) Update(ctx context.Context, request resource.Upd
 					// GlobalSpecType
 					// false
 					{
-						healthCheckOptions, isHealthCheck := aPoolhealthCheckChoiceChoices.(*ves_io_schema_dns_lb_pool.APool_HealthCheck)
+						healthCheckOptionsWrapper, isHealthCheck := aPoolhealthCheckChoiceChoices.(*ves_io_schema_dns_lb_pool.APool_HealthCheck)
 						healthCheckAttributeMap := make(map[string]attr.Value)
 
-						if isHealthCheck && healthCheckOptions != nil {
-
-							// resource specToModelNested StringField --> Tenant
-							if healthCheckOptions.HealthCheck.GetTenant() != "" {
-								healthCheckAttributeMap["tenant"] = types.StringValue(healthCheckOptions.HealthCheck.GetTenant())
-							} else {
-								// Empty string, set to null
-								healthCheckAttributeMap["tenant"] = types.StringNull()
-							}
-
-							// resource specToModelNested RequiredStringField --> Namespace
-							if healthCheckOptions.HealthCheck.GetNamespace() != "" {
-								healthCheckAttributeMap["namespace"] = types.StringValue(healthCheckOptions.HealthCheck.GetNamespace())
-							} else {
-								// Empty string, set to null
-								healthCheckAttributeMap["namespace"] = types.StringNull()
-							}
+						if isHealthCheck && healthCheckOptionsWrapper != nil && healthCheckOptionsWrapper.HealthCheck != nil {
+							healthCheckElement := healthCheckOptionsWrapper.HealthCheck
 
 							// resource specToModelNested RequiredStringField --> Name
-							if healthCheckOptions.HealthCheck.GetName() != "" {
-								healthCheckAttributeMap["name"] = types.StringValue(healthCheckOptions.HealthCheck.GetName())
+							if healthCheckElement.GetName() != "" {
+								healthCheckAttributeMap["name"] = types.StringValue(healthCheckElement.GetName())
 							} else {
 								// Empty string, set to null
 								healthCheckAttributeMap["name"] = types.StringNull()
 							}
 
-							healthCheckObj, diags := types.ObjectValue(DnsLbPoolPoolTypeChoiceAPoolHealthCheckChoiceHealthCheckModelAttributeMap, healthCheckAttributeMap)
-							response.Diagnostics.Append(diags...)
+							// resource specToModelNested RequiredStringField --> Namespace
+							if healthCheckElement.GetNamespace() != "" {
+								healthCheckAttributeMap["namespace"] = types.StringValue(healthCheckElement.GetNamespace())
+							} else {
+								// Empty string, set to null
+								healthCheckAttributeMap["namespace"] = types.StringNull()
+							}
+
+							// resource specToModelNested StringField --> Tenant
+							if healthCheckElement.GetTenant() != "" {
+								healthCheckAttributeMap["tenant"] = types.StringValue(healthCheckElement.GetTenant())
+							} else {
+								// Empty string, set to null
+								healthCheckAttributeMap["tenant"] = types.StringNull()
+							}
+
+							healthCheckObj, healthCheckObjDiags := types.ObjectValue(DnsLbPoolPoolTypeChoiceAPoolHealthCheckChoiceHealthCheckModelAttributeMap, healthCheckAttributeMap)
+							response.Diagnostics.Append(healthCheckObjDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
@@ -4086,10 +4348,58 @@ func (r *ResourceF5XCDnsLbPool) Update(ctx context.Context, request resource.Upd
 				}
 
 				// resource specToModelNested RequiredUintField --> MaxAnswers
-				aPoolAttributeMap["max_answers"] = types.Int64Value(int64(aPoolOptions.APool.GetMaxAnswers()))
+				aPoolAttributeMap["max_answers"] = types.Int64Value(int64(aPoolElement.GetMaxAnswers()))
 
-				aPoolObj, diags := types.ObjectValue(DnsLbPoolPoolTypeChoiceAPoolModelAttributeMap, aPoolAttributeMap)
-				response.Diagnostics.Append(diags...)
+				// resource specToModelNested RequiredArrayOfPointerField --> Members
+				if len(aPoolElement.GetMembers()) > 0 {
+					// Step 1: Always create a slice of model structs from the spec data.
+					// This slice serves as an intermediate representation.
+					membersElements := make([]DnsLbPoolAddrMember, 0, len(aPoolElement.GetMembers()))
+					for _, membersElement := range aPoolElement.GetMembers() {
+						dnsLbPoolAddrMemberModel := DnsLbPoolAddrMember{}
+
+						// resource specToModelNested RequiredStringField --> IpEndpoint
+						if membersElement.GetIpEndpoint() != "" {
+							dnsLbPoolAddrMemberModel.IpEndpoint = types.StringValue(membersElement.GetIpEndpoint())
+						} else {
+							// Empty string, set to null
+							dnsLbPoolAddrMemberModel.IpEndpoint = types.StringNull()
+						}
+
+						// resource specToModelNested StringField --> Name
+						if membersElement.GetName() != "" {
+							dnsLbPoolAddrMemberModel.Name = types.StringValue(membersElement.GetName())
+						} else {
+							// Empty string, set to null
+							dnsLbPoolAddrMemberModel.Name = types.StringNull()
+						}
+
+						// resource specToModelNested UintField --> Priority
+						dnsLbPoolAddrMemberModel.Priority = types.Int64Value(int64(membersElement.GetPriority()))
+
+						// resource specToModelNested UintField --> Ratio
+						dnsLbPoolAddrMemberModel.Ratio = types.Int64Value(int64(membersElement.GetRatio()))
+
+						membersElements = append(membersElements, dnsLbPoolAddrMemberModel)
+					}
+					// CASE 1: The target field is a `types.List` or an attribute map.
+					// The intermediate slice of structs must be converted to a `types.ListValue`.
+					membersListValue, membersListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DnsLbPoolPoolTypeChoiceAPoolMembersModelAttributeMap}, membersElements)
+					response.Diagnostics.Append(membersListDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					aPoolAttributeMap["members"] = membersListValue
+
+				} else {
+					// The source list is empty or nil.
+					// CASE 1: The target field is a `types.List` or an attribute map.
+					// Assign a null `types.ListValue`.
+					aPoolAttributeMap["members"] = types.ListNull(types.ObjectType{AttrTypes: DnsLbPoolPoolTypeChoiceAPoolMembersModelAttributeMap})
+				}
+
+				aPoolObj, aPoolObjDiags := types.ObjectValue(DnsLbPoolPoolTypeChoiceAPoolModelAttributeMap, aPoolAttributeMap)
+				response.Diagnostics.Append(aPoolObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -4103,47 +4413,51 @@ func (r *ResourceF5XCDnsLbPool) Update(ctx context.Context, request resource.Upd
 		// GlobalSpecType
 		// false
 		{
-			aaaaPoolOptions, isAaaaPool := poolTypeChoiceChoices.(*ves_io_schema_dns_lb_pool.GlobalSpecType_AaaaPool)
+			aaaaPoolOptionsWrapper, isAaaaPool := poolTypeChoiceChoices.(*ves_io_schema_dns_lb_pool.GlobalSpecType_AaaaPool)
 			aaaaPoolAttributeMap := make(map[string]attr.Value)
 
-			if isAaaaPool && aaaaPoolOptions != nil {
+			if isAaaaPool && aaaaPoolOptionsWrapper != nil && aaaaPoolOptionsWrapper.AaaaPool != nil {
+				aaaaPoolElement := aaaaPoolOptionsWrapper.AaaaPool
+
+				// resource specToModelNested RequiredUintField --> MaxAnswers
+				aaaaPoolAttributeMap["max_answers"] = types.Int64Value(int64(aaaaPoolElement.GetMaxAnswers()))
 
 				// resource specToModelNested RequiredArrayOfPointerField --> Members
-				if len(aaaaPoolOptions.AaaaPool.GetMembers()) > 0 {
+				if len(aaaaPoolElement.GetMembers()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					membersElements := make([]DnsLbPoolDnsLbPoolAddressMember, 0, len(aaaaPoolOptions.AaaaPool.GetMembers()))
-					for _, membersElement := range aaaaPoolOptions.AaaaPool.GetMembers() {
-						dnsLbPoolDnsLbPoolAddressMemberModel := DnsLbPoolDnsLbPoolAddressMember{}
+					membersElements := make([]DnsLbPoolAddrMember, 0, len(aaaaPoolElement.GetMembers()))
+					for _, membersElement := range aaaaPoolElement.GetMembers() {
+						dnsLbPoolAddrMemberModel := DnsLbPoolAddrMember{}
 
 						// resource specToModelNested RequiredStringField --> IpEndpoint
 						if membersElement.GetIpEndpoint() != "" {
-							dnsLbPoolDnsLbPoolAddressMemberModel.IpEndpoint = types.StringValue(membersElement.GetIpEndpoint())
+							dnsLbPoolAddrMemberModel.IpEndpoint = types.StringValue(membersElement.GetIpEndpoint())
 						} else {
 							// Empty string, set to null
-							dnsLbPoolDnsLbPoolAddressMemberModel.IpEndpoint = types.StringNull()
+							dnsLbPoolAddrMemberModel.IpEndpoint = types.StringNull()
 						}
-
-						// resource specToModelNested UintField --> Ratio
-						dnsLbPoolDnsLbPoolAddressMemberModel.Ratio = types.Int64Value(int64(membersElement.GetRatio()))
-
-						// resource specToModelNested UintField --> Priority
-						dnsLbPoolDnsLbPoolAddressMemberModel.Priority = types.Int64Value(int64(membersElement.GetPriority()))
 
 						// resource specToModelNested StringField --> Name
 						if membersElement.GetName() != "" {
-							dnsLbPoolDnsLbPoolAddressMemberModel.Name = types.StringValue(membersElement.GetName())
+							dnsLbPoolAddrMemberModel.Name = types.StringValue(membersElement.GetName())
 						} else {
 							// Empty string, set to null
-							dnsLbPoolDnsLbPoolAddressMemberModel.Name = types.StringNull()
+							dnsLbPoolAddrMemberModel.Name = types.StringNull()
 						}
 
-						membersElements = append(membersElements, dnsLbPoolDnsLbPoolAddressMemberModel)
+						// resource specToModelNested UintField --> Priority
+						dnsLbPoolAddrMemberModel.Priority = types.Int64Value(int64(membersElement.GetPriority()))
+
+						// resource specToModelNested UintField --> Ratio
+						dnsLbPoolAddrMemberModel.Ratio = types.Int64Value(int64(membersElement.GetRatio()))
+
+						membersElements = append(membersElements, dnsLbPoolAddrMemberModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
-					membersListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DnsLbPoolPoolTypeChoiceAaaaPoolMembersModelAttributeMap}, membersElements)
-					response.Diagnostics.Append(diags...)
+					membersListValue, membersListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DnsLbPoolPoolTypeChoiceAaaaPoolMembersModelAttributeMap}, membersElements)
+					response.Diagnostics.Append(membersListDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
@@ -4156,11 +4470,8 @@ func (r *ResourceF5XCDnsLbPool) Update(ctx context.Context, request resource.Upd
 					aaaaPoolAttributeMap["members"] = types.ListNull(types.ObjectType{AttrTypes: DnsLbPoolPoolTypeChoiceAaaaPoolMembersModelAttributeMap})
 				}
 
-				// resource specToModelNested RequiredUintField --> MaxAnswers
-				aaaaPoolAttributeMap["max_answers"] = types.Int64Value(int64(aaaaPoolOptions.AaaaPool.GetMaxAnswers()))
-
-				aaaaPoolObj, diags := types.ObjectValue(DnsLbPoolPoolTypeChoiceAaaaPoolModelAttributeMap, aaaaPoolAttributeMap)
-				response.Diagnostics.Append(diags...)
+				aaaaPoolObj, aaaaPoolObjDiags := types.ObjectValue(DnsLbPoolPoolTypeChoiceAaaaPoolModelAttributeMap, aaaaPoolAttributeMap)
+				response.Diagnostics.Append(aaaaPoolObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -4174,70 +4485,20 @@ func (r *ResourceF5XCDnsLbPool) Update(ctx context.Context, request resource.Upd
 		// GlobalSpecType
 		// false
 		{
-			cnamePoolOptions, isCnamePool := poolTypeChoiceChoices.(*ves_io_schema_dns_lb_pool.GlobalSpecType_CnamePool)
+			cnamePoolOptionsWrapper, isCnamePool := poolTypeChoiceChoices.(*ves_io_schema_dns_lb_pool.GlobalSpecType_CnamePool)
 			cnamePoolAttributeMap := make(map[string]attr.Value)
 
-			if isCnamePool && cnamePoolOptions != nil {
-
-				// resource specToModelNested RequiredArrayOfPointerField --> Members
-				if len(cnamePoolOptions.CnamePool.GetMembers()) > 0 {
-					// Step 1: Always create a slice of model structs from the spec data.
-					// This slice serves as an intermediate representation.
-					membersElements := make([]DnsLbPoolDnsLbPoolCNAMEMember, 0, len(cnamePoolOptions.CnamePool.GetMembers()))
-					for _, membersElement := range cnamePoolOptions.CnamePool.GetMembers() {
-						dnsLbPoolDnsLbPoolCNAMEMemberModel := DnsLbPoolDnsLbPoolCNAMEMember{}
-
-						// resource specToModelNested UintField --> Priority
-						dnsLbPoolDnsLbPoolCNAMEMemberModel.Priority = types.Int64Value(int64(membersElement.GetPriority()))
-
-						// resource specToModelNested RequiredStringField --> Domain
-						if membersElement.GetDomain() != "" {
-							dnsLbPoolDnsLbPoolCNAMEMemberModel.Domain = types.StringValue(membersElement.GetDomain())
-						} else {
-							// Empty string, set to null
-							dnsLbPoolDnsLbPoolCNAMEMemberModel.Domain = types.StringNull()
-						}
-
-						// resource specToModelNested UintField --> Ratio
-						dnsLbPoolDnsLbPoolCNAMEMemberModel.Ratio = types.Int64Value(int64(membersElement.GetRatio()))
-
-						// resource specToModelNested BoolField --> FinalTranslation
-						dnsLbPoolDnsLbPoolCNAMEMemberModel.FinalTranslation = types.BoolValue(bool(membersElement.GetFinalTranslation()))
-
-						// resource specToModelNested StringField --> Name
-						if membersElement.GetName() != "" {
-							dnsLbPoolDnsLbPoolCNAMEMemberModel.Name = types.StringValue(membersElement.GetName())
-						} else {
-							// Empty string, set to null
-							dnsLbPoolDnsLbPoolCNAMEMemberModel.Name = types.StringNull()
-						}
-
-						membersElements = append(membersElements, dnsLbPoolDnsLbPoolCNAMEMemberModel)
-					}
-					// CASE 1: The target field is a `types.List` or an attribute map.
-					// The intermediate slice of structs must be converted to a `types.ListValue`.
-					membersListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DnsLbPoolPoolTypeChoiceCnamePoolMembersModelAttributeMap}, membersElements)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					cnamePoolAttributeMap["members"] = membersListValue
-
-				} else {
-					// The source list is empty or nil.
-					// CASE 1: The target field is a `types.List` or an attribute map.
-					// Assign a null `types.ListValue`.
-					cnamePoolAttributeMap["members"] = types.ListNull(types.ObjectType{AttrTypes: DnsLbPoolPoolTypeChoiceCnamePoolMembersModelAttributeMap})
-				}
+			if isCnamePool && cnamePoolOptionsWrapper != nil && cnamePoolOptionsWrapper.CnamePool != nil {
+				cnamePoolElement := cnamePoolOptionsWrapper.CnamePool
 
 				// resource specToModelNested RequiredOneOfField --> HealthCheckChoice
 				// GlobalSpecType
-				if cnamePoolOptions.CnamePool.GetHealthCheckChoice() != nil {
+				if cnamePoolElement.GetHealthCheckChoice() != nil {
 					// Create a temporary attribute map for the choices within this OneOf
 					cnamePoolhealthCheckChoiceChoicesAttributeMap := make(map[string]attr.Value)
 
 					// Define a variable for the spec choices to be passed down to nested templates
-					cnamePoolhealthCheckChoiceChoices := cnamePoolOptions.CnamePool.GetHealthCheckChoice()
+					cnamePoolhealthCheckChoiceChoices := cnamePoolElement.GetHealthCheckChoice()
 
 					// Process nested choices, populating the temporary attribute map
 
@@ -4254,37 +4515,38 @@ func (r *ResourceF5XCDnsLbPool) Update(ctx context.Context, request resource.Upd
 					// GlobalSpecType
 					// false
 					{
-						healthCheckOptions, isHealthCheck := cnamePoolhealthCheckChoiceChoices.(*ves_io_schema_dns_lb_pool.CNAMEPool_HealthCheck)
+						healthCheckOptionsWrapper, isHealthCheck := cnamePoolhealthCheckChoiceChoices.(*ves_io_schema_dns_lb_pool.CNAMEPool_HealthCheck)
 						healthCheckAttributeMap := make(map[string]attr.Value)
 
-						if isHealthCheck && healthCheckOptions != nil {
+						if isHealthCheck && healthCheckOptionsWrapper != nil && healthCheckOptionsWrapper.HealthCheck != nil {
+							healthCheckElement := healthCheckOptionsWrapper.HealthCheck
 
 							// resource specToModelNested RequiredStringField --> Name
-							if healthCheckOptions.HealthCheck.GetName() != "" {
-								healthCheckAttributeMap["name"] = types.StringValue(healthCheckOptions.HealthCheck.GetName())
+							if healthCheckElement.GetName() != "" {
+								healthCheckAttributeMap["name"] = types.StringValue(healthCheckElement.GetName())
 							} else {
 								// Empty string, set to null
 								healthCheckAttributeMap["name"] = types.StringNull()
 							}
 
-							// resource specToModelNested StringField --> Tenant
-							if healthCheckOptions.HealthCheck.GetTenant() != "" {
-								healthCheckAttributeMap["tenant"] = types.StringValue(healthCheckOptions.HealthCheck.GetTenant())
-							} else {
-								// Empty string, set to null
-								healthCheckAttributeMap["tenant"] = types.StringNull()
-							}
-
 							// resource specToModelNested RequiredStringField --> Namespace
-							if healthCheckOptions.HealthCheck.GetNamespace() != "" {
-								healthCheckAttributeMap["namespace"] = types.StringValue(healthCheckOptions.HealthCheck.GetNamespace())
+							if healthCheckElement.GetNamespace() != "" {
+								healthCheckAttributeMap["namespace"] = types.StringValue(healthCheckElement.GetNamespace())
 							} else {
 								// Empty string, set to null
 								healthCheckAttributeMap["namespace"] = types.StringNull()
 							}
 
-							healthCheckObj, diags := types.ObjectValue(DnsLbPoolPoolTypeChoiceCnamePoolHealthCheckChoiceHealthCheckModelAttributeMap, healthCheckAttributeMap)
-							response.Diagnostics.Append(diags...)
+							// resource specToModelNested StringField --> Tenant
+							if healthCheckElement.GetTenant() != "" {
+								healthCheckAttributeMap["tenant"] = types.StringValue(healthCheckElement.GetTenant())
+							} else {
+								// Empty string, set to null
+								healthCheckAttributeMap["tenant"] = types.StringNull()
+							}
+
+							healthCheckObj, healthCheckObjDiags := types.ObjectValue(DnsLbPoolPoolTypeChoiceCnamePoolHealthCheckChoiceHealthCheckModelAttributeMap, healthCheckAttributeMap)
+							response.Diagnostics.Append(healthCheckObjDiags...)
 							if response.Diagnostics.HasError() {
 								return
 							}
@@ -4313,8 +4575,59 @@ func (r *ResourceF5XCDnsLbPool) Update(ctx context.Context, request resource.Upd
 					cnamePoolAttributeMap["health_check_choice"] = types.ObjectNull(DnsLbPoolPoolTypeChoiceCnamePoolHealthCheckChoiceModelAttributeMap)
 				}
 
-				cnamePoolObj, diags := types.ObjectValue(DnsLbPoolPoolTypeChoiceCnamePoolModelAttributeMap, cnamePoolAttributeMap)
-				response.Diagnostics.Append(diags...)
+				// resource specToModelNested RequiredArrayOfPointerField --> Members
+				if len(cnamePoolElement.GetMembers()) > 0 {
+					// Step 1: Always create a slice of model structs from the spec data.
+					// This slice serves as an intermediate representation.
+					membersElements := make([]DnsLbPoolCNAMEMember, 0, len(cnamePoolElement.GetMembers()))
+					for _, membersElement := range cnamePoolElement.GetMembers() {
+						dnsLbPoolCNAMEMemberModel := DnsLbPoolCNAMEMember{}
+
+						// resource specToModelNested RequiredStringField --> Domain
+						if membersElement.GetDomain() != "" {
+							dnsLbPoolCNAMEMemberModel.Domain = types.StringValue(membersElement.GetDomain())
+						} else {
+							// Empty string, set to null
+							dnsLbPoolCNAMEMemberModel.Domain = types.StringNull()
+						}
+
+						// resource specToModelNested BoolField --> FinalTranslation
+						dnsLbPoolCNAMEMemberModel.FinalTranslation = types.BoolValue(bool(membersElement.GetFinalTranslation()))
+
+						// resource specToModelNested StringField --> Name
+						if membersElement.GetName() != "" {
+							dnsLbPoolCNAMEMemberModel.Name = types.StringValue(membersElement.GetName())
+						} else {
+							// Empty string, set to null
+							dnsLbPoolCNAMEMemberModel.Name = types.StringNull()
+						}
+
+						// resource specToModelNested UintField --> Priority
+						dnsLbPoolCNAMEMemberModel.Priority = types.Int64Value(int64(membersElement.GetPriority()))
+
+						// resource specToModelNested UintField --> Ratio
+						dnsLbPoolCNAMEMemberModel.Ratio = types.Int64Value(int64(membersElement.GetRatio()))
+
+						membersElements = append(membersElements, dnsLbPoolCNAMEMemberModel)
+					}
+					// CASE 1: The target field is a `types.List` or an attribute map.
+					// The intermediate slice of structs must be converted to a `types.ListValue`.
+					membersListValue, membersListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DnsLbPoolPoolTypeChoiceCnamePoolMembersModelAttributeMap}, membersElements)
+					response.Diagnostics.Append(membersListDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					cnamePoolAttributeMap["members"] = membersListValue
+
+				} else {
+					// The source list is empty or nil.
+					// CASE 1: The target field is a `types.List` or an attribute map.
+					// Assign a null `types.ListValue`.
+					cnamePoolAttributeMap["members"] = types.ListNull(types.ObjectType{AttrTypes: DnsLbPoolPoolTypeChoiceCnamePoolMembersModelAttributeMap})
+				}
+
+				cnamePoolObj, cnamePoolObjDiags := types.ObjectValue(DnsLbPoolPoolTypeChoiceCnamePoolModelAttributeMap, cnamePoolAttributeMap)
+				response.Diagnostics.Append(cnamePoolObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -4328,47 +4641,51 @@ func (r *ResourceF5XCDnsLbPool) Update(ctx context.Context, request resource.Upd
 		// GlobalSpecType
 		// false
 		{
-			mxPoolOptions, isMxPool := poolTypeChoiceChoices.(*ves_io_schema_dns_lb_pool.GlobalSpecType_MxPool)
+			mxPoolOptionsWrapper, isMxPool := poolTypeChoiceChoices.(*ves_io_schema_dns_lb_pool.GlobalSpecType_MxPool)
 			mxPoolAttributeMap := make(map[string]attr.Value)
 
-			if isMxPool && mxPoolOptions != nil {
+			if isMxPool && mxPoolOptionsWrapper != nil && mxPoolOptionsWrapper.MxPool != nil {
+				mxPoolElement := mxPoolOptionsWrapper.MxPool
+
+				// resource specToModelNested RequiredUintField --> MaxAnswers
+				mxPoolAttributeMap["max_answers"] = types.Int64Value(int64(mxPoolElement.GetMaxAnswers()))
 
 				// resource specToModelNested RequiredArrayOfPointerField --> Members
-				if len(mxPoolOptions.MxPool.GetMembers()) > 0 {
+				if len(mxPoolElement.GetMembers()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					membersElements := make([]DnsLbPoolDnsLbPoolMXMember, 0, len(mxPoolOptions.MxPool.GetMembers()))
-					for _, membersElement := range mxPoolOptions.MxPool.GetMembers() {
-						dnsLbPoolDnsLbPoolMXMemberModel := DnsLbPoolDnsLbPoolMXMember{}
-
-						// resource specToModelNested StringField --> Name
-						if membersElement.GetName() != "" {
-							dnsLbPoolDnsLbPoolMXMemberModel.Name = types.StringValue(membersElement.GetName())
-						} else {
-							// Empty string, set to null
-							dnsLbPoolDnsLbPoolMXMemberModel.Name = types.StringNull()
-						}
+					membersElements := make([]DnsLbPoolMXMember, 0, len(mxPoolElement.GetMembers()))
+					for _, membersElement := range mxPoolElement.GetMembers() {
+						dnsLbPoolMXMemberModel := DnsLbPoolMXMember{}
 
 						// resource specToModelNested RequiredStringField --> Domain
 						if membersElement.GetDomain() != "" {
-							dnsLbPoolDnsLbPoolMXMemberModel.Domain = types.StringValue(membersElement.GetDomain())
+							dnsLbPoolMXMemberModel.Domain = types.StringValue(membersElement.GetDomain())
 						} else {
 							// Empty string, set to null
-							dnsLbPoolDnsLbPoolMXMemberModel.Domain = types.StringNull()
+							dnsLbPoolMXMemberModel.Domain = types.StringNull()
+						}
+
+						// resource specToModelNested StringField --> Name
+						if membersElement.GetName() != "" {
+							dnsLbPoolMXMemberModel.Name = types.StringValue(membersElement.GetName())
+						} else {
+							// Empty string, set to null
+							dnsLbPoolMXMemberModel.Name = types.StringNull()
 						}
 
 						// resource specToModelNested UintField --> Priority
-						dnsLbPoolDnsLbPoolMXMemberModel.Priority = types.Int64Value(int64(membersElement.GetPriority()))
+						dnsLbPoolMXMemberModel.Priority = types.Int64Value(int64(membersElement.GetPriority()))
 
 						// resource specToModelNested UintField --> Ratio
-						dnsLbPoolDnsLbPoolMXMemberModel.Ratio = types.Int64Value(int64(membersElement.GetRatio()))
+						dnsLbPoolMXMemberModel.Ratio = types.Int64Value(int64(membersElement.GetRatio()))
 
-						membersElements = append(membersElements, dnsLbPoolDnsLbPoolMXMemberModel)
+						membersElements = append(membersElements, dnsLbPoolMXMemberModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
-					membersListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DnsLbPoolPoolTypeChoiceMxPoolMembersModelAttributeMap}, membersElements)
-					response.Diagnostics.Append(diags...)
+					membersListValue, membersListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DnsLbPoolPoolTypeChoiceMxPoolMembersModelAttributeMap}, membersElements)
+					response.Diagnostics.Append(membersListDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
@@ -4381,11 +4698,8 @@ func (r *ResourceF5XCDnsLbPool) Update(ctx context.Context, request resource.Upd
 					mxPoolAttributeMap["members"] = types.ListNull(types.ObjectType{AttrTypes: DnsLbPoolPoolTypeChoiceMxPoolMembersModelAttributeMap})
 				}
 
-				// resource specToModelNested RequiredUintField --> MaxAnswers
-				mxPoolAttributeMap["max_answers"] = types.Int64Value(int64(mxPoolOptions.MxPool.GetMaxAnswers()))
-
-				mxPoolObj, diags := types.ObjectValue(DnsLbPoolPoolTypeChoiceMxPoolModelAttributeMap, mxPoolAttributeMap)
-				response.Diagnostics.Append(diags...)
+				mxPoolObj, mxPoolObjDiags := types.ObjectValue(DnsLbPoolPoolTypeChoiceMxPoolModelAttributeMap, mxPoolAttributeMap)
+				response.Diagnostics.Append(mxPoolObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -4399,56 +4713,60 @@ func (r *ResourceF5XCDnsLbPool) Update(ctx context.Context, request resource.Upd
 		// GlobalSpecType
 		// false
 		{
-			srvPoolOptions, isSrvPool := poolTypeChoiceChoices.(*ves_io_schema_dns_lb_pool.GlobalSpecType_SrvPool)
+			srvPoolOptionsWrapper, isSrvPool := poolTypeChoiceChoices.(*ves_io_schema_dns_lb_pool.GlobalSpecType_SrvPool)
 			srvPoolAttributeMap := make(map[string]attr.Value)
 
-			if isSrvPool && srvPoolOptions != nil {
+			if isSrvPool && srvPoolOptionsWrapper != nil && srvPoolOptionsWrapper.SrvPool != nil {
+				srvPoolElement := srvPoolOptionsWrapper.SrvPool
+
+				// resource specToModelNested RequiredUintField --> MaxAnswers
+				srvPoolAttributeMap["max_answers"] = types.Int64Value(int64(srvPoolElement.GetMaxAnswers()))
 
 				// resource specToModelNested RequiredArrayOfPointerField --> Members
-				if len(srvPoolOptions.SrvPool.GetMembers()) > 0 {
+				if len(srvPoolElement.GetMembers()) > 0 {
 					// Step 1: Always create a slice of model structs from the spec data.
 					// This slice serves as an intermediate representation.
-					membersElements := make([]DnsLbPoolDnsLbPoolSRVMember, 0, len(srvPoolOptions.SrvPool.GetMembers()))
-					for _, membersElement := range srvPoolOptions.SrvPool.GetMembers() {
-						dnsLbPoolDnsLbPoolSRVMemberModel := DnsLbPoolDnsLbPoolSRVMember{}
-
-						// resource specToModelNested RequiredUintField --> Priority
-						dnsLbPoolDnsLbPoolSRVMemberModel.Priority = types.Int64Value(int64(membersElement.GetPriority()))
-
-						// resource specToModelNested RequiredUintField --> Weight
-						dnsLbPoolDnsLbPoolSRVMemberModel.Weight = types.Int64Value(int64(membersElement.GetWeight()))
-
-						// resource specToModelNested RequiredUintField --> Port
-						dnsLbPoolDnsLbPoolSRVMemberModel.Port = types.Int64Value(int64(membersElement.GetPort()))
-
-						// resource specToModelNested RequiredStringField --> Target
-						if membersElement.GetTarget() != "" {
-							dnsLbPoolDnsLbPoolSRVMemberModel.Target = types.StringValue(membersElement.GetTarget())
-						} else {
-							// Empty string, set to null
-							dnsLbPoolDnsLbPoolSRVMemberModel.Target = types.StringNull()
-						}
+					membersElements := make([]DnsLbPoolSRVMember, 0, len(srvPoolElement.GetMembers()))
+					for _, membersElement := range srvPoolElement.GetMembers() {
+						dnsLbPoolSRVMemberModel := DnsLbPoolSRVMember{}
 
 						// resource specToModelNested BoolField --> FinalTranslation
-						dnsLbPoolDnsLbPoolSRVMemberModel.FinalTranslation = types.BoolValue(bool(membersElement.GetFinalTranslation()))
-
-						// resource specToModelNested UintField --> Ratio
-						dnsLbPoolDnsLbPoolSRVMemberModel.Ratio = types.Int64Value(int64(membersElement.GetRatio()))
+						dnsLbPoolSRVMemberModel.FinalTranslation = types.BoolValue(bool(membersElement.GetFinalTranslation()))
 
 						// resource specToModelNested StringField --> Name
 						if membersElement.GetName() != "" {
-							dnsLbPoolDnsLbPoolSRVMemberModel.Name = types.StringValue(membersElement.GetName())
+							dnsLbPoolSRVMemberModel.Name = types.StringValue(membersElement.GetName())
 						} else {
 							// Empty string, set to null
-							dnsLbPoolDnsLbPoolSRVMemberModel.Name = types.StringNull()
+							dnsLbPoolSRVMemberModel.Name = types.StringNull()
 						}
 
-						membersElements = append(membersElements, dnsLbPoolDnsLbPoolSRVMemberModel)
+						// resource specToModelNested RequiredUintField --> Port
+						dnsLbPoolSRVMemberModel.Port = types.Int64Value(int64(membersElement.GetPort()))
+
+						// resource specToModelNested RequiredUintField --> Priority
+						dnsLbPoolSRVMemberModel.Priority = types.Int64Value(int64(membersElement.GetPriority()))
+
+						// resource specToModelNested UintField --> Ratio
+						dnsLbPoolSRVMemberModel.Ratio = types.Int64Value(int64(membersElement.GetRatio()))
+
+						// resource specToModelNested RequiredStringField --> Target
+						if membersElement.GetTarget() != "" {
+							dnsLbPoolSRVMemberModel.Target = types.StringValue(membersElement.GetTarget())
+						} else {
+							// Empty string, set to null
+							dnsLbPoolSRVMemberModel.Target = types.StringNull()
+						}
+
+						// resource specToModelNested RequiredUintField --> Weight
+						dnsLbPoolSRVMemberModel.Weight = types.Int64Value(int64(membersElement.GetWeight()))
+
+						membersElements = append(membersElements, dnsLbPoolSRVMemberModel)
 					}
 					// CASE 1: The target field is a `types.List` or an attribute map.
 					// The intermediate slice of structs must be converted to a `types.ListValue`.
-					membersListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DnsLbPoolPoolTypeChoiceSrvPoolMembersModelAttributeMap}, membersElements)
-					response.Diagnostics.Append(diags...)
+					membersListValue, membersListDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: DnsLbPoolPoolTypeChoiceSrvPoolMembersModelAttributeMap}, membersElements)
+					response.Diagnostics.Append(membersListDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
@@ -4461,11 +4779,8 @@ func (r *ResourceF5XCDnsLbPool) Update(ctx context.Context, request resource.Upd
 					srvPoolAttributeMap["members"] = types.ListNull(types.ObjectType{AttrTypes: DnsLbPoolPoolTypeChoiceSrvPoolMembersModelAttributeMap})
 				}
 
-				// resource specToModelNested RequiredUintField --> MaxAnswers
-				srvPoolAttributeMap["max_answers"] = types.Int64Value(int64(srvPoolOptions.SrvPool.GetMaxAnswers()))
-
-				srvPoolObj, diags := types.ObjectValue(DnsLbPoolPoolTypeChoiceSrvPoolModelAttributeMap, srvPoolAttributeMap)
-				response.Diagnostics.Append(diags...)
+				srvPoolObj, srvPoolObjDiags := types.ObjectValue(DnsLbPoolPoolTypeChoiceSrvPoolModelAttributeMap, srvPoolAttributeMap)
+				response.Diagnostics.Append(srvPoolObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -4476,36 +4791,25 @@ func (r *ResourceF5XCDnsLbPool) Update(ctx context.Context, request resource.Upd
 		}
 
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		poolTypeChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			DnsLbPoolPoolTypeChoiceModelAttributeMap,
-			poolTypeChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
+		{
+			poolTypeChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				DnsLbPoolPoolTypeChoiceModelAttributeMap,
+				poolTypeChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
 
-		// Assign the final object to the root data model.
-		data.PoolTypeChoice = poolTypeChoiceObj
+			// Assign the final object to the root data model.
+			data.PoolTypeChoice = poolTypeChoiceObj
+		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
+		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.PoolTypeChoice = types.ObjectNull(DnsLbPoolPoolTypeChoiceModelAttributeMap)
-	}
-
-	// resource SpecToModelRoot RequiredEnumField --> LoadBalancingMode
-	if specData.GetLoadBalancingMode().String() != "" {
-		stringValue := types.StringValue(specData.GetLoadBalancingMode().String())
-		stringSlice := []types.String{stringValue}
-		listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.LoadBalancingMode = listValue
-	} else {
-		// Empty string, set to null
-		data.LoadBalancingMode = types.ListNull(types.StringType)
 	}
 
 	// resource SpecToModelRoot RequiredOneOfField --> TtlChoice
@@ -4517,7 +4821,7 @@ func (r *ResourceF5XCDnsLbPool) Update(ctx context.Context, request resource.Upd
 		ttlChoiceChoices := specData.GetTtlChoice()
 
 		// The model struct that will be populated by the nested template.
-		var ttlChoiceChoicesModel = &DnsLbPoolGlobalSpecTypeTtlChoice{}
+		var ttlChoiceChoicesModel = &DnsLbPoolTtlChoice{}
 
 		// Recursively call the nested template to process the oneof choices.
 
@@ -4541,75 +4845,51 @@ func (r *ResourceF5XCDnsLbPool) Update(ctx context.Context, request resource.Upd
 		}
 
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		ttlChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			DnsLbPoolTtlChoiceModelAttributeMap,
-			ttlChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
+		{
+			ttlChoiceObj, oneOfDiags := utils.GoStructToObjectValue(
+				ctx,
+				DnsLbPoolTtlChoiceModelAttributeMap,
+				ttlChoiceChoicesModel,
+			)
+			if oneOfDiags.HasError() {
+				response.Diagnostics.Append(oneOfDiags...)
+				return
+			}
 
-		// Assign the final object to the root data model.
-		data.TtlChoice = ttlChoiceObj
+			// Assign the final object to the root data model.
+			data.TtlChoice = ttlChoiceObj
+		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
+		// Apply State Healing if the API redacted this OneOf field (e.g. secret_info_choice):
+		// restore the prior Terraform state value so Terraform does not detect a false drift.
 		data.TtlChoice = types.ObjectNull(DnsLbPoolTtlChoiceModelAttributeMap)
 	}
 
-	// resource SpecToModelRoot ArrayOfPointerField --> DnsLoadBalancers
-	if len(specData.DnsLoadBalancers) > 0 {
-		dnsLoadBalancersElements := make([]ObjectRefTypeModel, 0, len(specData.DnsLoadBalancers))
-
-		for _, dnsLoadBalancersElement := range specData.DnsLoadBalancers {
-			objectRefTypeModelModel := ObjectRefTypeModel{}
-
-			// resource specToModelNested RequiredStringField --> Name
-			if dnsLoadBalancersElement.GetName() != "" {
-				objectRefTypeModelModel.Name = types.StringValue(dnsLoadBalancersElement.GetName())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Name = types.StringNull()
-			}
-
-			// resource specToModelNested StringField --> Tenant
-			if dnsLoadBalancersElement.GetTenant() != "" {
-				objectRefTypeModelModel.Tenant = types.StringValue(dnsLoadBalancersElement.GetTenant())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Tenant = types.StringNull()
-			}
-
-			// resource specToModelNested RequiredStringField --> Namespace
-			if dnsLoadBalancersElement.GetNamespace() != "" {
-				objectRefTypeModelModel.Namespace = types.StringValue(dnsLoadBalancersElement.GetNamespace())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Namespace = types.StringNull()
-			}
-
-			dnsLoadBalancersElements = append(dnsLoadBalancersElements, objectRefTypeModelModel)
-		}
-
-		dnsLoadBalancersList, diags := utils.GoStructSliceToListValue(
-			ctx,
-			DnsLbPoolDnsLoadBalancersObjectRefModelAttributeMap,
-			dnsLoadBalancersElements,
-		)
-
-		response.Diagnostics.Append(diags...)
+	// Restore the merged value for Optional+Computed map meta-attributes.
+	// MapMergeModifier sets plan = prior state on Update so that Terraform Core's
+	// constraint (plan must equal config or prior state) is satisfied.
+	// We merge planX (prior state, contains backend-injected keys such as
+	// "ves.io/config-propagation-destination") with configData.X (user-intent values,
+	// config wins on conflict) so that:
+	//   (a) backend-injected keys from prior state are preserved in state, and
+	//   (b) user-changed values (e.g. "version":"v1" → "v2") are reflected immediately
+	//       without waiting for the next Read — fixing ImportStateVerify failures.
+	{
+		mergedMap, mergeDiags := utils.MergeStringMaps(planAnnotations, configData.Annotations)
+		response.Diagnostics.Append(mergeDiags...)
 		if response.Diagnostics.HasError() {
 			return
 		}
-
-		data.DnsLoadBalancers = dnsLoadBalancersList
-	} else {
-		var dnsLoadBalancersObjectType = basetypes.ObjectType{
-			AttrTypes: DnsLbPoolDnsLoadBalancersObjectRefModelAttributeMap,
+		data.Annotations = mergedMap
+	}
+	{
+		mergedMap, mergeDiags := utils.MergeStringMaps(planLabels, configData.Labels)
+		response.Diagnostics.Append(mergeDiags...)
+		if response.Diagnostics.HasError() {
+			return
 		}
-		nullDnsLoadBalancersList := basetypes.NewListNull(dnsLoadBalancersObjectType)
-		data.DnsLoadBalancers = nullDnsLoadBalancersList
+		data.Labels = mergedMap
 	}
 
 	// Save updated data into Terraform state
@@ -4646,9 +4926,8 @@ func (r *ResourceF5XCDnsLbPool) Delete(ctx context.Context, request resource.Del
 	defer cancel()
 
 	// Standard Delete Logic
-	opts := []vesapi.CallOpt{
-		vesapi.WithFailIfReferred(),
-	}
+	opts := []vesapi.CallOpt{}
+	opts = append(opts, vesapi.WithFailIfReferred())
 
 	err = r.client.DeleteObject(ctx, ves_io_schema_dns_lb_pool.ObjectType, data.Namespace.ValueString(), data.Name.ValueString(), opts...)
 
@@ -4663,19 +4942,32 @@ func (r *ResourceF5XCDnsLbPool) Delete(ctx context.Context, request resource.Del
 		)
 		return
 	}
-}
 
+}
 func (r *ResourceF5XCDnsLbPool) ImportState(ctx context.Context, req resource.ImportStateRequest, response *resource.ImportStateResponse) {
 	// Import ID format: namespace/name
 	parts := strings.Split(req.ID, "/")
-	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+	if len(parts) != 2 {
 		response.Diagnostics.AddError(
 			"Invalid Import ID",
 			fmt.Sprintf("Expected import ID format: namespace/name, got: %s", req.ID),
 		)
 		return
 	}
-
+	if parts[0] == "" {
+		response.Diagnostics.AddError(
+			"Invalid Import ID",
+			fmt.Sprintf("Expected import ID format: namespace/name, got: %s (namespace is empty)", req.ID),
+		)
+		return
+	}
 	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("namespace"), parts[0])...)
+	if parts[1] == "" {
+		response.Diagnostics.AddError(
+			"Invalid Import ID",
+			fmt.Sprintf("Expected import ID format: namespace/name, got: %s (name is empty)", req.ID),
+		)
+		return
+	}
 	response.Diagnostics.Append(response.State.SetAttribute(ctx, path.Root("name"), parts[1])...)
 }

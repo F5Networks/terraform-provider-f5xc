@@ -871,10 +871,7 @@ var CustomAPISwaggerJSON string = `{
         "description": "Public Custom API definition for Bot Endpoint Policy",
         "version": "version not set"
     },
-    "schemes": [
-        "http",
-        "https"
-    ],
+    "schemes": null,
     "consumes": [
         "application/json"
     ],
@@ -941,6 +938,12 @@ var CustomAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1037,6 +1040,12 @@ var CustomAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1138,6 +1147,12 @@ var CustomAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -1229,6 +1244,12 @@ var CustomAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1342,6 +1363,12 @@ var CustomAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1575,13 +1602,11 @@ var CustomAPISwaggerJSON string = `{
                 "case_sensitive": {
                     "type": "boolean",
                     "title": "Case sensitive",
-                    "format": "boolean",
                     "x-displayname": "Case Sensitive"
                 },
                 "not": {
                     "type": "boolean",
                     "title": "Check not",
-                    "format": "boolean",
                     "x-displayname": "Not(!)"
                 },
                 "operator": {
@@ -1618,14 +1643,12 @@ var CustomAPISwaggerJSON string = `{
                 "case_sensitive": {
                     "type": "boolean",
                     "description": "x-displayName: \"Case Sensitive\"",
-                    "title": "Case sensitive",
-                    "format": "boolean"
+                    "title": "Case sensitive"
                 },
                 "not_value": {
                     "type": "boolean",
                     "description": "x-displayName: \"Not(!)\"",
-                    "title": "Negation",
-                    "format": "boolean"
+                    "title": "Negation"
                 },
                 "value": {
                     "type": "string",
@@ -1710,12 +1733,13 @@ var CustomAPISwaggerJSON string = `{
                 },
                 "name": {
                     "type": "string",
-                    "description": " Operator Name\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n",
+                    "description": " Operator Name\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n  ves.io.schema.rules.string.cookie_name: true\n",
                     "title": "Operator Name",
                     "x-displayname": "Cookie Name",
                     "x-ves-required": "true",
                     "x-ves-validation-rules": {
-                        "ves.io.schema.rules.message.required": "true"
+                        "ves.io.schema.rules.message.required": "true",
+                        "ves.io.schema.rules.string.cookie_name": "true"
                     }
                 }
             }
@@ -1858,12 +1882,13 @@ var CustomAPISwaggerJSON string = `{
             "properties": {
                 "header_name": {
                     "type": "string",
-                    "description": " Enter the Header Name\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n",
+                    "description": " Enter the Header Name\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n  ves.io.schema.rules.string.http_header_field: true\n",
                     "title": "Header Name",
                     "x-displayname": "Header",
                     "x-ves-required": "true",
                     "x-ves-validation-rules": {
-                        "ves.io.schema.rules.message.required": "true"
+                        "ves.io.schema.rules.message.required": "true",
+                        "ves.io.schema.rules.string.http_header_field": "true"
                     }
                 },
                 "header_value": {
@@ -1912,12 +1937,13 @@ var CustomAPISwaggerJSON string = `{
                 },
                 "name": {
                     "type": "string",
-                    "description": " Operator Name\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n",
+                    "description": " Operator Name\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n  ves.io.schema.rules.string.http_header_field: true\n",
                     "title": "Operator Name",
                     "x-displayname": "Name",
                     "x-ves-required": "true",
                     "x-ves-validation-rules": {
-                        "ves.io.schema.rules.message.required": "true"
+                        "ves.io.schema.rules.message.required": "true",
+                        "ves.io.schema.rules.string.http_header_field": "true"
                     }
                 },
                 "not_present_header": {
@@ -2058,14 +2084,12 @@ var CustomAPISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " case insensitive checker",
                     "title": "Check case insensitive",
-                    "format": "boolean",
                     "x-displayname": "Case-Insensitive"
                 },
                 "not": {
                     "type": "boolean",
                     "description": " not checker",
                     "title": "Check not",
-                    "format": "boolean",
                     "x-displayname": "Not(!)"
                 },
                 "value": {
@@ -2083,6 +2107,46 @@ var CustomAPISwaggerJSON string = `{
                     }
                 }
             }
+        },
+        "bot_defenseMobileConfigFetchPaths": {
+            "type": "object",
+            "description": "Android and iOS mobile SDK config fetch paths.",
+            "title": "Mobile Config Fetch Paths",
+            "x-displayname": "Mobile Config Fetch Paths",
+            "x-ves-proto-message": "ves.io.schema.shape.bot_defense.MobileConfigFetchPaths",
+            "properties": {
+                "path_android": {
+                    "type": "string",
+                    "description": " Android mobile client will fetch F5 Client mobile configuration SDK from this path.\n This path must not conflict with any other website/mobile/application paths.\n\nExample: - \"/somepath\"-",
+                    "title": "Android Mobile Config Fetch Path",
+                    "x-displayname": "Android Mobile Config Fetch Path",
+                    "x-ves-example": "/somepath"
+                },
+                "path_ios": {
+                    "type": "string",
+                    "description": " iOS mobile client will fetch F5 Client mobile configuration SDK from this path.\n This path must not conflict with any other website/mobile/application paths.\n\nExample: - \"/somepath\"-",
+                    "title": "iOS Mobile Config Fetch Path",
+                    "x-displayname": "iOS Mobile Config Fetch Path",
+                    "x-ves-example": "/somepath"
+                },
+                "unavailable_text": {
+                    "type": "string",
+                    "description": " Certain mobile policies rely on older mobile components.",
+                    "title": "Unavailable Text",
+                    "x-displayname": "Unavailable"
+                }
+            }
+        },
+        "bot_defenseMobileConfigFetchStatus": {
+            "type": "string",
+            "description": "x-displayName: \"Mobile Config Fetch Status\"\nInternal status for mobile config fetch paths availability.\n\n - NOT_FETCHED: Default - not fetched yet.\n - FETCHED_NOT_AVAILABLE: Status fetched but paths are not available.\n - FETCHED_AND_AVAILABLE: Status fetched and paths are available.",
+            "title": "Mobile Config Fetch Status",
+            "enum": [
+                "NOT_FETCHED",
+                "FETCHED_NOT_AVAILABLE",
+                "FETCHED_AND_AVAILABLE"
+            ],
+            "default": "NOT_FETCHED"
         },
         "bot_defenseNegationOperator": {
             "type": "string",
@@ -2130,14 +2194,12 @@ var CustomAPISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " case insensitive checker",
                     "title": "Check case insensitive",
-                    "format": "boolean",
                     "x-displayname": "Case-Insensitive"
                 },
                 "not": {
                     "type": "boolean",
                     "description": " not checker",
                     "title": "Check not",
-                    "format": "boolean",
                     "x-displayname": "Not(!)"
                 },
                 "value": {
@@ -2241,7 +2303,7 @@ var CustomAPISwaggerJSON string = `{
             "description": "Configures Endpoint Policy Content",
             "title": "Endpoint Policy Content",
             "x-displayname": "Protected Endpoint",
-            "x-ves-displayorder": "4,1",
+            "x-ves-displayorder": "4,5,6,1",
             "x-ves-oneof-field-endpoint_type_choice": "[\"protected_mobile_endpoints\",\"protected_web_endpoints\"]",
             "x-ves-proto-message": "ves.io.schema.shape.bot_defense.ProtectedEndpoints",
             "properties": {
@@ -2251,6 +2313,12 @@ var CustomAPISwaggerJSON string = `{
                     "title": "JavaScript Download Path",
                     "x-displayname": "Web Client JavaScript Path",
                     "x-ves-example": "/common.js?single"
+                },
+                "mobile_config_fetch_paths": {
+                    "description": " Android and iOS mobile SDK config fetch paths.",
+                    "title": "Mobile Config Fetch Paths",
+                    "$ref": "#/definitions/bot_defenseMobileConfigFetchPaths",
+                    "x-displayname": "Mobile Config Fetch Paths"
                 },
                 "protected_mobile_endpoints": {
                     "description": "Exclusive with [protected_web_endpoints]\n Protected Mobile Endpoints List",
@@ -2263,6 +2331,12 @@ var CustomAPISwaggerJSON string = `{
                     "title": "Protected Web Endpoint Version",
                     "$ref": "#/definitions/bot_defenseProtectedWebEndpointList",
                     "x-displayname": "Web"
+                },
+                "telemetry_prefix": {
+                    "type": "string",
+                    "description": " Defines a set of headers used to detect signals based on telemetry prefix",
+                    "title": "Telemetry Prefix",
+                    "x-displayname": "Telemetry Prefix"
                 }
             }
         },
@@ -2787,13 +2861,11 @@ var CustomAPISwaggerJSON string = `{
                 "case_sensitive": {
                     "type": "boolean",
                     "title": "Case sensitive",
-                    "format": "boolean",
                     "x-displayname": "Case Sensitive"
                 },
                 "not": {
                     "type": "boolean",
                     "title": "Check not",
-                    "format": "boolean",
                     "x-displayname": "Not(!)"
                 },
                 "operator": {
@@ -2830,14 +2902,12 @@ var CustomAPISwaggerJSON string = `{
                 "case_sensitive": {
                     "type": "boolean",
                     "description": "x-displayName: \"Case Sensitive\"",
-                    "title": "Case sensitive",
-                    "format": "boolean"
+                    "title": "Case sensitive"
                 },
                 "not_value": {
                     "type": "boolean",
                     "description": "x-displayName: \"Not(!)\"",
-                    "title": "Negation",
-                    "format": "boolean"
+                    "title": "Negation"
                 },
                 "value": {
                     "type": "string",
@@ -3045,13 +3115,11 @@ var CustomAPISwaggerJSON string = `{
                 "case_sensitive": {
                     "type": "boolean",
                     "title": "Case sensitive",
-                    "format": "boolean",
                     "x-displayname": "Case Sensitive"
                 },
                 "not": {
                     "type": "boolean",
                     "title": "Check not",
-                    "format": "boolean",
                     "x-displayname": "Not(!)"
                 },
                 "operator": {
@@ -3088,14 +3156,12 @@ var CustomAPISwaggerJSON string = `{
                 "case_sensitive": {
                     "type": "boolean",
                     "description": "x-displayName: \"Case Sensitive\"",
-                    "title": "Case sensitive",
-                    "format": "boolean"
+                    "title": "Case sensitive"
                 },
                 "not_value": {
                     "type": "boolean",
                     "description": "x-displayName: \"Not(!)\"",
-                    "title": "Negation",
-                    "format": "boolean"
+                    "title": "Negation"
                 },
                 "value": {
                     "type": "string",
@@ -3141,12 +3207,13 @@ var CustomAPISwaggerJSON string = `{
                 },
                 "name": {
                     "type": "string",
-                    "description": " Header Name\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n",
+                    "description": " Header Name\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n  ves.io.schema.rules.string.http_header_field: true\n",
                     "title": "Header Name",
                     "x-displayname": "Header Name",
                     "x-ves-required": "true",
                     "x-ves-validation-rules": {
-                        "ves.io.schema.rules.message.required": "true"
+                        "ves.io.schema.rules.message.required": "true",
+                        "ves.io.schema.rules.string.http_header_field": "true"
                     }
                 }
             }
@@ -3617,6 +3684,42 @@ var CustomAPISwaggerJSON string = `{
                 "IOS"
             ],
             "default": "MOBILE_OS_UNDEFINED"
+        },
+        "protobufAny": {
+            "type": "object",
+            "description": "-Any- contains an arbitrary serialized protocol buffer message along with a\nURL that describes the type of the serialized message.\n\nProtobuf library provides support to pack/unpack Any values in the form\nof utility functions or additional generated methods of the Any type.\n\nExample 1: Pack and unpack a message in C++.\n\n    Foo foo = ...;\n    Any any;\n    any.PackFrom(foo);\n    ...\n    if (any.UnpackTo(\u0026foo)) {\n      ...\n    }\n\nExample 2: Pack and unpack a message in Java.\n\n    Foo foo = ...;\n    Any any = Any.pack(foo);\n    ...\n    if (any.is(Foo.class)) {\n      foo = any.unpack(Foo.class);\n    }\n\n Example 3: Pack and unpack a message in Python.\n\n    foo = Foo(...)\n    any = Any()\n    any.Pack(foo)\n    ...\n    if any.Is(Foo.DESCRIPTOR):\n      any.Unpack(foo)\n      ...\n\n Example 4: Pack and unpack a message in Go\n\n     foo := \u0026pb.Foo{...}\n     any, err := ptypes.MarshalAny(foo)\n     ...\n     foo := \u0026pb.Foo{}\n     if err := ptypes.UnmarshalAny(any, foo); err != nil {\n       ...\n     }\n\nThe pack methods provided by protobuf library will by default use\n'type.googleapis.com/full.type.name' as the type URL and the unpack\nmethods only use the fully qualified type name after the last '/'\nin the type URL, for example \"foo.bar.com/x/y.z\" will yield type\nname \"y.z\".\n\n\nJSON\n====\nThe JSON representation of an -Any- value uses the regular\nrepresentation of the deserialized, embedded message, with an\nadditional field -@type- which contains the type URL. Example:\n\n    package google.profile;\n    message Person {\n      string first_name = 1;\n      string last_name = 2;\n    }\n\n    {\n      \"@type\": \"type.googleapis.com/google.profile.Person\",\n      \"firstName\": \u003cstring\u003e,\n      \"lastName\": \u003cstring\u003e\n    }\n\nIf the embedded message type is well-known and has a custom JSON\nrepresentation, that representation will be embedded adding a field\n-value- which holds the custom JSON in addition to the -@type-\nfield. Example (for message [google.protobuf.Duration][]):\n\n    {\n      \"@type\": \"type.googleapis.com/google.protobuf.Duration\",\n      \"value\": \"1.212s\"\n    }",
+            "properties": {
+                "type_url": {
+                    "type": "string",
+                    "description": "A URL/resource name that uniquely identifies the type of the serialized\nprotocol buffer message. This string must contain at least\none \"/\" character. The last segment of the URL's path must represent\nthe fully qualified name of the type (as in\n-path/google.protobuf.Duration-). The name should be in a canonical form\n(e.g., leading \".\" is not accepted).\n\nIn practice, teams usually precompile into the binary all types that they\nexpect it to use in the context of Any. However, for URLs which use the\nscheme -http-, -https-, or no scheme, one can optionally set up a type\nserver that maps type URLs to message definitions as follows:\n\n* If no scheme is provided, -https- is assumed.\n* An HTTP GET on the URL must yield a [google.protobuf.Type][]\n  value in binary format, or produce an error.\n* Applications are allowed to cache lookup results based on the\n  URL, or have them precompiled into a binary to avoid any\n  lookup. Therefore, binary compatibility needs to be preserved\n  on changes to types. (Use versioned type names to manage\n  breaking changes.)\n\nNote: this functionality is not currently available in the official\nprotobuf release, and it is not used for type URLs beginning with\ntype.googleapis.com.\n\nSchemes other than -http-, -https- (or the empty scheme) might be\nused with implementation specific semantics."
+                },
+                "value": {
+                    "type": "string",
+                    "description": "Must be a valid serialized protocol buffer of the above specified type.",
+                    "format": "byte"
+                }
+            }
+        },
+        "runtimeError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/protobufAny"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
         },
         "schemaBotPolicyFlowLabelAccountManagementChoiceType": {
             "type": "object",

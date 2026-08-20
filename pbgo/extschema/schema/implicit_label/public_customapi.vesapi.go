@@ -295,10 +295,7 @@ var CustomAPISwaggerJSON string = `{
         "description": "Implicit labels are attached to objects implicitly by the system. Users are not allowed to create/update/delete these labels\nThey are also not allowed to attach/detach these labels to objects. This API is provided to get the implicit labels available\nto be used in service-policies",
         "version": "version not set"
     },
-    "schemes": [
-        "http",
-        "https"
-    ],
+    "schemes": null,
     "consumes": [
         "application/json"
     ],
@@ -365,6 +362,12 @@ var CustomAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -502,6 +505,39 @@ var CustomAPISwaggerJSON string = `{
                 "QUERY_KEY_SUBSTRING"
             ],
             "default": "QUERY_ALL_LABELS"
+        },
+        "protobufAny": {
+            "type": "object",
+            "properties": {
+                "type_url": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string",
+                    "format": "byte"
+                }
+            }
+        },
+        "runtimeError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/protobufAny"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
         },
         "schemaLabelKeyClass": {
             "type": "string",

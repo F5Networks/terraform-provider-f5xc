@@ -10,6 +10,12 @@ package app_security
 import (
 	context "context"
 	fmt "fmt"
+	io "io"
+	math "math"
+	math_bits "math/bits"
+	reflect "reflect"
+	strings "strings"
+
 	_ "github.com/gogo/googleapis/google/api"
 	_ "github.com/gogo/protobuf/gogoproto"
 	proto "github.com/gogo/protobuf/proto"
@@ -19,11 +25,6 @@ import (
 	status "google.golang.org/grpc/status"
 	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema"
 	_ "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/vesenv"
-	io "io"
-	math "math"
-	math_bits "math/bits"
-	reflect "reflect"
-	strings "strings"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -266,11 +267,269 @@ func (m *ThreatCampaign) GetLastUpdate() string {
 	return ""
 }
 
+// ThreatsRequest
+//
+// x-displayName: "ThreatsRequest"
+// Returns threats associated with the given CVE IDs, which can be supplied explicitly or
+// derived from a WAF security event.
+type ThreatsRequest struct {
+	// ThreatsFilter
+	//
+	// x-displayName: "Threats Filter"
+	// x-required
+	// Threats filter
+	//
+	// Types that are valid to be assigned to ThreatsFilter:
+	//	*ThreatsRequest_CveIds
+	//	*ThreatsRequest_WafSecEventId
+	//	*ThreatsRequest_PrimaryTag
+	ThreatsFilter isThreatsRequest_ThreatsFilter `protobuf_oneof:"threats_filter"`
+	// Cursor
+	//
+	// x-displayName: "Cursor"
+	// x-example: "eyJpZCI6ICJjbnBjNTg0ODg1LWU4YjAtNDQ5ZC05YjA4LWFhYjA4ZDEyZDYifQ=="
+	// Opaque pagination cursor returned from previous response
+	Cursor string `protobuf:"bytes,4,opt,name=cursor,proto3" json:"cursor,omitempty"`
+	// Report Fields
+	//
+	// x-displayName: "Report Fields"
+	// x-example: "['title', 'severity', 'summary']"
+	// Optional list of fields to include in threat representation
+	ReportFields []string `protobuf:"bytes,5,rep,name=report_fields,json=reportFields,proto3" json:"report_fields,omitempty"`
+}
+
+func (m *ThreatsRequest) Reset()      { *m = ThreatsRequest{} }
+func (*ThreatsRequest) ProtoMessage() {}
+func (*ThreatsRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_058f990be476f057, []int{2}
+}
+func (m *ThreatsRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ThreatsRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ThreatsRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ThreatsRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ThreatsRequest.Merge(m, src)
+}
+func (m *ThreatsRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *ThreatsRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_ThreatsRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ThreatsRequest proto.InternalMessageInfo
+
+type isThreatsRequest_ThreatsFilter interface {
+	isThreatsRequest_ThreatsFilter()
+	Equal(interface{}) bool
+	MarshalTo([]byte) (int, error)
+	Size() int
+}
+
+type ThreatsRequest_CveIds struct {
+	CveIds *CVEIDList `protobuf:"bytes,2,opt,name=cve_ids,json=cveIds,proto3,oneof" json:"cve_ids,omitempty"`
+}
+type ThreatsRequest_WafSecEventId struct {
+	WafSecEventId string `protobuf:"bytes,3,opt,name=waf_sec_event_id,json=wafSecEventId,proto3,oneof" json:"waf_sec_event_id,omitempty"`
+}
+type ThreatsRequest_PrimaryTag struct {
+	PrimaryTag string `protobuf:"bytes,6,opt,name=primary_tag,json=primaryTag,proto3,oneof" json:"primary_tag,omitempty"`
+}
+
+func (*ThreatsRequest_CveIds) isThreatsRequest_ThreatsFilter()        {}
+func (*ThreatsRequest_WafSecEventId) isThreatsRequest_ThreatsFilter() {}
+func (*ThreatsRequest_PrimaryTag) isThreatsRequest_ThreatsFilter()    {}
+
+func (m *ThreatsRequest) GetThreatsFilter() isThreatsRequest_ThreatsFilter {
+	if m != nil {
+		return m.ThreatsFilter
+	}
+	return nil
+}
+
+func (m *ThreatsRequest) GetCveIds() *CVEIDList {
+	if x, ok := m.GetThreatsFilter().(*ThreatsRequest_CveIds); ok {
+		return x.CveIds
+	}
+	return nil
+}
+
+func (m *ThreatsRequest) GetWafSecEventId() string {
+	if x, ok := m.GetThreatsFilter().(*ThreatsRequest_WafSecEventId); ok {
+		return x.WafSecEventId
+	}
+	return ""
+}
+
+func (m *ThreatsRequest) GetPrimaryTag() string {
+	if x, ok := m.GetThreatsFilter().(*ThreatsRequest_PrimaryTag); ok {
+		return x.PrimaryTag
+	}
+	return ""
+}
+
+func (m *ThreatsRequest) GetCursor() string {
+	if m != nil {
+		return m.Cursor
+	}
+	return ""
+}
+
+func (m *ThreatsRequest) GetReportFields() []string {
+	if m != nil {
+		return m.ReportFields
+	}
+	return nil
+}
+
+// XXX_OneofWrappers is for the internal use of the proto package.
+func (*ThreatsRequest) XXX_OneofWrappers() []interface{} {
+	return []interface{}{
+		(*ThreatsRequest_CveIds)(nil),
+		(*ThreatsRequest_WafSecEventId)(nil),
+		(*ThreatsRequest_PrimaryTag)(nil),
+	}
+}
+
+// ThreatsResponse
+//
+// x-displayName: "ThreatsResponse"
+// Returns a list of threats tracked by F5 XC Threat Intelligence that match the query.
+type ThreatsResponse struct {
+	// threats
+	//
+	// x-displayName: "Threats"
+	// A list of threats that match the query.
+	Threats []string `protobuf:"bytes,1,rep,name=threats,proto3" json:"threats,omitempty"`
+	// Next Cursor
+	//
+	// x-displayName: "Next Cursor"
+	// x-example: "eyJpZCI6ICJjbnBjNTg0ODg1LWU4YjAtNDQ5ZC05YjA4LWFhYjA4ZDEyZDYifQ=="
+	// Opaque cursor for fetching next page
+	NextCursor string `protobuf:"bytes,2,opt,name=next_cursor,json=nextCursor,proto3" json:"next_cursor,omitempty"`
+}
+
+func (m *ThreatsResponse) Reset()      { *m = ThreatsResponse{} }
+func (*ThreatsResponse) ProtoMessage() {}
+func (*ThreatsResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_058f990be476f057, []int{3}
+}
+func (m *ThreatsResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ThreatsResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ThreatsResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ThreatsResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ThreatsResponse.Merge(m, src)
+}
+func (m *ThreatsResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *ThreatsResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_ThreatsResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ThreatsResponse proto.InternalMessageInfo
+
+func (m *ThreatsResponse) GetThreats() []string {
+	if m != nil {
+		return m.Threats
+	}
+	return nil
+}
+
+func (m *ThreatsResponse) GetNextCursor() string {
+	if m != nil {
+		return m.NextCursor
+	}
+	return ""
+}
+
+// CVEIDList
+//
+// x-displayName: "CVE ID List"
+// A list of CVE IDs
+type CVEIDList struct {
+	// ids
+	//
+	// x-displayName: "IDs"
+	// x-example: "CVE-2021-44228"
+	// x-required
+	// A list of CVE IDs
+	Ids []string `protobuf:"bytes,1,rep,name=ids,proto3" json:"ids,omitempty"`
+}
+
+func (m *CVEIDList) Reset()      { *m = CVEIDList{} }
+func (*CVEIDList) ProtoMessage() {}
+func (*CVEIDList) Descriptor() ([]byte, []int) {
+	return fileDescriptor_058f990be476f057, []int{4}
+}
+func (m *CVEIDList) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *CVEIDList) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_CVEIDList.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *CVEIDList) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CVEIDList.Merge(m, src)
+}
+func (m *CVEIDList) XXX_Size() int {
+	return m.Size()
+}
+func (m *CVEIDList) XXX_DiscardUnknown() {
+	xxx_messageInfo_CVEIDList.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_CVEIDList proto.InternalMessageInfo
+
+func (m *CVEIDList) GetIds() []string {
+	if m != nil {
+		return m.Ids
+	}
+	return nil
+}
+
 func init() {
 	proto.RegisterType((*ThreatCampaignRequest)(nil), "ves.io.schema.app_security.ThreatCampaignRequest")
 	golang_proto.RegisterType((*ThreatCampaignRequest)(nil), "ves.io.schema.app_security.ThreatCampaignRequest")
 	proto.RegisterType((*ThreatCampaign)(nil), "ves.io.schema.app_security.ThreatCampaign")
 	golang_proto.RegisterType((*ThreatCampaign)(nil), "ves.io.schema.app_security.ThreatCampaign")
+	proto.RegisterType((*ThreatsRequest)(nil), "ves.io.schema.app_security.ThreatsRequest")
+	golang_proto.RegisterType((*ThreatsRequest)(nil), "ves.io.schema.app_security.ThreatsRequest")
+	proto.RegisterType((*ThreatsResponse)(nil), "ves.io.schema.app_security.ThreatsResponse")
+	golang_proto.RegisterType((*ThreatsResponse)(nil), "ves.io.schema.app_security.ThreatsResponse")
+	proto.RegisterType((*CVEIDList)(nil), "ves.io.schema.app_security.CVEIDList")
+	golang_proto.RegisterType((*CVEIDList)(nil), "ves.io.schema.app_security.CVEIDList")
 }
 
 func init() {
@@ -281,46 +540,62 @@ func init() {
 }
 
 var fileDescriptor_058f990be476f057 = []byte{
-	// 624 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x53, 0xcf, 0x6b, 0x13, 0x4d,
-	0x18, 0xce, 0x6c, 0xf2, 0xb5, 0xcd, 0x14, 0xca, 0xf7, 0x0d, 0xf4, 0x63, 0xbf, 0x7c, 0x65, 0x8c,
-	0x39, 0x15, 0x71, 0x77, 0xfd, 0x81, 0x22, 0x78, 0xd1, 0x7a, 0x90, 0x8a, 0xa0, 0x84, 0x7a, 0xf1,
-	0x60, 0x98, 0xec, 0xbe, 0xd9, 0x8e, 0xcd, 0xee, 0x8c, 0x33, 0xb3, 0x69, 0x83, 0x08, 0xd2, 0x83,
-	0x78, 0x14, 0xbc, 0x8b, 0x47, 0xff, 0x06, 0x7b, 0xe9, 0x4d, 0x4f, 0x52, 0x14, 0xa4, 0x47, 0xbb,
-	0xf1, 0xa0, 0xb7, 0xfe, 0x09, 0xb2, 0xb3, 0xa9, 0x24, 0xa5, 0x8a, 0xb7, 0xf7, 0x7d, 0x9e, 0x3c,
-	0x0f, 0xf3, 0xbc, 0xd9, 0x07, 0x5f, 0x1d, 0x80, 0xf6, 0xb9, 0x08, 0x74, 0xb8, 0x0e, 0x09, 0x0b,
-	0x98, 0x94, 0x1d, 0x0d, 0x61, 0xa6, 0xb8, 0x19, 0x06, 0x32, 0xeb, 0xf6, 0x79, 0xd8, 0x31, 0xeb,
-	0x0a, 0x98, 0xe9, 0x84, 0x2c, 0x91, 0x8c, 0xc7, 0x69, 0x87, 0x49, 0xee, 0x4b, 0x25, 0x8c, 0x20,
-	0x8d, 0x52, 0xec, 0x97, 0x62, 0x7f, 0x52, 0xdc, 0xf0, 0x62, 0x6e, 0xd6, 0xb3, 0xae, 0x1f, 0x8a,
-	0x24, 0x88, 0x45, 0x2c, 0x02, 0x2b, 0xe9, 0x66, 0x3d, 0xbb, 0xd9, 0xc5, 0x4e, 0xa5, 0x55, 0x63,
-	0x29, 0x16, 0x22, 0xee, 0x43, 0xc0, 0x24, 0x0f, 0x58, 0x9a, 0x0a, 0xc3, 0x0c, 0x17, 0xa9, 0x1e,
-	0xb3, 0xff, 0x4f, 0xbf, 0x52, 0xc8, 0x49, 0x72, 0x69, 0x9a, 0x1c, 0xb0, 0x3e, 0x8f, 0x98, 0x81,
-	0x31, 0xdb, 0x3a, 0xc6, 0x82, 0x86, 0x74, 0x30, 0xed, 0xd0, 0xba, 0x82, 0x17, 0xd7, 0x6c, 0xc8,
-	0x1b, 0xe3, 0x8c, 0x6d, 0x78, 0x94, 0x81, 0x36, 0xe4, 0x3f, 0xec, 0xf0, 0xc8, 0x75, 0x9a, 0x68,
-	0xb9, 0xbe, 0x52, 0x7f, 0xfb, 0x7d, 0xb7, 0x5a, 0x53, 0x8e, 0x7b, 0xad, 0xed, 0xf0, 0xe8, 0x56,
-	0x6d, 0x0e, 0xfd, 0xed, 0xb4, 0x5e, 0x3b, 0x78, 0x61, 0x5a, 0x4a, 0x16, 0xac, 0x66, 0xbe, 0xd0,
-	0x14, 0x3f, 0x24, 0x04, 0xd7, 0x52, 0x96, 0x40, 0xe9, 0xd2, 0xb6, 0x33, 0x39, 0x85, 0xe7, 0x99,
-	0x31, 0x2c, 0xdc, 0xe8, 0x98, 0xa1, 0x04, 0xb7, 0x6a, 0x29, 0x5c, 0x42, 0x6b, 0x43, 0x09, 0xe4,
-	0x5f, 0x3c, 0xc3, 0x53, 0x03, 0xa9, 0x71, 0x6b, 0x96, 0x1b, 0x6f, 0x85, 0x99, 0xe2, 0x7a, 0xc3,
-	0xfd, 0xab, 0x34, 0x2b, 0x66, 0xd2, 0xc0, 0x73, 0x09, 0xeb, 0x6f, 0x32, 0x05, 0xda, 0x9d, 0x69,
-	0x56, 0x97, 0xeb, 0xed, 0x9f, 0x3b, 0x71, 0xf1, 0xac, 0x1e, 0x6a, 0x03, 0x89, 0x76, 0x67, 0x2d,
-	0x75, 0xb4, 0x92, 0x26, 0x9e, 0x8f, 0x40, 0x87, 0x8a, 0xdb, 0x4b, 0xb8, 0x73, 0xd6, 0x70, 0x12,
-	0x22, 0x14, 0x63, 0x05, 0x3d, 0x50, 0x90, 0x86, 0xa0, 0xdd, 0xba, 0x95, 0x4f, 0x20, 0x45, 0x88,
-	0x3e, 0xd3, 0xa6, 0x93, 0xc9, 0xe2, 0xdc, 0x2e, 0x2e, 0x43, 0x14, 0xd0, 0x3d, 0x8b, 0x94, 0x27,
-	0xba, 0xf0, 0xca, 0xc1, 0xff, 0x4c, 0x9f, 0xe8, 0xfa, 0xdd, 0x55, 0xf2, 0x19, 0xe1, 0xc5, 0x9b,
-	0x60, 0xa6, 0x89, 0x95, 0xe1, 0x6a, 0x44, 0xce, 0xfb, 0xbf, 0xfe, 0xaa, 0xfc, 0x13, 0xff, 0xa6,
-	0xc6, 0x99, 0x3f, 0x97, 0xb4, 0x1e, 0xe4, 0xef, 0xdc, 0xcb, 0xbd, 0x4b, 0x5b, 0xa1, 0xb7, 0xc9,
-	0x98, 0xf4, 0xb4, 0x61, 0x69, 0xc4, 0x54, 0xe4, 0x25, 0x22, 0xe5, 0x46, 0xa8, 0xb3, 0xcd, 0x01,
-	0x68, 0x8f, 0x0b, 0x4f, 0x2a, 0xb1, 0x35, 0xf4, 0x8e, 0x5c, 0x3c, 0x05, 0x2c, 0xda, 0xfe, 0xf4,
-	0xf5, 0xa5, 0x43, 0xc9, 0xd2, 0xb8, 0x18, 0xc1, 0xb1, 0x62, 0x04, 0x8f, 0x79, 0xf4, 0xa4, 0x71,
-	0x6e, 0x77, 0x07, 0x55, 0x3f, 0xee, 0xa0, 0xd3, 0xbf, 0x79, 0xd2, 0x9d, 0xee, 0x43, 0x08, 0xcd,
-	0xf6, 0x07, 0xb7, 0xfa, 0xdc, 0x41, 0x2b, 0xcf, 0xd0, 0xde, 0x01, 0xad, 0xec, 0x1f, 0xd0, 0xca,
-	0xe1, 0x01, 0x45, 0x4f, 0x73, 0x8a, 0xde, 0xe4, 0x14, 0xbd, 0xcf, 0x29, 0xda, 0xcb, 0x29, 0xfa,
-	0x92, 0x53, 0xf4, 0x2d, 0xa7, 0x95, 0xc3, 0x9c, 0xa2, 0x17, 0x23, 0x5a, 0xd9, 0x1d, 0x51, 0xb4,
-	0x37, 0xa2, 0x95, 0xfd, 0x11, 0xad, 0xdc, 0xbf, 0x1d, 0x0b, 0xb9, 0x11, 0xfb, 0x03, 0xd1, 0x37,
-	0xa0, 0x14, 0xf3, 0x33, 0x1d, 0xd8, 0xa1, 0x27, 0x54, 0x52, 0x24, 0x18, 0xf0, 0x08, 0x94, 0x57,
-	0xa4, 0x0d, 0x64, 0x37, 0x16, 0x01, 0x6c, 0x99, 0x71, 0x0f, 0x4e, 0xe8, 0x7b, 0x77, 0xc6, 0xb6,
-	0xe1, 0xe2, 0x8f, 0x00, 0x00, 0x00, 0xff, 0xff, 0xa4, 0xb0, 0x79, 0x3c, 0x14, 0x04, 0x00, 0x00,
+	// 878 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xa4, 0x55, 0x41, 0x6f, 0x1b, 0x45,
+	0x14, 0xf6, 0xac, 0x1d, 0x27, 0x1e, 0xd3, 0x34, 0x8c, 0x68, 0xb5, 0x98, 0x68, 0x49, 0x8d, 0x90,
+	0x4a, 0x61, 0x77, 0x4b, 0x11, 0x08, 0x81, 0x90, 0x8a, 0x43, 0xa1, 0x46, 0x91, 0x40, 0x26, 0x70,
+	0xe0, 0xc0, 0x6a, 0xbc, 0xfb, 0xbc, 0x19, 0xe2, 0xdd, 0x19, 0x66, 0xc6, 0x76, 0x2c, 0x84, 0x84,
+	0x7a, 0x40, 0x1c, 0x11, 0xfc, 0x01, 0x8e, 0xfc, 0x06, 0x72, 0xc9, 0x0d, 0x4e, 0x28, 0x02, 0x09,
+	0xf5, 0xc0, 0x81, 0x38, 0x1c, 0xe0, 0xd6, 0x3b, 0x17, 0x34, 0xb3, 0xeb, 0x28, 0x8e, 0x4a, 0x14,
+	0xa9, 0xb7, 0xf7, 0xbe, 0xf7, 0xbe, 0xa7, 0xf7, 0xbe, 0xf7, 0x76, 0x16, 0xbf, 0x3e, 0x06, 0x15,
+	0x30, 0x1e, 0xaa, 0x78, 0x07, 0x32, 0x1a, 0x52, 0x21, 0x22, 0x05, 0xf1, 0x48, 0x32, 0x3d, 0x0d,
+	0xc5, 0xa8, 0x3f, 0x64, 0x71, 0xa4, 0x77, 0x24, 0x50, 0x1d, 0xc5, 0x34, 0x13, 0x94, 0xa5, 0x79,
+	0x44, 0x05, 0x0b, 0x84, 0xe4, 0x9a, 0x93, 0x56, 0x41, 0x0e, 0x0a, 0x72, 0x70, 0x9a, 0xdc, 0xf2,
+	0x53, 0xa6, 0x77, 0x46, 0xfd, 0x20, 0xe6, 0x59, 0x98, 0xf2, 0x94, 0x87, 0x96, 0xd2, 0x1f, 0x0d,
+	0xac, 0x67, 0x1d, 0x6b, 0x15, 0xa5, 0x5a, 0xeb, 0x29, 0xe7, 0xe9, 0x10, 0x42, 0x2a, 0x58, 0x48,
+	0xf3, 0x9c, 0x6b, 0xaa, 0x19, 0xcf, 0x55, 0x19, 0x7d, 0x6a, 0xb1, 0x4b, 0x2e, 0x4e, 0x07, 0xd7,
+	0x17, 0x83, 0x63, 0x3a, 0x64, 0x09, 0xd5, 0x50, 0x46, 0xdb, 0x67, 0xa2, 0xa0, 0x20, 0x1f, 0x9f,
+	0xa9, 0xb0, 0x71, 0x26, 0x87, 0xc1, 0x24, 0x5a, 0xc8, 0x68, 0xbf, 0x8a, 0xaf, 0x6c, 0x5b, 0x19,
+	0x36, 0x4b, 0x15, 0x7a, 0xf0, 0xd9, 0x08, 0x94, 0x26, 0x4f, 0x62, 0x87, 0x25, 0xae, 0xb3, 0x81,
+	0xae, 0x37, 0x3a, 0x8d, 0x1f, 0xff, 0x39, 0xa8, 0xd6, 0xa4, 0xe3, 0xde, 0xee, 0x39, 0x2c, 0x79,
+	0xb7, 0xb6, 0x82, 0xd6, 0x9c, 0xf6, 0xf7, 0x0e, 0x5e, 0x5d, 0xa4, 0x92, 0x55, 0xcb, 0x69, 0x1a,
+	0x8e, 0x49, 0x24, 0x04, 0xd7, 0x72, 0x9a, 0x41, 0x51, 0xa5, 0x67, 0x6d, 0xf2, 0x34, 0x6e, 0x52,
+	0xad, 0x69, 0xbc, 0x1b, 0xe9, 0xa9, 0x00, 0xb7, 0x6a, 0x43, 0xb8, 0x80, 0xb6, 0xa7, 0x02, 0xc8,
+	0x55, 0x5c, 0x67, 0xb9, 0x86, 0x5c, 0xbb, 0x35, 0x1b, 0x2b, 0x3d, 0x53, 0x4c, 0x32, 0xb5, 0xeb,
+	0x2e, 0x15, 0xc5, 0x8c, 0x4d, 0x5a, 0x78, 0x25, 0xa3, 0xc3, 0x09, 0x95, 0xa0, 0xdc, 0xfa, 0x46,
+	0xf5, 0x7a, 0xa3, 0x77, 0xe2, 0x13, 0x17, 0x2f, 0xab, 0xa9, 0xd2, 0x90, 0x29, 0x77, 0xd9, 0x86,
+	0xe6, 0x2e, 0xd9, 0xc0, 0xcd, 0x04, 0x54, 0x2c, 0x99, 0x55, 0xc2, 0x5d, 0xb1, 0x05, 0x4f, 0x43,
+	0xc4, 0xc3, 0x58, 0xc2, 0x00, 0x24, 0xe4, 0x31, 0x28, 0xb7, 0x61, 0xe9, 0xa7, 0x10, 0x33, 0xc4,
+	0x90, 0x2a, 0x1d, 0x8d, 0x84, 0x59, 0x88, 0x8b, 0x8b, 0x21, 0x0c, 0xf4, 0xa1, 0x45, 0x4a, 0x89,
+	0xfe, 0x45, 0x73, 0x89, 0xd4, 0x5c, 0xd6, 0xdb, 0x78, 0x39, 0x1e, 0x43, 0xc4, 0x12, 0x65, 0x55,
+	0x69, 0xde, 0x7a, 0x36, 0xf8, 0xff, 0x5b, 0x0b, 0x36, 0x3f, 0xba, 0xd3, 0x7d, 0x6b, 0x8b, 0x29,
+	0x7d, 0xb7, 0xd2, 0xab, 0xc7, 0x63, 0xe8, 0x26, 0x8a, 0x3c, 0x87, 0xd7, 0x26, 0x74, 0x60, 0x72,
+	0x22, 0x18, 0x43, 0xae, 0x23, 0x96, 0x14, 0x2a, 0xde, 0xad, 0xf4, 0x2e, 0x4d, 0xe8, 0xe0, 0x03,
+	0x88, 0xef, 0x18, 0xbc, 0x9b, 0x90, 0x6b, 0xb8, 0x29, 0x24, 0xcb, 0xa8, 0x9c, 0x46, 0x9a, 0xa6,
+	0x6e, 0xbd, 0xcc, 0xc2, 0x25, 0xb8, 0x4d, 0x53, 0xa3, 0x76, 0x3c, 0x92, 0x8a, 0xcb, 0xb9, 0xda,
+	0x85, 0x47, 0x9e, 0xc1, 0x97, 0x24, 0x08, 0x2e, 0x75, 0x34, 0x60, 0x30, 0x4c, 0x94, 0xbb, 0x64,
+	0x45, 0x78, 0xac, 0x00, 0xdf, 0xb6, 0x58, 0xe7, 0x2a, 0x5e, 0x2d, 0xbe, 0x21, 0x15, 0x0d, 0xd8,
+	0x50, 0x83, 0x24, 0xb5, 0xc3, 0x7d, 0x84, 0xca, 0xe9, 0xb7, 0xf0, 0xe5, 0x93, 0xe1, 0x95, 0xe0,
+	0xb9, 0x02, 0xb3, 0x93, 0x92, 0xe0, 0xa2, 0x62, 0x27, 0xa5, 0x6b, 0x14, 0xcd, 0x61, 0x4f, 0x47,
+	0x65, 0x33, 0xc5, 0xc5, 0x60, 0x03, 0x6d, 0x5a, 0xa4, 0xfd, 0x06, 0x6e, 0x9c, 0xa8, 0x41, 0x6e,
+	0xe2, 0xaa, 0x51, 0xd0, 0xd6, 0xe8, 0x78, 0xe6, 0x3a, 0x97, 0xbe, 0x45, 0xce, 0xda, 0xda, 0xdc,
+	0x5a, 0x41, 0x73, 0xcb, 0x45, 0x3d, 0x93, 0x7a, 0xeb, 0x8f, 0x2a, 0x7e, 0x7c, 0xf1, 0x5a, 0xdf,
+	0x7c, 0xbf, 0x4b, 0x7e, 0x47, 0xf8, 0xca, 0x3b, 0xa0, 0x17, 0x03, 0x9d, 0x69, 0x37, 0x21, 0x2f,
+	0x9e, 0xb7, 0x96, 0x87, 0x7e, 0x31, 0xad, 0x1b, 0x17, 0xa7, 0xb4, 0x3f, 0x99, 0xfd, 0xe4, 0xbe,
+	0x32, 0x78, 0x79, 0x2f, 0xf6, 0x27, 0x94, 0x0a, 0x5f, 0x69, 0x9a, 0x27, 0x54, 0x26, 0x7e, 0xc6,
+	0x73, 0xa6, 0xb9, 0x7c, 0xc1, 0x7c, 0xb8, 0x3e, 0xe3, 0xbe, 0x90, 0x7c, 0x6f, 0xea, 0xcf, 0xab,
+	0xf8, 0x12, 0x68, 0x72, 0xef, 0xb7, 0xbf, 0xbe, 0x73, 0x3c, 0xb2, 0x5e, 0xbe, 0x62, 0xe1, 0x99,
+	0x57, 0x2c, 0xfc, 0x9c, 0x25, 0x5f, 0x90, 0x7d, 0x84, 0xf1, 0xc9, 0x60, 0x8a, 0x5c, 0xa0, 0xb5,
+	0xf9, 0x85, 0xb6, 0x9e, 0xbf, 0x50, 0x6e, 0xb1, 0xd0, 0xf6, 0xf6, 0x23, 0xce, 0xf1, 0x44, 0xfb,
+	0xf2, 0xe2, 0x1c, 0xea, 0x35, 0x74, 0xa3, 0x75, 0xf3, 0x60, 0x1f, 0x55, 0x7f, 0xdd, 0x47, 0xd7,
+	0xce, 0xe9, 0xe4, 0xbd, 0xfe, 0xa7, 0x10, 0xeb, 0x7b, 0xbf, 0xb8, 0xd5, 0xaf, 0x1d, 0xd4, 0xf9,
+	0x0a, 0x1d, 0x1e, 0x79, 0x95, 0xfb, 0x47, 0x5e, 0xe5, 0xc1, 0x91, 0x87, 0xbe, 0x9c, 0x79, 0xe8,
+	0x87, 0x99, 0x87, 0x7e, 0x9e, 0x79, 0xe8, 0x70, 0xe6, 0xa1, 0x3f, 0x67, 0x1e, 0xfa, 0x7b, 0xe6,
+	0x55, 0x1e, 0xcc, 0x3c, 0xf4, 0xcd, 0xb1, 0x57, 0x39, 0x38, 0xf6, 0xd0, 0xe1, 0xb1, 0x57, 0xb9,
+	0x7f, 0xec, 0x55, 0x3e, 0xde, 0x4a, 0xb9, 0xd8, 0x4d, 0x83, 0x31, 0x37, 0x07, 0x2c, 0x69, 0x30,
+	0x52, 0xa1, 0x35, 0x06, 0x5c, 0x66, 0xa6, 0xef, 0x31, 0x4b, 0x40, 0xfa, 0x66, 0xc6, 0x50, 0xf4,
+	0x53, 0x1e, 0xc2, 0x9e, 0x2e, 0x9f, 0xd3, 0x87, 0xfc, 0x5a, 0xfa, 0x75, 0xfb, 0xac, 0xbe, 0xf4,
+	0x5f, 0x00, 0x00, 0x00, 0xff, 0xff, 0xeb, 0x47, 0xad, 0x96, 0x7f, 0x06, 0x00, 0x00,
 }
 
 func (this *ThreatCampaignRequest) Equal(that interface{}) bool {
@@ -413,6 +688,180 @@ func (this *ThreatCampaign) Equal(that interface{}) bool {
 	}
 	return true
 }
+func (this *ThreatsRequest) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ThreatsRequest)
+	if !ok {
+		that2, ok := that.(ThreatsRequest)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if that1.ThreatsFilter == nil {
+		if this.ThreatsFilter != nil {
+			return false
+		}
+	} else if this.ThreatsFilter == nil {
+		return false
+	} else if !this.ThreatsFilter.Equal(that1.ThreatsFilter) {
+		return false
+	}
+	if this.Cursor != that1.Cursor {
+		return false
+	}
+	if len(this.ReportFields) != len(that1.ReportFields) {
+		return false
+	}
+	for i := range this.ReportFields {
+		if this.ReportFields[i] != that1.ReportFields[i] {
+			return false
+		}
+	}
+	return true
+}
+func (this *ThreatsRequest_CveIds) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ThreatsRequest_CveIds)
+	if !ok {
+		that2, ok := that.(ThreatsRequest_CveIds)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.CveIds.Equal(that1.CveIds) {
+		return false
+	}
+	return true
+}
+func (this *ThreatsRequest_WafSecEventId) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ThreatsRequest_WafSecEventId)
+	if !ok {
+		that2, ok := that.(ThreatsRequest_WafSecEventId)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.WafSecEventId != that1.WafSecEventId {
+		return false
+	}
+	return true
+}
+func (this *ThreatsRequest_PrimaryTag) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ThreatsRequest_PrimaryTag)
+	if !ok {
+		that2, ok := that.(ThreatsRequest_PrimaryTag)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.PrimaryTag != that1.PrimaryTag {
+		return false
+	}
+	return true
+}
+func (this *ThreatsResponse) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ThreatsResponse)
+	if !ok {
+		that2, ok := that.(ThreatsResponse)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if len(this.Threats) != len(that1.Threats) {
+		return false
+	}
+	for i := range this.Threats {
+		if this.Threats[i] != that1.Threats[i] {
+			return false
+		}
+	}
+	if this.NextCursor != that1.NextCursor {
+		return false
+	}
+	return true
+}
+func (this *CVEIDList) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*CVEIDList)
+	if !ok {
+		that2, ok := that.(CVEIDList)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if len(this.Ids) != len(that1.Ids) {
+		return false
+	}
+	for i := range this.Ids {
+		if this.Ids[i] != that1.Ids[i] {
+			return false
+		}
+	}
+	return true
+}
 func (this *ThreatCampaignRequest) GoString() string {
 	if this == nil {
 		return "nil"
@@ -442,6 +891,65 @@ func (this *ThreatCampaign) GoString() string {
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
+func (this *ThreatsRequest) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 9)
+	s = append(s, "&app_security.ThreatsRequest{")
+	if this.ThreatsFilter != nil {
+		s = append(s, "ThreatsFilter: "+fmt.Sprintf("%#v", this.ThreatsFilter)+",\n")
+	}
+	s = append(s, "Cursor: "+fmt.Sprintf("%#v", this.Cursor)+",\n")
+	s = append(s, "ReportFields: "+fmt.Sprintf("%#v", this.ReportFields)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *ThreatsRequest_CveIds) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&app_security.ThreatsRequest_CveIds{` +
+		`CveIds:` + fmt.Sprintf("%#v", this.CveIds) + `}`}, ", ")
+	return s
+}
+func (this *ThreatsRequest_WafSecEventId) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&app_security.ThreatsRequest_WafSecEventId{` +
+		`WafSecEventId:` + fmt.Sprintf("%#v", this.WafSecEventId) + `}`}, ", ")
+	return s
+}
+func (this *ThreatsRequest_PrimaryTag) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&app_security.ThreatsRequest_PrimaryTag{` +
+		`PrimaryTag:` + fmt.Sprintf("%#v", this.PrimaryTag) + `}`}, ", ")
+	return s
+}
+func (this *ThreatsResponse) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&app_security.ThreatsResponse{")
+	s = append(s, "Threats: "+fmt.Sprintf("%#v", this.Threats)+",\n")
+	s = append(s, "NextCursor: "+fmt.Sprintf("%#v", this.NextCursor)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *CVEIDList) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 5)
+	s = append(s, "&app_security.CVEIDList{")
+	s = append(s, "Ids: "+fmt.Sprintf("%#v", this.Ids)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
 func valueToGoStringPublicThreatCampaignApi(v interface{}, typ string) string {
 	rv := reflect.ValueOf(v)
 	if rv.IsNil() {
@@ -468,6 +976,14 @@ type ThreatCampaignAPIClient interface {
 	// x-displayName: "Get Threat Campaign by ID"
 	// Get Threat Campaign by ID
 	GetThreatCampaignById(ctx context.Context, in *ThreatCampaignRequest, opts ...grpc.CallOption) (*ThreatCampaign, error)
+	// Get Threats
+	//
+	// x-displayName: "Get Threats"
+	// Returns a list of threats tracked by F5 XC Threat Intelligence. A threat is a rollup of articles.
+	// An article originates from a public web page or blog post discussing a cybersecurity threat campaign,
+	// threat actor (or both combined). The public source is fed through a content pipeline to extract
+	// threat intelligence information that could be valuable.
+	GetThreats(ctx context.Context, in *ThreatsRequest, opts ...grpc.CallOption) (*ThreatsResponse, error)
 }
 
 type threatCampaignAPIClient struct {
@@ -487,6 +1003,15 @@ func (c *threatCampaignAPIClient) GetThreatCampaignById(ctx context.Context, in 
 	return out, nil
 }
 
+func (c *threatCampaignAPIClient) GetThreats(ctx context.Context, in *ThreatsRequest, opts ...grpc.CallOption) (*ThreatsResponse, error) {
+	out := new(ThreatsResponse)
+	err := c.cc.Invoke(ctx, "/ves.io.schema.app_security.ThreatCampaignAPI/GetThreats", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ThreatCampaignAPIServer is the server API for ThreatCampaignAPI service.
 type ThreatCampaignAPIServer interface {
 	// Get Threat Campaign by id
@@ -494,6 +1019,14 @@ type ThreatCampaignAPIServer interface {
 	// x-displayName: "Get Threat Campaign by ID"
 	// Get Threat Campaign by ID
 	GetThreatCampaignById(context.Context, *ThreatCampaignRequest) (*ThreatCampaign, error)
+	// Get Threats
+	//
+	// x-displayName: "Get Threats"
+	// Returns a list of threats tracked by F5 XC Threat Intelligence. A threat is a rollup of articles.
+	// An article originates from a public web page or blog post discussing a cybersecurity threat campaign,
+	// threat actor (or both combined). The public source is fed through a content pipeline to extract
+	// threat intelligence information that could be valuable.
+	GetThreats(context.Context, *ThreatsRequest) (*ThreatsResponse, error)
 }
 
 // UnimplementedThreatCampaignAPIServer can be embedded to have forward compatible implementations.
@@ -502,6 +1035,9 @@ type UnimplementedThreatCampaignAPIServer struct {
 
 func (*UnimplementedThreatCampaignAPIServer) GetThreatCampaignById(ctx context.Context, req *ThreatCampaignRequest) (*ThreatCampaign, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetThreatCampaignById not implemented")
+}
+func (*UnimplementedThreatCampaignAPIServer) GetThreats(ctx context.Context, req *ThreatsRequest) (*ThreatsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetThreats not implemented")
 }
 
 func RegisterThreatCampaignAPIServer(s *grpc.Server, srv ThreatCampaignAPIServer) {
@@ -526,6 +1062,24 @@ func _ThreatCampaignAPI_GetThreatCampaignById_Handler(srv interface{}, ctx conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ThreatCampaignAPI_GetThreats_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ThreatsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ThreatCampaignAPIServer).GetThreats(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ves.io.schema.app_security.ThreatCampaignAPI/GetThreats",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ThreatCampaignAPIServer).GetThreats(ctx, req.(*ThreatsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _ThreatCampaignAPI_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "ves.io.schema.app_security.ThreatCampaignAPI",
 	HandlerType: (*ThreatCampaignAPIServer)(nil),
@@ -533,6 +1087,10 @@ var _ThreatCampaignAPI_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetThreatCampaignById",
 			Handler:    _ThreatCampaignAPI_GetThreatCampaignById_Handler,
+		},
+		{
+			MethodName: "GetThreats",
+			Handler:    _ThreatCampaignAPI_GetThreats_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -668,6 +1226,174 @@ func (m *ThreatCampaign) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
+func (m *ThreatsRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ThreatsRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ThreatsRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.ThreatsFilter != nil {
+		{
+			size := m.ThreatsFilter.Size()
+			i -= size
+			if _, err := m.ThreatsFilter.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
+	}
+	if len(m.ReportFields) > 0 {
+		for iNdEx := len(m.ReportFields) - 1; iNdEx >= 0; iNdEx-- {
+			i -= len(m.ReportFields[iNdEx])
+			copy(dAtA[i:], m.ReportFields[iNdEx])
+			i = encodeVarintPublicThreatCampaignApi(dAtA, i, uint64(len(m.ReportFields[iNdEx])))
+			i--
+			dAtA[i] = 0x2a
+		}
+	}
+	if len(m.Cursor) > 0 {
+		i -= len(m.Cursor)
+		copy(dAtA[i:], m.Cursor)
+		i = encodeVarintPublicThreatCampaignApi(dAtA, i, uint64(len(m.Cursor)))
+		i--
+		dAtA[i] = 0x22
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *ThreatsRequest_CveIds) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ThreatsRequest_CveIds) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.CveIds != nil {
+		{
+			size, err := m.CveIds.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintPublicThreatCampaignApi(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	return len(dAtA) - i, nil
+}
+func (m *ThreatsRequest_WafSecEventId) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ThreatsRequest_WafSecEventId) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	i -= len(m.WafSecEventId)
+	copy(dAtA[i:], m.WafSecEventId)
+	i = encodeVarintPublicThreatCampaignApi(dAtA, i, uint64(len(m.WafSecEventId)))
+	i--
+	dAtA[i] = 0x1a
+	return len(dAtA) - i, nil
+}
+func (m *ThreatsRequest_PrimaryTag) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ThreatsRequest_PrimaryTag) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	i -= len(m.PrimaryTag)
+	copy(dAtA[i:], m.PrimaryTag)
+	i = encodeVarintPublicThreatCampaignApi(dAtA, i, uint64(len(m.PrimaryTag)))
+	i--
+	dAtA[i] = 0x32
+	return len(dAtA) - i, nil
+}
+func (m *ThreatsResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ThreatsResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ThreatsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.NextCursor) > 0 {
+		i -= len(m.NextCursor)
+		copy(dAtA[i:], m.NextCursor)
+		i = encodeVarintPublicThreatCampaignApi(dAtA, i, uint64(len(m.NextCursor)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Threats) > 0 {
+		for iNdEx := len(m.Threats) - 1; iNdEx >= 0; iNdEx-- {
+			i -= len(m.Threats[iNdEx])
+			copy(dAtA[i:], m.Threats[iNdEx])
+			i = encodeVarintPublicThreatCampaignApi(dAtA, i, uint64(len(m.Threats[iNdEx])))
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *CVEIDList) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *CVEIDList) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *CVEIDList) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Ids) > 0 {
+		for iNdEx := len(m.Ids) - 1; iNdEx >= 0; iNdEx-- {
+			i -= len(m.Ids[iNdEx])
+			copy(dAtA[i:], m.Ids[iNdEx])
+			i = encodeVarintPublicThreatCampaignApi(dAtA, i, uint64(len(m.Ids[iNdEx])))
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintPublicThreatCampaignApi(dAtA []byte, offset int, v uint64) int {
 	offset -= sovPublicThreatCampaignApi(v)
 	base := offset
@@ -747,6 +1473,94 @@ func (m *ThreatCampaign) Size() (n int) {
 	return n
 }
 
+func (m *ThreatsRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.ThreatsFilter != nil {
+		n += m.ThreatsFilter.Size()
+	}
+	l = len(m.Cursor)
+	if l > 0 {
+		n += 1 + l + sovPublicThreatCampaignApi(uint64(l))
+	}
+	if len(m.ReportFields) > 0 {
+		for _, s := range m.ReportFields {
+			l = len(s)
+			n += 1 + l + sovPublicThreatCampaignApi(uint64(l))
+		}
+	}
+	return n
+}
+
+func (m *ThreatsRequest_CveIds) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.CveIds != nil {
+		l = m.CveIds.Size()
+		n += 1 + l + sovPublicThreatCampaignApi(uint64(l))
+	}
+	return n
+}
+func (m *ThreatsRequest_WafSecEventId) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.WafSecEventId)
+	n += 1 + l + sovPublicThreatCampaignApi(uint64(l))
+	return n
+}
+func (m *ThreatsRequest_PrimaryTag) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.PrimaryTag)
+	n += 1 + l + sovPublicThreatCampaignApi(uint64(l))
+	return n
+}
+func (m *ThreatsResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.Threats) > 0 {
+		for _, s := range m.Threats {
+			l = len(s)
+			n += 1 + l + sovPublicThreatCampaignApi(uint64(l))
+		}
+	}
+	l = len(m.NextCursor)
+	if l > 0 {
+		n += 1 + l + sovPublicThreatCampaignApi(uint64(l))
+	}
+	return n
+}
+
+func (m *CVEIDList) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.Ids) > 0 {
+		for _, s := range m.Ids {
+			l = len(s)
+			n += 1 + l + sovPublicThreatCampaignApi(uint64(l))
+		}
+	}
+	return n
+}
+
 func sovPublicThreatCampaignApi(x uint64) (n int) {
 	return (math_bits.Len64(x|1) + 6) / 7
 }
@@ -778,6 +1592,69 @@ func (this *ThreatCampaign) String() string {
 		`References:` + fmt.Sprintf("%v", this.References) + `,`,
 		`LastUpdate:` + fmt.Sprintf("%v", this.LastUpdate) + `,`,
 		`Id:` + fmt.Sprintf("%v", this.Id) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ThreatsRequest) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ThreatsRequest{`,
+		`ThreatsFilter:` + fmt.Sprintf("%v", this.ThreatsFilter) + `,`,
+		`Cursor:` + fmt.Sprintf("%v", this.Cursor) + `,`,
+		`ReportFields:` + fmt.Sprintf("%v", this.ReportFields) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ThreatsRequest_CveIds) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ThreatsRequest_CveIds{`,
+		`CveIds:` + strings.Replace(fmt.Sprintf("%v", this.CveIds), "CVEIDList", "CVEIDList", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ThreatsRequest_WafSecEventId) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ThreatsRequest_WafSecEventId{`,
+		`WafSecEventId:` + fmt.Sprintf("%v", this.WafSecEventId) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ThreatsRequest_PrimaryTag) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ThreatsRequest_PrimaryTag{`,
+		`PrimaryTag:` + fmt.Sprintf("%v", this.PrimaryTag) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ThreatsResponse) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ThreatsResponse{`,
+		`Threats:` + fmt.Sprintf("%v", this.Threats) + `,`,
+		`NextCursor:` + fmt.Sprintf("%v", this.NextCursor) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *CVEIDList) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&CVEIDList{`,
+		`Ids:` + fmt.Sprintf("%v", this.Ids) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -857,10 +1734,7 @@ func (m *ThreatCampaignRequest) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthPublicThreatCampaignApi
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicThreatCampaignApi
 			}
 			if (iNdEx + skippy) > l {
@@ -1230,10 +2104,416 @@ func (m *ThreatCampaign) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicThreatCampaignApi
 			}
-			if (iNdEx + skippy) < 0 {
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ThreatsRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowPublicThreatCampaignApi
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ThreatsRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ThreatsRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field CveIds", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicThreatCampaignApi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthPublicThreatCampaignApi
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicThreatCampaignApi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &CVEIDList{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.ThreatsFilter = &ThreatsRequest_CveIds{v}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field WafSecEventId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicThreatCampaignApi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicThreatCampaignApi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicThreatCampaignApi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ThreatsFilter = &ThreatsRequest_WafSecEventId{string(dAtA[iNdEx:postIndex])}
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Cursor", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicThreatCampaignApi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicThreatCampaignApi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicThreatCampaignApi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Cursor = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ReportFields", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicThreatCampaignApi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicThreatCampaignApi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicThreatCampaignApi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ReportFields = append(m.ReportFields, string(dAtA[iNdEx:postIndex]))
+			iNdEx = postIndex
+		case 6:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field PrimaryTag", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicThreatCampaignApi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicThreatCampaignApi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicThreatCampaignApi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ThreatsFilter = &ThreatsRequest_PrimaryTag{string(dAtA[iNdEx:postIndex])}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipPublicThreatCampaignApi(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthPublicThreatCampaignApi
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ThreatsResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowPublicThreatCampaignApi
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ThreatsResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ThreatsResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Threats", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicThreatCampaignApi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicThreatCampaignApi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicThreatCampaignApi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Threats = append(m.Threats, string(dAtA[iNdEx:postIndex]))
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field NextCursor", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicThreatCampaignApi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicThreatCampaignApi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicThreatCampaignApi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.NextCursor = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipPublicThreatCampaignApi(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthPublicThreatCampaignApi
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *CVEIDList) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowPublicThreatCampaignApi
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: CVEIDList: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: CVEIDList: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Ids", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPublicThreatCampaignApi
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPublicThreatCampaignApi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPublicThreatCampaignApi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Ids = append(m.Ids, string(dAtA[iNdEx:postIndex]))
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipPublicThreatCampaignApi(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthPublicThreatCampaignApi
 			}
 			if (iNdEx + skippy) > l {

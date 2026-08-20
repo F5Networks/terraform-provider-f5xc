@@ -3010,10 +3010,7 @@ var CustomAPISwaggerJSON string = `{
         "description": "Custom API of user settings.",
         "version": "version not set"
     },
-    "schemes": [
-        "http",
-        "https"
-    ],
+    "schemes": null,
     "consumes": [
         "application/json"
     ],
@@ -3080,6 +3077,12 @@ var CustomAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -3149,6 +3152,12 @@ var CustomAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -3234,6 +3243,12 @@ var CustomAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -3318,6 +3333,12 @@ var CustomAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "tags": [
@@ -3386,6 +3407,12 @@ var CustomAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -3471,6 +3498,12 @@ var CustomAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "tags": [
@@ -3539,6 +3572,12 @@ var CustomAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -3624,6 +3663,12 @@ var CustomAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -3707,6 +3752,12 @@ var CustomAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -3792,6 +3843,12 @@ var CustomAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "tags": [
@@ -3866,6 +3923,12 @@ var CustomAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "tags": [
@@ -3934,6 +3997,12 @@ var CustomAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -4019,6 +4088,12 @@ var CustomAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -4102,6 +4177,12 @@ var CustomAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -4187,6 +4268,12 @@ var CustomAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "tags": [
@@ -4256,6 +4343,12 @@ var CustomAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "tags": [
@@ -4324,6 +4417,12 @@ var CustomAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -4409,6 +4508,12 @@ var CustomAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -4493,6 +4598,12 @@ var CustomAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "tags": [
@@ -4562,6 +4673,12 @@ var CustomAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -4626,6 +4743,27 @@ var CustomAPISwaggerJSON string = `{
                 }
             }
         },
+        "runtimeError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/protobufAny"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
         "settingInitialAccess": {
             "type": "object",
             "description": "User console view preferences",
@@ -4637,7 +4775,6 @@ var CustomAPISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Boolean flag which shows whether email has been sent or not.",
                     "title": "EmailSent",
-                    "format": "boolean",
                     "x-displayname": "EmailSent"
                 },
                 "last_requesting_time": {
@@ -4651,7 +4788,6 @@ var CustomAPISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Boolean flag which shows whether initial access was requested or not.",
                     "title": "Requested",
-                    "format": "boolean",
                     "x-displayname": "Requested"
                 }
             }
@@ -4681,7 +4817,6 @@ var CustomAPISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Is it enabled.",
                     "title": "Enabled",
-                    "format": "boolean",
                     "x-displayname": "Enabled"
                 },
                 "label": {
@@ -4745,52 +4880,38 @@ var CustomAPISwaggerJSON string = `{
         },
         "settingPersonaPreferences": {
             "type": "object",
-            "description": "Preferences to display appropriate content to appropriate audience",
+            "description": "x-displayName: \"Persona type\"\nPreferences to display appropriate content to appropriate audience\nDEPRECATED: This message is deprecated. Do not use for new implementations.",
             "title": "Persona type",
-            "x-displayname": "Persona type",
-            "x-ves-proto-message": "ves.io.schema.user.setting.PersonaPreferences",
             "properties": {
                 "billing": {
                     "type": "boolean",
-                    "description": " Audience is a billing admin",
-                    "title": "Billing",
-                    "format": "boolean",
-                    "x-displayname": "Billing"
+                    "description": "x-displayName: \"Billing\"\nAudience is a billing admin",
+                    "title": "Billing"
                 },
                 "dev_ops": {
                     "type": "boolean",
-                    "description": " Audience is DevOps",
-                    "title": "DevOps",
-                    "format": "boolean",
-                    "x-displayname": "DevOps"
+                    "description": "x-displayName: \"DevOps\"\nAudience is DevOps",
+                    "title": "DevOps"
                 },
                 "developer": {
                     "type": "boolean",
-                    "description": " Audience is a developer",
-                    "title": "Developer",
-                    "format": "boolean",
-                    "x-displayname": "Developer"
+                    "description": "x-displayName: \"Developer\"\nAudience is a developer",
+                    "title": "Developer"
                 },
                 "master": {
                     "type": "boolean",
-                    "description": " Audience is an admin",
-                    "title": "Admin",
-                    "format": "boolean",
-                    "x-displayname": "Admin"
+                    "description": "x-displayName: \"Admin\"\nAudience is an admin",
+                    "title": "Admin"
                 },
                 "net_ops": {
                     "type": "boolean",
-                    "description": " Audience is NetOps",
-                    "title": "NetOps",
-                    "format": "boolean",
-                    "x-displayname": "NetOps"
+                    "description": "x-displayName: \"NetOps\"\nAudience is NetOps",
+                    "title": "NetOps"
                 },
                 "sec_ops": {
                     "type": "boolean",
-                    "description": " Audience is SecOps",
-                    "title": "SecOps",
-                    "format": "boolean",
-                    "x-displayname": "SecOps"
+                    "description": "x-displayName: \"SecOps\"\nAudience is SecOps",
+                    "title": "SecOps"
                 }
             }
         },
@@ -4801,24 +4922,10 @@ var CustomAPISwaggerJSON string = `{
             "x-displayname": "View preference",
             "x-ves-proto-message": "ves.io.schema.user.setting.SetViewPreferenceRequest",
             "properties": {
-                "advanced_view": {
-                    "type": "boolean",
-                    "description": " If true then more options are displayed, otherwise a simplified view is displayed",
-                    "title": "Advanced view",
-                    "format": "boolean",
-                    "x-displayname": "Advanced view"
-                },
-                "persona_preferences": {
-                    "description": " View preferences based on user's speciality",
-                    "title": "Persona preferences",
-                    "$ref": "#/definitions/settingPersonaPreferences",
-                    "x-displayname": "Persona preferences"
-                },
                 "wizard_advanced_auto_expand": {
                     "type": "boolean",
                     "description": " If true then all advanced configuration fields are automatically expanded when creating a new object",
                     "title": "Advanced fields auto-expand",
-                    "format": "boolean",
                     "x-displayname": "Advanced fields auto-expand"
                 }
             }
@@ -4954,7 +5061,6 @@ var CustomAPISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " OTP enabled flag",
                     "title": "OTP enable",
-                    "format": "boolean",
                     "x-displayname": "OTP enabled"
                 }
             }
@@ -4984,7 +5090,6 @@ var CustomAPISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Boolean flag which shows whether re-request access is allowed or not.\n Virtually flag shows whether 24hrs are passed from the last_requesting_time timestamp or not.",
                     "title": "Is Next Request Allowed",
-                    "format": "boolean",
                     "x-displayname": "Is Next Request Allowed"
                 },
                 "notifications": {
@@ -5000,7 +5105,6 @@ var CustomAPISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Switcher for configuration of enabling OTP in IAM Provider.",
                     "title": "OTP Enabled",
-                    "format": "boolean",
                     "x-displayname": "OTP Enabled"
                 },
                 "otp_status": {
@@ -5018,31 +5122,16 @@ var CustomAPISwaggerJSON string = `{
             "x-displayname": "View preference",
             "x-ves-proto-message": "ves.io.schema.user.setting.ViewPreference",
             "properties": {
-                "advanced_view": {
-                    "type": "boolean",
-                    "description": " If true then more options are displayed, otherwise a simplified view is displayed",
-                    "title": "Advanced view",
-                    "format": "boolean",
-                    "x-displayname": "Advanced view"
-                },
                 "initialized": {
                     "type": "boolean",
                     "description": " If true then the user picked their preference",
                     "title": "Initialized",
-                    "format": "boolean",
                     "x-displayname": "Initialized"
-                },
-                "persona_preferences": {
-                    "description": " View preferences based on user's speciality",
-                    "title": "Persona preferences",
-                    "$ref": "#/definitions/settingPersonaPreferences",
-                    "x-displayname": "Persona preferences"
                 },
                 "wizard_advanced_auto_expand": {
                     "type": "boolean",
                     "description": " If true then all advanced configuration fields are automatically expanded when creating a new object",
                     "title": "Advanced fields auto-expand",
-                    "format": "boolean",
                     "x-displayname": "Advanced fields auto-expand"
                 }
             }

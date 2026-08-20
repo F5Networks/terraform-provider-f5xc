@@ -1,0 +1,269 @@
+resources:
+    active_alert_policies:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/namespace
+    active_network_policies:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/namespace
+    active_service_policies:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/namespace
+    advertise_policy:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/advertise-policy
+    alert_policy:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/alert-policy
+    alert_receiver:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/alert-receiver
+    allowed_domain:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/allowed-domain
+    api_crawler:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/api-crawler
+    api_credential:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/api-credential
+    api_definition:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/views-api-definition
+    api_discovery:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/api-discovery
+    api_testing:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/api-testing
+    app_api_group:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/views-app-api-group
+    app_firewall:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/app-firewall
+    app_setting:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/app-setting
+    app_type:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/app-type
+    appstack_site:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/views-voltstack-site
+    authorization_server:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/authorization-server
+    aws_tgw_site:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/views-aws-tgw-site
+    aws_tgw_site_set_vip_info:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/views-aws-tgw-site
+    aws_vpc_site:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/views-aws-vpc-site
+    aws_vpc_site_set_cloud_site_info:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/views-aws-vpc-site
+    aws_vpc_site_set_vip_info:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/views-aws-vpc-site
+    azure_vnet_site:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/views-azure-vnet-site
+    azure_vnet_site_set_cloud_site_info:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/views-azure-vnet-site
+    azure_vnet_site_set_vip_info:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/views-azure-vnet-site
+    bgp:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/bgp
+    bgp_asn_set:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/bgp-asn-set
+    bgp_routing_policy:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/bgp-routing-policy
+    bigip_irule:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/bigip-irule
+    bot_infrastructure:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/bot-infrastructure
+    cdn_cache_rule:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/cdn-cache-rule
+    cdn_loadbalancer:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/views-cdn-loadbalancer
+    certificate:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/certificate
+    certificate_chain:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/certificate-chain
+    cloud_credentials:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/cloud-credentials
+    cloud_elastic_ip:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/cloud-elastic-ip
+    cloud_link:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/cloud-link
+    cluster:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/cluster
+    code_base_integration:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/code-base-integration
+    container_registry:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/container-registry
+    crl:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/crl
+    data_type:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/data-type
+    dc_cluster_group:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/dc-cluster-group
+    discovery:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/discovery
+    dns_compliance_checks:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/dns-compliance-checks
+    dns_domain:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/dns-domain
+    dns_lb_health_check:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/dns-lb-health-check
+    dns_lb_pool:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/dns-lb-pool
+    dns_load_balancer:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/dns-load-balancer
+    dns_proxy:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/dns-proxy
+    dns_zone:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/dns-zone
+    dns_zone_record:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/rrset
+    endpoint:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/endpoint
+    enhanced_firewall_policy:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/enhanced-firewall-policy
+    external_connector:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/views-external-connector
+    fast_acl:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/fast-acl
+    fast_acl_rule:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/fast-acl-rule
+    fast_acls_for_internet_vips:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/namespace
+    fleet:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/fleet
+    forward_proxy_policy:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/views-forward-proxy-policy
+    gcp_vpc_site:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/views-gcp-vpc-site
+    gcp_vpc_site_set_cloud_site_info:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/views-gcp-vpc-site
+    geo_location_set:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/geo-location-set
+    global_log_receiver:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/global-log-receiver
+    healthcheck:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/healthcheck
+    http_loadbalancer:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/views-http-loadbalancer
+    ike_phase1_profile:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/views-ike-phase1-profile
+    ike_phase2_profile:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/views-ike-phase2-profile
+    ike1:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/ike1
+    ike2:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/ike2
+    infraprotect_asn:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/infraprotect-asn
+    infraprotect_asn_prefix:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/infraprotect-asn-prefix
+    infraprotect_firewall_rule_group:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/infraprotect-firewall-rule-group
+    ip_prefix_set:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/ip-prefix-set
+    irule:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/irule
+    known_label:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/known-label
+    known_label_key:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/known-label-key
+    log_receiver:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/log-receiver
+    malicious_user_mitigation:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/malicious-user-mitigation
+    mitigated_domain:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/mitigated-domain
+    mobile_base_config:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/mobile-base-config
+    namespace:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/namespace
+    nat_policy:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/nat-policy
+    network_connector:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/network-connector
+    network_firewall:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/network-firewall
+    network_interface:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/network-interface
+    network_policy:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/network-policy
+    network_policy_rule:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/network-policy-rule
+    network_policy_view:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/views-network-policy-view
+    nginx_service_discovery:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/nginx-service-discovery
+    origin_pool:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/views-origin-pool
+    policer:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/policer
+    policy_based_routing:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/views-policy-based-routing
+    protected_application:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/protected-application
+    protected_domain:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/protected-domain
+    protocol_inspection:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/protocol-inspection
+    protocol_policer:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/protocol-policer
+    proxy:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/views-proxy
+    rate_limiter:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/rate-limiter
+    rate_limiter_policy:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/views-rate-limiter-policy
+    role:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/role
+    route:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/route
+    secret_policy:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/secret-policy
+    secret_policy_rule:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/secret-policy-rule
+    securemesh_site:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/views-securemesh-site
+    securemesh_site_v2:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/views-securemesh-site-v2
+    segment:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/segment
+    segment_connection:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/segment-connection
+    sensitive_data_policy:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/sensitive-data-policy
+    service_credential:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/api-credential
+    service_policy:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/service-policy
+    service_policy_rule:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/service-policy-rule
+    site_mesh_group:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/site-mesh-group
+    subnet:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/subnet
+    tcp_loadbalancer:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/views-tcp-loadbalancer
+    tf_params_action:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/views-terraform-parameters
+    tgw_info:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/views-aws-tgw-site
+    tgw_vpc_ip_prefixes:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/views-aws-tgw-site
+    tgw_vpn_tunnels:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/views-aws-tgw-site
+    token:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/token
+    trusted_ca_list:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/trusted-ca-list
+    udp_loadbalancer:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/views-udp-loadbalancer
+    user:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/user
+    user_group:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/user-group
+    user_identification:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/user-identification
+    v1_dns_monitor:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/v1-dns-monitor
+    v1_http_monitor:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/v1-http-monitor
+    virtual_k8s:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/virtual-k8s
+    virtual_network:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/virtual-network
+    virtual_site:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/virtual-site
+    waf_exclusion_policy:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/waf-exclusion-policy
+    workload:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/views-workload
+    workload_flavor:
+        api_url: https://docs.cloud.f5.com/docs-v2/api/workload-flavor

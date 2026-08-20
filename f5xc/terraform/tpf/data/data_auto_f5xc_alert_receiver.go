@@ -31,12 +31,16 @@ type DataSourceF5XCAlertReceiver struct {
 }
 
 type AlertReceiverGlobalSpecTypeReceiverChoice struct {
-	Opsgenie  types.Object `tfsdk:"opsgenie"`
 	Email     types.Object `tfsdk:"email"`
+	Opsgenie  types.Object `tfsdk:"opsgenie"`
+	Pagerduty types.Object `tfsdk:"pagerduty"`
+	Slack     types.Object `tfsdk:"slack"`
 	Sms       types.Object `tfsdk:"sms"`
 	Webhook   types.Object `tfsdk:"webhook"`
-	Slack     types.Object `tfsdk:"slack"`
-	Pagerduty types.Object `tfsdk:"pagerduty"`
+}
+
+type AlertReceiverGlobalSpecTypeEmail struct {
+	Email types.String `tfsdk:"email"`
 }
 
 type AlertReceiverGlobalSpecTypeOpsgenie struct {
@@ -55,8 +59,8 @@ type AlertReceiverSecretTypeSecretInfoChoice struct {
 
 type AlertReceiverSecretTypeBlindfoldSecretInfo struct {
 	DecryptionProvider types.String `tfsdk:"decryption_provider"`
-	StoreProvider      types.String `tfsdk:"store_provider"`
 	Location           types.String `tfsdk:"location"`
+	StoreProvider      types.String `tfsdk:"store_provider"`
 }
 
 type AlertReceiverSecretTypeClearSecretInfo struct {
@@ -64,8 +68,14 @@ type AlertReceiverSecretTypeClearSecretInfo struct {
 	Url      types.String `tfsdk:"url"`
 }
 
-type AlertReceiverGlobalSpecTypeEmail struct {
-	Email types.String `tfsdk:"email"`
+type AlertReceiverGlobalSpecTypePagerduty struct {
+	RoutingKey types.Object `tfsdk:"routing_key"`
+	Url        types.String `tfsdk:"url"`
+}
+
+type AlertReceiverGlobalSpecTypeSlack struct {
+	Channel types.String `tfsdk:"channel"`
+	Url     types.Object `tfsdk:"url"`
 }
 
 type AlertReceiverGlobalSpecTypeSms struct {
@@ -73,8 +83,8 @@ type AlertReceiverGlobalSpecTypeSms struct {
 }
 
 type AlertReceiverGlobalSpecTypeWebhook struct {
-	Url        types.Object `tfsdk:"url"`
 	HttpConfig types.Object `tfsdk:"http_config"`
+	Url        types.Object `tfsdk:"url"`
 }
 
 type AlertReceiverAlertReceiverHTTPConfig struct {
@@ -85,19 +95,19 @@ type AlertReceiverAlertReceiverHTTPConfig struct {
 }
 
 type AlertReceiverHTTPConfigAuthChoice struct {
-	NoAuthorization types.Bool   `tfsdk:"no_authorization"`
-	BasicAuth       types.Object `tfsdk:"basic_auth"`
 	AuthToken       types.Object `tfsdk:"auth_token"`
+	BasicAuth       types.Object `tfsdk:"basic_auth"`
 	ClientCertObj   types.Object `tfsdk:"client_cert_obj"`
-}
-
-type AlertReceiverHTTPConfigBasicAuth struct {
-	UserName types.String `tfsdk:"user_name"`
-	Password types.Object `tfsdk:"password"`
+	NoAuthorization types.Bool   `tfsdk:"no_authorization"`
 }
 
 type AlertReceiverHTTPConfigAuthToken struct {
 	Token types.Object `tfsdk:"token"`
+}
+
+type AlertReceiverHTTPConfigBasicAuth struct {
+	Password types.Object `tfsdk:"password"`
+	UserName types.String `tfsdk:"user_name"`
 }
 
 type AlertReceiverHTTPConfigClientCertObj struct {
@@ -110,15 +120,10 @@ type AlertReceiverHTTPConfigTlsChoice struct {
 }
 
 type AlertReceiverHTTPConfigUseTls struct {
-	SniChoice              types.Object `tfsdk:"sni_choice"`
-	MinVersion             types.List   `tfsdk:"min_version"`
 	MaxVersion             types.List   `tfsdk:"max_version"`
+	MinVersion             types.List   `tfsdk:"min_version"`
 	ServerValidationChoice types.Object `tfsdk:"server_validation_choice"`
-}
-
-type AlertReceiverTLSConfigSniChoice struct {
-	Sni        types.String `tfsdk:"sni"`
-	DisableSni types.Bool   `tfsdk:"disable_sni"`
+	SniChoice              types.Object `tfsdk:"sni_choice"`
 }
 
 type AlertReceiverTLSConfigServerValidationChoice struct {
@@ -134,24 +139,19 @@ type AlertReceiverAlertReceiverCACertificateObj struct {
 	TrustedCa types.List `tfsdk:"trusted_ca"`
 }
 
-type AlertReceiverGlobalSpecTypeSlack struct {
-	Url     types.Object `tfsdk:"url"`
-	Channel types.String `tfsdk:"channel"`
-}
-
-type AlertReceiverGlobalSpecTypePagerduty struct {
-	RoutingKey types.Object `tfsdk:"routing_key"`
-	Url        types.String `tfsdk:"url"`
+type AlertReceiverTLSConfigSniChoice struct {
+	DisableSni types.Bool   `tfsdk:"disable_sni"`
+	Sni        types.String `tfsdk:"sni"`
 }
 
 // DataSourceF5XCAlertReceiverModel describes the resource data model.
 type DataSourceF5XCAlertReceiverModel struct {
+	Annotations    types.Map      `tfsdk:"annotations"`
+	Description    types.String   `tfsdk:"description"`
+	Labels         types.Map      `tfsdk:"labels"`
 	Name           types.String   `tfsdk:"name"`
 	Namespace      types.String   `tfsdk:"namespace"`
 	Uid            types.String   `tfsdk:"uid"`
-	Labels         types.Map      `tfsdk:"labels"`
-	Annotations    types.Map      `tfsdk:"annotations"`
-	Description    types.String   `tfsdk:"description"`
 	ReceiverChoice types.Object   `tfsdk:"receiver_choice"`
 	Timeouts       timeouts.Value `tfsdk:"timeouts"`
 }
@@ -160,11 +160,17 @@ type DataSourceF5XCAlertReceiverModel struct {
 // Attribute map for RequiredOneOfField --> Receiver
 var AlertReceiverReceiverModelAttributeMap = map[string]attr.Type{
 
+	"email": types.ObjectType{
+		AttrTypes: AlertReceiverReceiverEmailModelAttributeMap,
+	},
 	"opsgenie": types.ObjectType{
 		AttrTypes: AlertReceiverReceiverOpsgenieModelAttributeMap,
 	},
-	"email": types.ObjectType{
-		AttrTypes: AlertReceiverReceiverEmailModelAttributeMap,
+	"pagerduty": types.ObjectType{
+		AttrTypes: AlertReceiverReceiverPagerdutyModelAttributeMap,
+	},
+	"slack": types.ObjectType{
+		AttrTypes: AlertReceiverReceiverSlackModelAttributeMap,
 	},
 	"sms": types.ObjectType{
 		AttrTypes: AlertReceiverReceiverSmsModelAttributeMap,
@@ -172,12 +178,12 @@ var AlertReceiverReceiverModelAttributeMap = map[string]attr.Type{
 	"webhook": types.ObjectType{
 		AttrTypes: AlertReceiverReceiverWebhookModelAttributeMap,
 	},
-	"slack": types.ObjectType{
-		AttrTypes: AlertReceiverReceiverSlackModelAttributeMap,
-	},
-	"pagerduty": types.ObjectType{
-		AttrTypes: AlertReceiverReceiverPagerdutyModelAttributeMap,
-	},
+}
+
+// Attribute map for PointerOfOneOfField --> Email
+var AlertReceiverReceiverEmailModelAttributeMap = map[string]attr.Type{
+
+	"email": types.StringType,
 }
 
 // Attribute map for PointerOfOneOfField --> Opsgenie
@@ -214,345 +220,12 @@ var AlertReceiverReceiverOpsgenieApiKeySecretInfoOneofModelAttributeMap = map[st
 var AlertReceiverReceiverOpsgenieApiKeySecretInfoOneofBlindfoldSecretInfoModelAttributeMap = map[string]attr.Type{
 
 	"decryption_provider": types.StringType,
-	"store_provider":      types.StringType,
 	"location":            types.StringType,
+	"store_provider":      types.StringType,
 }
 
 // Attribute map for PointerOfOneOfField --> ClearSecretInfo
 var AlertReceiverReceiverOpsgenieApiKeySecretInfoOneofClearSecretInfoModelAttributeMap = map[string]attr.Type{
-
-	"provider": types.StringType,
-	"url":      types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> Email
-var AlertReceiverReceiverEmailModelAttributeMap = map[string]attr.Type{
-
-	"email": types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> Sms
-var AlertReceiverReceiverSmsModelAttributeMap = map[string]attr.Type{
-
-	"contact_number": types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> Webhook
-var AlertReceiverReceiverWebhookModelAttributeMap = map[string]attr.Type{
-	"url": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"secret_info_choice": types.ObjectType{
-				AttrTypes: AlertReceiverReceiverWebhookUrlSecretInfoOneofModelAttributeMap,
-			}},
-	}, "http_config": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"auth_choice": types.ObjectType{
-				AttrTypes: AlertReceiverReceiverWebhookHttpConfigAuthChoiceModelAttributeMap,
-			},
-			"enable_http2":     types.BoolType,
-			"follow_redirects": types.BoolType,
-			"tls_choice": types.ObjectType{
-				AttrTypes: AlertReceiverReceiverWebhookHttpConfigTlsChoiceModelAttributeMap,
-			}},
-	},
-}
-
-// Attribute map for RequiredPointerField --> Url
-var AlertReceiverReceiverWebhookUrlModelAttributeMap = map[string]attr.Type{
-
-	"secret_info_choice": types.ObjectType{
-		AttrTypes: AlertReceiverReceiverWebhookUrlSecretInfoOneofModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> SecretInfoOneof
-var AlertReceiverReceiverWebhookUrlSecretInfoOneofModelAttributeMap = map[string]attr.Type{
-
-	"blindfold_secret_info": types.ObjectType{
-		AttrTypes: AlertReceiverReceiverWebhookUrlSecretInfoOneofBlindfoldSecretInfoModelAttributeMap,
-	},
-	"clear_secret_info": types.ObjectType{
-		AttrTypes: AlertReceiverReceiverWebhookUrlSecretInfoOneofClearSecretInfoModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
-var AlertReceiverReceiverWebhookUrlSecretInfoOneofBlindfoldSecretInfoModelAttributeMap = map[string]attr.Type{
-
-	"decryption_provider": types.StringType,
-	"store_provider":      types.StringType,
-	"location":            types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> ClearSecretInfo
-var AlertReceiverReceiverWebhookUrlSecretInfoOneofClearSecretInfoModelAttributeMap = map[string]attr.Type{
-
-	"provider": types.StringType,
-	"url":      types.StringType,
-}
-
-// Attribute map for RequiredPointerField --> HttpConfig
-var AlertReceiverReceiverWebhookHttpConfigModelAttributeMap = map[string]attr.Type{
-
-	"auth_choice": types.ObjectType{
-		AttrTypes: AlertReceiverReceiverWebhookHttpConfigAuthChoiceModelAttributeMap,
-	},
-	"enable_http2":     types.BoolType,
-	"follow_redirects": types.BoolType,
-	"tls_choice": types.ObjectType{
-		AttrTypes: AlertReceiverReceiverWebhookHttpConfigTlsChoiceModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> AuthChoice
-var AlertReceiverReceiverWebhookHttpConfigAuthChoiceModelAttributeMap = map[string]attr.Type{
-
-	"no_authorization": types.BoolType,
-	"basic_auth": types.ObjectType{
-		AttrTypes: AlertReceiverReceiverWebhookHttpConfigAuthChoiceBasicAuthModelAttributeMap,
-	},
-	"auth_token": types.ObjectType{
-		AttrTypes: AlertReceiverReceiverWebhookHttpConfigAuthChoiceAuthTokenModelAttributeMap,
-	},
-	"client_cert_obj": types.ObjectType{
-		AttrTypes: AlertReceiverReceiverWebhookHttpConfigAuthChoiceClientCertObjModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> BasicAuth
-var AlertReceiverReceiverWebhookHttpConfigAuthChoiceBasicAuthModelAttributeMap = map[string]attr.Type{
-
-	"user_name": types.StringType, "password": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"secret_info_choice": types.ObjectType{
-				AttrTypes: AlertReceiverReceiverWebhookHttpConfigAuthChoiceBasicAuthPasswordSecretInfoOneofModelAttributeMap,
-			}},
-	},
-}
-
-// Attribute map for RequiredPointerField --> Password
-var AlertReceiverReceiverWebhookHttpConfigAuthChoiceBasicAuthPasswordModelAttributeMap = map[string]attr.Type{
-
-	"secret_info_choice": types.ObjectType{
-		AttrTypes: AlertReceiverReceiverWebhookHttpConfigAuthChoiceBasicAuthPasswordSecretInfoOneofModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> SecretInfoOneof
-var AlertReceiverReceiverWebhookHttpConfigAuthChoiceBasicAuthPasswordSecretInfoOneofModelAttributeMap = map[string]attr.Type{
-
-	"blindfold_secret_info": types.ObjectType{
-		AttrTypes: AlertReceiverReceiverWebhookHttpConfigAuthChoiceBasicAuthPasswordSecretInfoOneofBlindfoldSecretInfoModelAttributeMap,
-	},
-	"clear_secret_info": types.ObjectType{
-		AttrTypes: AlertReceiverReceiverWebhookHttpConfigAuthChoiceBasicAuthPasswordSecretInfoOneofClearSecretInfoModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
-var AlertReceiverReceiverWebhookHttpConfigAuthChoiceBasicAuthPasswordSecretInfoOneofBlindfoldSecretInfoModelAttributeMap = map[string]attr.Type{
-
-	"store_provider":      types.StringType,
-	"location":            types.StringType,
-	"decryption_provider": types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> ClearSecretInfo
-var AlertReceiverReceiverWebhookHttpConfigAuthChoiceBasicAuthPasswordSecretInfoOneofClearSecretInfoModelAttributeMap = map[string]attr.Type{
-
-	"provider": types.StringType,
-	"url":      types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> AuthToken
-var AlertReceiverReceiverWebhookHttpConfigAuthChoiceAuthTokenModelAttributeMap = map[string]attr.Type{
-	"token": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"secret_info_choice": types.ObjectType{
-				AttrTypes: AlertReceiverReceiverWebhookHttpConfigAuthChoiceAuthTokenTokenSecretInfoOneofModelAttributeMap,
-			}},
-	},
-}
-
-// Attribute map for RequiredPointerField --> Token
-var AlertReceiverReceiverWebhookHttpConfigAuthChoiceAuthTokenTokenModelAttributeMap = map[string]attr.Type{
-
-	"secret_info_choice": types.ObjectType{
-		AttrTypes: AlertReceiverReceiverWebhookHttpConfigAuthChoiceAuthTokenTokenSecretInfoOneofModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> SecretInfoOneof
-var AlertReceiverReceiverWebhookHttpConfigAuthChoiceAuthTokenTokenSecretInfoOneofModelAttributeMap = map[string]attr.Type{
-
-	"blindfold_secret_info": types.ObjectType{
-		AttrTypes: AlertReceiverReceiverWebhookHttpConfigAuthChoiceAuthTokenTokenSecretInfoOneofBlindfoldSecretInfoModelAttributeMap,
-	},
-	"clear_secret_info": types.ObjectType{
-		AttrTypes: AlertReceiverReceiverWebhookHttpConfigAuthChoiceAuthTokenTokenSecretInfoOneofClearSecretInfoModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
-var AlertReceiverReceiverWebhookHttpConfigAuthChoiceAuthTokenTokenSecretInfoOneofBlindfoldSecretInfoModelAttributeMap = map[string]attr.Type{
-
-	"decryption_provider": types.StringType,
-	"store_provider":      types.StringType,
-	"location":            types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> ClearSecretInfo
-var AlertReceiverReceiverWebhookHttpConfigAuthChoiceAuthTokenTokenSecretInfoOneofClearSecretInfoModelAttributeMap = map[string]attr.Type{
-
-	"provider": types.StringType,
-	"url":      types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> ClientCertObj
-var AlertReceiverReceiverWebhookHttpConfigAuthChoiceClientCertObjModelAttributeMap = map[string]attr.Type{
-
-	"use_tls_obj": types.ListType{
-		ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-
-				"tenant":    types.StringType,
-				"namespace": types.StringType,
-				"name":      types.StringType,
-			},
-		},
-	},
-}
-
-// Attribute map for ArrayOfPointerField --> UseTlsObj
-var AlertReceiverUseTlsObjObjectRefModelAttributeMap = map[string]attr.Type{
-
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
-	"name":      types.StringType,
-}
-
-// Attribute map for RequiredOneOfField --> TlsChoice
-var AlertReceiverReceiverWebhookHttpConfigTlsChoiceModelAttributeMap = map[string]attr.Type{
-
-	"no_tls": types.BoolType,
-	"use_tls": types.ObjectType{
-		AttrTypes: AlertReceiverReceiverWebhookHttpConfigTlsChoiceUseTlsModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> UseTls
-var AlertReceiverReceiverWebhookHttpConfigTlsChoiceUseTlsModelAttributeMap = map[string]attr.Type{
-
-	"sni_choice": types.ObjectType{
-		AttrTypes: AlertReceiverReceiverWebhookHttpConfigTlsChoiceUseTlsSniChoiceModelAttributeMap,
-	},
-	"min_version": types.ListType{
-		ElemType: types.StringType,
-	},
-	"max_version": types.ListType{
-		ElemType: types.StringType,
-	},
-	"server_validation_choice": types.ObjectType{
-		AttrTypes: AlertReceiverReceiverWebhookHttpConfigTlsChoiceUseTlsServerValidationChoiceModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> SniChoice
-var AlertReceiverReceiverWebhookHttpConfigTlsChoiceUseTlsSniChoiceModelAttributeMap = map[string]attr.Type{
-
-	"sni":         types.StringType,
-	"disable_sni": types.BoolType,
-}
-
-// Attribute map for RequiredOneOfField --> ServerValidationChoice
-var AlertReceiverReceiverWebhookHttpConfigTlsChoiceUseTlsServerValidationChoiceModelAttributeMap = map[string]attr.Type{
-
-	"use_server_verification": types.ObjectType{
-		AttrTypes: AlertReceiverReceiverWebhookHttpConfigTlsChoiceUseTlsServerValidationChoiceUseServerVerificationModelAttributeMap,
-	},
-	"volterra_trusted_ca": types.BoolType,
-}
-
-// Attribute map for PointerOfOneOfField --> UseServerVerification
-var AlertReceiverReceiverWebhookHttpConfigTlsChoiceUseTlsServerValidationChoiceUseServerVerificationModelAttributeMap = map[string]attr.Type{
-	"ca_cert_obj": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"trusted_ca": types.ListType{
-				ElemType: types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-
-						"name":      types.StringType,
-						"tenant":    types.StringType,
-						"namespace": types.StringType,
-					},
-				},
-			}},
-	},
-}
-
-// Attribute map for PointerField --> CaCertObj
-var AlertReceiverReceiverWebhookHttpConfigTlsChoiceUseTlsServerValidationChoiceUseServerVerificationCaCertObjModelAttributeMap = map[string]attr.Type{
-
-	"trusted_ca": types.ListType{
-		ElemType: types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-
-				"name":      types.StringType,
-				"tenant":    types.StringType,
-				"namespace": types.StringType,
-			},
-		},
-	},
-}
-
-// Attribute map for ArrayOfPointerField --> TrustedCa
-var AlertReceiverTrustedCaObjectRefModelAttributeMap = map[string]attr.Type{
-
-	"name":      types.StringType,
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> Slack
-var AlertReceiverReceiverSlackModelAttributeMap = map[string]attr.Type{
-	"url": types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"secret_info_choice": types.ObjectType{
-				AttrTypes: AlertReceiverReceiverSlackUrlSecretInfoOneofModelAttributeMap,
-			}},
-	},
-	"channel": types.StringType,
-}
-
-// Attribute map for RequiredPointerField --> Url
-var AlertReceiverReceiverSlackUrlModelAttributeMap = map[string]attr.Type{
-
-	"secret_info_choice": types.ObjectType{
-		AttrTypes: AlertReceiverReceiverSlackUrlSecretInfoOneofModelAttributeMap,
-	},
-}
-
-// Attribute map for RequiredOneOfField --> SecretInfoOneof
-var AlertReceiverReceiverSlackUrlSecretInfoOneofModelAttributeMap = map[string]attr.Type{
-
-	"blindfold_secret_info": types.ObjectType{
-		AttrTypes: AlertReceiverReceiverSlackUrlSecretInfoOneofBlindfoldSecretInfoModelAttributeMap,
-	},
-	"clear_secret_info": types.ObjectType{
-		AttrTypes: AlertReceiverReceiverSlackUrlSecretInfoOneofClearSecretInfoModelAttributeMap,
-	},
-}
-
-// Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
-var AlertReceiverReceiverSlackUrlSecretInfoOneofBlindfoldSecretInfoModelAttributeMap = map[string]attr.Type{
-
-	"store_provider":      types.StringType,
-	"location":            types.StringType,
-	"decryption_provider": types.StringType,
-}
-
-// Attribute map for PointerOfOneOfField --> ClearSecretInfo
-var AlertReceiverReceiverSlackUrlSecretInfoOneofClearSecretInfoModelAttributeMap = map[string]attr.Type{
 
 	"provider": types.StringType,
 	"url":      types.StringType,
@@ -592,15 +265,342 @@ var AlertReceiverReceiverPagerdutyRoutingKeySecretInfoOneofModelAttributeMap = m
 var AlertReceiverReceiverPagerdutyRoutingKeySecretInfoOneofBlindfoldSecretInfoModelAttributeMap = map[string]attr.Type{
 
 	"decryption_provider": types.StringType,
-	"store_provider":      types.StringType,
 	"location":            types.StringType,
+	"store_provider":      types.StringType,
 }
 
 // Attribute map for PointerOfOneOfField --> ClearSecretInfo
 var AlertReceiverReceiverPagerdutyRoutingKeySecretInfoOneofClearSecretInfoModelAttributeMap = map[string]attr.Type{
 
-	"url":      types.StringType,
 	"provider": types.StringType,
+	"url":      types.StringType,
+}
+
+// Attribute map for PointerOfOneOfField --> Slack
+var AlertReceiverReceiverSlackModelAttributeMap = map[string]attr.Type{
+
+	"channel": types.StringType, "url": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"secret_info_choice": types.ObjectType{
+				AttrTypes: AlertReceiverReceiverSlackUrlSecretInfoOneofModelAttributeMap,
+			}},
+	},
+}
+
+// Attribute map for RequiredPointerField --> Url
+var AlertReceiverReceiverSlackUrlModelAttributeMap = map[string]attr.Type{
+
+	"secret_info_choice": types.ObjectType{
+		AttrTypes: AlertReceiverReceiverSlackUrlSecretInfoOneofModelAttributeMap,
+	},
+}
+
+// Attribute map for RequiredOneOfField --> SecretInfoOneof
+var AlertReceiverReceiverSlackUrlSecretInfoOneofModelAttributeMap = map[string]attr.Type{
+
+	"blindfold_secret_info": types.ObjectType{
+		AttrTypes: AlertReceiverReceiverSlackUrlSecretInfoOneofBlindfoldSecretInfoModelAttributeMap,
+	},
+	"clear_secret_info": types.ObjectType{
+		AttrTypes: AlertReceiverReceiverSlackUrlSecretInfoOneofClearSecretInfoModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
+var AlertReceiverReceiverSlackUrlSecretInfoOneofBlindfoldSecretInfoModelAttributeMap = map[string]attr.Type{
+
+	"decryption_provider": types.StringType,
+	"location":            types.StringType,
+	"store_provider":      types.StringType,
+}
+
+// Attribute map for PointerOfOneOfField --> ClearSecretInfo
+var AlertReceiverReceiverSlackUrlSecretInfoOneofClearSecretInfoModelAttributeMap = map[string]attr.Type{
+
+	"provider": types.StringType,
+	"url":      types.StringType,
+}
+
+// Attribute map for PointerOfOneOfField --> Sms
+var AlertReceiverReceiverSmsModelAttributeMap = map[string]attr.Type{
+
+	"contact_number": types.StringType,
+}
+
+// Attribute map for PointerOfOneOfField --> Webhook
+var AlertReceiverReceiverWebhookModelAttributeMap = map[string]attr.Type{
+	"http_config": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"auth_choice": types.ObjectType{
+				AttrTypes: AlertReceiverReceiverWebhookHttpConfigAuthChoiceModelAttributeMap,
+			},
+			"enable_http2":     types.BoolType,
+			"follow_redirects": types.BoolType,
+			"tls_choice": types.ObjectType{
+				AttrTypes: AlertReceiverReceiverWebhookHttpConfigTlsChoiceModelAttributeMap,
+			}},
+	}, "url": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"secret_info_choice": types.ObjectType{
+				AttrTypes: AlertReceiverReceiverWebhookUrlSecretInfoOneofModelAttributeMap,
+			}},
+	},
+}
+
+// Attribute map for RequiredPointerField --> HttpConfig
+var AlertReceiverReceiverWebhookHttpConfigModelAttributeMap = map[string]attr.Type{
+
+	"auth_choice": types.ObjectType{
+		AttrTypes: AlertReceiverReceiverWebhookHttpConfigAuthChoiceModelAttributeMap,
+	},
+	"enable_http2":     types.BoolType,
+	"follow_redirects": types.BoolType,
+	"tls_choice": types.ObjectType{
+		AttrTypes: AlertReceiverReceiverWebhookHttpConfigTlsChoiceModelAttributeMap,
+	},
+}
+
+// Attribute map for RequiredOneOfField --> AuthChoice
+var AlertReceiverReceiverWebhookHttpConfigAuthChoiceModelAttributeMap = map[string]attr.Type{
+
+	"auth_token": types.ObjectType{
+		AttrTypes: AlertReceiverReceiverWebhookHttpConfigAuthChoiceAuthTokenModelAttributeMap,
+	},
+	"basic_auth": types.ObjectType{
+		AttrTypes: AlertReceiverReceiverWebhookHttpConfigAuthChoiceBasicAuthModelAttributeMap,
+	},
+	"client_cert_obj": types.ObjectType{
+		AttrTypes: AlertReceiverReceiverWebhookHttpConfigAuthChoiceClientCertObjModelAttributeMap,
+	},
+	"no_authorization": types.BoolType,
+}
+
+// Attribute map for PointerOfOneOfField --> AuthToken
+var AlertReceiverReceiverWebhookHttpConfigAuthChoiceAuthTokenModelAttributeMap = map[string]attr.Type{
+	"token": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"secret_info_choice": types.ObjectType{
+				AttrTypes: AlertReceiverReceiverWebhookHttpConfigAuthChoiceAuthTokenTokenSecretInfoOneofModelAttributeMap,
+			}},
+	},
+}
+
+// Attribute map for RequiredPointerField --> Token
+var AlertReceiverReceiverWebhookHttpConfigAuthChoiceAuthTokenTokenModelAttributeMap = map[string]attr.Type{
+
+	"secret_info_choice": types.ObjectType{
+		AttrTypes: AlertReceiverReceiverWebhookHttpConfigAuthChoiceAuthTokenTokenSecretInfoOneofModelAttributeMap,
+	},
+}
+
+// Attribute map for RequiredOneOfField --> SecretInfoOneof
+var AlertReceiverReceiverWebhookHttpConfigAuthChoiceAuthTokenTokenSecretInfoOneofModelAttributeMap = map[string]attr.Type{
+
+	"blindfold_secret_info": types.ObjectType{
+		AttrTypes: AlertReceiverReceiverWebhookHttpConfigAuthChoiceAuthTokenTokenSecretInfoOneofBlindfoldSecretInfoModelAttributeMap,
+	},
+	"clear_secret_info": types.ObjectType{
+		AttrTypes: AlertReceiverReceiverWebhookHttpConfigAuthChoiceAuthTokenTokenSecretInfoOneofClearSecretInfoModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
+var AlertReceiverReceiverWebhookHttpConfigAuthChoiceAuthTokenTokenSecretInfoOneofBlindfoldSecretInfoModelAttributeMap = map[string]attr.Type{
+
+	"decryption_provider": types.StringType,
+	"location":            types.StringType,
+	"store_provider":      types.StringType,
+}
+
+// Attribute map for PointerOfOneOfField --> ClearSecretInfo
+var AlertReceiverReceiverWebhookHttpConfigAuthChoiceAuthTokenTokenSecretInfoOneofClearSecretInfoModelAttributeMap = map[string]attr.Type{
+
+	"provider": types.StringType,
+	"url":      types.StringType,
+}
+
+// Attribute map for PointerOfOneOfField --> BasicAuth
+var AlertReceiverReceiverWebhookHttpConfigAuthChoiceBasicAuthModelAttributeMap = map[string]attr.Type{
+	"password": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"secret_info_choice": types.ObjectType{
+				AttrTypes: AlertReceiverReceiverWebhookHttpConfigAuthChoiceBasicAuthPasswordSecretInfoOneofModelAttributeMap,
+			}},
+	},
+	"user_name": types.StringType,
+}
+
+// Attribute map for RequiredPointerField --> Password
+var AlertReceiverReceiverWebhookHttpConfigAuthChoiceBasicAuthPasswordModelAttributeMap = map[string]attr.Type{
+
+	"secret_info_choice": types.ObjectType{
+		AttrTypes: AlertReceiverReceiverWebhookHttpConfigAuthChoiceBasicAuthPasswordSecretInfoOneofModelAttributeMap,
+	},
+}
+
+// Attribute map for RequiredOneOfField --> SecretInfoOneof
+var AlertReceiverReceiverWebhookHttpConfigAuthChoiceBasicAuthPasswordSecretInfoOneofModelAttributeMap = map[string]attr.Type{
+
+	"blindfold_secret_info": types.ObjectType{
+		AttrTypes: AlertReceiverReceiverWebhookHttpConfigAuthChoiceBasicAuthPasswordSecretInfoOneofBlindfoldSecretInfoModelAttributeMap,
+	},
+	"clear_secret_info": types.ObjectType{
+		AttrTypes: AlertReceiverReceiverWebhookHttpConfigAuthChoiceBasicAuthPasswordSecretInfoOneofClearSecretInfoModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
+var AlertReceiverReceiverWebhookHttpConfigAuthChoiceBasicAuthPasswordSecretInfoOneofBlindfoldSecretInfoModelAttributeMap = map[string]attr.Type{
+
+	"decryption_provider": types.StringType,
+	"location":            types.StringType,
+	"store_provider":      types.StringType,
+}
+
+// Attribute map for PointerOfOneOfField --> ClearSecretInfo
+var AlertReceiverReceiverWebhookHttpConfigAuthChoiceBasicAuthPasswordSecretInfoOneofClearSecretInfoModelAttributeMap = map[string]attr.Type{
+
+	"provider": types.StringType,
+	"url":      types.StringType,
+}
+
+// Attribute map for PointerOfOneOfField --> ClientCertObj
+var AlertReceiverReceiverWebhookHttpConfigAuthChoiceClientCertObjModelAttributeMap = map[string]attr.Type{
+
+	"use_tls_obj": types.ListType{
+		ElemType: types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+
+				"name":      types.StringType,
+				"namespace": types.StringType,
+				"tenant":    types.StringType,
+			},
+		},
+	},
+}
+
+// Attribute map for ArrayOfPointerField --> UseTlsObj
+var AlertReceiverUseTlsObjObjectRefModelAttributeMap = map[string]attr.Type{
+
+	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
+}
+
+// Attribute map for RequiredOneOfField --> TlsChoice
+var AlertReceiverReceiverWebhookHttpConfigTlsChoiceModelAttributeMap = map[string]attr.Type{
+
+	"no_tls": types.BoolType,
+	"use_tls": types.ObjectType{
+		AttrTypes: AlertReceiverReceiverWebhookHttpConfigTlsChoiceUseTlsModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> UseTls
+var AlertReceiverReceiverWebhookHttpConfigTlsChoiceUseTlsModelAttributeMap = map[string]attr.Type{
+
+	"max_version": types.ListType{
+		ElemType: types.StringType,
+	},
+	"min_version": types.ListType{
+		ElemType: types.StringType,
+	},
+	"server_validation_choice": types.ObjectType{
+		AttrTypes: AlertReceiverReceiverWebhookHttpConfigTlsChoiceUseTlsServerValidationChoiceModelAttributeMap,
+	},
+	"sni_choice": types.ObjectType{
+		AttrTypes: AlertReceiverReceiverWebhookHttpConfigTlsChoiceUseTlsSniChoiceModelAttributeMap,
+	},
+}
+
+// Attribute map for RequiredOneOfField --> ServerValidationChoice
+var AlertReceiverReceiverWebhookHttpConfigTlsChoiceUseTlsServerValidationChoiceModelAttributeMap = map[string]attr.Type{
+
+	"use_server_verification": types.ObjectType{
+		AttrTypes: AlertReceiverReceiverWebhookHttpConfigTlsChoiceUseTlsServerValidationChoiceUseServerVerificationModelAttributeMap,
+	},
+	"volterra_trusted_ca": types.BoolType,
+}
+
+// Attribute map for PointerOfOneOfField --> UseServerVerification
+var AlertReceiverReceiverWebhookHttpConfigTlsChoiceUseTlsServerValidationChoiceUseServerVerificationModelAttributeMap = map[string]attr.Type{
+	"ca_cert_obj": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"trusted_ca": types.ListType{
+				ElemType: types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+
+						"name":      types.StringType,
+						"namespace": types.StringType,
+						"tenant":    types.StringType,
+					},
+				},
+			}},
+	},
+}
+
+// Attribute map for PointerField --> CaCertObj
+var AlertReceiverReceiverWebhookHttpConfigTlsChoiceUseTlsServerValidationChoiceUseServerVerificationCaCertObjModelAttributeMap = map[string]attr.Type{
+
+	"trusted_ca": types.ListType{
+		ElemType: types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+
+				"name":      types.StringType,
+				"namespace": types.StringType,
+				"tenant":    types.StringType,
+			},
+		},
+	},
+}
+
+// Attribute map for ArrayOfPointerField --> TrustedCa
+var AlertReceiverTrustedCaObjectRefModelAttributeMap = map[string]attr.Type{
+
+	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
+}
+
+// Attribute map for RequiredOneOfField --> SniChoice
+var AlertReceiverReceiverWebhookHttpConfigTlsChoiceUseTlsSniChoiceModelAttributeMap = map[string]attr.Type{
+
+	"disable_sni": types.BoolType,
+	"sni":         types.StringType,
+}
+
+// Attribute map for RequiredPointerField --> Url
+var AlertReceiverReceiverWebhookUrlModelAttributeMap = map[string]attr.Type{
+
+	"secret_info_choice": types.ObjectType{
+		AttrTypes: AlertReceiverReceiverWebhookUrlSecretInfoOneofModelAttributeMap,
+	},
+}
+
+// Attribute map for RequiredOneOfField --> SecretInfoOneof
+var AlertReceiverReceiverWebhookUrlSecretInfoOneofModelAttributeMap = map[string]attr.Type{
+
+	"blindfold_secret_info": types.ObjectType{
+		AttrTypes: AlertReceiverReceiverWebhookUrlSecretInfoOneofBlindfoldSecretInfoModelAttributeMap,
+	},
+	"clear_secret_info": types.ObjectType{
+		AttrTypes: AlertReceiverReceiverWebhookUrlSecretInfoOneofClearSecretInfoModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> BlindfoldSecretInfo
+var AlertReceiverReceiverWebhookUrlSecretInfoOneofBlindfoldSecretInfoModelAttributeMap = map[string]attr.Type{
+
+	"decryption_provider": types.StringType,
+	"location":            types.StringType,
+	"store_provider":      types.StringType,
+}
+
+// Attribute map for PointerOfOneOfField --> ClearSecretInfo
+var AlertReceiverReceiverWebhookUrlSecretInfoOneofClearSecretInfoModelAttributeMap = map[string]attr.Type{
+
+	"provider": types.StringType,
+	"url":      types.StringType,
 }
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -617,10 +617,30 @@ func (d *DataSourceF5XCAlertReceiver) Metadata(ctx context.Context, request data
 func (r *DataSourceF5XCAlertReceiver) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "AlertReceiver data source",
-		Description:         "AlertReceiver data source",
+		MarkdownDescription: "GetRequest is used to get different forms of a alert_receiver This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of alert_receiver) etc. can be fetched",
+		Description:         "GetRequest is used to get different forms of a alert_receiver This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of alert_receiver) etc. can be fetched",
 
 		Attributes: map[string]schema.Attribute{
+			"annotations": schema.MapAttribute{
+				Description: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				ElementType: types.StringType,
+			},
+			"description": schema.StringAttribute{
+				Description: "description Human readable description for the object",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+			},
+			"labels": schema.MapAttribute{
+				Description: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				ElementType: types.StringType,
+			},
 			"name": schema.StringAttribute{
 				Description: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
 				Required:    false,
@@ -639,32 +659,26 @@ func (r *DataSourceF5XCAlertReceiver) Schema(ctx context.Context, request dataso
 				Optional:    false,
 				Computed:    true,
 			},
-			"labels": schema.MapAttribute{
-				Description: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
-			"annotations": schema.MapAttribute{
-				Description: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
-			"description": schema.StringAttribute{
-				Description: "description Human readable description for the object",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-			},
 			"receiver_choice": schema.SingleNestedAttribute{
 				Description: "Receiver Receiver Config",
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
 				Attributes: map[string]schema.Attribute{
+					"email": schema.SingleNestedAttribute{
+						Description: "Email Send alert notifications as Email",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+						Attributes: map[string]schema.Attribute{
+							"email": schema.StringAttribute{
+								Description: "Email Email id of the user",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
+						},
+					},
 					"opsgenie": schema.SingleNestedAttribute{
 						Description: "OpsGenie Send alert notifications to OpsGenie",
 						Required:    false,
@@ -695,14 +709,14 @@ func (r *DataSourceF5XCAlertReceiver) Schema(ctx context.Context, request dataso
 														Optional:    false,
 														Computed:    true,
 													},
-													"store_provider": schema.StringAttribute{
-														Description: "Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
+													"location": schema.StringAttribute{
+														Description: "Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location",
 														Required:    false,
 														Optional:    false,
 														Computed:    true,
 													},
-													"location": schema.StringAttribute{
-														Description: "Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location",
+													"store_provider": schema.StringAttribute{
+														Description: "Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
 														Required:    false,
 														Optional:    false,
 														Computed:    true,
@@ -735,510 +749,6 @@ func (r *DataSourceF5XCAlertReceiver) Schema(ctx context.Context, request dataso
 							},
 							"url": schema.StringAttribute{
 								Description: "URL URL to send API requests to",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-							},
-						},
-					},
-					"email": schema.SingleNestedAttribute{
-						Description: "Email Send alert notifications as Email",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-						Attributes: map[string]schema.Attribute{
-							"email": schema.StringAttribute{
-								Description: "Email Email id of the user",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-							},
-						},
-					},
-					"sms": schema.SingleNestedAttribute{
-						Description: "SMS Send alert notifications as SMS",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-						Attributes: map[string]schema.Attribute{
-							"contact_number": schema.StringAttribute{
-								Description: "Contact Number Contact number of the user in ITU E.164 format [+][country code][subscriber number including area code]",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-							},
-						},
-					},
-					"webhook": schema.SingleNestedAttribute{
-						Description: "Webhook Send alert notifications to Webhook",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-						Attributes: map[string]schema.Attribute{
-							"url": schema.SingleNestedAttribute{
-								Description: "URL Incoming webhook url to send alert notifications.",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-								Attributes: map[string]schema.Attribute{
-									"secret_info_choice": schema.SingleNestedAttribute{
-										Description: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-										Attributes: map[string]schema.Attribute{
-											"blindfold_secret_info": schema.SingleNestedAttribute{
-												Description: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-												Attributes: map[string]schema.Attribute{
-													"decryption_provider": schema.StringAttribute{
-														Description: "Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
-													"store_provider": schema.StringAttribute{
-														Description: "Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
-													"location": schema.StringAttribute{
-														Description: "Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
-												},
-											},
-											"clear_secret_info": schema.SingleNestedAttribute{
-												Description: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-												Attributes: map[string]schema.Attribute{
-													"provider": schema.StringAttribute{
-														Description: "Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
-													"url": schema.StringAttribute{
-														Description: "URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
-												},
-											},
-										},
-									},
-								},
-							},
-							"http_config": schema.SingleNestedAttribute{
-								Description: "HTTP Configuration Configuration for HTTP endpoint",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-								Attributes: map[string]schema.Attribute{
-									"auth_choice": schema.SingleNestedAttribute{
-										Description: "HTTP Authentication header HTTP Authentication header controls how to authenticate to the HTTP endpoint",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-										Attributes: map[string]schema.Attribute{
-											"no_authorization": schema.BoolAttribute{
-												Description: "No Authentication Do not use authentication to the HTTP(s) server",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-											"basic_auth": schema.SingleNestedAttribute{
-												Description: "Basic Authentication Use HTTP Basic Auth for authentication to the HTTP(s) server",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-												Attributes: map[string]schema.Attribute{
-													"user_name": schema.StringAttribute{
-														Description: "username HTTP Basic Auth User Name",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
-													"password": schema.SingleNestedAttribute{
-														Description: "password HTTP Basic Auth Password",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-														Attributes: map[string]schema.Attribute{
-															"secret_info_choice": schema.SingleNestedAttribute{
-																Description: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-																Attributes: map[string]schema.Attribute{
-																	"blindfold_secret_info": schema.SingleNestedAttribute{
-																		Description: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																		Attributes: map[string]schema.Attribute{
-																			"store_provider": schema.StringAttribute{
-																				Description: "Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																			},
-																			"location": schema.StringAttribute{
-																				Description: "Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location",
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																			},
-																			"decryption_provider": schema.StringAttribute{
-																				Description: "Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.",
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																			},
-																		},
-																	},
-																	"clear_secret_info": schema.SingleNestedAttribute{
-																		Description: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																		Attributes: map[string]schema.Attribute{
-																			"provider": schema.StringAttribute{
-																				Description: "Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																			},
-																			"url": schema.StringAttribute{
-																				Description: "URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.",
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																			},
-																		},
-																	},
-																},
-															},
-														},
-													},
-												},
-											},
-											"auth_token": schema.SingleNestedAttribute{
-												Description: "Token Authentication Configure an Access Token for authentication to the HTTP(s) server (such as a Bearer Token)",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-												Attributes: map[string]schema.Attribute{
-													"token": schema.SingleNestedAttribute{
-														Description: "token F5XC Secret. URL for token, needs to be fetched from this path",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-														Attributes: map[string]schema.Attribute{
-															"secret_info_choice": schema.SingleNestedAttribute{
-																Description: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-																Attributes: map[string]schema.Attribute{
-																	"blindfold_secret_info": schema.SingleNestedAttribute{
-																		Description: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																		Attributes: map[string]schema.Attribute{
-																			"decryption_provider": schema.StringAttribute{
-																				Description: "Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.",
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																			},
-																			"store_provider": schema.StringAttribute{
-																				Description: "Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																			},
-																			"location": schema.StringAttribute{
-																				Description: "Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location",
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																			},
-																		},
-																	},
-																	"clear_secret_info": schema.SingleNestedAttribute{
-																		Description: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																		Attributes: map[string]schema.Attribute{
-																			"provider": schema.StringAttribute{
-																				Description: "Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																			},
-																			"url": schema.StringAttribute{
-																				Description: "URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.",
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																			},
-																		},
-																	},
-																},
-															},
-														},
-													},
-												},
-											},
-											"client_cert_obj": schema.SingleNestedAttribute{
-												Description: "Enable TLS Auth With Certificate Object Use certificate and key files for client cert authentication to the server.",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-												Attributes: map[string]schema.Attribute{
-													"use_tls_obj": schema.ListNestedAttribute{
-														Description: "certificate_object_refs Reference to client certificate object",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-														NestedObject: schema.NestedAttributeObject{
-															Attributes: map[string]schema.Attribute{
-																"tenant": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"namespace": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-																"name": schema.StringAttribute{
-																	Description: "",
-																	Required:    false,
-																	Optional:    false,
-																	Computed:    true,
-																},
-															},
-														},
-													},
-												},
-											},
-										},
-									},
-									"enable_http2": schema.BoolAttribute{
-										Description: "Enable HTTP2 Configure to use HTTP2 protocol.",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-									},
-									"follow_redirects": schema.BoolAttribute{
-										Description: "Follow Redirects Configure whether HTTP requests follow HTTP 3xx redirects.",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-									},
-									"tls_choice": schema.SingleNestedAttribute{
-										Description: "Enable TLS",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-										Attributes: map[string]schema.Attribute{
-											"no_tls": schema.BoolAttribute{
-												Description: "No TLS",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-											},
-											"use_tls": schema.SingleNestedAttribute{
-												Description: "Use TLS",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-												Attributes: map[string]schema.Attribute{
-													"sni_choice": schema.SingleNestedAttribute{
-														Description: "sni choice Select SNI to be used for upstream connection",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-														Attributes: map[string]schema.Attribute{
-															"sni": schema.StringAttribute{
-																Description: "sni SNI value to be used.",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-															"disable_sni": schema.BoolAttribute{
-																Description: "disable_sni Do not use SNI.",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-														},
-													},
-													"min_version": schema.ListAttribute{
-														Description: "minimum_protocol_version Minimum TLS protocol version.",
-														ElementType: types.StringType,
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
-													"max_version": schema.ListAttribute{
-														Description: "maximum_protocol_version Maximum TLS protocol version.",
-														ElementType: types.StringType,
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
-													"server_validation_choice": schema.SingleNestedAttribute{
-														Description: "Server verification choice Choose whether to perform server verification.",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-														Attributes: map[string]schema.Attribute{
-															"use_server_verification": schema.SingleNestedAttribute{
-																Description: "Use Server Verification Perform server verification using the provided trusted CA list",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-																Attributes: map[string]schema.Attribute{
-																	"ca_cert_obj": schema.SingleNestedAttribute{
-																		Description: "trusted_ca Trusted CA List for verification of Server's certificate",
-																		Required:    false,
-																		Optional:    false,
-																		Computed:    true,
-																		Attributes: map[string]schema.Attribute{
-																			"trusted_ca": schema.ListNestedAttribute{
-																				Description: "certificate_object_refs Reference to client certificate object",
-																				Required:    false,
-																				Optional:    false,
-																				Computed:    true,
-																				NestedObject: schema.NestedAttributeObject{
-																					Attributes: map[string]schema.Attribute{
-																						"name": schema.StringAttribute{
-																							Description: "",
-																							Required:    false,
-																							Optional:    false,
-																							Computed:    true,
-																						},
-																						"tenant": schema.StringAttribute{
-																							Description: "",
-																							Required:    false,
-																							Optional:    false,
-																							Computed:    true,
-																						},
-																						"namespace": schema.StringAttribute{
-																							Description: "",
-																							Required:    false,
-																							Optional:    false,
-																							Computed:    true,
-																						},
-																					},
-																				},
-																			},
-																		},
-																	},
-																},
-															},
-															"volterra_trusted_ca": schema.BoolAttribute{
-																Description: "F5XC Trusted CA Perform server verification using F5XC default trusted CA list",
-																Required:    false,
-																Optional:    false,
-																Computed:    true,
-															},
-														},
-													},
-												},
-											},
-										},
-									},
-								},
-							},
-						},
-					},
-					"slack": schema.SingleNestedAttribute{
-						Description: "Slack Send alert notifications to Slack",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
-						Attributes: map[string]schema.Attribute{
-							"url": schema.SingleNestedAttribute{
-								Description: "URL Incoming webhook url to send alert notifications. API Key is embedded in the webhook URL.",
-								Required:    false,
-								Optional:    false,
-								Computed:    true,
-								Attributes: map[string]schema.Attribute{
-									"secret_info_choice": schema.SingleNestedAttribute{
-										Description: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
-										Required:    false,
-										Optional:    false,
-										Computed:    true,
-										Attributes: map[string]schema.Attribute{
-											"blindfold_secret_info": schema.SingleNestedAttribute{
-												Description: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-												Attributes: map[string]schema.Attribute{
-													"store_provider": schema.StringAttribute{
-														Description: "Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
-													"location": schema.StringAttribute{
-														Description: "Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
-													"decryption_provider": schema.StringAttribute{
-														Description: "Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
-												},
-											},
-											"clear_secret_info": schema.SingleNestedAttribute{
-												Description: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
-												Required:    false,
-												Optional:    false,
-												Computed:    true,
-												Attributes: map[string]schema.Attribute{
-													"provider": schema.StringAttribute{
-														Description: "Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
-													"url": schema.StringAttribute{
-														Description: "URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.",
-														Required:    false,
-														Optional:    false,
-														Computed:    true,
-													},
-												},
-											},
-										},
-									},
-								},
-							},
-							"channel": schema.StringAttribute{
-								Description: "Channel Channel or user to send notifications to",
 								Required:    false,
 								Optional:    false,
 								Computed:    true,
@@ -1275,14 +785,14 @@ func (r *DataSourceF5XCAlertReceiver) Schema(ctx context.Context, request dataso
 														Optional:    false,
 														Computed:    true,
 													},
-													"store_provider": schema.StringAttribute{
-														Description: "Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
+													"location": schema.StringAttribute{
+														Description: "Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location",
 														Required:    false,
 														Optional:    false,
 														Computed:    true,
 													},
-													"location": schema.StringAttribute{
-														Description: "Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location",
+													"store_provider": schema.StringAttribute{
+														Description: "Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
 														Required:    false,
 														Optional:    false,
 														Computed:    true,
@@ -1295,14 +805,14 @@ func (r *DataSourceF5XCAlertReceiver) Schema(ctx context.Context, request dataso
 												Optional:    false,
 												Computed:    true,
 												Attributes: map[string]schema.Attribute{
-													"url": schema.StringAttribute{
-														Description: "URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.",
+													"provider": schema.StringAttribute{
+														Description: "Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
 														Required:    false,
 														Optional:    false,
 														Computed:    true,
 													},
-													"provider": schema.StringAttribute{
-														Description: "Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
+													"url": schema.StringAttribute{
+														Description: "URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.",
 														Required:    false,
 														Optional:    false,
 														Computed:    true,
@@ -1318,6 +828,496 @@ func (r *DataSourceF5XCAlertReceiver) Schema(ctx context.Context, request dataso
 								Required:    false,
 								Optional:    false,
 								Computed:    true,
+							},
+						},
+					},
+					"slack": schema.SingleNestedAttribute{
+						Description: "Slack Send alert notifications to Slack",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+						Attributes: map[string]schema.Attribute{
+							"channel": schema.StringAttribute{
+								Description: "Channel Channel or user to send notifications to",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
+							"url": schema.SingleNestedAttribute{
+								Description: "URL Incoming webhook url to send alert notifications. API Key is embedded in the webhook URL.",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+								Attributes: map[string]schema.Attribute{
+									"secret_info_choice": schema.SingleNestedAttribute{
+										Description: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+										Attributes: map[string]schema.Attribute{
+											"blindfold_secret_info": schema.SingleNestedAttribute{
+												Description: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+												Attributes: map[string]schema.Attribute{
+													"decryption_provider": schema.StringAttribute{
+														Description: "Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+													},
+													"location": schema.StringAttribute{
+														Description: "Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+													},
+													"store_provider": schema.StringAttribute{
+														Description: "Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+													},
+												},
+											},
+											"clear_secret_info": schema.SingleNestedAttribute{
+												Description: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+												Attributes: map[string]schema.Attribute{
+													"provider": schema.StringAttribute{
+														Description: "Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+													},
+													"url": schema.StringAttribute{
+														Description: "URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+					"sms": schema.SingleNestedAttribute{
+						Description: "SMS Send alert notifications as SMS",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+						Attributes: map[string]schema.Attribute{
+							"contact_number": schema.StringAttribute{
+								Description: "Contact Number Contact number of the user in ITU E.164 format [+][country code][subscriber number including area code]",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
+						},
+					},
+					"webhook": schema.SingleNestedAttribute{
+						Description: "Webhook Send alert notifications to Webhook",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+						Attributes: map[string]schema.Attribute{
+							"http_config": schema.SingleNestedAttribute{
+								Description: "HTTP Configuration Configuration for HTTP endpoint",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+								Attributes: map[string]schema.Attribute{
+									"auth_choice": schema.SingleNestedAttribute{
+										Description: "HTTP Authentication header HTTP Authentication header controls how to authenticate to the HTTP endpoint",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+										Attributes: map[string]schema.Attribute{
+											"auth_token": schema.SingleNestedAttribute{
+												Description: "Token Authentication Configure an Access Token for authentication to the HTTP(s) server (such as a Bearer Token)",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+												Attributes: map[string]schema.Attribute{
+													"token": schema.SingleNestedAttribute{
+														Description: "token F5XC Secret. URL for token, needs to be fetched from this path",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+														Attributes: map[string]schema.Attribute{
+															"secret_info_choice": schema.SingleNestedAttribute{
+																Description: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
+																Attributes: map[string]schema.Attribute{
+																	"blindfold_secret_info": schema.SingleNestedAttribute{
+																		Description: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
+																		Attributes: map[string]schema.Attribute{
+																			"decryption_provider": schema.StringAttribute{
+																				Description: "Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.",
+																				Required:    false,
+																				Optional:    false,
+																				Computed:    true,
+																			},
+																			"location": schema.StringAttribute{
+																				Description: "Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location",
+																				Required:    false,
+																				Optional:    false,
+																				Computed:    true,
+																			},
+																			"store_provider": schema.StringAttribute{
+																				Description: "Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
+																				Required:    false,
+																				Optional:    false,
+																				Computed:    true,
+																			},
+																		},
+																	},
+																	"clear_secret_info": schema.SingleNestedAttribute{
+																		Description: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
+																		Attributes: map[string]schema.Attribute{
+																			"provider": schema.StringAttribute{
+																				Description: "Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
+																				Required:    false,
+																				Optional:    false,
+																				Computed:    true,
+																			},
+																			"url": schema.StringAttribute{
+																				Description: "URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.",
+																				Required:    false,
+																				Optional:    false,
+																				Computed:    true,
+																			},
+																		},
+																	},
+																},
+															},
+														},
+													},
+												},
+											},
+											"basic_auth": schema.SingleNestedAttribute{
+												Description: "Basic Authentication Use HTTP Basic Auth for authentication to the HTTP(s) server",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+												Attributes: map[string]schema.Attribute{
+													"password": schema.SingleNestedAttribute{
+														Description: "password HTTP Basic Auth Password",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+														Attributes: map[string]schema.Attribute{
+															"secret_info_choice": schema.SingleNestedAttribute{
+																Description: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
+																Attributes: map[string]schema.Attribute{
+																	"blindfold_secret_info": schema.SingleNestedAttribute{
+																		Description: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
+																		Attributes: map[string]schema.Attribute{
+																			"decryption_provider": schema.StringAttribute{
+																				Description: "Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.",
+																				Required:    false,
+																				Optional:    false,
+																				Computed:    true,
+																			},
+																			"location": schema.StringAttribute{
+																				Description: "Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location",
+																				Required:    false,
+																				Optional:    false,
+																				Computed:    true,
+																			},
+																			"store_provider": schema.StringAttribute{
+																				Description: "Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
+																				Required:    false,
+																				Optional:    false,
+																				Computed:    true,
+																			},
+																		},
+																	},
+																	"clear_secret_info": schema.SingleNestedAttribute{
+																		Description: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
+																		Attributes: map[string]schema.Attribute{
+																			"provider": schema.StringAttribute{
+																				Description: "Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
+																				Required:    false,
+																				Optional:    false,
+																				Computed:    true,
+																			},
+																			"url": schema.StringAttribute{
+																				Description: "URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.",
+																				Required:    false,
+																				Optional:    false,
+																				Computed:    true,
+																			},
+																		},
+																	},
+																},
+															},
+														},
+													},
+													"user_name": schema.StringAttribute{
+														Description: "username HTTP Basic Auth User Name",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+													},
+												},
+											},
+											"client_cert_obj": schema.SingleNestedAttribute{
+												Description: "Enable TLS Auth With Certificate Object Use certificate and key files for client cert authentication to the server.",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+												Attributes: map[string]schema.Attribute{
+													"use_tls_obj": schema.ListNestedAttribute{
+														Description: "certificate_object_refs Reference to client certificate object",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+														NestedObject: schema.NestedAttributeObject{
+															Attributes: map[string]schema.Attribute{
+																"name": schema.StringAttribute{
+																	Description: "",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
+																"namespace": schema.StringAttribute{
+																	Description: "",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
+																"tenant": schema.StringAttribute{
+																	Description: "",
+																	Required:    false,
+																	Optional:    false,
+																	Computed:    true,
+																},
+															},
+														},
+													},
+												},
+											},
+											"no_authorization": schema.BoolAttribute{
+												Description: "No Authentication Do not use authentication to the HTTP(s) server",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+											},
+										},
+									},
+									"enable_http2": schema.BoolAttribute{
+										Description: "Enable HTTP2 Configure to use HTTP2 protocol.",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+									},
+									"follow_redirects": schema.BoolAttribute{
+										Description: "Follow Redirects Configure whether HTTP requests follow HTTP 3xx redirects.",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+									},
+									"tls_choice": schema.SingleNestedAttribute{
+										Description: "Enable TLS",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+										Attributes: map[string]schema.Attribute{
+											"no_tls": schema.BoolAttribute{
+												Description: "No TLS",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+											},
+											"use_tls": schema.SingleNestedAttribute{
+												Description: "Use TLS",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+												Attributes: map[string]schema.Attribute{
+													"max_version": schema.ListAttribute{
+														Description: "maximum_protocol_version Maximum TLS protocol version.",
+														ElementType: types.StringType,
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+													},
+													"min_version": schema.ListAttribute{
+														Description: "minimum_protocol_version Minimum TLS protocol version.",
+														ElementType: types.StringType,
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+													},
+													"server_validation_choice": schema.SingleNestedAttribute{
+														Description: "Server verification choice Choose whether to perform server verification.",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+														Attributes: map[string]schema.Attribute{
+															"use_server_verification": schema.SingleNestedAttribute{
+																Description: "Use Server Verification Perform server verification using the provided trusted CA list",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
+																Attributes: map[string]schema.Attribute{
+																	"ca_cert_obj": schema.SingleNestedAttribute{
+																		Description: "trusted_ca Trusted CA List for verification of Server's certificate",
+																		Required:    false,
+																		Optional:    false,
+																		Computed:    true,
+																		Attributes: map[string]schema.Attribute{
+																			"trusted_ca": schema.ListNestedAttribute{
+																				Description: "certificate_object_refs Reference to client certificate object",
+																				Required:    false,
+																				Optional:    false,
+																				Computed:    true,
+																				NestedObject: schema.NestedAttributeObject{
+																					Attributes: map[string]schema.Attribute{
+																						"name": schema.StringAttribute{
+																							Description: "",
+																							Required:    false,
+																							Optional:    false,
+																							Computed:    true,
+																						},
+																						"namespace": schema.StringAttribute{
+																							Description: "",
+																							Required:    false,
+																							Optional:    false,
+																							Computed:    true,
+																						},
+																						"tenant": schema.StringAttribute{
+																							Description: "",
+																							Required:    false,
+																							Optional:    false,
+																							Computed:    true,
+																						},
+																					},
+																				},
+																			},
+																		},
+																	},
+																},
+															},
+															"volterra_trusted_ca": schema.BoolAttribute{
+																Description: "F5XC Trusted CA Perform server verification using F5XC default trusted CA list",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
+															},
+														},
+													},
+													"sni_choice": schema.SingleNestedAttribute{
+														Description: "sni choice Select SNI to be used for upstream connection",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+														Attributes: map[string]schema.Attribute{
+															"disable_sni": schema.BoolAttribute{
+																Description: "disable_sni Do not use SNI.",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
+															},
+															"sni": schema.StringAttribute{
+																Description: "sni SNI value to be used.",
+																Required:    false,
+																Optional:    false,
+																Computed:    true,
+															},
+														},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+							"url": schema.SingleNestedAttribute{
+								Description: "URL Incoming webhook url to send alert notifications.",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+								Attributes: map[string]schema.Attribute{
+									"secret_info_choice": schema.SingleNestedAttribute{
+										Description: "SecretInfoOneof Secret can be one of the following types - * Blindfold Secret - Secret is managed by F5XC Secret Management System * Clear Secret - Secret is not encrypted",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+										Attributes: map[string]schema.Attribute{
+											"blindfold_secret_info": schema.SingleNestedAttribute{
+												Description: "Blindfold Secret Blindfold Secret is used for the secrets managed by F5XC Secret Management Service",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+												Attributes: map[string]schema.Attribute{
+													"decryption_provider": schema.StringAttribute{
+														Description: "Decryption Provider Name of the Secret Management Access object that contains information about the backend Secret Management service.",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+													},
+													"location": schema.StringAttribute{
+														Description: "Location Location is the uri_ref. It could be in url format for string:/// Or it could be a path if the store provider is an http/https location",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+													},
+													"store_provider": schema.StringAttribute{
+														Description: "Store Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+													},
+												},
+											},
+											"clear_secret_info": schema.SingleNestedAttribute{
+												Description: "Clear Secret Clear Secret is used for the secrets that are not encrypted",
+												Required:    false,
+												Optional:    false,
+												Computed:    true,
+												Attributes: map[string]schema.Attribute{
+													"provider": schema.StringAttribute{
+														Description: "Provider Name of the Secret Management Access object that contains information about the store to get encrypted bytes This field needs to be provided only if the url scheme is not string:///",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+													},
+													"url": schema.StringAttribute{
+														Description: "URL URL of the secret. Currently supported URL schemes is string:///. For string:/// scheme, Secret needs to be encoded Base64 format. When asked for this secret, caller will get Secret bytes after Base64 decoding.",
+														Required:    false,
+														Optional:    false,
+														Computed:    true,
+													},
+												},
+											},
+										},
+									},
+								},
 							},
 						},
 					},
@@ -1370,15 +1370,14 @@ func (d *DataSourceF5XCAlertReceiver) Read(ctx context.Context, request datasour
 		return
 	}
 
-	readTimeout, diags := data.Timeouts.Read(ctx, duration)
-	response.Diagnostics.Append(diags...)
+	readTimeout, readDiags := data.Timeouts.Read(ctx, duration)
+	response.Diagnostics.Append(readDiags...)
 	if response.Diagnostics.HasError() {
 		return
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
-
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_alert_receiver.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
@@ -1393,33 +1392,6 @@ func (d *DataSourceF5XCAlertReceiver) Read(ctx context.Context, request datasour
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
-
-	// data SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
-
-	// data SpecToModelRoot Meta RequiredStringField --> Namespace
-	data.Namespace = types.StringValue(metaData.GetNamespace())
-
-	// data SpecToModelRoot Meta StringField --> Uid
-	data.Uid = types.StringValue(systemMetaData.GetUid())
-
-	// data SpecToModelRoot Meta MapOfStringField --> Labels
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// Assign the typed map to the model
-		data.Labels = labelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil and the model has no value: set an explicit Null map to avoid
-		// DynamicPseudoType errors. If the model already contains a value (e.g. labels were set
-		// but the API did not echo them back in the response), preserve the existing value to prevent
-		// "Provider produced inconsistent result after apply" errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
 
 	// data SpecToModelRoot Meta MapOfStringField --> Annotations
 	if metaData.GetAnnotations() != nil {
@@ -1442,6 +1414,33 @@ func (d *DataSourceF5XCAlertReceiver) Read(ctx context.Context, request datasour
 	// data SpecToModelRoot Meta StringField --> Description
 	data.Description = types.StringValue(metaData.GetDescription())
 
+	// data SpecToModelRoot Meta MapOfStringField --> Labels
+	if metaData.GetLabels() != nil {
+		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
+		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+		response.Diagnostics.Append(labelsDiags...)
+		if response.Diagnostics.HasError() {
+			return
+		}
+		// Assign the typed map to the model
+		data.Labels = labelsMap
+	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
+		// API returned nil and the model has no value: set an explicit Null map to avoid
+		// DynamicPseudoType errors. If the model already contains a value (e.g. labels were set
+		// but the API did not echo them back in the response), preserve the existing value to prevent
+		// "Provider produced inconsistent result after apply" errors.
+		data.Labels = types.MapNull(types.StringType)
+	}
+
+	// data SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
+
+	// data SpecToModelRoot Meta RequiredStringField --> Namespace
+	data.Namespace = types.StringValue(metaData.GetNamespace())
+
+	// data SpecToModelRoot Meta StringField --> Uid
+	data.Uid = types.StringValue(systemMetaData.GetUid())
+
 	// data SpecToModelRoot RequiredOneOfField --> Receiver
 	// false
 	// true
@@ -1456,20 +1455,50 @@ func (d *DataSourceF5XCAlertReceiver) Read(ctx context.Context, request datasour
 
 		// Recursively call the nested template to process the oneof choices.
 
+		// data specToModelNested PointerOfOneOfField --> Email
+		// <no value>
+		// false
+		{
+			emailOptionsWrapper, isEmail := receiverChoiceChoices.(*ves_io_schema_alert_receiver.GlobalSpecType_Email)
+			emailAttributeMap := make(map[string]attr.Value)
+
+			if isEmail && emailOptionsWrapper != nil && emailOptionsWrapper.Email != nil {
+				emailElement := emailOptionsWrapper.Email
+
+				// data specToModelNested StringField --> Email
+				if emailElement.GetEmail() != "" {
+					emailAttributeMap["email"] = types.StringValue(emailElement.GetEmail())
+				} else {
+					// Empty string, set to null
+					emailAttributeMap["email"] = types.StringNull()
+				}
+
+				emailObj, emailObjDiags := types.ObjectValue(AlertReceiverReceiverEmailModelAttributeMap, emailAttributeMap)
+				response.Diagnostics.Append(emailObjDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				receiverChoiceChoicesModel.Email = emailObj
+			} else {
+				receiverChoiceChoicesModel.Email = types.ObjectNull(AlertReceiverReceiverEmailModelAttributeMap)
+			}
+		}
+
 		// data specToModelNested PointerOfOneOfField --> Opsgenie
 		// <no value>
 		// false
 		{
-			opsgenieOptions, isOpsgenie := receiverChoiceChoices.(*ves_io_schema_alert_receiver.GlobalSpecType_Opsgenie)
+			opsgenieOptionsWrapper, isOpsgenie := receiverChoiceChoices.(*ves_io_schema_alert_receiver.GlobalSpecType_Opsgenie)
 			opsgenieAttributeMap := make(map[string]attr.Value)
 
-			if isOpsgenie && opsgenieOptions != nil {
+			if isOpsgenie && opsgenieOptionsWrapper != nil && opsgenieOptionsWrapper.Opsgenie != nil {
+				opsgenieElement := opsgenieOptionsWrapper.Opsgenie
 
 				// data specToModelNested RequiredPointerField --> ApiKey
-				if opsgenieOptions.Opsgenie.GetApiKey() != nil {
+				if opsgenieElement.GetApiKey() != nil {
 					// Create the nested Go struct
 					alertReceiverSecretTypeModel := &AlertReceiverSecretType{}
-					apiKeyElement := opsgenieOptions.Opsgenie.GetApiKey()
+					apiKeyElement := opsgenieElement.GetApiKey()
 
 					// Recursively populate the nested struct
 
@@ -1489,37 +1518,38 @@ func (d *DataSourceF5XCAlertReceiver) Read(ctx context.Context, request datasour
 						// <no value>
 						// false
 						{
-							blindfoldSecretInfoOptions, isBlindfoldSecretInfo := apiKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_BlindfoldSecretInfo)
+							blindfoldSecretInfoOptionsWrapper, isBlindfoldSecretInfo := apiKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_BlindfoldSecretInfo)
 							blindfoldSecretInfoAttributeMap := make(map[string]attr.Value)
 
-							if isBlindfoldSecretInfo && blindfoldSecretInfoOptions != nil {
+							if isBlindfoldSecretInfo && blindfoldSecretInfoOptionsWrapper != nil && blindfoldSecretInfoOptionsWrapper.BlindfoldSecretInfo != nil {
+								blindfoldSecretInfoElement := blindfoldSecretInfoOptionsWrapper.BlindfoldSecretInfo
 
 								// data specToModelNested StringField --> DecryptionProvider
-								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider() != "" {
-									blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider())
+								if blindfoldSecretInfoElement.GetDecryptionProvider() != "" {
+									blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoElement.GetDecryptionProvider())
 								} else {
 									// Empty string, set to null
 									blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringNull()
 								}
 
-								// data specToModelNested StringField --> StoreProvider
-								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider() != "" {
-									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider())
-								} else {
-									// Empty string, set to null
-									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringNull()
-								}
-
 								// data specToModelNested RequiredStringField --> Location
-								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation() != "" {
-									blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation())
+								if blindfoldSecretInfoElement.GetLocation() != "" {
+									blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoElement.GetLocation())
 								} else {
 									// Empty string, set to null
 									blindfoldSecretInfoAttributeMap["location"] = types.StringNull()
 								}
 
-								blindfoldSecretInfoObj, diags := types.ObjectValue(AlertReceiverReceiverOpsgenieApiKeySecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
-								response.Diagnostics.Append(diags...)
+								// data specToModelNested StringField --> StoreProvider
+								if blindfoldSecretInfoElement.GetStoreProvider() != "" {
+									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringValue(blindfoldSecretInfoElement.GetStoreProvider())
+								} else {
+									// Empty string, set to null
+									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringNull()
+								}
+
+								blindfoldSecretInfoObj, blindfoldSecretInfoObjDiags := types.ObjectValue(AlertReceiverReceiverOpsgenieApiKeySecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
+								response.Diagnostics.Append(blindfoldSecretInfoObjDiags...)
 								if response.Diagnostics.HasError() {
 									return
 								}
@@ -1533,29 +1563,30 @@ func (d *DataSourceF5XCAlertReceiver) Read(ctx context.Context, request datasour
 						// <no value>
 						// false
 						{
-							clearSecretInfoOptions, isClearSecretInfo := apiKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_ClearSecretInfo)
+							clearSecretInfoOptionsWrapper, isClearSecretInfo := apiKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_ClearSecretInfo)
 							clearSecretInfoAttributeMap := make(map[string]attr.Value)
 
-							if isClearSecretInfo && clearSecretInfoOptions != nil {
+							if isClearSecretInfo && clearSecretInfoOptionsWrapper != nil && clearSecretInfoOptionsWrapper.ClearSecretInfo != nil {
+								clearSecretInfoElement := clearSecretInfoOptionsWrapper.ClearSecretInfo
 
 								// data specToModelNested StringField --> Provider
-								if clearSecretInfoOptions.ClearSecretInfo.GetProvider() != "" {
-									clearSecretInfoAttributeMap["provider"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetProvider())
+								if clearSecretInfoElement.GetProvider() != "" {
+									clearSecretInfoAttributeMap["provider"] = types.StringValue(clearSecretInfoElement.GetProvider())
 								} else {
 									// Empty string, set to null
 									clearSecretInfoAttributeMap["provider"] = types.StringNull()
 								}
 
 								// data specToModelNested RequiredStringField --> Url
-								if clearSecretInfoOptions.ClearSecretInfo.GetUrl() != "" {
-									clearSecretInfoAttributeMap["url"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetUrl())
+								if clearSecretInfoElement.GetUrl() != "" {
+									clearSecretInfoAttributeMap["url"] = types.StringValue(clearSecretInfoElement.GetUrl())
 								} else {
 									// Empty string, set to null
 									clearSecretInfoAttributeMap["url"] = types.StringNull()
 								}
 
-								clearSecretInfoObj, diags := types.ObjectValue(AlertReceiverReceiverOpsgenieApiKeySecretInfoOneofClearSecretInfoModelAttributeMap, clearSecretInfoAttributeMap)
-								response.Diagnostics.Append(diags...)
+								clearSecretInfoObj, clearSecretInfoObjDiags := types.ObjectValue(AlertReceiverReceiverOpsgenieApiKeySecretInfoOneofClearSecretInfoModelAttributeMap, clearSecretInfoAttributeMap)
+								response.Diagnostics.Append(clearSecretInfoObjDiags...)
 								if response.Diagnostics.HasError() {
 									return
 								}
@@ -1597,8 +1628,8 @@ func (d *DataSourceF5XCAlertReceiver) Read(ctx context.Context, request datasour
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					alertReceiverSecretTypeModelObj, diags := types.ObjectValueFrom(ctx, AlertReceiverReceiverOpsgenieApiKeyModelAttributeMap, alertReceiverSecretTypeModel)
-					response.Diagnostics.Append(diags...)
+					alertReceiverSecretTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AlertReceiverReceiverOpsgenieApiKeyModelAttributeMap, alertReceiverSecretTypeModel)
+					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
@@ -1615,15 +1646,15 @@ func (d *DataSourceF5XCAlertReceiver) Read(ctx context.Context, request datasour
 				}
 
 				// data specToModelNested RequiredStringField --> Url
-				if opsgenieOptions.Opsgenie.GetUrl() != "" {
-					opsgenieAttributeMap["url"] = types.StringValue(opsgenieOptions.Opsgenie.GetUrl())
+				if opsgenieElement.GetUrl() != "" {
+					opsgenieAttributeMap["url"] = types.StringValue(opsgenieElement.GetUrl())
 				} else {
 					// Empty string, set to null
 					opsgenieAttributeMap["url"] = types.StringNull()
 				}
 
-				opsgenieObj, diags := types.ObjectValue(AlertReceiverReceiverOpsgenieModelAttributeMap, opsgenieAttributeMap)
-				response.Diagnostics.Append(diags...)
+				opsgenieObj, opsgenieObjDiags := types.ObjectValue(AlertReceiverReceiverOpsgenieModelAttributeMap, opsgenieAttributeMap)
+				response.Diagnostics.Append(opsgenieObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
@@ -1633,76 +1664,209 @@ func (d *DataSourceF5XCAlertReceiver) Read(ctx context.Context, request datasour
 			}
 		}
 
-		// data specToModelNested PointerOfOneOfField --> Email
+		// data specToModelNested PointerOfOneOfField --> Pagerduty
 		// <no value>
 		// false
 		{
-			emailOptions, isEmail := receiverChoiceChoices.(*ves_io_schema_alert_receiver.GlobalSpecType_Email)
-			emailAttributeMap := make(map[string]attr.Value)
+			pagerdutyOptionsWrapper, isPagerduty := receiverChoiceChoices.(*ves_io_schema_alert_receiver.GlobalSpecType_Pagerduty)
+			pagerdutyAttributeMap := make(map[string]attr.Value)
 
-			if isEmail && emailOptions != nil {
+			if isPagerduty && pagerdutyOptionsWrapper != nil && pagerdutyOptionsWrapper.Pagerduty != nil {
+				pagerdutyElement := pagerdutyOptionsWrapper.Pagerduty
 
-				// data specToModelNested StringField --> Email
-				if emailOptions.Email.GetEmail() != "" {
-					emailAttributeMap["email"] = types.StringValue(emailOptions.Email.GetEmail())
-				} else {
-					// Empty string, set to null
-					emailAttributeMap["email"] = types.StringNull()
-				}
-
-				emailObj, diags := types.ObjectValue(AlertReceiverReceiverEmailModelAttributeMap, emailAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				receiverChoiceChoicesModel.Email = emailObj
-			} else {
-				receiverChoiceChoicesModel.Email = types.ObjectNull(AlertReceiverReceiverEmailModelAttributeMap)
-			}
-		}
-
-		// data specToModelNested PointerOfOneOfField --> Sms
-		// <no value>
-		// false
-		{
-			smsOptions, isSms := receiverChoiceChoices.(*ves_io_schema_alert_receiver.GlobalSpecType_Sms)
-			smsAttributeMap := make(map[string]attr.Value)
-
-			if isSms && smsOptions != nil {
-
-				// data specToModelNested StringField --> ContactNumber
-				if smsOptions.Sms.GetContactNumber() != "" {
-					smsAttributeMap["contact_number"] = types.StringValue(smsOptions.Sms.GetContactNumber())
-				} else {
-					// Empty string, set to null
-					smsAttributeMap["contact_number"] = types.StringNull()
-				}
-
-				smsObj, diags := types.ObjectValue(AlertReceiverReceiverSmsModelAttributeMap, smsAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				receiverChoiceChoicesModel.Sms = smsObj
-			} else {
-				receiverChoiceChoicesModel.Sms = types.ObjectNull(AlertReceiverReceiverSmsModelAttributeMap)
-			}
-		}
-
-		// data specToModelNested PointerOfOneOfField --> Webhook
-		// <no value>
-		// false
-		{
-			webhookOptions, isWebhook := receiverChoiceChoices.(*ves_io_schema_alert_receiver.GlobalSpecType_Webhook)
-			webhookAttributeMap := make(map[string]attr.Value)
-
-			if isWebhook && webhookOptions != nil {
-
-				// data specToModelNested RequiredPointerField --> Url
-				if webhookOptions.Webhook.GetUrl() != nil {
+				// data specToModelNested RequiredPointerField --> RoutingKey
+				if pagerdutyElement.GetRoutingKey() != nil {
 					// Create the nested Go struct
 					alertReceiverSecretTypeModel := &AlertReceiverSecretType{}
-					urlElement := webhookOptions.Webhook.GetUrl()
+					routingKeyElement := pagerdutyElement.GetRoutingKey()
+
+					// Recursively populate the nested struct
+
+					// data specToModelNested RequiredOneOfField --> SecretInfoOneof
+					// <no value>
+					if routingKeyElement.GetSecretInfoOneof() != nil {
+						// Create a temporary attribute map for the choices within this OneOf
+						routingKeysecretInfoChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+						// Define a variable for the spec choices to be passed down to nested templates.
+						// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+						routingKeysecretInfoChoiceChoices := routingKeyElement.GetSecretInfoOneof()
+
+						// Process nested choices, populating the temporary attribute map
+
+						// data specToModelNested PointerOfOneOfField --> BlindfoldSecretInfo
+						// <no value>
+						// false
+						{
+							blindfoldSecretInfoOptionsWrapper, isBlindfoldSecretInfo := routingKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_BlindfoldSecretInfo)
+							blindfoldSecretInfoAttributeMap := make(map[string]attr.Value)
+
+							if isBlindfoldSecretInfo && blindfoldSecretInfoOptionsWrapper != nil && blindfoldSecretInfoOptionsWrapper.BlindfoldSecretInfo != nil {
+								blindfoldSecretInfoElement := blindfoldSecretInfoOptionsWrapper.BlindfoldSecretInfo
+
+								// data specToModelNested StringField --> DecryptionProvider
+								if blindfoldSecretInfoElement.GetDecryptionProvider() != "" {
+									blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoElement.GetDecryptionProvider())
+								} else {
+									// Empty string, set to null
+									blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringNull()
+								}
+
+								// data specToModelNested RequiredStringField --> Location
+								if blindfoldSecretInfoElement.GetLocation() != "" {
+									blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoElement.GetLocation())
+								} else {
+									// Empty string, set to null
+									blindfoldSecretInfoAttributeMap["location"] = types.StringNull()
+								}
+
+								// data specToModelNested StringField --> StoreProvider
+								if blindfoldSecretInfoElement.GetStoreProvider() != "" {
+									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringValue(blindfoldSecretInfoElement.GetStoreProvider())
+								} else {
+									// Empty string, set to null
+									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringNull()
+								}
+
+								blindfoldSecretInfoObj, blindfoldSecretInfoObjDiags := types.ObjectValue(AlertReceiverReceiverPagerdutyRoutingKeySecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
+								response.Diagnostics.Append(blindfoldSecretInfoObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								routingKeysecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = blindfoldSecretInfoObj
+							} else {
+								routingKeysecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = types.ObjectNull(AlertReceiverReceiverPagerdutyRoutingKeySecretInfoOneofBlindfoldSecretInfoModelAttributeMap)
+							}
+						}
+
+						// data specToModelNested PointerOfOneOfField --> ClearSecretInfo
+						// <no value>
+						// false
+						{
+							clearSecretInfoOptionsWrapper, isClearSecretInfo := routingKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_ClearSecretInfo)
+							clearSecretInfoAttributeMap := make(map[string]attr.Value)
+
+							if isClearSecretInfo && clearSecretInfoOptionsWrapper != nil && clearSecretInfoOptionsWrapper.ClearSecretInfo != nil {
+								clearSecretInfoElement := clearSecretInfoOptionsWrapper.ClearSecretInfo
+
+								// data specToModelNested StringField --> Provider
+								if clearSecretInfoElement.GetProvider() != "" {
+									clearSecretInfoAttributeMap["provider"] = types.StringValue(clearSecretInfoElement.GetProvider())
+								} else {
+									// Empty string, set to null
+									clearSecretInfoAttributeMap["provider"] = types.StringNull()
+								}
+
+								// data specToModelNested RequiredStringField --> Url
+								if clearSecretInfoElement.GetUrl() != "" {
+									clearSecretInfoAttributeMap["url"] = types.StringValue(clearSecretInfoElement.GetUrl())
+								} else {
+									// Empty string, set to null
+									clearSecretInfoAttributeMap["url"] = types.StringNull()
+								}
+
+								clearSecretInfoObj, clearSecretInfoObjDiags := types.ObjectValue(AlertReceiverReceiverPagerdutyRoutingKeySecretInfoOneofClearSecretInfoModelAttributeMap, clearSecretInfoAttributeMap)
+								response.Diagnostics.Append(clearSecretInfoObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								routingKeysecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = clearSecretInfoObj
+							} else {
+								routingKeysecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(AlertReceiverReceiverPagerdutyRoutingKeySecretInfoOneofClearSecretInfoModelAttributeMap)
+							}
+						}
+
+						// --- End of Choices ---
+
+						// Create the final ObjectValue for this OneOf field
+						finalObj, routingKeysecretInfoChoiceChoicesObjDiags := types.ObjectValue(
+							AlertReceiverReceiverPagerdutyRoutingKeySecretInfoOneofModelAttributeMap, // The attribute schema for the OneOf choices
+							routingKeysecretInfoChoiceChoicesAttributeMap,
+						)
+						response.Diagnostics.Append(routingKeysecretInfoChoiceChoicesObjDiags...)
+						if response.Diagnostics.HasError() {
+							return
+						}
+
+						// Assign the final object to the correct place (either the root model or a parent's attribute map)
+						alertReceiverSecretTypeModel.SecretInfoChoice = finalObj
+					} else {
+						// The OneOf field is nil in the source spec, so set the Terraform object to null.
+						// State Healing: The API redacted the OneOf secret field (returned nil). Restore the entire
+						// secret_info_choice object from prior Terraform state so that the model reflects what the
+						// user originally configured and Terraform does not detect a false drift.
+						{
+							savedSecretInfoChoicePath := path.Root("receiver_choice").AtName("pagerduty").AtName("routing_key").AtName("secret_info_choice")
+							var savedSecretInfoChoice types.Object
+							stateHealDiags := request.Config.GetAttribute(ctx, savedSecretInfoChoicePath, &savedSecretInfoChoice)
+							if !stateHealDiags.HasError() && !savedSecretInfoChoice.IsNull() && !savedSecretInfoChoice.IsUnknown() {
+								alertReceiverSecretTypeModel.SecretInfoChoice = savedSecretInfoChoice
+							} else {
+								alertReceiverSecretTypeModel.SecretInfoChoice = types.ObjectNull(AlertReceiverReceiverPagerdutyRoutingKeySecretInfoOneofModelAttributeMap)
+							}
+						}
+					}
+
+					// This field needs to be converted to a types.ObjectValue before assignment.
+					alertReceiverSecretTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AlertReceiverReceiverPagerdutyRoutingKeyModelAttributeMap, alertReceiverSecretTypeModel)
+					response.Diagnostics.Append(objDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					pagerdutyAttributeMap["routing_key"] = alertReceiverSecretTypeModelObj
+
+				} else {
+					// The source field is nil (e.g. redacted by the API).
+					// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
+					// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
+					// here because the API may always return a non-nil struct (with REDACTED values) for this
+					// field, making this else-branch unreachable. The child OneOf handles the actual healing.
+					// The target is a types.Object, so we use types.ObjectNull.
+					pagerdutyAttributeMap["routing_key"] = types.ObjectNull(AlertReceiverReceiverPagerdutyRoutingKeyModelAttributeMap)
+				}
+
+				// data specToModelNested RequiredStringField --> Url
+				if pagerdutyElement.GetUrl() != "" {
+					pagerdutyAttributeMap["url"] = types.StringValue(pagerdutyElement.GetUrl())
+				} else {
+					// Empty string, set to null
+					pagerdutyAttributeMap["url"] = types.StringNull()
+				}
+
+				pagerdutyObj, pagerdutyObjDiags := types.ObjectValue(AlertReceiverReceiverPagerdutyModelAttributeMap, pagerdutyAttributeMap)
+				response.Diagnostics.Append(pagerdutyObjDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				receiverChoiceChoicesModel.Pagerduty = pagerdutyObj
+			} else {
+				receiverChoiceChoicesModel.Pagerduty = types.ObjectNull(AlertReceiverReceiverPagerdutyModelAttributeMap)
+			}
+		}
+
+		// data specToModelNested PointerOfOneOfField --> Slack
+		// <no value>
+		// false
+		{
+			slackOptionsWrapper, isSlack := receiverChoiceChoices.(*ves_io_schema_alert_receiver.GlobalSpecType_Slack)
+			slackAttributeMap := make(map[string]attr.Value)
+
+			if isSlack && slackOptionsWrapper != nil && slackOptionsWrapper.Slack != nil {
+				slackElement := slackOptionsWrapper.Slack
+
+				// data specToModelNested RequiredStringField --> Channel
+				if slackElement.GetChannel() != "" {
+					slackAttributeMap["channel"] = types.StringValue(slackElement.GetChannel())
+				} else {
+					// Empty string, set to null
+					slackAttributeMap["channel"] = types.StringNull()
+				}
+
+				// data specToModelNested RequiredPointerField --> Url
+				if slackElement.GetUrl() != nil {
+					// Create the nested Go struct
+					alertReceiverSecretTypeModel := &AlertReceiverSecretType{}
+					urlElement := slackElement.GetUrl()
 
 					// Recursively populate the nested struct
 
@@ -1722,43 +1886,44 @@ func (d *DataSourceF5XCAlertReceiver) Read(ctx context.Context, request datasour
 						// <no value>
 						// false
 						{
-							blindfoldSecretInfoOptions, isBlindfoldSecretInfo := urlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_BlindfoldSecretInfo)
+							blindfoldSecretInfoOptionsWrapper, isBlindfoldSecretInfo := urlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_BlindfoldSecretInfo)
 							blindfoldSecretInfoAttributeMap := make(map[string]attr.Value)
 
-							if isBlindfoldSecretInfo && blindfoldSecretInfoOptions != nil {
+							if isBlindfoldSecretInfo && blindfoldSecretInfoOptionsWrapper != nil && blindfoldSecretInfoOptionsWrapper.BlindfoldSecretInfo != nil {
+								blindfoldSecretInfoElement := blindfoldSecretInfoOptionsWrapper.BlindfoldSecretInfo
 
 								// data specToModelNested StringField --> DecryptionProvider
-								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider() != "" {
-									blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider())
+								if blindfoldSecretInfoElement.GetDecryptionProvider() != "" {
+									blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoElement.GetDecryptionProvider())
 								} else {
 									// Empty string, set to null
 									blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringNull()
 								}
 
-								// data specToModelNested StringField --> StoreProvider
-								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider() != "" {
-									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider())
-								} else {
-									// Empty string, set to null
-									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringNull()
-								}
-
 								// data specToModelNested RequiredStringField --> Location
-								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation() != "" {
-									blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation())
+								if blindfoldSecretInfoElement.GetLocation() != "" {
+									blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoElement.GetLocation())
 								} else {
 									// Empty string, set to null
 									blindfoldSecretInfoAttributeMap["location"] = types.StringNull()
 								}
 
-								blindfoldSecretInfoObj, diags := types.ObjectValue(AlertReceiverReceiverWebhookUrlSecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
-								response.Diagnostics.Append(diags...)
+								// data specToModelNested StringField --> StoreProvider
+								if blindfoldSecretInfoElement.GetStoreProvider() != "" {
+									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringValue(blindfoldSecretInfoElement.GetStoreProvider())
+								} else {
+									// Empty string, set to null
+									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringNull()
+								}
+
+								blindfoldSecretInfoObj, blindfoldSecretInfoObjDiags := types.ObjectValue(AlertReceiverReceiverSlackUrlSecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
+								response.Diagnostics.Append(blindfoldSecretInfoObjDiags...)
 								if response.Diagnostics.HasError() {
 									return
 								}
 								urlsecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = blindfoldSecretInfoObj
 							} else {
-								urlsecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = types.ObjectNull(AlertReceiverReceiverWebhookUrlSecretInfoOneofBlindfoldSecretInfoModelAttributeMap)
+								urlsecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = types.ObjectNull(AlertReceiverReceiverSlackUrlSecretInfoOneofBlindfoldSecretInfoModelAttributeMap)
 							}
 						}
 
@@ -1766,35 +1931,36 @@ func (d *DataSourceF5XCAlertReceiver) Read(ctx context.Context, request datasour
 						// <no value>
 						// false
 						{
-							clearSecretInfoOptions, isClearSecretInfo := urlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_ClearSecretInfo)
+							clearSecretInfoOptionsWrapper, isClearSecretInfo := urlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_ClearSecretInfo)
 							clearSecretInfoAttributeMap := make(map[string]attr.Value)
 
-							if isClearSecretInfo && clearSecretInfoOptions != nil {
+							if isClearSecretInfo && clearSecretInfoOptionsWrapper != nil && clearSecretInfoOptionsWrapper.ClearSecretInfo != nil {
+								clearSecretInfoElement := clearSecretInfoOptionsWrapper.ClearSecretInfo
 
 								// data specToModelNested StringField --> Provider
-								if clearSecretInfoOptions.ClearSecretInfo.GetProvider() != "" {
-									clearSecretInfoAttributeMap["provider"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetProvider())
+								if clearSecretInfoElement.GetProvider() != "" {
+									clearSecretInfoAttributeMap["provider"] = types.StringValue(clearSecretInfoElement.GetProvider())
 								} else {
 									// Empty string, set to null
 									clearSecretInfoAttributeMap["provider"] = types.StringNull()
 								}
 
 								// data specToModelNested RequiredStringField --> Url
-								if clearSecretInfoOptions.ClearSecretInfo.GetUrl() != "" {
-									clearSecretInfoAttributeMap["url"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetUrl())
+								if clearSecretInfoElement.GetUrl() != "" {
+									clearSecretInfoAttributeMap["url"] = types.StringValue(clearSecretInfoElement.GetUrl())
 								} else {
 									// Empty string, set to null
 									clearSecretInfoAttributeMap["url"] = types.StringNull()
 								}
 
-								clearSecretInfoObj, diags := types.ObjectValue(AlertReceiverReceiverWebhookUrlSecretInfoOneofClearSecretInfoModelAttributeMap, clearSecretInfoAttributeMap)
-								response.Diagnostics.Append(diags...)
+								clearSecretInfoObj, clearSecretInfoObjDiags := types.ObjectValue(AlertReceiverReceiverSlackUrlSecretInfoOneofClearSecretInfoModelAttributeMap, clearSecretInfoAttributeMap)
+								response.Diagnostics.Append(clearSecretInfoObjDiags...)
 								if response.Diagnostics.HasError() {
 									return
 								}
 								urlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = clearSecretInfoObj
 							} else {
-								urlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(AlertReceiverReceiverWebhookUrlSecretInfoOneofClearSecretInfoModelAttributeMap)
+								urlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(AlertReceiverReceiverSlackUrlSecretInfoOneofClearSecretInfoModelAttributeMap)
 							}
 						}
 
@@ -1802,7 +1968,7 @@ func (d *DataSourceF5XCAlertReceiver) Read(ctx context.Context, request datasour
 
 						// Create the final ObjectValue for this OneOf field
 						finalObj, urlsecretInfoChoiceChoicesObjDiags := types.ObjectValue(
-							AlertReceiverReceiverWebhookUrlSecretInfoOneofModelAttributeMap, // The attribute schema for the OneOf choices
+							AlertReceiverReceiverSlackUrlSecretInfoOneofModelAttributeMap, // The attribute schema for the OneOf choices
 							urlsecretInfoChoiceChoicesAttributeMap,
 						)
 						response.Diagnostics.Append(urlsecretInfoChoiceChoicesObjDiags...)
@@ -1818,24 +1984,24 @@ func (d *DataSourceF5XCAlertReceiver) Read(ctx context.Context, request datasour
 						// secret_info_choice object from prior Terraform state so that the model reflects what the
 						// user originally configured and Terraform does not detect a false drift.
 						{
-							savedSecretInfoChoicePath := path.Root("receiver_choice").AtName("webhook").AtName("url").AtName("secret_info_choice")
+							savedSecretInfoChoicePath := path.Root("receiver_choice").AtName("slack").AtName("url").AtName("secret_info_choice")
 							var savedSecretInfoChoice types.Object
 							stateHealDiags := request.Config.GetAttribute(ctx, savedSecretInfoChoicePath, &savedSecretInfoChoice)
 							if !stateHealDiags.HasError() && !savedSecretInfoChoice.IsNull() && !savedSecretInfoChoice.IsUnknown() {
 								alertReceiverSecretTypeModel.SecretInfoChoice = savedSecretInfoChoice
 							} else {
-								alertReceiverSecretTypeModel.SecretInfoChoice = types.ObjectNull(AlertReceiverReceiverWebhookUrlSecretInfoOneofModelAttributeMap)
+								alertReceiverSecretTypeModel.SecretInfoChoice = types.ObjectNull(AlertReceiverReceiverSlackUrlSecretInfoOneofModelAttributeMap)
 							}
 						}
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					alertReceiverSecretTypeModelObj, diags := types.ObjectValueFrom(ctx, AlertReceiverReceiverWebhookUrlModelAttributeMap, alertReceiverSecretTypeModel)
-					response.Diagnostics.Append(diags...)
+					alertReceiverSecretTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AlertReceiverReceiverSlackUrlModelAttributeMap, alertReceiverSecretTypeModel)
+					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					webhookAttributeMap["url"] = alertReceiverSecretTypeModelObj
+					slackAttributeMap["url"] = alertReceiverSecretTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -1844,14 +2010,64 @@ func (d *DataSourceF5XCAlertReceiver) Read(ctx context.Context, request datasour
 					// here because the API may always return a non-nil struct (with REDACTED values) for this
 					// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 					// The target is a types.Object, so we use types.ObjectNull.
-					webhookAttributeMap["url"] = types.ObjectNull(AlertReceiverReceiverWebhookUrlModelAttributeMap)
+					slackAttributeMap["url"] = types.ObjectNull(AlertReceiverReceiverSlackUrlModelAttributeMap)
 				}
 
+				slackObj, slackObjDiags := types.ObjectValue(AlertReceiverReceiverSlackModelAttributeMap, slackAttributeMap)
+				response.Diagnostics.Append(slackObjDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				receiverChoiceChoicesModel.Slack = slackObj
+			} else {
+				receiverChoiceChoicesModel.Slack = types.ObjectNull(AlertReceiverReceiverSlackModelAttributeMap)
+			}
+		}
+
+		// data specToModelNested PointerOfOneOfField --> Sms
+		// <no value>
+		// false
+		{
+			smsOptionsWrapper, isSms := receiverChoiceChoices.(*ves_io_schema_alert_receiver.GlobalSpecType_Sms)
+			smsAttributeMap := make(map[string]attr.Value)
+
+			if isSms && smsOptionsWrapper != nil && smsOptionsWrapper.Sms != nil {
+				smsElement := smsOptionsWrapper.Sms
+
+				// data specToModelNested StringField --> ContactNumber
+				if smsElement.GetContactNumber() != "" {
+					smsAttributeMap["contact_number"] = types.StringValue(smsElement.GetContactNumber())
+				} else {
+					// Empty string, set to null
+					smsAttributeMap["contact_number"] = types.StringNull()
+				}
+
+				smsObj, smsObjDiags := types.ObjectValue(AlertReceiverReceiverSmsModelAttributeMap, smsAttributeMap)
+				response.Diagnostics.Append(smsObjDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				receiverChoiceChoicesModel.Sms = smsObj
+			} else {
+				receiverChoiceChoicesModel.Sms = types.ObjectNull(AlertReceiverReceiverSmsModelAttributeMap)
+			}
+		}
+
+		// data specToModelNested PointerOfOneOfField --> Webhook
+		// <no value>
+		// false
+		{
+			webhookOptionsWrapper, isWebhook := receiverChoiceChoices.(*ves_io_schema_alert_receiver.GlobalSpecType_Webhook)
+			webhookAttributeMap := make(map[string]attr.Value)
+
+			if isWebhook && webhookOptionsWrapper != nil && webhookOptionsWrapper.Webhook != nil {
+				webhookElement := webhookOptionsWrapper.Webhook
+
 				// data specToModelNested RequiredPointerField --> HttpConfig
-				if webhookOptions.Webhook.GetHttpConfig() != nil {
+				if webhookElement.GetHttpConfig() != nil {
 					// Create the nested Go struct
 					alertReceiverAlertReceiverHTTPConfigModel := &AlertReceiverAlertReceiverHTTPConfig{}
-					httpConfigElement := webhookOptions.Webhook.GetHttpConfig()
+					httpConfigElement := webhookElement.GetHttpConfig()
 
 					// Recursively populate the nested struct
 
@@ -1867,206 +2083,21 @@ func (d *DataSourceF5XCAlertReceiver) Read(ctx context.Context, request datasour
 
 						// Process nested choices, populating the temporary attribute map
 
-						// data specToModelNested BoolOfOneOfPointerField --> NoAuthorization
-						_, isNoAuthorization := httpConfigauthChoiceChoices.(*ves_io_schema_alert_receiver.HTTPConfig_NoAuthorization)
-
-						if isNoAuthorization {
-							httpConfigauthChoiceChoicesAttributeMap["no_authorization"] = types.BoolValue(true)
-						} else {
-							httpConfigauthChoiceChoicesAttributeMap["no_authorization"] = types.BoolNull()
-						}
-
-						// data specToModelNested PointerOfOneOfField --> BasicAuth
-						// <no value>
-						// false
-						{
-							basicAuthOptions, isBasicAuth := httpConfigauthChoiceChoices.(*ves_io_schema_alert_receiver.HTTPConfig_BasicAuth)
-							basicAuthAttributeMap := make(map[string]attr.Value)
-
-							if isBasicAuth && basicAuthOptions != nil {
-
-								// data specToModelNested RequiredStringField --> UserName
-								if basicAuthOptions.BasicAuth.GetUserName() != "" {
-									basicAuthAttributeMap["user_name"] = types.StringValue(basicAuthOptions.BasicAuth.GetUserName())
-								} else {
-									// Empty string, set to null
-									basicAuthAttributeMap["user_name"] = types.StringNull()
-								}
-
-								// data specToModelNested RequiredPointerField --> Password
-								if basicAuthOptions.BasicAuth.GetPassword() != nil {
-									// Create the nested Go struct
-									alertReceiverSecretTypeModel := &AlertReceiverSecretType{}
-									passwordElement := basicAuthOptions.BasicAuth.GetPassword()
-
-									// Recursively populate the nested struct
-
-									// data specToModelNested RequiredOneOfField --> SecretInfoOneof
-									// <no value>
-									if passwordElement.GetSecretInfoOneof() != nil {
-										// Create a temporary attribute map for the choices within this OneOf
-										passwordsecretInfoChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-										// Define a variable for the spec choices to be passed down to nested templates.
-										// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-										passwordsecretInfoChoiceChoices := passwordElement.GetSecretInfoOneof()
-
-										// Process nested choices, populating the temporary attribute map
-
-										// data specToModelNested PointerOfOneOfField --> BlindfoldSecretInfo
-										// <no value>
-										// false
-										{
-											blindfoldSecretInfoOptions, isBlindfoldSecretInfo := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_BlindfoldSecretInfo)
-											blindfoldSecretInfoAttributeMap := make(map[string]attr.Value)
-
-											if isBlindfoldSecretInfo && blindfoldSecretInfoOptions != nil {
-
-												// data specToModelNested StringField --> StoreProvider
-												if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider() != "" {
-													blindfoldSecretInfoAttributeMap["store_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider())
-												} else {
-													// Empty string, set to null
-													blindfoldSecretInfoAttributeMap["store_provider"] = types.StringNull()
-												}
-
-												// data specToModelNested RequiredStringField --> Location
-												if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation() != "" {
-													blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation())
-												} else {
-													// Empty string, set to null
-													blindfoldSecretInfoAttributeMap["location"] = types.StringNull()
-												}
-
-												// data specToModelNested StringField --> DecryptionProvider
-												if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider() != "" {
-													blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider())
-												} else {
-													// Empty string, set to null
-													blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringNull()
-												}
-
-												blindfoldSecretInfoObj, diags := types.ObjectValue(AlertReceiverReceiverWebhookHttpConfigAuthChoiceBasicAuthPasswordSecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
-												response.Diagnostics.Append(diags...)
-												if response.Diagnostics.HasError() {
-													return
-												}
-												passwordsecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = blindfoldSecretInfoObj
-											} else {
-												passwordsecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = types.ObjectNull(AlertReceiverReceiverWebhookHttpConfigAuthChoiceBasicAuthPasswordSecretInfoOneofBlindfoldSecretInfoModelAttributeMap)
-											}
-										}
-
-										// data specToModelNested PointerOfOneOfField --> ClearSecretInfo
-										// <no value>
-										// false
-										{
-											clearSecretInfoOptions, isClearSecretInfo := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_ClearSecretInfo)
-											clearSecretInfoAttributeMap := make(map[string]attr.Value)
-
-											if isClearSecretInfo && clearSecretInfoOptions != nil {
-
-												// data specToModelNested StringField --> Provider
-												if clearSecretInfoOptions.ClearSecretInfo.GetProvider() != "" {
-													clearSecretInfoAttributeMap["provider"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetProvider())
-												} else {
-													// Empty string, set to null
-													clearSecretInfoAttributeMap["provider"] = types.StringNull()
-												}
-
-												// data specToModelNested RequiredStringField --> Url
-												if clearSecretInfoOptions.ClearSecretInfo.GetUrl() != "" {
-													clearSecretInfoAttributeMap["url"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetUrl())
-												} else {
-													// Empty string, set to null
-													clearSecretInfoAttributeMap["url"] = types.StringNull()
-												}
-
-												clearSecretInfoObj, diags := types.ObjectValue(AlertReceiverReceiverWebhookHttpConfigAuthChoiceBasicAuthPasswordSecretInfoOneofClearSecretInfoModelAttributeMap, clearSecretInfoAttributeMap)
-												response.Diagnostics.Append(diags...)
-												if response.Diagnostics.HasError() {
-													return
-												}
-												passwordsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = clearSecretInfoObj
-											} else {
-												passwordsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(AlertReceiverReceiverWebhookHttpConfigAuthChoiceBasicAuthPasswordSecretInfoOneofClearSecretInfoModelAttributeMap)
-											}
-										}
-
-										// --- End of Choices ---
-
-										// Create the final ObjectValue for this OneOf field
-										finalObj, passwordsecretInfoChoiceChoicesObjDiags := types.ObjectValue(
-											AlertReceiverReceiverWebhookHttpConfigAuthChoiceBasicAuthPasswordSecretInfoOneofModelAttributeMap, // The attribute schema for the OneOf choices
-											passwordsecretInfoChoiceChoicesAttributeMap,
-										)
-										response.Diagnostics.Append(passwordsecretInfoChoiceChoicesObjDiags...)
-										if response.Diagnostics.HasError() {
-											return
-										}
-
-										// Assign the final object to the correct place (either the root model or a parent's attribute map)
-										alertReceiverSecretTypeModel.SecretInfoChoice = finalObj
-									} else {
-										// The OneOf field is nil in the source spec, so set the Terraform object to null.
-										// State Healing: The API redacted the OneOf secret field (returned nil). Restore the entire
-										// secret_info_choice object from prior Terraform state so that the model reflects what the
-										// user originally configured and Terraform does not detect a false drift.
-										{
-											savedSecretInfoChoicePath := path.Root("receiver_choice").AtName("webhook").AtName("http_config").AtName("auth_choice").AtName("basic_auth").AtName("password").AtName("secret_info_choice")
-											var savedSecretInfoChoice types.Object
-											stateHealDiags := request.Config.GetAttribute(ctx, savedSecretInfoChoicePath, &savedSecretInfoChoice)
-											if !stateHealDiags.HasError() && !savedSecretInfoChoice.IsNull() && !savedSecretInfoChoice.IsUnknown() {
-												alertReceiverSecretTypeModel.SecretInfoChoice = savedSecretInfoChoice
-											} else {
-												alertReceiverSecretTypeModel.SecretInfoChoice = types.ObjectNull(AlertReceiverReceiverWebhookHttpConfigAuthChoiceBasicAuthPasswordSecretInfoOneofModelAttributeMap)
-											}
-										}
-									}
-
-									// This field needs to be converted to a types.ObjectValue before assignment.
-									alertReceiverSecretTypeModelObj, diags := types.ObjectValueFrom(ctx, AlertReceiverReceiverWebhookHttpConfigAuthChoiceBasicAuthPasswordModelAttributeMap, alertReceiverSecretTypeModel)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									basicAuthAttributeMap["password"] = alertReceiverSecretTypeModelObj
-
-								} else {
-									// The source field is nil (e.g. redacted by the API).
-									// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
-									// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
-									// here because the API may always return a non-nil struct (with REDACTED values) for this
-									// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-									// The target is a types.Object, so we use types.ObjectNull.
-									basicAuthAttributeMap["password"] = types.ObjectNull(AlertReceiverReceiverWebhookHttpConfigAuthChoiceBasicAuthPasswordModelAttributeMap)
-								}
-
-								basicAuthObj, diags := types.ObjectValue(AlertReceiverReceiverWebhookHttpConfigAuthChoiceBasicAuthModelAttributeMap, basicAuthAttributeMap)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								httpConfigauthChoiceChoicesAttributeMap["basic_auth"] = basicAuthObj
-							} else {
-								httpConfigauthChoiceChoicesAttributeMap["basic_auth"] = types.ObjectNull(AlertReceiverReceiverWebhookHttpConfigAuthChoiceBasicAuthModelAttributeMap)
-							}
-						}
-
 						// data specToModelNested PointerOfOneOfField --> AuthToken
 						// <no value>
 						// false
 						{
-							authTokenOptions, isAuthToken := httpConfigauthChoiceChoices.(*ves_io_schema_alert_receiver.HTTPConfig_AuthToken)
+							authTokenOptionsWrapper, isAuthToken := httpConfigauthChoiceChoices.(*ves_io_schema_alert_receiver.HTTPConfig_AuthToken)
 							authTokenAttributeMap := make(map[string]attr.Value)
 
-							if isAuthToken && authTokenOptions != nil {
+							if isAuthToken && authTokenOptionsWrapper != nil && authTokenOptionsWrapper.AuthToken != nil {
+								authTokenElement := authTokenOptionsWrapper.AuthToken
 
 								// data specToModelNested RequiredPointerField --> Token
-								if authTokenOptions.AuthToken.GetToken() != nil {
+								if authTokenElement.GetToken() != nil {
 									// Create the nested Go struct
 									alertReceiverSecretTypeModel := &AlertReceiverSecretType{}
-									tokenElement := authTokenOptions.AuthToken.GetToken()
+									tokenElement := authTokenElement.GetToken()
 
 									// Recursively populate the nested struct
 
@@ -2086,37 +2117,38 @@ func (d *DataSourceF5XCAlertReceiver) Read(ctx context.Context, request datasour
 										// <no value>
 										// false
 										{
-											blindfoldSecretInfoOptions, isBlindfoldSecretInfo := tokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_BlindfoldSecretInfo)
+											blindfoldSecretInfoOptionsWrapper, isBlindfoldSecretInfo := tokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_BlindfoldSecretInfo)
 											blindfoldSecretInfoAttributeMap := make(map[string]attr.Value)
 
-											if isBlindfoldSecretInfo && blindfoldSecretInfoOptions != nil {
+											if isBlindfoldSecretInfo && blindfoldSecretInfoOptionsWrapper != nil && blindfoldSecretInfoOptionsWrapper.BlindfoldSecretInfo != nil {
+												blindfoldSecretInfoElement := blindfoldSecretInfoOptionsWrapper.BlindfoldSecretInfo
 
 												// data specToModelNested StringField --> DecryptionProvider
-												if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider() != "" {
-													blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider())
+												if blindfoldSecretInfoElement.GetDecryptionProvider() != "" {
+													blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoElement.GetDecryptionProvider())
 												} else {
 													// Empty string, set to null
 													blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringNull()
 												}
 
-												// data specToModelNested StringField --> StoreProvider
-												if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider() != "" {
-													blindfoldSecretInfoAttributeMap["store_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider())
-												} else {
-													// Empty string, set to null
-													blindfoldSecretInfoAttributeMap["store_provider"] = types.StringNull()
-												}
-
 												// data specToModelNested RequiredStringField --> Location
-												if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation() != "" {
-													blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation())
+												if blindfoldSecretInfoElement.GetLocation() != "" {
+													blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoElement.GetLocation())
 												} else {
 													// Empty string, set to null
 													blindfoldSecretInfoAttributeMap["location"] = types.StringNull()
 												}
 
-												blindfoldSecretInfoObj, diags := types.ObjectValue(AlertReceiverReceiverWebhookHttpConfigAuthChoiceAuthTokenTokenSecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
-												response.Diagnostics.Append(diags...)
+												// data specToModelNested StringField --> StoreProvider
+												if blindfoldSecretInfoElement.GetStoreProvider() != "" {
+													blindfoldSecretInfoAttributeMap["store_provider"] = types.StringValue(blindfoldSecretInfoElement.GetStoreProvider())
+												} else {
+													// Empty string, set to null
+													blindfoldSecretInfoAttributeMap["store_provider"] = types.StringNull()
+												}
+
+												blindfoldSecretInfoObj, blindfoldSecretInfoObjDiags := types.ObjectValue(AlertReceiverReceiverWebhookHttpConfigAuthChoiceAuthTokenTokenSecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
+												response.Diagnostics.Append(blindfoldSecretInfoObjDiags...)
 												if response.Diagnostics.HasError() {
 													return
 												}
@@ -2130,29 +2162,30 @@ func (d *DataSourceF5XCAlertReceiver) Read(ctx context.Context, request datasour
 										// <no value>
 										// false
 										{
-											clearSecretInfoOptions, isClearSecretInfo := tokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_ClearSecretInfo)
+											clearSecretInfoOptionsWrapper, isClearSecretInfo := tokensecretInfoChoiceChoices.(*ves_io_schema.SecretType_ClearSecretInfo)
 											clearSecretInfoAttributeMap := make(map[string]attr.Value)
 
-											if isClearSecretInfo && clearSecretInfoOptions != nil {
+											if isClearSecretInfo && clearSecretInfoOptionsWrapper != nil && clearSecretInfoOptionsWrapper.ClearSecretInfo != nil {
+												clearSecretInfoElement := clearSecretInfoOptionsWrapper.ClearSecretInfo
 
 												// data specToModelNested StringField --> Provider
-												if clearSecretInfoOptions.ClearSecretInfo.GetProvider() != "" {
-													clearSecretInfoAttributeMap["provider"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetProvider())
+												if clearSecretInfoElement.GetProvider() != "" {
+													clearSecretInfoAttributeMap["provider"] = types.StringValue(clearSecretInfoElement.GetProvider())
 												} else {
 													// Empty string, set to null
 													clearSecretInfoAttributeMap["provider"] = types.StringNull()
 												}
 
 												// data specToModelNested RequiredStringField --> Url
-												if clearSecretInfoOptions.ClearSecretInfo.GetUrl() != "" {
-													clearSecretInfoAttributeMap["url"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetUrl())
+												if clearSecretInfoElement.GetUrl() != "" {
+													clearSecretInfoAttributeMap["url"] = types.StringValue(clearSecretInfoElement.GetUrl())
 												} else {
 													// Empty string, set to null
 													clearSecretInfoAttributeMap["url"] = types.StringNull()
 												}
 
-												clearSecretInfoObj, diags := types.ObjectValue(AlertReceiverReceiverWebhookHttpConfigAuthChoiceAuthTokenTokenSecretInfoOneofClearSecretInfoModelAttributeMap, clearSecretInfoAttributeMap)
-												response.Diagnostics.Append(diags...)
+												clearSecretInfoObj, clearSecretInfoObjDiags := types.ObjectValue(AlertReceiverReceiverWebhookHttpConfigAuthChoiceAuthTokenTokenSecretInfoOneofClearSecretInfoModelAttributeMap, clearSecretInfoAttributeMap)
+												response.Diagnostics.Append(clearSecretInfoObjDiags...)
 												if response.Diagnostics.HasError() {
 													return
 												}
@@ -2194,8 +2227,8 @@ func (d *DataSourceF5XCAlertReceiver) Read(ctx context.Context, request datasour
 									}
 
 									// This field needs to be converted to a types.ObjectValue before assignment.
-									alertReceiverSecretTypeModelObj, diags := types.ObjectValueFrom(ctx, AlertReceiverReceiverWebhookHttpConfigAuthChoiceAuthTokenTokenModelAttributeMap, alertReceiverSecretTypeModel)
-									response.Diagnostics.Append(diags...)
+									alertReceiverSecretTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AlertReceiverReceiverWebhookHttpConfigAuthChoiceAuthTokenTokenModelAttributeMap, alertReceiverSecretTypeModel)
+									response.Diagnostics.Append(objDiags...)
 									if response.Diagnostics.HasError() {
 										return
 									}
@@ -2211,8 +2244,8 @@ func (d *DataSourceF5XCAlertReceiver) Read(ctx context.Context, request datasour
 									authTokenAttributeMap["token"] = types.ObjectNull(AlertReceiverReceiverWebhookHttpConfigAuthChoiceAuthTokenTokenModelAttributeMap)
 								}
 
-								authTokenObj, diags := types.ObjectValue(AlertReceiverReceiverWebhookHttpConfigAuthChoiceAuthTokenModelAttributeMap, authTokenAttributeMap)
-								response.Diagnostics.Append(diags...)
+								authTokenObj, authTokenObjDiags := types.ObjectValue(AlertReceiverReceiverWebhookHttpConfigAuthChoiceAuthTokenModelAttributeMap, authTokenAttributeMap)
+								response.Diagnostics.Append(authTokenObjDiags...)
 								if response.Diagnostics.HasError() {
 									return
 								}
@@ -2222,29 +2255,210 @@ func (d *DataSourceF5XCAlertReceiver) Read(ctx context.Context, request datasour
 							}
 						}
 
+						// data specToModelNested PointerOfOneOfField --> BasicAuth
+						// <no value>
+						// false
+						{
+							basicAuthOptionsWrapper, isBasicAuth := httpConfigauthChoiceChoices.(*ves_io_schema_alert_receiver.HTTPConfig_BasicAuth)
+							basicAuthAttributeMap := make(map[string]attr.Value)
+
+							if isBasicAuth && basicAuthOptionsWrapper != nil && basicAuthOptionsWrapper.BasicAuth != nil {
+								basicAuthElement := basicAuthOptionsWrapper.BasicAuth
+
+								// data specToModelNested RequiredPointerField --> Password
+								if basicAuthElement.GetPassword() != nil {
+									// Create the nested Go struct
+									alertReceiverSecretTypeModel := &AlertReceiverSecretType{}
+									passwordElement := basicAuthElement.GetPassword()
+
+									// Recursively populate the nested struct
+
+									// data specToModelNested RequiredOneOfField --> SecretInfoOneof
+									// <no value>
+									if passwordElement.GetSecretInfoOneof() != nil {
+										// Create a temporary attribute map for the choices within this OneOf
+										passwordsecretInfoChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+										// Define a variable for the spec choices to be passed down to nested templates.
+										// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+										passwordsecretInfoChoiceChoices := passwordElement.GetSecretInfoOneof()
+
+										// Process nested choices, populating the temporary attribute map
+
+										// data specToModelNested PointerOfOneOfField --> BlindfoldSecretInfo
+										// <no value>
+										// false
+										{
+											blindfoldSecretInfoOptionsWrapper, isBlindfoldSecretInfo := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_BlindfoldSecretInfo)
+											blindfoldSecretInfoAttributeMap := make(map[string]attr.Value)
+
+											if isBlindfoldSecretInfo && blindfoldSecretInfoOptionsWrapper != nil && blindfoldSecretInfoOptionsWrapper.BlindfoldSecretInfo != nil {
+												blindfoldSecretInfoElement := blindfoldSecretInfoOptionsWrapper.BlindfoldSecretInfo
+
+												// data specToModelNested StringField --> DecryptionProvider
+												if blindfoldSecretInfoElement.GetDecryptionProvider() != "" {
+													blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoElement.GetDecryptionProvider())
+												} else {
+													// Empty string, set to null
+													blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringNull()
+												}
+
+												// data specToModelNested RequiredStringField --> Location
+												if blindfoldSecretInfoElement.GetLocation() != "" {
+													blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoElement.GetLocation())
+												} else {
+													// Empty string, set to null
+													blindfoldSecretInfoAttributeMap["location"] = types.StringNull()
+												}
+
+												// data specToModelNested StringField --> StoreProvider
+												if blindfoldSecretInfoElement.GetStoreProvider() != "" {
+													blindfoldSecretInfoAttributeMap["store_provider"] = types.StringValue(blindfoldSecretInfoElement.GetStoreProvider())
+												} else {
+													// Empty string, set to null
+													blindfoldSecretInfoAttributeMap["store_provider"] = types.StringNull()
+												}
+
+												blindfoldSecretInfoObj, blindfoldSecretInfoObjDiags := types.ObjectValue(AlertReceiverReceiverWebhookHttpConfigAuthChoiceBasicAuthPasswordSecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
+												response.Diagnostics.Append(blindfoldSecretInfoObjDiags...)
+												if response.Diagnostics.HasError() {
+													return
+												}
+												passwordsecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = blindfoldSecretInfoObj
+											} else {
+												passwordsecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = types.ObjectNull(AlertReceiverReceiverWebhookHttpConfigAuthChoiceBasicAuthPasswordSecretInfoOneofBlindfoldSecretInfoModelAttributeMap)
+											}
+										}
+
+										// data specToModelNested PointerOfOneOfField --> ClearSecretInfo
+										// <no value>
+										// false
+										{
+											clearSecretInfoOptionsWrapper, isClearSecretInfo := passwordsecretInfoChoiceChoices.(*ves_io_schema.SecretType_ClearSecretInfo)
+											clearSecretInfoAttributeMap := make(map[string]attr.Value)
+
+											if isClearSecretInfo && clearSecretInfoOptionsWrapper != nil && clearSecretInfoOptionsWrapper.ClearSecretInfo != nil {
+												clearSecretInfoElement := clearSecretInfoOptionsWrapper.ClearSecretInfo
+
+												// data specToModelNested StringField --> Provider
+												if clearSecretInfoElement.GetProvider() != "" {
+													clearSecretInfoAttributeMap["provider"] = types.StringValue(clearSecretInfoElement.GetProvider())
+												} else {
+													// Empty string, set to null
+													clearSecretInfoAttributeMap["provider"] = types.StringNull()
+												}
+
+												// data specToModelNested RequiredStringField --> Url
+												if clearSecretInfoElement.GetUrl() != "" {
+													clearSecretInfoAttributeMap["url"] = types.StringValue(clearSecretInfoElement.GetUrl())
+												} else {
+													// Empty string, set to null
+													clearSecretInfoAttributeMap["url"] = types.StringNull()
+												}
+
+												clearSecretInfoObj, clearSecretInfoObjDiags := types.ObjectValue(AlertReceiverReceiverWebhookHttpConfigAuthChoiceBasicAuthPasswordSecretInfoOneofClearSecretInfoModelAttributeMap, clearSecretInfoAttributeMap)
+												response.Diagnostics.Append(clearSecretInfoObjDiags...)
+												if response.Diagnostics.HasError() {
+													return
+												}
+												passwordsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = clearSecretInfoObj
+											} else {
+												passwordsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(AlertReceiverReceiverWebhookHttpConfigAuthChoiceBasicAuthPasswordSecretInfoOneofClearSecretInfoModelAttributeMap)
+											}
+										}
+
+										// --- End of Choices ---
+
+										// Create the final ObjectValue for this OneOf field
+										finalObj, passwordsecretInfoChoiceChoicesObjDiags := types.ObjectValue(
+											AlertReceiverReceiverWebhookHttpConfigAuthChoiceBasicAuthPasswordSecretInfoOneofModelAttributeMap, // The attribute schema for the OneOf choices
+											passwordsecretInfoChoiceChoicesAttributeMap,
+										)
+										response.Diagnostics.Append(passwordsecretInfoChoiceChoicesObjDiags...)
+										if response.Diagnostics.HasError() {
+											return
+										}
+
+										// Assign the final object to the correct place (either the root model or a parent's attribute map)
+										alertReceiverSecretTypeModel.SecretInfoChoice = finalObj
+									} else {
+										// The OneOf field is nil in the source spec, so set the Terraform object to null.
+										// State Healing: The API redacted the OneOf secret field (returned nil). Restore the entire
+										// secret_info_choice object from prior Terraform state so that the model reflects what the
+										// user originally configured and Terraform does not detect a false drift.
+										{
+											savedSecretInfoChoicePath := path.Root("receiver_choice").AtName("webhook").AtName("http_config").AtName("auth_choice").AtName("basic_auth").AtName("password").AtName("secret_info_choice")
+											var savedSecretInfoChoice types.Object
+											stateHealDiags := request.Config.GetAttribute(ctx, savedSecretInfoChoicePath, &savedSecretInfoChoice)
+											if !stateHealDiags.HasError() && !savedSecretInfoChoice.IsNull() && !savedSecretInfoChoice.IsUnknown() {
+												alertReceiverSecretTypeModel.SecretInfoChoice = savedSecretInfoChoice
+											} else {
+												alertReceiverSecretTypeModel.SecretInfoChoice = types.ObjectNull(AlertReceiverReceiverWebhookHttpConfigAuthChoiceBasicAuthPasswordSecretInfoOneofModelAttributeMap)
+											}
+										}
+									}
+
+									// This field needs to be converted to a types.ObjectValue before assignment.
+									alertReceiverSecretTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AlertReceiverReceiverWebhookHttpConfigAuthChoiceBasicAuthPasswordModelAttributeMap, alertReceiverSecretTypeModel)
+									response.Diagnostics.Append(objDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									basicAuthAttributeMap["password"] = alertReceiverSecretTypeModelObj
+
+								} else {
+									// The source field is nil (e.g. redacted by the API).
+									// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
+									// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
+									// here because the API may always return a non-nil struct (with REDACTED values) for this
+									// field, making this else-branch unreachable. The child OneOf handles the actual healing.
+									// The target is a types.Object, so we use types.ObjectNull.
+									basicAuthAttributeMap["password"] = types.ObjectNull(AlertReceiverReceiverWebhookHttpConfigAuthChoiceBasicAuthPasswordModelAttributeMap)
+								}
+
+								// data specToModelNested RequiredStringField --> UserName
+								if basicAuthElement.GetUserName() != "" {
+									basicAuthAttributeMap["user_name"] = types.StringValue(basicAuthElement.GetUserName())
+								} else {
+									// Empty string, set to null
+									basicAuthAttributeMap["user_name"] = types.StringNull()
+								}
+
+								basicAuthObj, basicAuthObjDiags := types.ObjectValue(AlertReceiverReceiverWebhookHttpConfigAuthChoiceBasicAuthModelAttributeMap, basicAuthAttributeMap)
+								response.Diagnostics.Append(basicAuthObjDiags...)
+								if response.Diagnostics.HasError() {
+									return
+								}
+								httpConfigauthChoiceChoicesAttributeMap["basic_auth"] = basicAuthObj
+							} else {
+								httpConfigauthChoiceChoicesAttributeMap["basic_auth"] = types.ObjectNull(AlertReceiverReceiverWebhookHttpConfigAuthChoiceBasicAuthModelAttributeMap)
+							}
+						}
+
 						// data specToModelNested PointerOfOneOfField --> ClientCertObj
 						// <no value>
 						// false
 						{
-							clientCertObjOptions, isClientCertObj := httpConfigauthChoiceChoices.(*ves_io_schema_alert_receiver.HTTPConfig_ClientCertObj)
+							clientCertObjOptionsWrapper, isClientCertObj := httpConfigauthChoiceChoices.(*ves_io_schema_alert_receiver.HTTPConfig_ClientCertObj)
 							clientCertObjAttributeMap := make(map[string]attr.Value)
 
-							if isClientCertObj && clientCertObjOptions != nil {
+							if isClientCertObj && clientCertObjOptionsWrapper != nil && clientCertObjOptionsWrapper.ClientCertObj != nil {
+								clientCertObjElement := clientCertObjOptionsWrapper.ClientCertObj
 
 								// data specToModelNested ArrayOfPointerField --> UseTlsObj
-								if len(clientCertObjOptions.ClientCertObj.GetUseTlsObj()) > 0 {
+								if len(clientCertObjElement.GetUseTlsObj()) > 0 {
 									// Step 1: Always create a slice of model structs from the spec data.
 									// This slice serves as an intermediate representation.
-									useTlsObjElements := make([]ObjectRefTypeModel, 0, len(clientCertObjOptions.ClientCertObj.GetUseTlsObj()))
-									for _, useTlsObjElement := range clientCertObjOptions.ClientCertObj.GetUseTlsObj() {
+									useTlsObjElements := make([]ObjectRefTypeModel, 0, len(clientCertObjElement.GetUseTlsObj()))
+									for _, useTlsObjElement := range clientCertObjElement.GetUseTlsObj() {
 										objectRefTypeModelModel := ObjectRefTypeModel{}
 
-										// data specToModelNested StringField --> Tenant
-										if useTlsObjElement.GetTenant() != "" {
-											objectRefTypeModelModel.Tenant = types.StringValue(useTlsObjElement.GetTenant())
+										// data specToModelNested RequiredStringField --> Name
+										if useTlsObjElement.GetName() != "" {
+											objectRefTypeModelModel.Name = types.StringValue(useTlsObjElement.GetName())
 										} else {
 											// Empty string, set to null
-											objectRefTypeModelModel.Tenant = types.StringNull()
+											objectRefTypeModelModel.Name = types.StringNull()
 										}
 
 										// data specToModelNested RequiredStringField --> Namespace
@@ -2255,20 +2469,20 @@ func (d *DataSourceF5XCAlertReceiver) Read(ctx context.Context, request datasour
 											objectRefTypeModelModel.Namespace = types.StringNull()
 										}
 
-										// data specToModelNested RequiredStringField --> Name
-										if useTlsObjElement.GetName() != "" {
-											objectRefTypeModelModel.Name = types.StringValue(useTlsObjElement.GetName())
+										// data specToModelNested StringField --> Tenant
+										if useTlsObjElement.GetTenant() != "" {
+											objectRefTypeModelModel.Tenant = types.StringValue(useTlsObjElement.GetTenant())
 										} else {
 											// Empty string, set to null
-											objectRefTypeModelModel.Name = types.StringNull()
+											objectRefTypeModelModel.Tenant = types.StringNull()
 										}
 
 										useTlsObjElements = append(useTlsObjElements, objectRefTypeModelModel)
 									}
 									// CASE 1: The target field is a `types.List` or an attribute map.
 									// The intermediate slice of structs must be converted to a `types.ListValue`.
-									useTlsObjListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: AlertReceiverUseTlsObjObjectRefModelAttributeMap}, useTlsObjElements)
-									response.Diagnostics.Append(diags...)
+									useTlsObjListValue, listDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: AlertReceiverUseTlsObjObjectRefModelAttributeMap}, useTlsObjElements)
+									response.Diagnostics.Append(listDiags...)
 									if response.Diagnostics.HasError() {
 										return
 									}
@@ -2281,8 +2495,8 @@ func (d *DataSourceF5XCAlertReceiver) Read(ctx context.Context, request datasour
 									clientCertObjAttributeMap["use_tls_obj"] = types.ListNull(types.ObjectType{AttrTypes: AlertReceiverUseTlsObjObjectRefModelAttributeMap})
 								}
 
-								clientCertObjObj, diags := types.ObjectValue(AlertReceiverReceiverWebhookHttpConfigAuthChoiceClientCertObjModelAttributeMap, clientCertObjAttributeMap)
-								response.Diagnostics.Append(diags...)
+								clientCertObjObj, clientCertObjObjDiags := types.ObjectValue(AlertReceiverReceiverWebhookHttpConfigAuthChoiceClientCertObjModelAttributeMap, clientCertObjAttributeMap)
+								response.Diagnostics.Append(clientCertObjObjDiags...)
 								if response.Diagnostics.HasError() {
 									return
 								}
@@ -2290,6 +2504,15 @@ func (d *DataSourceF5XCAlertReceiver) Read(ctx context.Context, request datasour
 							} else {
 								httpConfigauthChoiceChoicesAttributeMap["client_cert_obj"] = types.ObjectNull(AlertReceiverReceiverWebhookHttpConfigAuthChoiceClientCertObjModelAttributeMap)
 							}
+						}
+
+						// data specToModelNested BoolOfOneOfPointerField --> NoAuthorization
+						_, isNoAuthorization := httpConfigauthChoiceChoices.(*ves_io_schema_alert_receiver.HTTPConfig_NoAuthorization)
+
+						if isNoAuthorization {
+							httpConfigauthChoiceChoicesAttributeMap["no_authorization"] = types.BoolValue(true)
+						} else {
+							httpConfigauthChoiceChoicesAttributeMap["no_authorization"] = types.BoolNull()
 						}
 
 						// --- End of Choices ---
@@ -2342,81 +2565,18 @@ func (d *DataSourceF5XCAlertReceiver) Read(ctx context.Context, request datasour
 						// <no value>
 						// false
 						{
-							useTlsOptions, isUseTls := httpConfigtlsChoiceChoices.(*ves_io_schema_alert_receiver.HTTPConfig_UseTls)
+							useTlsOptionsWrapper, isUseTls := httpConfigtlsChoiceChoices.(*ves_io_schema_alert_receiver.HTTPConfig_UseTls)
 							useTlsAttributeMap := make(map[string]attr.Value)
 
-							if isUseTls && useTlsOptions != nil {
-
-								// data specToModelNested RequiredOneOfField --> SniChoice
-								// <no value>
-								if useTlsOptions.UseTls.GetSniChoice() != nil {
-									// Create a temporary attribute map for the choices within this OneOf
-									useTlssniChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-									// Define a variable for the spec choices to be passed down to nested templates.
-									// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-									useTlssniChoiceChoices := useTlsOptions.UseTls.GetSniChoice()
-
-									// Process nested choices, populating the temporary attribute map
-
-									// data specToModelNested StringOfOneOfField --> Sni
-									sniItem, isSni := useTlssniChoiceChoices.(*ves_io_schema_alert_receiver.TLSConfig_Sni)
-
-									if isSni {
-										useTlssniChoiceChoicesAttributeMap["sni"] = types.StringValue(string(sniItem.Sni))
-									} else {
-										// Empty string, set to null
-										useTlssniChoiceChoicesAttributeMap["sni"] = types.StringNull()
-									}
-
-									// data specToModelNested BoolOfOneOfPointerField --> DisableSni
-									_, isDisableSni := useTlssniChoiceChoices.(*ves_io_schema_alert_receiver.TLSConfig_DisableSni)
-
-									if isDisableSni {
-										useTlssniChoiceChoicesAttributeMap["disable_sni"] = types.BoolValue(true)
-									} else {
-										useTlssniChoiceChoicesAttributeMap["disable_sni"] = types.BoolNull()
-									}
-
-									// --- End of Choices ---
-
-									// Create the final ObjectValue for this OneOf field
-									finalObj, useTlssniChoiceChoicesObjDiags := types.ObjectValue(
-										AlertReceiverReceiverWebhookHttpConfigTlsChoiceUseTlsSniChoiceModelAttributeMap, // The attribute schema for the OneOf choices
-										useTlssniChoiceChoicesAttributeMap,
-									)
-									response.Diagnostics.Append(useTlssniChoiceChoicesObjDiags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-
-									// Assign the final object to the correct place (either the root model or a parent's attribute map)
-									useTlsAttributeMap["sni_choice"] = finalObj
-								} else {
-									// The OneOf field is nil in the source spec, so set the Terraform object to null.
-									useTlsAttributeMap["sni_choice"] = types.ObjectNull(AlertReceiverReceiverWebhookHttpConfigTlsChoiceUseTlsSniChoiceModelAttributeMap)
-								}
-
-								// data specToModelNested EnumField --> MinVersion
-								if useTlsOptions.UseTls.GetMinVersion().String() != "" {
-									stringValue := types.StringValue(useTlsOptions.UseTls.GetMinVersion().String())
-									stringSlice := []types.String{stringValue}
-									listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-									response.Diagnostics.Append(diags...)
-									if response.Diagnostics.HasError() {
-										return
-									}
-									useTlsAttributeMap["min_version"] = listValue
-								} else {
-									useTlsAttributeMap["min_version"] = types.ListNull(types.StringType)
-								}
+							if isUseTls && useTlsOptionsWrapper != nil && useTlsOptionsWrapper.UseTls != nil {
+								useTlsElement := useTlsOptionsWrapper.UseTls
 
 								// data specToModelNested EnumField --> MaxVersion
-								if useTlsOptions.UseTls.GetMaxVersion().String() != "" {
-									stringValue := types.StringValue(useTlsOptions.UseTls.GetMaxVersion().String())
+								if useTlsElement.GetMaxVersion().String() != "" {
+									stringValue := types.StringValue(useTlsElement.GetMaxVersion().String())
 									stringSlice := []types.String{stringValue}
-									listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-									response.Diagnostics.Append(diags...)
+									listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+									response.Diagnostics.Append(listDiags...)
 									if response.Diagnostics.HasError() {
 										return
 									}
@@ -2425,15 +2585,29 @@ func (d *DataSourceF5XCAlertReceiver) Read(ctx context.Context, request datasour
 									useTlsAttributeMap["max_version"] = types.ListNull(types.StringType)
 								}
 
+								// data specToModelNested EnumField --> MinVersion
+								if useTlsElement.GetMinVersion().String() != "" {
+									stringValue := types.StringValue(useTlsElement.GetMinVersion().String())
+									stringSlice := []types.String{stringValue}
+									listValue, listDiags := types.ListValueFrom(ctx, types.StringType, stringSlice)
+									response.Diagnostics.Append(listDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+									useTlsAttributeMap["min_version"] = listValue
+								} else {
+									useTlsAttributeMap["min_version"] = types.ListNull(types.StringType)
+								}
+
 								// data specToModelNested RequiredOneOfField --> ServerValidationChoice
 								// <no value>
-								if useTlsOptions.UseTls.GetServerValidationChoice() != nil {
+								if useTlsElement.GetServerValidationChoice() != nil {
 									// Create a temporary attribute map for the choices within this OneOf
 									useTlsserverValidationChoiceChoicesAttributeMap := make(map[string]attr.Value)
 
 									// Define a variable for the spec choices to be passed down to nested templates.
 									// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-									useTlsserverValidationChoiceChoices := useTlsOptions.UseTls.GetServerValidationChoice()
+									useTlsserverValidationChoiceChoices := useTlsElement.GetServerValidationChoice()
 
 									// Process nested choices, populating the temporary attribute map
 
@@ -2441,16 +2615,17 @@ func (d *DataSourceF5XCAlertReceiver) Read(ctx context.Context, request datasour
 									// <no value>
 									// false
 									{
-										useServerVerificationOptions, isUseServerVerification := useTlsserverValidationChoiceChoices.(*ves_io_schema_alert_receiver.TLSConfig_UseServerVerification)
+										useServerVerificationOptionsWrapper, isUseServerVerification := useTlsserverValidationChoiceChoices.(*ves_io_schema_alert_receiver.TLSConfig_UseServerVerification)
 										useServerVerificationAttributeMap := make(map[string]attr.Value)
 
-										if isUseServerVerification && useServerVerificationOptions != nil {
+										if isUseServerVerification && useServerVerificationOptionsWrapper != nil && useServerVerificationOptionsWrapper.UseServerVerification != nil {
+											useServerVerificationElement := useServerVerificationOptionsWrapper.UseServerVerification
 
 											// data specToModelNested PointerField --> CaCertObj
-											if useServerVerificationOptions.UseServerVerification.GetCaCertObj() != nil {
+											if useServerVerificationElement.GetCaCertObj() != nil {
 												// Create the nested Go struct
 												alertReceiverAlertReceiverCACertificateObjModel := &AlertReceiverAlertReceiverCACertificateObj{}
-												caCertObjElement := useServerVerificationOptions.UseServerVerification.GetCaCertObj()
+												caCertObjElement := useServerVerificationElement.GetCaCertObj()
 
 												// Recursively populate the nested struct
 
@@ -2470,14 +2645,6 @@ func (d *DataSourceF5XCAlertReceiver) Read(ctx context.Context, request datasour
 															objectRefTypeModelModel.Name = types.StringNull()
 														}
 
-														// data specToModelNested StringField --> Tenant
-														if trustedCaElement.GetTenant() != "" {
-															objectRefTypeModelModel.Tenant = types.StringValue(trustedCaElement.GetTenant())
-														} else {
-															// Empty string, set to null
-															objectRefTypeModelModel.Tenant = types.StringNull()
-														}
-
 														// data specToModelNested RequiredStringField --> Namespace
 														if trustedCaElement.GetNamespace() != "" {
 															objectRefTypeModelModel.Namespace = types.StringValue(trustedCaElement.GetNamespace())
@@ -2486,12 +2653,20 @@ func (d *DataSourceF5XCAlertReceiver) Read(ctx context.Context, request datasour
 															objectRefTypeModelModel.Namespace = types.StringNull()
 														}
 
+														// data specToModelNested StringField --> Tenant
+														if trustedCaElement.GetTenant() != "" {
+															objectRefTypeModelModel.Tenant = types.StringValue(trustedCaElement.GetTenant())
+														} else {
+															// Empty string, set to null
+															objectRefTypeModelModel.Tenant = types.StringNull()
+														}
+
 														trustedCaElements = append(trustedCaElements, objectRefTypeModelModel)
 													}
 													// CASE 1: The target field is a `types.List` or an attribute map.
 													// The intermediate slice of structs must be converted to a `types.ListValue`.
-													trustedCaListValue, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: AlertReceiverTrustedCaObjectRefModelAttributeMap}, trustedCaElements)
-													response.Diagnostics.Append(diags...)
+													trustedCaListValue, listDiags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: AlertReceiverTrustedCaObjectRefModelAttributeMap}, trustedCaElements)
+													response.Diagnostics.Append(listDiags...)
 													if response.Diagnostics.HasError() {
 														return
 													}
@@ -2505,8 +2680,8 @@ func (d *DataSourceF5XCAlertReceiver) Read(ctx context.Context, request datasour
 												}
 
 												// This field needs to be converted to a types.ObjectValue before assignment.
-												alertReceiverAlertReceiverCACertificateObjModelObj, diags := types.ObjectValueFrom(ctx, AlertReceiverReceiverWebhookHttpConfigTlsChoiceUseTlsServerValidationChoiceUseServerVerificationCaCertObjModelAttributeMap, alertReceiverAlertReceiverCACertificateObjModel)
-												response.Diagnostics.Append(diags...)
+												alertReceiverAlertReceiverCACertificateObjModelObj, objDiags := types.ObjectValueFrom(ctx, AlertReceiverReceiverWebhookHttpConfigTlsChoiceUseTlsServerValidationChoiceUseServerVerificationCaCertObjModelAttributeMap, alertReceiverAlertReceiverCACertificateObjModel)
+												response.Diagnostics.Append(objDiags...)
 												if response.Diagnostics.HasError() {
 													return
 												}
@@ -2522,8 +2697,8 @@ func (d *DataSourceF5XCAlertReceiver) Read(ctx context.Context, request datasour
 												useServerVerificationAttributeMap["ca_cert_obj"] = types.ObjectNull(AlertReceiverReceiverWebhookHttpConfigTlsChoiceUseTlsServerValidationChoiceUseServerVerificationCaCertObjModelAttributeMap)
 											}
 
-											useServerVerificationObj, diags := types.ObjectValue(AlertReceiverReceiverWebhookHttpConfigTlsChoiceUseTlsServerValidationChoiceUseServerVerificationModelAttributeMap, useServerVerificationAttributeMap)
-											response.Diagnostics.Append(diags...)
+											useServerVerificationObj, useServerVerificationObjDiags := types.ObjectValue(AlertReceiverReceiverWebhookHttpConfigTlsChoiceUseTlsServerValidationChoiceUseServerVerificationModelAttributeMap, useServerVerificationAttributeMap)
+											response.Diagnostics.Append(useServerVerificationObjDiags...)
 											if response.Diagnostics.HasError() {
 												return
 											}
@@ -2561,8 +2736,58 @@ func (d *DataSourceF5XCAlertReceiver) Read(ctx context.Context, request datasour
 									useTlsAttributeMap["server_validation_choice"] = types.ObjectNull(AlertReceiverReceiverWebhookHttpConfigTlsChoiceUseTlsServerValidationChoiceModelAttributeMap)
 								}
 
-								useTlsObj, diags := types.ObjectValue(AlertReceiverReceiverWebhookHttpConfigTlsChoiceUseTlsModelAttributeMap, useTlsAttributeMap)
-								response.Diagnostics.Append(diags...)
+								// data specToModelNested RequiredOneOfField --> SniChoice
+								// <no value>
+								if useTlsElement.GetSniChoice() != nil {
+									// Create a temporary attribute map for the choices within this OneOf
+									useTlssniChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+									// Define a variable for the spec choices to be passed down to nested templates.
+									// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+									useTlssniChoiceChoices := useTlsElement.GetSniChoice()
+
+									// Process nested choices, populating the temporary attribute map
+
+									// data specToModelNested BoolOfOneOfPointerField --> DisableSni
+									_, isDisableSni := useTlssniChoiceChoices.(*ves_io_schema_alert_receiver.TLSConfig_DisableSni)
+
+									if isDisableSni {
+										useTlssniChoiceChoicesAttributeMap["disable_sni"] = types.BoolValue(true)
+									} else {
+										useTlssniChoiceChoicesAttributeMap["disable_sni"] = types.BoolNull()
+									}
+
+									// data specToModelNested StringOfOneOfField --> Sni
+									sniItem, isSni := useTlssniChoiceChoices.(*ves_io_schema_alert_receiver.TLSConfig_Sni)
+
+									if isSni {
+										useTlssniChoiceChoicesAttributeMap["sni"] = types.StringValue(string(sniItem.Sni))
+									} else {
+										// Empty string, set to null
+										useTlssniChoiceChoicesAttributeMap["sni"] = types.StringNull()
+									}
+
+									// --- End of Choices ---
+
+									// Create the final ObjectValue for this OneOf field
+									finalObj, useTlssniChoiceChoicesObjDiags := types.ObjectValue(
+										AlertReceiverReceiverWebhookHttpConfigTlsChoiceUseTlsSniChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+										useTlssniChoiceChoicesAttributeMap,
+									)
+									response.Diagnostics.Append(useTlssniChoiceChoicesObjDiags...)
+									if response.Diagnostics.HasError() {
+										return
+									}
+
+									// Assign the final object to the correct place (either the root model or a parent's attribute map)
+									useTlsAttributeMap["sni_choice"] = finalObj
+								} else {
+									// The OneOf field is nil in the source spec, so set the Terraform object to null.
+									useTlsAttributeMap["sni_choice"] = types.ObjectNull(AlertReceiverReceiverWebhookHttpConfigTlsChoiceUseTlsSniChoiceModelAttributeMap)
+								}
+
+								useTlsObj, useTlsObjDiags := types.ObjectValue(AlertReceiverReceiverWebhookHttpConfigTlsChoiceUseTlsModelAttributeMap, useTlsAttributeMap)
+								response.Diagnostics.Append(useTlsObjDiags...)
 								if response.Diagnostics.HasError() {
 									return
 								}
@@ -2592,8 +2817,8 @@ func (d *DataSourceF5XCAlertReceiver) Read(ctx context.Context, request datasour
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					alertReceiverAlertReceiverHTTPConfigModelObj, diags := types.ObjectValueFrom(ctx, AlertReceiverReceiverWebhookHttpConfigModelAttributeMap, alertReceiverAlertReceiverHTTPConfigModel)
-					response.Diagnostics.Append(diags...)
+					alertReceiverAlertReceiverHTTPConfigModelObj, objDiags := types.ObjectValueFrom(ctx, AlertReceiverReceiverWebhookHttpConfigModelAttributeMap, alertReceiverAlertReceiverHTTPConfigModel)
+					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
@@ -2609,31 +2834,11 @@ func (d *DataSourceF5XCAlertReceiver) Read(ctx context.Context, request datasour
 					webhookAttributeMap["http_config"] = types.ObjectNull(AlertReceiverReceiverWebhookHttpConfigModelAttributeMap)
 				}
 
-				webhookObj, diags := types.ObjectValue(AlertReceiverReceiverWebhookModelAttributeMap, webhookAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				receiverChoiceChoicesModel.Webhook = webhookObj
-			} else {
-				receiverChoiceChoicesModel.Webhook = types.ObjectNull(AlertReceiverReceiverWebhookModelAttributeMap)
-			}
-		}
-
-		// data specToModelNested PointerOfOneOfField --> Slack
-		// <no value>
-		// false
-		{
-			slackOptions, isSlack := receiverChoiceChoices.(*ves_io_schema_alert_receiver.GlobalSpecType_Slack)
-			slackAttributeMap := make(map[string]attr.Value)
-
-			if isSlack && slackOptions != nil {
-
 				// data specToModelNested RequiredPointerField --> Url
-				if slackOptions.Slack.GetUrl() != nil {
+				if webhookElement.GetUrl() != nil {
 					// Create the nested Go struct
 					alertReceiverSecretTypeModel := &AlertReceiverSecretType{}
-					urlElement := slackOptions.Slack.GetUrl()
+					urlElement := webhookElement.GetUrl()
 
 					// Recursively populate the nested struct
 
@@ -2653,43 +2858,44 @@ func (d *DataSourceF5XCAlertReceiver) Read(ctx context.Context, request datasour
 						// <no value>
 						// false
 						{
-							blindfoldSecretInfoOptions, isBlindfoldSecretInfo := urlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_BlindfoldSecretInfo)
+							blindfoldSecretInfoOptionsWrapper, isBlindfoldSecretInfo := urlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_BlindfoldSecretInfo)
 							blindfoldSecretInfoAttributeMap := make(map[string]attr.Value)
 
-							if isBlindfoldSecretInfo && blindfoldSecretInfoOptions != nil {
-
-								// data specToModelNested StringField --> StoreProvider
-								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider() != "" {
-									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider())
-								} else {
-									// Empty string, set to null
-									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringNull()
-								}
-
-								// data specToModelNested RequiredStringField --> Location
-								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation() != "" {
-									blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation())
-								} else {
-									// Empty string, set to null
-									blindfoldSecretInfoAttributeMap["location"] = types.StringNull()
-								}
+							if isBlindfoldSecretInfo && blindfoldSecretInfoOptionsWrapper != nil && blindfoldSecretInfoOptionsWrapper.BlindfoldSecretInfo != nil {
+								blindfoldSecretInfoElement := blindfoldSecretInfoOptionsWrapper.BlindfoldSecretInfo
 
 								// data specToModelNested StringField --> DecryptionProvider
-								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider() != "" {
-									blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider())
+								if blindfoldSecretInfoElement.GetDecryptionProvider() != "" {
+									blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoElement.GetDecryptionProvider())
 								} else {
 									// Empty string, set to null
 									blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringNull()
 								}
 
-								blindfoldSecretInfoObj, diags := types.ObjectValue(AlertReceiverReceiverSlackUrlSecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
-								response.Diagnostics.Append(diags...)
+								// data specToModelNested RequiredStringField --> Location
+								if blindfoldSecretInfoElement.GetLocation() != "" {
+									blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoElement.GetLocation())
+								} else {
+									// Empty string, set to null
+									blindfoldSecretInfoAttributeMap["location"] = types.StringNull()
+								}
+
+								// data specToModelNested StringField --> StoreProvider
+								if blindfoldSecretInfoElement.GetStoreProvider() != "" {
+									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringValue(blindfoldSecretInfoElement.GetStoreProvider())
+								} else {
+									// Empty string, set to null
+									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringNull()
+								}
+
+								blindfoldSecretInfoObj, blindfoldSecretInfoObjDiags := types.ObjectValue(AlertReceiverReceiverWebhookUrlSecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
+								response.Diagnostics.Append(blindfoldSecretInfoObjDiags...)
 								if response.Diagnostics.HasError() {
 									return
 								}
 								urlsecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = blindfoldSecretInfoObj
 							} else {
-								urlsecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = types.ObjectNull(AlertReceiverReceiverSlackUrlSecretInfoOneofBlindfoldSecretInfoModelAttributeMap)
+								urlsecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = types.ObjectNull(AlertReceiverReceiverWebhookUrlSecretInfoOneofBlindfoldSecretInfoModelAttributeMap)
 							}
 						}
 
@@ -2697,35 +2903,36 @@ func (d *DataSourceF5XCAlertReceiver) Read(ctx context.Context, request datasour
 						// <no value>
 						// false
 						{
-							clearSecretInfoOptions, isClearSecretInfo := urlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_ClearSecretInfo)
+							clearSecretInfoOptionsWrapper, isClearSecretInfo := urlsecretInfoChoiceChoices.(*ves_io_schema.SecretType_ClearSecretInfo)
 							clearSecretInfoAttributeMap := make(map[string]attr.Value)
 
-							if isClearSecretInfo && clearSecretInfoOptions != nil {
+							if isClearSecretInfo && clearSecretInfoOptionsWrapper != nil && clearSecretInfoOptionsWrapper.ClearSecretInfo != nil {
+								clearSecretInfoElement := clearSecretInfoOptionsWrapper.ClearSecretInfo
 
 								// data specToModelNested StringField --> Provider
-								if clearSecretInfoOptions.ClearSecretInfo.GetProvider() != "" {
-									clearSecretInfoAttributeMap["provider"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetProvider())
+								if clearSecretInfoElement.GetProvider() != "" {
+									clearSecretInfoAttributeMap["provider"] = types.StringValue(clearSecretInfoElement.GetProvider())
 								} else {
 									// Empty string, set to null
 									clearSecretInfoAttributeMap["provider"] = types.StringNull()
 								}
 
 								// data specToModelNested RequiredStringField --> Url
-								if clearSecretInfoOptions.ClearSecretInfo.GetUrl() != "" {
-									clearSecretInfoAttributeMap["url"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetUrl())
+								if clearSecretInfoElement.GetUrl() != "" {
+									clearSecretInfoAttributeMap["url"] = types.StringValue(clearSecretInfoElement.GetUrl())
 								} else {
 									// Empty string, set to null
 									clearSecretInfoAttributeMap["url"] = types.StringNull()
 								}
 
-								clearSecretInfoObj, diags := types.ObjectValue(AlertReceiverReceiverSlackUrlSecretInfoOneofClearSecretInfoModelAttributeMap, clearSecretInfoAttributeMap)
-								response.Diagnostics.Append(diags...)
+								clearSecretInfoObj, clearSecretInfoObjDiags := types.ObjectValue(AlertReceiverReceiverWebhookUrlSecretInfoOneofClearSecretInfoModelAttributeMap, clearSecretInfoAttributeMap)
+								response.Diagnostics.Append(clearSecretInfoObjDiags...)
 								if response.Diagnostics.HasError() {
 									return
 								}
 								urlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = clearSecretInfoObj
 							} else {
-								urlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(AlertReceiverReceiverSlackUrlSecretInfoOneofClearSecretInfoModelAttributeMap)
+								urlsecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(AlertReceiverReceiverWebhookUrlSecretInfoOneofClearSecretInfoModelAttributeMap)
 							}
 						}
 
@@ -2733,7 +2940,7 @@ func (d *DataSourceF5XCAlertReceiver) Read(ctx context.Context, request datasour
 
 						// Create the final ObjectValue for this OneOf field
 						finalObj, urlsecretInfoChoiceChoicesObjDiags := types.ObjectValue(
-							AlertReceiverReceiverSlackUrlSecretInfoOneofModelAttributeMap, // The attribute schema for the OneOf choices
+							AlertReceiverReceiverWebhookUrlSecretInfoOneofModelAttributeMap, // The attribute schema for the OneOf choices
 							urlsecretInfoChoiceChoicesAttributeMap,
 						)
 						response.Diagnostics.Append(urlsecretInfoChoiceChoicesObjDiags...)
@@ -2749,24 +2956,24 @@ func (d *DataSourceF5XCAlertReceiver) Read(ctx context.Context, request datasour
 						// secret_info_choice object from prior Terraform state so that the model reflects what the
 						// user originally configured and Terraform does not detect a false drift.
 						{
-							savedSecretInfoChoicePath := path.Root("receiver_choice").AtName("slack").AtName("url").AtName("secret_info_choice")
+							savedSecretInfoChoicePath := path.Root("receiver_choice").AtName("webhook").AtName("url").AtName("secret_info_choice")
 							var savedSecretInfoChoice types.Object
 							stateHealDiags := request.Config.GetAttribute(ctx, savedSecretInfoChoicePath, &savedSecretInfoChoice)
 							if !stateHealDiags.HasError() && !savedSecretInfoChoice.IsNull() && !savedSecretInfoChoice.IsUnknown() {
 								alertReceiverSecretTypeModel.SecretInfoChoice = savedSecretInfoChoice
 							} else {
-								alertReceiverSecretTypeModel.SecretInfoChoice = types.ObjectNull(AlertReceiverReceiverSlackUrlSecretInfoOneofModelAttributeMap)
+								alertReceiverSecretTypeModel.SecretInfoChoice = types.ObjectNull(AlertReceiverReceiverWebhookUrlSecretInfoOneofModelAttributeMap)
 							}
 						}
 					}
 
 					// This field needs to be converted to a types.ObjectValue before assignment.
-					alertReceiverSecretTypeModelObj, diags := types.ObjectValueFrom(ctx, AlertReceiverReceiverSlackUrlModelAttributeMap, alertReceiverSecretTypeModel)
-					response.Diagnostics.Append(diags...)
+					alertReceiverSecretTypeModelObj, objDiags := types.ObjectValueFrom(ctx, AlertReceiverReceiverWebhookUrlModelAttributeMap, alertReceiverSecretTypeModel)
+					response.Diagnostics.Append(objDiags...)
 					if response.Diagnostics.HasError() {
 						return
 					}
-					slackAttributeMap["url"] = alertReceiverSecretTypeModelObj
+					webhookAttributeMap["url"] = alertReceiverSecretTypeModelObj
 
 				} else {
 					// The source field is nil (e.g. redacted by the API).
@@ -2775,225 +2982,42 @@ func (d *DataSourceF5XCAlertReceiver) Read(ctx context.Context, request datasour
 					// here because the API may always return a non-nil struct (with REDACTED values) for this
 					// field, making this else-branch unreachable. The child OneOf handles the actual healing.
 					// The target is a types.Object, so we use types.ObjectNull.
-					slackAttributeMap["url"] = types.ObjectNull(AlertReceiverReceiverSlackUrlModelAttributeMap)
+					webhookAttributeMap["url"] = types.ObjectNull(AlertReceiverReceiverWebhookUrlModelAttributeMap)
 				}
 
-				// data specToModelNested RequiredStringField --> Channel
-				if slackOptions.Slack.GetChannel() != "" {
-					slackAttributeMap["channel"] = types.StringValue(slackOptions.Slack.GetChannel())
-				} else {
-					// Empty string, set to null
-					slackAttributeMap["channel"] = types.StringNull()
-				}
-
-				slackObj, diags := types.ObjectValue(AlertReceiverReceiverSlackModelAttributeMap, slackAttributeMap)
-				response.Diagnostics.Append(diags...)
+				webhookObj, webhookObjDiags := types.ObjectValue(AlertReceiverReceiverWebhookModelAttributeMap, webhookAttributeMap)
+				response.Diagnostics.Append(webhookObjDiags...)
 				if response.Diagnostics.HasError() {
 					return
 				}
-				receiverChoiceChoicesModel.Slack = slackObj
+				receiverChoiceChoicesModel.Webhook = webhookObj
 			} else {
-				receiverChoiceChoicesModel.Slack = types.ObjectNull(AlertReceiverReceiverSlackModelAttributeMap)
-			}
-		}
-
-		// data specToModelNested PointerOfOneOfField --> Pagerduty
-		// <no value>
-		// false
-		{
-			pagerdutyOptions, isPagerduty := receiverChoiceChoices.(*ves_io_schema_alert_receiver.GlobalSpecType_Pagerduty)
-			pagerdutyAttributeMap := make(map[string]attr.Value)
-
-			if isPagerduty && pagerdutyOptions != nil {
-
-				// data specToModelNested RequiredPointerField --> RoutingKey
-				if pagerdutyOptions.Pagerduty.GetRoutingKey() != nil {
-					// Create the nested Go struct
-					alertReceiverSecretTypeModel := &AlertReceiverSecretType{}
-					routingKeyElement := pagerdutyOptions.Pagerduty.GetRoutingKey()
-
-					// Recursively populate the nested struct
-
-					// data specToModelNested RequiredOneOfField --> SecretInfoOneof
-					// <no value>
-					if routingKeyElement.GetSecretInfoOneof() != nil {
-						// Create a temporary attribute map for the choices within this OneOf
-						routingKeysecretInfoChoiceChoicesAttributeMap := make(map[string]attr.Value)
-
-						// Define a variable for the spec choices to be passed down to nested templates.
-						// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
-						routingKeysecretInfoChoiceChoices := routingKeyElement.GetSecretInfoOneof()
-
-						// Process nested choices, populating the temporary attribute map
-
-						// data specToModelNested PointerOfOneOfField --> BlindfoldSecretInfo
-						// <no value>
-						// false
-						{
-							blindfoldSecretInfoOptions, isBlindfoldSecretInfo := routingKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_BlindfoldSecretInfo)
-							blindfoldSecretInfoAttributeMap := make(map[string]attr.Value)
-
-							if isBlindfoldSecretInfo && blindfoldSecretInfoOptions != nil {
-
-								// data specToModelNested StringField --> DecryptionProvider
-								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider() != "" {
-									blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetDecryptionProvider())
-								} else {
-									// Empty string, set to null
-									blindfoldSecretInfoAttributeMap["decryption_provider"] = types.StringNull()
-								}
-
-								// data specToModelNested StringField --> StoreProvider
-								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider() != "" {
-									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetStoreProvider())
-								} else {
-									// Empty string, set to null
-									blindfoldSecretInfoAttributeMap["store_provider"] = types.StringNull()
-								}
-
-								// data specToModelNested RequiredStringField --> Location
-								if blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation() != "" {
-									blindfoldSecretInfoAttributeMap["location"] = types.StringValue(blindfoldSecretInfoOptions.BlindfoldSecretInfo.GetLocation())
-								} else {
-									// Empty string, set to null
-									blindfoldSecretInfoAttributeMap["location"] = types.StringNull()
-								}
-
-								blindfoldSecretInfoObj, diags := types.ObjectValue(AlertReceiverReceiverPagerdutyRoutingKeySecretInfoOneofBlindfoldSecretInfoModelAttributeMap, blindfoldSecretInfoAttributeMap)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								routingKeysecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = blindfoldSecretInfoObj
-							} else {
-								routingKeysecretInfoChoiceChoicesAttributeMap["blindfold_secret_info"] = types.ObjectNull(AlertReceiverReceiverPagerdutyRoutingKeySecretInfoOneofBlindfoldSecretInfoModelAttributeMap)
-							}
-						}
-
-						// data specToModelNested PointerOfOneOfField --> ClearSecretInfo
-						// <no value>
-						// false
-						{
-							clearSecretInfoOptions, isClearSecretInfo := routingKeysecretInfoChoiceChoices.(*ves_io_schema.SecretType_ClearSecretInfo)
-							clearSecretInfoAttributeMap := make(map[string]attr.Value)
-
-							if isClearSecretInfo && clearSecretInfoOptions != nil {
-
-								// data specToModelNested RequiredStringField --> Url
-								if clearSecretInfoOptions.ClearSecretInfo.GetUrl() != "" {
-									clearSecretInfoAttributeMap["url"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetUrl())
-								} else {
-									// Empty string, set to null
-									clearSecretInfoAttributeMap["url"] = types.StringNull()
-								}
-
-								// data specToModelNested StringField --> Provider
-								if clearSecretInfoOptions.ClearSecretInfo.GetProvider() != "" {
-									clearSecretInfoAttributeMap["provider"] = types.StringValue(clearSecretInfoOptions.ClearSecretInfo.GetProvider())
-								} else {
-									// Empty string, set to null
-									clearSecretInfoAttributeMap["provider"] = types.StringNull()
-								}
-
-								clearSecretInfoObj, diags := types.ObjectValue(AlertReceiverReceiverPagerdutyRoutingKeySecretInfoOneofClearSecretInfoModelAttributeMap, clearSecretInfoAttributeMap)
-								response.Diagnostics.Append(diags...)
-								if response.Diagnostics.HasError() {
-									return
-								}
-								routingKeysecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = clearSecretInfoObj
-							} else {
-								routingKeysecretInfoChoiceChoicesAttributeMap["clear_secret_info"] = types.ObjectNull(AlertReceiverReceiverPagerdutyRoutingKeySecretInfoOneofClearSecretInfoModelAttributeMap)
-							}
-						}
-
-						// --- End of Choices ---
-
-						// Create the final ObjectValue for this OneOf field
-						finalObj, routingKeysecretInfoChoiceChoicesObjDiags := types.ObjectValue(
-							AlertReceiverReceiverPagerdutyRoutingKeySecretInfoOneofModelAttributeMap, // The attribute schema for the OneOf choices
-							routingKeysecretInfoChoiceChoicesAttributeMap,
-						)
-						response.Diagnostics.Append(routingKeysecretInfoChoiceChoicesObjDiags...)
-						if response.Diagnostics.HasError() {
-							return
-						}
-
-						// Assign the final object to the correct place (either the root model or a parent's attribute map)
-						alertReceiverSecretTypeModel.SecretInfoChoice = finalObj
-					} else {
-						// The OneOf field is nil in the source spec, so set the Terraform object to null.
-						// State Healing: The API redacted the OneOf secret field (returned nil). Restore the entire
-						// secret_info_choice object from prior Terraform state so that the model reflects what the
-						// user originally configured and Terraform does not detect a false drift.
-						{
-							savedSecretInfoChoicePath := path.Root("receiver_choice").AtName("pagerduty").AtName("routing_key").AtName("secret_info_choice")
-							var savedSecretInfoChoice types.Object
-							stateHealDiags := request.Config.GetAttribute(ctx, savedSecretInfoChoicePath, &savedSecretInfoChoice)
-							if !stateHealDiags.HasError() && !savedSecretInfoChoice.IsNull() && !savedSecretInfoChoice.IsUnknown() {
-								alertReceiverSecretTypeModel.SecretInfoChoice = savedSecretInfoChoice
-							} else {
-								alertReceiverSecretTypeModel.SecretInfoChoice = types.ObjectNull(AlertReceiverReceiverPagerdutyRoutingKeySecretInfoOneofModelAttributeMap)
-							}
-						}
-					}
-
-					// This field needs to be converted to a types.ObjectValue before assignment.
-					alertReceiverSecretTypeModelObj, diags := types.ObjectValueFrom(ctx, AlertReceiverReceiverPagerdutyRoutingKeyModelAttributeMap, alertReceiverSecretTypeModel)
-					response.Diagnostics.Append(diags...)
-					if response.Diagnostics.HasError() {
-						return
-					}
-					pagerdutyAttributeMap["routing_key"] = alertReceiverSecretTypeModelObj
-
-				} else {
-					// The source field is nil (e.g. redacted by the API).
-					// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
-					// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
-					// here because the API may always return a non-nil struct (with REDACTED values) for this
-					// field, making this else-branch unreachable. The child OneOf handles the actual healing.
-					// The target is a types.Object, so we use types.ObjectNull.
-					pagerdutyAttributeMap["routing_key"] = types.ObjectNull(AlertReceiverReceiverPagerdutyRoutingKeyModelAttributeMap)
-				}
-
-				// data specToModelNested RequiredStringField --> Url
-				if pagerdutyOptions.Pagerduty.GetUrl() != "" {
-					pagerdutyAttributeMap["url"] = types.StringValue(pagerdutyOptions.Pagerduty.GetUrl())
-				} else {
-					// Empty string, set to null
-					pagerdutyAttributeMap["url"] = types.StringNull()
-				}
-
-				pagerdutyObj, diags := types.ObjectValue(AlertReceiverReceiverPagerdutyModelAttributeMap, pagerdutyAttributeMap)
-				response.Diagnostics.Append(diags...)
-				if response.Diagnostics.HasError() {
-					return
-				}
-				receiverChoiceChoicesModel.Pagerduty = pagerdutyObj
-			} else {
-				receiverChoiceChoicesModel.Pagerduty = types.ObjectNull(AlertReceiverReceiverPagerdutyModelAttributeMap)
+				receiverChoiceChoicesModel.Webhook = types.ObjectNull(AlertReceiverReceiverWebhookModelAttributeMap)
 			}
 		}
 
 		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
-		receiverChoiceObj, diags := utils.GoStructToObjectValue(
-			ctx,
-			AlertReceiverReceiverModelAttributeMap,
-			receiverChoiceChoicesModel,
-		)
-		if diags.HasError() {
-			response.Diagnostics.Append(diags...)
-			return
-		}
+		{
+			receiverChoiceObj, oneofDiags := utils.GoStructToObjectValue(
+				ctx,
+				AlertReceiverReceiverModelAttributeMap,
+				receiverChoiceChoicesModel,
+			)
+			if oneofDiags.HasError() {
+				response.Diagnostics.Append(oneofDiags...)
+				return
+			}
 
-		// Assign the final object to the root data model.
-		data.ReceiverChoice = receiverChoiceObj
+			// Assign the final object to the root data model.
+			data.ReceiverChoice = receiverChoiceObj
+		}
 	} else {
 		// The oneof field is nil in the source spec, so set the Terraform object to null.
 		data.ReceiverChoice = types.ObjectNull(AlertReceiverReceiverModelAttributeMap)
 	}
 
 	// Set state to fully populated data
-	diags = response.State.Set(ctx, &data)
+	diags := response.State.Set(ctx, &data)
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return

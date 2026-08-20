@@ -1689,10 +1689,7 @@ var APISwaggerJSON string = `{
         "description": "Secure Mesh site defines a required parameters that can be used in CRUD, to create and manage an Secure Mesh site.",
         "version": "version not set"
     },
-    "schemes": [
-        "http",
-        "https"
-    ],
+    "schemes": null,
     "consumes": [
         "application/json"
     ],
@@ -1759,6 +1756,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1851,6 +1854,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1951,6 +1960,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2068,6 +2083,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2171,6 +2192,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2214,6 +2241,29 @@ var APISwaggerJSON string = `{
         }
     },
     "definitions": {
+        "common_wafLiveSignaturesUpdate": {
+            "type": "object",
+            "description": "Select F5XC WAF Signatures update mode for the site. By default, new signatures will be applied manually.\nRefer to release notes for details about available Signatures update modes.",
+            "title": "Live Signatures Update",
+            "x-displayname": "WAF Signatures Update Mode",
+            "x-ves-displayorder": "1",
+            "x-ves-oneof-field-signatures_update_mode_choice": "[\"automatic\",\"manual\"]",
+            "x-ves-proto-message": "ves.io.schema.views.common_waf.LiveSignaturesUpdate",
+            "properties": {
+                "automatic": {
+                    "description": "Exclusive with [manual]\n New WAF signatures will be applied automatically as soon as they are released.",
+                    "title": "Automatic update mode",
+                    "$ref": "#/definitions/ioschemaEmpty",
+                    "x-displayname": "Automatic"
+                },
+                "manual": {
+                    "description": "Exclusive with [automatic]\n New WAF signatures will only be applied when an update is triggered manually.",
+                    "title": "Manual update mode",
+                    "$ref": "#/definitions/ioschemaEmpty",
+                    "x-displayname": "Manual"
+                }
+            }
+        },
         "fleetBlockedServices": {
             "type": "object",
             "description": "Disable a node local service on this site.",
@@ -2229,12 +2279,12 @@ var APISwaggerJSON string = `{
                     "x-displayname": "DNS"
                 },
                 "network_type": {
-                    "description": " Site Local VRF on which this service will be disabled\n\nValidation Rules:\n  ves.io.schema.rules.enum.in: [0,1,13]\n",
+                    "description": " Site Local VRF on which this service will be disabled\n\nValidation Rules:\n  ves.io.schema.rules.enum.in: [0,1,12,13]\n",
                     "title": "network_type",
                     "$ref": "#/definitions/schemaVirtualNetworkType",
                     "x-displayname": "Site Local VRF",
                     "x-ves-validation-rules": {
-                        "ves.io.schema.rules.enum.in": "[0,1,13]"
+                        "ves.io.schema.rules.enum.in": "[0,1,12,13]"
                     }
                 },
                 "ssh": {
@@ -2452,58 +2502,6 @@ var APISwaggerJSON string = `{
                     "title": "uid",
                     "x-displayname": "UID",
                     "x-ves-example": "d15f1fad-4d37-48c0-8706-df1824d76d31"
-                }
-            }
-        },
-        "network_firewallActiveEnhancedFirewallPoliciesType": {
-            "type": "object",
-            "description": "List of Enhanced Firewall Policies\nThese policies use session-based rules and provide all options available under firewall policies\nwith an additional option for service insertion.",
-            "title": "Active Enhanced Firewall Policies Type",
-            "x-displayname": "Active Enhanced Network Policies Type",
-            "x-ves-proto-message": "ves.io.schema.network_firewall.ActiveEnhancedFirewallPoliciesType",
-            "properties": {
-                "enhanced_firewall_policies": {
-                    "type": "array",
-                    "description": " Ordered List of Enhanced Firewall Policies active\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n  ves.io.schema.rules.repeated.max_items: 128\n  ves.io.schema.rules.repeated.min_items: 1\n",
-                    "title": "Enhanced Firewall Policy",
-                    "minItems": 1,
-                    "maxItems": 128,
-                    "items": {
-                        "$ref": "#/definitions/schemaviewsObjectRefType"
-                    },
-                    "x-displayname": "Enhanced Firewall Policy",
-                    "x-ves-required": "true",
-                    "x-ves-validation-rules": {
-                        "ves.io.schema.rules.message.required": "true",
-                        "ves.io.schema.rules.repeated.max_items": "128",
-                        "ves.io.schema.rules.repeated.min_items": "1"
-                    }
-                }
-            }
-        },
-        "network_firewallActiveForwardProxyPoliciesType": {
-            "type": "object",
-            "description": "Ordered List of Forward Proxy Policies active",
-            "title": "Active Forward Proxy Policies Type",
-            "x-displayname": "Active Forward Proxy Policies Type",
-            "x-ves-proto-message": "ves.io.schema.network_firewall.ActiveForwardProxyPoliciesType",
-            "properties": {
-                "forward_proxy_policies": {
-                    "type": "array",
-                    "description": " Ordered List of Forward Proxy Policies active\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n  ves.io.schema.rules.repeated.max_items: 128\n  ves.io.schema.rules.repeated.min_items: 1\n",
-                    "title": "Forward Proxy Policies",
-                    "minItems": 1,
-                    "maxItems": 128,
-                    "items": {
-                        "$ref": "#/definitions/schemaviewsObjectRefType"
-                    },
-                    "x-displayname": "Forward Proxy Policies",
-                    "x-ves-required": "true",
-                    "x-ves-validation-rules": {
-                        "ves.io.schema.rules.message.required": "true",
-                        "ves.io.schema.rules.repeated.max_items": "128",
-                        "ves.io.schema.rules.repeated.min_items": "1"
-                    }
                 }
             }
         },
@@ -2944,13 +2942,13 @@ var APISwaggerJSON string = `{
                 },
                 "mtu": {
                     "type": "integer",
-                    "description": " Maximum packet size (Maximum Transfer Unit) of the interface\n When configured, mtu must be between 512 and 16384\n\nExample: - \"1450\"-\n\nValidation Rules:\n  ves.io.schema.rules.uint32.ranges: 0,512-16384\n",
+                    "description": " Maximum packet size (Maximum Transfer Unit) of the interface\n When configured, mtu must be between 512 and 8000\n\nExample: - \"1450\"-\n\nValidation Rules:\n  ves.io.schema.rules.uint32.ranges: 0,512-8000\n",
                     "title": "Maximum Packet Size (MTU)",
                     "format": "int64",
                     "x-displayname": "Maximum Packet Size (MTU)",
                     "x-ves-example": "1450",
                     "x-ves-validation-rules": {
-                        "ves.io.schema.rules.uint32.ranges": "0,512-16384"
+                        "ves.io.schema.rules.uint32.ranges": "0,512-8000"
                     }
                 },
                 "node": {
@@ -3016,13 +3014,13 @@ var APISwaggerJSON string = `{
                 },
                 "mtu": {
                     "type": "integer",
-                    "description": " Maximum packet size (Maximum Transfer Unit) of the interface\n When configured, mtu must be between 512 and 16384\n\nExample: - \"1450\"-\n\nValidation Rules:\n  ves.io.schema.rules.uint32.ranges: 0,512-16384\n",
+                    "description": " Maximum packet size (Maximum Transfer Unit) of the interface\n When configured, mtu must be between 512 and 8000\n\nExample: - \"1450\"-\n\nValidation Rules:\n  ves.io.schema.rules.uint32.ranges: 0,512-8000\n",
                     "title": "Maximum Packet Size (MTU)",
                     "format": "int64",
                     "x-displayname": "Maximum Packet Size (MTU)",
                     "x-ves-example": "1450",
                     "x-ves-validation-rules": {
-                        "ves.io.schema.rules.uint32.ranges": "0,512-16384"
+                        "ves.io.schema.rules.uint32.ranges": "0,512-8000"
                     }
                 },
                 "node": {
@@ -3112,13 +3110,13 @@ var APISwaggerJSON string = `{
                 },
                 "mtu": {
                     "type": "integer",
-                    "description": " Maximum packet size (Maximum Transfer Unit) of the interface\n When configured, mtu must be between 512 and 16384\n\nExample: - \"1450\"-\n\nValidation Rules:\n  ves.io.schema.rules.uint32.ranges: 0,512-16384\n",
+                    "description": " Maximum packet size (Maximum Transfer Unit) of the interface\n When configured, mtu must be between 512 and 8000\n\nExample: - \"1450\"-\n\nValidation Rules:\n  ves.io.schema.rules.uint32.ranges: 0,512-8000\n",
                     "title": "Maximum Packet Size (MTU)",
                     "format": "int64",
                     "x-displayname": "Maximum Packet Size (MTU)",
                     "x-ves-example": "1450",
                     "x-ves-validation-rules": {
-                        "ves.io.schema.rules.uint32.ranges": "0,512-16384"
+                        "ves.io.schema.rules.uint32.ranges": "0,512-8000"
                     }
                 },
                 "no_ipv6_address": {
@@ -3294,7 +3292,7 @@ var APISwaggerJSON string = `{
             "properties": {
                 "dns_list": {
                     "type": "array",
-                    "description": " List of IPV6 Addresses acting as Dns servers\n\nExample: - \"2001::11\"-\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n  ves.io.schema.rules.repeated.max_items: 4\n  ves.io.schema.rules.repeated.min_items: 1\n  ves.io.schema.rules.repeated.unique: true\n  ves.io.schema.rules.string.ipv6: true\n",
+                    "description": " List of IPV6 Addresses acting as Dns servers\n\nExample: - \"2001::11\"-\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n  ves.io.schema.rules.repeated.items.string.ipv6: true\n  ves.io.schema.rules.repeated.max_items: 4\n  ves.io.schema.rules.repeated.min_items: 1\n  ves.io.schema.rules.repeated.unique: true\n",
                     "title": "Dns List",
                     "minItems": 1,
                     "maxItems": 4,
@@ -3306,10 +3304,10 @@ var APISwaggerJSON string = `{
                     "x-ves-required": "true",
                     "x-ves-validation-rules": {
                         "ves.io.schema.rules.message.required": "true",
+                        "ves.io.schema.rules.repeated.items.string.ipv6": "true",
                         "ves.io.schema.rules.repeated.max_items": "4",
                         "ves.io.schema.rules.repeated.min_items": "1",
-                        "ves.io.schema.rules.repeated.unique": "true",
-                        "ves.io.schema.rules.string.ipv6": "true"
+                        "ves.io.schema.rules.repeated.unique": "true"
                     }
                 }
             }
@@ -3384,7 +3382,7 @@ var APISwaggerJSON string = `{
                 },
                 "mtu": {
                     "type": "integer",
-                    "description": "x-displayName: \"Maximum Packet Size (MTU)\"\nx-example: \"1450\"\nMaximum packet size (Maximum Transfer Unit) of the interface\nWhen configured, mtu must be between 512 and 16384",
+                    "description": "x-displayName: \"Maximum Packet Size (MTU)\"\nx-example: \"1450\"\nMaximum packet size (Maximum Transfer Unit) of the interface\nWhen configured, mtu must be between 512 and 8000",
                     "title": "Maximum Packet Size (MTU)",
                     "format": "int64"
                 },
@@ -3527,6 +3525,27 @@ var APISwaggerJSON string = `{
                     "type": "string",
                     "description": "Must be a valid serialized protocol buffer of the above specified type.",
                     "format": "byte"
+                }
+            }
+        },
+        "runtimeError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/protobufAny"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
                 }
             }
         },
@@ -3889,7 +3908,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "labels": {
@@ -3953,7 +3971,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable",
                     "x-ves-example": "true"
                 },
@@ -4019,7 +4036,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "labels": {
@@ -4167,7 +4183,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Indicate whether mars deems this object to be stale via graceful restart timer information",
                     "title": "vtrp_stale",
-                    "format": "boolean",
                     "x-displayname": "VTRP Stale"
                 }
             }
@@ -4506,7 +4521,7 @@ var APISwaggerJSON string = `{
         },
         "schemaVirtualNetworkType": {
             "type": "string",
-            "description": "Different types of virtual networks understood by the system\n\nVirtual-network of type VIRTUAL_NETWORK_SITE_LOCAL provides connectivity to public (outside) network.\nThis is an insecure network and is connected to public internet via NAT Gateways/firwalls\nVirtual-network of this type is local to every site. Two virtual networks of this type on different\nsites are neither related nor connected.\n\nConstraints:\nThere can be atmost one virtual network of this type in a given site.\nThis network type is supported on CE sites. This network is created automatically and present on all sites\nVirtual-network of type VIRTUAL_NETWORK_SITE_LOCAL_INSIDE is a private network inside site.\nIt is a secure network and is not connected to public network.\nVirtual-network of this type is local to every site. Two virtual networks of this type on different\nsites are neither related nor connected.\n\nConstraints:\nThere can be atmost one virtual network of this type in a given site.\nThis network type is supported on CE sites. This network is created during provisioning of site\nUser defined per-site virtual network. Scope of this virtual network is limited to the site.\nThis is not yet supported\nVirtual-network of type VIRTUAL_NETWORK_PUBLIC directly conects to the public internet.\nVirtual-network of this type is local to every site. Two virtual networks of this type on different sites are neither related nor connected.\n\nConstraints:\nThere can be atmost one virtual network of this type in a given site.\nThis network type is supported on RE sites only\nIt is an internally created by the system. They must not be created by user\nVirtual Neworks with global scope across different sites in F5XC domain.\nAn example global virtual-network called \"AIN Network\" is created for every tenant.\nfor volterra fabric\n\nConstraints:\nIt is currently only supported as internally created by the system.\nvK8s service network for a given tenant. Used to advertise a virtual host only to vk8s pods for that tenant\nConstraints:\nIt is an internally created by the system. Must not be created by user\nVER internal network for the site. It can only be used for virtual hosts with SMA_PROXY type proxy\nConstraints:\nIt is an internally created by the system. Must not be created by user\nVirtual-network of type VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE represents both\nVIRTUAL_NETWORK_SITE_LOCAL and VIRTUAL_NETWORK_SITE_LOCAL_INSIDE\n\nConstraints:\nThis network type is only meaningful in an advertise policy\nWhen virtual-network of type VIRTUAL_NETWORK_IP_AUTO is selected for\nan endpoint, VER will try to determine the network based on the provided\nIP address\n\nConstraints:\nThis network type is only meaningful in an endpoint\n\nVoltADN Private Network is used on volterra RE(s) to connect to customer private networks\nThis network is created by opening a support ticket\n\nThis network is per site srv6 network\nVER IP Fabric network for the site.\nThis Virtual network type is used for exposing virtual host on IP Fabric network on the VER site or\nfor endpoint in IP Fabric network\nConstraints:\nIt is an internally created by the system. Must not be created by user\nNetwork internally created for a segment\nConstraints:\nIt is an internally created by the system. Must not be created by user\nVirtual-network of type VIRTUAL_NETWORK_MANAGEMENT is used for management purposes",
+            "description": "Different types of virtual networks understood by the system\n\nVirtual-network of type VIRTUAL_NETWORK_SITE_LOCAL provides connectivity to public (outside) network.\nThis is an insecure network and is connected to public internet via NAT Gateways/firwalls\nVirtual-network of this type is local to every site. Two virtual networks of this type on different\nsites are neither related nor connected.\n\nConstraints:\nThere can be atmost one virtual network of this type in a given site.\nThis network type is supported on CE sites. This network is created automatically and present on all sites\nVirtual-network of type VIRTUAL_NETWORK_SITE_LOCAL_INSIDE is a private network inside site.\nIt is a secure network and is not connected to public network.\nVirtual-network of this type is local to every site. Two virtual networks of this type on different\nsites are neither related nor connected.\n\nConstraints:\nThere can be atmost one virtual network of this type in a given site.\nThis network type is supported on CE sites. This network is created during provisioning of site\nUser defined per-site virtual network. Scope of this virtual network is limited to the site.\nThis is not yet supported\nVirtual-network of type VIRTUAL_NETWORK_PUBLIC directly conects to the public internet.\nVirtual-network of this type is local to every site. Two virtual networks of this type on different sites are neither related nor connected.\n\nConstraints:\nThere can be atmost one virtual network of this type in a given site.\nThis network type is supported on RE sites only\nIt is an internally created by the system. They must not be created by user\nVirtual Neworks with global scope across different sites in F5XC domain.\nAn example global virtual-network called \"AIN Network\" is created for every tenant.\nfor volterra fabric\n\nConstraints:\nIt is currently only supported as internally created by the system.\nvK8s service network for a given tenant. Used to advertise a virtual host only to vk8s pods for that tenant\nConstraints:\nIt is an internally created by the system. Must not be created by user\nVER internal network for the site. It can only be used for virtual hosts with SMA_PROXY type proxy\nConstraints:\nIt is an internally created by the system. Must not be created by user\nVirtual-network of type VIRTUAL_NETWORK_SITE_LOCAL_INSIDE_OUTSIDE represents both\nVIRTUAL_NETWORK_SITE_LOCAL and VIRTUAL_NETWORK_SITE_LOCAL_INSIDE\n\nConstraints:\nThis network type is only meaningful in an advertise policy\nWhen virtual-network of type VIRTUAL_NETWORK_IP_AUTO is selected for\nan endpoint, VER will try to determine the network based on the provided\nIP address\n\nConstraints:\nThis network type is only meaningful in an endpoint\n\nVoltADN Private Network is used on volterra RE(s) to connect to customer private networks\nThis network is created by opening a support ticket\n\nThis network is per site srv6 network\nVER IP Fabric network for the site.\nThis Virtual network type is used for exposing virtual host on IP Fabric network on the VER site or\nfor endpoint in IP Fabric network\nConstraints:\nIt is an internally created by the system. Must not be created by user\nVirtual-network of type VIRTUAL_NETWORK_SEGMENT for segment interface\nVirtual-network of type VIRTUAL_NETWORK_MANAGEMENT is used for management purposes",
             "title": "VirtualNetworkType",
             "enum": [
                 "VIRTUAL_NETWORK_SITE_LOCAL",
@@ -4537,6 +4552,58 @@ var APISwaggerJSON string = `{
                     "type": "string",
                     "description": "x-displayName: \"Name\"\nx-required\nx-example: \"ChargeBack-API-Key\"\nName of the secret.",
                     "title": "Name"
+                }
+            }
+        },
+        "schemanetwork_firewallActiveEnhancedFirewallPoliciesType": {
+            "type": "object",
+            "description": "List of Enhanced Firewall Policies\nThese policies use session-based rules and provide all options available under firewall policies\nwith an additional option for service insertion.",
+            "title": "Active Enhanced Firewall Policies Type",
+            "x-displayname": "Active Enhanced Network Policies Type",
+            "x-ves-proto-message": "ves.io.schema.network_firewall.ActiveEnhancedFirewallPoliciesType",
+            "properties": {
+                "enhanced_firewall_policies": {
+                    "type": "array",
+                    "description": " Ordered List of Enhanced Firewall Policies active\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n  ves.io.schema.rules.repeated.max_items: 128\n  ves.io.schema.rules.repeated.min_items: 1\n",
+                    "title": "Enhanced Firewall Policy",
+                    "minItems": 1,
+                    "maxItems": 128,
+                    "items": {
+                        "$ref": "#/definitions/schemaviewsObjectRefType"
+                    },
+                    "x-displayname": "Enhanced Firewall Policy",
+                    "x-ves-required": "true",
+                    "x-ves-validation-rules": {
+                        "ves.io.schema.rules.message.required": "true",
+                        "ves.io.schema.rules.repeated.max_items": "128",
+                        "ves.io.schema.rules.repeated.min_items": "1"
+                    }
+                }
+            }
+        },
+        "schemanetwork_firewallActiveForwardProxyPoliciesType": {
+            "type": "object",
+            "description": "Ordered List of Forward Proxy Policies active",
+            "title": "Active Forward Proxy Policies Type",
+            "x-displayname": "Active Forward Proxy Policies Type",
+            "x-ves-proto-message": "ves.io.schema.network_firewall.ActiveForwardProxyPoliciesType",
+            "properties": {
+                "forward_proxy_policies": {
+                    "type": "array",
+                    "description": " Ordered List of Forward Proxy Policies active\n\nRequired: YES\n\nValidation Rules:\n  ves.io.schema.rules.message.required: true\n  ves.io.schema.rules.repeated.max_items: 128\n  ves.io.schema.rules.repeated.min_items: 1\n",
+                    "title": "Forward Proxy Policies",
+                    "minItems": 1,
+                    "maxItems": 128,
+                    "items": {
+                        "$ref": "#/definitions/schemaviewsObjectRefType"
+                    },
+                    "x-displayname": "Forward Proxy Policies",
+                    "x-ves-required": "true",
+                    "x-ves-validation-rules": {
+                        "ves.io.schema.rules.message.required": "true",
+                        "ves.io.schema.rules.repeated.max_items": "128",
+                        "ves.io.schema.rules.repeated.min_items": "1"
+                    }
                 }
             }
         },
@@ -4642,7 +4709,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Fail the delete operation if this object is being referred by other objects",
                     "title": "fail_if_referred",
-                    "format": "boolean",
                     "x-displayname": "Fail-If-Referred"
                 },
                 "name": {
@@ -4894,7 +4960,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true indicates securemesh_site is administratively disabled",
                     "title": "disabled",
-                    "format": "boolean",
                     "x-displayname": "Disabled"
                 },
                 "get_spec": {
@@ -5007,13 +5072,13 @@ var APISwaggerJSON string = `{
                 "active_enhanced_firewall_policies": {
                     "description": "Exclusive with [active_network_policies no_network_policy]\n Enhanced Firewall Policies active for this site.\n These policies use session-based rules and provide all options available under firewall policies\n with an additional option for service insertion.",
                     "title": "Manage Enhanced Firewall Policy",
-                    "$ref": "#/definitions/network_firewallActiveEnhancedFirewallPoliciesType",
+                    "$ref": "#/definitions/schemanetwork_firewallActiveEnhancedFirewallPoliciesType",
                     "x-displayname": "Active Enhanced Firewall Policies"
                 },
                 "active_forward_proxy_policies": {
                     "description": "Exclusive with [forward_proxy_allow_all no_forward_proxy]\n Enable Forward Proxy for this site and manage policies",
                     "title": "Enable Forward Proxy and Manage Policies",
-                    "$ref": "#/definitions/network_firewallActiveForwardProxyPoliciesType",
+                    "$ref": "#/definitions/schemanetwork_firewallActiveForwardProxyPoliciesType",
                     "x-displayname": "Enable Forward Proxy and Manage Policies"
                 },
                 "active_network_policies": {
@@ -5784,6 +5849,11 @@ var APISwaggerJSON string = `{
                         "ves.io.schema.rules.string.ves_object_name": "true"
                     }
                 },
+                "waf_signatures": {
+                    "description": " Select WAF Signatures Update Mode for the site. By default, new signatures will be applied manually.",
+                    "$ref": "#/definitions/common_wafLiveSignaturesUpdate",
+                    "x-displayname": "WAF Signatures Update Mode"
+                },
                 "worker_nodes": {
                     "type": "array",
                     "description": " Names of worker nodes\n\nExample: - \"worker-0\"-\n\nValidation Rules:\n  ves.io.schema.rules.repeated.max_items: 128\n  ves.io.schema.rules.repeated.unique: true\n",
@@ -5935,6 +6005,11 @@ var APISwaggerJSON string = `{
                         "ves.io.schema.rules.string.max_len": "256"
                     }
                 },
+                "waf_signatures": {
+                    "description": " Select WAF Signatures Update Mode for the site. By default, new signatures will be applied manually.",
+                    "$ref": "#/definitions/common_wafLiveSignaturesUpdate",
+                    "x-displayname": "WAF Signatures Update Mode"
+                },
                 "worker_nodes": {
                     "type": "array",
                     "description": " Names of worker nodes\n\nExample: - \"worker-0\"-\n\nValidation Rules:\n  ves.io.schema.rules.repeated.max_items: 128\n  ves.io.schema.rules.repeated.unique: true\n",
@@ -6069,6 +6144,11 @@ var APISwaggerJSON string = `{
                         "ves.io.schema.rules.string.min_len": "1",
                         "ves.io.schema.rules.string.ves_object_name": "true"
                     }
+                },
+                "waf_signatures": {
+                    "description": " Select WAF Signatures Update Mode for the site. By default, new signatures will be applied manually.",
+                    "$ref": "#/definitions/common_wafLiveSignaturesUpdate",
+                    "x-displayname": "WAF Signatures Update Mode"
                 },
                 "worker_nodes": {
                     "type": "array",

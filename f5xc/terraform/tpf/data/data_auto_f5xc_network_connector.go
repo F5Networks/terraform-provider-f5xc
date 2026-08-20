@@ -6,16 +6,19 @@
 package data
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"time"
 
+	"github.com/gogo/protobuf/jsonpb"
+	"github.com/gogo/protobuf/proto"
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
 	"gopkg.volterra.us/terraform-provider-f5xc/f5xc/terraform/tpf/client"
@@ -29,69 +32,152 @@ type DataSourceF5XCNetworkConnector struct {
 	client *client.APIClient
 }
 
-type NetworkConnectorForwardProxyConfigType struct {
-	WhiteListedPrefixes types.List  `tfsdk:"white_listed_prefixes"`
-	WhiteListedPorts    types.List  `tfsdk:"white_listed_ports"`
-	MaxConnectAttempts  types.Int64 `tfsdk:"max_connect_attempts"`
+type NetworkConnectorCreateSpecTypeConnectorChoice struct {
+	SliToGlobalDr types.Object `tfsdk:"sli_to_global_dr"`
+	SliToSloSnat  types.Object `tfsdk:"sli_to_slo_snat"`
+	SloToGlobalDr types.Object `tfsdk:"slo_to_global_dr"`
+}
+
+type NetworkConnectorCreateSpecTypeSliToGlobalDr struct {
+	GlobalVn types.Object `tfsdk:"global_vn"`
+}
+
+type NetworkConnectorCreateSpecTypeSliToSloSnat struct {
+	PoolChoice    types.Object `tfsdk:"pool_choice"`
+	RoutingChoice types.Object `tfsdk:"routing_choice"`
+}
+
+type NetworkConnectorSnatConnectorTypePoolChoice struct {
+	InterfaceIp types.Bool `tfsdk:"interface_ip"`
+}
+
+type NetworkConnectorSnatConnectorTypeRoutingChoice struct {
+	DefaultGwSnat types.Bool `tfsdk:"default_gw_snat"`
+}
+
+type NetworkConnectorCreateSpecTypeSloToGlobalDr struct {
+	GlobalVn types.Object `tfsdk:"global_vn"`
+}
+
+type NetworkConnectorCreateSpecTypeForwardProxyChoice struct {
+	DisableForwardProxy types.Bool   `tfsdk:"disable_forward_proxy"`
+	EnableForwardProxy  types.Object `tfsdk:"enable_forward_proxy"`
+}
+
+type NetworkConnectorCreateSpecTypeEnableForwardProxy struct {
 	ConnectionTimeout   types.Int64 `tfsdk:"connection_timeout"`
+	MaxConnectAttempts  types.Int64 `tfsdk:"max_connect_attempts"`
+	WhiteListedPorts    types.List  `tfsdk:"white_listed_ports"`
+	WhiteListedPrefixes types.List  `tfsdk:"white_listed_prefixes"`
 }
 
 // DataSourceF5XCNetworkConnectorModel describes the resource data model.
 type DataSourceF5XCNetworkConnectorModel struct {
-	Description         types.String   `tfsdk:"description"`
-	Name                types.String   `tfsdk:"name"`
-	Namespace           types.String   `tfsdk:"namespace"`
-	Uid                 types.String   `tfsdk:"uid"`
-	Labels              types.Map      `tfsdk:"labels"`
-	Annotations         types.Map      `tfsdk:"annotations"`
-	OutsideNetwork      types.List     `tfsdk:"outside_network"`
-	SnatPoolType        types.List     `tfsdk:"snat_pool_type"`
-	DynamicReverseProxy types.List     `tfsdk:"dynamic_reverse_proxy"`
-	ForwardProxy        types.Object   `tfsdk:"forward_proxy"`
-	InsideNetworkType   types.List     `tfsdk:"inside_network_type"`
-	InsideNetwork       types.List     `tfsdk:"inside_network"`
-	ProxyType           types.List     `tfsdk:"proxy_type"`
-	ConnectorType       types.List     `tfsdk:"connector_type"`
-	OutsideNetworkType  types.List     `tfsdk:"outside_network_type"`
-	Timeouts            timeouts.Value `tfsdk:"timeouts"`
+	Annotations        types.Map      `tfsdk:"annotations"`
+	Description        types.String   `tfsdk:"description"`
+	Labels             types.Map      `tfsdk:"labels"`
+	Name               types.String   `tfsdk:"name"`
+	Namespace          types.String   `tfsdk:"namespace"`
+	Uid                types.String   `tfsdk:"uid"`
+	ConnectorChoice    types.Object   `tfsdk:"connector_choice"`
+	ForwardProxyChoice types.Object   `tfsdk:"forward_proxy_choice"`
+	Timeouts           timeouts.Value `tfsdk:"timeouts"`
 }
 
 // --- Attribute Maps for Nested Structs ---
-// Attribute map for ArrayOfPointerField --> OutsideNetwork
-var NetworkConnectorOutsideNetworkObjectRefModelAttributeMap = map[string]attr.Type{
+// Attribute map for RequiredOneOfField --> ConnectorChoice
+var NetworkConnectorConnectorChoiceModelAttributeMap = map[string]attr.Type{
 
-	"name":      types.StringType,
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
-}
-
-// Attribute map for ArrayOfPointerField --> DynamicReverseProxy
-var NetworkConnectorDynamicReverseProxyObjectRefModelAttributeMap = map[string]attr.Type{
-
-	"tenant":    types.StringType,
-	"namespace": types.StringType,
-	"name":      types.StringType,
-}
-
-// Attribute map for PointerField --> ForwardProxy
-var NetworkConnectorForwardProxyModelAttributeMap = map[string]attr.Type{
-
-	"white_listed_prefixes": types.ListType{
-		ElemType: types.StringType,
+	"sli_to_global_dr": types.ObjectType{
+		AttrTypes: NetworkConnectorConnectorChoiceSliToGlobalDrModelAttributeMap,
 	},
+	"sli_to_slo_snat": types.ObjectType{
+		AttrTypes: NetworkConnectorConnectorChoiceSliToSloSnatModelAttributeMap,
+	},
+	"slo_to_global_dr": types.ObjectType{
+		AttrTypes: NetworkConnectorConnectorChoiceSloToGlobalDrModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> SliToGlobalDr
+var NetworkConnectorConnectorChoiceSliToGlobalDrModelAttributeMap = map[string]attr.Type{
+	"global_vn": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"name":      types.StringType,
+			"namespace": types.StringType,
+			"tenant":    types.StringType},
+	},
+}
+
+// Attribute map for RequiredPointerField --> GlobalVn
+var NetworkConnectorConnectorChoiceSliToGlobalDrGlobalVnModelAttributeMap = map[string]attr.Type{
+
+	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
+}
+
+// Attribute map for PointerOfOneOfField --> SliToSloSnat
+var NetworkConnectorConnectorChoiceSliToSloSnatModelAttributeMap = map[string]attr.Type{
+
+	"pool_choice": types.ObjectType{
+		AttrTypes: NetworkConnectorConnectorChoiceSliToSloSnatPoolChoiceModelAttributeMap,
+	},
+	"routing_choice": types.ObjectType{
+		AttrTypes: NetworkConnectorConnectorChoiceSliToSloSnatRoutingChoiceModelAttributeMap,
+	},
+}
+
+// Attribute map for RequiredOneOfField --> PoolChoice
+var NetworkConnectorConnectorChoiceSliToSloSnatPoolChoiceModelAttributeMap = map[string]attr.Type{
+
+	"interface_ip": types.BoolType,
+}
+
+// Attribute map for RequiredOneOfField --> RoutingChoice
+var NetworkConnectorConnectorChoiceSliToSloSnatRoutingChoiceModelAttributeMap = map[string]attr.Type{
+
+	"default_gw_snat": types.BoolType,
+}
+
+// Attribute map for PointerOfOneOfField --> SloToGlobalDr
+var NetworkConnectorConnectorChoiceSloToGlobalDrModelAttributeMap = map[string]attr.Type{
+	"global_vn": types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"name":      types.StringType,
+			"namespace": types.StringType,
+			"tenant":    types.StringType},
+	},
+}
+
+// Attribute map for RequiredPointerField --> GlobalVn
+var NetworkConnectorConnectorChoiceSloToGlobalDrGlobalVnModelAttributeMap = map[string]attr.Type{
+
+	"name":      types.StringType,
+	"namespace": types.StringType,
+	"tenant":    types.StringType,
+}
+
+// Attribute map for RequiredOneOfField --> ForwardProxyChoice
+var NetworkConnectorForwardProxyChoiceModelAttributeMap = map[string]attr.Type{
+
+	"disable_forward_proxy": types.BoolType,
+	"enable_forward_proxy": types.ObjectType{
+		AttrTypes: NetworkConnectorForwardProxyChoiceEnableForwardProxyModelAttributeMap,
+	},
+}
+
+// Attribute map for PointerOfOneOfField --> EnableForwardProxy
+var NetworkConnectorForwardProxyChoiceEnableForwardProxyModelAttributeMap = map[string]attr.Type{
+
+	"connection_timeout":   types.Int64Type,
+	"max_connect_attempts": types.Int64Type,
 	"white_listed_ports": types.ListType{
 		ElemType: types.Int64Type,
 	},
-	"max_connect_attempts": types.Int64Type,
-	"connection_timeout":   types.Int64Type,
-}
-
-// Attribute map for ArrayOfPointerField --> InsideNetwork
-var NetworkConnectorInsideNetworkObjectRefModelAttributeMap = map[string]attr.Type{
-
-	"namespace": types.StringType,
-	"name":      types.StringType,
-	"tenant":    types.StringType,
+	"white_listed_prefixes": types.ListType{
+		ElemType: types.StringType,
+	},
 }
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -108,15 +194,29 @@ func (d *DataSourceF5XCNetworkConnector) Metadata(ctx context.Context, request d
 func (r *DataSourceF5XCNetworkConnector) Schema(ctx context.Context, request datasource.SchemaRequest, response *datasource.SchemaResponse) {
 	response.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "NetworkConnector data source",
-		Description:         "NetworkConnector data source",
+		MarkdownDescription: "GetRequest is used to get different forms of a network_connector This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of network_connector) etc. can be fetched",
+		Description:         "GetRequest is used to get different forms of a network_connector This is the input message of the 'Get' RPC. Different forms of a resource for e.g. a ReplaceRequest form (for editing), a CreateRequest form (for creating new instance of network_connector) etc. can be fetched",
 
 		Attributes: map[string]schema.Attribute{
+			"annotations": schema.MapAttribute{
+				Description: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				ElementType: types.StringType,
+			},
 			"description": schema.StringAttribute{
 				Description: "description Human readable description for the object",
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
+			},
+			"labels": schema.MapAttribute{
+				Description: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
+				Required:    false,
+				Optional:    false,
+				Computed:    true,
+				ElementType: types.StringType,
 			},
 			"name": schema.StringAttribute{
 				Description: "name This is the name of configuration object. It has to be unique within the namespace. It can only be specified during create API and cannot be changed during replace API. The value of name has to follow DNS-1035 format.",
@@ -136,172 +236,165 @@ func (r *DataSourceF5XCNetworkConnector) Schema(ctx context.Context, request dat
 				Optional:    false,
 				Computed:    true,
 			},
-			"labels": schema.MapAttribute{
-				Description: "labels Map of string keys and values that can be used to organize and categorize (scope and select) objects as chosen by the user. Values specified here will be used by selector expression",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
-			"annotations": schema.MapAttribute{
-				Description: "annotations Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
-			"outside_network": schema.ListNestedAttribute{
-				Description: "Outside VN Reference to outside network. Reference is valid only when the network type is per site virtual network or global virtual network. It is ignored for all other network types",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-						"name": schema.StringAttribute{
-							Description: "",
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-						},
-						"tenant": schema.StringAttribute{
-							Description: "",
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-						},
-						"namespace": schema.StringAttribute{
-							Description: "",
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-						},
-					},
-				},
-			},
-			"snat_pool_type": schema.ListAttribute{
-				Description: "Snat Pool Type SNAT setting not valid when  network connector type is Dynamic Gateway without SNAT. Type of Snat configuration to be used.",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
-			"dynamic_reverse_proxy": schema.ListNestedAttribute{
-				Description: "Dynamic Reverse Proxy Vhost to be used for dynamic reverse proxy configuration",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-						"tenant": schema.StringAttribute{
-							Description: "",
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-						},
-						"namespace": schema.StringAttribute{
-							Description: "",
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-						},
-						"name": schema.StringAttribute{
-							Description: "",
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-						},
-					},
-				},
-			},
-			"forward_proxy": schema.SingleNestedAttribute{
-				Description: "Forward Proxy Configuration Configuration, applicable only for forward proxy, fine tunes the forward proxy behavior",
+			"connector_choice": schema.SingleNestedAttribute{
+				Description: "Connector Choice Select the networks and method in which they are connected.",
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
 				Attributes: map[string]schema.Attribute{
-					"white_listed_prefixes": schema.ListAttribute{
-						Description: "IP prefix list Traffic to these destination ip prefixes is not subjected to protocol parsing Example 'tmate' server ip",
-						ElementType: types.StringType,
+					"sli_to_global_dr": schema.SingleNestedAttribute{
+						Description: "Site Local Inside to a Global Network' Site local inside is connected directly to a given global network",
 						Required:    false,
 						Optional:    false,
 						Computed:    true,
+						Attributes: map[string]schema.Attribute{
+							"global_vn": schema.SingleNestedAttribute{
+								Description: "Virtual Network Select Virtual Network of Global Type",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+								Attributes: map[string]schema.Attribute{
+									"name": schema.StringAttribute{
+										Description: "",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+									},
+									"namespace": schema.StringAttribute{
+										Description: "",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+									},
+									"tenant": schema.StringAttribute{
+										Description: "",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+									},
+								},
+							},
+						},
 					},
-					"white_listed_ports": schema.ListAttribute{
-						Description: "Port list Traffic to these destination TCP ports is not subjected to protocol parsing Example 'tmate' server port",
-						ElementType: types.Int64Type,
+					"sli_to_slo_snat": schema.SingleNestedAttribute{
+						Description: "Site Local Inside to Site Local Outside SNAT' Site local inside is connected to site local outside, using SNAT",
 						Required:    false,
 						Optional:    false,
 						Computed:    true,
+						Attributes: map[string]schema.Attribute{
+							"pool_choice": schema.SingleNestedAttribute{
+								Description: "SNAT SIP Selection Select ip will be used for SNAT from SNATed Network",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+								Attributes: map[string]schema.Attribute{
+									"interface_ip": schema.BoolAttribute{
+										Description: "Interface IP Interface IP of the outgoing interface will be used for SNAT",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+									},
+								},
+							},
+							"routing_choice": schema.SingleNestedAttribute{
+								Description: "Routing mode Select how is the traffic sent to SNATed network",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+								Attributes: map[string]schema.Attribute{
+									"default_gw_snat": schema.BoolAttribute{
+										Description: "Default Gateway Default route in inside network to SNATed network",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+									},
+								},
+							},
+						},
 					},
-					"max_connect_attempts": schema.Int64Attribute{
-						Description: "max_connect_attempts Specifies the allowed number of retries on connect failure to upstream server. Defaults to 1.",
+					"slo_to_global_dr": schema.SingleNestedAttribute{
+						Description: "Site Local Outside to a Global Network' Site local outside is connected directly to a given global network",
 						Required:    false,
 						Optional:    false,
 						Computed:    true,
-					},
-					"connection_timeout": schema.Int64Attribute{
-						Description: "connection_timeout The timeout for new network connections to upstream server. This is specified in milliseconds. The default value is 2000 (2 seconds)",
-						Required:    false,
-						Optional:    false,
-						Computed:    true,
+						Attributes: map[string]schema.Attribute{
+							"global_vn": schema.SingleNestedAttribute{
+								Description: "Virtual Network Select Virtual Network of Global Type",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+								Attributes: map[string]schema.Attribute{
+									"name": schema.StringAttribute{
+										Description: "",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+									},
+									"namespace": schema.StringAttribute{
+										Description: "",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+									},
+									"tenant": schema.StringAttribute{
+										Description: "",
+										Required:    false,
+										Optional:    false,
+										Computed:    true,
+									},
+								},
+							},
+						},
 					},
 				},
 			},
-			"inside_network_type": schema.ListAttribute{
-				Description: "Inside VN Type Type of the inside network. The network can be well known virtual network like site local inside / site local. If the virtual network is well known virtual network, the inside_network ref need not be present and will be auto derived. If virtual network is not well known like per site virtual network inside_network reference need to be specified inside_network_type can be one of type VIRTUAL_NETWORK_SITE_LOCAL, VIRTUAL_NETWORK_SITE_LOCAL_INSIDE or VIRTUAL_NETWORK_PER_SITE When inside_network_type is VIRTUAL_NETWORK_SITE_LOCAL outside_network_type can only be VIRTUAL_NETWORK_GLOBAL",
+			"forward_proxy_choice": schema.SingleNestedAttribute{
+				Description: "Select Forward Proxy Select to enable forward proxy",
 				Required:    false,
 				Optional:    false,
 				Computed:    true,
-				ElementType: types.StringType,
-			},
-			"inside_network": schema.ListNestedAttribute{
-				Description: "Inside VN Reference to inside network. Reference is valid only when the network type is per site virtual network or global virtual network. It is ignored for all other network types. public virtual network is not allowed as inside network",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-						"namespace": schema.StringAttribute{
-							Description: "",
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-						},
-						"name": schema.StringAttribute{
-							Description: "",
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
-						},
-						"tenant": schema.StringAttribute{
-							Description: "",
-							Required:    false,
-							Optional:    false,
-							Computed:    true,
+				Attributes: map[string]schema.Attribute{
+					"disable_forward_proxy": schema.BoolAttribute{
+						Description: "Disable Forward Proxy Forward Proxy is disabled for this connector",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+					},
+					"enable_forward_proxy": schema.SingleNestedAttribute{
+						Description: "Enable Forward Proxy Forward Proxy is enabled for this connector",
+						Required:    false,
+						Optional:    false,
+						Computed:    true,
+						Attributes: map[string]schema.Attribute{
+							"connection_timeout": schema.Int64Attribute{
+								Description: "connection_timeout The timeout for new network connections to upstream server. This is specified in milliseconds. The default value is 2000 (2 seconds)",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
+							"max_connect_attempts": schema.Int64Attribute{
+								Description: "max_connect_attempts Specifies the allowed number of retries on connect failure to upstream server. Defaults to 1.",
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
+							"white_listed_ports": schema.ListAttribute{
+								Description: "Port list Traffic to these destination TCP ports is not subjected to protocol parsing Example 'tmate' server port",
+								ElementType: types.Int64Type,
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
+							"white_listed_prefixes": schema.ListAttribute{
+								Description: "IP prefix list Traffic to these destination ip prefixes is not subjected to protocol parsing Example 'tmate' server ip",
+								ElementType: types.StringType,
+								Required:    false,
+								Optional:    false,
+								Computed:    true,
+							},
 						},
 					},
 				},
-			},
-			"proxy_type": schema.ListAttribute{
-				Description: "Proxy Type Forward proxy or dynamic reverse proxy for this connector If network-connector type is NETWORK_CONNECTOR_TYPE_DEFAULT_GATEWAY_SNAT, then proxy-type can be - NETWORK_CONNECTOR_NO_PROXY - NETWORK_CONNECTOR_DYNAMIC_REVERSE_PROXY - NETWORK_CONNECTOR_FORWARD_PROXY If network-connector type is NETWORK_CONNECTOR_TYPE_DYNAMIC_GATEWAY, then proxy-type must be NETWORK_CONNECTOR_NO_PROXY",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
-			"connector_type": schema.ListAttribute{
-				Description: "Network Connector Type Type of connector to use between inside virtual network and outside virtual network",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
-			"outside_network_type": schema.ListAttribute{
-				Description: "Outside VN type Type of the outside network. The network can be well known virtual network like site local inside / site local/ public etc. If the  virtual network is well known virtual network, the outside_network ref need not be present and will be auto derived. If virtual network is not well known like per site virtual network outside_network reference need to be specified outside_network_type can be one of type VIRTUAL_NETWORK_SITE_LOCAL, VIRTUAL_NETWORK_SITE_LOCAL_INSIDE, VIRTUAL_NETWORK_PER_SITE, VIRTUAL_NETWORK_PUBLIC or VIRTUAL_NETWORK_GLOBAL",
-				Required:    false,
-				Optional:    false,
-				Computed:    true,
-				ElementType: types.StringType,
 			},
 			"timeouts": timeouts.Attributes(ctx, timeouts.Opts{
 				Read: false, // activate timeouts.read
@@ -350,15 +443,14 @@ func (d *DataSourceF5XCNetworkConnector) Read(ctx context.Context, request datas
 		return
 	}
 
-	readTimeout, diags := data.Timeouts.Read(ctx, duration)
-	response.Diagnostics.Append(diags...)
+	readTimeout, readDiags := data.Timeouts.Read(ctx, duration)
+	response.Diagnostics.Append(readDiags...)
 	if response.Diagnostics.HasError() {
 		return
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
-
 	httpResp, err := d.client.GetObject(ctx, ves_io_schema_network_connector.ObjectType, data.Namespace.ValueString(), data.Name.ValueString())
 	if err != nil {
 		response.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read data, got error: %s", err))
@@ -367,42 +459,42 @@ func (d *DataSourceF5XCNetworkConnector) Read(ctx context.Context, request datas
 
 	// Write back the response to the model
 	metaData := httpResp.GetObjMetadata()
-	specData := httpResp.GetObjSpec().(*ves_io_schema_network_connector.SpecType).GcSpec
+	var specData ves_io_schema_network_connector.CreateSpecType
+	var rawSpecMap map[string]interface{}
+	if objSpec := httpResp.GetObjSpec(); objSpec != nil {
+		var buf bytes.Buffer
+		marshaler := &jsonpb.Marshaler{
+			OrigName: true,
+		}
+
+		specMsg, ok := interface{}(objSpec).(proto.Message)
+		if !ok {
+			response.Diagnostics.AddError("Internal Error", "objSpec is not a proto message")
+			return
+		}
+
+		if err := marshaler.Marshal(&buf, specMsg); err != nil {
+			response.Diagnostics.AddError("Marshal Error", fmt.Sprintf("Failed to marshal: %s", err))
+			return
+		}
+
+		if err := json.Unmarshal(buf.Bytes(), &rawSpecMap); err != nil {
+			response.Diagnostics.AddError("JSON Unmarshal Error", fmt.Sprintf("Failed to marshal: %s", err))
+			return
+		}
+
+		unmarshaler := &jsonpb.Unmarshaler{AllowUnknownFields: true}
+
+		if err := unmarshaler.Unmarshal(bytes.NewReader(buf.Bytes()), &specData); err != nil {
+			response.Diagnostics.AddError("Unmarshal Error", fmt.Sprintf("Failed to unmarshal: %s", err))
+			return
+		}
+	}
 	systemMetaData := httpResp.GetObjSystemMetadata()
 
 	tflog.Info(ctx, fmt.Sprintf("meta_type: %v", metaData))
 	tflog.Info(ctx, fmt.Sprintf("spec_type: %v", specData))
 	tflog.Info(ctx, fmt.Sprintf("meta_system_type_uid_field: %v", systemMetaData.GetUid()))
-
-	// data SpecToModelRoot Meta StringField --> Description
-	data.Description = types.StringValue(metaData.GetDescription())
-
-	// data SpecToModelRoot Meta RequiredStringField --> Name
-	data.Name = types.StringValue(metaData.GetName())
-
-	// data SpecToModelRoot Meta RequiredStringField --> Namespace
-	data.Namespace = types.StringValue(metaData.GetNamespace())
-
-	// data SpecToModelRoot Meta StringField --> Uid
-	data.Uid = types.StringValue(systemMetaData.GetUid())
-
-	// data SpecToModelRoot Meta MapOfStringField --> Labels
-	if metaData.GetLabels() != nil {
-		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
-		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
-		response.Diagnostics.Append(labelsDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		// Assign the typed map to the model
-		data.Labels = labelsMap
-	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
-		// API returned nil and the model has no value: set an explicit Null map to avoid
-		// DynamicPseudoType errors. If the model already contains a value (e.g. labels were set
-		// but the API did not echo them back in the response), preserve the existing value to prevent
-		// "Provider produced inconsistent result after apply" errors.
-		data.Labels = types.MapNull(types.StringType)
-	}
 
 	// data SpecToModelRoot Meta MapOfStringField --> Annotations
 	if metaData.GetAnnotations() != nil {
@@ -422,282 +514,499 @@ func (d *DataSourceF5XCNetworkConnector) Read(ctx context.Context, request datas
 		data.Annotations = types.MapNull(types.StringType)
 	}
 
-	// data SpecToModelRoot ArrayOfPointerField --> OutsideNetwork
-	if len(specData.OutsideNetwork) > 0 {
-		outsideNetworkElements := make([]ObjectRefTypeModel, 0, len(specData.OutsideNetwork))
+	// data SpecToModelRoot Meta StringField --> Description
+	data.Description = types.StringValue(metaData.GetDescription())
 
-		for _, outsideNetworkElement := range specData.OutsideNetwork {
-			objectRefTypeModelModel := ObjectRefTypeModel{}
-
-			// data specToModelNested RequiredStringField --> Name
-			if outsideNetworkElement.GetName() != "" {
-				objectRefTypeModelModel.Name = types.StringValue(outsideNetworkElement.GetName())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Name = types.StringNull()
-			}
-
-			// data specToModelNested StringField --> Tenant
-			if outsideNetworkElement.GetTenant() != "" {
-				objectRefTypeModelModel.Tenant = types.StringValue(outsideNetworkElement.GetTenant())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Tenant = types.StringNull()
-			}
-
-			// data specToModelNested RequiredStringField --> Namespace
-			if outsideNetworkElement.GetNamespace() != "" {
-				objectRefTypeModelModel.Namespace = types.StringValue(outsideNetworkElement.GetNamespace())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Namespace = types.StringNull()
-			}
-
-			outsideNetworkElements = append(outsideNetworkElements, objectRefTypeModelModel)
-		}
-
-		outsideNetworkList, diags := utils.GoStructSliceToListValue(
-			ctx,
-			NetworkConnectorOutsideNetworkObjectRefModelAttributeMap,
-			outsideNetworkElements,
-		)
-
-		response.Diagnostics.Append(diags...)
+	// data SpecToModelRoot Meta MapOfStringField --> Labels
+	if metaData.GetLabels() != nil {
+		// Convert native Go map[<KeyType>]string to types.Map with explicit value type of StringType
+		labelsMap, labelsDiags := utils.StringMapToTerraformMap(metaData.GetLabels())
+		response.Diagnostics.Append(labelsDiags...)
 		if response.Diagnostics.HasError() {
 			return
 		}
-
-		data.OutsideNetwork = outsideNetworkList
-	} else {
-		var outsideNetworkObjectType = basetypes.ObjectType{
-			AttrTypes: NetworkConnectorOutsideNetworkObjectRefModelAttributeMap,
-		}
-		nullOutsideNetworkList := basetypes.NewListNull(outsideNetworkObjectType)
-		data.OutsideNetwork = nullOutsideNetworkList
+		// Assign the typed map to the model
+		data.Labels = labelsMap
+	} else if data.Labels.IsNull() || data.Labels.IsUnknown() {
+		// API returned nil and the model has no value: set an explicit Null map to avoid
+		// DynamicPseudoType errors. If the model already contains a value (e.g. labels were set
+		// but the API did not echo them back in the response), preserve the existing value to prevent
+		// "Provider produced inconsistent result after apply" errors.
+		data.Labels = types.MapNull(types.StringType)
 	}
 
-	// data SpecToModelRoot EnumField --> SnatPoolType
-	if specData.GetSnatPoolType().String() != "" {
-		stringValue := types.StringValue(specData.GetSnatPoolType().String())
-		stringSlice := []types.String{stringValue}
-		listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
+	// data SpecToModelRoot Meta RequiredStringField --> Name
+	data.Name = types.StringValue(metaData.GetName())
+
+	// data SpecToModelRoot Meta RequiredStringField --> Namespace
+	data.Namespace = types.StringValue(metaData.GetNamespace())
+
+	// data SpecToModelRoot Meta StringField --> Uid
+	data.Uid = types.StringValue(systemMetaData.GetUid())
+
+	// data SpecToModelRoot RequiredOneOfField --> ConnectorChoice
+	// true
+	// true
+	// This resource uses custom JSON resolution.
+	// The API response for this oneof field can be inconsistent.
+	// We must inspect the raw JSON map to determine which choice is present.
+	// The logic checks for the presence of any of the possible oneof choices.
+	var oneofConnectorChoicePresent bool
+
+	// 1. Check for the choice inside a 'gc_spec' map, which is a common pattern in GET responses.
+	if gcSpec, gcSpecOk := rawSpecMap["gc_spec"].(map[string]interface{}); gcSpecOk {
+		if _, ok := gcSpec["sli_to_global_dr"]; ok {
+			oneofConnectorChoicePresent = true
+		} else if _, ok := gcSpec["sli_to_slo_snat"]; ok {
+			oneofConnectorChoicePresent = true
+		} else if _, ok := gcSpec["slo_to_global_dr"]; ok {
+			oneofConnectorChoicePresent = true
 		}
-		data.SnatPoolType = listValue
-	} else {
-		// Empty string, set to null
-		data.SnatPoolType = types.ListNull(types.StringType)
 	}
 
-	// data SpecToModelRoot ArrayOfPointerField --> DynamicReverseProxy
-	if len(specData.DynamicReverseProxy) > 0 {
-		dynamicReverseProxyElements := make([]ObjectRefTypeModel, 0, len(specData.DynamicReverseProxy))
-
-		for _, dynamicReverseProxyElement := range specData.DynamicReverseProxy {
-			objectRefTypeModelModel := ObjectRefTypeModel{}
-
-			// data specToModelNested StringField --> Tenant
-			if dynamicReverseProxyElement.GetTenant() != "" {
-				objectRefTypeModelModel.Tenant = types.StringValue(dynamicReverseProxyElement.GetTenant())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Tenant = types.StringNull()
-			}
-
-			// data specToModelNested RequiredStringField --> Namespace
-			if dynamicReverseProxyElement.GetNamespace() != "" {
-				objectRefTypeModelModel.Namespace = types.StringValue(dynamicReverseProxyElement.GetNamespace())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Namespace = types.StringNull()
-			}
-
-			// data specToModelNested RequiredStringField --> Name
-			if dynamicReverseProxyElement.GetName() != "" {
-				objectRefTypeModelModel.Name = types.StringValue(dynamicReverseProxyElement.GetName())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Name = types.StringNull()
-			}
-
-			dynamicReverseProxyElements = append(dynamicReverseProxyElements, objectRefTypeModelModel)
+	// 2. If not found in 'gc_spec', check for the choice at the top level of the spec.
+	if !oneofConnectorChoicePresent {
+		if _, ok := rawSpecMap["sli_to_global_dr"]; ok {
+			oneofConnectorChoicePresent = true
+		} else if _, ok := rawSpecMap["sli_to_slo_snat"]; ok {
+			oneofConnectorChoicePresent = true
+		} else if _, ok := rawSpecMap["slo_to_global_dr"]; ok {
+			oneofConnectorChoicePresent = true
 		}
-
-		dynamicReverseProxyList, diags := utils.GoStructSliceToListValue(
-			ctx,
-			NetworkConnectorDynamicReverseProxyObjectRefModelAttributeMap,
-			dynamicReverseProxyElements,
-		)
-
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-
-		data.DynamicReverseProxy = dynamicReverseProxyList
-	} else {
-		var dynamicReverseProxyObjectType = basetypes.ObjectType{
-			AttrTypes: NetworkConnectorDynamicReverseProxyObjectRefModelAttributeMap,
-		}
-		nullDynamicReverseProxyList := basetypes.NewListNull(dynamicReverseProxyObjectType)
-		data.DynamicReverseProxy = nullDynamicReverseProxyList
 	}
 
-	// data SpecToModelRoot PointerField --> ForwardProxy
-	if specData.GetForwardProxy() != nil {
-		var networkConnectorForwardProxyConfigTypeModel = &NetworkConnectorForwardProxyConfigType{}
-		forwardProxyElement := specData.GetForwardProxy()
+	if oneofConnectorChoicePresent {
+		// Define a variable for the spec choices to be passed down to nested templates.
+		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+		connectorChoiceChoices := rawSpecMap["connector_choice"]
 
-		// data specToModelNested ArrayOfStringField --> WhiteListedPrefixes
-		if len(forwardProxyElement.GetWhiteListedPrefixes()) > 0 {
-			listValue, diags := types.ListValueFrom(ctx, types.StringType, forwardProxyElement.GetWhiteListedPrefixes())
-			response.Diagnostics.Append(diags...)
-			if response.Diagnostics.HasError() {
+		// The model struct that will be populated by the nested template.
+		var connectorChoiceChoicesModel = &NetworkConnectorCreateSpecTypeConnectorChoice{}
+
+		// Recursively call the nested template to process the oneof choices.
+
+		// data specToModelNested PointerOfOneOfField --> SliToGlobalDr
+		// CreateSpecType
+		// true
+		{
+			sliToGlobalDrOptionsWrapper, isSliToGlobalDr := connectorChoiceChoices.(*ves_io_schema_network_connector.CreateSpecType_SliToGlobalDr)
+			sliToGlobalDrAttributeMap := make(map[string]attr.Value)
+
+			if isSliToGlobalDr && sliToGlobalDrOptionsWrapper != nil && sliToGlobalDrOptionsWrapper.SliToGlobalDr != nil {
+				sliToGlobalDrElement := sliToGlobalDrOptionsWrapper.SliToGlobalDr
+
+				// data specToModelNested RequiredPointerField --> GlobalVn
+				if sliToGlobalDrElement.GetGlobalVn() != nil {
+					// Create the nested Go struct
+					objectRefTypeModelModel := &ObjectRefTypeModel{}
+					globalVnElement := sliToGlobalDrElement.GetGlobalVn()
+
+					// Recursively populate the nested struct
+
+					// data specToModelNested RequiredStringField --> Name
+					if globalVnElement.GetName() != "" {
+						objectRefTypeModelModel.Name = types.StringValue(globalVnElement.GetName())
+					} else {
+						// Empty string, set to null
+						objectRefTypeModelModel.Name = types.StringNull()
+					}
+
+					// data specToModelNested RequiredStringField --> Namespace
+					if globalVnElement.GetNamespace() != "" {
+						objectRefTypeModelModel.Namespace = types.StringValue(globalVnElement.GetNamespace())
+					} else {
+						// Empty string, set to null
+						objectRefTypeModelModel.Namespace = types.StringNull()
+					}
+
+					// data specToModelNested StringField --> Tenant
+					if globalVnElement.GetTenant() != "" {
+						objectRefTypeModelModel.Tenant = types.StringValue(globalVnElement.GetTenant())
+					} else {
+						// Empty string, set to null
+						objectRefTypeModelModel.Tenant = types.StringNull()
+					}
+
+					// This field needs to be converted to a types.ObjectValue before assignment.
+					objectRefTypeModelModelObj, objDiags := types.ObjectValueFrom(ctx, NetworkConnectorConnectorChoiceSliToGlobalDrGlobalVnModelAttributeMap, objectRefTypeModelModel)
+					response.Diagnostics.Append(objDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					sliToGlobalDrAttributeMap["global_vn"] = objectRefTypeModelModelObj
+
+				} else {
+					// The source field is nil (e.g. redacted by the API).
+					// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
+					// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
+					// here because the API may always return a non-nil struct (with REDACTED values) for this
+					// field, making this else-branch unreachable. The child OneOf handles the actual healing.
+					// The target is a types.Object, so we use types.ObjectNull.
+					sliToGlobalDrAttributeMap["global_vn"] = types.ObjectNull(NetworkConnectorConnectorChoiceSliToGlobalDrGlobalVnModelAttributeMap)
+				}
+
+				sliToGlobalDrObj, sliToGlobalDrObjDiags := types.ObjectValue(NetworkConnectorConnectorChoiceSliToGlobalDrModelAttributeMap, sliToGlobalDrAttributeMap)
+				response.Diagnostics.Append(sliToGlobalDrObjDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				connectorChoiceChoicesModel.SliToGlobalDr = sliToGlobalDrObj
+			} else {
+				connectorChoiceChoicesModel.SliToGlobalDr = types.ObjectNull(NetworkConnectorConnectorChoiceSliToGlobalDrModelAttributeMap)
+			}
+		}
+
+		// data specToModelNested PointerOfOneOfField --> SliToSloSnat
+		// CreateSpecType
+		// true
+		{
+			sliToSloSnatOptionsWrapper, isSliToSloSnat := connectorChoiceChoices.(*ves_io_schema_network_connector.CreateSpecType_SliToSloSnat)
+			sliToSloSnatAttributeMap := make(map[string]attr.Value)
+
+			if isSliToSloSnat && sliToSloSnatOptionsWrapper != nil && sliToSloSnatOptionsWrapper.SliToSloSnat != nil {
+				sliToSloSnatElement := sliToSloSnatOptionsWrapper.SliToSloSnat
+
+				// data specToModelNested RequiredOneOfField --> PoolChoice
+				// CreateSpecType
+				// CreateSpecType: GetPoolChoice() returns the oneof interface value.
+				if sliToSloSnatElement.GetPoolChoice() != nil {
+					// Create a temporary attribute map for the choices within this OneOf
+					sliToSloSnatpoolChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+					// Define a variable for the spec choices to be passed down to nested templates.
+					// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+					sliToSloSnatpoolChoiceChoices := sliToSloSnatElement.GetPoolChoice()
+
+					// Process nested choices, populating the temporary attribute map
+
+					// data specToModelNested BoolOfOneOfPointerField --> InterfaceIp
+					var interfaceIpInMap bool
+
+					if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+						if _, found := gcSpec["interface_ip"]; found {
+							interfaceIpInMap = true
+						}
+					}
+
+					if !interfaceIpInMap {
+						if _, found := rawSpecMap["interface_ip"]; found {
+							interfaceIpInMap = true
+						}
+					}
+
+					_, isInterfaceIpForBool := sliToSloSnatpoolChoiceChoices.(*ves_io_schema_network_connector.SnatConnectorType_InterfaceIp)
+					if interfaceIpInMap || isInterfaceIpForBool {
+						sliToSloSnatpoolChoiceChoicesAttributeMap["interface_ip"] = types.BoolValue(true)
+					} else {
+						sliToSloSnatpoolChoiceChoicesAttributeMap["interface_ip"] = types.BoolNull()
+					}
+
+					// --- End of Choices ---
+
+					// Create the final ObjectValue for this OneOf field
+					finalObj, sliToSloSnatpoolChoiceChoicesObjDiags := types.ObjectValue(
+						NetworkConnectorConnectorChoiceSliToSloSnatPoolChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+						sliToSloSnatpoolChoiceChoicesAttributeMap,
+					)
+					response.Diagnostics.Append(sliToSloSnatpoolChoiceChoicesObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					// Assign the final object to the correct place (either the root model or a parent's attribute map)
+					sliToSloSnatAttributeMap["pool_choice"] = finalObj
+				} else {
+					sliToSloSnatAttributeMap["pool_choice"] = types.ObjectNull(NetworkConnectorConnectorChoiceSliToSloSnatPoolChoiceModelAttributeMap)
+				}
+
+				// data specToModelNested RequiredOneOfField --> RoutingChoice
+				// CreateSpecType
+				// CreateSpecType: GetRoutingChoice() returns the oneof interface value.
+				if sliToSloSnatElement.GetRoutingChoice() != nil {
+					// Create a temporary attribute map for the choices within this OneOf
+					sliToSloSnatroutingChoiceChoicesAttributeMap := make(map[string]attr.Value)
+
+					// Define a variable for the spec choices to be passed down to nested templates.
+					// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+					sliToSloSnatroutingChoiceChoices := sliToSloSnatElement.GetRoutingChoice()
+
+					// Process nested choices, populating the temporary attribute map
+
+					// data specToModelNested BoolOfOneOfPointerField --> DefaultGwSnat
+					var defaultGwSnatInMap bool
+
+					if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+						if _, found := gcSpec["default_gw_snat"]; found {
+							defaultGwSnatInMap = true
+						}
+					}
+
+					if !defaultGwSnatInMap {
+						if _, found := rawSpecMap["default_gw_snat"]; found {
+							defaultGwSnatInMap = true
+						}
+					}
+
+					_, isDefaultGwSnatForBool := sliToSloSnatroutingChoiceChoices.(*ves_io_schema_network_connector.SnatConnectorType_DefaultGwSnat)
+					if defaultGwSnatInMap || isDefaultGwSnatForBool {
+						sliToSloSnatroutingChoiceChoicesAttributeMap["default_gw_snat"] = types.BoolValue(true)
+					} else {
+						sliToSloSnatroutingChoiceChoicesAttributeMap["default_gw_snat"] = types.BoolNull()
+					}
+
+					// --- End of Choices ---
+
+					// Create the final ObjectValue for this OneOf field
+					finalObj, sliToSloSnatroutingChoiceChoicesObjDiags := types.ObjectValue(
+						NetworkConnectorConnectorChoiceSliToSloSnatRoutingChoiceModelAttributeMap, // The attribute schema for the OneOf choices
+						sliToSloSnatroutingChoiceChoicesAttributeMap,
+					)
+					response.Diagnostics.Append(sliToSloSnatroutingChoiceChoicesObjDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+
+					// Assign the final object to the correct place (either the root model or a parent's attribute map)
+					sliToSloSnatAttributeMap["routing_choice"] = finalObj
+				} else {
+					sliToSloSnatAttributeMap["routing_choice"] = types.ObjectNull(NetworkConnectorConnectorChoiceSliToSloSnatRoutingChoiceModelAttributeMap)
+				}
+
+				sliToSloSnatObj, sliToSloSnatObjDiags := types.ObjectValue(NetworkConnectorConnectorChoiceSliToSloSnatModelAttributeMap, sliToSloSnatAttributeMap)
+				response.Diagnostics.Append(sliToSloSnatObjDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				connectorChoiceChoicesModel.SliToSloSnat = sliToSloSnatObj
+			} else {
+				connectorChoiceChoicesModel.SliToSloSnat = types.ObjectNull(NetworkConnectorConnectorChoiceSliToSloSnatModelAttributeMap)
+			}
+		}
+
+		// data specToModelNested PointerOfOneOfField --> SloToGlobalDr
+		// CreateSpecType
+		// true
+		{
+			sloToGlobalDrOptionsWrapper, isSloToGlobalDr := connectorChoiceChoices.(*ves_io_schema_network_connector.CreateSpecType_SloToGlobalDr)
+			sloToGlobalDrAttributeMap := make(map[string]attr.Value)
+
+			if isSloToGlobalDr && sloToGlobalDrOptionsWrapper != nil && sloToGlobalDrOptionsWrapper.SloToGlobalDr != nil {
+				sloToGlobalDrElement := sloToGlobalDrOptionsWrapper.SloToGlobalDr
+
+				// data specToModelNested RequiredPointerField --> GlobalVn
+				if sloToGlobalDrElement.GetGlobalVn() != nil {
+					// Create the nested Go struct
+					objectRefTypeModelModel := &ObjectRefTypeModel{}
+					globalVnElement := sloToGlobalDrElement.GetGlobalVn()
+
+					// Recursively populate the nested struct
+
+					// data specToModelNested RequiredStringField --> Name
+					if globalVnElement.GetName() != "" {
+						objectRefTypeModelModel.Name = types.StringValue(globalVnElement.GetName())
+					} else {
+						// Empty string, set to null
+						objectRefTypeModelModel.Name = types.StringNull()
+					}
+
+					// data specToModelNested RequiredStringField --> Namespace
+					if globalVnElement.GetNamespace() != "" {
+						objectRefTypeModelModel.Namespace = types.StringValue(globalVnElement.GetNamespace())
+					} else {
+						// Empty string, set to null
+						objectRefTypeModelModel.Namespace = types.StringNull()
+					}
+
+					// data specToModelNested StringField --> Tenant
+					if globalVnElement.GetTenant() != "" {
+						objectRefTypeModelModel.Tenant = types.StringValue(globalVnElement.GetTenant())
+					} else {
+						// Empty string, set to null
+						objectRefTypeModelModel.Tenant = types.StringNull()
+					}
+
+					// This field needs to be converted to a types.ObjectValue before assignment.
+					objectRefTypeModelModelObj, objDiags := types.ObjectValueFrom(ctx, NetworkConnectorConnectorChoiceSloToGlobalDrGlobalVnModelAttributeMap, objectRefTypeModelModel)
+					response.Diagnostics.Append(objDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					sloToGlobalDrAttributeMap["global_vn"] = objectRefTypeModelModelObj
+
+				} else {
+					// The source field is nil (e.g. redacted by the API).
+					// Note: When NeedsStateHealing is true for a RequiredPointerField, the healing is already
+					// handled by the child OneOfField (e.g. secret_info_choice). No stateHealingSetter is emitted
+					// here because the API may always return a non-nil struct (with REDACTED values) for this
+					// field, making this else-branch unreachable. The child OneOf handles the actual healing.
+					// The target is a types.Object, so we use types.ObjectNull.
+					sloToGlobalDrAttributeMap["global_vn"] = types.ObjectNull(NetworkConnectorConnectorChoiceSloToGlobalDrGlobalVnModelAttributeMap)
+				}
+
+				sloToGlobalDrObj, sloToGlobalDrObjDiags := types.ObjectValue(NetworkConnectorConnectorChoiceSloToGlobalDrModelAttributeMap, sloToGlobalDrAttributeMap)
+				response.Diagnostics.Append(sloToGlobalDrObjDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				connectorChoiceChoicesModel.SloToGlobalDr = sloToGlobalDrObj
+			} else {
+				connectorChoiceChoicesModel.SloToGlobalDr = types.ObjectNull(NetworkConnectorConnectorChoiceSloToGlobalDrModelAttributeMap)
+			}
+		}
+
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			connectorChoiceObj, oneofDiags := utils.GoStructToObjectValue(
+				ctx,
+				NetworkConnectorConnectorChoiceModelAttributeMap,
+				connectorChoiceChoicesModel,
+			)
+			if oneofDiags.HasError() {
+				response.Diagnostics.Append(oneofDiags...)
 				return
 			}
-			networkConnectorForwardProxyConfigTypeModel.WhiteListedPrefixes = listValue
+
+			// Assign the final object to the root data model.
+			data.ConnectorChoice = connectorChoiceObj
+		}
+	} else {
+		// The oneof field is not present in the API response, so set the Terraform object to null.
+		data.ConnectorChoice = types.ObjectNull(NetworkConnectorConnectorChoiceModelAttributeMap)
+	}
+
+	// data SpecToModelRoot RequiredOneOfField --> ForwardProxyChoice
+	// true
+	// true
+	// This resource uses custom JSON resolution.
+	// The API response for this oneof field can be inconsistent.
+	// We must inspect the raw JSON map to determine which choice is present.
+	// The logic checks for the presence of any of the possible oneof choices.
+	var oneofForwardProxyChoicePresent bool
+
+	// 1. Check for the choice inside a 'gc_spec' map, which is a common pattern in GET responses.
+	if gcSpec, gcSpecOk := rawSpecMap["gc_spec"].(map[string]interface{}); gcSpecOk {
+		if _, ok := gcSpec["disable_forward_proxy"]; ok {
+			oneofForwardProxyChoicePresent = true
+		} else if _, ok := gcSpec["enable_forward_proxy"]; ok {
+			oneofForwardProxyChoicePresent = true
+		}
+	}
+
+	// 2. If not found in 'gc_spec', check for the choice at the top level of the spec.
+	if !oneofForwardProxyChoicePresent {
+		if _, ok := rawSpecMap["disable_forward_proxy"]; ok {
+			oneofForwardProxyChoicePresent = true
+		} else if _, ok := rawSpecMap["enable_forward_proxy"]; ok {
+			oneofForwardProxyChoicePresent = true
+		}
+	}
+
+	if oneofForwardProxyChoicePresent {
+		// Define a variable for the spec choices to be passed down to nested templates.
+		// Always declared (even for boolOnly flavour) because BoolOfOneOfPointerField children use it for type assertions.
+		forwardProxyChoiceChoices := rawSpecMap["forward_proxy_choice"]
+
+		// The model struct that will be populated by the nested template.
+		var forwardProxyChoiceChoicesModel = &NetworkConnectorCreateSpecTypeForwardProxyChoice{}
+
+		// Recursively call the nested template to process the oneof choices.
+
+		// data specToModelNested BoolOfOneOfPointerField --> DisableForwardProxy
+		var disableForwardProxyInMap bool
+
+		if gcSpec, ok := rawSpecMap["gc_spec"].(map[string]interface{}); ok {
+			if _, found := gcSpec["disable_forward_proxy"]; found {
+				disableForwardProxyInMap = true
+			}
+		}
+
+		if !disableForwardProxyInMap {
+			if _, found := rawSpecMap["disable_forward_proxy"]; found {
+				disableForwardProxyInMap = true
+			}
+		}
+
+		_, isDisableForwardProxyForBool := forwardProxyChoiceChoices.(*ves_io_schema_network_connector.CreateSpecType_DisableForwardProxy)
+		if disableForwardProxyInMap || isDisableForwardProxyForBool {
+			forwardProxyChoiceChoicesModel.DisableForwardProxy = types.BoolValue(true)
 		} else {
-			networkConnectorForwardProxyConfigTypeModel.WhiteListedPrefixes = types.ListNull(types.StringType)
+			forwardProxyChoiceChoicesModel.DisableForwardProxy = types.BoolNull()
 		}
 
-		// data specToModelNested UintField --> MaxConnectAttempts
-		networkConnectorForwardProxyConfigTypeModel.MaxConnectAttempts = types.Int64Value(int64(forwardProxyElement.GetMaxConnectAttempts()))
+		// data specToModelNested PointerOfOneOfField --> EnableForwardProxy
+		// CreateSpecType
+		// true
+		{
+			enableForwardProxyOptionsWrapper, isEnableForwardProxy := forwardProxyChoiceChoices.(*ves_io_schema_network_connector.CreateSpecType_EnableForwardProxy)
+			enableForwardProxyAttributeMap := make(map[string]attr.Value)
 
-		// data specToModelNested UintField --> ConnectionTimeout
-		networkConnectorForwardProxyConfigTypeModel.ConnectionTimeout = types.Int64Value(int64(forwardProxyElement.GetConnectionTimeout()))
+			if isEnableForwardProxy && enableForwardProxyOptionsWrapper != nil && enableForwardProxyOptionsWrapper.EnableForwardProxy != nil {
+				enableForwardProxyElement := enableForwardProxyOptionsWrapper.EnableForwardProxy
 
-		forwardProxyObj, forwardProxyDiags := utils.GoStructToObjectValue(
-			ctx,
-			NetworkConnectorForwardProxyModelAttributeMap,
-			networkConnectorForwardProxyConfigTypeModel,
-		)
-		response.Diagnostics.Append(forwardProxyDiags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.ForwardProxy = forwardProxyObj
-	} else {
-		data.ForwardProxy = types.ObjectNull(NetworkConnectorForwardProxyModelAttributeMap)
-	}
+				// data specToModelNested UintField --> ConnectionTimeout
+				enableForwardProxyAttributeMap["connection_timeout"] = types.Int64Value(int64(enableForwardProxyElement.GetConnectionTimeout()))
 
-	// data SpecToModelRoot RequiredEnumField --> InsideNetworkType
-	if specData.GetInsideNetworkType().String() != "" {
-		stringValue := types.StringValue(specData.GetInsideNetworkType().String())
-		stringSlice := []types.String{stringValue}
-		listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.InsideNetworkType = listValue
-	} else {
-		// Empty string, set to null
-		data.InsideNetworkType = types.ListNull(types.StringType)
-	}
+				// data specToModelNested UintField --> MaxConnectAttempts
+				enableForwardProxyAttributeMap["max_connect_attempts"] = types.Int64Value(int64(enableForwardProxyElement.GetMaxConnectAttempts()))
 
-	// data SpecToModelRoot ArrayOfPointerField --> InsideNetwork
-	if len(specData.InsideNetwork) > 0 {
-		insideNetworkElements := make([]ObjectRefTypeModel, 0, len(specData.InsideNetwork))
+				// data specToModelNested ArrayOfUintField --> WhiteListedPorts
+				whiteListedPortsValue := enableForwardProxyElement.GetWhiteListedPorts()
+				if len(whiteListedPortsValue) > 0 {
+					listValue, listDiags := types.ListValueFrom(ctx, types.Int64Type, enableForwardProxyElement.GetWhiteListedPorts())
+					response.Diagnostics.Append(listDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					enableForwardProxyAttributeMap["white_listed_ports"] = listValue
+				} else {
+					enableForwardProxyAttributeMap["white_listed_ports"] = types.ListNull(types.Int64Type)
+				}
 
-		for _, insideNetworkElement := range specData.InsideNetwork {
-			objectRefTypeModelModel := ObjectRefTypeModel{}
+				// data specToModelNested ArrayOfStringField --> WhiteListedPrefixes
+				if len(enableForwardProxyElement.GetWhiteListedPrefixes()) > 0 {
+					listValue, listDiags := types.ListValueFrom(ctx, types.StringType, enableForwardProxyElement.GetWhiteListedPrefixes())
+					response.Diagnostics.Append(listDiags...)
+					if response.Diagnostics.HasError() {
+						return
+					}
+					enableForwardProxyAttributeMap["white_listed_prefixes"] = listValue
+				} else {
+					enableForwardProxyAttributeMap["white_listed_prefixes"] = types.ListNull(types.StringType)
+				}
 
-			// data specToModelNested RequiredStringField --> Namespace
-			if insideNetworkElement.GetNamespace() != "" {
-				objectRefTypeModelModel.Namespace = types.StringValue(insideNetworkElement.GetNamespace())
+				enableForwardProxyObj, enableForwardProxyObjDiags := types.ObjectValue(NetworkConnectorForwardProxyChoiceEnableForwardProxyModelAttributeMap, enableForwardProxyAttributeMap)
+				response.Diagnostics.Append(enableForwardProxyObjDiags...)
+				if response.Diagnostics.HasError() {
+					return
+				}
+				forwardProxyChoiceChoicesModel.EnableForwardProxy = enableForwardProxyObj
 			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Namespace = types.StringNull()
+				forwardProxyChoiceChoicesModel.EnableForwardProxy = types.ObjectNull(NetworkConnectorForwardProxyChoiceEnableForwardProxyModelAttributeMap)
+			}
+		}
+
+		// Convert the populated Go struct for the oneof choices into a Terraform ObjectValue.
+		{
+			forwardProxyChoiceObj, oneofDiags := utils.GoStructToObjectValue(
+				ctx,
+				NetworkConnectorForwardProxyChoiceModelAttributeMap,
+				forwardProxyChoiceChoicesModel,
+			)
+			if oneofDiags.HasError() {
+				response.Diagnostics.Append(oneofDiags...)
+				return
 			}
 
-			// data specToModelNested RequiredStringField --> Name
-			if insideNetworkElement.GetName() != "" {
-				objectRefTypeModelModel.Name = types.StringValue(insideNetworkElement.GetName())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Name = types.StringNull()
-			}
-
-			// data specToModelNested StringField --> Tenant
-			if insideNetworkElement.GetTenant() != "" {
-				objectRefTypeModelModel.Tenant = types.StringValue(insideNetworkElement.GetTenant())
-			} else {
-				// Empty string, set to null
-				objectRefTypeModelModel.Tenant = types.StringNull()
-			}
-
-			insideNetworkElements = append(insideNetworkElements, objectRefTypeModelModel)
+			// Assign the final object to the root data model.
+			data.ForwardProxyChoice = forwardProxyChoiceObj
 		}
-
-		insideNetworkList, diags := utils.GoStructSliceToListValue(
-			ctx,
-			NetworkConnectorInsideNetworkObjectRefModelAttributeMap,
-			insideNetworkElements,
-		)
-
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-
-		data.InsideNetwork = insideNetworkList
 	} else {
-		var insideNetworkObjectType = basetypes.ObjectType{
-			AttrTypes: NetworkConnectorInsideNetworkObjectRefModelAttributeMap,
-		}
-		nullInsideNetworkList := basetypes.NewListNull(insideNetworkObjectType)
-		data.InsideNetwork = nullInsideNetworkList
-	}
-
-	// data SpecToModelRoot EnumField --> ProxyType
-	if specData.GetProxyType().String() != "" {
-		stringValue := types.StringValue(specData.GetProxyType().String())
-		stringSlice := []types.String{stringValue}
-		listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.ProxyType = listValue
-	} else {
-		// Empty string, set to null
-		data.ProxyType = types.ListNull(types.StringType)
-	}
-
-	// data SpecToModelRoot RequiredEnumField --> ConnectorType
-	if specData.GetConnectorType().String() != "" {
-		stringValue := types.StringValue(specData.GetConnectorType().String())
-		stringSlice := []types.String{stringValue}
-		listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.ConnectorType = listValue
-	} else {
-		// Empty string, set to null
-		data.ConnectorType = types.ListNull(types.StringType)
-	}
-
-	// data SpecToModelRoot RequiredEnumField --> OutsideNetworkType
-	if specData.GetOutsideNetworkType().String() != "" {
-		stringValue := types.StringValue(specData.GetOutsideNetworkType().String())
-		stringSlice := []types.String{stringValue}
-		listValue, diags := types.ListValueFrom(ctx, types.StringType, stringSlice)
-		response.Diagnostics.Append(diags...)
-		if response.Diagnostics.HasError() {
-			return
-		}
-		data.OutsideNetworkType = listValue
-	} else {
-		// Empty string, set to null
-		data.OutsideNetworkType = types.ListNull(types.StringType)
+		// The oneof field is not present in the API response, so set the Terraform object to null.
+		data.ForwardProxyChoice = types.ObjectNull(NetworkConnectorForwardProxyChoiceModelAttributeMap)
 	}
 
 	// Set state to fully populated data
-	diags = response.State.Set(ctx, &data)
+	diags := response.State.Set(ctx, &data)
 	response.Diagnostics.Append(diags...)
 	if response.Diagnostics.HasError() {
 		return

@@ -1689,10 +1689,7 @@ var APISwaggerJSON string = `{
         "description": "Alert Policy is used to specify a set of routes to match the incoming alert and the set of receivers to\nsend the alert notification if there is a match.\nAn Alert policy object defines a node in the Alert policy routing tree. An incoming alert matches the\nroutes defined in the alert policy in order till a match is found. If the action defined in the matching route is send,\nthen the alert is sent to all the receivers associated with the alert policy, else the alert is not sent\nto any receiver.",
         "version": "version not set"
     },
-    "schemes": [
-        "http",
-        "https"
-    ],
+    "schemes": null,
     "consumes": [
         "application/json"
     ],
@@ -1759,6 +1756,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1851,6 +1854,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1951,6 +1960,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2068,6 +2083,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2171,6 +2192,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2216,7 +2243,7 @@ var APISwaggerJSON string = `{
     "definitions": {
         "alert_policyAlertName": {
             "type": "string",
-            "description": "List of Alert Names\n\nCustomer tunnel interface down\nPhysical Interface down\nTunnel Interfaces to Customer Site Down\nVirutal Host server error\nVirtual Host client error\nService Health Low\nService Unavailable\nVirtual Host server error\nVirtual Host client error\nEndpoint Healthcheck failure\nSynthetic monitor health critical\nMalicious user detected\nVirtual Host WAF security events detected\nVirtual Host API security events detected\nVirtual Host Service Policy security events detected\nVirtual Host Many Malicious Bots based WAF security events detected\nVirtual Host Many Malicious Bots based Bot Defense security events detected\nVirtual Host Many Threat campaign based WAF security events detected\nSuspicious domain identified by Client-Side Defense service\nClient-Side Defense has identified a suspicious script that is reading sensitive form field\nTLS Automatic Certificate renewal is failing\nTLS Automatic Certificate renewal is still failing after multiple retries\nTLS Automatic Certificate has expired\nTLS Custom Certificate will expire in less than 28 days\nTLS Custom Certificate will expire in less than 15 days\nTLS Custom Certificate has expired\nDDoS security event detected\nDNS Zone Ignored a Duplicate Record Create Request\nUnused APIs Detected\nShadow APIs Detected\nEndpoints With Sensitive Data In Response Detected\nHigh Risk Score Endpoints Detected\nA routed DDoS traffic anomaly has been detected\nA routed DDoS mitigation has been implemented to block malicious traffic\nA routed DDoS tunnel status has been changed",
+            "description": "List of Alert Names\n\nCustomer tunnel interface down\nPhysical Interface down\nTunnel Interfaces to Customer Site Down\nVirutal Host server error\nVirtual Host client error\nService Health Low\nService Unavailable\nVirtual Host server error\nVirtual Host client error\nEndpoint Healthcheck failure\nSynthetic monitor health critical\nMalicious user detected\nVirtual Host WAF security events detected\nVirtual Host API security events detected\nVirtual Host Service Policy security events detected\nVirtual Host Many Malicious Bots based WAF security events detected\nVirtual Host Many Malicious Bots based Bot Defense security events detected\nVirtual Host Many Threat campaign based WAF security events detected\nSuspicious domain identified by Client-Side Defense service\nClient-Side Defense has identified a suspicious script that is reading sensitive form field\nTLS Automatic Certificate renewal is failing\nTLS Automatic Certificate renewal is still failing after multiple retries\nTLS Automatic Certificate has expired\nTLS Custom Certificate will expire in less than 28 days\nTLS Custom Certificate will expire in less than 15 days\nTLS Custom Certificate has expired\nDDoS security event detected\nDNS Zone Ignored a Duplicate Record Create Request\nUnused APIs Detected\nShadow APIs Detected\nEndpoints With Sensitive Data In Response Detected\nHigh Risk Score Endpoints Detected\nA routed DDoS traffic anomaly has been detected\nA routed DDoS mitigation has been implemented to block malicious traffic\nA routed DDoS tunnel status has been changed\nL7 DDoS attack was detected, automatic mitigation is taking place",
             "title": "AlertName",
             "enum": [
                 "SITE_CUSTOMER_TUNNEL_INTERFACE_DOWN",
@@ -2253,7 +2280,8 @@ var APISwaggerJSON string = `{
                 "API_SECURITY_RISK_SCORE_HIGH_DETECTED",
                 "ROUTED_DDOS_ALERT_NOTIFICATION",
                 "ROUTED_DDOS_MITIGATION_NOTIFICATION",
-                "ROUTED_DDOS_TUNNEL_STATUS_UPDATE_NOTIFICATION"
+                "ROUTED_DDOS_TUNNEL_STATUS_UPDATE_NOTIFICATION",
+                "L7_DDOS_AUTO_MITIGATION"
             ],
             "default": "SITE_CUSTOMER_TUNNEL_INTERFACE_DOWN",
             "x-displayname": "AlertName",
@@ -2355,7 +2383,7 @@ var APISwaggerJSON string = `{
             "properties": {
                 "labels": {
                     "type": "array",
-                    "description": " Name of labels to group/aggregate the alerts\n\nExample: - \"value\"-\n\nValidation Rules:\n  ves.io.schema.rules.repeated.max_items: 5\n  ves.io.schema.rules.repeated.unique: true\n  ves.io.schema.rules.string.pattern: ^[a-zA-Z_][a-zA-Z0-9_]*$\n",
+                    "description": " Name of labels to group/aggregate the alerts\n\nExample: - \"value\"-\n\nValidation Rules:\n  ves.io.schema.rules.repeated.items.string.pattern: ^[a-zA-Z_][a-zA-Z0-9_]*$\n  ves.io.schema.rules.repeated.max_items: 5\n  ves.io.schema.rules.repeated.unique: true\n",
                     "title": "labels",
                     "maxItems": 5,
                     "items": {
@@ -2364,9 +2392,9 @@ var APISwaggerJSON string = `{
                     "x-displayname": "Labels",
                     "x-ves-example": "value",
                     "x-ves-validation-rules": {
+                        "ves.io.schema.rules.repeated.items.string.pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$",
                         "ves.io.schema.rules.repeated.max_items": "5",
-                        "ves.io.schema.rules.repeated.unique": "true",
-                        "ves.io.schema.rules.string.pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$"
+                        "ves.io.schema.rules.repeated.unique": "true"
                     }
                 }
             }
@@ -2422,7 +2450,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Fail the delete operation if this object is being referred by other objects",
                     "title": "fail_if_referred",
-                    "format": "boolean",
                     "x-displayname": "Fail-If-Referred"
                 },
                 "name": {
@@ -2692,7 +2719,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true indicates alert_policy is administratively disabled",
                     "title": "disabled",
-                    "format": "boolean",
                     "x-displayname": "Disabled"
                 },
                 "get_spec": {
@@ -3053,6 +3079,27 @@ var APISwaggerJSON string = `{
                 }
             }
         },
+        "runtimeError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/protobufAny"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
         "schemaConditionType": {
             "type": "object",
             "description": "Conditions are used in the object status to describe the current state of the\nobject, e.g. Ready, Succeeded, etc.",
@@ -3228,7 +3275,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "labels": {
@@ -3292,7 +3338,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable",
                     "x-ves-example": "true"
                 },
@@ -3402,7 +3447,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "labels": {
@@ -3488,7 +3532,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Indicate whether mars deems this object to be stale via graceful restart timer information",
                     "title": "vtrp_stale",
-                    "format": "boolean",
                     "x-displayname": "VTRP Stale"
                 }
             }

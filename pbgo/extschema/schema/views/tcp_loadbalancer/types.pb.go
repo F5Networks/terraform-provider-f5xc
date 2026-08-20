@@ -5,6 +5,12 @@ package tcp_loadbalancer
 
 import (
 	fmt "fmt"
+	io "io"
+	math "math"
+	math_bits "math/bits"
+	reflect "reflect"
+	strings "strings"
+
 	_ "github.com/gogo/protobuf/gogoproto"
 	proto "github.com/gogo/protobuf/proto"
 	types "github.com/gogo/protobuf/types"
@@ -13,11 +19,6 @@ import (
 	views "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/views"
 	virtual_host "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/virtual_host"
 	virtual_host_dns_info "gopkg.volterra.us/terraform-provider-f5xc/pbgo/extschema/schema/virtual_host_dns_info"
-	io "io"
-	math "math"
-	math_bits "math/bits"
-	reflect "reflect"
-	strings "strings"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -359,10 +360,14 @@ type GlobalSpecType struct {
 	// This is a choice to select method to advertise VIP.
 	//
 	// Types that are valid to be assigned to AdvertiseChoice:
-	//	*GlobalSpecType_DoNotAdvertise
 	//	*GlobalSpecType_AdvertiseOnPublicDefaultVip
+	//	*GlobalSpecType_AdvertiseOnPublicDefaultIpv6Vip
+	//	*GlobalSpecType_AdvertiseOnPublicDefaultDualstackVip
 	//	*GlobalSpecType_AdvertiseOnPublic
+	//	*GlobalSpecType_AdvertiseV6OnPublic
+	//	*GlobalSpecType_AdvertiseDualstackOnPublic
 	//	*GlobalSpecType_AdvertiseCustom
+	//	*GlobalSpecType_DoNotAdvertise
 	AdvertiseChoice isGlobalSpecType_AdvertiseChoice `protobuf_oneof:"advertise_choice"`
 	// Load Balancing Control
 	//
@@ -542,17 +547,29 @@ type GlobalSpecType_Sni struct {
 type GlobalSpecType_DefaultLbWithSni struct {
 	DefaultLbWithSni *schema.Empty `protobuf:"bytes,28,opt,name=default_lb_with_sni,json=defaultLbWithSni,proto3,oneof" json:"default_lb_with_sni,omitempty"`
 }
-type GlobalSpecType_DoNotAdvertise struct {
-	DoNotAdvertise *schema.Empty `protobuf:"bytes,7,opt,name=do_not_advertise,json=doNotAdvertise,proto3,oneof" json:"do_not_advertise,omitempty"`
-}
 type GlobalSpecType_AdvertiseOnPublicDefaultVip struct {
 	AdvertiseOnPublicDefaultVip *schema.Empty `protobuf:"bytes,8,opt,name=advertise_on_public_default_vip,json=advertiseOnPublicDefaultVip,proto3,oneof" json:"advertise_on_public_default_vip,omitempty"`
+}
+type GlobalSpecType_AdvertiseOnPublicDefaultIpv6Vip struct {
+	AdvertiseOnPublicDefaultIpv6Vip *schema.Empty `protobuf:"bytes,36,opt,name=advertise_on_public_default_ipv6_vip,json=advertiseOnPublicDefaultIpv6Vip,proto3,oneof" json:"advertise_on_public_default_ipv6_vip,omitempty"`
+}
+type GlobalSpecType_AdvertiseOnPublicDefaultDualstackVip struct {
+	AdvertiseOnPublicDefaultDualstackVip *schema.Empty `protobuf:"bytes,37,opt,name=advertise_on_public_default_dualstack_vip,json=advertiseOnPublicDefaultDualstackVip,proto3,oneof" json:"advertise_on_public_default_dualstack_vip,omitempty"`
 }
 type GlobalSpecType_AdvertiseOnPublic struct {
 	AdvertiseOnPublic *views.AdvertisePublic `protobuf:"bytes,5,opt,name=advertise_on_public,json=advertiseOnPublic,proto3,oneof" json:"advertise_on_public,omitempty"`
 }
+type GlobalSpecType_AdvertiseV6OnPublic struct {
+	AdvertiseV6OnPublic *views.AdvertisePublic `protobuf:"bytes,38,opt,name=advertise_v6_on_public,json=advertiseV6OnPublic,proto3,oneof" json:"advertise_v6_on_public,omitempty"`
+}
+type GlobalSpecType_AdvertiseDualstackOnPublic struct {
+	AdvertiseDualstackOnPublic *views.AdvertisePublic `protobuf:"bytes,39,opt,name=advertise_dualstack_on_public,json=advertiseDualstackOnPublic,proto3,oneof" json:"advertise_dualstack_on_public,omitempty"`
+}
 type GlobalSpecType_AdvertiseCustom struct {
 	AdvertiseCustom *views.AdvertiseCustom `protobuf:"bytes,6,opt,name=advertise_custom,json=advertiseCustom,proto3,oneof" json:"advertise_custom,omitempty"`
+}
+type GlobalSpecType_DoNotAdvertise struct {
+	DoNotAdvertise *schema.Empty `protobuf:"bytes,7,opt,name=do_not_advertise,json=doNotAdvertise,proto3,oneof" json:"do_not_advertise,omitempty"`
 }
 type GlobalSpecType_HashPolicyChoiceRoundRobin struct {
 	HashPolicyChoiceRoundRobin *schema.Empty `protobuf:"bytes,13,opt,name=hash_policy_choice_round_robin,json=hashPolicyChoiceRoundRobin,proto3,oneof" json:"hash_policy_choice_round_robin,omitempty"`
@@ -591,27 +608,31 @@ type GlobalSpecType_ActiveServicePolicies struct {
 	ActiveServicePolicies *ServicePolicyList `protobuf:"bytes,33,opt,name=active_service_policies,json=activeServicePolicies,proto3,oneof" json:"active_service_policies,omitempty"`
 }
 
-func (*GlobalSpecType_ListenPort) isGlobalSpecType_PortChoice()                               {}
-func (*GlobalSpecType_PortRanges) isGlobalSpecType_PortChoice()                               {}
-func (*GlobalSpecType_NoSni) isGlobalSpecType_SniDefaultLbChoice()                            {}
-func (*GlobalSpecType_Sni) isGlobalSpecType_SniDefaultLbChoice()                              {}
-func (*GlobalSpecType_DefaultLbWithSni) isGlobalSpecType_SniDefaultLbChoice()                 {}
-func (*GlobalSpecType_DoNotAdvertise) isGlobalSpecType_AdvertiseChoice()                      {}
-func (*GlobalSpecType_AdvertiseOnPublicDefaultVip) isGlobalSpecType_AdvertiseChoice()         {}
-func (*GlobalSpecType_AdvertiseOnPublic) isGlobalSpecType_AdvertiseChoice()                   {}
-func (*GlobalSpecType_AdvertiseCustom) isGlobalSpecType_AdvertiseChoice()                     {}
-func (*GlobalSpecType_HashPolicyChoiceRoundRobin) isGlobalSpecType_HashPolicyChoice()         {}
-func (*GlobalSpecType_HashPolicyChoiceLeastActive) isGlobalSpecType_HashPolicyChoice()        {}
-func (*GlobalSpecType_HashPolicyChoiceRandom) isGlobalSpecType_HashPolicyChoice()             {}
-func (*GlobalSpecType_HashPolicyChoiceSourceIpStickiness) isGlobalSpecType_HashPolicyChoice() {}
-func (*GlobalSpecType_RetractCluster) isGlobalSpecType_ClusterRetractChoice()                 {}
-func (*GlobalSpecType_DoNotRetractCluster) isGlobalSpecType_ClusterRetractChoice()            {}
-func (*GlobalSpecType_Tcp) isGlobalSpecType_LoadbalancerType()                                {}
-func (*GlobalSpecType_TlsTcpAutoCert) isGlobalSpecType_LoadbalancerType()                     {}
-func (*GlobalSpecType_TlsTcp) isGlobalSpecType_LoadbalancerType()                             {}
-func (*GlobalSpecType_ServicePoliciesFromNamespace) isGlobalSpecType_ServicePolicyChoice()    {}
-func (*GlobalSpecType_NoServicePolicies) isGlobalSpecType_ServicePolicyChoice()               {}
-func (*GlobalSpecType_ActiveServicePolicies) isGlobalSpecType_ServicePolicyChoice()           {}
+func (*GlobalSpecType_ListenPort) isGlobalSpecType_PortChoice()                                {}
+func (*GlobalSpecType_PortRanges) isGlobalSpecType_PortChoice()                                {}
+func (*GlobalSpecType_NoSni) isGlobalSpecType_SniDefaultLbChoice()                             {}
+func (*GlobalSpecType_Sni) isGlobalSpecType_SniDefaultLbChoice()                               {}
+func (*GlobalSpecType_DefaultLbWithSni) isGlobalSpecType_SniDefaultLbChoice()                  {}
+func (*GlobalSpecType_AdvertiseOnPublicDefaultVip) isGlobalSpecType_AdvertiseChoice()          {}
+func (*GlobalSpecType_AdvertiseOnPublicDefaultIpv6Vip) isGlobalSpecType_AdvertiseChoice()      {}
+func (*GlobalSpecType_AdvertiseOnPublicDefaultDualstackVip) isGlobalSpecType_AdvertiseChoice() {}
+func (*GlobalSpecType_AdvertiseOnPublic) isGlobalSpecType_AdvertiseChoice()                    {}
+func (*GlobalSpecType_AdvertiseV6OnPublic) isGlobalSpecType_AdvertiseChoice()                  {}
+func (*GlobalSpecType_AdvertiseDualstackOnPublic) isGlobalSpecType_AdvertiseChoice()           {}
+func (*GlobalSpecType_AdvertiseCustom) isGlobalSpecType_AdvertiseChoice()                      {}
+func (*GlobalSpecType_DoNotAdvertise) isGlobalSpecType_AdvertiseChoice()                       {}
+func (*GlobalSpecType_HashPolicyChoiceRoundRobin) isGlobalSpecType_HashPolicyChoice()          {}
+func (*GlobalSpecType_HashPolicyChoiceLeastActive) isGlobalSpecType_HashPolicyChoice()         {}
+func (*GlobalSpecType_HashPolicyChoiceRandom) isGlobalSpecType_HashPolicyChoice()              {}
+func (*GlobalSpecType_HashPolicyChoiceSourceIpStickiness) isGlobalSpecType_HashPolicyChoice()  {}
+func (*GlobalSpecType_RetractCluster) isGlobalSpecType_ClusterRetractChoice()                  {}
+func (*GlobalSpecType_DoNotRetractCluster) isGlobalSpecType_ClusterRetractChoice()             {}
+func (*GlobalSpecType_Tcp) isGlobalSpecType_LoadbalancerType()                                 {}
+func (*GlobalSpecType_TlsTcpAutoCert) isGlobalSpecType_LoadbalancerType()                      {}
+func (*GlobalSpecType_TlsTcp) isGlobalSpecType_LoadbalancerType()                              {}
+func (*GlobalSpecType_ServicePoliciesFromNamespace) isGlobalSpecType_ServicePolicyChoice()     {}
+func (*GlobalSpecType_NoServicePolicies) isGlobalSpecType_ServicePolicyChoice()                {}
+func (*GlobalSpecType_ActiveServicePolicies) isGlobalSpecType_ServicePolicyChoice()            {}
 
 func (m *GlobalSpecType) GetPortChoice() isGlobalSpecType_PortChoice {
 	if m != nil {
@@ -727,16 +748,23 @@ func (m *GlobalSpecType) GetOriginPoolsWeights() []*views.OriginPoolWithWeight {
 	return nil
 }
 
-func (m *GlobalSpecType) GetDoNotAdvertise() *schema.Empty {
-	if x, ok := m.GetAdvertiseChoice().(*GlobalSpecType_DoNotAdvertise); ok {
-		return x.DoNotAdvertise
+func (m *GlobalSpecType) GetAdvertiseOnPublicDefaultVip() *schema.Empty {
+	if x, ok := m.GetAdvertiseChoice().(*GlobalSpecType_AdvertiseOnPublicDefaultVip); ok {
+		return x.AdvertiseOnPublicDefaultVip
 	}
 	return nil
 }
 
-func (m *GlobalSpecType) GetAdvertiseOnPublicDefaultVip() *schema.Empty {
-	if x, ok := m.GetAdvertiseChoice().(*GlobalSpecType_AdvertiseOnPublicDefaultVip); ok {
-		return x.AdvertiseOnPublicDefaultVip
+func (m *GlobalSpecType) GetAdvertiseOnPublicDefaultIpv6Vip() *schema.Empty {
+	if x, ok := m.GetAdvertiseChoice().(*GlobalSpecType_AdvertiseOnPublicDefaultIpv6Vip); ok {
+		return x.AdvertiseOnPublicDefaultIpv6Vip
+	}
+	return nil
+}
+
+func (m *GlobalSpecType) GetAdvertiseOnPublicDefaultDualstackVip() *schema.Empty {
+	if x, ok := m.GetAdvertiseChoice().(*GlobalSpecType_AdvertiseOnPublicDefaultDualstackVip); ok {
+		return x.AdvertiseOnPublicDefaultDualstackVip
 	}
 	return nil
 }
@@ -748,9 +776,30 @@ func (m *GlobalSpecType) GetAdvertiseOnPublic() *views.AdvertisePublic {
 	return nil
 }
 
+func (m *GlobalSpecType) GetAdvertiseV6OnPublic() *views.AdvertisePublic {
+	if x, ok := m.GetAdvertiseChoice().(*GlobalSpecType_AdvertiseV6OnPublic); ok {
+		return x.AdvertiseV6OnPublic
+	}
+	return nil
+}
+
+func (m *GlobalSpecType) GetAdvertiseDualstackOnPublic() *views.AdvertisePublic {
+	if x, ok := m.GetAdvertiseChoice().(*GlobalSpecType_AdvertiseDualstackOnPublic); ok {
+		return x.AdvertiseDualstackOnPublic
+	}
+	return nil
+}
+
 func (m *GlobalSpecType) GetAdvertiseCustom() *views.AdvertiseCustom {
 	if x, ok := m.GetAdvertiseChoice().(*GlobalSpecType_AdvertiseCustom); ok {
 		return x.AdvertiseCustom
+	}
+	return nil
+}
+
+func (m *GlobalSpecType) GetDoNotAdvertise() *schema.Empty {
+	if x, ok := m.GetAdvertiseChoice().(*GlobalSpecType_DoNotAdvertise); ok {
+		return x.DoNotAdvertise
 	}
 	return nil
 }
@@ -903,10 +952,14 @@ func (*GlobalSpecType) XXX_OneofWrappers() []interface{} {
 		(*GlobalSpecType_NoSni)(nil),
 		(*GlobalSpecType_Sni)(nil),
 		(*GlobalSpecType_DefaultLbWithSni)(nil),
-		(*GlobalSpecType_DoNotAdvertise)(nil),
 		(*GlobalSpecType_AdvertiseOnPublicDefaultVip)(nil),
+		(*GlobalSpecType_AdvertiseOnPublicDefaultIpv6Vip)(nil),
+		(*GlobalSpecType_AdvertiseOnPublicDefaultDualstackVip)(nil),
 		(*GlobalSpecType_AdvertiseOnPublic)(nil),
+		(*GlobalSpecType_AdvertiseV6OnPublic)(nil),
+		(*GlobalSpecType_AdvertiseDualstackOnPublic)(nil),
 		(*GlobalSpecType_AdvertiseCustom)(nil),
+		(*GlobalSpecType_DoNotAdvertise)(nil),
 		(*GlobalSpecType_HashPolicyChoiceRoundRobin)(nil),
 		(*GlobalSpecType_HashPolicyChoiceLeastActive)(nil),
 		(*GlobalSpecType_HashPolicyChoiceRandom)(nil),
@@ -940,10 +993,14 @@ type CreateSpecType struct {
 	DnsVolterraManaged bool                                `protobuf:"varint,11,opt,name=dns_volterra_managed,json=dnsVolterraManaged,proto3" json:"dns_volterra_managed,omitempty"`
 	OriginPoolsWeights []*views.OriginPoolWithWeight       `protobuf:"bytes,10,rep,name=origin_pools_weights,json=originPoolsWeights,proto3" json:"origin_pools_weights,omitempty"`
 	// Types that are valid to be assigned to AdvertiseChoice:
-	//	*CreateSpecType_DoNotAdvertise
 	//	*CreateSpecType_AdvertiseOnPublicDefaultVip
+	//	*CreateSpecType_AdvertiseOnPublicDefaultIpv6Vip
+	//	*CreateSpecType_AdvertiseOnPublicDefaultDualstackVip
 	//	*CreateSpecType_AdvertiseOnPublic
+	//	*CreateSpecType_AdvertiseV6OnPublic
+	//	*CreateSpecType_AdvertiseDualstackOnPublic
 	//	*CreateSpecType_AdvertiseCustom
+	//	*CreateSpecType_DoNotAdvertise
 	AdvertiseChoice isCreateSpecType_AdvertiseChoice `protobuf_oneof:"advertise_choice"`
 	// Types that are valid to be assigned to HashPolicyChoice:
 	//	*CreateSpecType_HashPolicyChoiceRoundRobin
@@ -1054,17 +1111,29 @@ type CreateSpecType_Sni struct {
 type CreateSpecType_DefaultLbWithSni struct {
 	DefaultLbWithSni *schema.Empty `protobuf:"bytes,28,opt,name=default_lb_with_sni,json=defaultLbWithSni,proto3,oneof" json:"default_lb_with_sni,omitempty"`
 }
-type CreateSpecType_DoNotAdvertise struct {
-	DoNotAdvertise *schema.Empty `protobuf:"bytes,7,opt,name=do_not_advertise,json=doNotAdvertise,proto3,oneof" json:"do_not_advertise,omitempty"`
-}
 type CreateSpecType_AdvertiseOnPublicDefaultVip struct {
 	AdvertiseOnPublicDefaultVip *schema.Empty `protobuf:"bytes,8,opt,name=advertise_on_public_default_vip,json=advertiseOnPublicDefaultVip,proto3,oneof" json:"advertise_on_public_default_vip,omitempty"`
+}
+type CreateSpecType_AdvertiseOnPublicDefaultIpv6Vip struct {
+	AdvertiseOnPublicDefaultIpv6Vip *schema.Empty `protobuf:"bytes,36,opt,name=advertise_on_public_default_ipv6_vip,json=advertiseOnPublicDefaultIpv6Vip,proto3,oneof" json:"advertise_on_public_default_ipv6_vip,omitempty"`
+}
+type CreateSpecType_AdvertiseOnPublicDefaultDualstackVip struct {
+	AdvertiseOnPublicDefaultDualstackVip *schema.Empty `protobuf:"bytes,37,opt,name=advertise_on_public_default_dualstack_vip,json=advertiseOnPublicDefaultDualstackVip,proto3,oneof" json:"advertise_on_public_default_dualstack_vip,omitempty"`
 }
 type CreateSpecType_AdvertiseOnPublic struct {
 	AdvertiseOnPublic *views.AdvertisePublic `protobuf:"bytes,5,opt,name=advertise_on_public,json=advertiseOnPublic,proto3,oneof" json:"advertise_on_public,omitempty"`
 }
+type CreateSpecType_AdvertiseV6OnPublic struct {
+	AdvertiseV6OnPublic *views.AdvertisePublic `protobuf:"bytes,38,opt,name=advertise_v6_on_public,json=advertiseV6OnPublic,proto3,oneof" json:"advertise_v6_on_public,omitempty"`
+}
+type CreateSpecType_AdvertiseDualstackOnPublic struct {
+	AdvertiseDualstackOnPublic *views.AdvertisePublic `protobuf:"bytes,39,opt,name=advertise_dualstack_on_public,json=advertiseDualstackOnPublic,proto3,oneof" json:"advertise_dualstack_on_public,omitempty"`
+}
 type CreateSpecType_AdvertiseCustom struct {
 	AdvertiseCustom *views.AdvertiseCustom `protobuf:"bytes,6,opt,name=advertise_custom,json=advertiseCustom,proto3,oneof" json:"advertise_custom,omitempty"`
+}
+type CreateSpecType_DoNotAdvertise struct {
+	DoNotAdvertise *schema.Empty `protobuf:"bytes,7,opt,name=do_not_advertise,json=doNotAdvertise,proto3,oneof" json:"do_not_advertise,omitempty"`
 }
 type CreateSpecType_HashPolicyChoiceRoundRobin struct {
 	HashPolicyChoiceRoundRobin *schema.Empty `protobuf:"bytes,13,opt,name=hash_policy_choice_round_robin,json=hashPolicyChoiceRoundRobin,proto3,oneof" json:"hash_policy_choice_round_robin,omitempty"`
@@ -1103,27 +1172,31 @@ type CreateSpecType_ActiveServicePolicies struct {
 	ActiveServicePolicies *ServicePolicyList `protobuf:"bytes,33,opt,name=active_service_policies,json=activeServicePolicies,proto3,oneof" json:"active_service_policies,omitempty"`
 }
 
-func (*CreateSpecType_ListenPort) isCreateSpecType_PortChoice()                               {}
-func (*CreateSpecType_PortRanges) isCreateSpecType_PortChoice()                               {}
-func (*CreateSpecType_NoSni) isCreateSpecType_SniDefaultLbChoice()                            {}
-func (*CreateSpecType_Sni) isCreateSpecType_SniDefaultLbChoice()                              {}
-func (*CreateSpecType_DefaultLbWithSni) isCreateSpecType_SniDefaultLbChoice()                 {}
-func (*CreateSpecType_DoNotAdvertise) isCreateSpecType_AdvertiseChoice()                      {}
-func (*CreateSpecType_AdvertiseOnPublicDefaultVip) isCreateSpecType_AdvertiseChoice()         {}
-func (*CreateSpecType_AdvertiseOnPublic) isCreateSpecType_AdvertiseChoice()                   {}
-func (*CreateSpecType_AdvertiseCustom) isCreateSpecType_AdvertiseChoice()                     {}
-func (*CreateSpecType_HashPolicyChoiceRoundRobin) isCreateSpecType_HashPolicyChoice()         {}
-func (*CreateSpecType_HashPolicyChoiceLeastActive) isCreateSpecType_HashPolicyChoice()        {}
-func (*CreateSpecType_HashPolicyChoiceRandom) isCreateSpecType_HashPolicyChoice()             {}
-func (*CreateSpecType_HashPolicyChoiceSourceIpStickiness) isCreateSpecType_HashPolicyChoice() {}
-func (*CreateSpecType_RetractCluster) isCreateSpecType_ClusterRetractChoice()                 {}
-func (*CreateSpecType_DoNotRetractCluster) isCreateSpecType_ClusterRetractChoice()            {}
-func (*CreateSpecType_Tcp) isCreateSpecType_LoadbalancerType()                                {}
-func (*CreateSpecType_TlsTcpAutoCert) isCreateSpecType_LoadbalancerType()                     {}
-func (*CreateSpecType_TlsTcp) isCreateSpecType_LoadbalancerType()                             {}
-func (*CreateSpecType_ServicePoliciesFromNamespace) isCreateSpecType_ServicePolicyChoice()    {}
-func (*CreateSpecType_NoServicePolicies) isCreateSpecType_ServicePolicyChoice()               {}
-func (*CreateSpecType_ActiveServicePolicies) isCreateSpecType_ServicePolicyChoice()           {}
+func (*CreateSpecType_ListenPort) isCreateSpecType_PortChoice()                                {}
+func (*CreateSpecType_PortRanges) isCreateSpecType_PortChoice()                                {}
+func (*CreateSpecType_NoSni) isCreateSpecType_SniDefaultLbChoice()                             {}
+func (*CreateSpecType_Sni) isCreateSpecType_SniDefaultLbChoice()                               {}
+func (*CreateSpecType_DefaultLbWithSni) isCreateSpecType_SniDefaultLbChoice()                  {}
+func (*CreateSpecType_AdvertiseOnPublicDefaultVip) isCreateSpecType_AdvertiseChoice()          {}
+func (*CreateSpecType_AdvertiseOnPublicDefaultIpv6Vip) isCreateSpecType_AdvertiseChoice()      {}
+func (*CreateSpecType_AdvertiseOnPublicDefaultDualstackVip) isCreateSpecType_AdvertiseChoice() {}
+func (*CreateSpecType_AdvertiseOnPublic) isCreateSpecType_AdvertiseChoice()                    {}
+func (*CreateSpecType_AdvertiseV6OnPublic) isCreateSpecType_AdvertiseChoice()                  {}
+func (*CreateSpecType_AdvertiseDualstackOnPublic) isCreateSpecType_AdvertiseChoice()           {}
+func (*CreateSpecType_AdvertiseCustom) isCreateSpecType_AdvertiseChoice()                      {}
+func (*CreateSpecType_DoNotAdvertise) isCreateSpecType_AdvertiseChoice()                       {}
+func (*CreateSpecType_HashPolicyChoiceRoundRobin) isCreateSpecType_HashPolicyChoice()          {}
+func (*CreateSpecType_HashPolicyChoiceLeastActive) isCreateSpecType_HashPolicyChoice()         {}
+func (*CreateSpecType_HashPolicyChoiceRandom) isCreateSpecType_HashPolicyChoice()              {}
+func (*CreateSpecType_HashPolicyChoiceSourceIpStickiness) isCreateSpecType_HashPolicyChoice()  {}
+func (*CreateSpecType_RetractCluster) isCreateSpecType_ClusterRetractChoice()                  {}
+func (*CreateSpecType_DoNotRetractCluster) isCreateSpecType_ClusterRetractChoice()             {}
+func (*CreateSpecType_Tcp) isCreateSpecType_LoadbalancerType()                                 {}
+func (*CreateSpecType_TlsTcpAutoCert) isCreateSpecType_LoadbalancerType()                      {}
+func (*CreateSpecType_TlsTcp) isCreateSpecType_LoadbalancerType()                              {}
+func (*CreateSpecType_ServicePoliciesFromNamespace) isCreateSpecType_ServicePolicyChoice()     {}
+func (*CreateSpecType_NoServicePolicies) isCreateSpecType_ServicePolicyChoice()                {}
+func (*CreateSpecType_ActiveServicePolicies) isCreateSpecType_ServicePolicyChoice()            {}
 
 func (m *CreateSpecType) GetPortChoice() isCreateSpecType_PortChoice {
 	if m != nil {
@@ -1224,16 +1297,23 @@ func (m *CreateSpecType) GetOriginPoolsWeights() []*views.OriginPoolWithWeight {
 	return nil
 }
 
-func (m *CreateSpecType) GetDoNotAdvertise() *schema.Empty {
-	if x, ok := m.GetAdvertiseChoice().(*CreateSpecType_DoNotAdvertise); ok {
-		return x.DoNotAdvertise
+func (m *CreateSpecType) GetAdvertiseOnPublicDefaultVip() *schema.Empty {
+	if x, ok := m.GetAdvertiseChoice().(*CreateSpecType_AdvertiseOnPublicDefaultVip); ok {
+		return x.AdvertiseOnPublicDefaultVip
 	}
 	return nil
 }
 
-func (m *CreateSpecType) GetAdvertiseOnPublicDefaultVip() *schema.Empty {
-	if x, ok := m.GetAdvertiseChoice().(*CreateSpecType_AdvertiseOnPublicDefaultVip); ok {
-		return x.AdvertiseOnPublicDefaultVip
+func (m *CreateSpecType) GetAdvertiseOnPublicDefaultIpv6Vip() *schema.Empty {
+	if x, ok := m.GetAdvertiseChoice().(*CreateSpecType_AdvertiseOnPublicDefaultIpv6Vip); ok {
+		return x.AdvertiseOnPublicDefaultIpv6Vip
+	}
+	return nil
+}
+
+func (m *CreateSpecType) GetAdvertiseOnPublicDefaultDualstackVip() *schema.Empty {
+	if x, ok := m.GetAdvertiseChoice().(*CreateSpecType_AdvertiseOnPublicDefaultDualstackVip); ok {
+		return x.AdvertiseOnPublicDefaultDualstackVip
 	}
 	return nil
 }
@@ -1245,9 +1325,30 @@ func (m *CreateSpecType) GetAdvertiseOnPublic() *views.AdvertisePublic {
 	return nil
 }
 
+func (m *CreateSpecType) GetAdvertiseV6OnPublic() *views.AdvertisePublic {
+	if x, ok := m.GetAdvertiseChoice().(*CreateSpecType_AdvertiseV6OnPublic); ok {
+		return x.AdvertiseV6OnPublic
+	}
+	return nil
+}
+
+func (m *CreateSpecType) GetAdvertiseDualstackOnPublic() *views.AdvertisePublic {
+	if x, ok := m.GetAdvertiseChoice().(*CreateSpecType_AdvertiseDualstackOnPublic); ok {
+		return x.AdvertiseDualstackOnPublic
+	}
+	return nil
+}
+
 func (m *CreateSpecType) GetAdvertiseCustom() *views.AdvertiseCustom {
 	if x, ok := m.GetAdvertiseChoice().(*CreateSpecType_AdvertiseCustom); ok {
 		return x.AdvertiseCustom
+	}
+	return nil
+}
+
+func (m *CreateSpecType) GetDoNotAdvertise() *schema.Empty {
+	if x, ok := m.GetAdvertiseChoice().(*CreateSpecType_DoNotAdvertise); ok {
+		return x.DoNotAdvertise
 	}
 	return nil
 }
@@ -1351,10 +1452,14 @@ func (*CreateSpecType) XXX_OneofWrappers() []interface{} {
 		(*CreateSpecType_NoSni)(nil),
 		(*CreateSpecType_Sni)(nil),
 		(*CreateSpecType_DefaultLbWithSni)(nil),
-		(*CreateSpecType_DoNotAdvertise)(nil),
 		(*CreateSpecType_AdvertiseOnPublicDefaultVip)(nil),
+		(*CreateSpecType_AdvertiseOnPublicDefaultIpv6Vip)(nil),
+		(*CreateSpecType_AdvertiseOnPublicDefaultDualstackVip)(nil),
 		(*CreateSpecType_AdvertiseOnPublic)(nil),
+		(*CreateSpecType_AdvertiseV6OnPublic)(nil),
+		(*CreateSpecType_AdvertiseDualstackOnPublic)(nil),
 		(*CreateSpecType_AdvertiseCustom)(nil),
+		(*CreateSpecType_DoNotAdvertise)(nil),
 		(*CreateSpecType_HashPolicyChoiceRoundRobin)(nil),
 		(*CreateSpecType_HashPolicyChoiceLeastActive)(nil),
 		(*CreateSpecType_HashPolicyChoiceRandom)(nil),
@@ -1389,10 +1494,14 @@ type ReplaceSpecType struct {
 	OriginPools        []*views.ObjectRefType               `protobuf:"bytes,4,rep,name=origin_pools,json=originPools,proto3" json:"origin_pools,omitempty"`
 	OriginPoolsWeights []*views.OriginPoolWithWeight        `protobuf:"bytes,10,rep,name=origin_pools_weights,json=originPoolsWeights,proto3" json:"origin_pools_weights,omitempty"`
 	// Types that are valid to be assigned to AdvertiseChoice:
-	//	*ReplaceSpecType_DoNotAdvertise
 	//	*ReplaceSpecType_AdvertiseOnPublicDefaultVip
+	//	*ReplaceSpecType_AdvertiseOnPublicDefaultIpv6Vip
+	//	*ReplaceSpecType_AdvertiseOnPublicDefaultDualstackVip
 	//	*ReplaceSpecType_AdvertiseOnPublic
+	//	*ReplaceSpecType_AdvertiseV6OnPublic
+	//	*ReplaceSpecType_AdvertiseDualstackOnPublic
 	//	*ReplaceSpecType_AdvertiseCustom
+	//	*ReplaceSpecType_DoNotAdvertise
 	AdvertiseChoice isReplaceSpecType_AdvertiseChoice `protobuf_oneof:"advertise_choice"`
 	// Types that are valid to be assigned to HashPolicyChoice:
 	//	*ReplaceSpecType_HashPolicyChoiceRoundRobin
@@ -1503,17 +1612,29 @@ type ReplaceSpecType_Sni struct {
 type ReplaceSpecType_DefaultLbWithSni struct {
 	DefaultLbWithSni *schema.Empty `protobuf:"bytes,28,opt,name=default_lb_with_sni,json=defaultLbWithSni,proto3,oneof" json:"default_lb_with_sni,omitempty"`
 }
-type ReplaceSpecType_DoNotAdvertise struct {
-	DoNotAdvertise *schema.Empty `protobuf:"bytes,7,opt,name=do_not_advertise,json=doNotAdvertise,proto3,oneof" json:"do_not_advertise,omitempty"`
-}
 type ReplaceSpecType_AdvertiseOnPublicDefaultVip struct {
 	AdvertiseOnPublicDefaultVip *schema.Empty `protobuf:"bytes,8,opt,name=advertise_on_public_default_vip,json=advertiseOnPublicDefaultVip,proto3,oneof" json:"advertise_on_public_default_vip,omitempty"`
+}
+type ReplaceSpecType_AdvertiseOnPublicDefaultIpv6Vip struct {
+	AdvertiseOnPublicDefaultIpv6Vip *schema.Empty `protobuf:"bytes,36,opt,name=advertise_on_public_default_ipv6_vip,json=advertiseOnPublicDefaultIpv6Vip,proto3,oneof" json:"advertise_on_public_default_ipv6_vip,omitempty"`
+}
+type ReplaceSpecType_AdvertiseOnPublicDefaultDualstackVip struct {
+	AdvertiseOnPublicDefaultDualstackVip *schema.Empty `protobuf:"bytes,37,opt,name=advertise_on_public_default_dualstack_vip,json=advertiseOnPublicDefaultDualstackVip,proto3,oneof" json:"advertise_on_public_default_dualstack_vip,omitempty"`
 }
 type ReplaceSpecType_AdvertiseOnPublic struct {
 	AdvertiseOnPublic *views.AdvertisePublic `protobuf:"bytes,5,opt,name=advertise_on_public,json=advertiseOnPublic,proto3,oneof" json:"advertise_on_public,omitempty"`
 }
+type ReplaceSpecType_AdvertiseV6OnPublic struct {
+	AdvertiseV6OnPublic *views.AdvertisePublic `protobuf:"bytes,38,opt,name=advertise_v6_on_public,json=advertiseV6OnPublic,proto3,oneof" json:"advertise_v6_on_public,omitempty"`
+}
+type ReplaceSpecType_AdvertiseDualstackOnPublic struct {
+	AdvertiseDualstackOnPublic *views.AdvertisePublic `protobuf:"bytes,39,opt,name=advertise_dualstack_on_public,json=advertiseDualstackOnPublic,proto3,oneof" json:"advertise_dualstack_on_public,omitempty"`
+}
 type ReplaceSpecType_AdvertiseCustom struct {
 	AdvertiseCustom *views.AdvertiseCustom `protobuf:"bytes,6,opt,name=advertise_custom,json=advertiseCustom,proto3,oneof" json:"advertise_custom,omitempty"`
+}
+type ReplaceSpecType_DoNotAdvertise struct {
+	DoNotAdvertise *schema.Empty `protobuf:"bytes,7,opt,name=do_not_advertise,json=doNotAdvertise,proto3,oneof" json:"do_not_advertise,omitempty"`
 }
 type ReplaceSpecType_HashPolicyChoiceRoundRobin struct {
 	HashPolicyChoiceRoundRobin *schema.Empty `protobuf:"bytes,13,opt,name=hash_policy_choice_round_robin,json=hashPolicyChoiceRoundRobin,proto3,oneof" json:"hash_policy_choice_round_robin,omitempty"`
@@ -1552,27 +1673,31 @@ type ReplaceSpecType_ActiveServicePolicies struct {
 	ActiveServicePolicies *ServicePolicyList `protobuf:"bytes,33,opt,name=active_service_policies,json=activeServicePolicies,proto3,oneof" json:"active_service_policies,omitempty"`
 }
 
-func (*ReplaceSpecType_ListenPort) isReplaceSpecType_PortChoice()                               {}
-func (*ReplaceSpecType_PortRanges) isReplaceSpecType_PortChoice()                               {}
-func (*ReplaceSpecType_NoSni) isReplaceSpecType_SniDefaultLbChoice()                            {}
-func (*ReplaceSpecType_Sni) isReplaceSpecType_SniDefaultLbChoice()                              {}
-func (*ReplaceSpecType_DefaultLbWithSni) isReplaceSpecType_SniDefaultLbChoice()                 {}
-func (*ReplaceSpecType_DoNotAdvertise) isReplaceSpecType_AdvertiseChoice()                      {}
-func (*ReplaceSpecType_AdvertiseOnPublicDefaultVip) isReplaceSpecType_AdvertiseChoice()         {}
-func (*ReplaceSpecType_AdvertiseOnPublic) isReplaceSpecType_AdvertiseChoice()                   {}
-func (*ReplaceSpecType_AdvertiseCustom) isReplaceSpecType_AdvertiseChoice()                     {}
-func (*ReplaceSpecType_HashPolicyChoiceRoundRobin) isReplaceSpecType_HashPolicyChoice()         {}
-func (*ReplaceSpecType_HashPolicyChoiceLeastActive) isReplaceSpecType_HashPolicyChoice()        {}
-func (*ReplaceSpecType_HashPolicyChoiceRandom) isReplaceSpecType_HashPolicyChoice()             {}
-func (*ReplaceSpecType_HashPolicyChoiceSourceIpStickiness) isReplaceSpecType_HashPolicyChoice() {}
-func (*ReplaceSpecType_RetractCluster) isReplaceSpecType_ClusterRetractChoice()                 {}
-func (*ReplaceSpecType_DoNotRetractCluster) isReplaceSpecType_ClusterRetractChoice()            {}
-func (*ReplaceSpecType_Tcp) isReplaceSpecType_LoadbalancerType()                                {}
-func (*ReplaceSpecType_TlsTcpAutoCert) isReplaceSpecType_LoadbalancerType()                     {}
-func (*ReplaceSpecType_TlsTcp) isReplaceSpecType_LoadbalancerType()                             {}
-func (*ReplaceSpecType_ServicePoliciesFromNamespace) isReplaceSpecType_ServicePolicyChoice()    {}
-func (*ReplaceSpecType_NoServicePolicies) isReplaceSpecType_ServicePolicyChoice()               {}
-func (*ReplaceSpecType_ActiveServicePolicies) isReplaceSpecType_ServicePolicyChoice()           {}
+func (*ReplaceSpecType_ListenPort) isReplaceSpecType_PortChoice()                                {}
+func (*ReplaceSpecType_PortRanges) isReplaceSpecType_PortChoice()                                {}
+func (*ReplaceSpecType_NoSni) isReplaceSpecType_SniDefaultLbChoice()                             {}
+func (*ReplaceSpecType_Sni) isReplaceSpecType_SniDefaultLbChoice()                               {}
+func (*ReplaceSpecType_DefaultLbWithSni) isReplaceSpecType_SniDefaultLbChoice()                  {}
+func (*ReplaceSpecType_AdvertiseOnPublicDefaultVip) isReplaceSpecType_AdvertiseChoice()          {}
+func (*ReplaceSpecType_AdvertiseOnPublicDefaultIpv6Vip) isReplaceSpecType_AdvertiseChoice()      {}
+func (*ReplaceSpecType_AdvertiseOnPublicDefaultDualstackVip) isReplaceSpecType_AdvertiseChoice() {}
+func (*ReplaceSpecType_AdvertiseOnPublic) isReplaceSpecType_AdvertiseChoice()                    {}
+func (*ReplaceSpecType_AdvertiseV6OnPublic) isReplaceSpecType_AdvertiseChoice()                  {}
+func (*ReplaceSpecType_AdvertiseDualstackOnPublic) isReplaceSpecType_AdvertiseChoice()           {}
+func (*ReplaceSpecType_AdvertiseCustom) isReplaceSpecType_AdvertiseChoice()                      {}
+func (*ReplaceSpecType_DoNotAdvertise) isReplaceSpecType_AdvertiseChoice()                       {}
+func (*ReplaceSpecType_HashPolicyChoiceRoundRobin) isReplaceSpecType_HashPolicyChoice()          {}
+func (*ReplaceSpecType_HashPolicyChoiceLeastActive) isReplaceSpecType_HashPolicyChoice()         {}
+func (*ReplaceSpecType_HashPolicyChoiceRandom) isReplaceSpecType_HashPolicyChoice()              {}
+func (*ReplaceSpecType_HashPolicyChoiceSourceIpStickiness) isReplaceSpecType_HashPolicyChoice()  {}
+func (*ReplaceSpecType_RetractCluster) isReplaceSpecType_ClusterRetractChoice()                  {}
+func (*ReplaceSpecType_DoNotRetractCluster) isReplaceSpecType_ClusterRetractChoice()             {}
+func (*ReplaceSpecType_Tcp) isReplaceSpecType_LoadbalancerType()                                 {}
+func (*ReplaceSpecType_TlsTcpAutoCert) isReplaceSpecType_LoadbalancerType()                      {}
+func (*ReplaceSpecType_TlsTcp) isReplaceSpecType_LoadbalancerType()                              {}
+func (*ReplaceSpecType_ServicePoliciesFromNamespace) isReplaceSpecType_ServicePolicyChoice()     {}
+func (*ReplaceSpecType_NoServicePolicies) isReplaceSpecType_ServicePolicyChoice()                {}
+func (*ReplaceSpecType_ActiveServicePolicies) isReplaceSpecType_ServicePolicyChoice()            {}
 
 func (m *ReplaceSpecType) GetPortChoice() isReplaceSpecType_PortChoice {
 	if m != nil {
@@ -1680,16 +1805,23 @@ func (m *ReplaceSpecType) GetOriginPoolsWeights() []*views.OriginPoolWithWeight 
 	return nil
 }
 
-func (m *ReplaceSpecType) GetDoNotAdvertise() *schema.Empty {
-	if x, ok := m.GetAdvertiseChoice().(*ReplaceSpecType_DoNotAdvertise); ok {
-		return x.DoNotAdvertise
+func (m *ReplaceSpecType) GetAdvertiseOnPublicDefaultVip() *schema.Empty {
+	if x, ok := m.GetAdvertiseChoice().(*ReplaceSpecType_AdvertiseOnPublicDefaultVip); ok {
+		return x.AdvertiseOnPublicDefaultVip
 	}
 	return nil
 }
 
-func (m *ReplaceSpecType) GetAdvertiseOnPublicDefaultVip() *schema.Empty {
-	if x, ok := m.GetAdvertiseChoice().(*ReplaceSpecType_AdvertiseOnPublicDefaultVip); ok {
-		return x.AdvertiseOnPublicDefaultVip
+func (m *ReplaceSpecType) GetAdvertiseOnPublicDefaultIpv6Vip() *schema.Empty {
+	if x, ok := m.GetAdvertiseChoice().(*ReplaceSpecType_AdvertiseOnPublicDefaultIpv6Vip); ok {
+		return x.AdvertiseOnPublicDefaultIpv6Vip
+	}
+	return nil
+}
+
+func (m *ReplaceSpecType) GetAdvertiseOnPublicDefaultDualstackVip() *schema.Empty {
+	if x, ok := m.GetAdvertiseChoice().(*ReplaceSpecType_AdvertiseOnPublicDefaultDualstackVip); ok {
+		return x.AdvertiseOnPublicDefaultDualstackVip
 	}
 	return nil
 }
@@ -1701,9 +1833,30 @@ func (m *ReplaceSpecType) GetAdvertiseOnPublic() *views.AdvertisePublic {
 	return nil
 }
 
+func (m *ReplaceSpecType) GetAdvertiseV6OnPublic() *views.AdvertisePublic {
+	if x, ok := m.GetAdvertiseChoice().(*ReplaceSpecType_AdvertiseV6OnPublic); ok {
+		return x.AdvertiseV6OnPublic
+	}
+	return nil
+}
+
+func (m *ReplaceSpecType) GetAdvertiseDualstackOnPublic() *views.AdvertisePublic {
+	if x, ok := m.GetAdvertiseChoice().(*ReplaceSpecType_AdvertiseDualstackOnPublic); ok {
+		return x.AdvertiseDualstackOnPublic
+	}
+	return nil
+}
+
 func (m *ReplaceSpecType) GetAdvertiseCustom() *views.AdvertiseCustom {
 	if x, ok := m.GetAdvertiseChoice().(*ReplaceSpecType_AdvertiseCustom); ok {
 		return x.AdvertiseCustom
+	}
+	return nil
+}
+
+func (m *ReplaceSpecType) GetDoNotAdvertise() *schema.Empty {
+	if x, ok := m.GetAdvertiseChoice().(*ReplaceSpecType_DoNotAdvertise); ok {
+		return x.DoNotAdvertise
 	}
 	return nil
 }
@@ -1807,10 +1960,14 @@ func (*ReplaceSpecType) XXX_OneofWrappers() []interface{} {
 		(*ReplaceSpecType_NoSni)(nil),
 		(*ReplaceSpecType_Sni)(nil),
 		(*ReplaceSpecType_DefaultLbWithSni)(nil),
-		(*ReplaceSpecType_DoNotAdvertise)(nil),
 		(*ReplaceSpecType_AdvertiseOnPublicDefaultVip)(nil),
+		(*ReplaceSpecType_AdvertiseOnPublicDefaultIpv6Vip)(nil),
+		(*ReplaceSpecType_AdvertiseOnPublicDefaultDualstackVip)(nil),
 		(*ReplaceSpecType_AdvertiseOnPublic)(nil),
+		(*ReplaceSpecType_AdvertiseV6OnPublic)(nil),
+		(*ReplaceSpecType_AdvertiseDualstackOnPublic)(nil),
 		(*ReplaceSpecType_AdvertiseCustom)(nil),
+		(*ReplaceSpecType_DoNotAdvertise)(nil),
 		(*ReplaceSpecType_HashPolicyChoiceRoundRobin)(nil),
 		(*ReplaceSpecType_HashPolicyChoiceLeastActive)(nil),
 		(*ReplaceSpecType_HashPolicyChoiceRandom)(nil),
@@ -1845,10 +2002,14 @@ type GetSpecType struct {
 	OriginPools        []*views.ObjectRefType           `protobuf:"bytes,4,rep,name=origin_pools,json=originPools,proto3" json:"origin_pools,omitempty"`
 	OriginPoolsWeights []*views.OriginPoolWithWeight    `protobuf:"bytes,10,rep,name=origin_pools_weights,json=originPoolsWeights,proto3" json:"origin_pools_weights,omitempty"`
 	// Types that are valid to be assigned to AdvertiseChoice:
-	//	*GetSpecType_DoNotAdvertise
 	//	*GetSpecType_AdvertiseOnPublicDefaultVip
+	//	*GetSpecType_AdvertiseOnPublicDefaultIpv6Vip
+	//	*GetSpecType_AdvertiseOnPublicDefaultDualstackVip
 	//	*GetSpecType_AdvertiseOnPublic
+	//	*GetSpecType_AdvertiseV6OnPublic
+	//	*GetSpecType_AdvertiseDualstackOnPublic
 	//	*GetSpecType_AdvertiseCustom
+	//	*GetSpecType_DoNotAdvertise
 	AdvertiseChoice isGetSpecType_AdvertiseChoice `protobuf_oneof:"advertise_choice"`
 	// Types that are valid to be assigned to HashPolicyChoice:
 	//	*GetSpecType_HashPolicyChoiceRoundRobin
@@ -1965,17 +2126,29 @@ type GetSpecType_Sni struct {
 type GetSpecType_DefaultLbWithSni struct {
 	DefaultLbWithSni *schema.Empty `protobuf:"bytes,28,opt,name=default_lb_with_sni,json=defaultLbWithSni,proto3,oneof" json:"default_lb_with_sni,omitempty"`
 }
-type GetSpecType_DoNotAdvertise struct {
-	DoNotAdvertise *schema.Empty `protobuf:"bytes,7,opt,name=do_not_advertise,json=doNotAdvertise,proto3,oneof" json:"do_not_advertise,omitempty"`
-}
 type GetSpecType_AdvertiseOnPublicDefaultVip struct {
 	AdvertiseOnPublicDefaultVip *schema.Empty `protobuf:"bytes,8,opt,name=advertise_on_public_default_vip,json=advertiseOnPublicDefaultVip,proto3,oneof" json:"advertise_on_public_default_vip,omitempty"`
+}
+type GetSpecType_AdvertiseOnPublicDefaultIpv6Vip struct {
+	AdvertiseOnPublicDefaultIpv6Vip *schema.Empty `protobuf:"bytes,36,opt,name=advertise_on_public_default_ipv6_vip,json=advertiseOnPublicDefaultIpv6Vip,proto3,oneof" json:"advertise_on_public_default_ipv6_vip,omitempty"`
+}
+type GetSpecType_AdvertiseOnPublicDefaultDualstackVip struct {
+	AdvertiseOnPublicDefaultDualstackVip *schema.Empty `protobuf:"bytes,37,opt,name=advertise_on_public_default_dualstack_vip,json=advertiseOnPublicDefaultDualstackVip,proto3,oneof" json:"advertise_on_public_default_dualstack_vip,omitempty"`
 }
 type GetSpecType_AdvertiseOnPublic struct {
 	AdvertiseOnPublic *views.AdvertisePublic `protobuf:"bytes,5,opt,name=advertise_on_public,json=advertiseOnPublic,proto3,oneof" json:"advertise_on_public,omitempty"`
 }
+type GetSpecType_AdvertiseV6OnPublic struct {
+	AdvertiseV6OnPublic *views.AdvertisePublic `protobuf:"bytes,38,opt,name=advertise_v6_on_public,json=advertiseV6OnPublic,proto3,oneof" json:"advertise_v6_on_public,omitempty"`
+}
+type GetSpecType_AdvertiseDualstackOnPublic struct {
+	AdvertiseDualstackOnPublic *views.AdvertisePublic `protobuf:"bytes,39,opt,name=advertise_dualstack_on_public,json=advertiseDualstackOnPublic,proto3,oneof" json:"advertise_dualstack_on_public,omitempty"`
+}
 type GetSpecType_AdvertiseCustom struct {
 	AdvertiseCustom *views.AdvertiseCustom `protobuf:"bytes,6,opt,name=advertise_custom,json=advertiseCustom,proto3,oneof" json:"advertise_custom,omitempty"`
+}
+type GetSpecType_DoNotAdvertise struct {
+	DoNotAdvertise *schema.Empty `protobuf:"bytes,7,opt,name=do_not_advertise,json=doNotAdvertise,proto3,oneof" json:"do_not_advertise,omitempty"`
 }
 type GetSpecType_HashPolicyChoiceRoundRobin struct {
 	HashPolicyChoiceRoundRobin *schema.Empty `protobuf:"bytes,13,opt,name=hash_policy_choice_round_robin,json=hashPolicyChoiceRoundRobin,proto3,oneof" json:"hash_policy_choice_round_robin,omitempty"`
@@ -2014,27 +2187,31 @@ type GetSpecType_ActiveServicePolicies struct {
 	ActiveServicePolicies *ServicePolicyList `protobuf:"bytes,33,opt,name=active_service_policies,json=activeServicePolicies,proto3,oneof" json:"active_service_policies,omitempty"`
 }
 
-func (*GetSpecType_ListenPort) isGetSpecType_PortChoice()                               {}
-func (*GetSpecType_PortRanges) isGetSpecType_PortChoice()                               {}
-func (*GetSpecType_NoSni) isGetSpecType_SniDefaultLbChoice()                            {}
-func (*GetSpecType_Sni) isGetSpecType_SniDefaultLbChoice()                              {}
-func (*GetSpecType_DefaultLbWithSni) isGetSpecType_SniDefaultLbChoice()                 {}
-func (*GetSpecType_DoNotAdvertise) isGetSpecType_AdvertiseChoice()                      {}
-func (*GetSpecType_AdvertiseOnPublicDefaultVip) isGetSpecType_AdvertiseChoice()         {}
-func (*GetSpecType_AdvertiseOnPublic) isGetSpecType_AdvertiseChoice()                   {}
-func (*GetSpecType_AdvertiseCustom) isGetSpecType_AdvertiseChoice()                     {}
-func (*GetSpecType_HashPolicyChoiceRoundRobin) isGetSpecType_HashPolicyChoice()         {}
-func (*GetSpecType_HashPolicyChoiceLeastActive) isGetSpecType_HashPolicyChoice()        {}
-func (*GetSpecType_HashPolicyChoiceRandom) isGetSpecType_HashPolicyChoice()             {}
-func (*GetSpecType_HashPolicyChoiceSourceIpStickiness) isGetSpecType_HashPolicyChoice() {}
-func (*GetSpecType_RetractCluster) isGetSpecType_ClusterRetractChoice()                 {}
-func (*GetSpecType_DoNotRetractCluster) isGetSpecType_ClusterRetractChoice()            {}
-func (*GetSpecType_Tcp) isGetSpecType_LoadbalancerType()                                {}
-func (*GetSpecType_TlsTcpAutoCert) isGetSpecType_LoadbalancerType()                     {}
-func (*GetSpecType_TlsTcp) isGetSpecType_LoadbalancerType()                             {}
-func (*GetSpecType_ServicePoliciesFromNamespace) isGetSpecType_ServicePolicyChoice()    {}
-func (*GetSpecType_NoServicePolicies) isGetSpecType_ServicePolicyChoice()               {}
-func (*GetSpecType_ActiveServicePolicies) isGetSpecType_ServicePolicyChoice()           {}
+func (*GetSpecType_ListenPort) isGetSpecType_PortChoice()                                {}
+func (*GetSpecType_PortRanges) isGetSpecType_PortChoice()                                {}
+func (*GetSpecType_NoSni) isGetSpecType_SniDefaultLbChoice()                             {}
+func (*GetSpecType_Sni) isGetSpecType_SniDefaultLbChoice()                               {}
+func (*GetSpecType_DefaultLbWithSni) isGetSpecType_SniDefaultLbChoice()                  {}
+func (*GetSpecType_AdvertiseOnPublicDefaultVip) isGetSpecType_AdvertiseChoice()          {}
+func (*GetSpecType_AdvertiseOnPublicDefaultIpv6Vip) isGetSpecType_AdvertiseChoice()      {}
+func (*GetSpecType_AdvertiseOnPublicDefaultDualstackVip) isGetSpecType_AdvertiseChoice() {}
+func (*GetSpecType_AdvertiseOnPublic) isGetSpecType_AdvertiseChoice()                    {}
+func (*GetSpecType_AdvertiseV6OnPublic) isGetSpecType_AdvertiseChoice()                  {}
+func (*GetSpecType_AdvertiseDualstackOnPublic) isGetSpecType_AdvertiseChoice()           {}
+func (*GetSpecType_AdvertiseCustom) isGetSpecType_AdvertiseChoice()                      {}
+func (*GetSpecType_DoNotAdvertise) isGetSpecType_AdvertiseChoice()                       {}
+func (*GetSpecType_HashPolicyChoiceRoundRobin) isGetSpecType_HashPolicyChoice()          {}
+func (*GetSpecType_HashPolicyChoiceLeastActive) isGetSpecType_HashPolicyChoice()         {}
+func (*GetSpecType_HashPolicyChoiceRandom) isGetSpecType_HashPolicyChoice()              {}
+func (*GetSpecType_HashPolicyChoiceSourceIpStickiness) isGetSpecType_HashPolicyChoice()  {}
+func (*GetSpecType_RetractCluster) isGetSpecType_ClusterRetractChoice()                  {}
+func (*GetSpecType_DoNotRetractCluster) isGetSpecType_ClusterRetractChoice()             {}
+func (*GetSpecType_Tcp) isGetSpecType_LoadbalancerType()                                 {}
+func (*GetSpecType_TlsTcpAutoCert) isGetSpecType_LoadbalancerType()                      {}
+func (*GetSpecType_TlsTcp) isGetSpecType_LoadbalancerType()                              {}
+func (*GetSpecType_ServicePoliciesFromNamespace) isGetSpecType_ServicePolicyChoice()     {}
+func (*GetSpecType_NoServicePolicies) isGetSpecType_ServicePolicyChoice()                {}
+func (*GetSpecType_ActiveServicePolicies) isGetSpecType_ServicePolicyChoice()            {}
 
 func (m *GetSpecType) GetPortChoice() isGetSpecType_PortChoice {
 	if m != nil {
@@ -2142,16 +2319,23 @@ func (m *GetSpecType) GetOriginPoolsWeights() []*views.OriginPoolWithWeight {
 	return nil
 }
 
-func (m *GetSpecType) GetDoNotAdvertise() *schema.Empty {
-	if x, ok := m.GetAdvertiseChoice().(*GetSpecType_DoNotAdvertise); ok {
-		return x.DoNotAdvertise
+func (m *GetSpecType) GetAdvertiseOnPublicDefaultVip() *schema.Empty {
+	if x, ok := m.GetAdvertiseChoice().(*GetSpecType_AdvertiseOnPublicDefaultVip); ok {
+		return x.AdvertiseOnPublicDefaultVip
 	}
 	return nil
 }
 
-func (m *GetSpecType) GetAdvertiseOnPublicDefaultVip() *schema.Empty {
-	if x, ok := m.GetAdvertiseChoice().(*GetSpecType_AdvertiseOnPublicDefaultVip); ok {
-		return x.AdvertiseOnPublicDefaultVip
+func (m *GetSpecType) GetAdvertiseOnPublicDefaultIpv6Vip() *schema.Empty {
+	if x, ok := m.GetAdvertiseChoice().(*GetSpecType_AdvertiseOnPublicDefaultIpv6Vip); ok {
+		return x.AdvertiseOnPublicDefaultIpv6Vip
+	}
+	return nil
+}
+
+func (m *GetSpecType) GetAdvertiseOnPublicDefaultDualstackVip() *schema.Empty {
+	if x, ok := m.GetAdvertiseChoice().(*GetSpecType_AdvertiseOnPublicDefaultDualstackVip); ok {
+		return x.AdvertiseOnPublicDefaultDualstackVip
 	}
 	return nil
 }
@@ -2163,9 +2347,30 @@ func (m *GetSpecType) GetAdvertiseOnPublic() *views.AdvertisePublic {
 	return nil
 }
 
+func (m *GetSpecType) GetAdvertiseV6OnPublic() *views.AdvertisePublic {
+	if x, ok := m.GetAdvertiseChoice().(*GetSpecType_AdvertiseV6OnPublic); ok {
+		return x.AdvertiseV6OnPublic
+	}
+	return nil
+}
+
+func (m *GetSpecType) GetAdvertiseDualstackOnPublic() *views.AdvertisePublic {
+	if x, ok := m.GetAdvertiseChoice().(*GetSpecType_AdvertiseDualstackOnPublic); ok {
+		return x.AdvertiseDualstackOnPublic
+	}
+	return nil
+}
+
 func (m *GetSpecType) GetAdvertiseCustom() *views.AdvertiseCustom {
 	if x, ok := m.GetAdvertiseChoice().(*GetSpecType_AdvertiseCustom); ok {
 		return x.AdvertiseCustom
+	}
+	return nil
+}
+
+func (m *GetSpecType) GetDoNotAdvertise() *schema.Empty {
+	if x, ok := m.GetAdvertiseChoice().(*GetSpecType_DoNotAdvertise); ok {
+		return x.DoNotAdvertise
 	}
 	return nil
 }
@@ -2311,10 +2516,14 @@ func (*GetSpecType) XXX_OneofWrappers() []interface{} {
 		(*GetSpecType_NoSni)(nil),
 		(*GetSpecType_Sni)(nil),
 		(*GetSpecType_DefaultLbWithSni)(nil),
-		(*GetSpecType_DoNotAdvertise)(nil),
 		(*GetSpecType_AdvertiseOnPublicDefaultVip)(nil),
+		(*GetSpecType_AdvertiseOnPublicDefaultIpv6Vip)(nil),
+		(*GetSpecType_AdvertiseOnPublicDefaultDualstackVip)(nil),
 		(*GetSpecType_AdvertiseOnPublic)(nil),
+		(*GetSpecType_AdvertiseV6OnPublic)(nil),
+		(*GetSpecType_AdvertiseDualstackOnPublic)(nil),
 		(*GetSpecType_AdvertiseCustom)(nil),
+		(*GetSpecType_DoNotAdvertise)(nil),
 		(*GetSpecType_HashPolicyChoiceRoundRobin)(nil),
 		(*GetSpecType_HashPolicyChoiceLeastActive)(nil),
 		(*GetSpecType_HashPolicyChoiceRandom)(nil),
@@ -2355,151 +2564,162 @@ func init() {
 }
 
 var fileDescriptor_af54a43838ffcca9 = []byte{
-	// 2295 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xec, 0x5a, 0xcd, 0x6f, 0x1b, 0xc7,
-	0xf9, 0xd6, 0xf0, 0x5b, 0xa3, 0x2f, 0x6a, 0xf4, 0xe1, 0x95, 0xec, 0x1f, 0x25, 0x33, 0xf9, 0x25,
-	0x8a, 0xb1, 0xa2, 0x44, 0xd2, 0xf2, 0x17, 0x50, 0xb7, 0x5e, 0x39, 0xb6, 0xac, 0x28, 0x8e, 0xb2,
-	0x52, 0x65, 0xc0, 0x49, 0xb0, 0x58, 0x2d, 0x47, 0xd4, 0xd6, 0xcb, 0x9d, 0xcd, 0xce, 0x50, 0xb6,
-	0x0a, 0x18, 0x30, 0xd4, 0x1e, 0x52, 0xb4, 0x40, 0x0b, 0xa3, 0x87, 0x1e, 0x7b, 0x2c, 0xfc, 0x1f,
-	0xb4, 0x9b, 0x83, 0x50, 0x20, 0x40, 0x50, 0xb4, 0x00, 0x8f, 0x46, 0x4f, 0x31, 0x7d, 0x71, 0xda,
-	0x1e, 0x8c, 0x9e, 0x0a, 0x5d, 0x5c, 0xcc, 0xec, 0x92, 0x22, 0x29, 0x8a, 0x36, 0xd2, 0x26, 0x68,
-	0x53, 0xea, 0xb4, 0x3b, 0xf3, 0x3e, 0xcf, 0x3b, 0xef, 0xbb, 0xef, 0xce, 0x3c, 0xef, 0x52, 0x70,
-	0x7e, 0x07, 0xd3, 0x8c, 0x49, 0xe6, 0xa8, 0xb1, 0x8d, 0x4b, 0xfa, 0xdc, 0x8e, 0x89, 0xef, 0xd2,
-	0x39, 0x66, 0x38, 0x9a, 0x45, 0xf4, 0xc2, 0xa6, 0x6e, 0xe9, 0xb6, 0x81, 0xdd, 0x39, 0xb6, 0xeb,
-	0x60, 0x9a, 0x71, 0x5c, 0xc2, 0x08, 0x7a, 0xdd, 0x47, 0x64, 0x7c, 0x44, 0x46, 0x20, 0x32, 0xad,
-	0x88, 0xc9, 0xd9, 0xa2, 0xc9, 0xb6, 0xcb, 0x9b, 0x19, 0x83, 0x94, 0xe6, 0x8a, 0xa4, 0x48, 0xe6,
-	0x04, 0x78, 0xb3, 0xbc, 0x25, 0xee, 0xc4, 0x8d, 0xb8, 0xf2, 0x49, 0x27, 0xa7, 0x8a, 0x84, 0x14,
-	0x2d, 0x7c, 0x68, 0xc5, 0xcc, 0x12, 0xa6, 0x4c, 0x2f, 0x39, 0x81, 0xc1, 0xc9, 0xe6, 0x75, 0x12,
-	0x87, 0x99, 0xc4, 0x0e, 0x96, 0x34, 0x39, 0xd1, 0x3c, 0xd9, 0xb0, 0xda, 0xc9, 0x53, 0x2d, 0xf1,
-	0xe9, 0x96, 0x59, 0xd0, 0x19, 0x0e, 0x66, 0xa7, 0x8f, 0x46, 0xaf, 0x35, 0x53, 0x4f, 0xb5, 0xcd,
-	0x4f, 0x83, 0x83, 0x37, 0x5a, 0x0d, 0x5c, 0x56, 0xd6, 0x2d, 0x6d, 0x9b, 0x50, 0xd6, 0x64, 0x37,
-	0x7f, 0xbc, 0x9d, 0x56, 0xb0, 0xa9, 0x66, 0xda, 0x5b, 0x64, 0x8e, 0x6c, 0xfe, 0x00, 0x1b, 0xcc,
-	0x47, 0xa4, 0x5f, 0x00, 0x38, 0xb4, 0xea, 0x92, 0x7b, 0xbb, 0xeb, 0xbb, 0x0e, 0x5e, 0x5f, 0x59,
-	0x5b, 0x5f, 0x5c, 0x45, 0x1f, 0xc0, 0x41, 0x66, 0x51, 0xcd, 0xd1, 0x5d, 0xbd, 0x84, 0x19, 0x76,
-	0xa9, 0x04, 0xa6, 0xc1, 0x4c, 0x5f, 0x4e, 0xce, 0xb4, 0x7b, 0x2a, 0x57, 0xc9, 0x5d, 0x9b, 0x32,
-	0x17, 0xeb, 0xa5, 0x75, 0x8b, 0xae, 0x72, 0x0c, 0xe5, 0x5c, 0x4a, 0xa4, 0xe2, 0x01, 0xb0, 0xd4,
-	0xa3, 0x0e, 0xb0, 0x60, 0x58, 0x50, 0xa1, 0x8f, 0xe0, 0x10, 0x27, 0x37, 0xb0, 0xcb, 0x7c, 0x0f,
-	0x54, 0x0a, 0x0b, 0xf6, 0xd9, 0x97, 0xb1, 0xaf, 0xac, 0x2d, 0x62, 0x97, 0x05, 0x2e, 0x9a, 0xe8,
-	0xf9, 0x78, 0x30, 0x7c, 0x06, 0x9e, 0xa8, 0xd1, 0x9b, 0x5b, 0xa6, 0xa1, 0x33, 0x4c, 0x35, 0x63,
-	0x9b, 0x98, 0x06, 0x46, 0x43, 0xfb, 0x1e, 0x08, 0x57, 0x3c, 0x10, 0xaa, 0x7a, 0x20, 0x9c, 0x97,
-	0xb3, 0xcb, 0x91, 0x44, 0x28, 0x19, 0x4e, 0xff, 0x3a, 0x04, 0xa5, 0x96, 0x0c, 0x5c, 0x29, 0x33,
-	0x22, 0x7c, 0xa1, 0x45, 0x08, 0x05, 0x1d, 0xb1, 0xb7, 0xcc, 0x62, 0xb0, 0xd0, 0x54, 0xdb, 0x85,
-	0xae, 0x5b, 0x74, 0x51, 0x58, 0x29, 0x91, 0xe7, 0x1e, 0x00, 0x6a, 0x2f, 0xab, 0x0d, 0xa0, 0x05,
-	0x18, 0xb7, 0x89, 0x56, 0x62, 0x16, 0x95, 0xa2, 0x82, 0x61, 0xb4, 0x85, 0xe1, 0xed, 0x92, 0xc3,
-	0x76, 0x95, 0xc8, 0xbe, 0x1f, 0x51, 0xcc, 0x26, 0xef, 0x32, 0x8b, 0xa2, 0x0d, 0x98, 0x28, 0x53,
-	0xec, 0xe3, 0x62, 0x02, 0x97, 0x7f, 0xf9, 0x03, 0xd8, 0xf0, 0x6b, 0xcf, 0x24, 0xf6, 0x22, 0xb1,
-	0x19, 0xbe, 0xc7, 0xea, 0xb4, 0xf1, 0x32, 0xc5, 0x9c, 0xf7, 0x52, 0xec, 0xef, 0x97, 0xc3, 0x79,
-	0xf9, 0xac, 0x92, 0x86, 0x7d, 0x25, 0x11, 0x9c, 0x9f, 0x9e, 0x91, 0x7d, 0x0f, 0x44, 0x3f, 0xf7,
-	0x00, 0xa8, 0x78, 0x20, 0xc2, 0x53, 0xb4, 0x20, 0x9f, 0x5b, 0x8e, 0x24, 0x22, 0xc9, 0x68, 0xfa,
-	0xe7, 0x00, 0x0e, 0xaf, 0x61, 0x77, 0xc7, 0x34, 0xf0, 0x2a, 0xb1, 0x4c, 0x63, 0x77, 0xc5, 0xa4,
-	0x0c, 0xfd, 0x10, 0x26, 0x1c, 0x7e, 0x67, 0x62, 0x5e, 0x20, 0xe1, 0x99, 0xbe, 0x5c, 0xba, 0xed,
-	0xfa, 0xde, 0x13, 0xf5, 0xa6, 0xe2, 0x2d, 0x51, 0x16, 0x97, 0x1e, 0xdd, 0x1f, 0xa4, 0x3e, 0x97,
-	0x26, 0xe0, 0xbb, 0xbf, 0xfb, 0x72, 0x3f, 0x1c, 0x7d, 0x08, 0x42, 0xc9, 0x64, 0xed, 0x2a, 0x01,
-	0x6a, 0x57, 0x12, 0xa8, 0x7e, 0xf1, 0x59, 0x38, 0xf6, 0xf0, 0x53, 0x10, 0x4a, 0x02, 0xb5, 0xee,
-	0x2f, 0xfd, 0xd3, 0x09, 0x38, 0x78, 0xdd, 0x22, 0x9b, 0xba, 0xb5, 0xe6, 0x60, 0x83, 0x13, 0xa3,
-	0xef, 0xc0, 0x78, 0x81, 0x94, 0x74, 0xd3, 0xf6, 0x57, 0xd3, 0xab, 0xbc, 0xc6, 0x49, 0xe0, 0x43,
-	0x10, 0x4f, 0x47, 0xdd, 0xf0, 0x27, 0xa1, 0x3a, 0x67, 0x72, 0xfa, 0x90, 0x5d, 0xad, 0x61, 0x50,
-	0x06, 0xf6, 0x59, 0x26, 0x65, 0xd8, 0xd6, 0x1c, 0xe2, 0x32, 0x29, 0x34, 0x0d, 0x66, 0x06, 0x94,
-	0x3e, 0x6e, 0x19, 0x3b, 0x13, 0x91, 0x5e, 0xbc, 0x08, 0x2f, 0xf5, 0xa8, 0xd0, 0xb7, 0x58, 0x25,
-	0x2e, 0x43, 0xcb, 0xb0, 0x8f, 0x1b, 0x6a, 0xae, 0x6e, 0x17, 0x31, 0x95, 0x5e, 0x9b, 0x06, 0x33,
-	0xbd, 0xca, 0x9b, 0x82, 0xd9, 0x0d, 0x4b, 0x0f, 0x22, 0xc1, 0x55, 0x25, 0xf2, 0x3d, 0x7e, 0x15,
-	0x71, 0x43, 0x49, 0x10, 0x0c, 0x3d, 0x8e, 0xf0, 0xc7, 0x01, 0x39, 0x5a, 0x15, 0x60, 0x74, 0x1a,
-	0x26, 0xee, 0x9a, 0x6c, 0x5b, 0xa3, 0xb6, 0x29, 0x6a, 0x2c, 0xa1, 0xc4, 0x9e, 0x79, 0x00, 0xf0,
-	0xe5, 0xf1, 0xf1, 0x35, 0xdb, 0x44, 0xb3, 0x30, 0x66, 0x13, 0x61, 0x30, 0x79, 0x7c, 0x09, 0x2d,
-	0x01, 0x35, 0x6a, 0x13, 0x6e, 0x3e, 0x03, 0xc3, 0xdc, 0xf6, 0x64, 0x47, 0x5b, 0x6e, 0x82, 0xde,
-	0x81, 0x23, 0x05, 0xbc, 0xa5, 0x97, 0x2d, 0xa6, 0x59, 0x9b, 0x5a, 0x7d, 0x19, 0xa7, 0x5e, 0x5a,
-	0xa8, 0x40, 0x4d, 0x06, 0xc0, 0x95, 0xcd, 0x5b, 0xc1, 0x2a, 0xe7, 0xe1, 0x28, 0xdf, 0x66, 0x76,
-	0x88, 0xc5, 0xb0, 0xeb, 0xea, 0x5a, 0x49, 0xb7, 0xf5, 0x22, 0x2e, 0x48, 0x7d, 0x3c, 0x28, 0x15,
-	0x15, 0x6c, 0xba, 0x11, 0x4c, 0xbd, 0xeb, 0xcf, 0x20, 0x07, 0xf6, 0x13, 0xd7, 0x2c, 0x9a, 0x3c,
-	0xed, 0xc4, 0xa2, 0x52, 0xe4, 0x95, 0x0b, 0xe9, 0xad, 0x47, 0xf7, 0xfb, 0x1a, 0xa0, 0x8f, 0xef,
-	0x03, 0x9e, 0xb3, 0xa3, 0xc5, 0x24, 0x01, 0x35, 0xb0, 0x5b, 0xe5, 0x1e, 0xd0, 0xc7, 0x70, 0xb4,
-	0xd1, 0xa3, 0x76, 0x17, 0x9b, 0xc5, 0x6d, 0x46, 0x25, 0x28, 0x3c, 0xbf, 0xd5, 0xde, 0x73, 0x1d,
-	0xcf, 0x23, 0xbd, 0x25, 0x10, 0xca, 0x68, 0x5b, 0x5f, 0xa8, 0xc1, 0x97, 0x6f, 0x48, 0xd1, 0x35,
-	0x98, 0x2c, 0x10, 0xcd, 0x26, 0x4c, 0xd3, 0x0b, 0x3b, 0x7c, 0x67, 0xa2, 0x58, 0x8a, 0xbf, 0x34,
-	0xc1, 0x21, 0x75, 0xb0, 0x40, 0x6e, 0x12, 0x76, 0xa5, 0x86, 0x41, 0x1f, 0xc2, 0xa9, 0x3a, 0x81,
-	0x46, 0x6c, 0xcd, 0x29, 0x6f, 0x5a, 0xa6, 0xa1, 0xd5, 0x9e, 0xdf, 0x8e, 0xe9, 0x48, 0x89, 0x0e,
-	0x4f, 0x3c, 0xa4, 0x9e, 0xac, 0xc3, 0xdf, 0xb3, 0x57, 0x05, 0xf8, 0xaa, 0x8f, 0xdd, 0x30, 0x1d,
-	0xf4, 0x21, 0x1c, 0x69, 0xc3, 0x1e, 0x6c, 0x59, 0xaf, 0xb7, 0xcd, 0x4b, 0x7d, 0x69, 0x3e, 0x59,
-	0x7d, 0xe1, 0xc3, 0x47, 0xfc, 0xa0, 0x5b, 0x30, 0x79, 0xc8, 0x6e, 0x94, 0x29, 0x23, 0xa5, 0x60,
-	0x57, 0x7b, 0x09, 0xf5, 0xa2, 0xb0, 0x0d, 0xf6, 0xfb, 0x90, 0x3a, 0xa4, 0x37, 0x4f, 0xa0, 0xdb,
-	0x30, 0xb5, 0xad, 0xd3, 0xed, 0x60, 0x33, 0x09, 0x76, 0x33, 0xcd, 0x25, 0x65, 0xbb, 0xa0, 0xb9,
-	0x64, 0xd3, 0xb4, 0xa5, 0x81, 0x0e, 0x39, 0x09, 0xab, 0x93, 0x1c, 0xed, 0x6f, 0x6b, 0x8b, 0x02,
-	0xab, 0x72, 0xa8, 0xca, 0x91, 0x3c, 0xe1, 0x6d, 0xb8, 0x2d, 0xac, 0x53, 0xa6, 0xe9, 0x06, 0x33,
-	0x77, 0xb0, 0x34, 0xd8, 0x91, 0xfc, 0x64, 0x2b, 0xf9, 0x0a, 0xc7, 0x5e, 0x11, 0x50, 0xf4, 0x3e,
-	0x9c, 0x68, 0xb7, 0x72, 0xdd, 0x2e, 0x90, 0x92, 0x34, 0xd4, 0x91, 0x77, 0xfc, 0xc8, 0xa2, 0x05,
-	0x0a, 0xdd, 0x81, 0x6f, 0xb6, 0xa1, 0xa4, 0xa4, 0xec, 0x1a, 0x58, 0x33, 0x1d, 0x8d, 0x32, 0xd3,
-	0xb8, 0x63, 0xda, 0x98, 0x52, 0x29, 0xd9, 0xd1, 0x41, 0xba, 0xd5, 0xc1, 0x9a, 0xe0, 0xb8, 0xe1,
-	0xac, 0xd5, 0x19, 0xd0, 0x75, 0xd8, 0x6f, 0x16, 0x2c, 0xac, 0x71, 0x19, 0x45, 0xca, 0x4c, 0x1a,
-	0x16, 0x7b, 0xe6, 0xeb, 0xbc, 0x06, 0xfe, 0xec, 0x81, 0x78, 0xfe, 0xdc, 0x3c, 0xff, 0xfb, 0x87,
-	0x07, 0x7a, 0x3e, 0xf9, 0x14, 0xf4, 0xf0, 0x77, 0x24, 0x71, 0x26, 0x26, 0x3d, 0x78, 0xf0, 0xd9,
-	0x6f, 0x87, 0xd4, 0x3e, 0x8e, 0x5c, 0xf7, 0x81, 0xe8, 0xbb, 0x70, 0xc8, 0xc5, 0xcc, 0xd5, 0x0d,
-	0xa6, 0x19, 0x56, 0x99, 0x32, 0xec, 0x4a, 0x23, 0x1d, 0x56, 0x17, 0x51, 0x07, 0x03, 0xf3, 0x45,
-	0xdf, 0x1a, 0xbd, 0x03, 0xc7, 0x83, 0x17, 0xac, 0x95, 0x67, 0xb4, 0x23, 0xcf, 0x88, 0x78, 0xc1,
-	0xd4, 0x66, 0xb2, 0x19, 0x18, 0x66, 0x86, 0x23, 0x8d, 0x77, 0x40, 0x46, 0x55, 0x6e, 0x82, 0xee,
-	0xc0, 0x61, 0x7e, 0x80, 0x72, 0x5d, 0xaa, 0x97, 0x19, 0x11, 0xaa, 0x43, 0x3a, 0x21, 0x70, 0x97,
-	0x33, 0xaf, 0xa2, 0x60, 0x33, 0xc7, 0x09, 0x8f, 0xa5, 0xa8, 0xca, 0x35, 0xd8, 0xba, 0xe1, 0xd4,
-	0x86, 0xd0, 0x2a, 0x8c, 0x07, 0xce, 0x24, 0x49, 0xb8, 0x58, 0xf8, 0x4a, 0x2e, 0x96, 0xa2, 0x6a,
-	0xcc, 0x67, 0x46, 0x1f, 0xc1, 0xa9, 0xa6, 0x93, 0xd8, 0xc4, 0x54, 0xdb, 0x72, 0x49, 0x49, 0xb3,
-	0xf5, 0x12, 0xa6, 0x8e, 0x6e, 0x60, 0x69, 0xaa, 0x43, 0x12, 0x62, 0xea, 0x29, 0xda, 0x20, 0x0a,
-	0x4c, 0x4c, 0xaf, 0xb9, 0xa4, 0x74, 0xb3, 0x86, 0x45, 0xd7, 0xe0, 0x08, 0x3f, 0xb2, 0x5a, 0x3c,
-	0x48, 0xd3, 0x1d, 0x29, 0x87, 0x6d, 0xb2, 0xd6, 0x4c, 0x8a, 0xee, 0xc2, 0x13, 0xfe, 0xbb, 0x76,
-	0x94, 0xeb, 0xb4, 0xe0, 0x3a, 0xff, 0x6a, 0x89, 0x38, 0xa2, 0x60, 0x82, 0x3d, 0x25, 0xa6, 0x8e,
-	0xf9, 0xfc, 0xad, 0x8e, 0x6f, 0xc3, 0x01, 0x21, 0xd6, 0x4d, 0x9b, 0x61, 0xd7, 0xd6, 0x2d, 0xe9,
-	0x99, 0xbf, 0x69, 0xbf, 0xca, 0xe9, 0x94, 0x7c, 0x74, 0xbf, 0x19, 0xac, 0xf6, 0xf3, 0xdb, 0x1b,
-	0xc1, 0x1d, 0x3a, 0x05, 0x7b, 0x85, 0x2a, 0xe7, 0xa9, 0x96, 0xbe, 0xe4, 0xbc, 0xbd, 0x6a, 0x82,
-	0x8f, 0xf0, 0xfc, 0xa1, 0x25, 0x98, 0xa8, 0xc9, 0x75, 0xe9, 0x2f, 0x71, 0x71, 0x30, 0x1d, 0x15,
-	0xdf, 0x6d, 0xb4, 0x7d, 0xe6, 0xaa, 0x4d, 0x6f, 0xd8, 0x5b, 0x44, 0x8d, 0x17, 0xfc, 0x0b, 0xb4,
-	0x06, 0x07, 0xeb, 0xa5, 0xe9, 0xf3, 0xfd, 0x35, 0x7e, 0x8c, 0x98, 0x3f, 0xe4, 0xcb, 0xd4, 0x8a,
-	0x8e, 0x53, 0xf0, 0x70, 0xd4, 0x7e, 0xbd, 0x61, 0x04, 0xfd, 0x0c, 0xc0, 0xf9, 0x42, 0x5d, 0x75,
-	0x6a, 0x2d, 0x82, 0x5b, 0xc3, 0xf7, 0x1c, 0xd3, 0x15, 0x1a, 0x54, 0xab, 0x77, 0x58, 0x54, 0xfa,
-	0x9b, 0x1f, 0xc7, 0x64, 0xc6, 0xef, 0xc2, 0x32, 0xb5, 0x2e, 0x2c, 0xb3, 0x5e, 0xb3, 0x51, 0xe2,
-	0xc1, 0x21, 0xae, 0xca, 0x85, 0x46, 0x4d, 0xbb, 0x78, 0xc8, 0xfd, 0x76, 0x9d, 0xba, 0x8e, 0xa2,
-	0xe8, 0x7d, 0x38, 0xec, 0x67, 0x19, 0x8b, 0x33, 0xd0, 0x0f, 0xf3, 0x8f, 0x09, 0xe1, 0xae, 0xfd,
-	0xe1, 0x72, 0x23, 0x30, 0xdf, 0xb8, 0xb1, 0x2a, 0xd2, 0x35, 0x54, 0xc3, 0x6f, 0x98, 0x8e, 0x88,
-	0xf0, 0x26, 0x84, 0x22, 0x63, 0x94, 0xe9, 0x0c, 0x4b, 0x7f, 0xe2, 0xa7, 0xea, 0x60, 0x2e, 0xd3,
-	0x29, 0x65, 0x87, 0x8b, 0x34, 0x89, 0xbd, 0xc6, 0x61, 0x6a, 0x2f, 0xa7, 0x10, 0x97, 0x97, 0x7e,
-	0x02, 0x7e, 0xef, 0x81, 0x1f, 0x03, 0xf8, 0x06, 0x1c, 0x51, 0x74, 0x6a, 0x1a, 0xd3, 0x7e, 0x6b,
-	0x50, 0xf6, 0x63, 0x41, 0x43, 0x59, 0x39, 0x7f, 0x56, 0xce, 0x2d, 0xc8, 0xd9, 0xac, 0x9c, 0x9d,
-	0x97, 0x2f, 0xc2, 0x29, 0x38, 0xbe, 0x42, 0xf4, 0xc2, 0xb4, 0x22, 0x8a, 0xd7, 0xb4, 0x8b, 0x1c,
-	0xc0, 0x5c, 0x62, 0xa1, 0x68, 0x2e, 0x2b, 0x67, 0x73, 0x50, 0x82, 0xc9, 0xa0, 0x5c, 0xa7, 0xeb,
-	0xf5, 0x1a, 0xca, 0xcf, 0xcf, 0x00, 0x0e, 0xbd, 0x52, 0xd8, 0xe1, 0x25, 0x5f, 0x68, 0xf1, 0x12,
-	0xcd, 0x9e, 0x97, 0xb3, 0x17, 0x94, 0xa9, 0x40, 0xb9, 0x06, 0xba, 0x3f, 0xb9, 0xef, 0x81, 0x50,
-	0xc5, 0x03, 0xe9, 0xaa, 0x07, 0x22, 0x39, 0x39, 0xbf, 0xa0, 0xcc, 0xc2, 0x31, 0x6a, 0x9b, 0x5a,
-	0x83, 0x2c, 0x0c, 0x4c, 0x47, 0xf7, 0x3d, 0x30, 0x59, 0xf1, 0xc0, 0x44, 0xd5, 0x03, 0x89, 0xdc,
-	0x39, 0x39, 0x77, 0x5e, 0xce, 0x5d, 0x50, 0xde, 0x6c, 0x3a, 0xd9, 0x0f, 0x9b, 0x89, 0x44, 0xc5,
-	0x03, 0xbd, 0x55, 0x0f, 0xc4, 0x2f, 0xc8, 0x0b, 0xf2, 0x79, 0xf9, 0x9c, 0x32, 0x0b, 0xd1, 0xd1,
-	0xc3, 0x09, 0x9d, 0xd8, 0xf7, 0xc0, 0x40, 0xc5, 0x03, 0xfd, 0x55, 0x0f, 0xf4, 0x65, 0xf3, 0x72,
-	0xf6, 0xac, 0x9c, 0x5d, 0x90, 0xb3, 0xe7, 0x94, 0x79, 0x38, 0x1e, 0xec, 0xe2, 0x87, 0xbb, 0xba,
-	0x0f, 0x19, 0xdf, 0xf7, 0xc0, 0x48, 0xd0, 0xaa, 0xa0, 0xaa, 0x07, 0x62, 0xd9, 0x8b, 0xf2, 0x74,
-	0x6e, 0x5e, 0xf9, 0x3f, 0x38, 0xdc, 0xf8, 0xc6, 0x6b, 0xbc, 0x35, 0x46, 0x89, 0x7d, 0x0f, 0x8c,
-	0x57, 0x3c, 0x30, 0x26, 0xe2, 0x6a, 0xea, 0x3c, 0x1a, 0xe3, 0x9a, 0xaa, 0x78, 0x20, 0xc5, 0xe3,
-	0xca, 0x67, 0xe5, 0x7c, 0x4e, 0xce, 0xe7, 0x97, 0x23, 0x89, 0x74, 0xf2, 0xb5, 0xe5, 0x48, 0x62,
-	0x22, 0x39, 0xb9, 0x1c, 0x49, 0xf4, 0x26, 0xe1, 0x72, 0x24, 0xd1, 0x9f, 0x1c, 0x58, 0x8e, 0x24,
-	0x50, 0x72, 0x64, 0x39, 0x92, 0x18, 0x4b, 0x8e, 0x2f, 0x47, 0x12, 0xa9, 0xe4, 0x54, 0x7a, 0x7f,
-	0x18, 0x0e, 0x2e, 0xba, 0x58, 0x67, 0xb8, 0xde, 0x8d, 0x48, 0x2d, 0xdd, 0xc8, 0x61, 0xa3, 0x71,
-	0xba, 0x4d, 0xa3, 0xd1, 0xd2, 0x5b, 0x9c, 0x6e, 0xd3, 0x5b, 0xb4, 0xb4, 0x0c, 0xdf, 0xd6, 0x7e,
-	0xe0, 0x83, 0x7f, 0x93, 0x3a, 0xef, 0xea, 0xf0, 0xae, 0x0e, 0xff, 0x5f, 0xd1, 0xe1, 0xa7, 0xdb,
-	0xe9, 0xf0, 0xae, 0xc2, 0xee, 0x2a, 0xec, 0x57, 0x55, 0xd8, 0x1f, 0x7f, 0x5d, 0x0a, 0xfb, 0x58,
-	0x6d, 0x7d, 0x69, 0xf8, 0x0f, 0x97, 0x5b, 0x3e, 0xe0, 0x29, 0xa9, 0x66, 0x5d, 0x32, 0xb4, 0x77,
-	0x00, 0x1a, 0x07, 0x94, 0xdc, 0x71, 0xb2, 0x64, 0x62, 0xef, 0x00, 0xb4, 0x9f, 0x52, 0x2e, 0xb6,
-	0xd1, 0x26, 0xff, 0xdf, 0xa0, 0x4d, 0xa2, 0x42, 0x99, 0xec, 0x1d, 0x80, 0x23, 0x66, 0x8a, 0xdc,
-	0x56, 0xad, 0x8c, 0xef, 0x1d, 0x80, 0x36, 0xe3, 0xca, 0xd9, 0x63, 0xc5, 0xca, 0xe4, 0xde, 0x01,
-	0x38, 0x66, 0x4e, 0x39, 0xd3, 0x4e, 0xb0, 0x8c, 0xed, 0x1d, 0x80, 0xa3, 0xc3, 0x22, 0xfc, 0xb6,
-	0xea, 0xc5, 0x0f, 0xbf, 0xdd, 0x54, 0x5d, 0xc2, 0x84, 0x93, 0x91, 0xce, 0x42, 0x26, 0xfd, 0x2b,
-	0x04, 0x87, 0x54, 0xec, 0x58, 0xba, 0xd1, 0xd5, 0x30, 0xff, 0xaa, 0x86, 0xf9, 0xfe, 0x57, 0xfe,
-	0xa6, 0x39, 0xd8, 0xfc, 0x4d, 0xb3, 0xf9, 0xc3, 0x65, 0x57, 0x1a, 0x75, 0xa5, 0x51, 0x57, 0x1a,
-	0x75, 0xa5, 0x51, 0x57, 0x1a, 0x75, 0xa5, 0x51, 0x57, 0x1a, 0x7d, 0x73, 0xd2, 0xe8, 0x60, 0x0c,
-	0xf6, 0x5d, 0xc7, 0xac, 0x2b, 0x8b, 0xba, 0xb2, 0xa8, 0x2b, 0x8b, 0xba, 0xb2, 0xa8, 0x2b, 0x8b,
-	0xba, 0xb2, 0xa8, 0x2b, 0x8b, 0xbe, 0x71, 0x59, 0xf4, 0xdf, 0xfd, 0x8b, 0xe9, 0x8f, 0xbe, 0x9e,
-	0x5f, 0x4c, 0xbf, 0x7d, 0x3f, 0x94, 0x76, 0xc5, 0xef, 0x7f, 0x94, 0xf8, 0x55, 0x7e, 0x09, 0x2a,
-	0x4f, 0x52, 0x3d, 0x8f, 0x9f, 0xa4, 0x7a, 0x9e, 0x3f, 0x49, 0x81, 0x07, 0xd5, 0x14, 0xf8, 0x4d,
-	0x35, 0x05, 0x3e, 0xaf, 0xa6, 0x40, 0xa5, 0x9a, 0x02, 0x8f, 0xab, 0x29, 0xf0, 0x45, 0x35, 0x05,
-	0x9e, 0x55, 0x53, 0x3d, 0xcf, 0xab, 0x29, 0xf0, 0x8b, 0xa7, 0xa9, 0x9e, 0xfd, 0xa7, 0x29, 0x50,
-	0x79, 0x9a, 0xea, 0x79, 0xfc, 0x34, 0xd5, 0x73, 0x7b, 0xa3, 0x48, 0x9c, 0x3b, 0xc5, 0x4c, 0x4d,
-	0x25, 0x66, 0xca, 0x74, 0x4e, 0x5c, 0x6c, 0x11, 0xb7, 0x34, 0xeb, 0xb8, 0x64, 0xc7, 0x2c, 0x60,
-	0x77, 0x76, 0x6b, 0xe1, 0x9e, 0x31, 0xe7, 0x6c, 0x16, 0xc9, 0x1c, 0xbe, 0xc7, 0x82, 0xff, 0x5d,
-	0xee, 0xf8, 0xbf, 0xe2, 0x9b, 0x31, 0xf1, 0x2e, 0xe4, 0xff, 0x19, 0x00, 0x00, 0xff, 0xff, 0x64,
-	0xa0, 0x8e, 0xfa, 0x5a, 0x2e, 0x00, 0x00,
+	// 2480 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xec, 0x5b, 0xdf, 0x6f, 0xdb, 0xd6,
+	0x15, 0xf6, 0x95, 0x64, 0x59, 0xbe, 0x4e, 0x6c, 0x99, 0x76, 0x1c, 0x46, 0x49, 0x65, 0x47, 0xf5,
+	0x5a, 0x37, 0xa0, 0x65, 0x4b, 0x8a, 0x9d, 0x34, 0xc0, 0xba, 0x86, 0x4e, 0x5b, 0xdb, 0x75, 0x5b,
+	0x97, 0xf6, 0x5c, 0xa0, 0x3f, 0x40, 0xd0, 0xd4, 0xb5, 0xcc, 0x85, 0xe2, 0x65, 0x79, 0xaf, 0x64,
+	0x7b, 0x40, 0x80, 0xcc, 0xdb, 0x80, 0xee, 0x07, 0xb0, 0xa1, 0xd8, 0xde, 0xf7, 0x38, 0xe4, 0x3f,
+	0xd8, 0xd8, 0x02, 0xc6, 0x80, 0x02, 0xc5, 0xb0, 0x01, 0x7a, 0x0c, 0xf6, 0xd4, 0x2a, 0x2f, 0xed,
+	0xb6, 0x87, 0x62, 0x2f, 0x1b, 0xfc, 0xd2, 0xe1, 0x5e, 0x52, 0x3f, 0x4d, 0xcb, 0x6e, 0x93, 0xa2,
+	0x5b, 0xab, 0x3c, 0x91, 0x97, 0xe7, 0xfb, 0xce, 0xb9, 0x87, 0x47, 0xe4, 0xf7, 0x45, 0x32, 0x9c,
+	0x2d, 0x23, 0x92, 0x36, 0xf0, 0x0c, 0xd1, 0xb7, 0x51, 0x51, 0x9b, 0x29, 0x1b, 0x68, 0x87, 0xcc,
+	0x50, 0xdd, 0x56, 0x4d, 0xac, 0xe5, 0x37, 0x35, 0x53, 0xb3, 0x74, 0xe4, 0xcc, 0xd0, 0x3d, 0x1b,
+	0x91, 0xb4, 0xed, 0x60, 0x8a, 0x85, 0x49, 0x0f, 0x91, 0xf6, 0x10, 0x69, 0x8e, 0x48, 0xb7, 0x23,
+	0x12, 0xd3, 0x05, 0x83, 0x6e, 0x97, 0x36, 0xd3, 0x3a, 0x2e, 0xce, 0x14, 0x70, 0x01, 0xcf, 0x70,
+	0xf0, 0x66, 0x69, 0x8b, 0x9f, 0xf1, 0x13, 0x7e, 0xe4, 0x91, 0x26, 0xc6, 0x0b, 0x18, 0x17, 0x4c,
+	0xd4, 0x88, 0xa2, 0x46, 0x11, 0x11, 0xaa, 0x15, 0x6d, 0x3f, 0xe0, 0x62, 0x6b, 0x9d, 0xd8, 0xa6,
+	0x06, 0xb6, 0xfc, 0x92, 0x12, 0x17, 0x5a, 0x2f, 0x36, 0x55, 0x9b, 0xb8, 0xd4, 0xb6, 0x3f, 0xcd,
+	0x34, 0xf2, 0x1a, 0x45, 0xfe, 0xd5, 0x89, 0xa3, 0xbb, 0x57, 0x5b, 0xa9, 0xc7, 0x03, 0xfb, 0xd3,
+	0x94, 0xe0, 0x89, 0xf6, 0x00, 0x87, 0x96, 0x34, 0x53, 0xdd, 0xc6, 0x84, 0xb6, 0xc4, 0xcd, 0x1e,
+	0x1f, 0xa7, 0xe6, 0x2d, 0xa2, 0x1a, 0xd6, 0x16, 0x9e, 0xc1, 0x9b, 0x3f, 0x40, 0x3a, 0xf5, 0x10,
+	0xa9, 0xcf, 0x01, 0x1c, 0x5a, 0x75, 0xf0, 0xee, 0xde, 0xfa, 0x9e, 0x8d, 0xd6, 0x57, 0xd6, 0xd6,
+	0x17, 0x56, 0x85, 0x37, 0xe0, 0x20, 0x35, 0x89, 0x6a, 0x6b, 0x8e, 0x56, 0x44, 0x14, 0x39, 0x44,
+	0x04, 0x13, 0x60, 0x6a, 0x20, 0x2b, 0xa5, 0x83, 0xee, 0xca, 0x2d, 0xbc, 0x63, 0x11, 0xea, 0x20,
+	0xad, 0xb8, 0x6e, 0x92, 0x55, 0x86, 0x21, 0x8c, 0x4b, 0x8e, 0x54, 0x5c, 0x00, 0x16, 0x7b, 0x94,
+	0xb3, 0xd4, 0x5f, 0xe6, 0x54, 0xc2, 0x5b, 0x70, 0x88, 0x91, 0xeb, 0xc8, 0xa1, 0x5e, 0x06, 0x22,
+	0x86, 0x39, 0xfb, 0xf4, 0x49, 0xec, 0x2b, 0x6b, 0x0b, 0xc8, 0xa1, 0x7e, 0x8a, 0x16, 0x7a, 0xb6,
+	0xee, 0x2f, 0x5f, 0x81, 0xe7, 0x6b, 0xf4, 0xc6, 0x96, 0xa1, 0x6b, 0x14, 0x11, 0x55, 0xdf, 0xc6,
+	0x86, 0x8e, 0x84, 0xa1, 0x03, 0x17, 0x84, 0x2b, 0x2e, 0x08, 0x55, 0x5d, 0x10, 0xce, 0x49, 0x99,
+	0xe5, 0x48, 0x2c, 0x14, 0x0f, 0xa7, 0x7e, 0x17, 0x82, 0x62, 0x5b, 0x07, 0x6e, 0x96, 0x28, 0xe6,
+	0xb9, 0x84, 0x05, 0x08, 0x39, 0x1d, 0xb6, 0xb6, 0x8c, 0x82, 0x5f, 0x68, 0x32, 0xb0, 0xd0, 0x75,
+	0x93, 0x2c, 0xf0, 0x28, 0x39, 0xf2, 0x99, 0x0b, 0x80, 0xd2, 0x4f, 0x6b, 0x0b, 0xc2, 0x1c, 0xec,
+	0xb3, 0xb0, 0x5a, 0xa4, 0x26, 0x11, 0x7b, 0x39, 0xc3, 0x68, 0x1b, 0xc3, 0x73, 0x45, 0x9b, 0xee,
+	0xc9, 0x91, 0x03, 0x6f, 0x47, 0x51, 0x0b, 0xbf, 0x44, 0x4d, 0x22, 0x6c, 0xc0, 0x58, 0x89, 0x20,
+	0x0f, 0x17, 0xe5, 0xb8, 0xdc, 0xc9, 0x37, 0x60, 0xc3, 0x9b, 0x3d, 0x03, 0x5b, 0x0b, 0xd8, 0xa2,
+	0x68, 0x97, 0xd6, 0x69, 0xfb, 0x4a, 0x04, 0x31, 0xde, 0x1b, 0xd1, 0x7f, 0x3d, 0x13, 0xce, 0x49,
+	0x57, 0xe5, 0x14, 0x1c, 0x28, 0xf2, 0xcd, 0x79, 0xed, 0x19, 0x39, 0x70, 0x41, 0xef, 0x87, 0x2e,
+	0x00, 0x15, 0x17, 0x44, 0x58, 0x8b, 0xe6, 0xa4, 0xf9, 0xe5, 0x48, 0x2c, 0x12, 0xef, 0x4d, 0xfd,
+	0x0a, 0xc0, 0xe1, 0x35, 0xe4, 0x94, 0x0d, 0x1d, 0xad, 0x62, 0xd3, 0xd0, 0xf7, 0x56, 0x0c, 0x42,
+	0x85, 0x1f, 0xc2, 0x98, 0xcd, 0xce, 0x0c, 0xc4, 0x06, 0x24, 0x3c, 0x35, 0x90, 0x4d, 0x05, 0xd6,
+	0xf7, 0x0a, 0x9f, 0x37, 0x05, 0x6d, 0xf1, 0xb1, 0xb8, 0x71, 0xef, 0xce, 0x20, 0xf1, 0xb8, 0x54,
+	0x0e, 0xdf, 0xfb, 0xe3, 0xa7, 0x07, 0xe1, 0xde, 0x77, 0x41, 0x28, 0x1e, 0xaf, 0x1d, 0xc5, 0x40,
+	0xed, 0x48, 0x04, 0xd5, 0x8f, 0x3e, 0x08, 0x47, 0xdf, 0x7d, 0x0f, 0x84, 0xe2, 0x40, 0xa9, 0xe7,
+	0x4b, 0xdd, 0x7b, 0x0c, 0x0e, 0xbe, 0x60, 0xe2, 0x4d, 0xcd, 0x5c, 0xb3, 0x91, 0xce, 0x88, 0x85,
+	0xef, 0xc2, 0xbe, 0x3c, 0x2e, 0x6a, 0x86, 0xe5, 0x55, 0xd3, 0x2f, 0x3f, 0xce, 0x48, 0xe0, 0xbb,
+	0xa0, 0x2f, 0xd5, 0xeb, 0x84, 0xdf, 0x09, 0xd5, 0x39, 0xe3, 0x13, 0x0d, 0x76, 0xa5, 0x86, 0x11,
+	0xd2, 0x70, 0xc0, 0x34, 0x08, 0x45, 0x96, 0x6a, 0x63, 0x87, 0x8a, 0xa1, 0x09, 0x30, 0x75, 0x56,
+	0x1e, 0x60, 0x91, 0xd1, 0x2b, 0x11, 0xf1, 0xf3, 0xcf, 0xc3, 0x8b, 0x3d, 0x0a, 0xf4, 0x22, 0x56,
+	0xb1, 0x43, 0x85, 0x65, 0x38, 0xc0, 0x02, 0x55, 0x47, 0xb3, 0x0a, 0x88, 0x88, 0x8f, 0x4f, 0x80,
+	0xa9, 0x7e, 0xf9, 0x49, 0xce, 0xec, 0x84, 0xc5, 0xbb, 0x11, 0xff, 0xa8, 0x12, 0x79, 0x96, 0x1d,
+	0x45, 0x9c, 0x50, 0x1c, 0xf8, 0x4b, 0xf7, 0x23, 0xec, 0x76, 0x40, 0x86, 0x56, 0x38, 0x58, 0xb8,
+	0x0c, 0x63, 0x3b, 0x06, 0xdd, 0x56, 0x89, 0x65, 0xf0, 0x19, 0x8b, 0xc9, 0xd1, 0x4f, 0x5c, 0x00,
+	0x58, 0x79, 0x6c, 0x7d, 0xcd, 0x32, 0x84, 0x69, 0x18, 0xb5, 0x30, 0x0f, 0x48, 0x1c, 0x3f, 0x42,
+	0x8b, 0x40, 0xe9, 0xb5, 0x30, 0x0b, 0x9f, 0x82, 0x61, 0x16, 0x7b, 0xb1, 0x63, 0x2c, 0x0b, 0x11,
+	0x5e, 0x84, 0x23, 0x79, 0xb4, 0xa5, 0x95, 0x4c, 0xaa, 0x9a, 0x9b, 0x6a, 0xbd, 0x8c, 0x4b, 0x27,
+	0x0e, 0x2a, 0x50, 0xe2, 0x3e, 0x70, 0x65, 0xf3, 0x35, 0xbf, 0xca, 0x59, 0x38, 0xca, 0x1e, 0x33,
+	0x65, 0x6c, 0x52, 0xe4, 0x38, 0x9a, 0x5a, 0xd4, 0x2c, 0xad, 0x80, 0xf2, 0xe2, 0x00, 0xdb, 0x94,
+	0x22, 0xe4, 0x2d, 0xb2, 0xe1, 0x5f, 0x7a, 0xc9, 0xbb, 0x22, 0xd8, 0xf0, 0x0c, 0x76, 0x8c, 0x82,
+	0xc1, 0xda, 0x8e, 0x4d, 0x22, 0x46, 0x4e, 0x3d, 0x48, 0x4f, 0xdd, 0xbb, 0x33, 0xd0, 0x04, 0xbd,
+	0x7f, 0x07, 0xb0, 0x9e, 0x1d, 0x1d, 0x26, 0x11, 0x28, 0x7e, 0xdc, 0x2a, 0xcb, 0x20, 0xbc, 0x0d,
+	0x47, 0x9b, 0x33, 0xaa, 0x3b, 0xc8, 0x28, 0x6c, 0x53, 0x22, 0x42, 0x9e, 0xf9, 0xa9, 0xe0, 0xcc,
+	0x75, 0x3c, 0xdb, 0xe9, 0x6b, 0x1c, 0x21, 0x8f, 0x06, 0xe6, 0x12, 0x9a, 0x72, 0x79, 0x81, 0x44,
+	0x78, 0x13, 0x8e, 0x6b, 0xf9, 0x32, 0x7b, 0x24, 0x11, 0xa4, 0x62, 0x4b, 0xb5, 0x4b, 0x9b, 0xa6,
+	0xa1, 0xab, 0xb5, 0xbe, 0x97, 0x0d, 0x5b, 0x8c, 0x75, 0xb8, 0x53, 0x21, 0xe5, 0x62, 0x1d, 0xfe,
+	0x8a, 0xb5, 0xca, 0xc1, 0xb7, 0x3c, 0xec, 0x86, 0x61, 0x0b, 0x3f, 0x02, 0x70, 0xb2, 0x13, 0xbd,
+	0x61, 0x97, 0xe7, 0x79, 0x8e, 0xc9, 0x0e, 0xf7, 0x34, 0xc1, 0x9a, 0xf7, 0xf3, 0xf7, 0x81, 0xb0,
+	0x35, 0xb7, 0xab, 0x4f, 0x33, 0xc8, 0x34, 0xa1, 0x9a, 0x95, 0xd7, 0x9c, 0xfc, 0x62, 0x48, 0x19,
+	0x3f, 0x2e, 0xff, 0x92, 0x5d, 0x9e, 0x67, 0x35, 0xfc, 0x02, 0xc0, 0xa7, 0x3a, 0xd5, 0x90, 0x2f,
+	0x69, 0x26, 0xa1, 0x9a, 0x7e, 0x9b, 0x17, 0xf2, 0x9d, 0x2f, 0x5d, 0xc8, 0xe4, 0x71, 0x85, 0xdc,
+	0xaa, 0x25, 0x60, 0xd5, 0xbc, 0x09, 0x47, 0x02, 0x8a, 0xf1, 0x1f, 0xbe, 0x93, 0x81, 0x77, 0xf8,
+	0x66, 0x2d, 0xde, 0x63, 0xf5, 0x67, 0x3c, 0xa4, 0x0c, 0x1f, 0x49, 0x28, 0xec, 0xc0, 0xb1, 0x06,
+	0x7b, 0x79, 0xbe, 0x29, 0xc1, 0x13, 0x5f, 0x20, 0x41, 0xe7, 0x7d, 0x36, 0xea, 0xdf, 0x98, 0xaf,
+	0x27, 0xfe, 0x29, 0x80, 0x8f, 0x35, 0x32, 0x37, 0x5a, 0xda, 0x28, 0xe0, 0xc9, 0x47, 0x56, 0x40,
+	0xa2, 0x9e, 0xa8, 0xde, 0xd9, 0x7a, 0x1d, 0xaf, 0xc1, 0x78, 0xa3, 0x0c, 0xbd, 0x44, 0x28, 0x2e,
+	0xfa, 0x2f, 0xa8, 0x13, 0x32, 0x2f, 0xf0, 0x58, 0xff, 0xd5, 0x1d, 0x52, 0x86, 0xb4, 0xd6, 0x0b,
+	0xc2, 0xf3, 0x30, 0x9e, 0xc7, 0xaa, 0x85, 0xa9, 0x5a, 0xbf, 0x22, 0xf6, 0x9d, 0xf8, 0x20, 0x0a,
+	0x29, 0x83, 0x79, 0xfc, 0x32, 0xa6, 0xf5, 0x34, 0xc2, 0xeb, 0x30, 0xb9, 0xad, 0x91, 0x6d, 0xff,
+	0xfd, 0xe2, 0xbf, 0xe0, 0x54, 0x07, 0x97, 0xac, 0xbc, 0xea, 0xe0, 0x4d, 0xc3, 0x12, 0xcf, 0x76,
+	0xf8, 0xb8, 0x85, 0x95, 0x04, 0x43, 0x7b, 0x6f, 0xba, 0x05, 0x8e, 0x55, 0x18, 0x54, 0x61, 0x48,
+	0xf6, 0x59, 0x0e, 0xe0, 0x36, 0x91, 0x46, 0xa8, 0xaa, 0xe9, 0xd4, 0x28, 0x23, 0x71, 0xb0, 0x23,
+	0xf9, 0xc5, 0x76, 0xf2, 0x15, 0x86, 0xbd, 0xc9, 0xa1, 0xc2, 0xab, 0xf0, 0x42, 0x50, 0xe5, 0x9a,
+	0x95, 0xc7, 0x45, 0x71, 0xa8, 0x23, 0xef, 0xd8, 0x91, 0xa2, 0x39, 0x4a, 0xb8, 0x0d, 0x9f, 0x0c,
+	0xa0, 0x24, 0xb8, 0xe4, 0xe8, 0x48, 0x35, 0x6c, 0x95, 0x50, 0x43, 0xbf, 0x6d, 0x58, 0x88, 0x10,
+	0x31, 0xde, 0x31, 0x41, 0xaa, 0x3d, 0xc1, 0x1a, 0xe7, 0x58, 0xb2, 0xd7, 0xea, 0x0c, 0xc2, 0x0b,
+	0xf0, 0x8c, 0x91, 0x37, 0x91, 0xca, 0x94, 0x35, 0x2e, 0x51, 0x71, 0x98, 0xbf, 0x46, 0x27, 0xd9,
+	0x7d, 0xfa, 0x9b, 0x0b, 0xfa, 0x72, 0xf3, 0xb3, 0xec, 0xdf, 0x7f, 0x5c, 0xd0, 0xf3, 0xce, 0x7b,
+	0xa0, 0x87, 0x3d, 0x36, 0x63, 0x57, 0xa2, 0xe2, 0xdd, 0xbb, 0x1f, 0xfc, 0x61, 0x48, 0x19, 0x60,
+	0xc8, 0x75, 0x0f, 0x28, 0x7c, 0x0f, 0x0e, 0x39, 0x88, 0x3a, 0x9a, 0x4e, 0x55, 0xdd, 0x2c, 0x11,
+	0x8a, 0x1c, 0x71, 0xa4, 0x43, 0x75, 0x11, 0x65, 0xd0, 0x0f, 0x5f, 0xf0, 0xa2, 0x85, 0x17, 0xe1,
+	0x98, 0x3f, 0x4b, 0xed, 0x3c, 0xa3, 0x1d, 0x79, 0x46, 0xf8, 0x2c, 0x29, 0xad, 0x64, 0x53, 0x30,
+	0x4c, 0x75, 0x5b, 0x1c, 0xeb, 0x80, 0xec, 0x55, 0x58, 0x88, 0x70, 0x1b, 0x0e, 0x33, 0x4d, 0xc5,
+	0xac, 0x8a, 0x56, 0xa2, 0x98, 0x0b, 0x51, 0xf1, 0x3c, 0xc7, 0x3d, 0x93, 0x3e, 0x8d, 0xa9, 0x49,
+	0x1f, 0xa7, 0x45, 0x17, 0x7b, 0x15, 0x26, 0xcb, 0xd7, 0x75, 0xbb, 0xb6, 0x24, 0xac, 0xc2, 0x3e,
+	0x3f, 0x99, 0x28, 0xf2, 0x14, 0x73, 0x5f, 0x2a, 0xc5, 0x62, 0xaf, 0x12, 0xf5, 0x98, 0x85, 0xb7,
+	0xe0, 0x78, 0x8b, 0x38, 0x33, 0x10, 0x51, 0xb7, 0x1c, 0x5c, 0x54, 0x2d, 0xad, 0x88, 0x88, 0xad,
+	0xe9, 0x48, 0x1c, 0xef, 0xd0, 0x84, 0xa8, 0x72, 0x89, 0x34, 0xe9, 0x44, 0x03, 0x91, 0xe7, 0x1d,
+	0x5c, 0x7c, 0xb9, 0x86, 0x15, 0x9e, 0x87, 0x23, 0x4c, 0xc5, 0xb4, 0x65, 0x10, 0x27, 0x3a, 0x52,
+	0x0e, 0x5b, 0x78, 0xad, 0x95, 0x54, 0xd8, 0x81, 0xe7, 0xbd, 0xcf, 0xda, 0x51, 0xae, 0xcb, 0x9c,
+	0xeb, 0xda, 0xe9, 0x1a, 0x71, 0x44, 0xd4, 0xfa, 0xcf, 0xa6, 0xa8, 0x72, 0xce, 0xe3, 0x6f, 0x4f,
+	0xfc, 0x3a, 0x3c, 0xcb, 0xfd, 0x9b, 0x61, 0x51, 0xe4, 0x58, 0x9a, 0x29, 0x7e, 0xe2, 0x3d, 0x9f,
+	0x4e, 0x23, 0x58, 0xe2, 0xf7, 0xee, 0xb4, 0x82, 0x95, 0x33, 0xec, 0x74, 0xc9, 0x3f, 0x13, 0x2e,
+	0xc1, 0x7e, 0x6e, 0xd4, 0x58, 0xab, 0xc5, 0x4f, 0x19, 0x6f, 0xbf, 0x12, 0x63, 0x2b, 0xac, 0x7f,
+	0xc2, 0x22, 0x8c, 0xd5, 0x1c, 0x9c, 0xf8, 0xf7, 0x3e, 0xae, 0x55, 0x8e, 0xfa, 0xb1, 0x00, 0xbb,
+	0x97, 0xbe, 0x65, 0x91, 0x25, 0x6b, 0x0b, 0x2b, 0x7d, 0x79, 0xef, 0x40, 0x58, 0x83, 0x83, 0xf5,
+	0xd1, 0xf4, 0xf8, 0xfe, 0xd1, 0x77, 0x8c, 0xbf, 0x6b, 0xf0, 0xa5, 0x6b, 0x43, 0xc7, 0x28, 0xd8,
+	0x76, 0x94, 0x33, 0x5a, 0xd3, 0x8a, 0xf0, 0x4b, 0x00, 0x67, 0xf3, 0x75, 0x23, 0xa2, 0xb6, 0x79,
+	0x30, 0x15, 0xed, 0xda, 0x86, 0xc3, 0x6d, 0x89, 0x5a, 0x37, 0xdd, 0x44, 0xfc, 0xa7, 0xb7, 0x8f,
+	0x44, 0xda, 0x33, 0xe6, 0xe9, 0x9a, 0x31, 0x4f, 0xaf, 0xd7, 0x62, 0xe4, 0x3e, 0x5f, 0xd7, 0x29,
+	0x52, 0xbe, 0xd9, 0xe6, 0x2c, 0x34, 0xb8, 0x9f, 0xab, 0x53, 0xd7, 0x51, 0x44, 0x78, 0x15, 0x0e,
+	0x7b, 0x5d, 0x46, 0x5c, 0x5e, 0x79, 0xdb, 0xfc, 0x4b, 0x8c, 0xa7, 0x0b, 0x7e, 0x49, 0x2d, 0xf9,
+	0xe1, 0x1b, 0x4b, 0xab, 0xbc, 0x5d, 0x43, 0x35, 0xfc, 0x86, 0x61, 0xf3, 0x1d, 0xbe, 0x0c, 0x21,
+	0xef, 0x18, 0xa1, 0x1a, 0x45, 0xe2, 0x5f, 0x99, 0x60, 0x1b, 0xcc, 0xa6, 0x3b, 0xb5, 0xac, 0x51,
+	0xa4, 0x81, 0xad, 0x35, 0x06, 0x53, 0xfa, 0x19, 0x05, 0x3f, 0xbc, 0xf1, 0x33, 0xf0, 0x27, 0x17,
+	0xfc, 0x04, 0xc0, 0x27, 0xe0, 0x88, 0xac, 0x11, 0x43, 0x9f, 0xf0, 0xdc, 0x62, 0xc9, 0xdb, 0x8b,
+	0x30, 0x94, 0x91, 0x72, 0x57, 0xa5, 0xec, 0x9c, 0x94, 0xc9, 0x48, 0x99, 0x59, 0xe9, 0x69, 0x38,
+	0x0e, 0xc7, 0x56, 0xb0, 0x96, 0x9f, 0x90, 0xf9, 0xf0, 0x1a, 0x56, 0x81, 0x01, 0xa8, 0x83, 0x4d,
+	0xa1, 0x37, 0x9b, 0x91, 0x32, 0x59, 0x28, 0xc2, 0xb8, 0x3f, 0xae, 0x13, 0xf5, 0x79, 0x0d, 0xe5,
+	0x66, 0xa7, 0x00, 0x83, 0xde, 0xcc, 0x97, 0xd9, 0xc8, 0xe7, 0xdb, 0xb2, 0xf4, 0x66, 0xae, 0x49,
+	0x99, 0xeb, 0xf2, 0xb8, 0x6f, 0x66, 0x7c, 0x2b, 0x18, 0x3f, 0x70, 0x41, 0xa8, 0xe2, 0x82, 0x54,
+	0xd5, 0x05, 0x91, 0xac, 0x94, 0x9b, 0x93, 0xa7, 0xe1, 0x39, 0x62, 0x19, 0x6a, 0x93, 0x53, 0xf0,
+	0x43, 0x47, 0x0f, 0x5c, 0x90, 0xa8, 0xb8, 0xe0, 0x42, 0xd5, 0x05, 0xb1, 0xec, 0xbc, 0x94, 0xbd,
+	0x26, 0x65, 0xaf, 0xcb, 0xb9, 0x16, 0x85, 0xe0, 0x45, 0x8e, 0x1f, 0xb8, 0x20, 0x56, 0x71, 0x41,
+	0x7f, 0xd5, 0x05, 0x23, 0xd7, 0xa5, 0xdc, 0xbc, 0x94, 0xbb, 0x26, 0xcd, 0x49, 0xb9, 0xeb, 0x52,
+	0xee, 0x69, 0x69, 0x5e, 0xba, 0x26, 0x4f, 0x43, 0xe1, 0xe8, 0x8b, 0x4a, 0x38, 0x7f, 0xe0, 0x82,
+	0xb3, 0x15, 0x17, 0x9c, 0xa9, 0xba, 0x60, 0x20, 0x93, 0x93, 0x32, 0x57, 0xa5, 0xcc, 0x9c, 0x94,
+	0x99, 0x97, 0x67, 0xe1, 0x98, 0xff, 0x44, 0x6f, 0x3c, 0xe1, 0x3d, 0xc8, 0xd8, 0x81, 0x0b, 0x46,
+	0x7c, 0x27, 0x2b, 0x54, 0x5d, 0x10, 0xcd, 0x3c, 0x2d, 0x4d, 0x64, 0x67, 0xe5, 0xc7, 0xe0, 0x70,
+	0xf3, 0xa7, 0x5f, 0xa5, 0xcc, 0x36, 0xc6, 0x0e, 0x5c, 0x30, 0x56, 0x71, 0xc1, 0x39, 0xbe, 0xc7,
+	0x16, 0x63, 0xda, 0xbc, 0xc7, 0xf1, 0x8a, 0x0b, 0x92, 0x6c, 0x8f, 0xb9, 0x8c, 0x94, 0xcb, 0x4a,
+	0xb9, 0xdc, 0x72, 0x24, 0x96, 0x8a, 0x3f, 0xbe, 0x1c, 0x89, 0x5d, 0x88, 0x27, 0x96, 0x23, 0xb1,
+	0xfe, 0x38, 0x5c, 0x8e, 0xc4, 0xce, 0xc4, 0xcf, 0x2e, 0x47, 0x62, 0x42, 0x7c, 0x64, 0x39, 0x12,
+	0x3b, 0x17, 0x1f, 0x5b, 0x8e, 0xc4, 0x92, 0xf1, 0xf1, 0xd4, 0xfb, 0xa3, 0x70, 0x70, 0xc1, 0x41,
+	0x1a, 0x45, 0x75, 0xb3, 0x2a, 0xb6, 0x99, 0xd5, 0x86, 0x0f, 0xbd, 0x1c, 0xe0, 0x43, 0xdb, 0xac,
+	0xe7, 0xe5, 0x00, 0xeb, 0xd9, 0xe6, 0x28, 0xbf, 0xa9, 0x76, 0xf1, 0x8d, 0x47, 0x64, 0xde, 0xbe,
+	0x06, 0x9b, 0x86, 0x1e, 0xde, 0xa5, 0x9d, 0xc6, 0x89, 0xe1, 0x47, 0x64, 0xc4, 0x4e, 0x6d, 0xb6,
+	0x36, 0x1e, 0xda, 0x6c, 0x05, 0xdb, 0xac, 0x37, 0x1e, 0x85, 0xcd, 0x3a, 0xce, 0x4a, 0x19, 0x8f,
+	0xd0, 0x49, 0x9d, 0xe0, 0x96, 0x5e, 0x7d, 0x38, 0xb7, 0x14, 0xe4, 0x93, 0x9e, 0xfd, 0x62, 0x3e,
+	0xa9, 0xeb, 0x90, 0xfe, 0x87, 0x1c, 0xd2, 0xe5, 0x20, 0x87, 0xd4, 0xf5, 0x3e, 0x5d, 0xef, 0x73,
+	0x5a, 0xef, 0xf3, 0xf6, 0x57, 0xe5, 0x7d, 0x8e, 0x75, 0x3d, 0x37, 0x86, 0xff, 0xfc, 0x4c, 0xdb,
+	0xff, 0xb6, 0xcb, 0xc9, 0x56, 0xc5, 0x38, 0xb4, 0x7f, 0x08, 0x9a, 0x17, 0xe4, 0xec, 0x71, 0x82,
+	0xf1, 0xc2, 0xfe, 0x21, 0x08, 0xbe, 0x24, 0x4f, 0x05, 0xa8, 0xc6, 0xd1, 0xfd, 0x43, 0x70, 0x64,
+	0x55, 0x96, 0x02, 0xa5, 0xe2, 0xd8, 0xfe, 0x21, 0x08, 0x58, 0x97, 0xaf, 0x1e, 0xab, 0x14, 0x13,
+	0xfb, 0x87, 0xe0, 0x98, 0x6b, 0xf2, 0x95, 0x20, 0xb5, 0x78, 0x6e, 0xff, 0x10, 0x1c, 0x5d, 0xe6,
+	0xbb, 0x0d, 0x94, 0x8e, 0xde, 0x6e, 0x83, 0x2e, 0xd5, 0xf5, 0x63, 0x38, 0x1e, 0xe9, 0xac, 0x22,
+	0x53, 0xbf, 0x3d, 0x07, 0x87, 0x14, 0x64, 0x9b, 0x9a, 0xde, 0x15, 0x90, 0x0f, 0x2b, 0x20, 0xbf,
+	0xff, 0xa5, 0xbf, 0x6f, 0x18, 0x6c, 0xfd, 0xbe, 0xa1, 0xf5, 0x4b, 0x85, 0xae, 0x2e, 0xed, 0xea,
+	0xd2, 0xae, 0x2e, 0xed, 0xea, 0xd2, 0xae, 0x2e, 0xed, 0xea, 0xd2, 0xae, 0x2e, 0xed, 0xea, 0xd2,
+	0x6f, 0x85, 0x2e, 0xfd, 0xb7, 0x08, 0x07, 0x5e, 0x40, 0xb4, 0xab, 0x49, 0xbb, 0x9a, 0xb4, 0xab,
+	0x49, 0xbb, 0x9a, 0xb4, 0xab, 0x49, 0xbb, 0x9a, 0xb4, 0xab, 0x49, 0xbb, 0x9a, 0xf4, 0x5b, 0xad,
+	0x49, 0xff, 0xbf, 0x7f, 0xc5, 0xf1, 0xe3, 0xaf, 0xe6, 0x57, 0x1c, 0xdf, 0xbc, 0x1f, 0x6f, 0x74,
+	0x9d, 0xc7, 0xd7, 0xe9, 0x3c, 0xe4, 0xdf, 0x80, 0xca, 0xc7, 0xc9, 0x9e, 0xfb, 0x1f, 0x27, 0x7b,
+	0x3e, 0xfb, 0x38, 0x09, 0xee, 0x56, 0x93, 0xe0, 0xf7, 0xd5, 0x24, 0xf8, 0xb0, 0x9a, 0x04, 0x95,
+	0x6a, 0x12, 0xdc, 0xaf, 0x26, 0xc1, 0x47, 0xd5, 0x24, 0xf8, 0xa4, 0x9a, 0xec, 0xf9, 0xac, 0x9a,
+	0x04, 0xbf, 0x7e, 0x90, 0xec, 0x39, 0x78, 0x90, 0x04, 0x95, 0x07, 0xc9, 0x9e, 0xfb, 0x0f, 0x92,
+	0x3d, 0xaf, 0x6f, 0x14, 0xb0, 0x7d, 0xbb, 0x90, 0xae, 0x49, 0xf4, 0x74, 0x89, 0xcc, 0xf0, 0x83,
+	0x2d, 0xec, 0x14, 0xa7, 0x6d, 0x07, 0x97, 0x8d, 0x3c, 0x72, 0xa6, 0xb7, 0xe6, 0x76, 0xf5, 0x19,
+	0x7b, 0xb3, 0x80, 0x67, 0xd0, 0x2e, 0xf5, 0xff, 0xa2, 0xa6, 0xe3, 0x5f, 0x30, 0x6d, 0x46, 0xf9,
+	0xe8, 0xe7, 0xfe, 0x1b, 0x00, 0x00, 0xff, 0xff, 0xe7, 0x44, 0xcd, 0xdc, 0xf0, 0x34, 0x00, 0x00,
 }
 
 func (this *ProxyTypeTLSTCP) Equal(that interface{}) bool {
@@ -2963,30 +3183,6 @@ func (this *GlobalSpecType_DefaultLbWithSni) Equal(that interface{}) bool {
 	}
 	return true
 }
-func (this *GlobalSpecType_DoNotAdvertise) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*GlobalSpecType_DoNotAdvertise)
-	if !ok {
-		that2, ok := that.(GlobalSpecType_DoNotAdvertise)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if !this.DoNotAdvertise.Equal(that1.DoNotAdvertise) {
-		return false
-	}
-	return true
-}
 func (this *GlobalSpecType_AdvertiseOnPublicDefaultVip) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
@@ -3007,6 +3203,54 @@ func (this *GlobalSpecType_AdvertiseOnPublicDefaultVip) Equal(that interface{}) 
 		return false
 	}
 	if !this.AdvertiseOnPublicDefaultVip.Equal(that1.AdvertiseOnPublicDefaultVip) {
+		return false
+	}
+	return true
+}
+func (this *GlobalSpecType_AdvertiseOnPublicDefaultIpv6Vip) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GlobalSpecType_AdvertiseOnPublicDefaultIpv6Vip)
+	if !ok {
+		that2, ok := that.(GlobalSpecType_AdvertiseOnPublicDefaultIpv6Vip)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.AdvertiseOnPublicDefaultIpv6Vip.Equal(that1.AdvertiseOnPublicDefaultIpv6Vip) {
+		return false
+	}
+	return true
+}
+func (this *GlobalSpecType_AdvertiseOnPublicDefaultDualstackVip) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GlobalSpecType_AdvertiseOnPublicDefaultDualstackVip)
+	if !ok {
+		that2, ok := that.(GlobalSpecType_AdvertiseOnPublicDefaultDualstackVip)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.AdvertiseOnPublicDefaultDualstackVip.Equal(that1.AdvertiseOnPublicDefaultDualstackVip) {
 		return false
 	}
 	return true
@@ -3035,6 +3279,54 @@ func (this *GlobalSpecType_AdvertiseOnPublic) Equal(that interface{}) bool {
 	}
 	return true
 }
+func (this *GlobalSpecType_AdvertiseV6OnPublic) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GlobalSpecType_AdvertiseV6OnPublic)
+	if !ok {
+		that2, ok := that.(GlobalSpecType_AdvertiseV6OnPublic)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.AdvertiseV6OnPublic.Equal(that1.AdvertiseV6OnPublic) {
+		return false
+	}
+	return true
+}
+func (this *GlobalSpecType_AdvertiseDualstackOnPublic) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GlobalSpecType_AdvertiseDualstackOnPublic)
+	if !ok {
+		that2, ok := that.(GlobalSpecType_AdvertiseDualstackOnPublic)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.AdvertiseDualstackOnPublic.Equal(that1.AdvertiseDualstackOnPublic) {
+		return false
+	}
+	return true
+}
 func (this *GlobalSpecType_AdvertiseCustom) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
@@ -3055,6 +3347,30 @@ func (this *GlobalSpecType_AdvertiseCustom) Equal(that interface{}) bool {
 		return false
 	}
 	if !this.AdvertiseCustom.Equal(that1.AdvertiseCustom) {
+		return false
+	}
+	return true
+}
+func (this *GlobalSpecType_DoNotAdvertise) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GlobalSpecType_DoNotAdvertise)
+	if !ok {
+		that2, ok := that.(GlobalSpecType_DoNotAdvertise)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.DoNotAdvertise.Equal(that1.DoNotAdvertise) {
 		return false
 	}
 	return true
@@ -3573,30 +3889,6 @@ func (this *CreateSpecType_DefaultLbWithSni) Equal(that interface{}) bool {
 	}
 	return true
 }
-func (this *CreateSpecType_DoNotAdvertise) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*CreateSpecType_DoNotAdvertise)
-	if !ok {
-		that2, ok := that.(CreateSpecType_DoNotAdvertise)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if !this.DoNotAdvertise.Equal(that1.DoNotAdvertise) {
-		return false
-	}
-	return true
-}
 func (this *CreateSpecType_AdvertiseOnPublicDefaultVip) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
@@ -3617,6 +3909,54 @@ func (this *CreateSpecType_AdvertiseOnPublicDefaultVip) Equal(that interface{}) 
 		return false
 	}
 	if !this.AdvertiseOnPublicDefaultVip.Equal(that1.AdvertiseOnPublicDefaultVip) {
+		return false
+	}
+	return true
+}
+func (this *CreateSpecType_AdvertiseOnPublicDefaultIpv6Vip) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*CreateSpecType_AdvertiseOnPublicDefaultIpv6Vip)
+	if !ok {
+		that2, ok := that.(CreateSpecType_AdvertiseOnPublicDefaultIpv6Vip)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.AdvertiseOnPublicDefaultIpv6Vip.Equal(that1.AdvertiseOnPublicDefaultIpv6Vip) {
+		return false
+	}
+	return true
+}
+func (this *CreateSpecType_AdvertiseOnPublicDefaultDualstackVip) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*CreateSpecType_AdvertiseOnPublicDefaultDualstackVip)
+	if !ok {
+		that2, ok := that.(CreateSpecType_AdvertiseOnPublicDefaultDualstackVip)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.AdvertiseOnPublicDefaultDualstackVip.Equal(that1.AdvertiseOnPublicDefaultDualstackVip) {
 		return false
 	}
 	return true
@@ -3645,6 +3985,54 @@ func (this *CreateSpecType_AdvertiseOnPublic) Equal(that interface{}) bool {
 	}
 	return true
 }
+func (this *CreateSpecType_AdvertiseV6OnPublic) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*CreateSpecType_AdvertiseV6OnPublic)
+	if !ok {
+		that2, ok := that.(CreateSpecType_AdvertiseV6OnPublic)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.AdvertiseV6OnPublic.Equal(that1.AdvertiseV6OnPublic) {
+		return false
+	}
+	return true
+}
+func (this *CreateSpecType_AdvertiseDualstackOnPublic) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*CreateSpecType_AdvertiseDualstackOnPublic)
+	if !ok {
+		that2, ok := that.(CreateSpecType_AdvertiseDualstackOnPublic)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.AdvertiseDualstackOnPublic.Equal(that1.AdvertiseDualstackOnPublic) {
+		return false
+	}
+	return true
+}
 func (this *CreateSpecType_AdvertiseCustom) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
@@ -3665,6 +4053,30 @@ func (this *CreateSpecType_AdvertiseCustom) Equal(that interface{}) bool {
 		return false
 	}
 	if !this.AdvertiseCustom.Equal(that1.AdvertiseCustom) {
+		return false
+	}
+	return true
+}
+func (this *CreateSpecType_DoNotAdvertise) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*CreateSpecType_DoNotAdvertise)
+	if !ok {
+		that2, ok := that.(CreateSpecType_DoNotAdvertise)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.DoNotAdvertise.Equal(that1.DoNotAdvertise) {
 		return false
 	}
 	return true
@@ -4191,30 +4603,6 @@ func (this *ReplaceSpecType_DefaultLbWithSni) Equal(that interface{}) bool {
 	}
 	return true
 }
-func (this *ReplaceSpecType_DoNotAdvertise) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*ReplaceSpecType_DoNotAdvertise)
-	if !ok {
-		that2, ok := that.(ReplaceSpecType_DoNotAdvertise)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if !this.DoNotAdvertise.Equal(that1.DoNotAdvertise) {
-		return false
-	}
-	return true
-}
 func (this *ReplaceSpecType_AdvertiseOnPublicDefaultVip) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
@@ -4235,6 +4623,54 @@ func (this *ReplaceSpecType_AdvertiseOnPublicDefaultVip) Equal(that interface{})
 		return false
 	}
 	if !this.AdvertiseOnPublicDefaultVip.Equal(that1.AdvertiseOnPublicDefaultVip) {
+		return false
+	}
+	return true
+}
+func (this *ReplaceSpecType_AdvertiseOnPublicDefaultIpv6Vip) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ReplaceSpecType_AdvertiseOnPublicDefaultIpv6Vip)
+	if !ok {
+		that2, ok := that.(ReplaceSpecType_AdvertiseOnPublicDefaultIpv6Vip)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.AdvertiseOnPublicDefaultIpv6Vip.Equal(that1.AdvertiseOnPublicDefaultIpv6Vip) {
+		return false
+	}
+	return true
+}
+func (this *ReplaceSpecType_AdvertiseOnPublicDefaultDualstackVip) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ReplaceSpecType_AdvertiseOnPublicDefaultDualstackVip)
+	if !ok {
+		that2, ok := that.(ReplaceSpecType_AdvertiseOnPublicDefaultDualstackVip)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.AdvertiseOnPublicDefaultDualstackVip.Equal(that1.AdvertiseOnPublicDefaultDualstackVip) {
 		return false
 	}
 	return true
@@ -4263,6 +4699,54 @@ func (this *ReplaceSpecType_AdvertiseOnPublic) Equal(that interface{}) bool {
 	}
 	return true
 }
+func (this *ReplaceSpecType_AdvertiseV6OnPublic) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ReplaceSpecType_AdvertiseV6OnPublic)
+	if !ok {
+		that2, ok := that.(ReplaceSpecType_AdvertiseV6OnPublic)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.AdvertiseV6OnPublic.Equal(that1.AdvertiseV6OnPublic) {
+		return false
+	}
+	return true
+}
+func (this *ReplaceSpecType_AdvertiseDualstackOnPublic) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ReplaceSpecType_AdvertiseDualstackOnPublic)
+	if !ok {
+		that2, ok := that.(ReplaceSpecType_AdvertiseDualstackOnPublic)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.AdvertiseDualstackOnPublic.Equal(that1.AdvertiseDualstackOnPublic) {
+		return false
+	}
+	return true
+}
 func (this *ReplaceSpecType_AdvertiseCustom) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
@@ -4283,6 +4767,30 @@ func (this *ReplaceSpecType_AdvertiseCustom) Equal(that interface{}) bool {
 		return false
 	}
 	if !this.AdvertiseCustom.Equal(that1.AdvertiseCustom) {
+		return false
+	}
+	return true
+}
+func (this *ReplaceSpecType_DoNotAdvertise) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ReplaceSpecType_DoNotAdvertise)
+	if !ok {
+		that2, ok := that.(ReplaceSpecType_DoNotAdvertise)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.DoNotAdvertise.Equal(that1.DoNotAdvertise) {
 		return false
 	}
 	return true
@@ -4842,30 +5350,6 @@ func (this *GetSpecType_DefaultLbWithSni) Equal(that interface{}) bool {
 	}
 	return true
 }
-func (this *GetSpecType_DoNotAdvertise) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*GetSpecType_DoNotAdvertise)
-	if !ok {
-		that2, ok := that.(GetSpecType_DoNotAdvertise)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if !this.DoNotAdvertise.Equal(that1.DoNotAdvertise) {
-		return false
-	}
-	return true
-}
 func (this *GetSpecType_AdvertiseOnPublicDefaultVip) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
@@ -4886,6 +5370,54 @@ func (this *GetSpecType_AdvertiseOnPublicDefaultVip) Equal(that interface{}) boo
 		return false
 	}
 	if !this.AdvertiseOnPublicDefaultVip.Equal(that1.AdvertiseOnPublicDefaultVip) {
+		return false
+	}
+	return true
+}
+func (this *GetSpecType_AdvertiseOnPublicDefaultIpv6Vip) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GetSpecType_AdvertiseOnPublicDefaultIpv6Vip)
+	if !ok {
+		that2, ok := that.(GetSpecType_AdvertiseOnPublicDefaultIpv6Vip)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.AdvertiseOnPublicDefaultIpv6Vip.Equal(that1.AdvertiseOnPublicDefaultIpv6Vip) {
+		return false
+	}
+	return true
+}
+func (this *GetSpecType_AdvertiseOnPublicDefaultDualstackVip) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GetSpecType_AdvertiseOnPublicDefaultDualstackVip)
+	if !ok {
+		that2, ok := that.(GetSpecType_AdvertiseOnPublicDefaultDualstackVip)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.AdvertiseOnPublicDefaultDualstackVip.Equal(that1.AdvertiseOnPublicDefaultDualstackVip) {
 		return false
 	}
 	return true
@@ -4914,6 +5446,54 @@ func (this *GetSpecType_AdvertiseOnPublic) Equal(that interface{}) bool {
 	}
 	return true
 }
+func (this *GetSpecType_AdvertiseV6OnPublic) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GetSpecType_AdvertiseV6OnPublic)
+	if !ok {
+		that2, ok := that.(GetSpecType_AdvertiseV6OnPublic)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.AdvertiseV6OnPublic.Equal(that1.AdvertiseV6OnPublic) {
+		return false
+	}
+	return true
+}
+func (this *GetSpecType_AdvertiseDualstackOnPublic) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GetSpecType_AdvertiseDualstackOnPublic)
+	if !ok {
+		that2, ok := that.(GetSpecType_AdvertiseDualstackOnPublic)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.AdvertiseDualstackOnPublic.Equal(that1.AdvertiseDualstackOnPublic) {
+		return false
+	}
+	return true
+}
 func (this *GetSpecType_AdvertiseCustom) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
@@ -4934,6 +5514,30 @@ func (this *GetSpecType_AdvertiseCustom) Equal(that interface{}) bool {
 		return false
 	}
 	if !this.AdvertiseCustom.Equal(that1.AdvertiseCustom) {
+		return false
+	}
+	return true
+}
+func (this *GetSpecType_DoNotAdvertise) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GetSpecType_DoNotAdvertise)
+	if !ok {
+		that2, ok := that.(GetSpecType_DoNotAdvertise)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.DoNotAdvertise.Equal(that1.DoNotAdvertise) {
 		return false
 	}
 	return true
@@ -5301,7 +5905,7 @@ func (this *GlobalSpecType) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 38)
+	s := make([]string, 0, 42)
 	s = append(s, "&tcp_loadbalancer.GlobalSpecType{")
 	s = append(s, "Domains: "+fmt.Sprintf("%#v", this.Domains)+",\n")
 	if this.PortChoice != nil {
@@ -5394,20 +5998,28 @@ func (this *GlobalSpecType_DefaultLbWithSni) GoString() string {
 		`DefaultLbWithSni:` + fmt.Sprintf("%#v", this.DefaultLbWithSni) + `}`}, ", ")
 	return s
 }
-func (this *GlobalSpecType_DoNotAdvertise) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&tcp_loadbalancer.GlobalSpecType_DoNotAdvertise{` +
-		`DoNotAdvertise:` + fmt.Sprintf("%#v", this.DoNotAdvertise) + `}`}, ", ")
-	return s
-}
 func (this *GlobalSpecType_AdvertiseOnPublicDefaultVip) GoString() string {
 	if this == nil {
 		return "nil"
 	}
 	s := strings.Join([]string{`&tcp_loadbalancer.GlobalSpecType_AdvertiseOnPublicDefaultVip{` +
 		`AdvertiseOnPublicDefaultVip:` + fmt.Sprintf("%#v", this.AdvertiseOnPublicDefaultVip) + `}`}, ", ")
+	return s
+}
+func (this *GlobalSpecType_AdvertiseOnPublicDefaultIpv6Vip) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&tcp_loadbalancer.GlobalSpecType_AdvertiseOnPublicDefaultIpv6Vip{` +
+		`AdvertiseOnPublicDefaultIpv6Vip:` + fmt.Sprintf("%#v", this.AdvertiseOnPublicDefaultIpv6Vip) + `}`}, ", ")
+	return s
+}
+func (this *GlobalSpecType_AdvertiseOnPublicDefaultDualstackVip) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&tcp_loadbalancer.GlobalSpecType_AdvertiseOnPublicDefaultDualstackVip{` +
+		`AdvertiseOnPublicDefaultDualstackVip:` + fmt.Sprintf("%#v", this.AdvertiseOnPublicDefaultDualstackVip) + `}`}, ", ")
 	return s
 }
 func (this *GlobalSpecType_AdvertiseOnPublic) GoString() string {
@@ -5418,12 +6030,36 @@ func (this *GlobalSpecType_AdvertiseOnPublic) GoString() string {
 		`AdvertiseOnPublic:` + fmt.Sprintf("%#v", this.AdvertiseOnPublic) + `}`}, ", ")
 	return s
 }
+func (this *GlobalSpecType_AdvertiseV6OnPublic) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&tcp_loadbalancer.GlobalSpecType_AdvertiseV6OnPublic{` +
+		`AdvertiseV6OnPublic:` + fmt.Sprintf("%#v", this.AdvertiseV6OnPublic) + `}`}, ", ")
+	return s
+}
+func (this *GlobalSpecType_AdvertiseDualstackOnPublic) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&tcp_loadbalancer.GlobalSpecType_AdvertiseDualstackOnPublic{` +
+		`AdvertiseDualstackOnPublic:` + fmt.Sprintf("%#v", this.AdvertiseDualstackOnPublic) + `}`}, ", ")
+	return s
+}
 func (this *GlobalSpecType_AdvertiseCustom) GoString() string {
 	if this == nil {
 		return "nil"
 	}
 	s := strings.Join([]string{`&tcp_loadbalancer.GlobalSpecType_AdvertiseCustom{` +
 		`AdvertiseCustom:` + fmt.Sprintf("%#v", this.AdvertiseCustom) + `}`}, ", ")
+	return s
+}
+func (this *GlobalSpecType_DoNotAdvertise) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&tcp_loadbalancer.GlobalSpecType_DoNotAdvertise{` +
+		`DoNotAdvertise:` + fmt.Sprintf("%#v", this.DoNotAdvertise) + `}`}, ", ")
 	return s
 }
 func (this *GlobalSpecType_HashPolicyChoiceRoundRobin) GoString() string {
@@ -5526,7 +6162,7 @@ func (this *CreateSpecType) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 29)
+	s := make([]string, 0, 33)
 	s = append(s, "&tcp_loadbalancer.CreateSpecType{")
 	s = append(s, "Domains: "+fmt.Sprintf("%#v", this.Domains)+",\n")
 	if this.PortChoice != nil {
@@ -5598,20 +6234,28 @@ func (this *CreateSpecType_DefaultLbWithSni) GoString() string {
 		`DefaultLbWithSni:` + fmt.Sprintf("%#v", this.DefaultLbWithSni) + `}`}, ", ")
 	return s
 }
-func (this *CreateSpecType_DoNotAdvertise) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&tcp_loadbalancer.CreateSpecType_DoNotAdvertise{` +
-		`DoNotAdvertise:` + fmt.Sprintf("%#v", this.DoNotAdvertise) + `}`}, ", ")
-	return s
-}
 func (this *CreateSpecType_AdvertiseOnPublicDefaultVip) GoString() string {
 	if this == nil {
 		return "nil"
 	}
 	s := strings.Join([]string{`&tcp_loadbalancer.CreateSpecType_AdvertiseOnPublicDefaultVip{` +
 		`AdvertiseOnPublicDefaultVip:` + fmt.Sprintf("%#v", this.AdvertiseOnPublicDefaultVip) + `}`}, ", ")
+	return s
+}
+func (this *CreateSpecType_AdvertiseOnPublicDefaultIpv6Vip) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&tcp_loadbalancer.CreateSpecType_AdvertiseOnPublicDefaultIpv6Vip{` +
+		`AdvertiseOnPublicDefaultIpv6Vip:` + fmt.Sprintf("%#v", this.AdvertiseOnPublicDefaultIpv6Vip) + `}`}, ", ")
+	return s
+}
+func (this *CreateSpecType_AdvertiseOnPublicDefaultDualstackVip) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&tcp_loadbalancer.CreateSpecType_AdvertiseOnPublicDefaultDualstackVip{` +
+		`AdvertiseOnPublicDefaultDualstackVip:` + fmt.Sprintf("%#v", this.AdvertiseOnPublicDefaultDualstackVip) + `}`}, ", ")
 	return s
 }
 func (this *CreateSpecType_AdvertiseOnPublic) GoString() string {
@@ -5622,12 +6266,36 @@ func (this *CreateSpecType_AdvertiseOnPublic) GoString() string {
 		`AdvertiseOnPublic:` + fmt.Sprintf("%#v", this.AdvertiseOnPublic) + `}`}, ", ")
 	return s
 }
+func (this *CreateSpecType_AdvertiseV6OnPublic) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&tcp_loadbalancer.CreateSpecType_AdvertiseV6OnPublic{` +
+		`AdvertiseV6OnPublic:` + fmt.Sprintf("%#v", this.AdvertiseV6OnPublic) + `}`}, ", ")
+	return s
+}
+func (this *CreateSpecType_AdvertiseDualstackOnPublic) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&tcp_loadbalancer.CreateSpecType_AdvertiseDualstackOnPublic{` +
+		`AdvertiseDualstackOnPublic:` + fmt.Sprintf("%#v", this.AdvertiseDualstackOnPublic) + `}`}, ", ")
+	return s
+}
 func (this *CreateSpecType_AdvertiseCustom) GoString() string {
 	if this == nil {
 		return "nil"
 	}
 	s := strings.Join([]string{`&tcp_loadbalancer.CreateSpecType_AdvertiseCustom{` +
 		`AdvertiseCustom:` + fmt.Sprintf("%#v", this.AdvertiseCustom) + `}`}, ", ")
+	return s
+}
+func (this *CreateSpecType_DoNotAdvertise) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&tcp_loadbalancer.CreateSpecType_DoNotAdvertise{` +
+		`DoNotAdvertise:` + fmt.Sprintf("%#v", this.DoNotAdvertise) + `}`}, ", ")
 	return s
 }
 func (this *CreateSpecType_HashPolicyChoiceRoundRobin) GoString() string {
@@ -5730,7 +6398,7 @@ func (this *ReplaceSpecType) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 30)
+	s := make([]string, 0, 34)
 	s = append(s, "&tcp_loadbalancer.ReplaceSpecType{")
 	s = append(s, "Domains: "+fmt.Sprintf("%#v", this.Domains)+",\n")
 	if this.PortChoice != nil {
@@ -5805,20 +6473,28 @@ func (this *ReplaceSpecType_DefaultLbWithSni) GoString() string {
 		`DefaultLbWithSni:` + fmt.Sprintf("%#v", this.DefaultLbWithSni) + `}`}, ", ")
 	return s
 }
-func (this *ReplaceSpecType_DoNotAdvertise) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&tcp_loadbalancer.ReplaceSpecType_DoNotAdvertise{` +
-		`DoNotAdvertise:` + fmt.Sprintf("%#v", this.DoNotAdvertise) + `}`}, ", ")
-	return s
-}
 func (this *ReplaceSpecType_AdvertiseOnPublicDefaultVip) GoString() string {
 	if this == nil {
 		return "nil"
 	}
 	s := strings.Join([]string{`&tcp_loadbalancer.ReplaceSpecType_AdvertiseOnPublicDefaultVip{` +
 		`AdvertiseOnPublicDefaultVip:` + fmt.Sprintf("%#v", this.AdvertiseOnPublicDefaultVip) + `}`}, ", ")
+	return s
+}
+func (this *ReplaceSpecType_AdvertiseOnPublicDefaultIpv6Vip) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&tcp_loadbalancer.ReplaceSpecType_AdvertiseOnPublicDefaultIpv6Vip{` +
+		`AdvertiseOnPublicDefaultIpv6Vip:` + fmt.Sprintf("%#v", this.AdvertiseOnPublicDefaultIpv6Vip) + `}`}, ", ")
+	return s
+}
+func (this *ReplaceSpecType_AdvertiseOnPublicDefaultDualstackVip) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&tcp_loadbalancer.ReplaceSpecType_AdvertiseOnPublicDefaultDualstackVip{` +
+		`AdvertiseOnPublicDefaultDualstackVip:` + fmt.Sprintf("%#v", this.AdvertiseOnPublicDefaultDualstackVip) + `}`}, ", ")
 	return s
 }
 func (this *ReplaceSpecType_AdvertiseOnPublic) GoString() string {
@@ -5829,12 +6505,36 @@ func (this *ReplaceSpecType_AdvertiseOnPublic) GoString() string {
 		`AdvertiseOnPublic:` + fmt.Sprintf("%#v", this.AdvertiseOnPublic) + `}`}, ", ")
 	return s
 }
+func (this *ReplaceSpecType_AdvertiseV6OnPublic) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&tcp_loadbalancer.ReplaceSpecType_AdvertiseV6OnPublic{` +
+		`AdvertiseV6OnPublic:` + fmt.Sprintf("%#v", this.AdvertiseV6OnPublic) + `}`}, ", ")
+	return s
+}
+func (this *ReplaceSpecType_AdvertiseDualstackOnPublic) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&tcp_loadbalancer.ReplaceSpecType_AdvertiseDualstackOnPublic{` +
+		`AdvertiseDualstackOnPublic:` + fmt.Sprintf("%#v", this.AdvertiseDualstackOnPublic) + `}`}, ", ")
+	return s
+}
 func (this *ReplaceSpecType_AdvertiseCustom) GoString() string {
 	if this == nil {
 		return "nil"
 	}
 	s := strings.Join([]string{`&tcp_loadbalancer.ReplaceSpecType_AdvertiseCustom{` +
 		`AdvertiseCustom:` + fmt.Sprintf("%#v", this.AdvertiseCustom) + `}`}, ", ")
+	return s
+}
+func (this *ReplaceSpecType_DoNotAdvertise) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&tcp_loadbalancer.ReplaceSpecType_DoNotAdvertise{` +
+		`DoNotAdvertise:` + fmt.Sprintf("%#v", this.DoNotAdvertise) + `}`}, ", ")
 	return s
 }
 func (this *ReplaceSpecType_HashPolicyChoiceRoundRobin) GoString() string {
@@ -5937,7 +6637,7 @@ func (this *GetSpecType) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 36)
+	s := make([]string, 0, 40)
 	s = append(s, "&tcp_loadbalancer.GetSpecType{")
 	s = append(s, "Domains: "+fmt.Sprintf("%#v", this.Domains)+",\n")
 	if this.PortChoice != nil {
@@ -6026,20 +6726,28 @@ func (this *GetSpecType_DefaultLbWithSni) GoString() string {
 		`DefaultLbWithSni:` + fmt.Sprintf("%#v", this.DefaultLbWithSni) + `}`}, ", ")
 	return s
 }
-func (this *GetSpecType_DoNotAdvertise) GoString() string {
-	if this == nil {
-		return "nil"
-	}
-	s := strings.Join([]string{`&tcp_loadbalancer.GetSpecType_DoNotAdvertise{` +
-		`DoNotAdvertise:` + fmt.Sprintf("%#v", this.DoNotAdvertise) + `}`}, ", ")
-	return s
-}
 func (this *GetSpecType_AdvertiseOnPublicDefaultVip) GoString() string {
 	if this == nil {
 		return "nil"
 	}
 	s := strings.Join([]string{`&tcp_loadbalancer.GetSpecType_AdvertiseOnPublicDefaultVip{` +
 		`AdvertiseOnPublicDefaultVip:` + fmt.Sprintf("%#v", this.AdvertiseOnPublicDefaultVip) + `}`}, ", ")
+	return s
+}
+func (this *GetSpecType_AdvertiseOnPublicDefaultIpv6Vip) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&tcp_loadbalancer.GetSpecType_AdvertiseOnPublicDefaultIpv6Vip{` +
+		`AdvertiseOnPublicDefaultIpv6Vip:` + fmt.Sprintf("%#v", this.AdvertiseOnPublicDefaultIpv6Vip) + `}`}, ", ")
+	return s
+}
+func (this *GetSpecType_AdvertiseOnPublicDefaultDualstackVip) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&tcp_loadbalancer.GetSpecType_AdvertiseOnPublicDefaultDualstackVip{` +
+		`AdvertiseOnPublicDefaultDualstackVip:` + fmt.Sprintf("%#v", this.AdvertiseOnPublicDefaultDualstackVip) + `}`}, ", ")
 	return s
 }
 func (this *GetSpecType_AdvertiseOnPublic) GoString() string {
@@ -6050,12 +6758,36 @@ func (this *GetSpecType_AdvertiseOnPublic) GoString() string {
 		`AdvertiseOnPublic:` + fmt.Sprintf("%#v", this.AdvertiseOnPublic) + `}`}, ", ")
 	return s
 }
+func (this *GetSpecType_AdvertiseV6OnPublic) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&tcp_loadbalancer.GetSpecType_AdvertiseV6OnPublic{` +
+		`AdvertiseV6OnPublic:` + fmt.Sprintf("%#v", this.AdvertiseV6OnPublic) + `}`}, ", ")
+	return s
+}
+func (this *GetSpecType_AdvertiseDualstackOnPublic) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&tcp_loadbalancer.GetSpecType_AdvertiseDualstackOnPublic{` +
+		`AdvertiseDualstackOnPublic:` + fmt.Sprintf("%#v", this.AdvertiseDualstackOnPublic) + `}`}, ", ")
+	return s
+}
 func (this *GetSpecType_AdvertiseCustom) GoString() string {
 	if this == nil {
 		return "nil"
 	}
 	s := strings.Join([]string{`&tcp_loadbalancer.GetSpecType_AdvertiseCustom{` +
 		`AdvertiseCustom:` + fmt.Sprintf("%#v", this.AdvertiseCustom) + `}`}, ", ")
+	return s
+}
+func (this *GetSpecType_DoNotAdvertise) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&tcp_loadbalancer.GetSpecType_DoNotAdvertise{` +
+		`DoNotAdvertise:` + fmt.Sprintf("%#v", this.DoNotAdvertise) + `}`}, ", ")
 	return s
 }
 func (this *GetSpecType_HashPolicyChoiceRoundRobin) GoString() string {
@@ -6471,6 +7203,15 @@ func (m *GlobalSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0xc2
 	}
+	if m.AdvertiseChoice != nil {
+		{
+			size := m.AdvertiseChoice.Size()
+			i -= size
+			if _, err := m.AdvertiseChoice.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
+	}
 	if m.PortChoice != nil {
 		{
 			size := m.PortChoice.Size()
@@ -6554,15 +7295,6 @@ func (m *GlobalSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 			}
 			i--
 			dAtA[i] = 0x52
-		}
-	}
-	if m.AdvertiseChoice != nil {
-		{
-			size := m.AdvertiseChoice.Size()
-			i -= size
-			if _, err := m.AdvertiseChoice.MarshalTo(dAtA[i:]); err != nil {
-				return 0, err
-			}
 		}
 	}
 	if len(m.OriginPools) > 0 {
@@ -7052,6 +7784,98 @@ func (m *GlobalSpecType_PortRanges) MarshalToSizedBuffer(dAtA []byte) (int, erro
 	dAtA[i] = 0x9a
 	return len(dAtA) - i, nil
 }
+func (m *GlobalSpecType_AdvertiseOnPublicDefaultIpv6Vip) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GlobalSpecType_AdvertiseOnPublicDefaultIpv6Vip) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.AdvertiseOnPublicDefaultIpv6Vip != nil {
+		{
+			size, err := m.AdvertiseOnPublicDefaultIpv6Vip.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x2
+		i--
+		dAtA[i] = 0xa2
+	}
+	return len(dAtA) - i, nil
+}
+func (m *GlobalSpecType_AdvertiseOnPublicDefaultDualstackVip) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GlobalSpecType_AdvertiseOnPublicDefaultDualstackVip) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.AdvertiseOnPublicDefaultDualstackVip != nil {
+		{
+			size, err := m.AdvertiseOnPublicDefaultDualstackVip.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x2
+		i--
+		dAtA[i] = 0xaa
+	}
+	return len(dAtA) - i, nil
+}
+func (m *GlobalSpecType_AdvertiseV6OnPublic) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GlobalSpecType_AdvertiseV6OnPublic) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.AdvertiseV6OnPublic != nil {
+		{
+			size, err := m.AdvertiseV6OnPublic.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x2
+		i--
+		dAtA[i] = 0xb2
+	}
+	return len(dAtA) - i, nil
+}
+func (m *GlobalSpecType_AdvertiseDualstackOnPublic) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GlobalSpecType_AdvertiseDualstackOnPublic) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.AdvertiseDualstackOnPublic != nil {
+		{
+			size, err := m.AdvertiseDualstackOnPublic.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x2
+		i--
+		dAtA[i] = 0xba
+	}
+	return len(dAtA) - i, nil
+}
 func (m *CreateSpecType) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -7072,6 +7896,15 @@ func (m *CreateSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if m.AdvertiseChoice != nil {
+		{
+			size := m.AdvertiseChoice.Size()
+			i -= size
+			if _, err := m.AdvertiseChoice.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
+	}
 	if m.PortChoice != nil {
 		{
 			size := m.PortChoice.Size()
@@ -7155,15 +7988,6 @@ func (m *CreateSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 			}
 			i--
 			dAtA[i] = 0x52
-		}
-	}
-	if m.AdvertiseChoice != nil {
-		{
-			size := m.AdvertiseChoice.Size()
-			i -= size
-			if _, err := m.AdvertiseChoice.MarshalTo(dAtA[i:]); err != nil {
-				return 0, err
-			}
 		}
 	}
 	if len(m.Domains) > 0 {
@@ -7629,6 +8453,98 @@ func (m *CreateSpecType_PortRanges) MarshalToSizedBuffer(dAtA []byte) (int, erro
 	dAtA[i] = 0x9a
 	return len(dAtA) - i, nil
 }
+func (m *CreateSpecType_AdvertiseOnPublicDefaultIpv6Vip) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *CreateSpecType_AdvertiseOnPublicDefaultIpv6Vip) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.AdvertiseOnPublicDefaultIpv6Vip != nil {
+		{
+			size, err := m.AdvertiseOnPublicDefaultIpv6Vip.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x2
+		i--
+		dAtA[i] = 0xa2
+	}
+	return len(dAtA) - i, nil
+}
+func (m *CreateSpecType_AdvertiseOnPublicDefaultDualstackVip) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *CreateSpecType_AdvertiseOnPublicDefaultDualstackVip) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.AdvertiseOnPublicDefaultDualstackVip != nil {
+		{
+			size, err := m.AdvertiseOnPublicDefaultDualstackVip.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x2
+		i--
+		dAtA[i] = 0xaa
+	}
+	return len(dAtA) - i, nil
+}
+func (m *CreateSpecType_AdvertiseV6OnPublic) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *CreateSpecType_AdvertiseV6OnPublic) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.AdvertiseV6OnPublic != nil {
+		{
+			size, err := m.AdvertiseV6OnPublic.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x2
+		i--
+		dAtA[i] = 0xb2
+	}
+	return len(dAtA) - i, nil
+}
+func (m *CreateSpecType_AdvertiseDualstackOnPublic) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *CreateSpecType_AdvertiseDualstackOnPublic) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.AdvertiseDualstackOnPublic != nil {
+		{
+			size, err := m.AdvertiseDualstackOnPublic.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x2
+		i--
+		dAtA[i] = 0xba
+	}
+	return len(dAtA) - i, nil
+}
 func (m *ReplaceSpecType) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -7649,6 +8565,15 @@ func (m *ReplaceSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if m.AdvertiseChoice != nil {
+		{
+			size := m.AdvertiseChoice.Size()
+			i -= size
+			if _, err := m.AdvertiseChoice.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
+	}
 	if m.PortChoice != nil {
 		{
 			size := m.PortChoice.Size()
@@ -7732,15 +8657,6 @@ func (m *ReplaceSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 			}
 			i--
 			dAtA[i] = 0x52
-		}
-	}
-	if m.AdvertiseChoice != nil {
-		{
-			size := m.AdvertiseChoice.Size()
-			i -= size
-			if _, err := m.AdvertiseChoice.MarshalTo(dAtA[i:]); err != nil {
-				return 0, err
-			}
 		}
 	}
 	if len(m.OriginPools) > 0 {
@@ -8220,6 +9136,98 @@ func (m *ReplaceSpecType_PortRanges) MarshalToSizedBuffer(dAtA []byte) (int, err
 	dAtA[i] = 0x9a
 	return len(dAtA) - i, nil
 }
+func (m *ReplaceSpecType_AdvertiseOnPublicDefaultIpv6Vip) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ReplaceSpecType_AdvertiseOnPublicDefaultIpv6Vip) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.AdvertiseOnPublicDefaultIpv6Vip != nil {
+		{
+			size, err := m.AdvertiseOnPublicDefaultIpv6Vip.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x2
+		i--
+		dAtA[i] = 0xa2
+	}
+	return len(dAtA) - i, nil
+}
+func (m *ReplaceSpecType_AdvertiseOnPublicDefaultDualstackVip) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ReplaceSpecType_AdvertiseOnPublicDefaultDualstackVip) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.AdvertiseOnPublicDefaultDualstackVip != nil {
+		{
+			size, err := m.AdvertiseOnPublicDefaultDualstackVip.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x2
+		i--
+		dAtA[i] = 0xaa
+	}
+	return len(dAtA) - i, nil
+}
+func (m *ReplaceSpecType_AdvertiseV6OnPublic) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ReplaceSpecType_AdvertiseV6OnPublic) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.AdvertiseV6OnPublic != nil {
+		{
+			size, err := m.AdvertiseV6OnPublic.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x2
+		i--
+		dAtA[i] = 0xb2
+	}
+	return len(dAtA) - i, nil
+}
+func (m *ReplaceSpecType_AdvertiseDualstackOnPublic) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ReplaceSpecType_AdvertiseDualstackOnPublic) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.AdvertiseDualstackOnPublic != nil {
+		{
+			size, err := m.AdvertiseDualstackOnPublic.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x2
+		i--
+		dAtA[i] = 0xba
+	}
+	return len(dAtA) - i, nil
+}
 func (m *GetSpecType) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -8318,6 +9326,15 @@ func (m *GetSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0xca
 	}
+	if m.AdvertiseChoice != nil {
+		{
+			size := m.AdvertiseChoice.Size()
+			i -= size
+			if _, err := m.AdvertiseChoice.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
+	}
 	if m.PortChoice != nil {
 		{
 			size := m.PortChoice.Size()
@@ -8401,15 +9418,6 @@ func (m *GetSpecType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 			}
 			i--
 			dAtA[i] = 0x52
-		}
-	}
-	if m.AdvertiseChoice != nil {
-		{
-			size := m.AdvertiseChoice.Size()
-			i -= size
-			if _, err := m.AdvertiseChoice.MarshalTo(dAtA[i:]); err != nil {
-				return 0, err
-			}
 		}
 	}
 	if len(m.OriginPools) > 0 {
@@ -8889,6 +9897,98 @@ func (m *GetSpecType_PortRanges) MarshalToSizedBuffer(dAtA []byte) (int, error) 
 	dAtA[i] = 0x9a
 	return len(dAtA) - i, nil
 }
+func (m *GetSpecType_AdvertiseOnPublicDefaultIpv6Vip) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetSpecType_AdvertiseOnPublicDefaultIpv6Vip) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.AdvertiseOnPublicDefaultIpv6Vip != nil {
+		{
+			size, err := m.AdvertiseOnPublicDefaultIpv6Vip.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x2
+		i--
+		dAtA[i] = 0xa2
+	}
+	return len(dAtA) - i, nil
+}
+func (m *GetSpecType_AdvertiseOnPublicDefaultDualstackVip) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetSpecType_AdvertiseOnPublicDefaultDualstackVip) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.AdvertiseOnPublicDefaultDualstackVip != nil {
+		{
+			size, err := m.AdvertiseOnPublicDefaultDualstackVip.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x2
+		i--
+		dAtA[i] = 0xaa
+	}
+	return len(dAtA) - i, nil
+}
+func (m *GetSpecType_AdvertiseV6OnPublic) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetSpecType_AdvertiseV6OnPublic) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.AdvertiseV6OnPublic != nil {
+		{
+			size, err := m.AdvertiseV6OnPublic.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x2
+		i--
+		dAtA[i] = 0xb2
+	}
+	return len(dAtA) - i, nil
+}
+func (m *GetSpecType_AdvertiseDualstackOnPublic) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetSpecType_AdvertiseDualstackOnPublic) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.AdvertiseDualstackOnPublic != nil {
+		{
+			size, err := m.AdvertiseDualstackOnPublic.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x2
+		i--
+		dAtA[i] = 0xba
+	}
+	return len(dAtA) - i, nil
+}
 func encodeVarintTypes(dAtA []byte, offset int, v uint64) int {
 	offset -= sovTypes(v)
 	base := offset
@@ -9328,6 +10428,54 @@ func (m *GlobalSpecType_PortRanges) Size() (n int) {
 	n += 2 + l + sovTypes(uint64(l))
 	return n
 }
+func (m *GlobalSpecType_AdvertiseOnPublicDefaultIpv6Vip) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.AdvertiseOnPublicDefaultIpv6Vip != nil {
+		l = m.AdvertiseOnPublicDefaultIpv6Vip.Size()
+		n += 2 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *GlobalSpecType_AdvertiseOnPublicDefaultDualstackVip) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.AdvertiseOnPublicDefaultDualstackVip != nil {
+		l = m.AdvertiseOnPublicDefaultDualstackVip.Size()
+		n += 2 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *GlobalSpecType_AdvertiseV6OnPublic) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.AdvertiseV6OnPublic != nil {
+		l = m.AdvertiseV6OnPublic.Size()
+		n += 2 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *GlobalSpecType_AdvertiseDualstackOnPublic) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.AdvertiseDualstackOnPublic != nil {
+		l = m.AdvertiseDualstackOnPublic.Size()
+		n += 2 + l + sovTypes(uint64(l))
+	}
+	return n
+}
 func (m *CreateSpecType) Size() (n int) {
 	if m == nil {
 		return 0
@@ -9621,6 +10769,54 @@ func (m *CreateSpecType_PortRanges) Size() (n int) {
 	_ = l
 	l = len(m.PortRanges)
 	n += 2 + l + sovTypes(uint64(l))
+	return n
+}
+func (m *CreateSpecType_AdvertiseOnPublicDefaultIpv6Vip) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.AdvertiseOnPublicDefaultIpv6Vip != nil {
+		l = m.AdvertiseOnPublicDefaultIpv6Vip.Size()
+		n += 2 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *CreateSpecType_AdvertiseOnPublicDefaultDualstackVip) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.AdvertiseOnPublicDefaultDualstackVip != nil {
+		l = m.AdvertiseOnPublicDefaultDualstackVip.Size()
+		n += 2 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *CreateSpecType_AdvertiseV6OnPublic) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.AdvertiseV6OnPublic != nil {
+		l = m.AdvertiseV6OnPublic.Size()
+		n += 2 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *CreateSpecType_AdvertiseDualstackOnPublic) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.AdvertiseDualstackOnPublic != nil {
+		l = m.AdvertiseDualstackOnPublic.Size()
+		n += 2 + l + sovTypes(uint64(l))
+	}
 	return n
 }
 func (m *ReplaceSpecType) Size() (n int) {
@@ -9922,6 +11118,54 @@ func (m *ReplaceSpecType_PortRanges) Size() (n int) {
 	_ = l
 	l = len(m.PortRanges)
 	n += 2 + l + sovTypes(uint64(l))
+	return n
+}
+func (m *ReplaceSpecType_AdvertiseOnPublicDefaultIpv6Vip) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.AdvertiseOnPublicDefaultIpv6Vip != nil {
+		l = m.AdvertiseOnPublicDefaultIpv6Vip.Size()
+		n += 2 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *ReplaceSpecType_AdvertiseOnPublicDefaultDualstackVip) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.AdvertiseOnPublicDefaultDualstackVip != nil {
+		l = m.AdvertiseOnPublicDefaultDualstackVip.Size()
+		n += 2 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *ReplaceSpecType_AdvertiseV6OnPublic) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.AdvertiseV6OnPublic != nil {
+		l = m.AdvertiseV6OnPublic.Size()
+		n += 2 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *ReplaceSpecType_AdvertiseDualstackOnPublic) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.AdvertiseDualstackOnPublic != nil {
+		l = m.AdvertiseDualstackOnPublic.Size()
+		n += 2 + l + sovTypes(uint64(l))
+	}
 	return n
 }
 func (m *GetSpecType) Size() (n int) {
@@ -10252,6 +11496,54 @@ func (m *GetSpecType_PortRanges) Size() (n int) {
 	_ = l
 	l = len(m.PortRanges)
 	n += 2 + l + sovTypes(uint64(l))
+	return n
+}
+func (m *GetSpecType_AdvertiseOnPublicDefaultIpv6Vip) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.AdvertiseOnPublicDefaultIpv6Vip != nil {
+		l = m.AdvertiseOnPublicDefaultIpv6Vip.Size()
+		n += 2 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *GetSpecType_AdvertiseOnPublicDefaultDualstackVip) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.AdvertiseOnPublicDefaultDualstackVip != nil {
+		l = m.AdvertiseOnPublicDefaultDualstackVip.Size()
+		n += 2 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *GetSpecType_AdvertiseV6OnPublic) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.AdvertiseV6OnPublic != nil {
+		l = m.AdvertiseV6OnPublic.Size()
+		n += 2 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+func (m *GetSpecType_AdvertiseDualstackOnPublic) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.AdvertiseDualstackOnPublic != nil {
+		l = m.AdvertiseDualstackOnPublic.Size()
+		n += 2 + l + sovTypes(uint64(l))
+	}
 	return n
 }
 
@@ -10601,6 +11893,46 @@ func (this *GlobalSpecType_PortRanges) String() string {
 	}, "")
 	return s
 }
+func (this *GlobalSpecType_AdvertiseOnPublicDefaultIpv6Vip) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GlobalSpecType_AdvertiseOnPublicDefaultIpv6Vip{`,
+		`AdvertiseOnPublicDefaultIpv6Vip:` + strings.Replace(fmt.Sprintf("%v", this.AdvertiseOnPublicDefaultIpv6Vip), "Empty", "schema.Empty", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GlobalSpecType_AdvertiseOnPublicDefaultDualstackVip) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GlobalSpecType_AdvertiseOnPublicDefaultDualstackVip{`,
+		`AdvertiseOnPublicDefaultDualstackVip:` + strings.Replace(fmt.Sprintf("%v", this.AdvertiseOnPublicDefaultDualstackVip), "Empty", "schema.Empty", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GlobalSpecType_AdvertiseV6OnPublic) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GlobalSpecType_AdvertiseV6OnPublic{`,
+		`AdvertiseV6OnPublic:` + strings.Replace(fmt.Sprintf("%v", this.AdvertiseV6OnPublic), "AdvertisePublic", "views.AdvertisePublic", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GlobalSpecType_AdvertiseDualstackOnPublic) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GlobalSpecType_AdvertiseDualstackOnPublic{`,
+		`AdvertiseDualstackOnPublic:` + strings.Replace(fmt.Sprintf("%v", this.AdvertiseDualstackOnPublic), "AdvertisePublic", "views.AdvertisePublic", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
 func (this *CreateSpecType) String() string {
 	if this == nil {
 		return "nil"
@@ -10832,6 +12164,46 @@ func (this *CreateSpecType_PortRanges) String() string {
 	}
 	s := strings.Join([]string{`&CreateSpecType_PortRanges{`,
 		`PortRanges:` + fmt.Sprintf("%v", this.PortRanges) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *CreateSpecType_AdvertiseOnPublicDefaultIpv6Vip) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&CreateSpecType_AdvertiseOnPublicDefaultIpv6Vip{`,
+		`AdvertiseOnPublicDefaultIpv6Vip:` + strings.Replace(fmt.Sprintf("%v", this.AdvertiseOnPublicDefaultIpv6Vip), "Empty", "schema.Empty", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *CreateSpecType_AdvertiseOnPublicDefaultDualstackVip) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&CreateSpecType_AdvertiseOnPublicDefaultDualstackVip{`,
+		`AdvertiseOnPublicDefaultDualstackVip:` + strings.Replace(fmt.Sprintf("%v", this.AdvertiseOnPublicDefaultDualstackVip), "Empty", "schema.Empty", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *CreateSpecType_AdvertiseV6OnPublic) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&CreateSpecType_AdvertiseV6OnPublic{`,
+		`AdvertiseV6OnPublic:` + strings.Replace(fmt.Sprintf("%v", this.AdvertiseV6OnPublic), "AdvertisePublic", "views.AdvertisePublic", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *CreateSpecType_AdvertiseDualstackOnPublic) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&CreateSpecType_AdvertiseDualstackOnPublic{`,
+		`AdvertiseDualstackOnPublic:` + strings.Replace(fmt.Sprintf("%v", this.AdvertiseDualstackOnPublic), "AdvertisePublic", "views.AdvertisePublic", 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -11073,6 +12445,46 @@ func (this *ReplaceSpecType_PortRanges) String() string {
 	}
 	s := strings.Join([]string{`&ReplaceSpecType_PortRanges{`,
 		`PortRanges:` + fmt.Sprintf("%v", this.PortRanges) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ReplaceSpecType_AdvertiseOnPublicDefaultIpv6Vip) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ReplaceSpecType_AdvertiseOnPublicDefaultIpv6Vip{`,
+		`AdvertiseOnPublicDefaultIpv6Vip:` + strings.Replace(fmt.Sprintf("%v", this.AdvertiseOnPublicDefaultIpv6Vip), "Empty", "schema.Empty", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ReplaceSpecType_AdvertiseOnPublicDefaultDualstackVip) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ReplaceSpecType_AdvertiseOnPublicDefaultDualstackVip{`,
+		`AdvertiseOnPublicDefaultDualstackVip:` + strings.Replace(fmt.Sprintf("%v", this.AdvertiseOnPublicDefaultDualstackVip), "Empty", "schema.Empty", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ReplaceSpecType_AdvertiseV6OnPublic) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ReplaceSpecType_AdvertiseV6OnPublic{`,
+		`AdvertiseV6OnPublic:` + strings.Replace(fmt.Sprintf("%v", this.AdvertiseV6OnPublic), "AdvertisePublic", "views.AdvertisePublic", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ReplaceSpecType_AdvertiseDualstackOnPublic) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&ReplaceSpecType_AdvertiseDualstackOnPublic{`,
+		`AdvertiseDualstackOnPublic:` + strings.Replace(fmt.Sprintf("%v", this.AdvertiseDualstackOnPublic), "AdvertisePublic", "views.AdvertisePublic", 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -11339,6 +12751,46 @@ func (this *GetSpecType_PortRanges) String() string {
 	}, "")
 	return s
 }
+func (this *GetSpecType_AdvertiseOnPublicDefaultIpv6Vip) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GetSpecType_AdvertiseOnPublicDefaultIpv6Vip{`,
+		`AdvertiseOnPublicDefaultIpv6Vip:` + strings.Replace(fmt.Sprintf("%v", this.AdvertiseOnPublicDefaultIpv6Vip), "Empty", "schema.Empty", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GetSpecType_AdvertiseOnPublicDefaultDualstackVip) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GetSpecType_AdvertiseOnPublicDefaultDualstackVip{`,
+		`AdvertiseOnPublicDefaultDualstackVip:` + strings.Replace(fmt.Sprintf("%v", this.AdvertiseOnPublicDefaultDualstackVip), "Empty", "schema.Empty", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GetSpecType_AdvertiseV6OnPublic) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GetSpecType_AdvertiseV6OnPublic{`,
+		`AdvertiseV6OnPublic:` + strings.Replace(fmt.Sprintf("%v", this.AdvertiseV6OnPublic), "AdvertisePublic", "views.AdvertisePublic", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GetSpecType_AdvertiseDualstackOnPublic) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GetSpecType_AdvertiseDualstackOnPublic{`,
+		`AdvertiseDualstackOnPublic:` + strings.Replace(fmt.Sprintf("%v", this.AdvertiseDualstackOnPublic), "AdvertisePublic", "views.AdvertisePublic", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
 func valueToStringTypes(v interface{}) string {
 	rv := reflect.ValueOf(v)
 	if rv.IsNil() {
@@ -11452,10 +12904,7 @@ func (m *ProxyTypeTLSTCP) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -11611,10 +13060,7 @@ func (m *ProxyTypeTLSTCPAutoCerts) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -11698,10 +13144,7 @@ func (m *ServicePolicyList) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -12621,6 +14064,146 @@ func (m *GlobalSpecType) Unmarshal(dAtA []byte) error {
 			}
 			m.PortChoice = &GlobalSpecType_PortRanges{string(dAtA[iNdEx:postIndex])}
 			iNdEx = postIndex
+		case 36:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AdvertiseOnPublicDefaultIpv6Vip", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &schema.Empty{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.AdvertiseChoice = &GlobalSpecType_AdvertiseOnPublicDefaultIpv6Vip{v}
+			iNdEx = postIndex
+		case 37:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AdvertiseOnPublicDefaultDualstackVip", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &schema.Empty{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.AdvertiseChoice = &GlobalSpecType_AdvertiseOnPublicDefaultDualstackVip{v}
+			iNdEx = postIndex
+		case 38:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AdvertiseV6OnPublic", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &views.AdvertisePublic{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.AdvertiseChoice = &GlobalSpecType_AdvertiseV6OnPublic{v}
+			iNdEx = postIndex
+		case 39:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AdvertiseDualstackOnPublic", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &views.AdvertisePublic{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.AdvertiseChoice = &GlobalSpecType_AdvertiseDualstackOnPublic{v}
+			iNdEx = postIndex
 		case 1000:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field ViewInternal", wireType)
@@ -12852,10 +14435,7 @@ func (m *GlobalSpecType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -13721,16 +15301,153 @@ func (m *CreateSpecType) Unmarshal(dAtA []byte) error {
 			}
 			m.PortChoice = &CreateSpecType_PortRanges{string(dAtA[iNdEx:postIndex])}
 			iNdEx = postIndex
+		case 36:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AdvertiseOnPublicDefaultIpv6Vip", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &schema.Empty{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.AdvertiseChoice = &CreateSpecType_AdvertiseOnPublicDefaultIpv6Vip{v}
+			iNdEx = postIndex
+		case 37:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AdvertiseOnPublicDefaultDualstackVip", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &schema.Empty{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.AdvertiseChoice = &CreateSpecType_AdvertiseOnPublicDefaultDualstackVip{v}
+			iNdEx = postIndex
+		case 38:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AdvertiseV6OnPublic", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &views.AdvertisePublic{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.AdvertiseChoice = &CreateSpecType_AdvertiseV6OnPublic{v}
+			iNdEx = postIndex
+		case 39:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AdvertiseDualstackOnPublic", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &views.AdvertisePublic{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.AdvertiseChoice = &CreateSpecType_AdvertiseDualstackOnPublic{v}
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipTypes(dAtA[iNdEx:])
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -14630,16 +16347,153 @@ func (m *ReplaceSpecType) Unmarshal(dAtA []byte) error {
 			}
 			m.PortChoice = &ReplaceSpecType_PortRanges{string(dAtA[iNdEx:postIndex])}
 			iNdEx = postIndex
+		case 36:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AdvertiseOnPublicDefaultIpv6Vip", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &schema.Empty{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.AdvertiseChoice = &ReplaceSpecType_AdvertiseOnPublicDefaultIpv6Vip{v}
+			iNdEx = postIndex
+		case 37:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AdvertiseOnPublicDefaultDualstackVip", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &schema.Empty{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.AdvertiseChoice = &ReplaceSpecType_AdvertiseOnPublicDefaultDualstackVip{v}
+			iNdEx = postIndex
+		case 38:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AdvertiseV6OnPublic", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &views.AdvertisePublic{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.AdvertiseChoice = &ReplaceSpecType_AdvertiseV6OnPublic{v}
+			iNdEx = postIndex
+		case 39:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AdvertiseDualstackOnPublic", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &views.AdvertisePublic{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.AdvertiseChoice = &ReplaceSpecType_AdvertiseDualstackOnPublic{v}
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipTypes(dAtA[iNdEx:])
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthTypes
 			}
 			if (iNdEx + skippy) > l {
@@ -15539,6 +17393,146 @@ func (m *GetSpecType) Unmarshal(dAtA []byte) error {
 			}
 			m.PortChoice = &GetSpecType_PortRanges{string(dAtA[iNdEx:postIndex])}
 			iNdEx = postIndex
+		case 36:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AdvertiseOnPublicDefaultIpv6Vip", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &schema.Empty{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.AdvertiseChoice = &GetSpecType_AdvertiseOnPublicDefaultIpv6Vip{v}
+			iNdEx = postIndex
+		case 37:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AdvertiseOnPublicDefaultDualstackVip", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &schema.Empty{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.AdvertiseChoice = &GetSpecType_AdvertiseOnPublicDefaultDualstackVip{v}
+			iNdEx = postIndex
+		case 38:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AdvertiseV6OnPublic", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &views.AdvertisePublic{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.AdvertiseChoice = &GetSpecType_AdvertiseV6OnPublic{v}
+			iNdEx = postIndex
+		case 39:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AdvertiseDualstackOnPublic", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &views.AdvertisePublic{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.AdvertiseChoice = &GetSpecType_AdvertiseDualstackOnPublic{v}
+			iNdEx = postIndex
 		case 1001:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field HostName", wireType)
@@ -15734,10 +17728,7 @@ func (m *GetSpecType) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if skippy < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if (iNdEx + skippy) < 0 {
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
 				return ErrInvalidLengthTypes
 			}
 			if (iNdEx + skippy) > l {

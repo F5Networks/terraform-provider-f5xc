@@ -1414,10 +1414,7 @@ var APISwaggerJSON string = `{
         "title": "ves.io/schema/billing_config/crudapi/api.proto",
         "version": "version not set"
     },
-    "schemes": [
-        "http",
-        "https"
-    ],
+    "schemes": null,
     "consumes": [
         "application/json"
     ],
@@ -1483,6 +1480,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -1496,8 +1499,7 @@ var APISwaggerJSON string = `{
                         "name": "all_backrefs",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     },
                     {
                         "name": "backref_types",
@@ -1514,8 +1516,7 @@ var APISwaggerJSON string = `{
                         "description": "in case of ref-by-name whether to report referred's uid.",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     }
                 ],
                 "tags": [
@@ -1582,6 +1583,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1657,6 +1664,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1748,6 +1761,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -1796,16 +1815,14 @@ var APISwaggerJSON string = `{
                         "description": "Get the resource_version associated with the list.",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     },
                     {
                         "name": "include_referred_id",
                         "description": "in case of ref-by-name whether to report referred's uid.",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     },
                     {
                         "name": "page_start",
@@ -1888,6 +1905,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -1922,7 +1945,16 @@ var APISwaggerJSON string = `{
                     "200": {
                         "description": "A successful response.(streaming responses)",
                         "schema": {
-                            "$ref": "#/x-stream-definitions/crudapiObjectListRsp"
+                            "type": "object",
+                            "title": "Stream result of crudapiObjectListRsp",
+                            "properties": {
+                                "error": {
+                                    "$ref": "#/definitions/runtimeStreamError"
+                                },
+                                "result": {
+                                    "$ref": "#/definitions/crudapiObjectListRsp"
+                                }
+                            }
                         }
                     },
                     "401": {
@@ -1972,6 +2004,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2020,16 +2058,14 @@ var APISwaggerJSON string = `{
                         "description": "Get the resource_version associated with the list.",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     },
                     {
                         "name": "include_referred_id",
                         "description": "in case of ref-by-name whether to report referred's uid.",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     },
                     {
                         "name": "page_start",
@@ -2119,6 +2155,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2132,8 +2174,7 @@ var APISwaggerJSON string = `{
                         "name": "all_backrefs",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     },
                     {
                         "name": "backref_types",
@@ -2150,8 +2191,7 @@ var APISwaggerJSON string = `{
                         "description": "in case of ref-by-name whether to report referred's uid.",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     }
                 ],
                 "tags": [
@@ -2226,6 +2266,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2274,16 +2320,14 @@ var APISwaggerJSON string = `{
                         "description": "Get the resource_version associated with the list.",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     },
                     {
                         "name": "include_referred_id",
                         "description": "in case of ref-by-name whether to report referred's uid.",
                         "in": "query",
                         "required": false,
-                        "type": "boolean",
-                        "format": "boolean"
+                        "type": "boolean"
                     },
                     {
                         "name": "page_start",
@@ -2373,6 +2417,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2447,6 +2497,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2538,6 +2594,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2567,22 +2629,65 @@ var APISwaggerJSON string = `{
         }
     },
     "definitions": {
-        "billing_configGlobalSpecType": {
+        "addon_serviceEntitlementConfig": {
             "type": "object",
-            "description": "GlobalSpecType for the billing config object",
-            "title": "Global Spec Type",
-            "x-displayname": "Global Spec Type",
-            "x-ves-proto-message": "ves.io.schema.billing_config.GlobalSpecType",
+            "description": "x-displayName: \"Entitlement Config\"\nEntitlementConfig represents data such as service usage type, quota mapping required for entitlement feature",
+            "title": "EntitlementConfig",
             "properties": {
-                "service_usage_types": {
+                "entitlement_features": {
                     "type": "object",
-                    "description": " Map of addon_service and service usage types\n\nExample: - \"{f5xc-securemesh-advanced{tier: ADVANCED,billing_doc_link: \u003curl\u003e,usage_types: {F5-V-O-ADN-MSH-PBVIP: {name: Anycast Public Virtual IP, unit: hour}F5-V-O-ADN-MSH-RLIM: {name: Rate Limiting enabled on App Connect Load balancers on Regional Edge (good requests to origin), unit: requests}}}}\"-\n\nValidation Rules:\n  ves.io.schema.rules.map.keys.string.pattern: ^[a-z](?:[a-z0-9]*-)?[a-z0-9]+(?:-[a-z0-9]+)*$\n",
-                    "title": "Service Usage Types",
-                    "x-displayname": "Service Usage Types",
-                    "x-ves-example": "{f5xc-securemesh-advanced: {tier: ADVANCED,billing_doc_link: \u003curl\u003e,usage_types: {F5-V-O-ADN-MSH-PBVIP: {name: Anycast Public Virtual IP, unit: hour}F5-V-O-ADN-MSH-RLIM: {name: Rate Limiting enabled on App Connect Load balancers on Regional Edge (good requests to origin), unit: requests}}}}",
-                    "x-ves-validation-rules": {
-                        "ves.io.schema.rules.map.keys.string.pattern": "^[a-z](?:[a-z0-9]*-)?[a-z0-9]+(?:-[a-z0-9]+)*$"
-                    }
+                    "description": "x-displayName: \"Entitlement Features\"\nx-example: \"{re_public_loadbalancer_in_qty: {usage_type: public-loadbalancer-usage, quota_mapping: {object_limits: {http_loadbalancer.public: {operator: EQUAL}}}}, dns_loadbalancer_in_qty: {usage_type: dns-loadbalancer-usage, quota_mapping: {object_limits: {dns_loadbalancer.public: {operator: EQUAL}}}}}\"\nMap of entitlement feature name and feature details",
+                    "title": "EntitlementFeatures"
+                }
+            }
+        },
+        "addon_serviceEntitlementFeatureDetails": {
+            "type": "object",
+            "description": "x-displayName: \"Entitlement Feature Details\"\nEntitlementFeatureDetails holds the details required for entitlement ingestion",
+            "title": "EntitlementFeatureDetails",
+            "properties": {
+                "quota_mapping": {
+                    "description": "x-displayName: \"Quota Mapping\"\nx-example: \"{object_limits: {http_loadbalancer.public: {operator: EQUAL}}}\"\nQuotaMapping holds the quota details for the entitlement feature",
+                    "title": "Quota Mapping",
+                    "$ref": "#/definitions/addon_serviceQuotaMapping"
+                },
+                "usage_type": {
+                    "type": "string",
+                    "description": "x-displayName: \"Usage Type\"\nx-example: \"public-loadbalancer-usage\"\nUsageType represents the name of the telemetry config usage metric",
+                    "title": "Usage Type"
+                }
+            }
+        },
+        "addon_serviceFormula": {
+            "type": "object",
+            "description": "x-displayName: \"Formula\"\nFormula holds the operator details for the entitlement feature",
+            "title": "Formula",
+            "properties": {
+                "operator": {
+                    "description": "x-displayName: \"Operator\"\nOperator for the quota mapping",
+                    "title": "Operator",
+                    "$ref": "#/definitions/addon_serviceOperator"
+                }
+            }
+        },
+        "addon_serviceOperator": {
+            "type": "string",
+            "description": "x-displayName: \"Equal\"\nEQUAL",
+            "title": "- EQUAL: EQUAL",
+            "enum": [
+                "EQUAL"
+            ],
+            "default": "EQUAL"
+        },
+        "addon_serviceQuotaMapping": {
+            "type": "object",
+            "description": "x-displayName: \"Quota Mapping\"\nQuotaMapping holds the quota mapping details for the usage type",
+            "title": "QuotaMapping",
+            "properties": {
+                "object_limits": {
+                    "type": "object",
+                    "description": "x-displayName: \"Object Limits\"\nx-example: \"{http_loadbalancer.public: {operator: EQUAL}}\"\nObjectLimits holds the object limits for the entitlement feature",
+                    "title": "Object Limits"
                 }
             }
         },
@@ -2595,7 +2700,7 @@ var APISwaggerJSON string = `{
             "properties": {
                 "gc_spec": {
                     "title": "gc_spec",
-                    "$ref": "#/definitions/billing_configGlobalSpecType",
+                    "$ref": "#/definitions/schemabilling_configGlobalSpecType",
                     "x-displayname": "GC Spec"
                 }
             }
@@ -2779,6 +2884,45 @@ var APISwaggerJSON string = `{
                 }
             }
         },
+        "ioschemaServiceUsageType": {
+            "type": "object",
+            "description": "x-displayName: \"Service Usage Type\"\nx-example: \"{tier: ADVANCED,billing_doc_link: \u003curl\u003e,usage_types: {F5-V-O-ADN-MSH-PBVIP: {name: Anycast Public Virtual IP, unit: hour}F5-V-O-ADN-MSH-RLIM: {name: Rate Limiting enabled on App Connect Load balancers on Regional Edge (good requests to origin), unit: requests}}}\"\nServiceUsageType object",
+            "title": "Service Usage Type",
+            "properties": {
+                "billing_doc_link": {
+                    "type": "string",
+                    "description": "x-displayName: \"Billing Doc Link\"\nx-example: \"\u003cbilling_doc_url\u003e\"\nBillingDocLink for the UsageType",
+                    "title": "Billing Doc Link"
+                },
+                "tier": {
+                    "description": "x-displayName: \"Tier\"\nx-example: \"ADVANCED\"\nTier of the addon service",
+                    "title": "Tier",
+                    "$ref": "#/definitions/schemaAddonServiceTierType"
+                },
+                "usage_types": {
+                    "type": "object",
+                    "description": "x-displayName: \"Usage Types\"\nx-example: \"{F5-V-O-ADN-MSH-PBVIP: {name: Anycast Public Virtual IP, unit: hour},F5-V-O-ADN-MSH-RLIM: {name: Rate Limiting enabled on App Connect Load balancers on Regional Edge (good requests to origin), unit: requests}}\nMap of SKU ID and UsageType",
+                    "title": "Usage Types"
+                }
+            }
+        },
+        "ioschemaUsageType": {
+            "type": "object",
+            "description": "x-displayName: \"Usage Type\"\nUsageType object",
+            "title": "UsageType",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "x-displayName: \"Name\"\nx-example: \"Anycast Public Virtual IP\"\nName of the UsageType",
+                    "title": "Name"
+                },
+                "unit": {
+                    "type": "string",
+                    "description": "x-displayName: \"Unit\"\nx-example: \"hour\"\nUnit of the UsageType",
+                    "title": "Unit"
+                }
+            }
+        },
         "protobufAny": {
             "type": "object",
             "description": "-Any- contains an arbitrary serialized protocol buffer message along with a\nURL that describes the type of the serialized message.\n\nProtobuf library provides support to pack/unpack Any values in the form\nof utility functions or additional generated methods of the Any type.\n\nExample 1: Pack and unpack a message in C++.\n\n    Foo foo = ...;\n    Any any;\n    any.PackFrom(foo);\n    ...\n    if (any.UnpackTo(\u0026foo)) {\n      ...\n    }\n\nExample 2: Pack and unpack a message in Java.\n\n    Foo foo = ...;\n    Any any = Any.pack(foo);\n    ...\n    if (any.is(Foo.class)) {\n      foo = any.unpack(Foo.class);\n    }\n\n Example 3: Pack and unpack a message in Python.\n\n    foo = Foo(...)\n    any = Any()\n    any.Pack(foo)\n    ...\n    if any.Is(Foo.DESCRIPTOR):\n      any.Unpack(foo)\n      ...\n\n Example 4: Pack and unpack a message in Go\n\n     foo := \u0026pb.Foo{...}\n     any, err := ptypes.MarshalAny(foo)\n     ...\n     foo := \u0026pb.Foo{}\n     if err := ptypes.UnmarshalAny(any, foo); err != nil {\n       ...\n     }\n\nThe pack methods provided by protobuf library will by default use\n'type.googleapis.com/full.type.name' as the type URL and the unpack\nmethods only use the fully qualified type name after the last '/'\nin the type URL, for example \"foo.bar.com/x/y.z\" will yield type\nname \"y.z\".\n\n\nJSON\n====\nThe JSON representation of an -Any- value uses the regular\nrepresentation of the deserialized, embedded message, with an\nadditional field -@type- which contains the type URL. Example:\n\n    package google.profile;\n    message Person {\n      string first_name = 1;\n      string last_name = 2;\n    }\n\n    {\n      \"@type\": \"type.googleapis.com/google.profile.Person\",\n      \"firstName\": \u003cstring\u003e,\n      \"lastName\": \u003cstring\u003e\n    }\n\nIf the embedded message type is well-known and has a custom JSON\nrepresentation, that representation will be embedded adding a field\n-value- which holds the custom JSON in addition to the -@type-\nfield. Example (for message [google.protobuf.Duration][]):\n\n    {\n      \"@type\": \"type.googleapis.com/google.protobuf.Duration\",\n      \"value\": \"1.212s\"\n    }",
@@ -2791,6 +2935,27 @@ var APISwaggerJSON string = `{
                     "type": "string",
                     "description": "Must be a valid serialized protocol buffer of the above specified type.",
                     "format": "byte"
+                }
+            }
+        },
+        "runtimeError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/protobufAny"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
                 }
             }
         },
@@ -2913,7 +3078,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable",
                     "x-ves-example": "true"
                 },
@@ -2992,28 +3156,6 @@ var APISwaggerJSON string = `{
                     "title": "uid",
                     "x-displayname": "UID",
                     "x-ves-example": "d15f1fad-4d37-48c0-8706-df1824d76d31"
-                }
-            }
-        },
-        "schemaServiceUsageType": {
-            "type": "object",
-            "description": "x-displayName: \"Service Usage Type\"\nx-example: \"{tier: ADVANCED,billing_doc_link: \u003curl\u003e,usage_types: {F5-V-O-ADN-MSH-PBVIP: {name: Anycast Public Virtual IP, unit: hour}F5-V-O-ADN-MSH-RLIM: {name: Rate Limiting enabled on App Connect Load balancers on Regional Edge (good requests to origin), unit: requests}}}\"\nServiceUsageType object",
-            "title": "Service Usage Type",
-            "properties": {
-                "billing_doc_link": {
-                    "type": "string",
-                    "description": "x-displayName: \"Billing Doc Link\"\nx-example: \"\u003cbilling_doc_url\u003e\"\nBillingDocLink for the UsageType",
-                    "title": "Billing Doc Link"
-                },
-                "tier": {
-                    "description": "x-displayName: \"Tier\"\nx-example: \"ADVANCED\"\nTier of the addon service",
-                    "title": "Tier",
-                    "$ref": "#/definitions/schemaAddonServiceTierType"
-                },
-                "usage_types": {
-                    "type": "object",
-                    "description": "x-displayName: \"Usage Types\"\nx-example: \"{F5-V-O-ADN-MSH-PBVIP: {name: Anycast Public Virtual IP, unit: hour},F5-V-O-ADN-MSH-RLIM: {name: Rate Limiting enabled on App Connect Load balancers on Regional Edge (good requests to origin), unit: requests}}\nMap of SKU ID and UsageType",
-                    "title": "Usage Types"
                 }
             }
         },
@@ -3164,7 +3306,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " This should be set to true If VES/SRE operator wants to suppress an object from being\n presented to business-logic of a daemon(e.g. due to bad-form/issue-causing Object).\n This is meant only to be used in temporary situations for operational continuity till\n a fix is rolled out in business-logic.\n\nExample: - \"true\"-",
                     "title": "sre_disable",
-                    "format": "boolean",
                     "x-displayname": "SRE Disable",
                     "x-ves-example": "true"
                 },
@@ -3199,25 +3340,7 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Indicate whether mars deems this object to be stale via graceful restart timer information",
                     "title": "vtrp_stale",
-                    "format": "boolean",
                     "x-displayname": "VTRP Stale"
-                }
-            }
-        },
-        "schemaUsageType": {
-            "type": "object",
-            "description": "x-displayName: \"Usage Type\"\nUsageType object",
-            "title": "UsageType",
-            "properties": {
-                "name": {
-                    "type": "string",
-                    "description": "x-displayName: \"Name\"\nx-example: \"Anycast Public Virtual IP\"\nName of the UsageType",
-                    "title": "Name"
-                },
-                "unit": {
-                    "type": "string",
-                    "description": "x-displayName: \"Unit\"\nx-example: \"hour\"\nUnit of the UsageType",
-                    "title": "Unit"
                 }
             }
         },
@@ -3257,22 +3380,34 @@ var APISwaggerJSON string = `{
                     "x-ves-example": "f3744323-1adf-4aaa-a5dc-0707c1d1bd82"
                 }
             }
+        },
+        "schemabilling_configGlobalSpecType": {
+            "type": "object",
+            "description": "GlobalSpecType for the billing config object",
+            "title": "Global Spec Type",
+            "x-displayname": "Global Spec Type",
+            "x-ves-proto-message": "ves.io.schema.billing_config.GlobalSpecType",
+            "properties": {
+                "entitlement_configs": {
+                    "type": "object",
+                    "description": " Map of addon_service name and entitlement configs\n\nExample: - \"{f5xc-udp-lb-standard{entitlement_features: {re_public_loadbalancer_in_qty: {usage_type: public-loadbalancer-usage, quota_mapping: {object_limits: {http_loadbalancer.public: {operator: EQUAL}}}}, dns_loadbalancer_in_qty: {usage_type: dns-loadbalancer-usage, quota_mapping: {object_limits: {dns_loadbalancer.public: {operator: EQUAL}}}}}}}\"-",
+                    "title": "Entitlement Configs",
+                    "x-displayname": "Entitlement Configs",
+                    "x-ves-example": "{f5xc-udp-lb-standard: {entitlement_features: {re_public_loadbalancer_in_qty: {usage_type: public-loadbalancer-usage, quota_mapping: {object_limits: {http_loadbalancer.public: {operator: EQUAL}}}}, dns_loadbalancer_in_qty: {usage_type: dns-loadbalancer-usage, quota_mapping: {object_limits: {dns_loadbalancer.public: {operator: EQUAL}}}}}}}"
+                },
+                "service_usage_types": {
+                    "type": "object",
+                    "description": " Map of addon_service and service usage types\n\nExample: - \"{f5xc-securemesh-advanced{tier: ADVANCED,billing_doc_link: \u003curl\u003e,usage_types: {F5-V-O-ADN-MSH-PBVIP: {name: Anycast Public Virtual IP, unit: hour}F5-V-O-ADN-MSH-RLIM: {name: Rate Limiting enabled on App Connect Load balancers on Regional Edge (good requests to origin), unit: requests}}}}\"-\n\nValidation Rules:\n  ves.io.schema.rules.map.keys.string.pattern: ^[a-z](?:[a-z0-9]*-)?[a-z0-9]+(?:-[a-z0-9]+)*$\n",
+                    "title": "Service Usage Types",
+                    "x-displayname": "Service Usage Types",
+                    "x-ves-example": "{f5xc-securemesh-advanced: {tier: ADVANCED,billing_doc_link: \u003curl\u003e,usage_types: {F5-V-O-ADN-MSH-PBVIP: {name: Anycast Public Virtual IP, unit: hour}F5-V-O-ADN-MSH-RLIM: {name: Rate Limiting enabled on App Connect Load balancers on Regional Edge (good requests to origin), unit: requests}}}}",
+                    "x-ves-validation-rules": {
+                        "ves.io.schema.rules.map.keys.string.pattern": "^[a-z](?:[a-z0-9]*-)?[a-z0-9]+(?:-[a-z0-9]+)*$"
+                    }
+                }
+            }
         }
     },
     "x-displayname": "",
-    "x-stream-definitions": {
-        "crudapiObjectListRsp": {
-            "properties": {
-                "error": {
-                    "$ref": "#/definitions/runtimeStreamError"
-                },
-                "result": {
-                    "$ref": "#/definitions/crudapiObjectListRsp"
-                }
-            },
-            "title": "Stream result of crudapiObjectListRsp",
-            "type": "object"
-        }
-    },
     "x-ves-proto-file": "ves.io/schema/billing_config/crudapi/api.proto"
 }`

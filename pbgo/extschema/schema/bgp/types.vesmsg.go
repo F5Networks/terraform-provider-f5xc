@@ -1323,6 +1323,31 @@ func (v *ValidateBgpPeer) Validate(ctx context.Context, pm interface{}, opts ...
 			return err
 		}
 	}
+
+	switch m.GetEbgpMultihopChoice().(type) {
+	case *BgpPeer_EbgpMultihopEnabled:
+		if fv, exists := v.FldValidators["ebgp_multihop_choice.ebgp_multihop_enabled"]; exists {
+			val := m.GetEbgpMultihopChoice().(*BgpPeer_EbgpMultihopEnabled).EbgpMultihopEnabled
+			vOpts := append(opts,
+				db.WithValidateField("ebgp_multihop_choice"),
+				db.WithValidateField("ebgp_multihop_enabled"),
+			)
+			if err := fv(ctx, val, vOpts...); err != nil {
+				return err
+			}
+		}
+	case *BgpPeer_EbgpMultihopDisabled:
+		if fv, exists := v.FldValidators["ebgp_multihop_choice.ebgp_multihop_disabled"]; exists {
+			val := m.GetEbgpMultihopChoice().(*BgpPeer_EbgpMultihopDisabled).EbgpMultihopDisabled
+			vOpts := append(opts,
+				db.WithValidateField("ebgp_multihop_choice"),
+				db.WithValidateField("ebgp_multihop_disabled"),
+			)
+			if err := fv(ctx, val, vOpts...); err != nil {
+				return err
+			}
+		}
+	}
 	if fv, exists := v.FldValidators["families"]; exists {
 		vOpts := append(opts, db.WithValidateField("families"))
 		if err := fv(ctx, m.GetFamilies(), vOpts...); err != nil {
@@ -4815,6 +4840,31 @@ func (v *ValidatePeer) Validate(ctx context.Context, pm interface{}, opts ...db.
 			vOpts := append(opts,
 				db.WithValidateField("bfd_choice"),
 				db.WithValidateField("bfd_enabled"),
+			)
+			if err := fv(ctx, val, vOpts...); err != nil {
+				return err
+			}
+		}
+	}
+
+	switch m.GetEbgpMultihopChoice().(type) {
+	case *Peer_EbgpMultihopEnabled:
+		if fv, exists := v.FldValidators["ebgp_multihop_choice.ebgp_multihop_enabled"]; exists {
+			val := m.GetEbgpMultihopChoice().(*Peer_EbgpMultihopEnabled).EbgpMultihopEnabled
+			vOpts := append(opts,
+				db.WithValidateField("ebgp_multihop_choice"),
+				db.WithValidateField("ebgp_multihop_enabled"),
+			)
+			if err := fv(ctx, val, vOpts...); err != nil {
+				return err
+			}
+		}
+	case *Peer_EbgpMultihopDisabled:
+		if fv, exists := v.FldValidators["ebgp_multihop_choice.ebgp_multihop_disabled"]; exists {
+			val := m.GetEbgpMultihopChoice().(*Peer_EbgpMultihopDisabled).EbgpMultihopDisabled
+			vOpts := append(opts,
+				db.WithValidateField("ebgp_multihop_choice"),
+				db.WithValidateField("ebgp_multihop_disabled"),
 			)
 			if err := fv(ctx, val, vOpts...); err != nil {
 				return err

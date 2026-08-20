@@ -1689,10 +1689,7 @@ var APISwaggerJSON string = `{
         "description": "Pod Security Policies enable fine-grained authorization of pod creation and updates.",
         "version": "version not set"
     },
-    "schemes": [
-        "http",
-        "https"
-    ],
+    "schemes": null,
     "consumes": [
         "application/json"
     ],
@@ -1759,6 +1756,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1851,6 +1854,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -1951,6 +1960,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2068,6 +2083,12 @@ var APISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2170,6 +2191,12 @@ var APISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2330,7 +2357,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Fail the delete operation if this object is being referred by other objects",
                     "title": "fail_if_referred",
-                    "format": "boolean",
                     "x-displayname": "Fail-If-Referred"
                 },
                 "name": {
@@ -2490,7 +2516,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " This volume will be allowed to mount read only.",
                     "title": "Read Only",
-                    "format": "boolean",
                     "x-displayname": "Read Only"
                 }
             }
@@ -2616,7 +2641,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true indicates k8s_pod_security_policy is administratively disabled",
                     "title": "disabled",
-                    "format": "boolean",
                     "x-displayname": "Disabled"
                 },
                 "get_spec": {
@@ -2708,7 +2732,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Pod can request to privilege escalation",
                     "title": "Allow Privilege Escalation",
-                    "format": "boolean",
                     "x-displayname": "Allow Privilege Escalation"
                 },
                 "allowed_capabilities": {
@@ -2803,7 +2826,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Pod has permission for privilege escalation by default",
                     "title": "Default Allow Privilege Escalation",
-                    "format": "boolean",
                     "x-displayname": "Default Allow Privilege Escalation"
                 },
                 "default_capabilities": {
@@ -2843,21 +2865,18 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Host IPC determines if the policy allows the use of host IPC in the pod spec.",
                     "title": "Host IPC",
-                    "format": "boolean",
                     "x-displayname": "Host IPC"
                 },
                 "host_network": {
                     "type": "boolean",
                     "description": " Host Network determines if the policy allows the use of host network in the pod spec.",
                     "title": "Host Network",
-                    "format": "boolean",
                     "x-displayname": "Host Network"
                 },
                 "host_pid": {
                     "type": "boolean",
                     "description": " Host PID determines if the policy allows the use of host PID in the pod spec.",
                     "title": "Host PID",
-                    "format": "boolean",
                     "x-displayname": "Host PID"
                 },
                 "host_port_ranges": {
@@ -2928,14 +2947,12 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Privileged determines if a pod can request to be run as privileged.",
                     "title": "Privileged",
-                    "format": "boolean",
                     "x-displayname": "Privileged"
                 },
                 "read_only_root_filesystem": {
                     "type": "boolean",
                     "description": " Containers can only run with read only root filesystem.",
                     "title": "Read Only Root Filesystem",
-                    "format": "boolean",
                     "x-displayname": "Read Only Root Filesystem"
                 },
                 "run_as_group": {
@@ -3127,6 +3144,27 @@ var APISwaggerJSON string = `{
                 }
             }
         },
+        "runtimeError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/protobufAny"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
         "schemaConditionType": {
             "type": "object",
             "description": "Conditions are used in the object status to describe the current state of the\nobject, e.g. Ready, Succeeded, etc.",
@@ -3302,7 +3340,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "labels": {
@@ -3366,7 +3403,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable",
                     "x-ves-example": "true"
                 },
@@ -3476,7 +3512,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " A value of true will administratively disable the object\n\nExample: - \"true\"-",
                     "title": "disable",
-                    "format": "boolean",
                     "x-displayname": "Disable"
                 },
                 "labels": {
@@ -3562,7 +3597,6 @@ var APISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Indicate whether mars deems this object to be stale via graceful restart timer information",
                     "title": "vtrp_stale",
-                    "format": "boolean",
                     "x-displayname": "VTRP Stale"
                 }
             }

@@ -98,6 +98,14 @@ func (c *AppSecurityMonitoringAPIGrpcClient) doRPCSecurityEventsScrollQuery(ctx 
 	rsp, err := c.grpcClient.SecurityEventsScrollQuery(ctx, req, opts...)
 	return rsp, err
 }
+func (c *AppSecurityMonitoringAPIGrpcClient) doRPCSecurityEvidenceQuery(ctx context.Context, yamlReq string, opts ...grpc.CallOption) (proto.Message, error) {
+	req := &SecurityEvidenceRequest{}
+	if err := codec.FromYAML(yamlReq, req); err != nil {
+		return nil, fmt.Errorf("YAML Request %s is not of type *ves.io.schema.app_security.SecurityEvidenceRequest", yamlReq)
+	}
+	rsp, err := c.grpcClient.SecurityEvidenceQuery(ctx, req, opts...)
+	return rsp, err
+}
 func (c *AppSecurityMonitoringAPIGrpcClient) doRPCSecurityIncidentsAggregationQuery(ctx context.Context, yamlReq string, opts ...grpc.CallOption) (proto.Message, error) {
 	req := &SecurityIncidentsAggregationRequest{}
 	if err := codec.FromYAML(yamlReq, req); err != nil {
@@ -185,6 +193,7 @@ func NewAppSecurityMonitoringAPIGrpcClient(cc *grpc.ClientConn) server.CustomCli
 	rpcFns["SecurityEventsQuery"] = ccl.doRPCSecurityEventsQuery
 	rpcFns["SecurityEventsQueryAllNamespaces"] = ccl.doRPCSecurityEventsQueryAllNamespaces
 	rpcFns["SecurityEventsScrollQuery"] = ccl.doRPCSecurityEventsScrollQuery
+	rpcFns["SecurityEvidenceQuery"] = ccl.doRPCSecurityEvidenceQuery
 	rpcFns["SecurityIncidentsAggregationQuery"] = ccl.doRPCSecurityIncidentsAggregationQuery
 	rpcFns["SecurityIncidentsQuery"] = ccl.doRPCSecurityIncidentsQuery
 	rpcFns["SecurityIncidentsScrollQuery"] = ccl.doRPCSecurityIncidentsScrollQuery
@@ -895,6 +904,96 @@ func (c *AppSecurityMonitoringAPIRestClient) doRPCSecurityEventsScrollQuery(ctx 
 	}
 	return pbRsp, nil
 }
+func (c *AppSecurityMonitoringAPIRestClient) doRPCSecurityEvidenceQuery(ctx context.Context, callOpts *server.CustomCallOpts) (proto.Message, error) {
+	if callOpts.URI == "" {
+		return nil, fmt.Errorf("Error, URI should be specified, got empty")
+	}
+	url := fmt.Sprintf("%s%s", c.baseURL, callOpts.URI)
+
+	yamlReq := callOpts.YAMLReq
+	req := &SecurityEvidenceRequest{}
+	if err := codec.FromYAML(yamlReq, req); err != nil {
+		return nil, fmt.Errorf("YAML Request %s is not of type *ves.io.schema.app_security.SecurityEvidenceRequest: %s", yamlReq, err)
+	}
+
+	var hReq *http.Request
+	hm := strings.ToLower(callOpts.HTTPMethod)
+	switch hm {
+	case "post", "put":
+		jsn, err := codec.ToJSON(req, codec.ToWithUseProtoFieldName())
+		if err != nil {
+			return nil, errors.Wrap(err, "Custom RestClient converting YAML to JSON")
+		}
+		var op string
+		if hm == "post" {
+			op = http.MethodPost
+		} else {
+			op = http.MethodPut
+		}
+		newReq, err := http.NewRequest(op, url, bytes.NewBuffer([]byte(jsn)))
+		if err != nil {
+			return nil, errors.Wrapf(err, "Creating new HTTP %s request for custom API", op)
+		}
+		hReq = newReq
+	case "get":
+		newReq, err := http.NewRequest(http.MethodGet, url, nil)
+		if err != nil {
+			return nil, errors.Wrap(err, "Creating new HTTP GET request for custom API")
+		}
+		hReq = newReq
+		q := hReq.URL.Query()
+		_ = q
+		q.Add("aggs", fmt.Sprintf("%v", req.Aggs))
+		q.Add("end_time", fmt.Sprintf("%v", req.EndTime))
+		q.Add("limit", fmt.Sprintf("%v", req.Limit))
+		q.Add("namespace", fmt.Sprintf("%v", req.Namespace))
+		q.Add("query", fmt.Sprintf("%v", req.Query))
+		q.Add("search_after", fmt.Sprintf("%v", req.SearchAfter))
+		q.Add("sort", fmt.Sprintf("%v", req.Sort))
+		q.Add("sort_by", fmt.Sprintf("%v", req.SortBy))
+		q.Add("sort_values", fmt.Sprintf("%v", req.SortValues))
+		q.Add("start_time", fmt.Sprintf("%v", req.StartTime))
+
+		hReq.URL.RawQuery += q.Encode()
+	case "delete":
+		newReq, err := http.NewRequest(http.MethodDelete, url, nil)
+		if err != nil {
+			return nil, errors.Wrap(err, "Creating new HTTP DELETE request for custom API")
+		}
+		hReq = newReq
+	default:
+		return nil, fmt.Errorf("Error, invalid/empty HTTPMethod(%s) specified, should be POST|DELETE|GET", callOpts.HTTPMethod)
+	}
+	hReq = hReq.WithContext(ctx)
+	hReq.Header.Set("Content-Type", "application/json")
+	client.AddHdrsToReq(callOpts.Headers, hReq)
+
+	rsp, err := c.client.Do(hReq)
+	if err != nil {
+		return nil, errors.Wrap(err, "Custom API RestClient")
+	}
+	defer rsp.Body.Close()
+
+	// checking whether the status code is a successful status code (2xx series)
+	if rsp.StatusCode < 200 || rsp.StatusCode > 299 {
+		body, err := io.ReadAll(rsp.Body)
+		return nil, fmt.Errorf("Unsuccessful custom API %s on %s, status code %d, body %s, err %s", callOpts.HTTPMethod, callOpts.URI, rsp.StatusCode, body, err)
+	}
+
+	body, err := io.ReadAll(rsp.Body)
+	if err != nil {
+		return nil, errors.Wrap(err, "Custom API RestClient read body")
+	}
+	pbRsp := &SecurityEvidenceResponse{}
+	if err := codec.FromJSON(string(body), pbRsp); err != nil {
+		return nil, errors.Wrapf(err, "JSON Response %s is not of type *ves.io.schema.app_security.SecurityEvidenceResponse", body)
+	}
+	if callOpts.OutCallResponse != nil {
+		callOpts.OutCallResponse.ProtoMsg = pbRsp
+		callOpts.OutCallResponse.JSON = string(body)
+	}
+	return pbRsp, nil
+}
 func (c *AppSecurityMonitoringAPIRestClient) doRPCSecurityIncidentsAggregationQuery(ctx context.Context, callOpts *server.CustomCallOpts) (proto.Message, error) {
 	if callOpts.URI == "" {
 		return nil, fmt.Errorf("Error, URI should be specified, got empty")
@@ -1444,6 +1543,7 @@ func NewAppSecurityMonitoringAPIRestClient(baseURL string, hc http.Client) serve
 	rpcFns["SecurityEventsQuery"] = ccl.doRPCSecurityEventsQuery
 	rpcFns["SecurityEventsQueryAllNamespaces"] = ccl.doRPCSecurityEventsQueryAllNamespaces
 	rpcFns["SecurityEventsScrollQuery"] = ccl.doRPCSecurityEventsScrollQuery
+	rpcFns["SecurityEvidenceQuery"] = ccl.doRPCSecurityEvidenceQuery
 	rpcFns["SecurityIncidentsAggregationQuery"] = ccl.doRPCSecurityIncidentsAggregationQuery
 	rpcFns["SecurityIncidentsQuery"] = ccl.doRPCSecurityIncidentsQuery
 	rpcFns["SecurityIncidentsScrollQuery"] = ccl.doRPCSecurityIncidentsScrollQuery
@@ -1492,6 +1592,10 @@ func (c *appSecurityMonitoringAPIInprocClient) SecurityEventsQueryAllNamespaces(
 func (c *appSecurityMonitoringAPIInprocClient) SecurityEventsScrollQuery(ctx context.Context, in *SecurityEventsScrollRequest, opts ...grpc.CallOption) (*SecurityEventsResponse, error) {
 	ctx = server.ContextWithRpcFQN(ctx, "ves.io.schema.app_security.AppSecurityMonitoringAPI.SecurityEventsScrollQuery")
 	return c.AppSecurityMonitoringAPIServer.SecurityEventsScrollQuery(ctx, in)
+}
+func (c *appSecurityMonitoringAPIInprocClient) SecurityEvidenceQuery(ctx context.Context, in *SecurityEvidenceRequest, opts ...grpc.CallOption) (*SecurityEvidenceResponse, error) {
+	ctx = server.ContextWithRpcFQN(ctx, "ves.io.schema.app_security.AppSecurityMonitoringAPI.SecurityEvidenceQuery")
+	return c.AppSecurityMonitoringAPIServer.SecurityEvidenceQuery(ctx, in)
 }
 func (c *appSecurityMonitoringAPIInprocClient) SecurityIncidentsAggregationQuery(ctx context.Context, in *SecurityIncidentsAggregationRequest, opts ...grpc.CallOption) (*SecurityIncidentsAggregationResponse, error) {
 	ctx = server.ContextWithRpcFQN(ctx, "ves.io.schema.app_security.AppSecurityMonitoringAPI.SecurityIncidentsAggregationQuery")
@@ -1923,6 +2027,54 @@ func (s *appSecurityMonitoringAPISrv) SecurityEventsScrollQuery(ctx context.Cont
 
 	return rsp, nil
 }
+func (s *appSecurityMonitoringAPISrv) SecurityEvidenceQuery(ctx context.Context, in *SecurityEvidenceRequest) (*SecurityEvidenceResponse, error) {
+	ah := s.svc.GetAPIHandler("ves.io.schema.app_security.AppSecurityMonitoringAPI")
+	cah, ok := ah.(AppSecurityMonitoringAPIServer)
+	if !ok {
+		return nil, fmt.Errorf("ah %v is not of type *AppSecurityMonitoringAPIServer", ah)
+	}
+
+	var (
+		rsp *SecurityEvidenceResponse
+		err error
+	)
+
+	bodyFields := svcfw.GenAuditReqBodyFields(ctx, s.svc, "ves.io.schema.app_security.SecurityEvidenceRequest", in)
+	defer func() {
+		if len(bodyFields) > 0 {
+			server.ExtendAPIAudit(ctx, svcfw.PublicAPIBodyLog.Uid, bodyFields)
+		}
+		userMsg := "The 'AppSecurityMonitoringAPI.SecurityEvidenceQuery' operation on 'app_security'"
+		if err == nil {
+			userMsg += " was successfully performed."
+		} else {
+			userMsg += " failed to be performed."
+		}
+		server.AddUserMsgToAPIAudit(ctx, userMsg)
+	}()
+
+	if err := svcfw.FillOneofDefaultChoice(ctx, s.svc, in); err != nil {
+		err = server.MaybePublicRestError(ctx, errors.Wrapf(err, "Filling oneof default choice"))
+		return nil, server.GRPCStatusFromError(err).Err()
+	}
+
+	if s.svc.Config().EnableAPIValidation {
+		if rvFn := s.svc.GetRPCValidator("ves.io.schema.app_security.AppSecurityMonitoringAPI.SecurityEvidenceQuery"); rvFn != nil {
+			if verr := rvFn(ctx, in); verr != nil {
+				err = server.MaybePublicRestError(ctx, errors.Wrapf(verr, "Validating Request"))
+				return nil, server.GRPCStatusFromError(err).Err()
+			}
+		}
+	}
+
+	rsp, err = cah.SecurityEvidenceQuery(ctx, in)
+	if err != nil {
+		return rsp, server.GRPCStatusFromError(server.MaybePublicRestError(ctx, err)).Err()
+	}
+	bodyFields = append(bodyFields, svcfw.GenAuditRspBodyFields(ctx, s.svc, "ves.io.schema.app_security.SecurityEvidenceResponse", rsp)...)
+
+	return rsp, nil
+}
 func (s *appSecurityMonitoringAPISrv) SecurityIncidentsAggregationQuery(ctx context.Context, in *SecurityIncidentsAggregationRequest) (*SecurityIncidentsAggregationResponse, error) {
 	ah := s.svc.GetAPIHandler("ves.io.schema.app_security.AppSecurityMonitoringAPI")
 	cah, ok := ah.(AppSecurityMonitoringAPIServer)
@@ -2223,10 +2375,7 @@ var AppSecurityMonitoringAPISwaggerJSON string = `{
         "description": "APIs to get application security events and metrics on virtual-host basis.\nSecurity events may be generated for following reasons:\n1. Service policy hits with action \"deny\"\n2. Rate limiting\n3. Javascript challenge failure",
         "version": "version not set"
     },
-    "schemes": [
-        "http",
-        "https"
-    ],
+    "schemes": null,
     "consumes": [
         "application/json"
     ],
@@ -2293,6 +2442,12 @@ var AppSecurityMonitoringAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2378,6 +2533,12 @@ var AppSecurityMonitoringAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2462,6 +2623,12 @@ var AppSecurityMonitoringAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2545,6 +2712,12 @@ var AppSecurityMonitoringAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -2638,6 +2811,12 @@ var AppSecurityMonitoringAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2730,6 +2909,12 @@ var AppSecurityMonitoringAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2817,6 +3002,12 @@ var AppSecurityMonitoringAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -2845,6 +3036,104 @@ var AppSecurityMonitoringAPISwaggerJSON string = `{
                     "url": "https://docs.cloud.f5.com/docs-v2/platform/reference/api-ref/ves-io-schema-app_security-appsecuritymonitoringapi-securityeventsscrollquery"
                 },
                 "x-ves-proto-rpc": "ves.io.schema.app_security.AppSecurityMonitoringAPI.SecurityEventsScrollQuery"
+            },
+            "x-displayname": "Application Security Monitoring APIs",
+            "x-ves-proto-service": "ves.io.schema.app_security.AppSecurityMonitoringAPI",
+            "x-ves-proto-service-type": "CUSTOM_PUBLIC"
+        },
+        "/public/namespaces/{namespace}/app_security/evidence": {
+            "post": {
+                "summary": "Security Evidence Query",
+                "description": "Get security evidence for the given namespace.",
+                "operationId": "ves.io.schema.app_security.AppSecurityMonitoringAPI.SecurityEvidenceQuery",
+                "responses": {
+                    "200": {
+                        "description": "A successful response.",
+                        "schema": {
+                            "$ref": "#/definitions/app_securitySecurityEvidenceResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Returned when operation is not authorized",
+                        "schema": {
+                            "format": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "Returned when there is no permission to access resource",
+                        "schema": {
+                            "format": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Returned when resource is not found",
+                        "schema": {
+                            "format": "string"
+                        }
+                    },
+                    "409": {
+                        "description": "Returned when operation on resource is conflicting with current value",
+                        "schema": {
+                            "format": "string"
+                        }
+                    },
+                    "429": {
+                        "description": "Returned when operation has been rejected as it is happening too frequently",
+                        "schema": {
+                            "format": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Returned when server encountered an error in processing API",
+                        "schema": {
+                            "format": "string"
+                        }
+                    },
+                    "503": {
+                        "description": "Returned when service is unavailable temporarily",
+                        "schema": {
+                            "format": "string"
+                        }
+                    },
+                    "504": {
+                        "description": "Returned when server timed out processing request",
+                        "schema": {
+                            "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "namespace",
+                        "description": "namespace\n\nfetch security evidence for a given namespace\nx-example: \"bloggin-app-namespace-1\"",
+                        "in": "path",
+                        "required": true,
+                        "type": "string",
+                        "x-displayname": "Namespace"
+                    },
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/app_securitySecurityEvidenceRequest"
+                        }
+                    }
+                ],
+                "tags": [
+                    "AppSecurityMonitoringAPI"
+                ],
+                "externalDocs": {
+                    "description": "Examples of this operation",
+                    "url": "https://docs.cloud.f5.com/docs-v2/platform/reference/api-ref/ves-io-schema-app_security-appsecuritymonitoringapi-securityevidencequery"
+                },
+                "x-ves-proto-rpc": "ves.io.schema.app_security.AppSecurityMonitoringAPI.SecurityEvidenceQuery"
             },
             "x-displayname": "Application Security Monitoring APIs",
             "x-ves-proto-service": "ves.io.schema.app_security.AppSecurityMonitoringAPI",
@@ -2908,6 +3197,12 @@ var AppSecurityMonitoringAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -3001,6 +3296,12 @@ var AppSecurityMonitoringAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -3093,6 +3394,12 @@ var AppSecurityMonitoringAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -3179,6 +3486,12 @@ var AppSecurityMonitoringAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -3272,6 +3585,12 @@ var AppSecurityMonitoringAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -3363,6 +3682,12 @@ var AppSecurityMonitoringAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -3456,6 +3781,12 @@ var AppSecurityMonitoringAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -3547,6 +3878,12 @@ var AppSecurityMonitoringAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -3640,6 +3977,12 @@ var AppSecurityMonitoringAPISwaggerJSON string = `{
                         "schema": {
                             "format": "string"
                         }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
+                        }
                     }
                 },
                 "parameters": [
@@ -3726,6 +4069,12 @@ var AppSecurityMonitoringAPISwaggerJSON string = `{
                         "description": "Returned when server timed out processing request",
                         "schema": {
                             "format": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "An unexpected error response.",
+                        "schema": {
+                            "$ref": "#/definitions/runtimeError"
                         }
                     }
                 },
@@ -4205,7 +4554,6 @@ var AppSecurityMonitoringAPISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Scroll is used to retrieve large number of security events (or all security events) that matches the query.\n If scroll is set to true, the scroll_id in the response can be used in the scroll API to fetch the next\n batch of security events until there are no more security events left to return. The number of messages in each batch is determined\n by the limit field.\n Note: Scroll is used for processing large amount of data and therefore is not intended for real time user request.\n Optional: default is false\n\nExample: - \"true\"-",
                     "title": "scroll",
-                    "format": "boolean",
                     "x-displayname": "Scroll",
                     "x-ves-example": "true"
                 },
@@ -4213,7 +4561,6 @@ var AppSecurityMonitoringAPISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Search After is used to retrieve large number of log messages (or all log messages) that matches the query.\n If search_after is set to true, the sort_values in the response can be used in the API to fetch the next\n batch of logs. The number of messages in each batch is determined by the limit field.\n Note: Search After is used for processing large amount of data and therefore is not intended for real time user request.\n Optional: default is false\n\nExample: - \"true\"-",
                     "title": "search after",
-                    "format": "boolean",
                     "x-displayname": "Search After",
                     "x-ves-example": "true"
                 },
@@ -4315,6 +4662,129 @@ var AppSecurityMonitoringAPISwaggerJSON string = `{
                     "title": "scroll id",
                     "x-displayname": "Scroll ID",
                     "x-ves-example": "DXF1ZXJ5QW5kRmV0Y2gBAAAAAAAAAD4WYm9laVYtZndUQlNsdDcwakFMNjU1QQ=="
+                }
+            }
+        },
+        "app_securitySecurityEvidenceRequest": {
+            "type": "object",
+            "description": "Request to fetch security evidence",
+            "title": "Security Evidence Request",
+            "x-displayname": "Security Evidence Request",
+            "x-ves-proto-message": "ves.io.schema.app_security.SecurityEvidenceRequest",
+            "properties": {
+                "aggs": {
+                    "type": "object",
+                    "description": " Aggregations provide summary/analytics data over the security evidence response. If the number of security evidence that matched the query\n is large and cannot be returned in a single response message, user can get helpful insights/summary using aggregations.\n The aggregations are key'ed by user-defined aggregation name. The response will be key'ed with the same name.\n Optional",
+                    "title": "aggregations",
+                    "x-displayname": "Aggregations"
+                },
+                "end_time": {
+                    "type": "string",
+                    "description": " fetch security evidence whose timestamp \u003c= end_time\n format: unix_timestamp|rfc 3339\n\n Optional: If not specified, then the end_time will be evaluated to start_time+10m\n           If start_time is not specified, then the end_time will be evaluated to \u003ccurrent time\u003e\n\nExample: - \"1570007981\"-\n\nValidation Rules:\n  ves.io.schema.rules.string.query_time: true\n",
+                    "title": "end time",
+                    "x-displayname": "End Time",
+                    "x-ves-example": "1570007981",
+                    "x-ves-validation-rules": {
+                        "ves.io.schema.rules.string.query_time": "true"
+                    }
+                },
+                "limit": {
+                    "type": "integer",
+                    "description": " limits the number of security evidence returned in the response\n Optional: If not specified, first or last 500 security evidence that matches the query (depending on the sort order) will be returned in the response.\n           The maximum value for limit is 500.\n\nExample: - \"100\"-",
+                    "title": "limit",
+                    "format": "int32",
+                    "x-displayname": "Limit",
+                    "x-ves-example": "100"
+                },
+                "namespace": {
+                    "type": "string",
+                    "description": " fetch security evidence for a given namespace\n\nExample: - \"bloggin-app-namespace-1\"-",
+                    "title": "namespace",
+                    "x-displayname": "Namespace",
+                    "x-ves-example": "bloggin-app-namespace-1"
+                },
+                "query": {
+                    "type": "string",
+                    "description": " query is used to specify the list of matchers\n syntax for query := {[\u003cmatcher\u003e]}\n \u003cmatcher\u003e := \u003cfield_name\u003e\u003coperator\u003e\"\u003cvalue\u003e\"\n \u003cfield_name\u003e := string\n   One or more of these fields in the security evidence may be specified in the query.\n     domain - domain\n     endpoint - endpoint\n     evidence_id - evidence Id\n \u003cvalue\u003e := string\n \u003coperator\u003e := [\"=\"|\"!=\"|\"=~\"|\"!~\"]\n   = : equal to\n   != : not equal to\n   =~ : regex match\n   !~ : not regex match\n When more than one matcher is specified in the query, then security evidence matching ALL the matchers will be returned in the response.\n Example: query={evidence_id=\"evd_2026021315_abc123\", endpoint=\"/cart_api/cart\"} will return all security evidence with evidence id evd_2026021315_abc123 and endoint /cart_api/cart.\n\n Optional: If not specified, all the security evidence matching the given tenant and namespace will be returned in the response.\n\nExample: - \"query={evidence_id=\"evd_2026021315_abc123\"}\"-",
+                    "title": "query",
+                    "x-displayname": "Query",
+                    "x-ves-example": "query={evidence_id=\"evd_2026021315_abc123\"}"
+                },
+                "search_after": {
+                    "type": "boolean",
+                    "description": " Search After is used to retrieve large number of log messages (or all log messages) that matches the query.\n If search_after is set to true, the sort_values in the response can be used in the API to fetch the next\n batch of logs. The number of messages in each batch is determined by the limit field.\n Note: Search After is used for processing large amount of data and therefore is not intended for real time user request.\n Optional: default is false\n\nExample: - \"true\"-",
+                    "title": "search after",
+                    "x-displayname": "Search After",
+                    "x-ves-example": "true"
+                },
+                "sort": {
+                    "description": " Optional: default is descending order",
+                    "title": "sort order",
+                    "$ref": "#/definitions/schemaSortOrder",
+                    "x-displayname": "Sort Order"
+                },
+                "sort_by": {
+                    "type": "string",
+                    "description": " Optional: default is sort by last_event_time",
+                    "title": "sort by",
+                    "x-displayname": "Sort By"
+                },
+                "sort_values": {
+                    "description": " List of sort values that can be used to retrieve the next batch of log messages.\n\nExample: - \"{last_timestamp1745695692759, last_doc_id: -8881051689166072872}\"-",
+                    "title": "sort values",
+                    "$ref": "#/definitions/app_securitySearchAfterSortValues",
+                    "x-displayname": "Sort Values",
+                    "x-ves-example": "{last_timestamp: 1745695692759, last_doc_id: -8881051689166072872}"
+                },
+                "start_time": {
+                    "type": "string",
+                    "description": " fetch security evidence whose timestamp \u003e= start_time\n format: unix_timestamp|rfc 3339\n\n Optional: If not specified, then the start_time will be evaluated to end_time-10m\n           If end_time is not specified, then the start_time will be evaluated to \u003ccurrent time\u003e-10m\n\nExample: - \"1570007981\"-\n\nValidation Rules:\n  ves.io.schema.rules.string.query_time: true\n",
+                    "title": "start time",
+                    "x-displayname": "Start Time",
+                    "x-ves-example": "1570007981",
+                    "x-ves-validation-rules": {
+                        "ves.io.schema.rules.string.query_time": "true"
+                    }
+                }
+            }
+        },
+        "app_securitySecurityEvidenceResponse": {
+            "type": "object",
+            "description": "Response message for SecurityEvidenceRequest",
+            "title": "Security Evidence Response",
+            "x-displayname": "Security Incidents Response",
+            "x-ves-proto-message": "ves.io.schema.app_security.SecurityEvidenceResponse",
+            "properties": {
+                "aggs": {
+                    "type": "object",
+                    "description": " Aggregations provide summary/analytics data over the security evidences response. If the number of security evidences\n that matched the query is large and cannot be returned in a single response message, user can get helpful\n insights/summary using aggregations.",
+                    "title": "aggregations",
+                    "x-displayname": "Aggregations"
+                },
+                "evidences": {
+                    "type": "array",
+                    "description": " list of security evidences that matched the query. Contains no more than 500 messages.\n\nExample: - \"value\"-",
+                    "title": "evidences",
+                    "items": {
+                        "type": "string"
+                    },
+                    "x-displayname": "evidences",
+                    "x-ves-example": "value"
+                },
+                "last_sort_values": {
+                    "description": " List of sort values that can be used to retrieve the next batch of log messages.\n Currently, timestamp and doc_id are the supported sort values.\n Empty list indicates no more messages to scroll (EOF).\n Note: This is stateless and hence more performant than the scroll API.\n\nExample: - \"{last_timestamp1745695692759, last_doc_id: -8881051689166072872}\"-",
+                    "title": "last sort values",
+                    "$ref": "#/definitions/app_securitySearchAfterSortValues",
+                    "x-displayname": "Last Sort Values",
+                    "x-ves-example": "{last_timestamp: 1745695692759, last_doc_id: -8881051689166072872}"
+                },
+                "total_hits": {
+                    "type": "string",
+                    "description": " total number of security events that matched the query.\n\nExample: - \"0\"-",
+                    "title": "total hits",
+                    "format": "uint64",
+                    "x-displayname": "Total Hits",
+                    "x-ves-example": "0"
                 }
             }
         },
@@ -4439,7 +4909,6 @@ var AppSecurityMonitoringAPISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Scroll is used to retrieve large number of security incidents (or all security incidents) that matches the query.\n If scroll is set to true, the scroll_id in the response can be used in the scroll API to fetch the next\n batch of security events until there are no more security events left to return. The number of messages in each\n batch is determined by the limit field.\n Note: Scroll is used for processing large amount of data and therefore is not intended for real time user request.\n Optional: default is false\n\nExample: - \"true\"-",
                     "title": "scroll",
-                    "format": "boolean",
                     "x-displayname": "Scroll",
                     "x-ves-example": "true"
                 },
@@ -4447,7 +4916,6 @@ var AppSecurityMonitoringAPISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Search After is used to retrieve large number of log messages (or all log messages) that matches the query.\n If search_after is set to true, the sort_values in the response can be used in the API to fetch the next\n batch of logs. The number of messages in each batch is determined by the limit field.\n Note: Search After is used for processing large amount of data and therefore is not intended for real time user request.\n Optional: default is false\n\nExample: - \"true\"-",
                     "title": "search after",
-                    "format": "boolean",
                     "x-displayname": "Search After",
                     "x-ves-example": "true"
                 },
@@ -4673,7 +5141,6 @@ var AppSecurityMonitoringAPISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Scroll is used to retrieve large number of logs (or all logs) that matches the query.\n If scroll is set to true, the scroll_id in the response can be used in the scroll API to fetch the next\n batch of logs until there are no logs left to return. The number of logs in each batch is determined\n by the limit field.\n Note: Scroll is used for processing large amount of data and therefore is not intended for real time user request.\n Optional: default is false\n\nExample: - \"true\"-",
                     "title": "scroll",
-                    "format": "boolean",
                     "x-displayname": "Scroll",
                     "x-ves-example": "true"
                 },
@@ -4681,7 +5148,6 @@ var AppSecurityMonitoringAPISwaggerJSON string = `{
                     "type": "boolean",
                     "description": " Search After is used to retrieve large number of log messages (or all log messages) that matches the query.\n If search_after is set to true, the sort_values in the response can be used in the API to fetch the next\n batch of logs. The number of messages in each batch is determined by the limit field.\n Note: Search After is used for processing large amount of data and therefore is not intended for real time user request.\n Optional: default is false\n\nExample: - \"true\"-",
                     "title": "search after",
-                    "format": "boolean",
                     "x-displayname": "Search After",
                     "x-ves-example": "true"
                 },
@@ -4906,7 +5372,7 @@ var AppSecurityMonitoringAPISwaggerJSON string = `{
         },
         "app_securityincidentsKeyField": {
             "type": "string",
-            "description": "x-displayName: \"Key Field\"\nSecurity events can be aggregated based on these fields.\n\n - CITY: x-displayName: \"City\"\n - COUNTRY: x-displayName: \"Country\"\n - ASN: x-displayName: \"ASN\"\n - INCIDENT_TYPE: x-displayName: \"Incident Type\"\n - INTENT: x-displayName: \"Intent\"\n - VH_NAME: x-displayName: \"Virtual Host Name\"\n - USER_ID: x-displayName: \"User ID\"\n - SRC_IP: x-displayName: \"Source IP\"\n - TLS_FINGERPRINT: x-displayName: \"JA3 TLS Fingerprint\"\n - LAST_STATUS: x-displayName: \"Last Status\"\n - INCIDENT_ID: x-displayName: \"Incident ID\"\n - JA4_TLS_FINGERPRINT: x-displayName: \"JA4 TLS Fingerprint\"",
+            "description": "x-displayName: \"Key Field\"\nSecurity events can be aggregated based on these fields.\n\n - CITY: x-displayName: \"City\"\n - COUNTRY: x-displayName: \"Country\"\n - ASN: x-displayName: \"ASN\"\n - INCIDENT_TYPE: x-displayName: \"Incident Type\"\n - INTENT: x-displayName: \"Intent\"\n - VH_NAME: x-displayName: \"Virtual Host Name\"\n - USER_ID: x-displayName: \"User ID\"\n - SRC_IP: x-displayName: \"Source IP\"\n - TLS_FINGERPRINT: x-displayName: \"JA3 TLS Fingerprint\"\n - LAST_STATUS: x-displayName: \"Last Status\"\n - INCIDENT_ID: x-displayName: \"Incident ID\"\n - JA4_TLS_FINGERPRINT: x-displayName: \"JA4 TLS Fingerprint\"\n - NAMESPACE: x-displayName: \"Namespace\"",
             "title": "Key Field",
             "enum": [
                 "CITY",
@@ -4920,7 +5386,8 @@ var AppSecurityMonitoringAPISwaggerJSON string = `{
                 "TLS_FINGERPRINT",
                 "LAST_STATUS",
                 "INCIDENT_ID",
-                "JA4_TLS_FINGERPRINT"
+                "JA4_TLS_FINGERPRINT",
+                "NAMESPACE"
             ],
             "default": "CITY"
         },
@@ -4987,11 +5454,12 @@ var AppSecurityMonitoringAPISwaggerJSON string = `{
         },
         "app_securityincidentsMultiKeyField": {
             "type": "string",
-            "description": "x-displayName: \"Multi-Key Field\"\nSecurity events can be aggregated based on these multiple key fields\n\n - SRC_IP_TLS_FINGERPRINT: x-displayName: \"Source IP, JA3 TLS Fingerprint\"\nAggregated by (KeyField.SRC_IP, KeyField.TLS_FINGERPRINT)\n - SRC_IP_JA4_TLS_FINGERPRINT: x-displayName: \"Source IP, JA4 TLS Fingerprint\"\nAggregated by (KeyField.SRC_IP, KeyField.JA4_TLS_FINGERPRINT)",
+            "description": "x-displayName: \"Multi-Key Field\"\nSecurity events can be aggregated based on these multiple key fields\n\n - SRC_IP_TLS_FINGERPRINT: x-displayName: \"Source IP, JA3 TLS Fingerprint\"\nAggregated by (KeyField.SRC_IP, KeyField.TLS_FINGERPRINT)\n - SRC_IP_JA4_TLS_FINGERPRINT: x-displayName: \"Source IP, JA4 TLS Fingerprint\"\nAggregated by (KeyField.SRC_IP, KeyField.JA4_TLS_FINGERPRINT)\n - VH_NAME_NAMESPACE: x-displayName: \"Virtual Host Name, Namespace\"\nAggregated by (KeyField.VH_NAME, KeyField.NAMESPACE)",
             "title": "Multi-Key Field",
             "enum": [
                 "SRC_IP_TLS_FINGERPRINT",
-                "SRC_IP_JA4_TLS_FINGERPRINT"
+                "SRC_IP_JA4_TLS_FINGERPRINT",
+                "VH_NAME_NAMESPACE"
             ],
             "default": "SRC_IP_TLS_FINGERPRINT"
         },
@@ -5847,6 +6315,42 @@ var AppSecurityMonitoringAPISwaggerJSON string = `{
                 }
             }
         },
+        "protobufAny": {
+            "type": "object",
+            "description": "-Any- contains an arbitrary serialized protocol buffer message along with a\nURL that describes the type of the serialized message.\n\nProtobuf library provides support to pack/unpack Any values in the form\nof utility functions or additional generated methods of the Any type.\n\nExample 1: Pack and unpack a message in C++.\n\n    Foo foo = ...;\n    Any any;\n    any.PackFrom(foo);\n    ...\n    if (any.UnpackTo(\u0026foo)) {\n      ...\n    }\n\nExample 2: Pack and unpack a message in Java.\n\n    Foo foo = ...;\n    Any any = Any.pack(foo);\n    ...\n    if (any.is(Foo.class)) {\n      foo = any.unpack(Foo.class);\n    }\n\n Example 3: Pack and unpack a message in Python.\n\n    foo = Foo(...)\n    any = Any()\n    any.Pack(foo)\n    ...\n    if any.Is(Foo.DESCRIPTOR):\n      any.Unpack(foo)\n      ...\n\n Example 4: Pack and unpack a message in Go\n\n     foo := \u0026pb.Foo{...}\n     any, err := ptypes.MarshalAny(foo)\n     ...\n     foo := \u0026pb.Foo{}\n     if err := ptypes.UnmarshalAny(any, foo); err != nil {\n       ...\n     }\n\nThe pack methods provided by protobuf library will by default use\n'type.googleapis.com/full.type.name' as the type URL and the unpack\nmethods only use the fully qualified type name after the last '/'\nin the type URL, for example \"foo.bar.com/x/y.z\" will yield type\nname \"y.z\".\n\n\nJSON\n====\nThe JSON representation of an -Any- value uses the regular\nrepresentation of the deserialized, embedded message, with an\nadditional field -@type- which contains the type URL. Example:\n\n    package google.profile;\n    message Person {\n      string first_name = 1;\n      string last_name = 2;\n    }\n\n    {\n      \"@type\": \"type.googleapis.com/google.profile.Person\",\n      \"firstName\": \u003cstring\u003e,\n      \"lastName\": \u003cstring\u003e\n    }\n\nIf the embedded message type is well-known and has a custom JSON\nrepresentation, that representation will be embedded adding a field\n-value- which holds the custom JSON in addition to the -@type-\nfield. Example (for message [google.protobuf.Duration][]):\n\n    {\n      \"@type\": \"type.googleapis.com/google.protobuf.Duration\",\n      \"value\": \"1.212s\"\n    }",
+            "properties": {
+                "type_url": {
+                    "type": "string",
+                    "description": "A URL/resource name that uniquely identifies the type of the serialized\nprotocol buffer message. This string must contain at least\none \"/\" character. The last segment of the URL's path must represent\nthe fully qualified name of the type (as in\n-path/google.protobuf.Duration-). The name should be in a canonical form\n(e.g., leading \".\" is not accepted).\n\nIn practice, teams usually precompile into the binary all types that they\nexpect it to use in the context of Any. However, for URLs which use the\nscheme -http-, -https-, or no scheme, one can optionally set up a type\nserver that maps type URLs to message definitions as follows:\n\n* If no scheme is provided, -https- is assumed.\n* An HTTP GET on the URL must yield a [google.protobuf.Type][]\n  value in binary format, or produce an error.\n* Applications are allowed to cache lookup results based on the\n  URL, or have them precompiled into a binary to avoid any\n  lookup. Therefore, binary compatibility needs to be preserved\n  on changes to types. (Use versioned type names to manage\n  breaking changes.)\n\nNote: this functionality is not currently available in the official\nprotobuf release, and it is not used for type URLs beginning with\ntype.googleapis.com.\n\nSchemes other than -http-, -https- (or the empty scheme) might be\nused with implementation specific semantics."
+                },
+                "value": {
+                    "type": "string",
+                    "description": "Must be a valid serialized protocol buffer of the above specified type.",
+                    "format": "byte"
+                }
+            }
+        },
+        "runtimeError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/protobufAny"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
         "schemaSortOrder": {
             "type": "string",
             "description": "Sort algorithm\n\nSort in descending order\nSort in ascending order",
@@ -5919,8 +6423,7 @@ var AppSecurityMonitoringAPISwaggerJSON string = `{
                 },
                 "is_trend_request": {
                     "type": "boolean",
-                    "description": "Trend value computation requested for the field present in aggregation.\n\nx-displayName: \"Trend calculation requested by the user\"\nx-example: \"true\"\nTrend value computation requested by the user\nOptional: default is false",
-                    "format": "boolean"
+                    "description": "Trend value computation requested for the field present in aggregation.\n\nx-displayName: \"Trend calculation requested by the user\"\nx-example: \"true\"\nTrend value computation requested by the user\nOptional: default is false"
                 },
                 "metrics_aggregation": {
                     "description": "x-displayName: \"Metrics Aggregation\"\nComputes metrics based on values for the field in the security event",
